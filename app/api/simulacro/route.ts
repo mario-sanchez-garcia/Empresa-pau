@@ -41,6 +41,28 @@ function examSystemLabel(comunidad: string) {
   return comunidad === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid'
 }
 
+function sanitizeImageType(value: unknown): 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' {
+  if (value === 'image/png' || value === 'image/gif' || value === 'image/webp') return value
+  return 'image/jpeg'
+}
+
+// A block's answer can carry a legacy single `image`/`imageType` (sessions
+// saved before multi-photo support) and/or the new `images` array — this
+// combines both into one ordered list so a page-spanning handwritten
+// answer is read as several consecutive pages, not just the first one.
+function imagesForAnswer(answer: unknown): Array<{ data: string; mediaType: string }> {
+  if (!answer || typeof answer !== 'object') return []
+  const a = answer as { image?: unknown; imageType?: unknown; images?: unknown }
+  const legacy = typeof a.image === 'string' && a.image
+    ? [{ data: a.image, mediaType: typeof a.imageType === 'string' && a.imageType ? a.imageType : 'image/jpeg' }]
+    : []
+  const extra = Array.isArray(a.images)
+    ? a.images.filter((item): item is { data: string; mediaType?: string } => Boolean(item && typeof (item as { data?: unknown }).data === 'string'))
+      .map(item => ({ data: item.data, mediaType: typeof item.mediaType === 'string' && item.mediaType ? item.mediaType : 'image/jpeg' }))
+    : []
+  return [...legacy, ...extra]
+}
+
 const SUBJECT_LABELS: Record<string, string> = {
   mates: 'Matemáticas II',
   matematicas_ccss: 'Matemáticas Aplicadas a las Ciencias Sociales',
@@ -261,12 +283,10 @@ export async function POST(request: NextRequest) {
     const t0 = Date.now()
     const model = 'claude-sonnet-4-6'
     const imagePayloadChars = blocks.reduce((total: number, block: SimulacroBlock) => {
-      const image = storedAnswers?.[block.id]?.image
-      return total + (typeof image === 'string' ? image.length : 0)
+      return total + imagesForAnswer(storedAnswers?.[block.id]).reduce((s, img) => s + img.data.length, 0)
     }, 0)
     const imageCount = blocks.reduce((total: number, block: SimulacroBlock) => {
-      const image = storedAnswers?.[block.id]?.image
-      return total + (typeof image === 'string' && image.length > 0 ? 1 : 0)
+      return total + imagesForAnswer(storedAnswers?.[block.id]).length
     }, 0)
     const usageMetadata = {
       asignatura: subject,
@@ -287,23 +307,24 @@ export async function POST(request: NextRequest) {
     const blockResults: (any | null)[] = await Promise.all(
       blocks.map(async (block: SimulacroBlock, index: number) => {
         const answer = storedAnswers?.[block.id]
+        const blockImages = imagesForAnswer(answer)
         console.info('[simulacro] correcting_block', { blockIndex: index })
 
         const blockContent: Extract<Anthropic.MessageParam['content'], unknown[]> = []
-        const blockImagePayloadChars = typeof answer?.image === 'string' ? answer.image.length : 0
+        const blockImagePayloadChars = blockImages.reduce((s, img) => s + img.data.length, 0)
         const blockMetadata = {
           ...usageMetadata,
           blockIndex: index,
-          blockHasImage: blockImagePayloadChars > 0,
-          blockImageCount: blockImagePayloadChars > 0 ? 1 : 0,
+          blockHasImage: blockImages.length > 0,
+          blockImageCount: blockImages.length,
           blockImagePayloadChars,
           answerTextChars: typeof answer?.text === 'string' ? answer.text.length : 0,
           officialPromptChars: typeof block.enunciado === 'string' ? block.enunciado.length : null
         }
-        if (answer?.image) {
+        for (const img of blockImages) {
           blockContent.push({
             type: 'image',
-            source: { type: 'base64', media_type: answer.imageType || 'image/jpeg', data: answer.image }
+            source: { type: 'base64', media_type: sanitizeImageType(img.mediaType), data: img.data }
           })
         }
         blockContent.push({
@@ -321,8 +342,8 @@ export async function POST(request: NextRequest) {
               criteria: block.criterios,
               sourceText: block.textoFuente,
               concepts: block.conceptos,
-              studentAnswer: answer?.image
-                ? `Respuesta manuscrita adjunta. Texto adicional: ${answer?.text ?? ''}`
+              studentAnswer: blockImages.length > 0
+                ? `Respuesta manuscrita adjunta como ${blockImages.length === 1 ? 'imagen' : `${blockImages.length} imágenes — están en orden, léelas como páginas consecutivas de una misma respuesta`}. Texto adicional: ${answer?.text ?? ''}`
                 : (answer?.text ?? '')
             },
             blockIndex: index,

@@ -22,8 +22,12 @@ export interface SimulacroBlock {
 
 export interface SimulacroAnswer {
   text: string
+  // Legacy single-photo fields — kept so sessions saved before multi-photo
+  // support (respuestas_parciales persisted in Supabase) still resume and
+  // correct correctly. New answers use `images` instead.
   image?: string | null
   imageType?: string | null
+  images?: Array<{ data: string; mediaType: string }>
 }
 
 export interface SimulacroRecord {

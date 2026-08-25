@@ -27,9 +27,7 @@ const CAT_UI = {
 
 export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat }) {
   const [respuesta, setRespuesta] = useState('')
-  const [imagen, setImagen] = useState<string | null>(null)
-  const [imagenTipo, setImagenTipo] = useState('image/jpeg')
-  const [imagenPreview, setImagenPreview] = useState<string | null>(null)
+  const [imagenes, setImagenes] = useState<Array<{ data: string; type: string; preview: string }>>([])
   const [correccion, setCorreccion] = useState('')
   const [imagenError, setImagenError] = useState('')
   const [cargando, setCargando] = useState(false)
@@ -37,36 +35,39 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function handleImagen(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
+    const files = Array.from(event.target.files ?? [])
+    event.target.value = ''
+    if (!files.length) return
     setImagenError('')
-    setImagenPreview(URL.createObjectURL(file))
-    setImagenTipo('image/jpeg')
-    try {
-      setImagen(await compressImageToBase64(file))
-    } catch (error) {
+    // allSettled: una sola foto en formato no compatible (típicamente HEIC
+    // de iPhone) no debe descartar las demás ya comprimidas del mismo lote.
+    const results = await Promise.allSettled(files.map(async file => ({
+      data: await compressImageToBase64(file),
+      type: 'image/jpeg',
+      preview: URL.createObjectURL(file),
+    })))
+    const succeeded = results.filter((r): r is PromiseFulfilledResult<{ data: string; type: string; preview: string }> => r.status === 'fulfilled').map(r => r.value)
+    const failedCount = results.length - succeeded.length
+    if (succeeded.length) setImagenes(current => [...current, ...succeeded])
+    if (failedCount > 0) {
       // compressImageToBase64 rechaza en formatos que el navegador no sabe
-      // decodificar (típicamente HEIC de iPhone) — sin este catch quedaba
-      // una promesa rechazada sin manejar y una preview engañosa con
-      // `imagen` sin rellenar.
-      console.error('[cat-pregunta] image_compression_failed', { message: (error as Error)?.message })
-      setImagenPreview(null)
-      setImagen(null)
-      setImagenError('No hemos podido leer esta foto (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte la imagen a JPG/PNG.')
+      // decodificar (típicamente HEIC de iPhone) — el resto del lote ya
+      // comprimido se conserva, solo se avisa de las que fallaron.
+      console.error('[cat-pregunta] image_compression_failed', { failedCount })
+      setImagenError(`No hemos podido leer ${failedCount === 1 ? 'una foto' : `${failedCount} fotos`} (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte la imagen a JPG/PNG.`)
     }
   }
 
-  function eliminarImagen() {
-    if (imagenPreview) URL.revokeObjectURL(imagenPreview)
-    setImagen(null)
-    setImagenPreview(null)
-    setImagenError('')
-    if (fileRef.current) fileRef.current.value = ''
+  function eliminarImagen(index: number) {
+    setImagenes(current => current.filter((img, i) => {
+      if (i === index) URL.revokeObjectURL(img.preview)
+      return i !== index
+    }))
   }
 
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
-    if (modo === 'imagen' && !imagen) return
+    if (modo === 'imagen' && imagenes.length === 0) return
 
     setCargando(true)
     setCorreccion('')
@@ -89,7 +90,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
         officialPrompt,
         criteria: pregunta.criterios,
         studentAnswer: modo === 'imagen'
-          ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.'
+          ? `Respuesta manuscrita adjunta como ${imagenes.length === 1 ? 'imagen' : `${imagenes.length} imágenes — están en orden, léelas como páginas consecutivas de una misma respuesta`}. Corrígela leyendo la(s) imagen(es) enviada(s).`
           : respuesta
       }]
     })
@@ -107,8 +108,9 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
           pregunta: prompt,
-          imagen: modo === 'imagen' ? imagen : null,
-          imagenTipo: modo === 'imagen' ? imagenTipo : null,
+          imagen: modo === 'imagen' ? imagenes[0]?.data ?? null : null,
+          imagenTipo: modo === 'imagen' ? imagenes[0]?.type ?? null : null,
+          imagenes: modo === 'imagen' ? imagenes.slice(1).map(img => ({ data: img.data, mediaType: img.type })) : undefined,
           creditKey: `cat-mates:${pregunta.year}:${pregunta.tipo}:${pregunta.serie}:${pregunta.ejercicio}:${option}`,
         })
       })
@@ -145,7 +147,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
           nota,
           nota_maxima: notaMax,
           enunciado: officialPrompt.substring(0, 2000),
-          respuesta: modo === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : respuesta.substring(0, 4000),
+          respuesta: modo === 'imagen' ? `Respuesta manuscrita adjunta (${imagenes.length} imagen${imagenes.length === 1 ? '' : 'es'}).` : respuesta.substring(0, 4000),
           // Do not truncate full correction: History modal needs complete feedback.
           correccion: correccionGuardada
         })
@@ -155,7 +157,7 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
     }
   }
 
-  const sinRespuesta = modo === 'texto' ? !respuesta.trim() : !imagen
+  const sinRespuesta = modo === 'texto' ? !respuesta.trim() : imagenes.length === 0
   const enunciadoCompleto = [pregunta.enunciado, ...pregunta.apartados].filter(Boolean).join('\n\n')
 
   return (
@@ -208,18 +210,25 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
           <RichTextArea value={respuesta} onChange={setRespuesta} placeholder="Escribe tu resolución paso a paso..." minHeight={180} accentColor={CAT_UI.color} softColor={CAT_UI.light} borderColor={CAT_UI.border} />
         ) : (
           <div>
-            <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImagen} className="hidden" />
-            {imagenPreview ? (
-              <div className="relative overflow-hidden rounded-2xl border bg-white" style={{ borderColor: CAT_UI.border }}>
-                <img src={imagenPreview} alt="Respuesta" loading="lazy" decoding="async" className="max-h-[300px] w-full object-contain" />
-                <button onClick={eliminarImagen} type="button" className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white shadow-lg" style={{ backgroundColor: CAT_UI.color }}><X size={16} /></button>
+            <input ref={fileRef} type="file" accept="image/*" multiple capture="environment" onChange={handleImagen} className="hidden" />
+            {imagenes.length > 0 && (
+              <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {imagenes.map((img, index) => (
+                  <div key={`${img.preview}-${index}`} className="relative overflow-hidden rounded-2xl border bg-white" style={{ borderColor: CAT_UI.border }}>
+                    <img src={img.preview} alt={`Página ${index + 1}`} loading="lazy" decoding="async" className="h-32 w-full object-cover" />
+                    <span className="absolute bottom-1.5 left-1.5 rounded-md px-1.5 py-0.5 text-[10px] font-black text-white" style={{ backgroundColor: 'rgba(15,23,42,0.75)' }}>{index + 1}</span>
+                    <button onClick={() => eliminarImagen(index)} type="button" aria-label={`Quitar página ${index + 1}`} className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full text-white shadow-lg" style={{ backgroundColor: CAT_UI.color }}><X size={12} /></button>
+                  </div>
+                ))}
               </div>
-            ) : (
-              <button onClick={() => fileRef.current?.click()} type="button" className="campus-hover flex h-[180px] w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed" style={{ borderColor: CAT_UI.accent, backgroundColor: `${CAT_UI.light}66`, color: CAT_UI.color }}>
-                <UploadCloud size={34} />
-                <span className="mt-2 text-sm font-black">Haz clic para subir una foto</span>
-                <span className="mt-1 text-xs font-semibold" style={{ color: CAT_UI.accent }}>Fotografía tu respuesta manuscrita</span>
-              </button>
+            )}
+            <button onClick={() => fileRef.current?.click()} type="button" className="campus-hover flex w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed" style={{ height: imagenes.length > 0 ? 96 : 180, borderColor: CAT_UI.accent, backgroundColor: `${CAT_UI.light}66`, color: CAT_UI.color }}>
+              <UploadCloud size={imagenes.length > 0 ? 22 : 34} />
+              <span className="mt-2 text-sm font-black">{imagenes.length > 0 ? 'Añadir otra página' : 'Haz clic para subir una foto'}</span>
+              {imagenes.length === 0 && <span className="mt-1 text-xs font-semibold" style={{ color: CAT_UI.accent }}>Fotografía tu respuesta manuscrita</span>}
+            </button>
+            {imagenes.length > 1 && (
+              <p className="mt-2 text-xs font-semibold" style={{ color: CAT_UI.muted }}>Se corrigen juntas como páginas consecutivas de una misma respuesta.</p>
             )}
             {imagenError && <p className="mt-2 text-xs font-bold" style={{ color: '#dc2626' }}>{imagenError}</p>}
           </div>

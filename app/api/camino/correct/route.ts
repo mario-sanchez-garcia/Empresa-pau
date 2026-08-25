@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
-import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
+import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent, logAiUsageEventForPhotos } from '@/app/lib/aiUsage'
 import { getMonthlyActionCount, getMonthlyUniqueActionCount, getUserBillingContext } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
@@ -35,6 +35,7 @@ type CaminoCorrectBody = {
   sortOrder?: unknown
   v2SortOrder?: unknown
   studentResponse?: unknown
+  studentResponseImages?: unknown
   responseMode?: unknown
   imageType?: unknown
 }
@@ -83,9 +84,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'La imagen no puede estar vacía.' }, { status: 400 })
   }
 
+  // studentResponse carries the first (and, for older clients, only) image;
+  // studentResponseImages carries any additional pages of the same answer.
+  // Both combine into one ordered set of image blocks sent to Claude.
   const imageData = responseMode === 'image' ? stripDataUrlPrefix(studentResponse) : null
-  if (imageData && imageData.length > MAX_IMAGE_PAYLOAD_CHARS) {
-    return NextResponse.json({ error: 'La imagen es demasiado grande. Sube una imagen más ligera.' }, { status: 413 })
+  const extraImages = responseMode === 'image' && Array.isArray(body.studentResponseImages)
+    ? body.studentResponseImages
+      .filter((item): item is { data: string; mediaType?: string } => Boolean(item && typeof (item as { data?: unknown }).data === 'string'))
+      .map(item => ({ data: stripDataUrlPrefix(item.data), mediaType: typeof item.mediaType === 'string' && item.mediaType.trim() ? item.mediaType : undefined }))
+    : []
+  const allImages = [
+    ...(imageData ? [{ data: imageData, mediaType: typeof body.imageType === 'string' ? body.imageType : undefined }] : []),
+    ...extraImages,
+  ]
+  const imagePayloadChars = allImages.reduce((sum, img) => sum + img.data.length, 0)
+  if (imagePayloadChars > MAX_IMAGE_PAYLOAD_CHARS) {
+    return NextResponse.json({ error: 'Las imágenes son demasiado grandes en conjunto. Sube fotos más ligeras o menos páginas.' }, { status: 413 })
   }
 
   const userSupabase = createUserSupabase(authContext.accessToken)
@@ -126,9 +140,9 @@ export async function POST(request: NextRequest) {
     blockSlug: topic.blockSlug,
     topicSlug: topic.topicSlug,
     sortOrder: sortOrder ?? topic.v2SortOrder ?? null,
-    hasImage: responseMode === 'image',
-    imageCount: responseMode === 'image' ? 1 : 0,
-    imagePayloadChars: imageData?.length ?? 0,
+    hasImage: allImages.length > 0,
+    imageCount: allImages.length,
+    imagePayloadChars,
     promptChars: statement.length,
   }
 
@@ -140,6 +154,7 @@ export async function POST(request: NextRequest) {
       email: authContext.user.email,
       action,
       creditKey,
+      photoCount: allImages.length,
       accessToken: authContext.accessToken,
     })
     if (limitResponse) return limitResponse
@@ -160,20 +175,20 @@ export async function POST(request: NextRequest) {
       maxScore,
       officialPrompt: statement,
       criteria: buildPrivateCriteria(topic.guidedExample, topic.referenceSolution),
-      studentAnswer: responseMode === 'image'
-        ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.'
+      studentAnswer: allImages.length > 0
+        ? `Respuesta manuscrita adjunta como ${allImages.length === 1 ? 'imagen' : `${allImages.length} imágenes — están en orden, léelas como páginas consecutivas de una misma respuesta`}. Corrígela leyendo la(s) imagen(es) enviada(s).`
         : studentResponse,
     }],
   })
 
   const content: Anthropic.Messages.ContentBlockParam[] = []
-  if (imageData) {
+  for (const img of allImages) {
     content.push({
       type: 'image',
       source: {
         type: 'base64',
-        media_type: sanitizeImageType(body.imageType),
-        data: imageData,
+        media_type: sanitizeImageType(img.mediaType),
+        data: img.data,
       },
     })
   }
@@ -219,7 +234,7 @@ export async function POST(request: NextRequest) {
   }
 
   const usage = extractAnthropicTokenUsage(message)
-  await logAiUsageEvent({
+  await logAiUsageEventForPhotos({
     userId: authContext.user.id,
     route: '/api/camino/correct',
     action,
@@ -229,6 +244,7 @@ export async function POST(request: NextRequest) {
     totalTokens: usage.totalTokens,
     status: 'success',
     metadata: { ...metadata, truncated: message.stop_reason === 'max_tokens' },
+    photoCount: allImages.length,
     accessToken: authContext.accessToken,
   })
 
@@ -350,6 +366,7 @@ async function enforceUsageLimits({
   email,
   action,
   creditKey,
+  photoCount,
   accessToken,
 }: {
   userId: string
@@ -357,6 +374,7 @@ async function enforceUsageLimits({
   email: string | undefined
   action: RateLimitAction
   creditKey: string
+  photoCount: number
   accessToken: string
 }) {
   const billing = await getUserBillingContext(userId, userCreatedAt, email)
@@ -376,7 +394,9 @@ async function enforceUsageLimits({
     const monthlyPhotos = creditKey
       ? await getMonthlyUniqueActionCount(userId, ['image_correction'])
       : await getMonthlyActionCount(userId, ['image_correction'])
-    if (monthlyPhotos >= planLimits.photosPerMonth) {
+    // Rejects up front if THIS submission's photos would push the student
+    // over the limit, not just once already at/over it.
+    if (monthlyPhotos + Math.max(1, photoCount) > planLimits.photosPerMonth) {
       return NextResponse.json(
         { error: 'photo_limit_reached', message: `Has alcanzado el límite de ${planLimits.photosPerMonth} correcciones con foto este mes. ${monthlyLimitResetNotice()}`, code: BILLING_BLOCK_CODE },
         { status: 429 }

@@ -465,11 +465,11 @@ function formatEnunciado(enunciado?: string | null) {
 type Asignatura = 'general' | 'mates' | 'matematicas_ccss' | 'fisica' | 'quimica' | 'biologia' | 'lengua' | 'historia' | 'historia_filosofia' | 'ingles'
 type Tipo = 'Ordinaria' | 'Extraordinaria' | 'Modelo'
 type Seccion = 'examenes' | 'chat' | 'historial' | 'planning'
-// imagenPreview: solo para mostrar la miniatura en la burbuja del propio
-// alumno en esta sesión — no se persiste en chat_messages (evita guardar
-// blobs de imagen en el historial de chat) ni se reenvía en mensajes
+// imagenPreviews: solo para mostrar las miniaturas en la burbuja del propio
+// alumno en esta sesión — no se persisten en chat_messages (evita guardar
+// blobs de imagen en el historial de chat) ni se reenvían en mensajes
 // posteriores.
-interface MensajeChat { rol: 'usuario' | 'kairo'; texto: string; ts?: number; imagenPreview?: string }
+interface MensajeChat { rol: 'usuario' | 'kairo'; texto: string; ts?: number; imagenPreviews?: string[] }
 
 const HOME_SECTIONS: Seccion[] = ['examenes', 'chat', 'historial', 'planning']
 const HOME_SUBJECTS: Asignatura[] = ['mates', 'matematicas_ccss', 'fisica', 'quimica', 'biologia', 'ingles', 'lengua', 'historia', 'historia_filosofia']
@@ -956,9 +956,7 @@ export default function Home() {
   const [diaHistoriaIdx, setDiaHistoriaIdx] = useState(0)
   const [opcion, setOpcion] = useState<0|1>(0)
   const [respuesta, setRespuesta] = useState('')
-  const [imagen, setImagen] = useState<string | null>(null)
-  const [imagenTipo, setImagenTipo] = useState('image/jpeg')
-  const [imagenPreview, setImagenPreview] = useState<string | null>(null)
+  const [imagenes, setImagenes] = useState<Array<{ data: string; type: string; preview: string }>>([])
   const [imagenError, setImagenError] = useState('')
   const [correccion, setCorreccion] = useState('')
   const [correccionNoEvaluable, setCorreccionNoEvaluable] = useState(false)
@@ -969,7 +967,7 @@ export default function Home() {
   const [mensajes, setMensajes] = useState<MensajeChat[]>([])
   const [inputChat, setInputChat] = useState('')
   const [cargandoChat, setCargandoChat] = useState(false)
-  const [chatAdjunto, setChatAdjunto] = useState<PhotoAttachment | null>(null)
+  const [chatAdjuntos, setChatAdjuntos] = useState<PhotoAttachment[]>([])
   const [historial, setHistorial] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   const [cargandoHistorial, setCargandoHistorial] = useState(false)
   const [historialTotalCount, setHistorialTotalCount] = useState<number | null>(null)
@@ -2001,8 +1999,10 @@ function formatChatTimestamp(ts: number) {
 function reset() {
   setCorreccion(''); setTruncated(false)
   setRespuesta('')
-  setImagen(null)
-  setImagenPreview(null)
+  setImagenes(current => {
+    current.forEach(img => URL.revokeObjectURL(img.preview))
+    return []
+  })
 }
 
 function cambiarAsignatura(a: Asignatura) {
@@ -2138,7 +2138,7 @@ function switchChatSubject(subject: Asignatura) {
   chatThreadCacheRef.current[asignatura] = mensajes
   cambiarAsignatura(subject)
   loadChatThread(subject)
-  setChatAdjunto(null)
+  setChatAdjuntos([])
 }
 
 function cambiarTipo(t: Tipo) {
@@ -2176,40 +2176,51 @@ function cambiarTipo(t: Tipo) {
   }
 
   async function handleImagen(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = Array.from(e.target.files ?? [])
+    e.target.value = ''
+    if (!files.length) return
     setImagenError('')
     const imageRequestId = `image-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     const imageStart = performance.now()
-    setImagenPreview(URL.createObjectURL(file))
-    setImagenTipo('image/jpeg')
-    try {
-      const compressed = await compressImageToBase64(file)
-      setImagen(compressed)
+    // allSettled: una sola foto en formato no compatible (típicamente HEIC
+    // de iPhone) no debe descartar las demás ya comprimidas del mismo lote.
+    const results = await Promise.allSettled(files.map(async file => ({
+      data: await compressImageToBase64(file),
+      type: 'image/jpeg',
+      preview: URL.createObjectURL(file),
+    })))
+    const succeeded = results.filter((r): r is PromiseFulfilledResult<{ data: string; type: string; preview: string }> => r.status === 'fulfilled').map(r => r.value)
+    const failedCount = results.length - succeeded.length
+    if (succeeded.length) {
+      setImagenes(current => [...current, ...succeeded])
       const imageMs = Math.round(performance.now() - imageStart)
-      lastImageTimingRef.current = { requestId: imageRequestId, ms: imageMs, chars: compressed.length }
+      const totalChars = succeeded.reduce((sum, img) => sum + img.data.length, 0)
+      lastImageTimingRef.current = { requestId: imageRequestId, ms: imageMs, chars: totalChars }
       console.info('[correction-timing] image_prepare_ms', {
         requestId: imageRequestId,
         ms: imageMs,
-        imagePayloadChars: compressed.length
+        imagePayloadChars: totalChars
       })
-    } catch (error) {
-      // compressImageToBase64 rechaza en formatos que el navegador no sabe
-      // decodificar (típicamente HEIC de iPhone). Sin este catch, la promesa
-      // rechazada quedaba sin manejar: `imagen` nunca se rellenaba pero
-      // imagenPreview ya se había puesto, así que el alumno veía "su foto
-      // subida" y al pulsar Corregir el guard `!imagen` no dejaba enviar
-      // nada — "las fotos no se leen" sin ningún aviso de por qué.
-      console.error('[exam] image_compression_failed', { message: (error as Error)?.message })
-      setImagenPreview(null)
-      setImagen(null)
-      setImagenError('No hemos podido leer esta foto (formato no compatible, p. ej. HEIC de iPhone). Prueba a hacer la foto con la cámara del navegador o convertirla a JPG/PNG.')
     }
+    if (failedCount > 0) {
+      // compressImageToBase64 rechaza en formatos que el navegador no sabe
+      // decodificar (típicamente HEIC de iPhone) — el resto del lote ya
+      // comprimido se conserva, solo se avisa de las que fallaron.
+      console.error('[exam] image_compression_failed', { failedCount })
+      setImagenError(`No hemos podido leer ${failedCount === 1 ? 'una foto' : `${failedCount} fotos`} (formato no compatible, p. ej. HEIC de iPhone). Prueba a hacer la foto con la cámara del navegador o convertirla a JPG/PNG.`)
+    }
+  }
+
+  function removeImagen(index: number) {
+    setImagenes(current => current.filter((img, i) => {
+      if (i === index) URL.revokeObjectURL(img.preview)
+      return i !== index
+    }))
   }
 
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
-    if (modo === 'imagen' && !imagen) return
+    if (modo === 'imagen' && imagenes.length === 0) return
     const totalStart = performance.now()
     setCargando(true); setCorreccion(''); setTruncated(false); setExamXpResult(null); setCorreccionNoEvaluable(false)
     try {
@@ -2251,10 +2262,11 @@ function cambiarTipo(t: Tipo) {
           sourceText: p?.texto_fuente,
           concepts: p?.conceptos,
           studentAnswer: modo === 'imagen'
-            ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.'
+            ? `Respuesta manuscrita adjunta como ${imagenes.length === 1 ? 'imagen' : `${imagenes.length} imágenes — están en orden, léelas como páginas consecutivas de una misma respuesta`}. Corrígela leyendo la(s) imagen(es) enviada(s).`
             : respuesta,
-          imagen: modo === 'imagen' ? imagen : null,
-          imagenTipo: modo === 'imagen' ? imagenTipo : null,
+          imagen: modo === 'imagen' ? imagenes[0]?.data ?? null : null,
+          imagenTipo: modo === 'imagen' ? imagenes[0]?.type ?? null : null,
+          imagenes: modo === 'imagen' ? imagenes.slice(1).map(img => ({ data: img.data, mediaType: img.type })) : undefined,
           creditKey: correctionCreditKey
         })
       })
@@ -2372,24 +2384,24 @@ function cambiarTipo(t: Tipo) {
   // el envío, y leer el estado ahí daría el valor de ANTES de aplicarlos.
   async function enviarChat(overrideText?: string, overrideContext?: string) {
     const textoBase = overrideText ?? inputChat
-    if (!textoBase.trim() && !chatAdjunto) return
-    // Foto fija de la asignatura activa al enviar — si el alumno cambia de
+    if (!textoBase.trim() && chatAdjuntos.length === 0) return
+    // Fotos fijas de la asignatura activa al enviar — si el alumno cambia de
     // pill mientras esta respuesta sigue en curso, el mensaje se sigue
     // guardando en el hilo correcto (el de cuando se envió), no en el que
     // esté activo cuando termine de llegar la respuesta.
     const chatSubject = asignatura
-    const adjunto = chatAdjunto
+    const adjuntos = chatAdjuntos
     const effectiveContext = overrideContext ?? contextoChat
     const textoMensaje = textoBase.trim() || '¿Está bien esto que he hecho?'
-    const nuevoMensaje: MensajeChat = { rol: 'usuario', texto: textoMensaje, ts: Date.now(), imagenPreview: adjunto?.preview }
+    const nuevoMensaje: MensajeChat = { rol: 'usuario', texto: textoMensaje, ts: Date.now(), imagenPreviews: adjuntos.map(a => a.preview) }
     const hist = [...mensajes, nuevoMensaje]
     setMensajes(hist)
-    // La imagen no se persiste en chat_messages (evitar guardar blobs de
+    // Las imágenes no se persisten en chat_messages (evitar guardar blobs de
     // foto en el historial de chat) — solo queda constancia en texto de que
-    // había una adjunta.
-    persistChatMessage(chatSubject, 'usuario', adjunto ? `${textoMensaje} [foto adjunta]` : textoMensaje)
+    // había alguna adjunta.
+    persistChatMessage(chatSubject, 'usuario', adjuntos.length > 0 ? `${textoMensaje} [${adjuntos.length === 1 ? 'foto adjunta' : `${adjuntos.length} fotos adjuntas`}]` : textoMensaje)
     setInputChat('')
-    setChatAdjunto(null)
+    setChatAdjuntos([])
     setCargandoChat(true)
     const accessToken = await getChatAccessToken()
     if (!accessToken) {
@@ -2416,9 +2428,11 @@ function cambiarTipo(t: Tipo) {
             // vez haría crecer el coste/tokens de cada respuesta sin tope. El
             // historial completo se sigue guardando y mostrando igual.
             hist.slice(-20).map(m => (m.rol === 'usuario' ? 'Estudiante' : 'Kairo') + ': ' + m.texto).join('\n') +
+            (adjuntos.length > 1 ? `\nEl estudiante ha adjuntado ${adjuntos.length} fotos — son páginas consecutivas de una misma respuesta manuscrita, en ese orden.` : '') +
             '\nResponde solo como Kairo.',
-          imagen: adjunto?.data ?? null,
-          imagenTipo: adjunto?.mediaType ?? null,
+          imagen: adjuntos[0]?.data ?? null,
+          imagenTipo: adjuntos[0]?.mediaType ?? null,
+          imagenes: adjuntos.slice(1).map(a => ({ data: a.data, mediaType: a.mediaType })),
         })
       })
       if (!res.ok) {
@@ -5963,18 +5977,25 @@ function cambiarTipo(t: Tipo) {
                   />
                 ) : (
                   <div style={{ padding: '14px 16px' }}>
-                    <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImagen} style={{ display: 'none' }} />
-                    {imagenPreview ? (
-                      <div style={{ position: 'relative' }}>
-                        <img src={imagenPreview} alt="Respuesta" loading="lazy" decoding="async" style={{ width: '100%', maxHeight: '260px', objectFit: 'contain', borderRadius: 10, border: '1.5px solid #dbe7fb' }} />
-                        <button onClick={() => { setImagen(null); setImagenPreview(null); setImagenError('') }} style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
+                    <input ref={fileRef} type="file" accept="image/*" multiple capture="environment" onChange={handleImagen} style={{ display: 'none' }} />
+                    {imagenes.length > 0 && (
+                      <div style={{ marginBottom: 10, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))', gap: 8 }}>
+                        {imagenes.map((img, index) => (
+                          <div key={`${img.preview}-${index}`} style={{ position: 'relative' }}>
+                            <img src={img.preview} alt={`Página ${index + 1}`} loading="lazy" decoding="async" style={{ height: 96, width: '100%', borderRadius: 10, border: '1.5px solid #dbe7fb', objectFit: 'cover' }} />
+                            <span style={{ position: 'absolute', bottom: 4, left: 4, borderRadius: 6, background: 'rgba(15,23,42,0.75)', color: 'white', fontSize: 10, fontWeight: 900, padding: '1px 6px' }}>{index + 1}</span>
+                            <button onClick={() => removeImagen(index)} aria-label={`Quitar página ${index + 1}`} style={{ position: 'absolute', top: -6, right: -6, width: 22, height: 22, borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={12} /></button>
+                          </div>
+                        ))}
                       </div>
-                    ) : (
-                      <div className="campus-hover" onClick={() => fileRef.current?.click()} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), height: 160, borderRadius: 10, border: '2px dashed ' + cfg.accent, background: cfg.light + '40', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' } as CSSProperties}>
-                        <UploadCloud size={30} color={cfg.color} />
-                        <p style={{ fontSize: 13, fontWeight: 600, color: cfg.color, margin: '8px 0 3px' }}>Haz una foto o sube una imagen</p>
-                        <p style={{ fontSize: 11, color: cfg.accent, margin: 0 }}>Fotografía tu respuesta manuscrita</p>
-                      </div>
+                    )}
+                    <div className="campus-hover" onClick={() => fileRef.current?.click()} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), height: imagenes.length > 0 ? 72 : 160, borderRadius: 10, border: '2px dashed ' + cfg.accent, background: cfg.light + '40', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' } as CSSProperties}>
+                      <UploadCloud size={imagenes.length > 0 ? 20 : 30} color={cfg.color} />
+                      <p style={{ fontSize: 13, fontWeight: 600, color: cfg.color, margin: '8px 0 3px' }}>{imagenes.length > 0 ? 'Añadir otra página' : 'Haz una foto o sube una imagen'}</p>
+                      {imagenes.length === 0 && <p style={{ fontSize: 11, color: cfg.accent, margin: 0 }}>Fotografía tu respuesta manuscrita</p>}
+                    </div>
+                    {imagenes.length > 1 && (
+                      <p style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: '#64748b' }}>Se corrigen juntas como páginas consecutivas de una misma respuesta.</p>
                     )}
                     {imagenError && (
                       <p style={{ marginTop: 10, fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{imagenError}</p>
@@ -5984,7 +6005,7 @@ function cambiarTipo(t: Tipo) {
               </div>
               {/* Footer row */}
               <div style={{ padding: '10px 16px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                <button className="campus-primary exams-correct-button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '9px 20px', borderRadius: 10, border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : '#2563eb', color: '#fff', fontSize: 13, fontWeight: 800, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : !imagen)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 4px 16px rgba(37,99,235,.3)', display: 'flex', alignItems: 'center', gap: 7 }}>
+                <button className="campus-primary exams-correct-button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : imagenes.length === 0)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '9px 20px', borderRadius: 10, border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : '#2563eb', color: '#fff', fontSize: 13, fontWeight: 800, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : imagenes.length === 0)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 4px 16px rgba(37,99,235,.3)', display: 'flex', alignItems: 'center', gap: 7 }}>
                   {cargando ? <KairoLoadingDot /> : <WandSparkles size={15} />}{cargando ? 'Corrigiendo con Kairo...' : 'Corregir con Kairo'}
                 </button>
               </div>
@@ -6153,7 +6174,7 @@ function cambiarTipo(t: Tipo) {
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 800, color: '#15803d' }}>Sesión activa</div>
                       <div style={{ fontSize: 10, color: '#86efac', marginTop: 1 }}>
-                        {respuesta.trim() || imagen ? 'Respuesta en progreso' : 'Empieza con el enunciado actual'}
+                        {respuesta.trim() || imagenes.length > 0 ? 'Respuesta en progreso' : 'Empieza con el enunciado actual'}
                       </div>
                     </div>
                   </div>
@@ -6296,8 +6317,12 @@ function cambiarTipo(t: Tipo) {
                               <div key={i} className="tutor-msg-user-row">
                                 <div>
                                   <div className="tutor-msg-user-bubble">
-                                    {msg.imagenPreview && (
-                                      <img src={msg.imagenPreview} alt="Foto enviada" loading="lazy" decoding="async" style={{ display: 'block', maxWidth: 200, maxHeight: 200, borderRadius: 10, marginBottom: msg.texto ? 8 : 0, objectFit: 'contain' }} />
+                                    {msg.imagenPreviews && msg.imagenPreviews.length > 0 && (
+                                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: msg.texto ? 8 : 0 }}>
+                                        {msg.imagenPreviews.map((preview, previewIdx) => (
+                                          <img key={previewIdx} src={preview} alt={`Foto enviada ${previewIdx + 1}`} loading="lazy" decoding="async" style={{ display: 'block', maxWidth: 200, maxHeight: 200, borderRadius: 10, objectFit: 'contain' }} />
+                                        ))}
+                                      </div>
                                     )}
                                     {msg.texto}
                                   </div>
@@ -6330,9 +6355,9 @@ function cambiarTipo(t: Tipo) {
 
                     <div className="tutor-input-zone">
                       <div className="chat-input-wrap">
-                        <PhotoAttachButton value={chatAdjunto} onChange={setChatAdjunto} disabled={cargandoChat} compact />
-                        <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder={chatAdjunto ? 'Pregúntale a Kairo sobre esta foto (opcional)...' : 'Pregunta lo que quieras a Kairo...'} rows={1} style={{ flex: 1, minHeight: 40, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '8px 4px 8px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' as const }} />
-                        <button className="chat-send-btn" onClick={() => enviarChat()} disabled={(!inputChat.trim() && !chatAdjunto) || cargandoChat}>
+                        <PhotoAttachButton value={chatAdjuntos} onChange={setChatAdjuntos} disabled={cargandoChat} compact />
+                        <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder={chatAdjuntos.length > 0 ? 'Pregúntale a Kairo sobre esta foto (opcional)...' : 'Pregunta lo que quieras a Kairo...'} rows={1} style={{ flex: 1, minHeight: 40, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '8px 4px 8px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' as const }} />
+                        <button className="chat-send-btn" onClick={() => enviarChat()} disabled={(!inputChat.trim() && chatAdjuntos.length === 0) || cargandoChat}>
                           {cargandoChat ? <KairoLoadingDot /> : <SendHorizontal size={15} />}
                           {cargandoChat ? 'Pensando...' : 'Enviar'}
                         </button>

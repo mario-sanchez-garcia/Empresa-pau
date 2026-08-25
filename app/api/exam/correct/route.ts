@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
+import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent, logAiUsageEventForPhotos } from '@/app/lib/aiUsage'
 import { isOverloadedError, withAnthropicRetry } from '@/app/lib/ai/withAnthropicRetry'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE, monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
@@ -84,6 +84,7 @@ type ExamCorrectBody = {
   studentAnswer?: unknown
   imagen?: unknown
   imagenTipo?: unknown
+  imagenes?: unknown
   creditKey?: unknown
 }
 
@@ -138,13 +139,26 @@ async function handlePost(request: NextRequest) {
     return NextResponse.json({ error: 'Falta la respuesta del alumno.' }, { status: 400 })
   }
 
+  // Legacy singular `imagen` still works (older clients / single-photo
+  // callers); `imagenes` is the new multi-photo array. Both can combine —
+  // the legacy field is just treated as photo #1 if present.
   const imagen = typeof body.imagen === 'string' && body.imagen.trim() ? body.imagen : null
   const imagenTipo = typeof body.imagenTipo === 'string' && body.imagenTipo.trim() ? body.imagenTipo : 'image/jpeg'
-  if (imagen && imagen.length > MAX_IMAGE_PAYLOAD_CHARS) {
-    return NextResponse.json({ error: 'La imagen es demasiado grande. Sube una imagen más ligera.' }, { status: 413 })
+  const imagenes = Array.isArray(body.imagenes)
+    ? body.imagenes
+      .filter((item): item is { data: string; mediaType?: string } => Boolean(item && typeof (item as { data?: unknown }).data === 'string'))
+      .map(item => ({ data: item.data, mediaType: typeof item.mediaType === 'string' && item.mediaType.trim() ? item.mediaType : 'image/jpeg' }))
+    : []
+  const allImages = [
+    ...(imagen ? [{ data: imagen, mediaType: imagenTipo }] : []),
+    ...imagenes,
+  ]
+  const imagePayloadChars = allImages.reduce((sum, img) => sum + img.data.length, 0)
+  if (imagePayloadChars > MAX_IMAGE_PAYLOAD_CHARS) {
+    return NextResponse.json({ error: 'Las imágenes son demasiado grandes en conjunto. Sube fotos más ligeras o menos páginas.' }, { status: 413 })
   }
 
-  const action: RateLimitAction = imagen ? 'image_correction' : 'chat'
+  const action: RateLimitAction = allImages.length > 0 ? 'image_correction' : 'chat'
   const creditKey = typeof body.creditKey === 'string' && body.creditKey.trim() ? body.creditKey.trim().slice(0, 180) : null
   const metadata = {
     creditKey,
@@ -154,9 +168,9 @@ async function handlePost(request: NextRequest) {
     option: option || null,
     year: body.year ?? null,
     examCall: asString(body.examCall) || null,
-    hasImage: Boolean(imagen),
-    imageCount: imagen ? 1 : 0,
-    imagePayloadChars: imagen?.length ?? 0,
+    hasImage: allImages.length > 0,
+    imageCount: allImages.length,
+    imagePayloadChars,
     promptChars: officialPrompt.length,
     answerChars: studentAnswer.length
   }
@@ -172,6 +186,7 @@ async function handlePost(request: NextRequest) {
       email: authContext.user.email,
       action,
       creditKey,
+      photoCount: allImages.length,
       accessToken: authContext.accessToken
     })
     if (limitResponse) return limitResponse
@@ -211,8 +226,8 @@ async function handlePost(request: NextRequest) {
       criteria: combinedCriteria,
       sourceText,
       concepts,
-      studentAnswer: imagen
-        ? `Respuesta manuscrita adjunta como imagen. Texto adicional: ${studentAnswer}`
+      studentAnswer: allImages.length > 0
+        ? `Respuesta manuscrita adjunta como ${allImages.length === 1 ? 'imagen' : `${allImages.length} imágenes — están en orden, léelas como páginas consecutivas de una misma respuesta`}. Texto adicional: ${studentAnswer}`
         : studentAnswer
     },
     blockIndex: 0,
@@ -229,10 +244,10 @@ Markdown (##, ###) dentro del valor de un campo — cada campo del JSON contiene
 un valor de texto, escapa los saltos de línea correctamente para no romper el JSON.`
 
   const content: Anthropic.Messages.ContentBlockParam[] = []
-  if (imagen) {
+  for (const img of allImages) {
     content.push({
       type: 'image',
-      source: { type: 'base64', media_type: sanitizeImageType(imagenTipo), data: imagen }
+      source: { type: 'base64', media_type: sanitizeImageType(img.mediaType), data: img.data }
     })
   }
   content.push({ type: 'text', text: prompt })
@@ -274,7 +289,7 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
 
   const usage = extractAnthropicTokenUsage(message)
   console.info('[exam/correct] llm_done', { ms: Date.now() - llmStart, stopReason: message.stop_reason ?? 'unknown' })
-  await logAiUsageEvent({
+  await logAiUsageEventForPhotos({
     userId: authContext.user.id,
     route: '/api/chat',
     action,
@@ -284,6 +299,7 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
     totalTokens: usage.totalTokens,
     status: 'success',
     metadata: { ...metadata, truncated: message.stop_reason === 'max_tokens' },
+    photoCount: allImages.length,
     accessToken: authContext.accessToken
   })
 
@@ -316,7 +332,7 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
   console.info('[exam/correct] done', { ms: Date.now() - totalStart, whyExplanationCacheHit: Boolean(cachedWhy) })
 
   if ((normalized as { notEvaluable?: boolean })?.notEvaluable) {
-    console.warn('[exam/correct] not_evaluable', { ms: Date.now() - totalStart, hasImage: Boolean(imagen) })
+    console.warn('[exam/correct] not_evaluable', { ms: Date.now() - totalStart, hasImage: allImages.length > 0, imageCount: allImages.length })
   }
 
   return NextResponse.json({
@@ -369,6 +385,7 @@ async function enforceUsageLimits({
   email,
   action,
   creditKey,
+  photoCount,
   accessToken
 }: {
   userId: string
@@ -376,6 +393,7 @@ async function enforceUsageLimits({
   email: string | undefined
   action: RateLimitAction
   creditKey: string | null
+  photoCount: number
   accessToken: string
 }) {
   const billing = await getUserBillingContext(userId, userCreatedAt, email)
@@ -391,7 +409,11 @@ async function enforceUsageLimits({
     const monthlyPhotos = creditKey
       ? await getMonthlyUniqueActionCount(userId, ['image_correction'])
       : await getMonthlyActionCount(userId, ['image_correction'])
-    if (monthlyPhotos >= planLimits.photosPerMonth) {
+    // Rejects up front if THIS submission's photos would push the student
+    // over the limit (not just when already at/over it) — a 3-photo
+    // submission with only 1 slot left must be blocked entirely, not let
+    // through and silently under-charged.
+    if (monthlyPhotos + Math.max(1, photoCount) > planLimits.photosPerMonth) {
       return NextResponse.json(
         { error: 'photo_limit_reached', message: `Has alcanzado el límite de ${planLimits.photosPerMonth} correcciones con foto este mes. ${monthlyLimitResetNotice()}`, code: BILLING_BLOCK_CODE },
         { status: 429 }

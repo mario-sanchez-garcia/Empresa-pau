@@ -107,6 +107,45 @@ export async function checkAiRateLimit(args: CheckAiRateLimitArgs): Promise<AiRa
   }
 }
 
+type LogPhotoUsageArgs = LogAiUsageArgs & {
+  /** How many photos this single AI call actually corrected (0 for text-only, N for a multi-photo submission). */
+  photoCount: number
+}
+
+// A multi-photo submission is still ONE Anthropic call, but must debit N
+// units from the student's monthly "fotos/mes" quota — the quota check
+// (getMonthlyActionCount/getMonthlyUniqueActionCount in serverUsage.ts)
+// counts *rows* in ai_usage_events, so debiting N units means inserting N
+// rows here, not one. Only the first row carries the call's real
+// input/output tokens and cost; the rest are quota-only markers (tokens
+// null, cost 0) so admin dashboards that sum every row's tokens/cost don't
+// get inflated N-fold for what was actually a single Claude request.
+//
+// When metadata.creditKey is set, each extra row gets a distinct
+// `${creditKey}::img${n}` suffix — the FIRST photo keeps the bare
+// creditKey unchanged (so it still dedupes exactly like before this
+// feature existed, for both pre-existing rows and single-photo callers).
+// Repeating the same exercise with the same-or-fewer photos later
+// reproduces the same suffixed keys and doesn't cost extra quota (matches
+// the existing "repeating an exercise is free" design); only genuinely
+// new additional photos mint a new unique key and cost quota.
+export async function logAiUsageEventForPhotos({ photoCount, metadata, ...args }: LogPhotoUsageArgs) {
+  const count = Math.max(1, Math.floor(photoCount) || 0)
+  const baseCreditKey = typeof metadata?.creditKey === 'string' && metadata.creditKey.trim() ? metadata.creditKey.trim() : null
+
+  await Promise.all(Array.from({ length: count }, (_, i) => {
+    const creditKey = baseCreditKey && i > 0 ? `${baseCreditKey}::img${i + 1}` : baseCreditKey
+    return logAiUsageEvent({
+      ...args,
+      inputTokens: i === 0 ? args.inputTokens : null,
+      outputTokens: i === 0 ? args.outputTokens : null,
+      totalTokens: i === 0 ? args.totalTokens : null,
+      estimatedCostEur: i === 0 ? args.estimatedCostEur : 0,
+      metadata: { ...(metadata ?? {}), ...(baseCreditKey ? { creditKey } : {}), photoIndex: i + 1, photoCount: count },
+    })
+  }))
+}
+
 export async function logAiUsageEvent(args: LogAiUsageArgs) {
   try {
     const supabase = createUsageClient(args.accessToken)

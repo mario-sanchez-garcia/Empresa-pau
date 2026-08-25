@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
+import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent, logAiUsageEventForPhotos } from '@/app/lib/aiUsage'
 import { isOverloadedError, withAnthropicRetry } from '@/app/lib/ai/withAnthropicRetry'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE, monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
@@ -181,7 +181,10 @@ async function handlePost(request: NextRequest) {
       const monthlyPhotos = metadata.creditKey
         ? await getMonthlyUniqueActionCount(authContext.user.id, ['image_correction'])
         : await getMonthlyActionCount(authContext.user.id, ['image_correction'])
-      if (monthlyPhotos >= planLimits.photosPerMonth) {
+      // Rejects up front if THIS submission's photos would push the student
+      // over the limit, not just once already at/over it — a 3-photo
+      // submission with only 1 slot left must be blocked entirely.
+      if (monthlyPhotos + Math.max(1, imageCount) > planLimits.photosPerMonth) {
         return NextResponse.json(
           { error: 'photo_limit_reached', message: `Has alcanzado el límite de ${planLimits.photosPerMonth} correcciones con foto este mes. ${monthlyLimitResetNotice()}`, code: BILLING_BLOCK_CODE },
           { status: 429 }
@@ -258,7 +261,7 @@ async function handlePost(request: NextRequest) {
             console.warn('[chat] truncated: true (stream)', { action, maxTokens, outputTokens: usage.outputTokens })
             controller.enqueue(encoder.encode(STREAM_TRUNCATION_SENTINEL))
           }
-          logAiUsageEvent({
+          logAiUsageEventForPhotos({
             userId: authContext.user.id,
             route: '/api/chat',
             action,
@@ -268,6 +271,7 @@ async function handlePost(request: NextRequest) {
             totalTokens: usage.totalTokens,
             status: 'success',
             metadata,
+            photoCount: imageCount,
             accessToken: authContext.accessToken
           }).catch(() => {})
         } catch {
@@ -337,7 +341,7 @@ async function handlePost(request: NextRequest) {
     outputTokens: usage.outputTokens,
     totalTokens: usage.totalTokens
   })
-  await logAiUsageEvent({
+  await logAiUsageEventForPhotos({
     userId: authContext.user.id,
     route: '/api/chat',
     action,
@@ -346,6 +350,7 @@ async function handlePost(request: NextRequest) {
     outputTokens: usage.outputTokens,
     totalTokens: usage.totalTokens,
     status: 'success',
+    photoCount: imageCount,
     metadata,
     accessToken: authContext.accessToken
   })

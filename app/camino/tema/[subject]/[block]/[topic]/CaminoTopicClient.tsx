@@ -287,7 +287,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [progress, setProgress] = useState<TopicProgress>(() => loadJson<TopicProgress>(TOPIC_PROGRESS_KEY, {}))
   const [answerMode, setAnswerMode] = useState<'texto' | 'imagen'>('texto')
   const [studentAnswer, setStudentAnswer] = useState('')
-  const [image, setImage] = useState<UploadedImage | null>(null)
+  const [images, setImages] = useState<UploadedImage[]>([])
   const [correction, setCorrection] = useState('')
   const [notEvaluable, setNotEvaluable] = useState(false)
   const [imageError, setImageError] = useState('')
@@ -681,26 +681,37 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   }
 
   async function handleImage(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
-    setImageError('')
-    try {
-      const data = await compressImageToBase64(file)
-      if (image?.preview) URL.revokeObjectURL(image.preview)
-      setImage({ data, preview: URL.createObjectURL(file), type: 'image/jpeg' })
-    } catch (error) {
-      // compressImageToBase64 rechaza en formatos que el navegador no sabe
-      // decodificar (típicamente HEIC de iPhone). Sin este catch la promesa
-      // rechazada quedaba sin manejar: no se fijaba imagen ni preview y no
-      // había ningún aviso — "las fotos no se leen" sin explicación.
-      console.error('[camino] image_compression_failed', { message: (error as Error)?.message })
-      setImageError('No hemos podido leer esta foto (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte la imagen a JPG/PNG.')
+    const files = Array.from(event.target.files ?? [])
+    event.target.value = ''
+    if (!files.length) return
+    // allSettled: una sola foto en formato no compatible (típicamente HEIC
+    // de iPhone) no debe descartar las demás ya comprimidas del mismo lote.
+    const results = await Promise.allSettled(files.map(async file => ({
+      data: await compressImageToBase64(file),
+      preview: URL.createObjectURL(file),
+      type: 'image/jpeg',
+    })))
+    const succeeded = results.filter((r): r is PromiseFulfilledResult<UploadedImage> => r.status === 'fulfilled').map(r => r.value)
+    const failedCount = results.length - succeeded.length
+    if (succeeded.length) setImages(current => [...current, ...succeeded])
+    if (failedCount > 0) {
+      console.error('[camino] image_compression_failed', { failedCount })
+      setImageError(`No hemos podido leer ${failedCount === 1 ? 'una foto' : `${failedCount} fotos`} (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte a JPG/PNG.`)
+    } else {
+      setImageError('')
     }
   }
 
-  function clearImage() {
-    if (image?.preview) URL.revokeObjectURL(image.preview)
-    setImage(null)
+  function removeImage(index: number) {
+    setImages(current => current.filter((img, i) => {
+      if (i === index) URL.revokeObjectURL(img.preview)
+      return i !== index
+    }))
+  }
+
+  function clearImages() {
+    images.forEach(img => URL.revokeObjectURL(img.preview))
+    setImages([])
     setImageError('')
     if (fileRef.current) fileRef.current.value = ''
   }
@@ -747,7 +758,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
 
   async function correctCourseExercise() {
     if (answerMode === 'texto' && !studentAnswer.trim()) return
-    if (answerMode === 'imagen' && !image) return
+    if (answerMode === 'imagen' && images.length === 0) return
     const maxScore = 10
     setCorrecting(true)
     setCorrection('')
@@ -772,8 +783,11 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           topic: currentTopic.topicSlug,
           sortOrder: selectedSortOrder,
           responseMode: answerMode === 'imagen' ? 'image' : 'text',
-          studentResponse: answerMode === 'imagen' ? image?.data : studentAnswer,
-          imageType: answerMode === 'imagen' ? image?.type : null,
+          studentResponse: answerMode === 'imagen' ? images[0]?.data : studentAnswer,
+          imageType: answerMode === 'imagen' ? images[0]?.type : null,
+          studentResponseImages: answerMode === 'imagen'
+            ? images.slice(1).map(img => ({ data: img.data, mediaType: img.type }))
+            : undefined,
         })
       })
       const data = await response.json()
@@ -824,7 +838,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             nota: rawScore,
             nota_maxima: maxScore,
             enunciado: statement.substring(0, 2000),
-            respuesta: answerMode === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : studentAnswer.substring(0, 4000),
+            respuesta: answerMode === 'imagen' ? `Respuesta manuscrita adjunta (${images.length} imagen${images.length === 1 ? '' : 'es'}).` : studentAnswer.substring(0, 4000),
             correccion: storedCorrection,
             repeated_from_id: repeatOfId,
             v2_sort_order: selectedSortOrder,
@@ -918,7 +932,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           nota: rawScore,
           nota_maxima: maxScore,
           enunciado: statement.substring(0, 2000),
-          respuesta: answerMode === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : studentAnswer.substring(0, 4000),
+          respuesta: answerMode === 'imagen' ? `Respuesta manuscrita adjunta (${images.length} imagen${images.length === 1 ? '' : 'es'}).` : studentAnswer.substring(0, 4000),
           correccion: storedCorrection,
           v2_sort_order: selectedSortOrder
         })
@@ -1209,25 +1223,39 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   <MathEditor subject={currentTopic.subject} value={studentAnswer} onChange={setStudentAnswer} placeholder="Escribe aquí tu desarrollo paso a paso..." minHeight={160} accentColor="#2563eb" />
                 ) : (
                   <div style={{ borderRadius: 4, border: '1px dashed #cbd5e1', background: '#f8fafc', padding: 14 }}>
-                    <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handleImage} style={{ display: 'none' }} />
-                    {image ? (
-                      <div style={{ display: 'grid', gap: 10 }}>
-                        <img src={image.preview} alt="Respuesta subida" loading="lazy" decoding="async" style={{ maxHeight: 280, borderRadius: 4, border: '1px solid #e2e8f0', objectFit: 'contain' }} />
-                        <button type="button" onClick={clearImage} style={{ display: 'inline-flex', width: 'fit-content', alignItems: 'center', gap: 6, borderRadius: 4, border: '1px solid #fecaca', background: 'white', padding: '6px 12px', fontSize: 11, fontWeight: 900, color: '#dc2626', cursor: 'pointer' }}>
-                          <X size={13} /> Quitar foto
-                        </button>
+                    <input ref={fileRef} type="file" accept="image/*" multiple capture="environment" onChange={handleImage} style={{ display: 'none' }} />
+                    {images.length > 0 && (
+                      <div style={{ marginBottom: 10, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))', gap: 8 }}>
+                        {images.map((img, index) => (
+                          <div key={`${img.preview}-${index}`} style={{ position: 'relative' }}>
+                            <img src={img.preview} alt={`Página ${index + 1}`} loading="lazy" decoding="async" style={{ height: 96, width: '100%', borderRadius: 4, border: '1px solid #e2e8f0', objectFit: 'cover' }} />
+                            <span style={{ position: 'absolute', bottom: 4, left: 4, borderRadius: 4, background: 'rgba(15,23,42,0.75)', color: 'white', fontSize: 10, fontWeight: 900, padding: '1px 6px' }}>{index + 1}</span>
+                            <button type="button" onClick={() => removeImage(index)} aria-label={`Quitar página ${index + 1}`} style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', background: '#dc2626', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <X size={11} />
+                            </button>
+                          </div>
+                        ))}
                       </div>
-                    ) : (
+                    )}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                       <button type="button" onClick={() => fileRef.current?.click()} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, background: 'white', border: '1px solid #e2e8f0', padding: '10px 16px', fontSize: 13, fontWeight: 900, color: '#2563eb', cursor: 'pointer' }}>
-                        <UploadCloud size={15} /> Hacer foto o elegir imagen
+                        <UploadCloud size={15} /> {images.length > 0 ? 'Añadir otra página' : 'Hacer foto o elegir imagen'}
                       </button>
+                      {images.length > 0 && (
+                        <button type="button" onClick={clearImages} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 4, border: '1px solid #fecaca', background: 'white', padding: '10px 12px', fontSize: 11, fontWeight: 900, color: '#dc2626', cursor: 'pointer' }}>
+                          <X size={13} /> Quitar todas
+                        </button>
+                      )}
+                    </div>
+                    {images.length > 1 && (
+                      <p style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: '#64748b' }}>Se corrigen juntas como páginas consecutivas de una misma respuesta.</p>
                     )}
                     {imageError && (
                       <p style={{ marginTop: 8, fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{imageError}</p>
                     )}
                   </div>
                 )}
-                <button type="button" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)} style={{ marginTop: 12, display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 4, background: '#0f172a', padding: '12px', fontSize: 13, fontWeight: 900, color: 'white', border: 'none', cursor: correcting ? 'not-allowed' : 'pointer', opacity: (correcting || (answerMode === 'texto' ? !studentAnswer.trim() : !image)) ? .5 : 1 }}>
+                <button type="button" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : images.length === 0)} style={{ marginTop: 12, display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 4, background: '#0f172a', padding: '12px', fontSize: 13, fontWeight: 900, color: 'white', border: 'none', cursor: correcting ? 'not-allowed' : 'pointer', opacity: (correcting || (answerMode === 'texto' ? !studentAnswer.trim() : images.length === 0)) ? .5 : 1 }}>
                   {correcting ? <><KairoLoadingDot /> Corrigiendo con Kairo...</> : <>Corregir con Kairo <Check size={15} /></>}
                 </button>
                 {notEvaluable && (

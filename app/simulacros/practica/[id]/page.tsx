@@ -25,6 +25,14 @@ const TOTAL_SECONDS = PARCIAL_MINUTES * 60
 const RING_RADIUS = 48
 const RING_CIRC = 2 * Math.PI * RING_RADIUS
 
+// Unifies the legacy single `image`/`imageType` (answers saved before
+// multi-photo support) with the new `images` array into one ordered list —
+// the legacy photo, if any, always comes first.
+function answerImages(answer?: SimulacroAnswer): Array<{ data: string; mediaType: string }> {
+  const legacy = answer?.image ? [{ data: answer.image, mediaType: answer.imageType || 'image/jpeg' }] : []
+  return [...legacy, ...(answer?.images ?? [])]
+}
+
 function PracticaPageInner() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
@@ -221,7 +229,7 @@ function PracticaPageInner() {
   }, [])
 
   const answeredCount = useMemo(
-    () => Object.values(answers).filter(a => a?.text?.trim() || a?.image).length,
+    () => Object.values(answers).filter(a => Boolean(a?.text?.trim()) || answerImages(a).length > 0).length,
     [answers],
   )
   const cfg = record ? SUBJECTS[record.asignatura] : SUBJECTS.mates
@@ -330,20 +338,44 @@ function PracticaPageInner() {
     })
   }
 
-  async function handleImage(blockId: string, file?: File) {
-    if (!file) return
+  async function handleImage(blockId: string, files: FileList | null) {
+    const fileList = Array.from(files ?? [])
+    if (!fileList.length) return
     setImageErrors(prev => ({ ...prev, [blockId]: '' }))
-    try {
-      const base64 = await compressImageToBase64(file)
-      setAnswers(prev => ({ ...prev, [blockId]: { ...(prev[blockId] ?? { text: '' }), image: base64, imageType: 'image/jpeg' } }))
-    } catch (error) {
-      // compressImageToBase64 rechaza en formatos que el navegador no sabe
-      // decodificar (típicamente HEIC de iPhone). Sin este catch la promesa
-      // rechazada quedaba sin manejar: el bloque se quedaba sin respuesta y
-      // sin ningún aviso — "las fotos no se leen" sin explicación.
-      console.error('[simulacro-practica] image_compression_failed', { blockId, message: (error as Error)?.message })
-      setImageErrors(prev => ({ ...prev, [blockId]: 'No hemos podido leer esta foto (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte la imagen a JPG/PNG.' }))
+    // allSettled: una sola foto en formato no compatible (típicamente HEIC
+    // de iPhone) no debe descartar las demás ya comprimidas del mismo lote.
+    const results = await Promise.allSettled(fileList.map(async file => ({
+      data: await compressImageToBase64(file),
+      mediaType: 'image/jpeg',
+    })))
+    const succeeded = results.filter((r): r is PromiseFulfilledResult<{ data: string; mediaType: string }> => r.status === 'fulfilled').map(r => r.value)
+    const failedCount = results.length - succeeded.length
+    if (succeeded.length) {
+      setAnswers(prev => ({
+        ...prev,
+        [blockId]: { ...(prev[blockId] ?? { text: '' }), images: [...(prev[blockId]?.images ?? []), ...succeeded] },
+      }))
     }
+    if (failedCount > 0) {
+      console.error('[simulacro-practica] image_compression_failed', { blockId, failedCount })
+      setImageErrors(prev => ({ ...prev, [blockId]: `No hemos podido leer ${failedCount === 1 ? 'una foto' : `${failedCount} fotos`} (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte a JPG/PNG.` }))
+    }
+  }
+
+  // The combined legacy+array list (answerImages) puts the legacy photo, if
+  // any, at index 0 — removal has to target whichever of the two fields
+  // that index actually lives in.
+  function removeAnswerImage(blockId: string, index: number) {
+    setAnswers(prev => {
+      const current = prev[blockId] ?? { text: '' }
+      const hasLegacy = Boolean(current.image)
+      if (hasLegacy && index === 0) {
+        return { ...prev, [blockId]: { ...current, image: null, imageType: null } }
+      }
+      const arrayIndex = hasLegacy ? index - 1 : index
+      const nextImages = (current.images ?? []).filter((_, i) => i !== arrayIndex)
+      return { ...prev, [blockId]: { ...current, images: nextImages } }
+    })
   }
 
   async function submitSession() {
@@ -620,7 +652,7 @@ function PracticaPageInner() {
 
           <div className="mt-4 flex flex-wrap gap-2">
             {record.bloques.map((block, index) => {
-              const answered = Boolean(answers[block.id]?.text?.trim() || answers[block.id]?.image)
+              const answered = Boolean(answers[block.id]?.text?.trim()) || answerImages(answers[block.id]).length > 0
               const marked = Boolean(reviewMarked[block.id])
               const isActive = active === index
               return (
@@ -664,8 +696,8 @@ function PracticaPageInner() {
                       <span
                         className="h-3 w-3 rounded-full"
                         style={{
-                          background: answers[block.id]?.text?.trim() || answers[block.id]?.image ? cfg.color : '#e2e8f0',
-                          boxShadow: answers[block.id]?.text?.trim() || answers[block.id]?.image ? `0 0 0 3px ${cfg.color}20` : 'none',
+                          background: Boolean(answers[block.id]?.text?.trim()) || answerImages(answers[block.id]).length > 0 ? cfg.color : '#e2e8f0',
+                          boxShadow: Boolean(answers[block.id]?.text?.trim()) || answerImages(answers[block.id]).length > 0 ? `0 0 0 3px ${cfg.color}20` : 'none',
                           transition: 'background 250ms, box-shadow 250ms',
                         }}
                       />
@@ -753,8 +785,8 @@ function PracticaPageInner() {
                       <span className="text-xs font-semibold" style={{ color: '#94a3b8' }}>
                         {answers[block.id]?.text?.trim()
                           ? `${answers[block.id].text.length} caracteres`
-                          : answers[block.id]?.image
-                          ? 'Imagen adjunta'
+                          : answerImages(answers[block.id]).length > 0
+                          ? `${answerImages(answers[block.id]).length} imagen${answerImages(answers[block.id]).length === 1 ? '' : 'es'} adjunta${answerImages(answers[block.id]).length === 1 ? '' : 's'}`
                           : 'Sin respuesta aún'}
                       </span>
                     </div>
@@ -767,24 +799,35 @@ function PracticaPageInner() {
                         style={{ borderColor: `${cfg.color}40`, background: `${cfg.color}08` }}
                       >
                         <Camera size={32} className="mb-3" style={{ color: cfg.color }} />
-                        <span className="font-black" style={{ color: cfg.color }}>Sube una foto de tu respuesta</span>
-                        <span className="mt-1 text-xs font-semibold" style={{ color: '#94a3b8' }}>JPG, PNG, HEIC hasta 10 MB</span>
-                        <input type="file" accept="image/*" capture="environment" className="hidden" onChange={event => void handleImage(block.id, event.target.files?.[0])} />
+                        <span className="font-black" style={{ color: cfg.color }}>
+                          {answerImages(answers[block.id]).length > 0 ? 'Añadir otra página' : 'Sube una foto de tu respuesta'}
+                        </span>
+                        <span className="mt-1 text-xs font-semibold" style={{ color: '#94a3b8' }}>JPG, PNG, HEIC hasta 10 MB · puedes elegir varias páginas a la vez</span>
+                        <input type="file" accept="image/*" multiple capture="environment" className="hidden" onChange={event => void handleImage(block.id, event.target.files)} />
                       </label>
                       {imageErrors[block.id] && (
                         <p className="text-xs font-bold" style={{ color: '#dc2626' }}>{imageErrors[block.id]}</p>
                       )}
-                      {answers[block.id]?.image && (
-                        <div className="relative overflow-hidden rounded-2xl border" style={{ borderColor: '#dbe7fb' }}>
-                          <img src={`data:${answers[block.id].imageType};base64,${answers[block.id].image}`} alt="Respuesta" loading="lazy" decoding="async" className="max-h-96 w-full object-contain" style={{ background: '#f8fbff' }} />
-                          <button
-                            onClick={() => setAnswers(prev => ({ ...prev, [block.id]: { ...(prev[block.id] ?? { text: '' }), image: null, imageType: null } }))}
-                            className="absolute right-3 top-3 rounded-full bg-white p-2 shadow-md transition hover:bg-red-50"
-                            style={{ border: '1px solid #fecaca' }}
-                          >
-                            <Trash2 size={15} style={{ color: '#ef4444' }} />
-                          </button>
+                      {answerImages(answers[block.id]).length > 0 && (
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {answerImages(answers[block.id]).map((img, index) => (
+                            <div key={index} className="relative overflow-hidden rounded-2xl border" style={{ borderColor: '#dbe7fb' }}>
+                              <img src={`data:${img.mediaType};base64,${img.data}`} alt={`Página ${index + 1}`} loading="lazy" decoding="async" className="h-48 w-full object-contain" style={{ background: '#f8fbff' }} />
+                              <span className="absolute bottom-2 left-2 rounded-md px-2 py-0.5 text-[11px] font-black text-white" style={{ background: 'rgba(15,23,42,0.75)' }}>{index + 1}</span>
+                              <button
+                                onClick={() => removeAnswerImage(block.id, index)}
+                                aria-label={`Quitar página ${index + 1}`}
+                                className="absolute right-2 top-2 rounded-full bg-white p-2 shadow-md transition hover:bg-red-50"
+                                style={{ border: '1px solid #fecaca' }}
+                              >
+                                <Trash2 size={14} style={{ color: '#ef4444' }} />
+                              </button>
+                            </div>
+                          ))}
                         </div>
+                      )}
+                      {answerImages(answers[block.id]).length > 1 && (
+                        <p className="text-xs font-semibold" style={{ color: '#64748b' }}>Se corrigen juntas como páginas consecutivas de una misma respuesta.</p>
                       )}
                     </div>
                   ) : (

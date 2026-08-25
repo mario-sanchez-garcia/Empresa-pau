@@ -36,9 +36,7 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
 }) {
   const [modo, setModo] = useState<'texto' | 'imagen'>('texto')
   const [answer, setAnswer] = useState('')
-  const [imagen, setImagen] = useState<string | null>(null)
-  const [imagenTipo, setImagenTipo] = useState('image/jpeg')
-  const [imagenPreview, setImagenPreview] = useState<string | null>(null)
+  const [imagenes, setImagenes] = useState<Array<{ data: string; type: string; preview: string }>>([])
   const [imagenError, setImagenError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -46,32 +44,35 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
   const [nota, setNota] = useState<number | null>(null)
   const [xpMessage, setXpMessage] = useState('')
   const maxScore = source.nota_maxima ?? 10
-  const canSubmit = modo === 'texto' ? Boolean(answer.trim()) : Boolean(imagen)
+  const canSubmit = modo === 'texto' ? Boolean(answer.trim()) : imagenes.length > 0
 
   async function handleImagen(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
-    setImagenError('')
-    setImagenPreview(URL.createObjectURL(file))
-    setImagenTipo('image/jpeg')
-    try {
-      setImagen(await compressImageToBase64(file))
-    } catch (err) {
-      // compressImageToBase64 rechaza en formatos que el navegador no sabe
-      // decodificar (típicamente HEIC de iPhone) — sin este catch quedaba
-      // una promesa rechazada sin manejar y una preview engañosa con
-      // `imagen` sin rellenar.
-      console.error('[repeat-exam] image_compression_failed', { message: (err as Error)?.message })
-      setImagenPreview(null)
-      setImagen(null)
-      setImagenError('No hemos podido leer esta foto (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte la imagen a JPG/PNG.')
+    const files = Array.from(event.target.files ?? [])
+    event.target.value = ''
+    if (!files.length) return
+    // allSettled: una sola foto en formato no compatible (típicamente HEIC
+    // de iPhone) no debe descartar las demás ya comprimidas del mismo lote.
+    const results = await Promise.allSettled(files.map(async file => ({
+      data: await compressImageToBase64(file),
+      type: 'image/jpeg',
+      preview: URL.createObjectURL(file),
+    })))
+    const succeeded = results.filter((r): r is PromiseFulfilledResult<{ data: string; type: string; preview: string }> => r.status === 'fulfilled').map(r => r.value)
+    const failedCount = results.length - succeeded.length
+    if (succeeded.length) setImagenes(current => [...current, ...succeeded])
+    if (failedCount > 0) {
+      console.error('[repeat-exam] image_compression_failed', { failedCount })
+      setImagenError(`No hemos podido leer ${failedCount === 1 ? 'una foto' : `${failedCount} fotos`} (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte a JPG/PNG.`)
+    } else {
+      setImagenError('')
     }
   }
 
-  function clearImagen() {
-    setImagen(null)
-    setImagenPreview(null)
-    setImagenError('')
+  function removeImagen(index: number) {
+    setImagenes(current => current.filter((img, i) => {
+      if (i === index) URL.revokeObjectURL(img.preview)
+      return i !== index
+    }))
   }
 
   async function submit() {
@@ -92,10 +93,11 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
           maxScore,
           officialPrompt: source.enunciado,
           studentAnswer: modo === 'imagen'
-            ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.'
+            ? `Respuesta manuscrita adjunta como ${imagenes.length === 1 ? 'imagen' : `${imagenes.length} imágenes — están en orden, léelas como páginas consecutivas de una misma respuesta`}. Corrígela leyendo la(s) imagen(es) enviada(s).`
             : answer,
-          imagen: modo === 'imagen' ? imagen : null,
-          imagenTipo: modo === 'imagen' ? imagenTipo : null,
+          imagen: modo === 'imagen' ? imagenes[0]?.data ?? null : null,
+          imagenTipo: modo === 'imagen' ? imagenes[0]?.type ?? null : null,
+          imagenes: modo === 'imagen' ? imagenes.slice(1).map(img => ({ data: img.data, mediaType: img.type })) : undefined,
         }),
       })
       const data = await res.json()
@@ -131,7 +133,7 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
         nota: rawScore,
         nota_maxima: maxScore,
         enunciado: source.enunciado.slice(0, 2000),
-        respuesta: modo === 'imagen' ? 'Respuesta manuscrita adjunta como imagen.' : answer.slice(0, 4000),
+        respuesta: modo === 'imagen' ? `Respuesta manuscrita adjunta (${imagenes.length} imagen${imagenes.length === 1 ? '' : 'es'}).` : answer.slice(0, 4000),
         correccion: JSON.stringify(correctionJson),
         repeated_from_id: source.id,
       }).select('id').single()
@@ -207,18 +209,25 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
               />
             ) : (
               <div>
-                <input type="file" accept="image/*" capture="environment" onChange={handleImagen} style={{ display: 'none' }} id="repeat-exam-image-input" />
-                {imagenPreview ? (
-                  <div style={{ position: 'relative' }}>
-                    <img src={imagenPreview} alt="Respuesta" loading="lazy" decoding="async" style={{ width: '100%', maxHeight: 260, objectFit: 'contain', borderRadius: 10, border: '1.5px solid #dbe7fb' }} />
-                    <button onClick={clearImagen} type="button" style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: '#2563eb', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
+                <input type="file" accept="image/*" multiple capture="environment" onChange={handleImagen} style={{ display: 'none' }} id="repeat-exam-image-input" />
+                {imagenes.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8, marginBottom: 10 }}>
+                    {imagenes.map((img, index) => (
+                      <div key={`${img.preview}-${index}`} style={{ position: 'relative' }}>
+                        <img src={img.preview} alt={`Página ${index + 1}`} loading="lazy" decoding="async" style={{ height: 100, width: '100%', objectFit: 'cover', borderRadius: 10, border: '1.5px solid #dbe7fb' }} />
+                        <span style={{ position: 'absolute', bottom: 4, left: 4, borderRadius: 6, background: 'rgba(15,23,42,0.75)', color: 'white', fontSize: 10, fontWeight: 900, padding: '1px 6px' }}>{index + 1}</span>
+                        <button onClick={() => removeImagen(index)} type="button" aria-label={`Quitar página ${index + 1}`} style={{ position: 'absolute', top: -6, right: -6, width: 22, height: 22, borderRadius: '50%', background: '#2563eb', color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={12} /></button>
+                      </div>
+                    ))}
                   </div>
-                ) : (
-                  <label htmlFor="repeat-exam-image-input" style={{ height: 160, borderRadius: 10, border: '2px dashed #93c5fd', background: '#eff6ff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                    <UploadCloud size={30} color="#2563eb" />
-                    <p style={{ fontSize: 13, fontWeight: 600, color: '#2563eb', margin: '8px 0 3px' }}>Haz una foto o sube una imagen</p>
-                    <p style={{ fontSize: 11, color: '#60a5fa', margin: 0 }}>Fotografía tu respuesta manuscrita</p>
-                  </label>
+                )}
+                <label htmlFor="repeat-exam-image-input" style={{ height: imagenes.length > 0 ? 80 : 160, borderRadius: 10, border: '2px dashed #93c5fd', background: '#eff6ff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                  <UploadCloud size={imagenes.length > 0 ? 20 : 30} color="#2563eb" />
+                  <p style={{ fontSize: 13, fontWeight: 600, color: '#2563eb', margin: '8px 0 3px' }}>{imagenes.length > 0 ? 'Añadir otra página' : 'Haz una foto o sube una imagen'}</p>
+                  {imagenes.length === 0 && <p style={{ fontSize: 11, color: '#60a5fa', margin: 0 }}>Fotografía tu respuesta manuscrita</p>}
+                </label>
+                {imagenes.length > 1 && (
+                  <p style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: '#64748b' }}>Se corrigen juntas como páginas consecutivas de una misma respuesta.</p>
                 )}
                 {imagenError && <p style={{ marginTop: 10, fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{imagenError}</p>}
               </div>

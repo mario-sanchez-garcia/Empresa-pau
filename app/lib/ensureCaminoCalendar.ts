@@ -6,6 +6,7 @@ import { cleanStudentExams } from './camino/cleanStudentExams'
 import { estimatedMinutesForSlot, missionsPerDayForMinutes } from './camino/dailyTimeCapacity'
 import { EXAM_SUBJECT_SLUG } from './camino/partialExamSubjects'
 import { injectAllPartialExamMissions } from './camino/injectPartialExamMissions'
+import { resolveTopicIdentitiesBatch } from './camino/resolveTopicIdentity'
 import { createDayScheduler, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
 import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
 import { addDays, countWorkingDays, getMadridToday, getStudyDays } from './camino/studyDays'
@@ -379,6 +380,18 @@ export async function ensureCaminoCalendar(
 
   const dailyMinutesForSlots = typeof declaredDailyMinutes === 'number' ? declaredDailyMinutes : null
 
+  // Historia only (curriculum_content_v2.topic_id, migration 20260825220000) —
+  // batched once up front instead of per-row so a normal ensure-calendar run
+  // doesn't add dozens of extra queries. Purely additive: v2_sort_order
+  // keeps being the identity every downstream reader (complete-mission,
+  // /api/camino/correct, etc.) already uses; this only attaches the real
+  // curriculum_topics.id alongside it when one exists.
+  const historiaTopicIdBySortOrder = await resolveTopicIdentitiesBatch(
+    supabase,
+    'historia_espana',
+    (subjectQueues['historia_espana'] ?? []).map(item => item.v2_sort_order),
+  )
+
   for (const dateStr of emptyDays) {
     const subject = subjectForDay(dateStr, subjects, examSubjectsByDate.get(dateStr))
     if (!subject) continue
@@ -404,6 +417,8 @@ export async function ensureCaminoCalendar(
       const missionType = (itemMeta.mission_type as string) ?? 'concept'
       const calMetadata: Record<string, unknown> = {}
       calMetadata.topic_slug = topicMeta.topicSlug
+      const topicId = item.subject === 'historia_espana' ? historiaTopicIdBySortOrder.get(item.v2_sort_order) : null
+      if (topicId) calMetadata.topic_id = topicId
       if (itemMeta.express) calMetadata.express = true
       if (rescueMode) calMetadata.plan_mode = 'rescue'
       const timeSlot = scheduler.place(estimatedMinutesForSlot(dailyMinutesForSlots, slot))

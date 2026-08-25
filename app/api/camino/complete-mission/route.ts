@@ -5,6 +5,7 @@ import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { awardXp } from '@/app/lib/camino/awardXp'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { getTopicByV2SortOrder, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
+import { resolveTopicIdentity } from '@/app/lib/camino/resolveTopicIdentity'
 
 export const dynamic = 'force-dynamic'
 
@@ -124,6 +125,7 @@ export async function POST(request: NextRequest) {
       }
 
       const topic = getTopicByV2SortOrder(subject, v2SortOrder)
+      const { topicId } = await resolveTopicIdentity(db, subject, v2SortOrder)
       await db.from('camino_calendar').upsert({
         user_id: user.id,
         scheduled_date: today,
@@ -140,7 +142,7 @@ export async function POST(request: NextRequest) {
         xp_awarded: 0,
         source: 'free_initiative',
         generated_by: 'free_initiative_v1',
-        metadata: { free_initiative: true },
+        metadata: topicId ? { free_initiative: true, topic_id: topicId } : { free_initiative: true },
       }, { onConflict: 'user_id,scheduled_date,subject,v2_sort_order' })
 
       return NextResponse.json({ success: false, reason: 'free_initiative_recorded' })

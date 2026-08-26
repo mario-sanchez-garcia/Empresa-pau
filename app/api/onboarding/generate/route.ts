@@ -89,6 +89,13 @@ export async function POST(request: NextRequest) {
     })
 
     if (!result.success) {
+      // Esta cuenta ya completó onboarding antes — generateCaminoPlan se
+      // negó a ejecutar el reset destructivo (ver su propia guarda). No es
+      // un fallo real de generación: se responde distinto, sin marcarlo
+      // como error interno ni registrar onboarding_generation_failed.
+      if (result.errorCode === 'already_onboarded') {
+        return respond({ error: 'already_onboarded' }, 409, 'already_onboarded')
+      }
       throw Object.assign(new Error(result.errorCode), { errorCode: result.errorCode })
     }
 

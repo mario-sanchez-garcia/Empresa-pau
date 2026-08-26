@@ -164,3 +164,23 @@ export async function reactivateQueueItems(db: SupabaseClient, userId: string, q
     .in('id', queueIds)
     .eq('queue_status', 'inactive')
 }
+
+/**
+ * Same undo as reactivateQueueItems, but for EVERY 'inactive' row of this
+ * user, regardless of whether it's tied to an active exam — used when
+ * rescueMode's own backlog-vs-exam ratio drops back under its trigger
+ * threshold (see ensureCaminoCalendar.ts), meaning the overflow cap that
+ * rescueMode applied earlier no longer reflects the student's real pace and
+ * shouldn't keep hiding those topics forever. Returns how many rows were
+ * reactivated, purely for logging/telemetry — callers don't need to branch
+ * on it.
+ */
+export async function reactivateAllInactiveQueueItems(db: SupabaseClient, userId: string): Promise<number> {
+  const { data } = await db
+    .from('user_learning_queue')
+    .update({ queue_status: 'pending' })
+    .eq('user_id', userId)
+    .eq('queue_status', 'inactive')
+    .select('id')
+  return data?.length ?? 0
+}

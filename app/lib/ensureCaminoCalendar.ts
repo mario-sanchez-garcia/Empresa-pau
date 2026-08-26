@@ -5,7 +5,7 @@ import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, res
 import { cleanStudentExams } from './camino/cleanStudentExams'
 import { estimatedMinutesForSlot, missionsPerDayForMinutes } from './camino/dailyTimeCapacity'
 import { EXAM_SUBJECT_SLUG } from './camino/partialExamSubjects'
-import { computeExamCoverage, reactivateQueueItems } from './camino/examCoverage'
+import { computeExamCoverage, reactivateAllInactiveQueueItems, reactivateQueueItems } from './camino/examCoverage'
 import { FINAL_MOCK_WINDOW_DAYS, injectAllPartialExamMissions, resolveFinalMockSlot } from './camino/injectPartialExamMissions'
 import { resolveTopicIdentitiesBatch } from './camino/resolveTopicIdentity'
 import { createDayScheduler, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
@@ -656,6 +656,16 @@ export async function ensureCaminoCalendar(
         .in('id', inactiveIds)
         .eq('user_id', userId)
     }
+  } else {
+    // rescueMode no está activo este run — si el alumno había recuperado el
+    // ritmo (el ratio bajó del umbral que lo dispara), cualquier tema que
+    // quedó 'inactive' por un recorte de rescueMode anterior debe volver a
+    // 'pending': ya no hay overflow real que justifique mantenerlo oculto.
+    // Igual que con el reordenamiento de prioridad de examen (comentario de
+    // abajo), lo reactivado aquí no entra en subjectQueues de ESTE run (ya se
+    // calculó arriba) — queda disponible para el próximo, mismo patrón ya
+    // aceptado en el resto de este archivo.
+    await reactivateAllInactiveQueueItems(supabase, userId)
   }
 
   // Prioridad absoluta de los temas de examen sobre el orden lineal de su

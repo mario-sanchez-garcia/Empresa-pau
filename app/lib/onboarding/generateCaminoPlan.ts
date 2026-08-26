@@ -7,6 +7,7 @@ import { missionsPerDayForMinutes } from '@/app/lib/camino/dailyTimeCapacity'
 import { injectAllPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { cleanStudentExams, type StudentExam } from '@/app/lib/camino/cleanStudentExams'
 import { getMadridToday, getStudyDays } from '@/app/lib/camino/studyDays'
+import { hasCompletedOnboarding } from '@/app/lib/onboarding/hasCompletedOnboarding'
 import { sendWelcomeEmail } from '@/app/lib/email/sendWelcomeEmail'
 import { generateUnsubscribeToken } from '@/app/lib/unsubscribeToken'
 
@@ -94,13 +95,27 @@ export interface GenerateCaminoPlanMission {
 
 export type GenerateCaminoPlanResult =
   | { success: true; daysGenerated: number; firstMission: GenerateCaminoPlanMission | null; missions: GenerateCaminoPlanMission[] }
-  | { success: false; errorCode: 'queue_insert_failed' | 'calendar_insert_failed' | 'queue_update_failed' | 'internal_error' }
+  | { success: false; errorCode: 'queue_insert_failed' | 'calendar_insert_failed' | 'queue_update_failed' | 'already_onboarded' | 'internal_error' }
 
 export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Promise<GenerateCaminoPlanResult> {
   const { userId, db, startMode, dailyMinutes } = params
   const subjects = [...new Set(params.subjects.map(s => normalizeSubjectSlug(s)).filter(s => ALLOWED_GENERATE_SUBJECTS.has(s)))]
 
   try {
+    // Guarda contra el reset destructivo de más abajo: esta función borra
+    // TODO el user_learning_queue pendiente/futuro y el camino_calendar
+    // futuro no completado de la cuenta — correcto la primera vez (onboarding
+    // real), pero catastrófico si se dispara sobre una cuenta ya activa
+    // (endpoint legacy /api/onboarding/generate sin guarda propia, o un
+    // draft nuevo para un usuario que ya completó onboarding antes). Se
+    // comprueba aquí, antes de tocar nada, con la misma señal autoritativa
+    // que /api/onboarding/me usa para decidir si una cuenta ya terminó el
+    // onboarding — así protege a CUALQUIER llamador presente o futuro, no
+    // solo al que se conoce hoy.
+    if (await hasCompletedOnboarding(db, userId)) {
+      return { success: false, errorCode: 'already_onboarded' }
+    }
+
     const requestedStudentExams: StudentExam[] = cleanStudentExams(params.studentExams)
 
     async function loadStudentExams() {
@@ -120,9 +135,15 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
     }
 
     // ── Reset: wipe old plan so subjects chosen in onboarding take effect ───
+    // user_learning_queue protege queue_status='completed' con el mismo
+    // criterio que camino_calendar ya protege status='completed' — antes
+    // borraba también los temas completados, así que computeExamCoverage
+    // (que lee solo esta tabla para contar cuántos temas de un examen ya se
+    // vieron) podía caer a 0% de golpe tras un reset aunque el alumno
+    // hubiera completado lecciones reales.
     const resetToday = getMadridToday()
     await Promise.all([
-      db.from('user_learning_queue').delete().eq('user_id', userId),
+      db.from('user_learning_queue').delete().eq('user_id', userId).neq('queue_status', 'completed'),
       db.from('camino_calendar').delete().eq('user_id', userId).neq('status', 'completed').gte('scheduled_date', resetToday),
     ])
 

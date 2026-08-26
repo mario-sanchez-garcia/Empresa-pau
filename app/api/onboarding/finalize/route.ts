@@ -4,6 +4,7 @@ import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getTopic, getTopicByV2SortOrder } from '@/app/lib/camino/caminoCurriculumPlan'
 import { claimOnboardingDraft, type OnboardingDraftRow } from '@/app/lib/onboarding/claimOnboardingDraft'
+import { hasCompletedOnboarding } from '@/app/lib/onboarding/hasCompletedOnboarding'
 import { saveOnboardingProfile, type CleanedOnboardingProfile } from '@/app/lib/onboarding/saveOnboardingProfile'
 import { generateCaminoPlan } from '@/app/lib/onboarding/generateCaminoPlan'
 import { buildOnboardingReward, type RewardMissionRow } from '@/app/lib/onboarding/buildOnboardingReward'
@@ -107,6 +108,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ status: 'failed', error_code: errorCode })
   }
 
+  // Este draft es genuinamente NUEVO (si fuera un reintento del mismo draft
+  // ya completado, la comprobación de claim.draft.status==='completed' de
+  // arriba ya habría devuelto antes de llegar aquí) — pero el USUARIO
+  // autenticado detrás de él puede llevar tiempo con una cuenta activa (p.
+  // ej. volvió a /onboarding por un marcador antiguo o el botón atrás). Se
+  // comprueba aquí, ANTES de saveOnboardingProfile, porque esa función
+  // sobrescribe perfiles.student_exams sin condición si el draft trae el
+  // campo — generateCaminoPlan tiene su propia guarda equivalente para el
+  // reset de queue/calendar, pero para cuando esta función la alcanzara el
+  // perfil ya se habría sobrescrito.
+  if (await hasCompletedOnboarding(db, user.id)) {
+    return fail('already_onboarded')
+  }
+
   // ── validating ───────────────────────────────────────────────────────────
   const username = typeof payload.username === 'string' ? payload.username : null
   const community = typeof payload.community === 'string' ? payload.community : null
@@ -172,6 +187,12 @@ export async function POST(request: NextRequest) {
   })
 
   if (!genResult.success) {
+    // Defensa en profundidad: la comprobación de arriba (antes de
+    // saveOnboardingProfile) ya debería haber cortado este caso — si de
+    // todos modos llega aquí (p. ej. una carrera muy estrecha entre ambas
+    // comprobaciones), se reporta igual como already_onboarded en vez de un
+    // fallo genérico de generación.
+    if (genResult.errorCode === 'already_onboarded') return fail('already_onboarded')
     await recordBetaMetric(db, user.id, 'onboarding_generation_failed', {
       event_id: crypto.randomUUID(),
       trace_id: draft.trace_id,

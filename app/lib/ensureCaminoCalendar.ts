@@ -232,6 +232,29 @@ export async function ensureCaminoCalendar(
       .eq('queue_status', 'scheduled')
   }
 
+  // Asignaturas activas del alumno (con algo pendiente en la cola de Curso)
+  // — se calcula aquí, antes de PASO 2.5, porque el forzado de prioridad de
+  // examen (más abajo) necesita saber cuántas asignaturas se reparten los
+  // días de la semana para poder comparar "turno normal" vs. "lo que hace
+  // falta". Nota: el early-return por subjects.length===0 se mantiene más
+  // abajo, en su sitio original (antes de PASO 5) — un alumno sin nada
+  // pendiente de Curso en NINGUNA asignatura no debe cortar PASO 2.5/3, que
+  // siguen aplicando igual (un examen puede necesitar sus misiones aunque el
+  // Curso de esa asignatura esté momentáneamente vacío).
+  const { data: subjectRows } = await supabase
+    .from('user_learning_queue')
+    .select('subject')
+    .eq('user_id', userId)
+    .eq('queue_status', 'pending')
+    .limit(500)
+
+  const subjectSet = new Set(
+    (subjectRows ?? [])
+      .map(r => r.subject as string)
+      .filter(isPrivateBetaSubject),
+  )
+  const subjects = [...subjectSet]
+
   // PASO 2.5 — Parciales: procesar TODOS los exámenes activos juntos (fechas +
   // asignaturas), no uno a uno, para que dos exámenes próximos no se pisen
   // los huecos de repaso y para que un examen que acaba de entrar en su
@@ -281,18 +304,25 @@ export async function ensureCaminoCalendar(
       for (const so of coverage.pendingSortOrders) prioritySet.add(so)
       examPrioritySortOrdersBySubject.set(slug, prioritySet)
 
-      // Cualquier tema pendiente de un examen fuerza el día entero (no solo
-      // el reordenamiento dentro del turno normal) — bajo el reparto
-      // rotativo entre asignaturas, "esperar a que le toque el turno" casi
-      // nunca deja suficientes días reales a tiempo (con 4 asignaturas
-      // activas, el turno normal da ~1 de cada 4 días, no 1 de cada 1), así
-      // que solo el reordenamiento no basta para maximizar cobertura como
-      // pide la regla. Forzar el día entero mientras haya algo pendiente es
-      // lo que de verdad "comprime al máximo posible".
-      for (const dateStr of coverage.weekdaysUntilExam) {
-        const forced = examSubjectsByDate.get(dateStr) ?? []
-        if (!forced.includes(slug)) forced.push(slug)
-        examSubjectsByDate.set(dateStr, forced)
+      // Solo forzar el día si el turno NORMAL (sin forzar nada) no llegaría
+      // a cubrir los temas pendientes a tiempo — cuántos días de la ventana
+      // le tocarían a esta asignatura por el reparto rotativo puro
+      // (subjectForDay sin examSubjectsToday), comparado con cuántos temas
+      // hacen falta. Si el reparto normal ya alcanza, no hace falta
+      // quitarle turno a otras asignaturas — el reordenamiento de arriba
+      // (que sí se aplica siempre que haya algo pendiente) ya se encarga de
+      // que, cuando le toque su turno, la asignatura empiece por los temas
+      // del examen.
+      const normalRotationDays = coverage.weekdaysUntilExam.filter(
+        dateStr => subjectForDay(dateStr, subjects) === slug,
+      ).length
+      const needsCompression = normalRotationDays < coverage.pendingSortOrders.length
+      if (needsCompression) {
+        for (const dateStr of coverage.weekdaysUntilExam) {
+          const forced = examSubjectsByDate.get(dateStr) ?? []
+          if (!forced.includes(slug)) forced.push(slug)
+          examSubjectsByDate.set(dateStr, forced)
+        }
       }
     }
     if (activeExams.length > 0) {
@@ -326,21 +356,9 @@ export async function ensureCaminoCalendar(
 
   // PASO 4+5 — Generar días hasta completar CALENDAR_HORIZON
 
-  // Private beta scope: the Supabase calendar engine only schedules the active core PAU subjects.
-  // Obtener asignaturas del usuario desde la cola
-  const { data: subjectRows } = await supabase
-    .from('user_learning_queue')
-    .select('subject')
-    .eq('user_id', userId)
-    .eq('queue_status', 'pending')
-    .limit(500)
-
-  const subjectSet = new Set(
-    (subjectRows ?? [])
-      .map(r => r.subject as string)
-      .filter(isPrivateBetaSubject),
-  )
-  const subjects = [...subjectSet]
+  // Private beta scope: the Supabase calendar engine only schedules the
+  // active core PAU subjects. `subjects` ya se calculó arriba, antes de
+  // PASO 2.5, para el forzado de prioridad de examen.
   if (subjects.length === 0) return
 
   // PASO 5 — Ratio de velocidad

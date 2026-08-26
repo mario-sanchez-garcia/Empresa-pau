@@ -1,12 +1,19 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 
-import { computeExamCoverage } from './examCoverage'
+import { getCaminoPlanLimits } from './caminoPlanLimits'
+import { computeExamCoverage, type ExamCoverage } from './examCoverage'
 import { EXAM_SUBJECT_SLUG, SIMULACRO_SUBJECT } from './partialExamSubjects'
 import { createDayScheduler, estimatedMinutesForMissionType } from './scheduleTimeSlot'
 import { SIMULACRO_MINUTES } from './xpMap'
 import type { ExamConfidence, ExamPriority, ExamScope, StudentExam } from './cleanStudentExams'
 
-type PartialMissionType = 'conceptual_review' | 'evau_practice' | 'block_mock' | 'final_mini_mock'
+// Antes había 4 sub-tipos (conceptual_review/evau_practice/block_mock/
+// final_mini_mock) — se fusionan los 3 de práctica en uno solo
+// ('exercise_practice', misma sesión de 45 min de siempre) porque las 4 se
+// generaban sin comprobar el Curso, rompiendo el orden Curso→Ejercicios→
+// Simulacro. Ahora solo quedan 2, y AMBAS pasan por computeExamCoverage.
+type PartialMissionType = 'exercise_practice' | 'final_mini_mock'
+type MissionFate = 'generate' | 'delay' | 'cancelled' | 'monthly_limit'
 
 const BLOCK_DISPLAY: Record<string, string> = {
   Algebra: 'Álgebra',
@@ -24,7 +31,7 @@ export type PartialExamInput = {
   priority?: ExamPriority
   confidence?: ExamConfidence
   content?: string
-  /** Overrides the computed session count (e.g. from an AI plan-intensity call, or from the "Recalcular mi Camino" flow). */
+  /** Ya no se consume — la secuencia se redujo a 2 misiones fijas (exercise_practice + final_mini_mock, ver missionSequence), así que ya no hay un "número de sesiones" que ajustar. Se mantiene en el tipo solo para no romper CaminoCalendarClient.tsx/examTimeNeed.ts ("Recalcular mi Camino"), que lo siguen enviando. */
   sessionOverride?: number
   /** How many of this exam's sessions may land on the same day (>1 = stacking, used when sessionOverride needs more depth than one slot/day gives — see examTimeNeed.ts). Defaults to 1. */
   maxSessionsPerDay?: number
@@ -59,42 +66,6 @@ export function weekdaysBefore(examDate: string, fromDate: string): string[] {
   return days
 }
 
-function priorityWeight(priority?: ExamPriority): number {
-  if (priority === 'muy_alta') return 4
-  if (priority === 'alta') return 3
-  if (priority === 'baja') return 1
-  return 2 // normal / unset
-}
-
-// Lower confidence ("voy mal") earns more prep sessions; high confidence needs fewer.
-function confidenceBonus(confidence?: ExamConfidence): number {
-  if (confidence === 'bajo') return 1
-  if (confidence === 'alto') return -1
-  return 0
-}
-
-function baseSessionCount(daysAvailable: number): number {
-  if (daysAvailable <= 2) return 1
-  if (daysAvailable <= 5) return 3
-  return 4
-}
-
-// Priority/confidence modulate how many prep sessions an exam earns, but the
-// count is always capped well below the available days so other active
-// subjects keep their rotation slots instead of being crowded out entirely.
-// maxSessionsPerDay > 1 (set by the explicit "Recalcular mi Camino" flow,
-// see examTimeNeed.ts) raises that cap proportionally, since a stacked day
-// can legitimately carry more than one prep session.
-function sessionCountFor(daysAvailable: number, priority?: ExamPriority, confidence?: ExamConfidence, sessionOverride?: number, maxSessionsPerDay = 1): number {
-  if (daysAvailable <= 0) return 0
-  const weight = priorityWeight(priority)
-  const priorityBonus = weight >= 4 ? 2 : weight === 3 ? 1 : weight === 1 ? -1 : 0
-  const computed = baseSessionCount(daysAvailable) + priorityBonus + confidenceBonus(confidence)
-  const requested = sessionOverride && sessionOverride > 0 ? sessionOverride : computed
-  const absoluteCap = maxSessionsPerDay > 1 ? 12 : 6
-  return Math.max(1, Math.min(requested, daysAvailable * Math.max(1, maxSessionsPerDay), absoluteCap))
-}
-
 // Distributes `count` sessions over `availableSlotsAscending` (chronological
 // dates), packing sessions onto the days closest to the exam first — up to
 // `maxPerDay` each — before spilling onto earlier days. This means a tight
@@ -120,34 +91,103 @@ function assignDatesForCount(count: number, availableSlotsAscending: string[], m
   return result
 }
 
-function missionSequence(count: number): PartialMissionType[] {
-  if (count <= 0) return []
-  const seq: PartialMissionType[] = []
-  if (count >= 4) seq.push('conceptual_review')
-  const reserved = (count >= 2 ? 1 : 0) + 1 // block_mock (if any) + final_mini_mock
-  const fillerCount = Math.max(0, count - seq.length - reserved)
-  for (let i = 0; i < fillerCount; i++) seq.push('evau_practice')
-  if (count >= 2) seq.push('block_mock')
-  seq.push('final_mini_mock')
-  return seq
+// Siempre las mismas 2 (una práctica de ejercicios + el Simulacro) cuando
+// hay al menos 1 día hábil disponible — ya no escala con prioridad/
+// confianza/días restantes como antes (eso decidía CUÁNTAS prácticas de 45
+// min había, ahora solo hay una). assignDatesForCount ya se encarga de
+// dejar caer la primera (exercise_practice) si el hueco es tan justo que
+// solo cabe una, quedándose con la más cercana al examen (final_mini_mock).
+function missionSequence(daysAvailable: number): PartialMissionType[] {
+  if (daysAvailable <= 0) return []
+  return ['exercise_practice', 'final_mini_mock']
 }
 
-// conceptual_review/evau_practice/block_mock usan mission_type:
-// 'partial_practice' al insertarse más abajo, así que abren el flujo de 45
-// min de /simulacros/practica/[id] (PARCIAL_MINUTES) — nunca dicen
-// "simulacro" en el título para no repetir la confusión que esto tuvo antes
-// (el alumno leía "Simulacro" esperando 90 min y el cronómetro le daba 45).
-// final_mini_mock es la excepción a propósito: desde que enlaza al Simulacro
-// real de 90 min (mission_type: 'pau_practice', ver el bucle de inserción
-// más abajo), su título SÍ debe decir "Simulacro" — ahora es verdad.
+// exercise_practice usa mission_type: 'partial_practice' al insertarse más
+// abajo, así que abre el flujo de 45 min de /simulacros/practica/[id]
+// (PARCIAL_MINUTES) — nunca dice "simulacro" en el título para no repetir la
+// confusión que esto tuvo antes (el alumno leía "Simulacro" esperando 90 min
+// y el cronómetro le daba 45). final_mini_mock es la excepción a propósito:
+// desde que enlaza al Simulacro real de 90 min (mission_type: 'pau_practice',
+// ver el bucle de inserción más abajo), su título SÍ debe decir "Simulacro".
 function missionTitle(type: PartialMissionType, blockDisplay: string, topic?: string): string {
   const ctx = topic ? `${blockDisplay} — ${topic}` : blockDisplay
   switch (type) {
-    case 'conceptual_review': return `Repaso de conceptos: ${ctx}`
-    case 'evau_practice':     return `Práctica PAU: ${ctx}`
-    case 'block_mock':        return `Práctica corta: ${ctx}`
+    case 'exercise_practice': return `Práctica de ejercicios: ${ctx}`
     case 'final_mini_mock':   return `Simulacro completo antes del examen: ${ctx}`
   }
+}
+
+// Límite mensual real de Simulacros completos (final_mini_mock) según el
+// plan del alumno (+ ajuste puntual por alumno si lo hay) — mismas tablas
+// que app/lib/billing/serverUsage.ts / limitOverrides.ts usan, pero
+// consultadas aquí directo (sin pasar por esos módulos, que tienen efectos
+// secundarios — cortesía de acceso — y una guarda 'server-only' que no hace
+// falta arrastrar a un módulo de programación que también se usa desde
+// scripts de verificación).
+async function resolveFullMocksLimit(supabase: SupabaseClient, userId: string): Promise<number> {
+  const now = new Date().toISOString()
+  const { data: entitlement } = await supabase
+    .from('user_entitlements')
+    .select('plan_id')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
+    .limit(1)
+    .maybeSingle()
+  const baseLimit = getCaminoPlanLimits(entitlement?.plan_id as string | null | undefined).fullMocksPerMonth
+  const { data: override } = await supabase
+    .from('user_limit_overrides')
+    .select('extra_mocks_per_month')
+    .eq('user_id', userId)
+    .maybeSingle()
+  return baseLimit + ((override?.extra_mocks_per_month as number | null) ?? 0)
+}
+
+// Cuenta por CREACIÓN (created_at), no por fecha programada — mismo criterio
+// que ya usa /api/practica-parcial para su propio tope mensual. Solo cuenta
+// Simulacros de examen reales (mission_type='pau_practice' Y
+// links_to_simulacro_exam_id) — nunca las misiones de "ejercicios de
+// bloque" de generateBlockPracticeMission.ts, que comparten mission_type
+// pero no cuentan contra este cupo.
+async function countFullMocksThisMonth(supabase: SupabaseClient, userId: string): Promise<number> {
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  const { count } = await supabase
+    .from('camino_calendar')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('mission_type', 'pau_practice')
+    .not('metadata->>links_to_simulacro_exam_id', 'is', null)
+    .gte('created_at', startOfMonth)
+  return count ?? 0
+}
+
+// Decide qué pasa con cada misión de la secuencia según la cobertura de
+// Curso (y, solo para el Simulacro, el cupo mensual del plan):
+//  - exercise_practice: 'delay' si aún no se ha completado NINGÚN tema del
+//    examen (practicar ejercicios sin haber visto nada de Curso no tiene
+//    sentido) — se reintentará en una ejecución futura, no es un "no" final.
+//    'cancelled' si, comprimiendo al máximo, no se llegaría al 80% a tiempo.
+//  - final_mini_mock: 'monthly_limit' si ya no quedan Simulacros este mes
+//    (chequeo aparte, antes que el de cobertura). 'cancelled' con el mismo
+//    umbral del 80% que ya existía.
+//  - computable=false (asignatura sin topic_id, examen sin exam_topics) ->
+//    'generate' siempre, comportamiento idéntico al de antes de esta regla.
+function decideMissionFate(
+  mType: PartialMissionType,
+  coverage: ExamCoverage,
+  coverageDecision: 'full' | 'partial' | 'cancelled' | null,
+  monthlyLimitReached: boolean,
+): MissionFate {
+  if (mType === 'final_mini_mock') {
+    if (monthlyLimitReached) return 'monthly_limit'
+    if (coverageDecision === 'cancelled') return 'cancelled'
+    return 'generate'
+  }
+  if (!coverage.computable) return 'generate'
+  if (coverage.completedCount === 0) return 'delay'
+  if (coverageDecision === 'cancelled') return 'cancelled'
+  return 'generate'
 }
 
 function toSlug(text: string): string {
@@ -271,8 +311,7 @@ export async function injectPartialExamMissions(
   const availableSlots = reserved ? allSlots.filter(d => !reserved.has(d)) : allSlots
 
   const maxSessionsPerDay = Math.max(1, Math.min(partialExam.maxSessionsPerDay ?? 1, 3))
-  const count = sessionCountFor(daysUntilExam, partialExam.priority, partialExam.confidence, partialExam.sessionOverride, maxSessionsPerDay)
-  const sequence = missionSequence(count)
+  const sequence = missionSequence(daysUntilExam)
   if (sequence.length === 0 || availableSlots.length === 0) return { claimedDates: [] }
 
   const subjectSlug = EXAM_SUBJECT_SLUG[partialExam.subject] ?? partialExam.subject
@@ -282,12 +321,12 @@ export async function injectPartialExamMissions(
   const topic = partialExam.topic || undefined
   const now = new Date().toISOString()
 
-  // Regla de negocio: el Simulacro (final_mini_mock) de un examen solo se
-  // genera si el Curso de sus temas está — o, comprimiendo al máximo el
-  // ritmo, PUEDE llegar a estar — razonablemente cubierto antes de la
-  // fecha. computable=false (asignatura sin topic_id todavía, o examen sin
-  // exam_topics) deja coverageDecision en null -> comportamiento idéntico
-  // al de siempre, sin ningún cambio (ver regla 4/6).
+  // Regla de negocio: ambas misiones (práctica de ejercicios Y Simulacro) de
+  // un examen solo se generan si el Curso de sus temas está — o,
+  // comprimiendo al máximo el ritmo, PUEDE llegar a estar — razonablemente
+  // cubierto antes de la fecha. computable=false (asignatura sin topic_id
+  // todavía, o examen sin exam_topics) deja coverageDecision en null ->
+  // comportamiento idéntico al de siempre, sin ningún cambio (ver regla 4/6).
   const coverage = await computeExamCoverage(supabase, userId, partialExam.id, subjectSlug, partialExam.date, today)
   const coverageDecision: 'full' | 'partial' | 'cancelled' | null = !coverage.computable
     ? null
@@ -296,12 +335,13 @@ export async function injectPartialExamMissions(
       : coverage.maxProjectedCoveragePct >= 80
         ? 'partial'
         : 'cancelled'
-  const coverageMetadata = coverageDecision
-    ? {
-        exam_coverage_pct: Math.round(coverage.maxProjectedCoveragePct),
-        exam_coverage_decision: coverageDecision,
-      }
-    : {}
+
+  // Cupo mensual de Simulacros — solo importa si esta secuencia incluye
+  // final_mini_mock, pero siempre la incluye (missionSequence ya solo
+  // devuelve [] o las 2), así que se resuelve una vez por examen.
+  const fullMocksLimit = await resolveFullMocksLimit(supabase, userId)
+  const fullMocksUsedThisMonth = await countFullMocksThisMonth(supabase, userId)
+  const monthlyLimitReached = fullMocksUsedThisMonth >= fullMocksLimit
 
   // Assign each session in `sequence` a date, packed onto the days closest
   // to the exam first (up to maxSessionsPerDay each). With maxSessionsPerDay
@@ -321,6 +361,13 @@ export async function injectPartialExamMissions(
     const slot = targetSlots[i]
     const mType = targetSequence[i]
     if (!slot) continue
+
+    const fate = decideMissionFate(mType, coverage, coverageDecision, monthlyLimitReached)
+    // 'delay': ni siquiera se crea un aviso — no es un "no" definitivo, solo
+    // "todavía no hay nada de Curso hecho de este examen", y se reintenta en
+    // una ejecución futura (misma cadencia que el resto de esta función:
+    // solo se recalcula si el examen cambia o hay force, ver arriba).
+    if (fate === 'delay') continue
 
     // Skip slot if there's already a locked mission
     const { data: locked } = await supabase
@@ -350,23 +397,31 @@ export async function injectPartialExamMissions(
 
     // final_mini_mock enlaza al Simulacro real de 90 min (ver más abajo), no
     // al flujo de práctica de 45 — su hueco en el día debe reservar la
-    // duración real, no la de partial_practice. Excepción: si la cobertura
-    // de Curso proyectada no llega al 80% (coverageDecision='cancelled'),
-    // este Simulacro concreto NO se genera — no hay bastante Curso visto
-    // para que tenga sentido — y esta fila se convierte en un aviso claro en
-    // vez de desaparecer sin explicación.
-    const isFinalSimulacroLink = mType === 'final_mini_mock' && coverageDecision !== 'cancelled'
-    const isCancelledSimulacro = mType === 'final_mini_mock' && coverageDecision === 'cancelled'
+    // duración real, no la de partial_practice. Si fate no es 'generate'
+    // (cobertura <80% o cupo mensual agotado), esta fila se convierte en un
+    // aviso claro en vez de desaparecer sin explicación.
+    const isFinalSimulacroLink = mType === 'final_mini_mock' && fate === 'generate'
     const scheduler = await createDayScheduler(userId, supabase, slot)
     const timeSlot = scheduler.place(isFinalSimulacroLink ? SIMULACRO_MINUTES : estimatedMinutesForMissionType('partial_practice'))
+
+    const title = fate === 'monthly_limit'
+      ? `Simulacro pospuesto: ya usaste tus Simulacros de este mes`
+      : fate === 'cancelled'
+        ? `${mType === 'final_mini_mock' ? 'Simulacro' : 'Práctica'} pospuesta: no ha dado tiempo a completar el Curso de ${blockDisplay}`
+        : missionTitle(mType, blockDisplay, topic)
+
+    // El motivo real de esta fila (para el banner de aviso) — 'monthly_limit'
+    // pisa a coverageDecision cuando ES la razón real, para que el banner no
+    // diga "no dio tiempo" cuando en realidad sí daba tiempo y lo que faltó
+    // fue cupo del plan.
+    const rowDecision: 'full' | 'partial' | 'cancelled' | 'monthly_limit' | null =
+      fate === 'monthly_limit' ? 'monthly_limit' : coverageDecision
 
     await supabase.from('camino_calendar').insert({
       user_id: userId,
       scheduled_date: slot,
       subject: subjectSlug,
-      title: isCancelledSimulacro
-        ? `Simulacro pospuesto: no ha dado tiempo a completar el Curso de ${blockDisplay}`
-        : missionTitle(mType, blockDisplay, topic),
+      title,
       block_key: partialExam.block || null,
       block_slug: blockSlug || null,
       // pau_practice (ya permitido por el constraint de BD, ya con XP
@@ -399,14 +454,18 @@ export async function injectPartialExamMissions(
           links_to_simulacro_exam_id: partialExam.id,
           links_to_simulacro_exam_scope: partialExam.examScope ?? 'parcial',
         } : {}),
-        ...(isCancelledSimulacro ? { simulacro_cancelled: true } : {}),
+        ...(fate === 'cancelled' ? { simulacro_cancelled: true } : {}),
+        ...(fate === 'monthly_limit' ? { simulacro_monthly_limit_reached: true } : {}),
         simulacro_subject: simSubject,
         // Presente en TODAS las misiones de este examen (no solo en
-        // final_mini_mock) cuando la cobertura es computable, para que el
-        // banner de aviso pueda encontrar la señal leyendo cualquier fila de
-        // este partial_exam_id, sin depender de si el Simulacro se llegó a
-        // generar o no.
-        ...coverageMetadata,
+        // final_mini_mock) cuando hay un motivo real que reportar, para que
+        // el banner de aviso pueda encontrar la señal leyendo cualquier fila
+        // de este partial_exam_id, sin depender de si el Simulacro se llegó
+        // a generar o no.
+        ...(rowDecision ? {
+          exam_coverage_pct: Math.round(coverage.maxProjectedCoveragePct ?? 100),
+          exam_coverage_decision: rowDecision,
+        } : {}),
       },
     })
     claimedDates.push(slot)

@@ -25,7 +25,13 @@ const EXAM_DATE = '2027-06-07'
 // resto de la lógica de programación (que ya escala con esta constante).
 const CALENDAR_HORIZON = 30
 
-function subjectForDay(dateStr: string, subjects: string[], examSubjectsToday?: string[]): string | null {
+// `orderedSubjects` decide qué asignatura le toca cada día del ciclo
+// rotativo (dow-1 % length) — el llamador la calcula una vez por ejecución
+// de ensureCaminoCalendar, ordenando por backlog pendiente real (ver
+// subjectsByBacklog más abajo) en vez de usar la posición fija de una
+// asignatura en PRIVATE_BETA_SUBJECTS, que no tenía relación alguna con
+// cuánto temario le quedaba a cada una.
+function subjectForDay(dateStr: string, subjects: string[], orderedSubjects: string[], examSubjectsToday?: string[]): string | null {
   if (subjects.length === 0) return null
   const dow = new Date(dateStr + 'T12:00:00Z').getUTCDay()
   if (dow === 0 || dow === 6) return null
@@ -39,7 +45,7 @@ function subjectForDay(dateStr: string, subjects: string[], examSubjectsToday?: 
     if (examSubject) return examSubject
   }
   if (subjects.length === 1) return subjects[0]
-  const ordered = (PRIVATE_BETA_SUBJECTS as readonly string[]).filter(subject => subjects.includes(subject))
+  const ordered = orderedSubjects.filter(subject => subjects.includes(subject))
   return ordered[(dow - 1) % ordered.length] ?? subjects[0]
 }
 
@@ -241,19 +247,42 @@ export async function ensureCaminoCalendar(
   // pendiente de Curso en NINGUNA asignatura no debe cortar PASO 2.5/3, que
   // siguen aplicando igual (un examen puede necesitar sus misiones aunque el
   // Curso de esa asignatura esté momentáneamente vacío).
+  // Límite generoso (muy por encima del temario más grande de una sola
+  // asignatura) para que, además de listar qué asignaturas tienen algo
+  // pendiente, esta misma consulta sirva para contar CUÁNTOS temas
+  // pendientes tiene cada una — necesario para subjectsByBacklog, más abajo.
   const { data: subjectRows } = await supabase
     .from('user_learning_queue')
     .select('subject')
     .eq('user_id', userId)
     .eq('queue_status', 'pending')
-    .limit(500)
+    .limit(2000)
 
-  const subjectSet = new Set(
-    (subjectRows ?? [])
-      .map(r => r.subject as string)
-      .filter(isPrivateBetaSubject),
-  )
-  const subjects = [...subjectSet]
+  const pendingCountBySubject: Record<string, number> = {}
+  for (const row of subjectRows ?? []) {
+    const subject = row.subject as string
+    if (!isPrivateBetaSubject(subject)) continue
+    pendingCountBySubject[subject] = (pendingCountBySubject[subject] ?? 0) + 1
+  }
+  const subjects = Object.keys(pendingCountBySubject)
+
+  // Orden del ciclo rotativo de subjectForDay: la asignatura con MÁS temas
+  // pendientes va primero, para que reciba más turnos reales por semana —
+  // antes se usaba directamente el orden fijo de PRIVATE_BETA_SUBJECTS, que
+  // no tenía ninguna relación con el backlog real de cada una (dos
+  // asignaturas con 122 y 20 temas pendientes recibían el mismo número de
+  // turnos solo por su posición en ese array). Se recalcula aquí, en cada
+  // ejecución, a partir del estado actual de la cola — nunca se guarda, así
+  // que si el backlog cambia (el alumno avanza, se añade una asignatura) el
+  // reparto se ajusta solo en la próxima ejecución. El empate (mismo nº de
+  // pendientes) se resuelve con el orden fijo de PRIVATE_BETA_SUBJECTS para
+  // que el resultado sea 100% determinista para un mismo estado de cola —
+  // nunca aleatorio entre dos ejecuciones con los mismos datos.
+  const subjectsByBacklog = [...subjects].sort((a, b) => {
+    const diff = pendingCountBySubject[b] - pendingCountBySubject[a]
+    if (diff !== 0) return diff
+    return (PRIVATE_BETA_SUBJECTS as readonly string[]).indexOf(a) - (PRIVATE_BETA_SUBJECTS as readonly string[]).indexOf(b)
+  })
 
   // Minutos diarios declarados en onboarding — se calcula aquí (antes de
   // PASO 2.5) porque PASO 2.6, más abajo, ya necesita estimar duración de
@@ -407,7 +436,7 @@ export async function ensureCaminoCalendar(
       // que, cuando le toque su turno, la asignatura empiece por los temas
       // del examen.
       const normalRotationDays = coverage.weekdaysUntilExam.filter(
-        dateStr => subjectForDay(dateStr, subjects) === slug,
+        dateStr => subjectForDay(dateStr, subjects, subjectsByBacklog) === slug,
       ).length
       const needsCompression = normalRotationDays < coverage.pendingSortOrders.length
       if (needsCompression) {
@@ -715,7 +744,7 @@ export async function ensureCaminoCalendar(
   )
 
   for (const dateStr of emptyDays) {
-    const subject = subjectForDay(dateStr, subjects, examSubjectsByDate.get(dateStr))
+    const subject = subjectForDay(dateStr, subjects, subjectsByBacklog, examSubjectsByDate.get(dateStr))
     if (!subject) continue
 
     const queue = subjectQueues[subject] ?? []

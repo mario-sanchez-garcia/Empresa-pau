@@ -5,7 +5,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
+import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
 import MonthCalendarOverlay, { MonthCalendarButton } from '@/app/components/camino/MonthCalendarOverlay'
 import WeeklyCheckinBanner from '@/app/components/camino/WeeklyCheckinBanner'
 import ExamCoverageBanner from '@/app/components/camino/ExamCoverageBanner'
@@ -286,14 +286,13 @@ function indexesFor(count: number) { if (count <= 3) return [0, 2, 4]; if (count
 function titleFor(kind: MissionKind, subject: string, item?: CurriculumItem) { if (kind === 'concept_explanation') return `Tema de hoy: ${item?.topic ?? subject}`; if (kind === 'guided_example') return `Ejemplo guiado: ${item?.topic ?? subject}`; if (kind === 'guided_practice') return `Practica guiada: ${item?.topic ?? subject}`; if (kind === 'evau_practice') return `Ejercicio PAU de ${item?.topic ?? subject}`; if (kind === 'exam_focus') return `Parcial cerca: ${item?.topic ?? subject}`; if (kind === 'mock_exam') return `Mini simulacro de ${subject}`; return `Tarea personalizada de ${subject}` }
 function loadJson<T>(key: string, fallback: T): T { try { const raw = window.localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback } catch { return fallback } }
 function saveJson(key: string, value: unknown) { window.localStorage.setItem(key, JSON.stringify(value)) }
-// "Sugiéreme qué repasar" (FreeReviewPanel) no persiste en camino_calendar
-// — es una propuesta, no una misión asignada — así que se guarda aquí solo
-// para que CompactWeekView pueda mostrarla junto a "Repaso libre" del día de
-// hoy sin levantar el estado hasta el padre. Se descarta sola al día
-// siguiente (comparación de fecha al leer), sin necesidad de limpiarla.
+// "Sugiéreme qué repasar" (FreeReviewPanel) guarda la propuesta aquí para
+// que CompactWeekView pueda mostrarla junto a "Repaso libre" del día de hoy.
+// Si el alumno pulsa "Añadir misión sugerida", se persiste en
+// camino_calendar desde el endpoint idempotente correspondiente.
 const FREE_REVIEW_SUGGESTION_KEY = 'kairo_free_review_suggestion_v2'
 type FreeReviewOption = { subject: string; focusNote: string }
-type FreeReviewSuggestion = { date: string; options: FreeReviewOption[]; selectedIndex: number }
+type FreeReviewSuggestion = { date: string; options: FreeReviewOption[]; selectedIndex: number; addedKeys?: string[] }
 // `exam-${date}-${exams.length + 1}` could collide with an existing exam's id
 // once one had been deleted (the counter resets to a value already used by a
 // surviving exam on the same date) — a React key collision that can hide the
@@ -3712,6 +3711,10 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
   const [options, setOptions] = useState<FreeReviewOption[]>([])
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [loadingSuggestion, setLoadingSuggestion] = useState(false)
+  const [addingKey, setAddingKey] = useState('')
+  const [addedKeys, setAddedKeys] = useState<string[]>([])
+  const [addErrorKey, setAddErrorKey] = useState('')
+  const [addInfoByKey, setAddInfoByKey] = useState<Record<string, string>>({})
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -3740,8 +3743,22 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
     if (saved && saved.date === todayMadrid() && saved.options.length > 0) {
       setOptions(saved.options)
       setSelectedIndex(Math.min(saved.selectedIndex, saved.options.length - 1))
+      setAddedKeys(saved.addedKeys ?? [])
     }
   }, [])
+
+  function suggestionKey(opt: FreeReviewOption) {
+    return `${todayMadrid()}:${subjectSlug(opt.subject)}:${textSlug(opt.focusNote || opt.subject)}`
+  }
+
+  function saveSuggestion(nextOptions: FreeReviewOption[], nextSelectedIndex: number, nextAddedKeys = addedKeys) {
+    saveJson(FREE_REVIEW_SUGGESTION_KEY, {
+      date: todayMadrid(),
+      options: nextOptions,
+      selectedIndex: nextSelectedIndex,
+      addedKeys: nextAddedKeys,
+    } satisfies FreeReviewSuggestion)
+  }
 
   async function suggest() {
     if (subjects.length === 0 || loadingSuggestion) return
@@ -3771,7 +3788,9 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
       if (json.options && json.options.length > 0) {
         setOptions(json.options)
         setSelectedIndex(0)
-        saveJson(FREE_REVIEW_SUGGESTION_KEY, { date: todayMadrid(), options: json.options, selectedIndex: 0 } satisfies FreeReviewSuggestion)
+        setAddedKeys([])
+        setAddErrorKey('')
+        saveSuggestion(json.options, 0, [])
       } else setError('No se ha podido generar una sugerencia. Inténtalo de nuevo.')
     } catch {
       setError('No se ha podido generar una sugerencia. Revisa la conexión.')
@@ -3782,7 +3801,39 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
 
   function selectOption(index: number) {
     setSelectedIndex(index)
-    saveJson(FREE_REVIEW_SUGGESTION_KEY, { date: todayMadrid(), options, selectedIndex: index } satisfies FreeReviewSuggestion)
+    saveSuggestion(options, index)
+  }
+
+  async function addSuggestedMission() {
+    const suggestion = options[selectedIndex]
+    if (!suggestion) return
+    const key = suggestionKey(suggestion)
+    if (addingKey || addedKeys.includes(key)) return
+    setAddingKey(key)
+    setAddErrorKey('')
+    setAddInfoByKey(current => ({ ...current, [key]: '' }))
+    try {
+      const { data } = await supabase.auth.getSession()
+      const token = data.session?.access_token
+      if (!token) { setAddErrorKey(key); return }
+      const res = await fetch('/api/camino/free-review-suggestion/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ subject: suggestion.subject, focusNote: suggestion.focusNote, date: todayMadrid() }),
+      })
+      if (!res.ok) { setAddErrorKey(key); return }
+      const json = await res.json() as { calendarSync?: string }
+      const nextAddedKeys = Array.from(new Set([...addedKeys, key]))
+      setAddedKeys(nextAddedKeys)
+      if (json.calendarSync === 'pending_no_time') {
+        setAddInfoByKey(current => ({ ...current, [key]: 'Añadida en Kairo; se sincronizará cuando tenga hora.' }))
+      }
+      saveSuggestion(options, selectedIndex, nextAddedKeys)
+    } catch {
+      setAddErrorKey(key)
+    } finally {
+      setAddingKey('')
+    }
   }
 
   if (subjects.length === 0) return null
@@ -3793,6 +3844,11 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
   const examSearchTerm = suggestion
     ? (suggestion.focusNote || suggestion.subject).replace(/^repasa\s+/i, '').slice(0, 140)
     : ''
+  const selectedSuggestionKey = suggestion ? suggestionKey(suggestion) : ''
+  const selectedAdded = !!selectedSuggestionKey && addedKeys.includes(selectedSuggestionKey)
+  const selectedAdding = !!selectedSuggestionKey && addingKey === selectedSuggestionKey
+  const selectedAddError = !!selectedSuggestionKey && addErrorKey === selectedSuggestionKey
+  const selectedAddInfo = selectedSuggestionKey ? addInfoByKey[selectedSuggestionKey] : ''
 
   return (
     <div className="mt-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-3">
@@ -3846,6 +3902,16 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
                 ¿Cómo repasas &quot;{suggestion.subject}&quot;?
               </p>
               <div className="flex flex-wrap gap-1.5">
+                <button
+                  type="button"
+                  onClick={addSuggestedMission}
+                  disabled={selectedAdding || selectedAdded}
+                  className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-black disabled:cursor-default disabled:opacity-80"
+                  style={{ background: selectedAdded ? '#ecfdf5' : CONTENT_TYPE_COLORS.suggestion.text, color: selectedAdded ? '#047857' : 'white', border: selectedAdded ? '1px solid #bbf7d0' : 'none' }}
+                >
+                  {selectedAdding ? <Loader2 size={12} className="animate-spin" /> : selectedAdded ? <Check size={12} /> : <Plus size={12} />}
+                  {selectedAdding ? 'Añadiendo...' : selectedAdded ? 'Añadida' : selectedAddError ? 'No se ha podido añadir. Reintentar' : 'Añadir misión sugerida'}
+                </button>
                 {examSlug && (
                   <a
                     href={`/examenes?subject=${encodeURIComponent(examSlug)}&search=${encodeURIComponent(examSearchTerm)}&source=camino_free_review`}
@@ -3865,6 +3931,7 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
                   </a>
                 )}
               </div>
+              {selectedAddInfo && <p className="mt-1.5 text-[9px] font-bold text-slate-500">{selectedAddInfo}</p>}
             </div>
           )}
         </div>

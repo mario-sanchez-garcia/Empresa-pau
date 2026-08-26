@@ -18,7 +18,8 @@ const MODEL = 'claude-sonnet-4-6'
 const OPTIONS_COUNT = 3
 
 type SuggestionOption = { subject: string; focusNote: string }
-type StudentExamRow = { subject?: unknown; date?: unknown; name?: unknown; block?: unknown; topic?: unknown }
+type StudentExamRow = { subject?: unknown; date?: unknown; name?: unknown; block?: unknown; topic?: unknown; content?: unknown; priority?: unknown }
+type UpcomingExam = { subjectLabel: string; name: string; date: string; focus: string; days: number; priority: string }
 
 function cleanString(value: unknown, max = 200) {
   return typeof value === 'string' ? value.trim().slice(0, max) : ''
@@ -50,6 +51,30 @@ function daysUntil(dateStr: string): number {
   return Math.round((target.getTime() - today.getTime()) / 86_400_000)
 }
 
+function examPriorityScore(priority: string): number {
+  if (priority === 'muy_alta') return 4
+  if (priority === 'alta') return 3
+  if (priority === 'normal') return 2
+  return 1
+}
+
+function examUrgencyScore(exam: UpcomingExam): number {
+  const dayScore = exam.days <= 7 ? 100 : exam.days <= 14 ? 70 : exam.days <= 30 ? 35 : 10
+  return dayScore + examPriorityScore(exam.priority) * 8 + (exam.focus ? 10 : 0)
+}
+
+function examFocusText(exam: StudentExamRow): string {
+  return cleanString(exam.topic, 120)
+    || cleanString(exam.block, 120)
+    || cleanString(exam.content, 140)
+    || cleanString(exam.name, 120)
+}
+
+function optionFromExam(exam: UpcomingExam): SuggestionOption {
+  const when = exam.days <= 0 ? 'hoy o ya pasó' : exam.days === 1 ? 'mañana' : `en ${exam.days} días`
+  return { subject: exam.subjectLabel, focusNote: `Parcial ${when}: ${exam.focus || exam.name}`.slice(0, 140) }
+}
+
 // Construye 3 opciones reales sin IA — usado tanto como fallback si la IA
 // falla como base que la IA nunca puede contradecir con datos inventados:
 // 1) el bloque con peor nota, 2) la asignatura con el parcial más próximo,
@@ -59,11 +84,20 @@ function daysUntil(dateStr: string): number {
 function deterministicOptions(
   activeSubjects: string[],
   weakAreas: Array<{ subjectKey: string; label: string; avgScore: number }>,
-  upcomingExams: Array<{ subjectLabel: string; name: string; date: string }>,
+  upcomingExams: UpcomingExam[],
   progressBySlug: Map<string, { completed: number; total: number }>,
 ): SuggestionOption[] {
   const options: SuggestionOption[] = []
   const usedSubjects = new Set<string>()
+
+  const urgentExam = [...upcomingExams]
+    .filter(e => e.days <= 14)
+    .sort((a, b) => examUrgencyScore(b) - examUrgencyScore(a) || a.date.localeCompare(b.date))[0]
+  if (urgentExam) {
+    const option = optionFromExam(urgentExam)
+    options.push(option)
+    usedSubjects.add(option.subject)
+  }
 
   const worst = weakAreas.find(w => activeSubjects.some(s => normalizeSubjectSlug(s) === toCaminoSlug(w.subjectKey)))
   if (worst) {
@@ -74,10 +108,9 @@ function deterministicOptions(
 
   const nextExam = upcomingExams.find(e => !usedSubjects.has(e.subjectLabel))
   if (nextExam) {
-    const days = daysUntil(nextExam.date)
-    const when = days <= 0 ? 'hoy o ya pasó' : days === 1 ? 'mañana' : `en ${days} días`
-    options.push({ subject: nextExam.subjectLabel, focusNote: `Parcial "${nextExam.name}" ${when} — repasa antes de que llegue` })
-    usedSubjects.add(nextExam.subjectLabel)
+    const option = optionFromExam(nextExam)
+    options.push(option)
+    usedSubjects.add(option.subject)
   }
 
   const leastProgress = [...activeSubjects]
@@ -202,15 +235,23 @@ export async function POST(request: NextRequest) {
     recentBySlug.set(slug, entry)
   }
 
-  const upcomingExamsRaw = (Array.isArray(profile?.student_exams) ? profile.student_exams as StudentExamRow[] : [])
+  const upcomingExamsRaw: UpcomingExam[] = (Array.isArray(profile?.student_exams) ? profile.student_exams as StudentExamRow[] : [])
     .filter((e): e is StudentExamRow & { subject: string; date: string } => typeof e?.subject === 'string' && typeof e?.date === 'string' && e.date >= todayStr)
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 5)
-    .map(e => ({
-      subjectLabel: activeSubjects.find(s => normalizeSubjectSlug(s) === normalizeSubjectSlug(e.subject)) ?? e.subject,
-      name: cleanString(e.name, 60) || cleanString(e.block, 60) || cleanString(e.topic, 60) || 'Parcial',
-      date: e.date,
-    }))
+    .map(e => {
+      const focus = examFocusText(e)
+      const name = cleanString(e.name, 60) || focus.slice(0, 60) || 'Parcial'
+      return {
+        subjectLabel: activeSubjects.find(s => normalizeSubjectSlug(s) === normalizeSubjectSlug(e.subject)) ?? e.subject,
+        name,
+        date: e.date,
+        focus,
+        days: daysUntil(e.date),
+        priority: cleanString(e.priority, 20) || 'normal',
+      }
+    })
+    .sort((a, b) => examUrgencyScore(b) - examUrgencyScore(a) || a.date.localeCompare(b.date))
 
   const fallbackOptions = deterministicOptions(activeSubjects, weakAreasRaw, upcomingExamsRaw, progressBySlug)
 
@@ -225,7 +266,7 @@ export async function POST(request: NextRequest) {
       if (progress && progress.total > 0) parts.push(`progreso del curso ${progress.completed}/${progress.total} temas`)
       if (recent) parts.push(`media reciente ${Math.round((recent.sum / recent.max) * 100)}% (${recent.count} correcciones)`)
       if (weak.length) parts.push(`bloques flojos: ${weak.map(w => `${w.label} (${w.avgScore}%)`).join(', ')}`)
-      if (exams.length) parts.push(`parcial próximo: "${exams[0].name}" en ${daysUntil(exams[0].date)} días`)
+      if (exams.length) parts.push(`parcial próximo: "${exams[0].name}" en ${exams[0].days} días`)
       if (subjectLevels[label]) parts.push(`el alumno dice que va "${subjectLevels[label]}"`)
       return `- ${label}: ${parts.length ? parts.join(' · ') : 'sin datos todavía'}`
     }).join('\n')
@@ -236,7 +277,7 @@ Datos reales de cada asignatura activa (progreso de curso, parciales próximos, 
 ${perSubjectLines}
 ${customInstructions ? `- Instrucciones personalizadas activas del alumno: ${customInstructions}` : ''}
 
-Elige TRES opciones de repaso DISTINTAS entre sí, basadas ÚNICAMENTE en los datos reales de arriba — nunca inventes una nota, un parcial o un progreso que no aparezca en la lista. Prioriza cubrir asignaturas distintas si hay más de una con datos; repite asignatura solo si no hay otra opción con motivo real. Cada opción es una asignatura (EXACTAMENTE como aparece en la lista) y una nota breve (máx 100 caracteres, en español, sin markdown) que mencione el motivo real (nota floja en un bloque concreto, parcial próximo, poco progreso, etc.). Responde ÚNICAMENTE con JSON válido, sin texto adicional: {"options": [{"subject": "<asignatura>", "focusNote": "<string>"}, {"subject": "<asignatura>", "focusNote": "<string>"}, {"subject": "<asignatura>", "focusNote": "<string>"}]}`
+Elige TRES opciones de repaso DISTINTAS entre sí, basadas ÚNICAMENTE en los datos reales de arriba — nunca inventes una nota, un parcial o un progreso que no aparezca en la lista. Si hay un parcial en 7 días o menos, debe pesar más que un bloque flojo antiguo; si hay un parcial en 8-14 días, trátalo como prioridad alta antes de temas lejanos. Prioriza cubrir asignaturas distintas solo después de respetar esa urgencia. Cada opción es una asignatura (EXACTAMENTE como aparece en la lista) y una nota breve (máx 100 caracteres, en español, sin markdown) que mencione el motivo real (parcial próximo, nota floja en un bloque concreto, poco progreso, etc.). Responde ÚNICAMENTE con JSON válido, sin texto adicional: {"options": [{"subject": "<asignatura>", "focusNote": "<string>"}, {"subject": "<asignatura>", "focusNote": "<string>"}, {"subject": "<asignatura>", "focusNote": "<string>"}]}`
 
     const response = await withAnthropicRetry(() => client.messages.create({
       model: MODEL,
@@ -264,6 +305,12 @@ Elige TRES opciones de repaso DISTINTAS entre sí, basadas ÚNICAMENTE en los da
       if (options.length >= OPTIONS_COUNT) break
       if (options.some(o => o.subject === fb.subject && o.focusNote === fb.focusNote)) continue
       options.push(fb)
+    }
+    const urgentExam = upcomingExamsRaw.find(e => e.days <= 14)
+    if (urgentExam && options[0]?.subject !== urgentExam.subjectLabel) {
+      const urgentOption = optionFromExam(urgentExam)
+      const rest = options.filter(o => o.subject !== urgentOption.subject || o.focusNote !== urgentOption.focusNote)
+      options.splice(0, options.length, urgentOption, ...rest)
     }
 
     const usage = extractAnthropicTokenUsage(response)

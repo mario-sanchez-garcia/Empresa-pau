@@ -65,8 +65,8 @@ function nowISO() {
   return new Date().toISOString()
 }
 
-function localDateTime(date: string, time: string | null | undefined, fallback: string) {
-  const t = (time ?? fallback).slice(0, 5)
+function localDateTime(date: string, time: string) {
+  const t = time.slice(0, 5)
   return `${date}T${t}:00`
 }
 
@@ -139,10 +139,11 @@ async function ensureExternalCalendar(db: SupabaseClient, connection: CalendarCo
   return { provider, calendarId: created.id, summary: created.summary ?? APP_CALENDAR_SUMMARY }
 }
 
-function eventFromMission(mission: CaminoMissionRow): CalendarEventInput {
+function eventFromMission(mission: CaminoMissionRow): CalendarEventInput | null {
+  if (!mission.start_time || !mission.end_time) return null
   const title = mission.title?.trim() || 'Mision de Kairo'
-  const start = localDateTime(mission.scheduled_date, mission.start_time, '18:00')
-  const end = localDateTime(mission.scheduled_date, mission.end_time, '18:30')
+  const start = localDateTime(mission.scheduled_date, mission.start_time)
+  const end = localDateTime(mission.scheduled_date, mission.end_time)
   return {
     summary: `Kairo: ${title}`,
     description: [
@@ -212,8 +213,17 @@ export async function syncKairoMissionsToGoogle(userId: string, db = createServi
     .limit(90)
   const missions = (data ?? []) as CaminoMissionRow[]
   let pushed = 0
+  let skippedNoTime = 0
+  let failed = 0
   for (const mission of missions) {
     const eventInput = eventFromMission(mission)
+    if (!eventInput) {
+      skippedNoTime++
+      await db.from('camino_calendar').update({
+        metadata: mergeMetadata(mission.metadata, { calendar_synced: false, calendar_sync_status: 'pending_no_time' }),
+      }).eq('id', mission.id).eq('user_id', userId)
+      continue
+    }
     const { data: linkData } = await db
       .from('calendar_event_links')
       .select('*')
@@ -229,7 +239,16 @@ export async function syncKairoMissionsToGoogle(userId: string, db = createServi
         ? await provider.updateEvent(calendarId, link.external_event_id, eventInput)
         : await provider.createEvent(calendarId, eventInput)
     } catch {
-      event = await provider.createEvent(calendarId, eventInput)
+      try {
+        event = await provider.createEvent(calendarId, eventInput)
+      } catch (error) {
+        failed++
+        await db.from('camino_calendar').update({
+          metadata: mergeMetadata(mission.metadata, { calendar_synced: false, calendar_sync_status: 'error' }),
+        }).eq('id', mission.id).eq('user_id', userId)
+        console.warn('[calendar] mission push failed:', error)
+        continue
+      }
     }
     await db.from('calendar_event_links').upsert({
       user_id: userId,
@@ -252,7 +271,7 @@ export async function syncKairoMissionsToGoogle(userId: string, db = createServi
     pushed++
   }
   await db.from('calendar_connections').update({ last_synced_at: nowISO() }).eq('id', connection.id)
-  return { pushed }
+  return { pushed, skippedNoTime, failed }
 }
 
 async function applyExternalEvent(db: SupabaseClient, connection: CalendarConnection, event: CalendarEvent) {

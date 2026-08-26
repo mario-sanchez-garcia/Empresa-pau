@@ -252,17 +252,94 @@ function signaturesEqual(a: ExamSignature, b: ExamSignature): boolean {
 }
 
 /**
+ * Resuelve SOLO el slot de final_mini_mock de un examen, dentro de su propia
+ * ventana de FINAL_MOCK_WINDOW_DAYS días hábiles — de solo lectura, sin
+ * escribir nada en camino_calendar. Se usa como "pasada 1" en
+ * injectAllPartialExamMissions para que cada examen reserve su Simulacro
+ * ANTES de que se reparta nada más, sin depender del orden en que se procesen
+ * los exámenes (antes: el más cercano se comía los huecos del resto).
+ * `otherExamDates` solo evita aterrizar en el día real de OTRO examen — dos
+ * Simulacros de exámenes distintos SÍ pueden coincidir en la misma fecha
+ * exacta (el scheduler de cada día, en injectPartialExamMissions, coloca
+ * cada uno en su propio hueco de hora sin pisarse).
+ */
+export async function resolveFinalMockSlot(
+  userId: string,
+  supabase: SupabaseClient,
+  partialExam: PartialExamInput,
+  otherExamDates: Set<string>,
+  force = false,
+): Promise<string | null> {
+  const today = madridToday()
+  if (partialExam.date <= today) return null
+
+  // Mismo chequeo de estabilidad que injectPartialExamMissions más abajo —
+  // si el examen no cambió, se reutiliza el Simulacro YA agendado en vez de
+  // recalcularlo, para que esta resolución de solo lectura sea consistente
+  // con lo que injectPartialExamMissions hará después con el mismo examen.
+  const { data: existingRows } = await supabase
+    .from('camino_calendar')
+    .select('scheduled_date, status, metadata')
+    .eq('user_id', userId)
+    .eq('source', 'partial')
+    .filter('metadata->>partial_exam_id', 'eq', partialExam.id)
+    .order('scheduled_date', { ascending: true })
+
+  if (!force && existingRows && existingRows.length > 0) {
+    const existingSignature = signatureFromMetadata(existingRows[0].metadata)
+    if (existingSignature && signaturesEqual(examSignature(partialExam), existingSignature)) {
+      const existingMock = existingRows.find(row => {
+        const meta = (row.metadata ?? {}) as Record<string, unknown>
+        return meta.partial_mission_type === 'final_mini_mock' && row.status === 'pending'
+      })
+      return (existingMock?.scheduled_date as string | undefined) ?? null
+    }
+  }
+
+  const allSlots = weekdaysBefore(partialExam.date, today)
+  const daysUntilExam = allSlots.length
+  // Mismo corte que injectPartialExamMissions (> 10 días hábiles: todavía no
+  // toca inyectar nada de este examen) — sin esto, un examen lejano
+  // reservaría aquí un slot "fantasma" que injectPartialExamMissions ni
+  // siquiera llegaría a insertar (corta antes por el mismo motivo),
+  // bloqueándole sin razón una fecha a otro examen sí computable en la
+  // pasada 2.
+  if (daysUntilExam === 0 || daysUntilExam > 10 || missionSequence(daysUntilExam).length === 0) return null
+
+  const subjectSlug = EXAM_SUBJECT_SLUG[partialExam.subject] ?? partialExam.subject
+  const coverage = await computeExamCoverage(supabase, userId, partialExam.id, subjectSlug, partialExam.date, today)
+
+  function projectedPctThrough(dateStr: string): number {
+    if (coverage.totalCount === 0) return 100
+    const daysThroughCandidate = allSlots.indexOf(dateStr) + 1
+    const additional = Math.min(coverage.pendingSortOrders.length, coverage.maxPerDayCapacity * daysThroughCandidate)
+    return Math.min(100, ((coverage.completedCount + additional) / coverage.totalCount) * 100)
+  }
+
+  for (let windowSize = Math.min(FINAL_MOCK_WINDOW_DAYS, allSlots.length); windowSize <= allSlots.length; windowSize++) {
+    const candidates = allSlots.slice(-windowSize).filter(d => !otherExamDates.has(d))
+    if (candidates.length === 0) continue
+    return candidates.find(d => projectedPctThrough(d) >= MIN_COVERAGE_PCT_FOR_SIMULACRO) ?? candidates[candidates.length - 1]
+  }
+  return null
+}
+
+/**
  * Injects prep missions for a single exam. `reservedDates` are calendar dates
  * already claimed by a *different* (nearer) exam this run — this exam skips
  * them instead of double-booking the day, and returns the dates it claimed so
  * a caller iterating multiple exams (see `injectAllPartialExamMissions`) can
- * keep growing that reserved set.
+ * keep growing that reserved set. `finalMockSlot`, when provided (pasada 1 de
+ * injectAllPartialExamMissions, vía resolveFinalMockSlot), se usa tal cual en
+ * vez de recalcularse aquí — si se omite (undefined), se calcula
+ * internamente con el algoritmo de siempre (compatibilidad para cualquier
+ * llamada directa a esta función).
  */
 export async function injectPartialExamMissions(
   userId: string,
   supabase: SupabaseClient,
   partialExam: PartialExamInput,
-  options: { reservedDates?: Set<string>; force?: boolean } = {},
+  options: { reservedDates?: Set<string>; force?: boolean; finalMockSlot?: string | null } = {},
 ): Promise<{ claimedDates: string[] }> {
   const today = madridToday()
   if (partialExam.date <= today) return { claimedDates: [] }
@@ -372,21 +449,28 @@ export async function injectPartialExamMissions(
     return Math.min(100, ((coverage.completedCount + additional) / coverage.totalCount) * 100)
   }
 
-  // Con varios exámenes próximos reservándose días entre sí, los últimos
-  // FINAL_MOCK_WINDOW_DAYS días pueden estar TODOS ya reservados por otro
-  // examen (visto con datos reales: 3 exámenes de Historia/Mates
-  // encadenados en la misma semana). En vez de caer directo al hueco
-  // disponible más lejano de toda la ventana de 10 días (lo que
-  // reintroducía el mismo problema que esta regla arregla), se amplía la
-  // ventana de búsqueda de 1 en 1 día hasta encontrar el primer tamaño con
-  // al menos un hueco libre — así el Simulacro se queda tan cerca del
-  // examen como sea físicamente posible, no en el otro extremo.
-  let finalMockSlot: string | null = null
-  for (let windowSize = Math.min(FINAL_MOCK_WINDOW_DAYS, allSlots.length); windowSize <= allSlots.length; windowSize++) {
-    const candidates = allSlots.slice(-windowSize).filter(d => !reserved?.has(d))
-    if (candidates.length === 0) continue
-    finalMockSlot = candidates.find(d => projectedPctThrough(d) >= MIN_COVERAGE_PCT_FOR_SIMULACRO) ?? candidates[candidates.length - 1]
-    break
+  // El algoritmo de ventana ampliada (1 en 1 día hasta encontrar hueco) vive
+  // ahora en resolveFinalMockSlot, usado como "pasada 1" por
+  // injectAllPartialExamMissions para que CADA examen reserve su propio
+  // Simulacro antes de que se reparta nada más — así ningún examen le roba
+  // el hueco a otro por orden de procesamiento. Se repite aquí, idéntico,
+  // solo como fallback si esta función se llama sin `options.finalMockSlot`
+  // (compatibilidad para una llamada directa fuera de ese flujo).
+  let finalMockSlot: string | null
+  if (options.finalMockSlot !== undefined) {
+    // Ya resuelto en la pasada 1 (resolveFinalMockSlot, vía
+    // injectAllPartialExamMissions) usando solo la ventana propia de este
+    // examen — no se recalcula aquí ni se filtra contra `reserved` (que
+    // ahora son las fechas de la pasada 2, no las de esta).
+    finalMockSlot = options.finalMockSlot
+  } else {
+    finalMockSlot = null
+    for (let windowSize = Math.min(FINAL_MOCK_WINDOW_DAYS, allSlots.length); windowSize <= allSlots.length; windowSize++) {
+      const candidates = allSlots.slice(-windowSize).filter(d => !reserved?.has(d))
+      if (candidates.length === 0) continue
+      finalMockSlot = candidates.find(d => projectedPctThrough(d) >= MIN_COVERAGE_PCT_FOR_SIMULACRO) ?? candidates[candidates.length - 1]
+      break
+    }
   }
 
   // exercise_practice usa el resto de la ventana de ≤10 días (sin la
@@ -534,10 +618,26 @@ export async function deletePartialExamMissions(
 }
 
 /**
- * Processes ALL of a student's active exams together (nearest date first) so
- * that two exams close in time don't silently overwrite each other's prep
- * slots, and so a further-out exam never plants a mission on a day that is
- * actually a different subject's exam date.
+ * Processes ALL of a student's active exams together in TWO passes, so that
+ * two exams close in time don't fight over the same prep slots and so a
+ * further-out exam never plants a mission on a day that is actually a
+ * different subject's exam date.
+ *
+ * PASADA 1 resuelve el slot de final_mini_mock (Simulacro) de CADA examen
+ * usando solo SU PROPIA ventana de FINAL_MOCK_WINDOW_DAYS días — antes esto
+ * se decidía dentro del mismo bucle secuencial que exercise_practice, más
+ * cercano primero: con 2+ exámenes próximos entre sí, los primeros se
+ * quedaban con los días cercanos y el examen más lejano de los tres (aunque
+ * su propia ventana de 1-3 días siguiera libre en términos absolutos) veía
+ * esos días ya "gastados" por otro examen y su Simulacro acababa cayendo
+ * lejos, mezclado entre las lecciones de Curso en vez de justo antes del
+ * examen. Ahora cada examen resuelve su Simulacro sin que los demás puedan
+ * robarle ese hueco.
+ *
+ * PASADA 2 reparte exercise_practice (más cercano primero, como siempre)
+ * evitando las fechas de examen y TODOS los slots de Simulacro de la pasada
+ * 1 — de cualquier examen, no solo el suyo — para que una práctica de
+ * ejercicios no aterrice el mismo día que un Simulacro ajeno.
  */
 export async function injectAllPartialExamMissions(
   userId: string,
@@ -565,13 +665,41 @@ export async function injectAllPartialExamMissions(
     .maybeSingle()
   const customInstructions = profile?.custom_instructions ?? undefined
 
-  const reservedDates = new Set<string>()
+  // Días de examen reales de TODOS los exámenes activos — solo esto excluye
+  // el slot de Simulacro de un examen en la pasada 1 (no queremos que un
+  // Simulacro caiga en el día real de otro examen); dos Simulacros SÍ pueden
+  // coincidir entre sí en la misma fecha (ver comentario de la función).
+  const examDates = new Set(upcoming.map(exam => exam.date))
+
+  // PASADA 1
+  const mockSlotByExamId = new Map<string, string | null>()
   for (const exam of upcoming) {
     const force = options.forceExamId != null && exam.id === options.forceExamId
-    const { claimedDates } = await injectPartialExamMissions(userId, supabase, { ...exam, customInstructions }, { reservedDates, force })
+    const slot = await resolveFinalMockSlot(userId, supabase, { ...exam, customInstructions }, examDates, force)
+    mockSlotByExamId.set(exam.id, slot)
+  }
+
+  // PASADA 2
+  const reservedDates = new Set<string>(examDates)
+  for (const slot of mockSlotByExamId.values()) {
+    if (slot) reservedDates.add(slot)
+  }
+  for (const exam of upcoming) {
+    const force = options.forceExamId != null && exam.id === options.forceExamId
+    const ownMockSlot = mockSlotByExamId.get(exam.id) ?? null
+    // El Simulacro de ESTE examen no debe excluirse de su propio reparto de
+    // exercise_practice sin condición — injectPartialExamMissions ya tiene
+    // su propio filtro (`d !== finalMockSlot`, salvo maxSessionsPerDay > 1)
+    // para decidir si puede apilar ambas misiones el mismo día. Si aquí
+    // también lo metiéramos en reservedDates sin condición, ese filtro
+    // interno dejaría de tener efecto nunca.
+    const reservedForThisExam = ownMockSlot
+      ? new Set([...reservedDates].filter(d => d !== ownMockSlot))
+      : reservedDates
+    const { claimedDates } = await injectPartialExamMissions(
+      userId, supabase, { ...exam, customInstructions },
+      { reservedDates: reservedForThisExam, force, finalMockSlot: ownMockSlot },
+    )
     for (const d of claimedDates) reservedDates.add(d)
-    // Reserve the exam's own date too: a later exam's prep window shouldn't
-    // claim what is actually a different subject's exam day.
-    reservedDates.add(exam.date)
   }
 }

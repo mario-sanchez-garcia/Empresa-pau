@@ -204,6 +204,11 @@ function weekStartForDate(dateISO: string) {
 function cloneWeek(days: DayPlan[]) {
   return days.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission })) }))
 }
+function mergeMissionMetadata(current: Record<string, unknown> | undefined, patch: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries({ ...(current ?? {}), ...patch }).filter(([, value]) => value !== undefined && value !== null),
+  )
+}
 function mergeWeekIntoCalendar(current: DayPlan[], weekStartISO: string, weekDays: DayPlan[]) {
   const weekEndISO = toISO(addDays(dateFromISO(weekStartISO), 6))
   const outsideWeek = current.filter(day => day.date < weekStartISO || day.date > weekEndISO)
@@ -423,6 +428,8 @@ type CaminoCalRow = {
   v2_sort_order: number | null
   mission_type: string
   xp_awarded: number | null
+  start_time: string | null
+  end_time: string | null
   metadata?: Record<string, unknown> | null
 }
 
@@ -467,7 +474,10 @@ function calRowToMission(row: CaminoCalRow): Mission {
       ? row.xp_awarded
       : resolveMissionTypeXp(row.mission_type),
     status: row.status === 'completed' ? 'done' : 'pending',
-    metadata: row.metadata ?? undefined,
+    metadata: mergeMissionMetadata(row.metadata ?? undefined, {
+      start_time: row.start_time,
+      end_time: row.end_time,
+    }),
     subjectSlug: rowSubjectSlug,
     v2SortOrder: row.v2_sort_order ?? undefined,
     blockKey: row.block_key ?? undefined,
@@ -486,7 +496,7 @@ async function fetchCaminoCalendar(userId: string): Promise<DayPlan[] | null> {
   const weekStartStr = currentWeekStartISO()
   const { data, error } = await supabase
     .from('camino_calendar')
-    .select('id, scheduled_date, subject, title, block_key, block_slug, is_main, is_bonus, status, v2_sort_order, mission_type, xp_awarded, metadata')
+    .select('id, scheduled_date, subject, title, block_key, block_slug, is_main, is_bonus, status, v2_sort_order, mission_type, xp_awarded, start_time, end_time, metadata')
     .eq('user_id', userId)
     .gte('scheduled_date', weekStartStr)
     .order('scheduled_date', { ascending: true })
@@ -3016,9 +3026,9 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             is_locked: true,
           }))
       )
-      for (const { id, ...fields } of toUpdate) {
-        supabase.from('camino_calendar').update(fields).eq('id', id).then(() => {}, () => {})
-      }
+      await Promise.all(toUpdate.map(({ id, ...fields }) =>
+        supabase.from('camino_calendar').update(fields).eq('id', id).then(() => undefined, () => undefined),
+      ))
 
       // INSERT new missions (no calendarRowId yet)
       type InsertEntry = { missionId: string; row: Record<string, unknown> }
@@ -3053,6 +3063,10 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
 
       if (insertEntries.length === 0) {
         onSave(draft)
+        fetch('/api/calendar/google/sync', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        }).catch(() => undefined)
         return
       }
 
@@ -3078,6 +3092,10 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
         }),
       }))
       onSave(updatedDraft)
+      fetch('/api/calendar/google/sync', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      }).catch(() => undefined)
     } catch {
       onSave(draft)
     }
@@ -3285,6 +3303,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                       <div className="mb-2 flex flex-wrap items-center gap-1.5">
                         <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[.08em]" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span>
                         <span className="rounded-full bg-slate-50 px-2.5 py-0.5 text-[8px] font-black uppercase tracking-[.1em] text-slate-400">{missionKindLabel(mission.kind, mission.missionType)}</span>
+                        {!!mission.metadata?.calendar_synced && <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[8px] font-black uppercase tracking-[.1em] text-blue-600">Calendar</span>}
                         <div className="ml-auto flex items-center gap-1">
                           <button type="button" onClick={() => updateMission(mission.id, { role: 'bonus' })} aria-label="Mover a bonus" className="flex h-6 w-6 items-center justify-center rounded-md border border-[#f1f5f9] bg-transparent text-slate-300 transition hover:bg-slate-50 hover:text-slate-500"><Bookmark size={12} /></button>
                           <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar" className="flex h-6 w-6 items-center justify-center rounded-md border border-[#f1f5f9] bg-transparent text-red-200 transition hover:bg-red-50 hover:text-red-500"><Trash2 size={12} /></button>
@@ -3963,7 +3982,7 @@ function WeeklyGoalCard({ completed, target }: { completed: number; target: numb
 function MissionRow({ mission, onPostpone, onComplete, compact = false }: { mission: Mission; onPostpone: (id: string) => void; onComplete?: (mission: Mission) => void; compact?: boolean }) {
   const theme = themeFor(mission.subject)
   const target = hrefForMission(mission)
-  return <div className={`rounded-2xl border p-4 ${mission.status === 'done' ? 'bg-emerald-50 border-emerald-100' : 'bg-white'}`} style={{ borderColor: mission.status === 'done' ? '#bbf7d0' : theme.border }}><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span><span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400"><Clock3 size={12} /> {mission.estimatedMinutes} min</span>{mission.block && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-500">{mission.block}</span>}{mission.missionType === 'review' && <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-black text-indigo-700">Repaso</span>}{mission.metadata?.free_initiative ? <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">✎ Por tu cuenta</span> : mission.role === 'bonus' && <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-black text-violet-700">Bonus</span>}{!!mission.metadata?.express && <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-black text-amber-700">⚡ Repaso Express</span>}</div><h3 className={`${compact ? 'text-sm' : 'text-base'} font-black text-slate-900`}>{mission.title}</h3><p className="mt-1 text-xs font-semibold text-slate-500">{mission.reason}</p>{target.fallback && <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">Todavía no hemos preparado este contenido.</p>}</div><div className="flex shrink-0 flex-wrap gap-2">{mission.status === 'done' ? <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Completada</span> : target.href ? <a href={target.href} className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white">Ir a practicar <ArrowRight size={13} /></a> : <span className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400">Sin pantalla</span>}{mission.status !== 'done' && mission.calendarRowId && onComplete && <button onClick={() => onComplete(mission)} className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Hecha</button>}{mission.status !== 'done' && mission.role === 'main' && <button onClick={() => onPostpone(mission.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500"><RotateCcw size={13} /> Posponer</button>}</div></div></div>
+  return <div className={`rounded-2xl border p-4 ${mission.status === 'done' ? 'bg-emerald-50 border-emerald-100' : 'bg-white'}`} style={{ borderColor: mission.status === 'done' ? '#bbf7d0' : theme.border }}><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span><span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400"><Clock3 size={12} /> {mission.estimatedMinutes} min</span>{mission.block && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-500">{mission.block}</span>}{mission.missionType === 'review' && <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-black text-indigo-700">Repaso</span>}{mission.metadata?.free_initiative ? <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">✎ Por tu cuenta</span> : mission.role === 'bonus' && <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-black text-violet-700">Bonus</span>}{!!mission.metadata?.express && <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-black text-amber-700">⚡ Repaso Express</span>}{!!mission.metadata?.calendar_synced && <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-black text-blue-700">Calendar</span>}</div><h3 className={`${compact ? 'text-sm' : 'text-base'} font-black text-slate-900`}>{mission.title}</h3><p className="mt-1 text-xs font-semibold text-slate-500">{mission.reason}</p>{target.fallback && <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">Todavía no hemos preparado este contenido.</p>}</div><div className="flex shrink-0 flex-wrap gap-2">{mission.status === 'done' ? <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Completada</span> : target.href ? <a href={target.href} className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white">Ir a practicar <ArrowRight size={13} /></a> : <span className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400">Sin pantalla</span>}{mission.status !== 'done' && mission.calendarRowId && onComplete && <button onClick={() => onComplete(mission)} className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Hecha</button>}{mission.status !== 'done' && mission.role === 'main' && <button onClick={() => onPostpone(mission.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500"><RotateCcw size={13} /> Posponer</button>}</div></div></div>
 }
 
 function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
@@ -3974,7 +3993,7 @@ function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
   // algo real.
   const main = day.missions.filter(mission => mission.role === 'main' || mission.metadata?.free_initiative)
   const done = main.length > 0 && main.every(mission => mission.status === 'done')
-  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3><div className="flex items-center gap-1.5">{day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div></div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}{!!mission.metadata?.free_initiative && <span className="mb-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">✎ Por tu cuenta</span>}<p className={`mt-1 text-xs font-bold ${mission.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
+  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3><div className="flex items-center gap-1.5">{day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div></div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}{!!mission.metadata?.free_initiative && <span className="mb-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">✎ Por tu cuenta</span>}{!!mission.metadata?.calendar_synced && <span className="mb-1 ml-1 inline-block rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-black text-blue-700">Calendar</span>}<p className={`mt-1 text-xs font-bold ${mission.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
 }
 
 type ExamDraft = { subject: string; date: string; block: string; topic: string; topicIds: string[]; examScope: ExamScope; name: string; priority: ExamPriority; confidence: ExamConfidence; content: string }

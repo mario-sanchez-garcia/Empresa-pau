@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
 import { createServiceClient } from '@/app/lib/billing/supabase'
+import { syncKairoMissionsToGoogle } from '@/app/lib/calendar/sync'
 import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
 import { getMadridToday } from '@/app/lib/camino/studyDays'
 import { injectWeakReviewMissions } from '@/app/lib/camino/injectWeakReviewMissions'
@@ -51,6 +52,9 @@ export async function POST(request: NextRequest) {
     await ensureCaminoCalendar(user.id, db)
     const weakReviews = await injectWeakReviewMissions(user.id, db)
     const personalization = await applyCalendarPersonalization(user.id, db)
+    await syncKairoMissionsToGoogle(user.id, db).catch(error => {
+      console.warn('[camino/ensure-calendar] calendar sync skipped:', error)
+    })
 
     // El marcador se escribe DESPUÉS de que las tres operaciones terminen: si
     // alguna lanza, el día no queda marcado y el siguiente intento vuelve a

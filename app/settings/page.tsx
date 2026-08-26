@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Camera, CreditCard, LogOut, Save, Trash2, X } from 'lucide-react'
+import { CalendarDays, Camera, CreditCard, Link2, LogOut, RefreshCcw, Save, Trash2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 import { supabase } from '@/app/lib/supabase'
@@ -23,6 +23,10 @@ type Preferences = {
   correctionStyle: 'breve' | 'normal' | 'detallado'
   longAdvice: boolean
 }
+
+type CalendarStatus =
+  | { connected: false; error?: string }
+  | { connected: true; accountEmail: string | null; calendarId: string | null; calendarSummary: string | null; lastSyncedAt: string | null; watchExpiration: string | null }
 
 const defaults: Preferences = {
   displayName: '',
@@ -125,6 +129,9 @@ export default function SettingsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState('')
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
+  const [calendarStatus, setCalendarStatus] = useState<CalendarStatus>({ connected: false })
+  const [calendarLoading, setCalendarLoading] = useState(false)
+  const [calendarMessage, setCalendarMessage] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -203,6 +210,10 @@ export default function SettingsPage() {
             setCaminoDailyMinutes(nextOnboarding.dailyMinutes ?? 60)
             setCaminoWeeklyDays(nextOnboarding.weeklyStudyDaysValue ?? 4)
           }
+        } catch { /* silent */ }
+        try {
+          const res = await fetch('/api/calendar/google/status', { headers: { Authorization: `Bearer ${token}` } })
+          if (res.ok) setCalendarStatus(await res.json() as CalendarStatus)
         } catch { /* silent */ }
       }
       setPreferences({ ...defaults, ...storedPreferences, displayName: serverDisplayName || storedPreferences.displayName || '' })
@@ -499,6 +510,75 @@ export default function SettingsPage() {
     }
   }
 
+  async function refreshCalendarStatus(token?: string) {
+    const sessionToken = token ?? (await supabase.auth.getSession()).data.session?.access_token
+    if (!sessionToken) return
+    const res = await fetch('/api/calendar/google/status', { headers: { Authorization: `Bearer ${sessionToken}` } })
+    if (res.ok) setCalendarStatus(await res.json() as CalendarStatus)
+  }
+
+  async function connectGoogleCalendar() {
+    setCalendarLoading(true)
+    setCalendarMessage('')
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      if (!token) throw new Error('no_session')
+      const res = await fetch('/api/calendar/google/connect', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const json = await res.json() as { url?: string; error?: string }
+      if (!res.ok || !json.url) throw new Error(json.error ?? 'connect_failed')
+      window.location.href = json.url
+    } catch {
+      setCalendarMessage('No se pudo abrir la conexión con Google Calendar. Revisa la configuración.')
+      setCalendarLoading(false)
+    }
+  }
+
+  async function syncGoogleCalendarNow() {
+    setCalendarLoading(true)
+    setCalendarMessage('')
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      if (!token) throw new Error('no_session')
+      const res = await fetch('/api/calendar/google/sync', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error('sync_failed')
+      await refreshCalendarStatus(token)
+      setCalendarMessage('Calendario sincronizado.')
+    } catch {
+      setCalendarMessage('No se pudo sincronizar ahora mismo.')
+    } finally {
+      setCalendarLoading(false)
+    }
+  }
+
+  async function disconnectGoogleCalendarNow() {
+    setCalendarLoading(true)
+    setCalendarMessage('')
+    try {
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+      if (!token) throw new Error('no_session')
+      const res = await fetch('/api/calendar/google/disconnect', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error('disconnect_failed')
+      setCalendarStatus({ connected: false })
+      setCalendarMessage('Google Calendar desconectado.')
+    } catch {
+      setCalendarMessage('No se pudo desconectar Google Calendar.')
+    } finally {
+      setCalendarLoading(false)
+    }
+  }
+
   const displayName = username || preferences.displayName || email.split('@')[0] || '?'
   const initial = displayName[0]?.toUpperCase() ?? '?'
 
@@ -713,6 +793,45 @@ export default function SettingsPage() {
               </div>
             </>
           )}
+
+          <Section label="Integraciones" />
+          <div style={{ marginBottom: 28, borderRadius: 14, border: '1px solid #dbeafe', background: 'white', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, minWidth: 260, flex: 1 }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <CalendarDays size={18} />
+              </div>
+              <div>
+                <strong style={{ display: 'block', fontSize: 13, fontWeight: 800, color: '#0f172a' }}>Google Calendar</strong>
+                <small style={{ display: 'block', marginTop: 4, fontSize: 11, lineHeight: 1.45, color: '#64748b', fontWeight: 650 }}>
+                  {calendarStatus.connected
+                    ? `${calendarStatus.accountEmail ?? 'Cuenta conectada'} · ${calendarStatus.calendarSummary ?? 'Kairo - Estudio'}`
+                    : 'Sincroniza tus misiones de Camino PAU con un calendario propio de Kairo.'}
+                </small>
+                {calendarStatus.connected && (
+                  <small style={{ display: 'block', marginTop: 4, fontSize: 10, color: '#94a3b8', fontWeight: 650 }}>
+                    Última sync: {calendarStatus.lastSyncedAt ? new Date(calendarStatus.lastSyncedAt).toLocaleString('es-ES') : 'pendiente'}
+                  </small>
+                )}
+                {calendarMessage && <small style={{ display: 'block', marginTop: 6, fontSize: 11, fontWeight: 750, color: calendarMessage.startsWith('No') ? '#dc2626' : '#16a34a' }}>{calendarMessage}</small>}
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              {calendarStatus.connected ? (
+                <>
+                  <button type="button" onClick={syncGoogleCalendarNow} disabled={calendarLoading} style={{ padding: '9px 14px', borderRadius: 999, background: '#eff6ff', color: '#1d4ed8', fontSize: 12, fontWeight: 900, border: '1px solid #bfdbfe', cursor: calendarLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 7, opacity: calendarLoading ? .7 : 1 }}>
+                    <RefreshCcw size={14} /> Sincronizar
+                  </button>
+                  <button type="button" onClick={disconnectGoogleCalendarNow} disabled={calendarLoading} style={{ padding: '9px 14px', borderRadius: 999, background: 'white', color: '#dc2626', fontSize: 12, fontWeight: 900, border: '1px solid #fee2e2', cursor: calendarLoading ? 'not-allowed' : 'pointer', opacity: calendarLoading ? .7 : 1 }}>
+                    Desconectar
+                  </button>
+                </>
+              ) : (
+                <button type="button" onClick={connectGoogleCalendar} disabled={calendarLoading} style={{ padding: '9px 18px', borderRadius: 999, background: '#2563eb', color: 'white', fontSize: 12, fontWeight: 900, border: 'none', cursor: calendarLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 7, opacity: calendarLoading ? .7 : 1 }}>
+                  <Link2 size={14} /> Conectar Google
+                </button>
+              )}
+            </div>
+          </div>
 
           {/* Preferencias */}
           <Section label="Preferencias de estudio" />

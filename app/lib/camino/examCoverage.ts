@@ -44,6 +44,8 @@ export type ExamCoverage = {
   weekdaysUntilExam: string[]
   /** Coverage % achievable if every one of weekdaysUntilExam is spent entirely on this exam's pending topics, at the student's max declared daily mission count. The ceiling used to decide the Simulacro's fate (100 / 80-99 / <80, see injectPartialExamMissions.ts). */
   maxProjectedCoveragePct: number
+  /** missionPlanForMinutes(dailyMinutes).count — how many Curso lessons/day compression can realistically add, at this student's declared pace. Exposed so callers can project coverage at a specific EARLIER checkpoint (e.g. "3 weekdays before the exam"), not just at the exam date itself — see injectPartialExamMissions.ts's final_mini_mock placement. */
+  maxPerDayCapacity: number
 }
 
 const NOT_COMPUTABLE: ExamCoverage = {
@@ -54,6 +56,7 @@ const NOT_COMPUTABLE: ExamCoverage = {
   inactiveQueueIdsToReactivate: [],
   weekdaysUntilExam: [],
   maxProjectedCoveragePct: 100,
+  maxPerDayCapacity: 1,
 }
 
 async function getDeclaredDailyMinutes(db: SupabaseClient, userId: string): Promise<number | null> {
@@ -147,6 +150,7 @@ export async function computeExamCoverage(
     inactiveQueueIdsToReactivate,
     weekdaysUntilExam,
     maxProjectedCoveragePct,
+    maxPerDayCapacity: maxPerDay,
   }
 }
 

@@ -22,6 +22,16 @@ const BLOCK_DISPLAY: Record<string, string> = {
   Probabilidad: 'Probabilidad',
 }
 
+// Umbral de cobertura de Curso para generar el Simulacro (ver
+// decideMissionFate) — mismo número usado para elegir EN QUÉ día de los
+// últimos FINAL_MOCK_WINDOW_DAYS colocarlo (más abajo).
+const MIN_COVERAGE_PCT_FOR_SIMULACRO = 80
+// final_mini_mock nunca se coloca a más de esto de días hábiles del examen
+// (nunca el día del examen en sí — weekdaysBefore ya lo excluye) —
+// exercise_practice no tiene esta restricción, puede usar cualquier día
+// libre del resto de la ventana de ≤10 días.
+const FINAL_MOCK_WINDOW_DAYS = 3
+
 export type PartialExamInput = {
   id: string
   subject: string
@@ -332,7 +342,7 @@ export async function injectPartialExamMissions(
     ? null
     : coverage.maxProjectedCoveragePct >= 100
       ? 'full'
-      : coverage.maxProjectedCoveragePct >= 80
+      : coverage.maxProjectedCoveragePct >= MIN_COVERAGE_PCT_FOR_SIMULACRO
         ? 'partial'
         : 'cancelled'
 
@@ -343,18 +353,53 @@ export async function injectPartialExamMissions(
   const fullMocksUsedThisMonth = await countFullMocksThisMonth(supabase, userId)
   const monthlyLimitReached = fullMocksUsedThisMonth >= fullMocksLimit
 
-  // Assign each session in `sequence` a date, packed onto the days closest
-  // to the exam first (up to maxSessionsPerDay each). With maxSessionsPerDay
-  // = 1 (the default, normal creation/edit flow) this behaves exactly like
-  // the previous slice(-usableCount) approach: when a nearer exam has
-  // already reserved part of this window and availableSlots is shorter than
-  // the full sequence, it's always the earliest/lowest-priority session
-  // types (missionSequence's front) that get dropped, never the ones
-  // closest to the exam. With maxSessionsPerDay > 1 (set by "Recalcular mi
-  // Camino para este examen", see examTimeNeed.ts) it stacks extra sessions
-  // on the days nearest the exam instead of dropping them.
+  // final_mini_mock: restringido a los últimos FINAL_MOCK_WINDOW_DAYS días
+  // hábiles del examen (nunca más lejos, y nunca el mismo día del examen —
+  // weekdaysBefore ya lo excluye) — antes se colocaba junto con
+  // exercise_practice vía el empaquetado genérico de assignDatesForCount, lo
+  // que con varios exámenes próximos reservándose días entre sí podía
+  // empujarlo hasta 6-9 días antes en vez de quedarse cerca de SU examen.
+  // Dentro de esos 1-3 días, se elige el MÁS TEMPRANO (más margen para el
+  // alumno) en el que la cobertura proyectada hasta ese punto ya alcanzaría
+  // el umbral; si ni siquiera el más tardío lo alcanza, se usa igualmente
+  // el más tardío (lo más cerca posible del examen, comprimiendo al
+  // máximo) — decideMissionFate ya decide aparte si con eso basta para
+  // generar el Simulacro o no.
+  function projectedPctThrough(dateStr: string): number {
+    if (coverage.totalCount === 0) return 100
+    const daysThroughCandidate = allSlots.indexOf(dateStr) + 1
+    const additional = Math.min(coverage.pendingSortOrders.length, coverage.maxPerDayCapacity * daysThroughCandidate)
+    return Math.min(100, ((coverage.completedCount + additional) / coverage.totalCount) * 100)
+  }
+
+  // Con varios exámenes próximos reservándose días entre sí, los últimos
+  // FINAL_MOCK_WINDOW_DAYS días pueden estar TODOS ya reservados por otro
+  // examen (visto con datos reales: 3 exámenes de Historia/Mates
+  // encadenados en la misma semana). En vez de caer directo al hueco
+  // disponible más lejano de toda la ventana de 10 días (lo que
+  // reintroducía el mismo problema que esta regla arregla), se amplía la
+  // ventana de búsqueda de 1 en 1 día hasta encontrar el primer tamaño con
+  // al menos un hueco libre — así el Simulacro se queda tan cerca del
+  // examen como sea físicamente posible, no en el otro extremo.
+  let finalMockSlot: string | null = null
+  for (let windowSize = Math.min(FINAL_MOCK_WINDOW_DAYS, allSlots.length); windowSize <= allSlots.length; windowSize++) {
+    const candidates = allSlots.slice(-windowSize).filter(d => !reserved?.has(d))
+    if (candidates.length === 0) continue
+    finalMockSlot = candidates.find(d => projectedPctThrough(d) >= MIN_COVERAGE_PCT_FOR_SIMULACRO) ?? candidates[candidates.length - 1]
+    break
+  }
+
+  // exercise_practice usa el resto de la ventana de ≤10 días (sin la
+  // restricción de los últimos 1-3) — mismo empaquetado "más cercano
+  // primero" de siempre, excluyendo el día ya asignado al Simulacro salvo
+  // que el alumno permita apilar varias sesiones el mismo día.
+  const availableForPractice = availableSlots.filter(d => d !== finalMockSlot || maxSessionsPerDay > 1)
+  const exercisePracticeSlot = assignDatesForCount(1, availableForPractice, maxSessionsPerDay)[0] ?? null
+
   const targetSequence = sequence
-  const targetSlots = assignDatesForCount(sequence.length, availableSlots, maxSessionsPerDay)
+  const targetSlots: (string | null)[] = sequence.map(mType =>
+    mType === 'final_mini_mock' ? finalMockSlot : exercisePracticeSlot,
+  )
   const claimedDates: string[] = []
 
   for (let i = 0; i < targetSequence.length; i++) {

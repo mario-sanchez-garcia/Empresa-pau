@@ -1,5 +1,6 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 
+import { computeExamCoverage } from './examCoverage'
 import { EXAM_SUBJECT_SLUG, SIMULACRO_SUBJECT } from './partialExamSubjects'
 import { createDayScheduler, estimatedMinutesForMissionType } from './scheduleTimeSlot'
 import { SIMULACRO_MINUTES } from './xpMap'
@@ -281,6 +282,27 @@ export async function injectPartialExamMissions(
   const topic = partialExam.topic || undefined
   const now = new Date().toISOString()
 
+  // Regla de negocio: el Simulacro (final_mini_mock) de un examen solo se
+  // genera si el Curso de sus temas está — o, comprimiendo al máximo el
+  // ritmo, PUEDE llegar a estar — razonablemente cubierto antes de la
+  // fecha. computable=false (asignatura sin topic_id todavía, o examen sin
+  // exam_topics) deja coverageDecision en null -> comportamiento idéntico
+  // al de siempre, sin ningún cambio (ver regla 4/6).
+  const coverage = await computeExamCoverage(supabase, userId, partialExam.id, subjectSlug, partialExam.date, today)
+  const coverageDecision: 'full' | 'partial' | 'cancelled' | null = !coverage.computable
+    ? null
+    : coverage.maxProjectedCoveragePct >= 100
+      ? 'full'
+      : coverage.maxProjectedCoveragePct >= 80
+        ? 'partial'
+        : 'cancelled'
+  const coverageMetadata = coverageDecision
+    ? {
+        exam_coverage_pct: Math.round(coverage.maxProjectedCoveragePct),
+        exam_coverage_decision: coverageDecision,
+      }
+    : {}
+
   // Assign each session in `sequence` a date, packed onto the days closest
   // to the exam first (up to maxSessionsPerDay each). With maxSessionsPerDay
   // = 1 (the default, normal creation/edit flow) this behaves exactly like
@@ -328,8 +350,13 @@ export async function injectPartialExamMissions(
 
     // final_mini_mock enlaza al Simulacro real de 90 min (ver más abajo), no
     // al flujo de práctica de 45 — su hueco en el día debe reservar la
-    // duración real, no la de partial_practice.
-    const isFinalSimulacroLink = mType === 'final_mini_mock'
+    // duración real, no la de partial_practice. Excepción: si la cobertura
+    // de Curso proyectada no llega al 80% (coverageDecision='cancelled'),
+    // este Simulacro concreto NO se genera — no hay bastante Curso visto
+    // para que tenga sentido — y esta fila se convierte en un aviso claro en
+    // vez de desaparecer sin explicación.
+    const isFinalSimulacroLink = mType === 'final_mini_mock' && coverageDecision !== 'cancelled'
+    const isCancelledSimulacro = mType === 'final_mini_mock' && coverageDecision === 'cancelled'
     const scheduler = await createDayScheduler(userId, supabase, slot)
     const timeSlot = scheduler.place(isFinalSimulacroLink ? SIMULACRO_MINUTES : estimatedMinutesForMissionType('partial_practice'))
 
@@ -337,7 +364,9 @@ export async function injectPartialExamMissions(
       user_id: userId,
       scheduled_date: slot,
       subject: subjectSlug,
-      title: missionTitle(mType, blockDisplay, topic),
+      title: isCancelledSimulacro
+        ? `Simulacro pospuesto: no ha dado tiempo a completar el Curso de ${blockDisplay}`
+        : missionTitle(mType, blockDisplay, topic),
       block_key: partialExam.block || null,
       block_slug: blockSlug || null,
       // pau_practice (ya permitido por el constraint de BD, ya con XP
@@ -370,7 +399,14 @@ export async function injectPartialExamMissions(
           links_to_simulacro_exam_id: partialExam.id,
           links_to_simulacro_exam_scope: partialExam.examScope ?? 'parcial',
         } : {}),
+        ...(isCancelledSimulacro ? { simulacro_cancelled: true } : {}),
         simulacro_subject: simSubject,
+        // Presente en TODAS las misiones de este examen (no solo en
+        // final_mini_mock) cuando la cobertura es computable, para que el
+        // banner de aviso pueda encontrar la señal leyendo cualquier fila de
+        // este partial_exam_id, sin depender de si el Simulacro se llegó a
+        // generar o no.
+        ...coverageMetadata,
       },
     })
     claimedDates.push(slot)

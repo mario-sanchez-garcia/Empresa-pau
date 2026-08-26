@@ -5,6 +5,7 @@ import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, res
 import { cleanStudentExams } from './camino/cleanStudentExams'
 import { estimatedMinutesForSlot, missionsPerDayForMinutes } from './camino/dailyTimeCapacity'
 import { EXAM_SUBJECT_SLUG } from './camino/partialExamSubjects'
+import { computeExamCoverage, reactivateQueueItems } from './camino/examCoverage'
 import { injectAllPartialExamMissions } from './camino/injectPartialExamMissions'
 import { resolveTopicIdentitiesBatch } from './camino/resolveTopicIdentity'
 import { createDayScheduler, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
@@ -241,6 +242,14 @@ export async function ensureCaminoCalendar(
   // cambió de verdad.
   const horizonEnd = addDays(today, CALENDAR_HORIZON)
   const examSubjectsByDate = new Map<string, string[]>()
+  // Temas de examen que deben ganar prioridad absoluta sobre el orden lineal
+  // de su propia asignatura (regla de negocio nueva: un examen con Curso
+  // pendiente pausa temporalmente el tema que tocaría por defecto). Se
+  // aplica SIEMPRE que haya temas pendientes de un examen (reordena la cola,
+  // barato/inofensivo); solo cuando además la ventana es justa
+  // (needsCompression) se fuerza también el DÍA — quitándole turno a otras
+  // asignaturas — para maximizar cuántos temas se completan a tiempo.
+  const examPrioritySortOrdersBySubject = new Map<string, Set<number>>()
   try {
     const { data: profileForExams } = await supabase
       .from('perfiles')
@@ -254,6 +263,37 @@ export async function ensureCaminoCalendar(
       const existing = examSubjectsByDate.get(exam.date) ?? []
       existing.push(slug)
       examSubjectsByDate.set(exam.date, existing)
+
+      // computable=false (asignatura sin topic_id, o examen sin exam_topics)
+      // -> sin cambios, exactamente el comportamiento de siempre.
+      const coverage = await computeExamCoverage(supabase, userId, exam.id, slug, exam.date, today)
+      if (!coverage.computable || coverage.pendingSortOrders.length === 0) continue
+
+      // rescueMode pudo haber marcado alguno de estos temas 'inactive' en un
+      // run anterior — para un examen real no puede quedar "no contado" solo
+      // porque el recorte de rescueMode lo tocó; se reactiva a 'pending'
+      // para que vuelva a aparecer en subjectQueues más abajo. No se toca
+      // nada más de rescueMode (su propio límite/bug de "borra temas para
+      // siempre" sigue igual, fuera de esta tarea).
+      await reactivateQueueItems(supabase, userId, coverage.inactiveQueueIdsToReactivate)
+
+      const prioritySet = examPrioritySortOrdersBySubject.get(slug) ?? new Set<number>()
+      for (const so of coverage.pendingSortOrders) prioritySet.add(so)
+      examPrioritySortOrdersBySubject.set(slug, prioritySet)
+
+      // Cualquier tema pendiente de un examen fuerza el día entero (no solo
+      // el reordenamiento dentro del turno normal) — bajo el reparto
+      // rotativo entre asignaturas, "esperar a que le toque el turno" casi
+      // nunca deja suficientes días reales a tiempo (con 4 asignaturas
+      // activas, el turno normal da ~1 de cada 4 días, no 1 de cada 1), así
+      // que solo el reordenamiento no basta para maximizar cobertura como
+      // pide la regla. Forzar el día entero mientras haya algo pendiente es
+      // lo que de verdad "comprime al máximo posible".
+      for (const dateStr of coverage.weekdaysUntilExam) {
+        const forced = examSubjectsByDate.get(dateStr) ?? []
+        if (!forced.includes(slug)) forced.push(slug)
+        examSubjectsByDate.set(dateStr, forced)
+      }
     }
     if (activeExams.length > 0) {
       await injectAllPartialExamMissions(userId, supabase, activeExams)
@@ -362,6 +402,27 @@ export async function ensureCaminoCalendar(
         .in('id', inactiveIds)
         .eq('user_id', userId)
     }
+  }
+
+  // Prioridad absoluta de los temas de examen sobre el orden lineal de su
+  // asignatura (regla de negocio nueva) — se aplica DESPUÉS de rescueMode a
+  // propósito: si rescueMode está activo, su propio re-sort/recorte ya
+  // corrió arriba, y esto debe ganar por encima, no al revés. Nota: si
+  // rescueMode cortó alguno de estos temas fuera de subjectQueues (los movió
+  // a 'inactive') en ESTE mismo run, ya no está en el array y este
+  // reordenamiento no puede resucitarlo desde aquí — solo queda reactivado
+  // en BD para el próximo run. Riesgo conocido, no se corrige aquí (ver
+  // comentario en la sección de arriba).
+  for (const [subj, prioritySet] of examPrioritySortOrdersBySubject) {
+    const queue = subjectQueues[subj]
+    if (!queue || prioritySet.size === 0) continue
+    const priority: QueueItem[] = []
+    const rest: QueueItem[] = []
+    for (const item of queue) {
+      if (prioritySet.has(item.v2_sort_order)) priority.push(item)
+      else rest.push(item)
+    }
+    subjectQueues[subj] = [...priority, ...rest]
   }
 
   const cursors: Record<string, number> = Object.fromEntries(subjects.map(s => [s, 0]))

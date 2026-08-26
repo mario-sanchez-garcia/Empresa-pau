@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/app/lib/billing/supabase'
-import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
+import { createUserSupabase, getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { DEFAULT_GRADE_THRESHOLD_CONFIG, type GradeThresholdMode } from '@/app/lib/camino/gradeThreshold'
 
 export const dynamic = 'force-dynamic'
@@ -51,16 +51,57 @@ function cleanWeeklyDays(value: unknown) {
     : null
 }
 
+async function readProfileOnboardingFallback(accessToken: string, userId: string, userCreatedAt: string | null) {
+  const db = createUserSupabase(accessToken)
+  const { data: perfil, error } = await db
+    .from('perfiles')
+    .select('comunidad, subjects, username, grade_threshold_mode, grade_threshold, subject_grade_thresholds')
+    .eq('id', userId)
+    .maybeSingle()
+
+  if (error) {
+    return NextResponse.json({ error: 'No se pudo recuperar el onboarding' }, { status: 500 })
+  }
+
+  const community = cleanCommunity(perfil?.comunidad)
+  const subjects = cleanSubjects(perfil?.subjects)
+  if (!community || subjects.length === 0) {
+    return NextResponse.json({ onboarding: null, draft: null })
+  }
+
+  return NextResponse.json({
+    onboarding: {
+      community,
+      username: cleanString(perfil?.username),
+      schoolName: null,
+      schoolSource: null,
+      subjects,
+      preparationFeeling: null,
+      dailyStudyTime: null,
+      dailyMinutes: null,
+      weeklyStudyDays: null,
+      weeklyStudyDaysValue: null,
+      completedAt: userCreatedAt ?? new Date().toISOString(),
+      lastStep: null,
+      firstSessionSeen: false,
+      gradeThresholdMode: cleanGradeThresholdMode(perfil?.grade_threshold_mode),
+      gradeThreshold: typeof perfil?.grade_threshold === 'number' ? perfil.grade_threshold : null,
+      subjectGradeThresholds: (perfil?.subject_grade_thresholds as Record<string, number> | null) ?? {},
+    },
+    draft: null,
+  })
+}
+
 export async function GET(request: NextRequest) {
   const authContext = await getAuthContext(request)
   if ('response' in authContext) return authContext.response
-  const { user } = authContext
+  const { user, accessToken } = authContext
 
   let db: ReturnType<typeof createServiceClient>
   try {
     db = createServiceClient()
   } catch {
-    return NextResponse.json({ error: 'Supabase service role not configured' }, { status: 500 })
+    return readProfileOnboardingFallback(accessToken, user.id, user.created_at ?? null)
   }
 
   // Filtra explícitamente por el flag de negocio en vez de fiarse de
@@ -80,7 +121,7 @@ export async function GET(request: NextRequest) {
     .maybeSingle()
 
   if (error) {
-    return NextResponse.json({ error: 'No se pudo recuperar el onboarding' }, { status: 500 })
+    return readProfileOnboardingFallback(accessToken, user.id, user.created_at ?? null)
   }
 
   // Fase 2 (signup al final): borrador server-side de un intento de
@@ -108,7 +149,8 @@ export async function GET(request: NextRequest) {
 
   const payload = data?.payload as Record<string, unknown> | null | undefined
   if (!data || !payload || payload.onboarding_completed !== true) {
-    return NextResponse.json({ onboarding: null, draft })
+    if (draft) return NextResponse.json({ onboarding: null, draft })
+    return readProfileOnboardingFallback(accessToken, user.id, user.created_at ?? null)
   }
 
   // perfiles.subjects es la fuente de verdad actual (la escriben

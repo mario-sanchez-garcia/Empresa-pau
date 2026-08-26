@@ -27,9 +27,9 @@ function weekdaysBefore(examDate: string, fromDate: string): string[] {
 // Historia only for now — curriculum_content_v2.topic_id (migration
 // 20260825220000) is the only place a real Parcial's exam_topics can be
 // resolved to a v2_sort_order today. Other subjects have no topic_id
-// populated, so `computable` comes back false and every caller falls
-// through to its existing behavior unchanged (see rule 4/6: no exam, or an
-// exam whose coverage can't be computed, must look exactly like today).
+// populated, so `computable` comes back false and every caller (see
+// injectPartialExamMissions.ts, ensureCaminoCalendar.ts) treats that exactly
+// like "no exam" — no coverage gating, no Simulacro-date restriction.
 const COVERAGE_SUBJECT = 'historia_espana'
 
 export type ExamCoverage = {

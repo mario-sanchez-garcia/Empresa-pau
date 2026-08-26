@@ -281,12 +281,12 @@ export async function ensureCaminoCalendar(
   const horizonEnd = addDays(today, CALENDAR_HORIZON)
   const examSubjectsByDate = new Map<string, string[]>()
   // Temas de examen que deben ganar prioridad absoluta sobre el orden lineal
-  // de su propia asignatura (regla de negocio nueva: un examen con Curso
-  // pendiente pausa temporalmente el tema que tocaría por defecto). Se
-  // aplica SIEMPRE que haya temas pendientes de un examen (reordena la cola,
-  // barato/inofensivo); solo cuando además la ventana es justa
-  // (needsCompression) se fuerza también el DÍA — quitándole turno a otras
-  // asignaturas — para maximizar cuántos temas se completan a tiempo.
+  // de su propia asignatura: un examen con Curso pendiente pausa
+  // temporalmente el tema que tocaría por defecto. Se aplica SIEMPRE que
+  // haya temas pendientes de un examen (reordena la cola, barato/inofensivo);
+  // solo cuando además la ventana es justa (needsCompression) se fuerza
+  // también el DÍA — quitándole turno a otras asignaturas — para maximizar
+  // cuántos temas se completan a tiempo.
   const examPrioritySortOrdersBySubject = new Map<string, Set<number>>()
   // Fechas que needsCompression (más abajo) marcó como imprescindibles para
   // que un examen llegue a tiempo, agrupadas por asignatura — a diferencia
@@ -367,12 +367,12 @@ export async function ensureCaminoCalendar(
       // injectPartialExamMissions (>10 días hábiles), resolveFinalMockSlot
       // devuelve null — no hay una fecha de Simulacro que reutilizar porque
       // ese módulo ni siquiera ha llegado a calcularla todavía. En ese caso
-      // se aplica el margen de seguridad conservador que pide la tarea: se
-      // excluyen ya de entrada los últimos FINAL_MOCK_WINDOW_DAYS días
-      // hábiles de la ventana, porque se sabe que el Simulacro acabará
-      // cayendo ahí en cuanto el examen entre en su ventana de ≤10 días —
-      // así ninguna lección de HOY (forzada o de turno normal) queda
-      // plantada justo donde el Simulacro aterrizará más adelante.
+      // se aplica un margen de seguridad conservador: se excluyen ya de
+      // entrada los últimos FINAL_MOCK_WINDOW_DAYS días hábiles de la
+      // ventana, porque se sabe que el Simulacro acabará cayendo ahí en
+      // cuanto el examen entre en su ventana de ≤10 días — así ninguna
+      // lección de HOY (forzada o de turno normal) queda plantada justo
+      // donde el Simulacro aterrizará más adelante.
       const mockSlot = await resolveFinalMockSlot(userId, supabase, { ...exam, customInstructions }, otherExamDates)
       const mockDateBoundary = mockSlot
         ?? coverage.weekdaysUntilExam[Math.max(0, coverage.weekdaysUntilExam.length - FINAL_MOCK_WINDOW_DAYS)]
@@ -433,21 +433,15 @@ export async function ensureCaminoCalendar(
     }
   } catch { /* parciales scheduling is best-effort; never blocks the base calendar fill */ }
 
-  // PASO 2.6 — Días forzados por examen, procesados aparte del bucle
-  // principal de 30 días (PASO 4+5): el bug que esto arregla es que
-  // examForcedDatesBySubject se calculaba (arriba) pero nunca se llegaba a
-  // usar en la práctica, porque el corte de PASO 3 (source='algorithm' >=
-  // CALENDAR_HORIZON) salía de toda la función antes de llegar a PASO 4+5 en
-  // cuanto el Curso normal llenaba sus 30 días — y para un alumno con algo de
-  // antigüedad eso pasa casi siempre. Además, aunque PASO 3 no cortara, esas
-  // fechas forzadas casi siempre YA tienen una misión de OTRA asignatura ese
-  // mismo día (el calendario de 30 días suele estar completo día a día), así
-  // que el bucle de PASO 4+5 — que solo rellena fechas totalmente vacías y
-  // reparte una única asignatura por fecha — tampoco serviría: hace falta
-  // añadir el Curso de la asignatura con examen como misión EXTRA ese mismo
-  // día, sin desplazar ni tocar la que ya hubiera. Por eso esto corre aquí,
-  // ANTES del corte de PASO 3, incondicionalmente (no consume ni cuenta
-  // contra el presupuesto de 30 días de las demás asignaturas — es aditivo).
+  // PASO 2.6 — Días forzados por examen: para cada asignatura con fechas en
+  // examForcedDatesBySubject, añade el Curso pendiente de ese examen como
+  // misión EXTRA en esas fechas — sin desplazar ni tocar la misión que ya
+  // hubiera ese día para otra asignatura (el calendario de 30 días suele
+  // estar completo día a día, así que casi nunca hay un hueco totalmente
+  // vacío que el bucle normal de PASO 4+5 pudiera aprovechar). Corre ANTES
+  // del corte de presupuesto de PASO 3, sin condición: estas fechas son
+  // aditivas y nunca cuentan contra el presupuesto de 30 días de las demás
+  // asignaturas.
   if (examForcedDatesBySubject.size > 0) {
     try {
       const now = new Date().toISOString()
@@ -573,17 +567,13 @@ export async function ensureCaminoCalendar(
 
   // PASO 3 — Contar días futuros pendientes (distintos) — SOLO source='algorithm'
   // (Curso normal). Las misiones de examen (source='partial') tienen su
-  // propia ventana natural y acotada (≤10 días hábiles antes de cada
-  // examen, ver injectPartialExamMissions.ts) — antes competían por el
-  // mismo presupuesto de CALENDAR_HORIZON=30 días que el Curso, así que con
-  // 1-2 exámenes activos podían llegar a ocupar casi la mitad de esos 30
-  // días sin dejar sitio a ninguna lección de Curso nueva. Al no contarlas
-  // aquí, el Curso vuelve a tener sus 30 días completos de presupuesto
-  // propio, y las misiones de examen (ya con su propio corte de ≤10 días)
-  // conviven en las mismas fechas sin competir por el mismo contador. Una
-  // misión de Curso degradada a is_bonus=true (cuando un examen le "roba" el
-  // hueco visual ese día) sigue siendo source='algorithm' — sigue contando
-  // aquí, correctamente, como parte del presupuesto de Curso.
+  // propia ventana natural y acotada (≤10 días hábiles antes de cada examen,
+  // ver injectPartialExamMissions.ts) y no cuentan aquí — así el Curso tiene
+  // siempre sus 30 días completos de presupuesto propio, y las misiones de
+  // examen conviven en las mismas fechas sin competir por el mismo contador.
+  // Una misión de Curso degradada a is_bonus=true (cuando un examen le "roba"
+  // el hueco visual ese día) sigue siendo source='algorithm' — sigue
+  // contando aquí, correctamente, como parte del presupuesto de Curso.
   const { data: futureDayRows } = await supabase
     .from('camino_calendar')
     .select('scheduled_date')
@@ -612,13 +602,13 @@ export async function ensureCaminoCalendar(
   const workingDaysUntilExam = countWorkingDays(today, EXAM_DATE)
   const ratio = workingDaysUntilExam > 0 ? (remainingQueue ?? 0) / workingDaysUntilExam : 0
   const rescueMode = ratio > 2
-  // itemsPerDay used to come ONLY from the backlog-vs-exam ratio, completely
-  // ignoring how much daily time the student actually declared — a student
-  // with a light backlog who said "2-3 horas/día" still only ever got 1
-  // item/day. Take the larger of the two signals: rescue mode (heavy
-  // backlog) can still push extra items even for a modest daily time, but a
-  // student's declared time is always at least respected. (declaredDailyMinutes
-  // ya se calculó arriba, antes de PASO 2.5, para reutilizarlo en PASO 2.6.)
+  // itemsPerDay toma el MAYOR de dos señales independientes: el ritmo que
+  // pide el backlog frente al examen (rescueMode/ratio) y el ritmo que el
+  // propio alumno declaró en onboarding (declaredDailyMinutes, ya calculado
+  // arriba, antes de PASO 2.5, para reutilizarlo también en PASO 2.6) — así
+  // un backlog pesado puede empujar más items incluso con poco tiempo
+  // diario declarado, pero el tiempo declarado por el alumno siempre se
+  // respeta como mínimo.
   const ratioItemsPerDay = rescueMode || ratio > 1.5 ? 2 : 1
   const itemsPerDay = Math.max(ratioItemsPerDay, missionsPerDayForMinutes(typeof declaredDailyMinutes === 'number' ? declaredDailyMinutes : null))
 
@@ -669,14 +659,13 @@ export async function ensureCaminoCalendar(
   }
 
   // Prioridad absoluta de los temas de examen sobre el orden lineal de su
-  // asignatura (regla de negocio nueva) — se aplica DESPUÉS de rescueMode a
-  // propósito: si rescueMode está activo, su propio re-sort/recorte ya
-  // corrió arriba, y esto debe ganar por encima, no al revés. Nota: si
-  // rescueMode cortó alguno de estos temas fuera de subjectQueues (los movió
-  // a 'inactive') en ESTE mismo run, ya no está en el array y este
-  // reordenamiento no puede resucitarlo desde aquí — solo queda reactivado
-  // en BD para el próximo run. Riesgo conocido, no se corrige aquí (ver
-  // comentario en la sección de arriba).
+  // asignatura — se aplica DESPUÉS de rescueMode a propósito: si rescueMode
+  // está activo, su propio re-sort/recorte ya corrió arriba, y esto debe
+  // ganar por encima, no al revés. Nota: si rescueMode cortó alguno de estos
+  // temas fuera de subjectQueues (los movió a 'inactive') en ESTE mismo run,
+  // ya no está en el array y este reordenamiento no puede resucitarlo desde
+  // aquí — solo queda reactivado en BD para el próximo run. Limitación
+  // conocida, no se corrige aquí.
   for (const [subj, prioritySet] of examPrioritySortOrdersBySubject) {
     const queue = subjectQueues[subj]
     if (!queue || prioritySet.size === 0) continue

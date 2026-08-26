@@ -300,11 +300,24 @@ export async function ensureCaminoCalendar(
     }
   } catch { /* parciales scheduling is best-effort; never blocks the base calendar fill */ }
 
-  // PASO 3 — Contar días futuros pendientes (distintos)
+  // PASO 3 — Contar días futuros pendientes (distintos) — SOLO source='algorithm'
+  // (Curso normal). Las misiones de examen (source='partial') tienen su
+  // propia ventana natural y acotada (≤10 días hábiles antes de cada
+  // examen, ver injectPartialExamMissions.ts) — antes competían por el
+  // mismo presupuesto de CALENDAR_HORIZON=30 días que el Curso, así que con
+  // 1-2 exámenes activos podían llegar a ocupar casi la mitad de esos 30
+  // días sin dejar sitio a ninguna lección de Curso nueva. Al no contarlas
+  // aquí, el Curso vuelve a tener sus 30 días completos de presupuesto
+  // propio, y las misiones de examen (ya con su propio corte de ≤10 días)
+  // conviven en las mismas fechas sin competir por el mismo contador. Una
+  // misión de Curso degradada a is_bonus=true (cuando un examen le "roba" el
+  // hueco visual ese día) sigue siendo source='algorithm' — sigue contando
+  // aquí, correctamente, como parte del presupuesto de Curso.
   const { data: futureDayRows } = await supabase
     .from('camino_calendar')
     .select('scheduled_date')
     .eq('user_id', userId)
+    .eq('source', 'algorithm')
     .gte('scheduled_date', today)
     .in('status', ['pending', 'postponed'])
 

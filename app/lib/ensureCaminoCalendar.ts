@@ -6,7 +6,7 @@ import { cleanStudentExams } from './camino/cleanStudentExams'
 import { estimatedMinutesForSlot, missionsPerDayForMinutes } from './camino/dailyTimeCapacity'
 import { EXAM_SUBJECT_SLUG } from './camino/partialExamSubjects'
 import { computeExamCoverage, reactivateQueueItems } from './camino/examCoverage'
-import { injectAllPartialExamMissions } from './camino/injectPartialExamMissions'
+import { FINAL_MOCK_WINDOW_DAYS, injectAllPartialExamMissions, resolveFinalMockSlot } from './camino/injectPartialExamMissions'
 import { resolveTopicIdentitiesBatch } from './camino/resolveTopicIdentity'
 import { createDayScheduler, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
 import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
@@ -297,13 +297,37 @@ export async function ensureCaminoCalendar(
   // del corte de PASO 3 justo por eso). Es un subconjunto, agrupado por
   // asignatura, de las claves de examSubjectsByDate.
   const examForcedDatesBySubject = new Map<string, Set<string>>()
+  // v2_sort_order -> fecha del Simulacro del examen al que pertenece ese
+  // tema, para CUALQUIER tema de examen pendiente (no solo los que
+  // needsCompression fuerza) — el reordenamiento de prioridad de más abajo
+  // ("Prioridad absoluta de los temas de examen...") se aplica SIEMPRE que
+  // haya algo pendiente, así que un tema puede acabar consumido por el
+  // turno NORMAL de rotación (PASO 4+5), no solo por PASO 2.6. Sin este
+  // mapa, ese turno normal podía aterrizar el mismo día o después del
+  // Simulacro de su propio examen — el mismo bug que PASO 2.6 arregla, pero
+  // por la otra vía. Se consulta en PASO 4+5 para saltar (no colocar todavía)
+  // un tema cuyo examen ya tiene su Simulacro en esa fecha o antes.
+  const historiaSortOrderMockDate = new Map<number, string>()
   try {
     const { data: profileForExams } = await supabase
       .from('perfiles')
-      .select('student_exams')
+      .select('student_exams, custom_instructions')
       .eq('id', userId)
       .maybeSingle()
     const activeExams = cleanStudentExams(profileForExams?.student_exams)
+    // customInstructions se lee aquí (una sola vez, junto a student_exams) en
+    // vez de que resolveFinalMockSlot invente su propio valor: tiene que ser
+    // EXACTAMENTE el mismo que injectAllPartialExamMissions usará más abajo
+    // (su propia lectura de perfiles.custom_instructions, sin escrituras de
+    // por medio en este mismo run) para que la fecha de Simulacro que aquí
+    // se calcula como límite de PASO 2.6 sea consistente con la que de
+    // verdad se inserte después — si no coincidieran, PASO 2.6 podría
+    // excluir la fecha equivocada.
+    const customInstructions = profileForExams?.custom_instructions ?? undefined
+    // Fechas reales de examen de TODOS los activos — mismo criterio que
+    // injectAllPartialExamMissions usa para resolveFinalMockSlot (solo
+    // evita que un Simulacro caiga en el día real de OTRO examen).
+    const otherExamDates = new Set(activeExams.map(e => e.date))
     for (const exam of activeExams) {
       if (exam.date < today || exam.date > horizonEnd) continue
       const slug = EXAM_SUBJECT_SLUG[exam.subject] ?? exam.subject
@@ -328,6 +352,51 @@ export async function ensureCaminoCalendar(
       for (const so of coverage.pendingSortOrders) prioritySet.add(so)
       examPrioritySortOrdersBySubject.set(slug, prioritySet)
 
+      // Fecha del Simulacro de ESTE examen — se resuelve aquí, para
+      // CUALQUIER examen con temas pendientes (no solo cuando needsCompression
+      // fuerza el día), porque el reordenamiento de prioridad de más abajo se
+      // aplica siempre que haya algo pendiente: un tema puede acabar
+      // colocado por el turno NORMAL de rotación (PASO 4+5), no solo por el
+      // forzado de PASO 2.6, y ambas vías deben respetar el mismo límite.
+      // Se usa resolveFinalMockSlot (de solo lectura, ya usado por
+      // injectAllPartialExamMissions para lo mismo) en vez de inventar un
+      // segundo criterio — si el examen ya tiene un Simulacro agendado, se
+      // reutiliza tal cual esa fecha.
+      //
+      // Si el examen todavía no entra en la ventana de inyección de
+      // injectPartialExamMissions (>10 días hábiles), resolveFinalMockSlot
+      // devuelve null — no hay una fecha de Simulacro que reutilizar porque
+      // ese módulo ni siquiera ha llegado a calcularla todavía. En ese caso
+      // se aplica el margen de seguridad conservador que pide la tarea: se
+      // excluyen ya de entrada los últimos FINAL_MOCK_WINDOW_DAYS días
+      // hábiles de la ventana, porque se sabe que el Simulacro acabará
+      // cayendo ahí en cuanto el examen entre en su ventana de ≤10 días —
+      // así ninguna lección de HOY (forzada o de turno normal) queda
+      // plantada justo donde el Simulacro aterrizará más adelante.
+      const mockSlot = await resolveFinalMockSlot(userId, supabase, { ...exam, customInstructions }, otherExamDates)
+      const mockDateBoundary = mockSlot
+        ?? coverage.weekdaysUntilExam[Math.max(0, coverage.weekdaysUntilExam.length - FINAL_MOCK_WINDOW_DAYS)]
+        ?? null
+      // Si el Simulacro de este examen YA pasó (pero el examen en sí
+      // todavía no — puede haber 1-3 días hábiles entre ambos), ya no tiene
+      // sentido seguir bloqueando estos temas: no hay nada que proteger, y
+      // dejarlos bloqueados los dejaría sin poder programarse hasta que el
+      // examen entero pasara. `dateStr` en los bucles de abajo nunca es
+      // anterior a `today`, así que un boundary ya pasado bloquearía para
+      // siempre sin este chequeo.
+      if (slug === 'historia_espana' && mockDateBoundary && mockDateBoundary >= today) {
+        for (const so of coverage.pendingSortOrders) {
+          // Si dos exámenes de Historia comparten un tema (mismo sort_order
+          // en ambos exam_topics), se queda con la fecha de Simulacro MÁS
+          // TEMPRANA de los dos — ese tema debe estar visto antes del
+          // primero de los dos exámenes que lo necesita.
+          const existingBoundary = historiaSortOrderMockDate.get(so)
+          if (!existingBoundary || mockDateBoundary < existingBoundary) {
+            historiaSortOrderMockDate.set(so, mockDateBoundary)
+          }
+        }
+      }
+
       // Solo forzar el día si el turno NORMAL (sin forzar nada) no llegaría
       // a cubrir los temas pendientes a tiempo — cuántos días de la ventana
       // le tocarían a esta asignatura por el reparto rotativo puro
@@ -342,8 +411,15 @@ export async function ensureCaminoCalendar(
       ).length
       const needsCompression = normalRotationDays < coverage.pendingSortOrders.length
       if (needsCompression) {
+        // Mismo límite que arriba (mockSlot, ya resuelto) — nunca se coloca
+        // una lección forzada el mismo día ni después del Simulacro de este
+        // examen.
+        const candidateForcedDates = mockSlot
+          ? coverage.weekdaysUntilExam.filter(dateStr => dateStr < mockSlot)
+          : coverage.weekdaysUntilExam.slice(0, Math.max(0, coverage.weekdaysUntilExam.length - FINAL_MOCK_WINDOW_DAYS))
+
         const forcedDatesForSubject = examForcedDatesBySubject.get(slug) ?? new Set<string>()
-        for (const dateStr of coverage.weekdaysUntilExam) {
+        for (const dateStr of candidateForcedDates) {
           const forced = examSubjectsByDate.get(dateStr) ?? []
           if (!forced.includes(slug)) forced.push(slug)
           examSubjectsByDate.set(dateStr, forced)
@@ -419,6 +495,21 @@ export async function ensureCaminoCalendar(
         const forcedScheduledQueueIds: string[] = []
         let cursor = 0
         for (const dateStr of stillNeeded) {
+          // Cuando una asignatura tiene más de un examen activo a la vez
+          // (p. ej. dos Parciales de Historia próximos entre sí), esta cola
+          // combinada puede traer temas de DISTINTOS exámenes mezclados —
+          // cada uno con su propio límite de Simulacro. Un tema cuyo límite
+          // ya está superado para esta fecha (a diferencia de
+          // retry_not_before, que solo pide esperar una fecha futura, este
+          // límite nunca se cumple más tarde dentro de esta misma lista
+          // ascendente de fechas) se salta de forma permanente — así el
+          // resto de fechas disponibles no se desperdician esperando a un
+          // tema que ya no puede colocarse antes de SU Simulacro.
+          while (cursor < orderedQueue.length) {
+            const candidateBoundary = historiaSortOrderMockDate.get(orderedQueue[cursor].v2_sort_order)
+            if (candidateBoundary && dateStr >= candidateBoundary) { cursor++; continue }
+            break
+          }
           if (cursor >= orderedQueue.length) break
           const item = orderedQueue[cursor]
           if (item.retry_not_before && item.retry_not_before > dateStr) continue
@@ -644,6 +735,17 @@ export async function ensureCaminoCalendar(
       // mientras dure la espera, esta asignatura no aporta nada ese día
       // (rota a las demás) en vez de forzar la misma tarjeta o saltarla.
       if (item.retry_not_before && item.retry_not_before > dateStr) break
+      // Mismo motivo, otro caso: este tema es de un examen cuyo Simulacro ya
+      // cae en esta fecha o antes — el turno normal de rotación no debe
+      // colocarlo aquí (rompería Curso→Simulacro), así que se deja pendiente
+      // igual que retry_not_before, para que un día POSTERIOR al Simulacro
+      // (donde el límite ya no aplica) lo recoja. PASO 2.6 ya respeta este
+      // mismo límite para sus propias fechas forzadas; esto cubre el resto
+      // de temas que ese forzado no alcanzó a colocar antes del Simulacro.
+      const examMockBoundary = item.subject === 'historia_espana'
+        ? historiaSortOrderMockDate.get(item.v2_sort_order)
+        : undefined
+      if (examMockBoundary && dateStr >= examMockBoundary) break
       const itemMeta = item.metadata ?? {}
       const topicMeta = queueTopicMeta(item)
       const missionType = (itemMeta.mission_type as string) ?? 'concept'

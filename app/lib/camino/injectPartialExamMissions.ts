@@ -30,7 +30,7 @@ const MIN_COVERAGE_PCT_FOR_SIMULACRO = 80
 // (nunca el día del examen en sí — weekdaysBefore ya lo excluye) —
 // exercise_practice no tiene esta restricción, puede usar cualquier día
 // libre del resto de la ventana de ≤10 días.
-const FINAL_MOCK_WINDOW_DAYS = 3
+export const FINAL_MOCK_WINDOW_DAYS = 3
 
 export type PartialExamInput = {
   id: string

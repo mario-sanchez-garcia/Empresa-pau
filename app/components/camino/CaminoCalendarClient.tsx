@@ -59,6 +59,8 @@ type Mission = {
   v2SortOrder?: number
   blockKey?: string
   missionType?: string
+  startTime?: string | null
+  endTime?: string | null
 }
 type DayPlan = { date: string; label: string; isToday: boolean; missions: Mission[] }
 type ExamPriority = 'baja' | 'normal' | 'alta' | 'muy_alta'
@@ -156,6 +158,13 @@ function missionKindLabel(kind: string, missionType?: string): string {
     }
   }
   return (missionType ? lookup(missionType) : null) ?? lookup(kind) ?? kind.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
+function dbMissionTypeFromKind(kind: MissionKind, missionType?: string): string {
+  if (missionType) return missionType
+  if (kind === 'evau_practice') return 'pau_practice'
+  if (kind === 'guided_example' || kind === 'guided_practice' || kind === 'exam_focus') return 'review'
+  if (kind === 'mock_exam') return 'pau_practice'
+  return 'concept'
 }
 const SUBJECT_ABBR: Record<string, string> = {
   'Matemáticas II': 'MAT II', 'Matemáticas CCSS': 'MAT CCSS',
@@ -2664,7 +2673,7 @@ export default function CaminoCalendarClient() {
         )}
       </AnimatePresence>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} saving={savingExam} />}</AnimatePresence>
-      <AnimatePresence>{showCalendarEditor && <CalendarEditorOverlay calendar={calendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems} planId={caminoPlanId} onNavigateWeek={w => calendar.filter(d => d.date >= w && d.date < addDays(new Date(w), 7).toISOString().slice(0, 10))} onClose={() => setShowCalendarEditor(false)} onAddExam={() => { setShowCalendarEditor(false); openNewExam() }} onSave={updated => { setCalendar(updated); setShowCalendarEditor(false) }} />}</AnimatePresence>
+      <AnimatePresence>{showCalendarEditor && <CalendarEditorOverlay calendar={calendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems} planId={caminoPlanId} onNavigateWeek={generateWeek} onClose={() => setShowCalendarEditor(false)} onAddExam={() => { setShowCalendarEditor(false); openNewExam() }} onSave={updated => { const weekStart = weekStartForDate(updated[0]?.date ?? selectedWeekStart); saveWeekCache(weekStart, updated); setCalendar(current => mergeWeekIntoCalendar(current, weekStart, updated)); setShowCalendarEditor(false) }} />}</AnimatePresence>
       <AnimatePresence>{showMonthCalendar && <MonthCalendarOverlay exams={exams} onClose={() => setShowMonthCalendar(false)} />}</AnimatePresence>
       <AnimatePresence>
         {leagueUpgrade && (() => {
@@ -2917,13 +2926,15 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
   // does filter) or a lucky reload where the parent happened to have just one
   // week loaded made it look "fixed".
   const initialWeek = fillWeekGaps(weekStartISO, onNavigateWeek(weekStartISO))
+  const initialSelectedDate = initialWeek.find(d => d.isToday)?.date ?? initialWeek[0]?.date ?? weekStartISO
   const [draft, setDraft] = useState<DayPlan[]>(() => initialWeek.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission })) })))
-  const [newMission, setNewMission] = useState({ day: initialWeek[0]?.date ?? weekStartISO, subject: safeSubjects[0] ?? 'Matemáticas II', kind: 'concept_explanation' as MissionKind, topic: '', minutes: 15, bonus: false })
+  const [newMission, setNewMission] = useState({ day: initialSelectedDate, subject: safeSubjects[0] ?? 'Matemáticas II', kind: 'concept_explanation' as MissionKind, topic: '', minutes: 15, startTime: '', endTime: '', bonus: false })
   const [draggedMissionId, setDraggedMissionId] = useState<string | null>(null)
   const [editorNotice, setEditorNotice] = useState('')
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [editorWeekStart, setEditorWeekStart] = useState(weekStartISO)
   const [missionPanelOpen, setMissionPanelOpen] = useState(false)
-  const [selectedDayDate, setSelectedDayDate] = useState<string>(() => initialWeek.find(d => d.isToday)?.date ?? initialWeek[0]?.date ?? weekStartISO)
+  const [selectedDayDate, setSelectedDayDate] = useState<string>(() => initialSelectedDate)
   const topics = curriculumForSubject(newMission.subject, curriculum)
   const orderedDraft = draft.slice().sort((a, b) => a.date.localeCompare(b.date))
   const selectedDay = orderedDraft.find(d => d.date === selectedDayDate) ?? orderedDraft[0]
@@ -2937,11 +2948,13 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
   function navigateEditorWeek(nextWeekStart: string) {
     const nextWeek = onNavigateWeek(nextWeekStart)
     const nextDraft = fillWeekGaps(nextWeekStart, cloneWeek(nextWeek))
+    const nextSelectedDate = nextDraft.find(d => d.isToday)?.date ?? nextDraft[0]?.date ?? nextWeekStart
     setEditorWeekStart(nextWeekStart)
     setDraft(nextDraft)
-    setNewMission(current => ({ ...current, day: nextDraft[0]?.date ?? nextWeekStart }))
+    setNewMission(current => ({ ...current, day: nextSelectedDate }))
     setDraggedMissionId(null)
-    setSelectedDayDate(nextDraft.find(d => d.isToday)?.date ?? nextDraft[0]?.date ?? nextWeekStart)
+    setSelectedDayDate(nextSelectedDate)
+    setSaveState('idle')
   }
 
   function moveMission(missionId: string, nextDate: string) {
@@ -2983,6 +2996,20 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
       ? 'evau_practice'
       : requestedKind
     if (requestedKind === 'mock_exam' && kind !== 'mock_exam') setEditorNotice('Has alcanzado el límite de simulacros de tu plan este mes. Te proponemos ejercicios PAU del mismo tema.')
+    const duplicate = draft
+      .find(day => day.date === effective.day)
+      ?.missions.some(mission =>
+        !mission.calendarRowId
+        && mission.subject === subject
+        && mission.kind === kind
+        && (mission.topic ?? '') === (topic ?? '')
+        && (mission.startTime ?? '') === (effective.startTime || '')
+        && (mission.endTime ?? '') === (effective.endTime || '')
+      )
+    if (duplicate) {
+      setEditorNotice('Esta misión ya está añadida en el borrador.')
+      return
+    }
     const mission: Mission = {
       id: `${effective.day}-${effective.bonus ? 'bonus' : 'main'}-manual-${draft.reduce((total, day) => total + day.missions.length, 0) + 1}`,
       role: effective.bonus ? 'bonus' : 'main',
@@ -2996,8 +3023,18 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
       estimatedMinutes: effective.minutes,
       baseXP: effective.bonus ? 12 : kind === 'mock_exam' ? 35 : kind === 'evau_practice' ? 25 : 15,
       status: 'pending',
+      missionType: dbMissionTypeFromKind(kind),
+      startTime: effective.startTime || null,
+      endTime: effective.endTime || null,
+      metadata: mergeMissionMetadata(undefined, {
+        estimated_minutes: effective.minutes,
+        start_time: effective.startTime || undefined,
+        end_time: effective.endTime || undefined,
+        manual_editor: true,
+      }),
     }
     setDraft(current => current.map(day => day.date === effective.day ? { ...day, missions: [...day.missions, mission] } : day))
+    setSaveState('idle')
   }
 
   const kindOptions: Array<{ value: MissionKind; label: string }> = [
@@ -3008,9 +3045,16 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
   ]
 
   async function handleSave() {
+    if (saveState === 'saving') return
+    setSaveState('saving')
+    setEditorNotice('')
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user?.id) { onSave(draft); return }
+      if (!session?.user?.id) {
+        setSaveState('error')
+        setEditorNotice('Inicia sesión para guardar cambios.')
+        return
+      }
       const userId = session.user.id
 
       // UPDATE missions that already exist in DB
@@ -3024,12 +3068,16 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             is_bonus: m.role !== 'main',
             title: m.title,
             source: 'manual',
-            is_locked: true,
+            locked: true,
+            start_time: m.startTime ?? (typeof m.metadata?.start_time === 'string' ? m.metadata.start_time : null),
+            end_time: m.endTime ?? (typeof m.metadata?.end_time === 'string' ? m.metadata.end_time : null),
           }))
       )
-      await Promise.all(toUpdate.map(({ id, ...fields }) =>
-        supabase.from('camino_calendar').update(fields).eq('id', id).then(() => undefined, () => undefined),
+      const updateResults = await Promise.all(toUpdate.map(({ id, ...fields }) =>
+        supabase.from('camino_calendar').update(fields).eq('id', id),
       ))
+      const updateError = updateResults.find(result => result.error)?.error
+      if (updateError) throw updateError
 
       // INSERT new missions (no calendarRowId yet)
       type InsertEntry = { missionId: string; row: Record<string, unknown> }
@@ -3040,6 +3088,8 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             const subjectRaw = m.subjectSlug ?? normalizeSubjectSlug(m.subject)
             const blockKey = m.blockKey ?? m.block ?? null
             const blockSlug = blockKey ? textSlug(blockKey) : null
+            const startTime = m.startTime ?? (typeof m.metadata?.start_time === 'string' ? m.metadata.start_time : null)
+            const endTime = m.endTime ?? (typeof m.metadata?.end_time === 'string' ? m.metadata.end_time : null)
             return {
               missionId: m.id,
               row: {
@@ -3052,29 +3102,40 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                 is_main: m.role === 'main',
                 is_bonus: m.role !== 'main',
                 status: 'pending',
-                mission_type: m.missionType ?? (m.kind as string) ?? 'concept_explanation',
+                mission_type: dbMissionTypeFromKind(m.kind, m.missionType),
                 source: 'manual',
-                is_locked: true,
+                locked: true,
                 generated_by: 'calendar_editor',
                 v2_sort_order: m.v2SortOrder ?? null,
+                start_time: startTime || null,
+                end_time: endTime || null,
+                metadata: mergeMissionMetadata(m.metadata, {
+                  manual_editor: true,
+                  estimated_minutes: m.estimatedMinutes,
+                  calendar_sync_status: startTime && endTime ? 'pending' : 'pending_no_time',
+                }),
               },
             }
           })
       )
 
       if (insertEntries.length === 0) {
+        setSaveState('saved')
+        await new Promise(resolve => setTimeout(resolve, 250))
         onSave(draft)
-        fetch('/api/calendar/google/sync', {
+        const hasTimedMission = toUpdate.some(({ start_time, end_time }) => start_time && end_time)
+        if (hasTimedMission) fetch('/api/calendar/google/sync', {
           method: 'POST',
           headers: { Authorization: `Bearer ${session.access_token}` },
         }).catch(() => undefined)
         return
       }
 
-      const { data: inserted } = await supabase
+      const { data: inserted, error: insertError } = await supabase
         .from('camino_calendar')
         .insert(insertEntries.map(e => e.row))
-        .select('id')
+        .select('id, start_time, end_time')
+      if (insertError) throw insertError
 
       // Map returned IDs back to draft missions by insertion order
       const idMap = new Map<string, string>()
@@ -3092,13 +3153,18 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
           return newId ? { ...m, calendarRowId: newId } : m
         }),
       }))
+      setSaveState('saved')
+      await new Promise(resolve => setTimeout(resolve, 250))
       onSave(updatedDraft)
-      fetch('/api/calendar/google/sync', {
+      const hasTimedMission = insertEntries.some(({ row }) => row.start_time && row.end_time)
+        || toUpdate.some(({ start_time, end_time }) => start_time && end_time)
+      if (hasTimedMission) fetch('/api/calendar/google/sync', {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },
       }).catch(() => undefined)
     } catch {
-      onSave(draft)
+      setSaveState('error')
+      setEditorNotice('No se ha podido guardar. Reintentar.')
     }
   }
 
@@ -3144,9 +3210,9 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                 <button
                   key={day.date}
                   type="button"
-                  onClick={() => setSelectedDayDate(day.date)}
+                  onClick={() => { setSelectedDayDate(day.date); setNewMission(current => ({ ...current, day: day.date })) }}
                   onDragOver={e => e.preventDefault()}
-                  onDrop={e => { e.preventDefault(); if (draggedMissionId) { moveMission(draggedMissionId, day.date); setSelectedDayDate(day.date) }; setDraggedMissionId(null) }}
+                  onDrop={e => { e.preventDefault(); if (draggedMissionId) { moveMission(draggedMissionId, day.date); setSelectedDayDate(day.date); setNewMission(current => ({ ...current, day: day.date })) }; setDraggedMissionId(null) }}
                   className="w-14 shrink-0 rounded-lg py-2.5 text-center transition-all sm:w-auto"
                   style={{
                     background: isSelected ? '#2563eb' : 'rgba(255,255,255,0.04)',
@@ -3262,6 +3328,12 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                 <Field label="Duración (min)">
                   <input type="number" min={5} max={90} value={newMission.minutes} onChange={e => setNewMission({ ...newMission, minutes: Number(e.target.value) })} className="inputish" />
                 </Field>
+                <Field label="Empieza">
+                  <input type="time" value={newMission.startTime} onChange={e => setNewMission({ ...newMission, startTime: e.target.value })} className="inputish" />
+                </Field>
+                <Field label="Termina">
+                  <input type="time" value={newMission.endTime} onChange={e => setNewMission({ ...newMission, endTime: e.target.value })} className="inputish" />
+                </Field>
                 <div className="flex flex-col justify-end gap-2">
                   <label className="inline-flex cursor-pointer items-center gap-2 text-[11px] font-black text-slate-600">
                     <input type="checkbox" checked={newMission.bonus} onChange={e => setNewMission({ ...newMission, bonus: e.target.checked })} />
@@ -3330,7 +3402,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
               })}
 
               {(selectedDay?.missions.filter(m => m.role === 'main').length ?? 0) === 0 && (
-                <button type="button" onClick={() => setMissionPanelOpen(true)} className="flex w-full items-center gap-3 rounded-xl border-2 border-dashed border-[#e2e8f0] bg-[#fafbfc] px-5 py-4 text-left transition hover:border-slate-300">
+                <button type="button" onClick={() => { setNewMission(c => ({ ...c, day: selectedDay?.date ?? c.day })); setMissionPanelOpen(true) }} className="flex w-full items-center gap-3 rounded-xl border-2 border-dashed border-[#e2e8f0] bg-[#fafbfc] px-5 py-4 text-left transition hover:border-slate-300">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#e2e8f0] bg-white text-[15px] font-black text-slate-400">+</span>
                   <span className="text-[12px] font-bold text-slate-400">Sin misiones · Añadir una</span>
                 </button>
@@ -3377,7 +3449,9 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
           <p className="text-[11px] font-bold text-slate-400">{mainMissionCount} misiones principales · {bonusMissions.length} bonus opcionales</p>
           <div className="flex gap-2">
             <button onClick={onClose} className="rounded-lg border border-[#e2e8f0] bg-white px-5 py-2.5 text-[12px] font-black text-slate-500 transition hover:bg-slate-50">Cancelar</button>
-            <button onClick={handleSave} className="rounded-lg bg-[#0f172a] px-5 py-2.5 text-[12px] font-black text-white transition hover:bg-slate-800">Guardar cambios</button>
+            <button onClick={handleSave} disabled={saveState === 'saving'} className="rounded-lg bg-[#0f172a] px-5 py-2.5 text-[12px] font-black text-white transition hover:bg-slate-800 disabled:opacity-50">
+              {saveState === 'saving' ? 'Guardando...' : saveState === 'saved' ? '✓ Guardada' : saveState === 'error' ? 'Reintentar' : 'Guardar cambios'}
+            </button>
           </div>
         </footer>
 

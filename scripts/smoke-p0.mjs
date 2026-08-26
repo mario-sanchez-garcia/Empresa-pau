@@ -546,19 +546,20 @@ assert(
     caminoCalendar.includes('navigateEditorWeek(weekOffset(editorWeekStart, -1))') &&
     caminoCalendar.includes('navigateEditorWeek(currentWeekStartISO())') &&
     caminoCalendar.includes('navigateEditorWeek(weekOffset(editorWeekStart, 1))') &&
-    caminoCalendar.includes('Semana anterior') &&
+    caminoCalendar.includes('Ant') &&
     caminoCalendar.includes('Hoy') &&
-    caminoCalendar.includes('Semana siguiente') &&
-    caminoCalendar.includes('grid min-w-[980px] grid-cols-7') &&
+    caminoCalendar.includes('Sig') &&
+    caminoCalendar.includes('overflow-x-auto') &&
+    caminoCalendar.includes('sm:grid-cols-7') &&
     caminoCalendar.includes("mission.role === 'main'") &&
-    caminoCalendar.includes('Misiones extra / bonus') &&
+    caminoCalendar.includes('Misiones extra · Bonus') &&
     caminoCalendar.includes('bonusMissions') &&
     caminoCalendar.includes('const [missionPanelOpen, setMissionPanelOpen]') &&
-    caminoCalendar.includes('setMissionPanelOpen(current => !current)') &&
-    caminoCalendar.includes('onDrop={event => { event.preventDefault(); if (draggedMissionId) moveMission(draggedMissionId, day.date); setDraggedMissionId(null) }}') &&
+    caminoCalendar.includes('setMissionPanelOpen(c => !c)') &&
+    caminoCalendar.includes('moveMission(draggedMissionId, day.date); setSelectedDayDate(day.date); setNewMission(current => ({ ...current, day: day.date }))') &&
     caminoCalendar.includes('draggable') &&
     caminoCalendar.includes('onDragStart={() => setDraggedMissionId(mission.id)}') &&
-    caminoCalendar.includes('onChange={event => moveMission(mission.id, event.target.value)}') &&
+    caminoCalendar.includes('onChange={e => { if (e.target.value) moveMission(mission.id, e.target.value) }}') &&
     caminoCalendar.includes('updateMission(mission.id') &&
     caminoCalendar.includes('deleteMission(mission.id') &&
     caminoCalendar.includes('draggable') &&
@@ -566,6 +567,13 @@ assert(
     caminoCalendar.includes('onDrop') &&
     caminoCalendar.includes('moveMission(draggedMissionId, day.date)') &&
     caminoCalendar.includes('missions: [...day.missions, mission]') &&
+    caminoCalendar.includes("setSaveState('saving')") &&
+    caminoCalendar.includes('locked: true') &&
+    caminoCalendar.includes('start_time: startTime || null') &&
+    caminoCalendar.includes('end_time: endTime || null') &&
+    caminoCalendar.includes(".select('id, start_time, end_time')") &&
+    caminoCalendar.includes("calendar_sync_status: startTime && endTime ? 'pending' : 'pending_no_time'") &&
+    caminoCalendar.includes('hasTimedMission') &&
     !caminoCalendar.includes('moved-${day.missions.length + 1}')
 )
 

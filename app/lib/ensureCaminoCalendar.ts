@@ -255,6 +255,21 @@ export async function ensureCaminoCalendar(
   )
   const subjects = [...subjectSet]
 
+  // Minutos diarios declarados en onboarding — se calcula aquí (antes de
+  // PASO 2.5) porque PASO 2.6, más abajo, ya necesita estimar duración de
+  // misión al colocar días forzados por examen; PASO 5 reutiliza el mismo
+  // valor más tarde en vez de repetir la consulta.
+  const { data: prefsRow } = await supabase
+    .from('billing_events')
+    .select('payload')
+    .eq('user_id', userId)
+    .eq('event_type', 'onboarding_completed')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const declaredDailyMinutes = (prefsRow?.payload as Record<string, unknown> | null | undefined)?.daily_minutes
+  const dailyMinutesForSlots = typeof declaredDailyMinutes === 'number' ? declaredDailyMinutes : null
+
   // PASO 2.5 — Parciales: procesar TODOS los exámenes activos juntos (fechas +
   // asignaturas), no uno a uno, para que dos exámenes próximos no se pisen
   // los huecos de repaso y para que un examen que acaba de entrar en su
@@ -273,6 +288,15 @@ export async function ensureCaminoCalendar(
   // (needsCompression) se fuerza también el DÍA — quitándole turno a otras
   // asignaturas — para maximizar cuántos temas se completan a tiempo.
   const examPrioritySortOrdersBySubject = new Map<string, Set<number>>()
+  // Fechas que needsCompression (más abajo) marcó como imprescindibles para
+  // que un examen llegue a tiempo, agrupadas por asignatura — a diferencia
+  // de examSubjectsByDate (que también incluye el día del examen en sí,
+  // usado solo como desempate de subjectForDay), estas SÍ deben poder
+  // generar una misión de Curso de esa asignatura aunque el presupuesto
+  // general de CALENDAR_HORIZON esté lleno (PASO 2.6, más abajo, corre ANTES
+  // del corte de PASO 3 justo por eso). Es un subconjunto, agrupado por
+  // asignatura, de las claves de examSubjectsByDate.
+  const examForcedDatesBySubject = new Map<string, Set<string>>()
   try {
     const { data: profileForExams } = await supabase
       .from('perfiles')
@@ -318,17 +342,143 @@ export async function ensureCaminoCalendar(
       ).length
       const needsCompression = normalRotationDays < coverage.pendingSortOrders.length
       if (needsCompression) {
+        const forcedDatesForSubject = examForcedDatesBySubject.get(slug) ?? new Set<string>()
         for (const dateStr of coverage.weekdaysUntilExam) {
           const forced = examSubjectsByDate.get(dateStr) ?? []
           if (!forced.includes(slug)) forced.push(slug)
           examSubjectsByDate.set(dateStr, forced)
+          forcedDatesForSubject.add(dateStr)
         }
+        examForcedDatesBySubject.set(slug, forcedDatesForSubject)
       }
     }
     if (activeExams.length > 0) {
       await injectAllPartialExamMissions(userId, supabase, activeExams)
     }
   } catch { /* parciales scheduling is best-effort; never blocks the base calendar fill */ }
+
+  // PASO 2.6 — Días forzados por examen, procesados aparte del bucle
+  // principal de 30 días (PASO 4+5): el bug que esto arregla es que
+  // examForcedDatesBySubject se calculaba (arriba) pero nunca se llegaba a
+  // usar en la práctica, porque el corte de PASO 3 (source='algorithm' >=
+  // CALENDAR_HORIZON) salía de toda la función antes de llegar a PASO 4+5 en
+  // cuanto el Curso normal llenaba sus 30 días — y para un alumno con algo de
+  // antigüedad eso pasa casi siempre. Además, aunque PASO 3 no cortara, esas
+  // fechas forzadas casi siempre YA tienen una misión de OTRA asignatura ese
+  // mismo día (el calendario de 30 días suele estar completo día a día), así
+  // que el bucle de PASO 4+5 — que solo rellena fechas totalmente vacías y
+  // reparte una única asignatura por fecha — tampoco serviría: hace falta
+  // añadir el Curso de la asignatura con examen como misión EXTRA ese mismo
+  // día, sin desplazar ni tocar la que ya hubiera. Por eso esto corre aquí,
+  // ANTES del corte de PASO 3, incondicionalmente (no consume ni cuenta
+  // contra el presupuesto de 30 días de las demás asignaturas — es aditivo).
+  if (examForcedDatesBySubject.size > 0) {
+    try {
+      const now = new Date().toISOString()
+      for (const [subj, forcedDatesSet] of examForcedDatesBySubject) {
+        const sortedDates = [...forcedDatesSet].sort()
+        if (sortedDates.length === 0) continue
+
+        // Fechas de esta lista que YA tienen una misión de Curso de ESTA
+        // asignatura (de un run anterior, o porque el bucle normal ya la
+        // hubiera colocado ahí) — no se duplican.
+        const { data: existingForSubject } = await supabase
+          .from('camino_calendar')
+          .select('scheduled_date')
+          .eq('user_id', userId)
+          .eq('subject', subj)
+          .eq('source', 'algorithm')
+          .in('scheduled_date', sortedDates)
+          .in('status', ['pending', 'postponed'])
+        const coveredDates = new Set((existingForSubject ?? []).map(r => r.scheduled_date as string))
+        const stillNeeded = sortedDates.filter(d => !coveredDates.has(d))
+        if (stillNeeded.length === 0) continue
+
+        const prioritySet = examPrioritySortOrdersBySubject.get(subj) ?? new Set<number>()
+        const { data: subjQueueRows } = await supabase
+          .from('user_learning_queue')
+          .select('id, subject, v2_sort_order, title, block_key, block_slug, metadata, retry_not_before')
+          .eq('user_id', userId)
+          .eq('subject', subj)
+          .eq('queue_status', 'pending')
+          .order('subject_position', { ascending: true })
+        const subjQueue = (subjQueueRows ?? []) as QueueItem[]
+        // Mismo criterio de prioridad que PASO 4+5 aplica más abajo para el
+        // resto del calendario: los temas del examen primero.
+        const orderedQueue = [
+          ...subjQueue.filter(item => prioritySet.has(item.v2_sort_order)),
+          ...subjQueue.filter(item => !prioritySet.has(item.v2_sort_order)),
+        ]
+        if (orderedQueue.length === 0) continue
+
+        const topicIdBySortOrder = subj === 'historia_espana'
+          ? await resolveTopicIdentitiesBatch(supabase, 'historia_espana', orderedQueue.map(item => item.v2_sort_order))
+          : new Map<number, string>()
+
+        const forcedRows: object[] = []
+        const forcedScheduledQueueIds: string[] = []
+        let cursor = 0
+        for (const dateStr of stillNeeded) {
+          if (cursor >= orderedQueue.length) break
+          const item = orderedQueue[cursor]
+          if (item.retry_not_before && item.retry_not_before > dateStr) continue
+          // Scheduler del día: ya cuenta como "ocupado" cualquier misión de
+          // camino_calendar que ese día tenga hora asignada (incluida la de
+          // otra asignatura) — ver getBusyIntervalsForDate en
+          // scheduleTimeSlot.ts — así que esto añade la misión forzada en el
+          // primer hueco libre que quede, sin pisar la que ya hubiera. Un
+          // día genuinamente sin hueco (agenda propia + otra misión ya lo
+          // llenan) se salta sin avanzar el cursor, igual que el bucle
+          // principal.
+          const scheduler = await createDayScheduler(userId, supabase, dateStr)
+          const timeSlot = scheduler.place(estimatedMinutesForSlot(dailyMinutesForSlots, 0))
+          if (!timeSlot) continue
+          const itemMeta = item.metadata ?? {}
+          const topicMeta = queueTopicMeta(item)
+          const missionType = (itemMeta.mission_type as string) ?? 'concept'
+          const calMetadata: Record<string, unknown> = { topic_slug: topicMeta.topicSlug, exam_forced: true }
+          const topicId = topicIdBySortOrder.get(item.v2_sort_order)
+          if (topicId) calMetadata.topic_id = topicId
+          if (itemMeta.express) calMetadata.express = true
+          forcedRows.push({
+            user_id: userId,
+            scheduled_date: dateStr,
+            subject: item.subject,
+            v2_sort_order: item.v2_sort_order,
+            title: sanitizeLessonTitle(item.title),
+            block_key: item.block_key,
+            block_slug: topicMeta.blockSlug,
+            mission_type: missionType,
+            is_main: true,
+            is_bonus: false,
+            status: 'pending',
+            source: 'algorithm',
+            generated_by: 'algorithm_v1',
+            queue_id: item.id,
+            start_time: timeSlot.start,
+            end_time: timeSlot.end,
+            metadata: calMetadata,
+          })
+          forcedScheduledQueueIds.push(item.id)
+          cursor++
+        }
+
+        if (forcedRows.length > 0) {
+          await supabase.from('camino_calendar').upsert(forcedRows, {
+            onConflict: 'user_id,scheduled_date,subject,v2_sort_order',
+            ignoreDuplicates: true,
+          })
+        }
+        if (forcedScheduledQueueIds.length > 0) {
+          await supabase
+            .from('user_learning_queue')
+            .update({ queue_status: 'scheduled', scheduled_at: now })
+            .in('id', forcedScheduledQueueIds)
+            .eq('user_id', userId)
+        }
+      }
+    } catch { /* best-effort, igual que PASO 2.5 — nunca debe bloquear el resto del calendario */ }
+  }
 
   // PASO 3 — Contar días futuros pendientes (distintos) — SOLO source='algorithm'
   // (Curso normal). Las misiones de examen (source='partial') tienen su
@@ -376,16 +526,8 @@ export async function ensureCaminoCalendar(
   // with a light backlog who said "2-3 horas/día" still only ever got 1
   // item/day. Take the larger of the two signals: rescue mode (heavy
   // backlog) can still push extra items even for a modest daily time, but a
-  // student's declared time is always at least respected.
-  const { data: prefsRow } = await supabase
-    .from('billing_events')
-    .select('payload')
-    .eq('user_id', userId)
-    .eq('event_type', 'onboarding_completed')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  const declaredDailyMinutes = (prefsRow?.payload as Record<string, unknown> | null | undefined)?.daily_minutes
+  // student's declared time is always at least respected. (declaredDailyMinutes
+  // ya se calculó arriba, antes de PASO 2.5, para reutilizarlo en PASO 2.6.)
   const ratioItemsPerDay = rescueMode || ratio > 1.5 ? 2 : 1
   const itemsPerDay = Math.max(ratioItemsPerDay, missionsPerDayForMinutes(typeof declaredDailyMinutes === 'number' ? declaredDailyMinutes : null))
 
@@ -469,8 +611,6 @@ export async function ensureCaminoCalendar(
   const calendarRows: object[] = []
   const scheduledQueueIds: string[] = []
   const now = new Date().toISOString()
-
-  const dailyMinutesForSlots = typeof declaredDailyMinutes === 'number' ? declaredDailyMinutes : null
 
   // Historia only (curriculum_content_v2.topic_id, migration 20260825220000) —
   // batched once up front instead of per-row so a normal ensure-calendar run

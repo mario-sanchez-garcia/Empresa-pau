@@ -55,6 +55,14 @@ const qaCorrectionsChecklist = read('docs/qa/p0-corrections-checklist.md')
 const stripeQaChecklist = read('docs/qa/stripe-test-mode-checklist.md')
 const stripeSmoke = read('scripts/smoke-stripe-p0.mjs')
 const practicaParcialRoute = read('app/api/practica-parcial/route.ts')
+const generateWeekSource = caminoCalendar.slice(
+  caminoCalendar.indexOf('function generateWeek'),
+  caminoCalendar.indexOf('function applyWeekNavigation'),
+)
+const applyWeekNavigationSource = caminoCalendar.slice(
+  caminoCalendar.indexOf('function applyWeekNavigation'),
+  caminoCalendar.indexOf('function goToWeek'),
+)
 
 assert(
   'streaming correction uses safe progressive stream before final renderer',
@@ -567,6 +575,15 @@ assert(
     caminoCalendar.includes('onDrop') &&
     caminoCalendar.includes('moveMission(draggedMissionId, day.date)') &&
     caminoCalendar.includes('missions: [...day.missions, mission]') &&
+    caminoCalendar.includes('function resolveWeek') &&
+    caminoCalendar.includes('function applyWeekNavigation') &&
+    !generateWeekSource.includes('setSelectedWeekStart(') &&
+    !generateWeekSource.includes('setCalendar(') &&
+    !generateWeekSource.includes('saveWeekCache(') &&
+    !generateWeekSource.includes('recordCalendarSource(') &&
+    applyWeekNavigationSource.includes('setSelectedWeekStart(weekStartISO)') &&
+    applyWeekNavigationSource.includes('saveWeekCache(weekStartISO, nextCalendar)') &&
+    applyWeekNavigationSource.includes('setCalendar(current => mergeWeekIntoCalendar(current, weekStartISO, nextCalendar))') &&
     caminoCalendar.includes("setSaveState('saving')") &&
     caminoCalendar.includes('locked: true') &&
     caminoCalendar.includes('start_time: startTime || null') &&

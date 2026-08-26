@@ -1712,35 +1712,37 @@ export default function CaminoCalendarClient() {
       }).catch(() => undefined)
     }, () => undefined)
   }
-  function generateWeek(weekStartISO: string, nextExams = exams, planId = caminoPlanId) {
-    if (!onboarding) return []
+  function resolveWeek(weekStartISO: string, nextExams = exams, planId = caminoPlanId): { days: DayPlan[]; source: CalendarSource; reason: string; shouldCache: boolean; shouldMerge: boolean } {
+    if (!onboarding) return { days: [], source: 'client', reason: 'missing_onboarding', shouldCache: false, shouldMerge: false }
     const weekEndISO = toISO(addDays(dateFromISO(weekStartISO), 6))
     const existingWeek = buildWeekDays(weekStartISO, calendar.filter(day => day.date >= weekStartISO && day.date <= weekEndISO))
     if (existingWeek.some(day => day.missions.length > 0)) {
-      setSelectedWeekStart(weekStartISO)
-      saveWeekCache(weekStartISO, existingWeek)
-      recordCalendarSource(supabaseCalLoaded ? 'server' : 'cache', 'week_navigation', { weekStart: weekStartISO, missionCount: missionCount(existingWeek), reason: 'existing_visible_week' })
-      return existingWeek
+      return { days: existingWeek, source: supabaseCalLoaded ? 'server' : 'cache', reason: 'existing_visible_week', shouldCache: true, shouldMerge: false }
     }
     const cachedWeek = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})[weekStartISO]
     if (cachedWeek) {
       const stableWeek = buildWeekDays(weekStartISO, cachedWeek)
-      setSelectedWeekStart(weekStartISO)
-      setCalendar(current => mergeWeekIntoCalendar(current, weekStartISO, stableWeek))
-      recordCalendarSource('cache', 'week_navigation', { weekStart: weekStartISO, missionCount: missionCount(stableWeek) })
-      return stableWeek
+      return { days: stableWeek, source: 'cache', reason: 'cached_week', shouldCache: false, shouldMerge: true }
     }
     const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
     const weekCache = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})
     const nextCalendar = generateCalendar(onboarding, nextExams, source, planId, weekStartISO, weekCache)
+    return { days: nextCalendar, source: 'client', reason: 'no_server_or_cache_week', shouldCache: true, shouldMerge: true }
+  }
+  function generateWeek(weekStartISO: string, nextExams = exams, planId = caminoPlanId) {
+    return resolveWeek(weekStartISO, nextExams, planId).days
+  }
+  function applyWeekNavigation(weekStartISO: string, nextExams = exams, planId = caminoPlanId) {
+    const result = resolveWeek(weekStartISO, nextExams, planId)
+    const nextCalendar = result.days
     setSelectedWeekStart(weekStartISO)
-    saveWeekCache(weekStartISO, nextCalendar)
-    setCalendar(current => mergeWeekIntoCalendar(current, weekStartISO, nextCalendar))
-    recordCalendarSource('client', 'week_navigation', { weekStart: weekStartISO, missionCount: missionCount(nextCalendar), reason: 'no_server_or_cache_week' })
+    if (result.shouldCache) saveWeekCache(weekStartISO, nextCalendar)
+    if (result.shouldMerge) setCalendar(current => mergeWeekIntoCalendar(current, weekStartISO, nextCalendar))
+    recordCalendarSource(result.source, 'week_navigation', { weekStart: weekStartISO, missionCount: missionCount(nextCalendar), reason: result.reason })
     return nextCalendar
   }
   function goToWeek(weekStartISO: string) {
-    generateWeek(weekStartISO)
+    applyWeekNavigation(weekStartISO)
   }
   function goToCurrentWeek() {
     goToWeek(currentWeekStartISO())

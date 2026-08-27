@@ -15,6 +15,7 @@ function assert(name, condition) {
 
 const client = read('app/components/camino/CaminoCalendarClient.tsx')
 const route = read('app/api/camino/calendar-editor/mission/route.ts')
+const config = read('app/lib/camino/calendarEditorConfig.ts')
 const existingMissionUpdatePayload = client.slice(
   client.indexOf('const toUpdate = draft.flatMap'),
   client.indexOf('// INSERT new missions'),
@@ -48,32 +49,50 @@ assert(
     client.includes('function handleTopAddClick()') &&
     client.includes('data-calendar-editor-action="top-add" onClick={handleTopAddClick}') &&
     client.includes("{missionPanelOpen ? 'Cerrar formulario' : 'Añadir misión'}") &&
-    client.includes('function handleAddHereClick()') &&
-    client.includes('data-calendar-editor-action="add-here"') &&
-    client.includes('onClick={handleAddHereClick}') &&
-    client.includes('function handleSuggestedClick()') &&
+    client.includes('function suggestTopicInForm()') &&
     client.includes('data-calendar-editor-action="suggested"') &&
-    client.includes('onClick={handleSuggestedClick}') &&
-    !client.includes('onClick={() => selectedDay && addMission(')
+    client.includes('onClick={suggestTopicInForm}') &&
+    !client.includes('onClick={() => selectedDay && addMission(') &&
+    !client.includes('Añadir aquí')
 )
 
 assert(
   'calendar editor exposes one traceable persistent submit control',
   (client.match(/data-calendar-editor-action="form-submit"/g) ?? []).length === 1 &&
     (client.match(/data-calendar-editor-action="top-add"/g) ?? []).length === 1 &&
-    (client.match(/data-calendar-editor-action="add-here"/g) ?? []).length === 1 &&
     (client.match(/data-calendar-editor-action="suggested"/g) ?? []).length === 1
 )
 
 assert(
   'calendar editor dev trace covers real button path to fetch',
   client.includes("[calendar-editor] TOP_ADD_CLICK") &&
-    client.includes("[calendar-editor] ADD_HERE_CLICK") &&
     client.includes("[calendar-editor] SUGGESTED_CLICK") &&
     client.includes("[calendar-editor] FORM_SUBMIT_CLICK") &&
     client.includes("[calendar-editor] ADD_MISSION_HANDLER_ENTER") &&
     client.includes("[calendar-editor] FETCH_START") &&
     client.includes("process.env.NODE_ENV !== 'production'")
+)
+
+assert(
+  'calendar editor has unified Semana Mes calendar surface',
+  client.includes('<CalendarDays size={13} /> Calendario') &&
+    client.includes("const [calendarView, setCalendarView] = useState<'week' | 'month'>('week')") &&
+    client.includes("setCalendarView('week')") &&
+    client.includes("setCalendarView('month')") &&
+    client.includes('monthGrid.map(dateISO =>') &&
+    client.includes('onClick={() => selectEditorDay(dateISO)}') &&
+    !client.includes('<MonthCalendarButton') &&
+    !client.includes('showMonthCalendar') &&
+    !client.includes("import MonthCalendarOverlay")
+)
+
+assert(
+  'calendar editor hides duration and keeps end time automatic',
+  config.includes('DEFAULT_MISSION_DURATION_MINUTES = 30') &&
+    client.includes('minutes: DEFAULT_MISSION_DURATION_MINUTES') &&
+    route.includes('DEFAULT_MISSION_DURATION_MINUTES') &&
+    !calendarEditorOverlay.includes('<Field label="Duración') &&
+    !calendarEditorOverlay.includes('<Field label="Termina">')
 )
 
 assert(

@@ -6,7 +6,6 @@ import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
-import MonthCalendarOverlay, { MonthCalendarButton } from '@/app/components/camino/MonthCalendarOverlay'
 import WeeklyCheckinBanner from '@/app/components/camino/WeeklyCheckinBanner'
 import ExamCoverageBanner from '@/app/components/camino/ExamCoverageBanner'
 import HistoriaTopicChips from '@/app/components/camino/HistoriaTopicChips'
@@ -27,6 +26,7 @@ import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
 import { monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
+import { DEFAULT_MISSION_DURATION_MINUTES } from '@/app/lib/camino/calendarEditorConfig'
 import { CONTENT_TYPE_COLORS } from '@/app/lib/camino/contentTypeColors'
 import DivisionIcon from '@/components/shared/DivisionIcon'
 import FullRankingModal from '@/components/shared/FullRankingModal'
@@ -203,6 +203,25 @@ function weekRangeLabel(weekStartISO: string) {
   const startText = start.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
   const endText = end.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
   return `Semana del ${startText} al ${endText}`
+}
+function monthStartISO(dateISO: string) { return `${dateISO.slice(0, 7)}-01` }
+function addMonths(monthStartISOStr: string, n: number): string {
+  const [year, month] = monthStartISOStr.split('-').map(Number)
+  const total = year * 12 + month - 1 + n
+  const nextYear = Math.floor(total / 12)
+  const nextMonth = total % 12 + 1
+  return `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`
+}
+function monthLabel(monthStartISOStr: string) {
+  const [year, month] = monthStartISOStr.split('-').map(Number)
+  const label = new Date(Date.UTC(year, month - 1, 1, 12)).toLocaleDateString('es-ES', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+  return label.replace(/^\w/, c => c.toUpperCase())
+}
+function buildMonthGrid(monthStartISOStr: string): string[] {
+  const first = dateFromISO(monthStartISOStr)
+  const day = first.getUTCDay() || 7
+  const gridStart = addDays(first, -day + 1)
+  return Array.from({ length: 42 }, (_, i) => toISO(addDays(gridStart, i)))
 }
 function weekOffset(weekStartISO: string, weeks: number) { return toISO(addDays(dateFromISO(weekStartISO), weeks * 7)) }
 function isRealToday(dateISO: string) { return dateISO === todayMadrid() }
@@ -992,7 +1011,6 @@ export default function CaminoCalendarClient() {
   const [toast, setToast] = useState<string | null>(null)
   const [curriculumItems, setCurriculumItems] = useState<CurriculumItem[]>([])
   const [showCalendarEditor, setShowCalendarEditor] = useState(false)
-  const [showMonthCalendar, setShowMonthCalendar] = useState(false)
   const [showAddSubjectModal, setShowAddSubjectModal] = useState(false)
   const [addSubjectLoading, setAddSubjectLoading] = useState(false)
   const [calendarExpanded, setCalendarExpanded] = useState(false)
@@ -2117,9 +2135,8 @@ export default function CaminoCalendarClient() {
           <div className="camino-header-actions" style={{ display: 'flex', gap: 8 }}>
             <GoogleCalendarConnection />
             <button onClick={() => setShowCalendarEditor(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
-              <CalendarDays size={13} /> Editar semana
+              <CalendarDays size={13} /> Calendario
             </button>
-            <MonthCalendarButton onClick={() => setShowMonthCalendar(true)} />
             <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
               <Plus size={13} /> Examen
             </button>
@@ -2685,7 +2702,6 @@ export default function CaminoCalendarClient() {
       </AnimatePresence>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} saving={savingExam} />}</AnimatePresence>
       <AnimatePresence>{showCalendarEditor && <CalendarEditorOverlay calendar={calendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems} planId={caminoPlanId} onNavigateWeek={generateWeek} onClose={() => setShowCalendarEditor(false)} onAddExam={() => { setShowCalendarEditor(false); openNewExam() }} onPersist={updated => { const weekStart = weekStartForDate(updated[0]?.date ?? selectedWeekStart); saveWeekCache(weekStart, updated); setCalendar(current => mergeWeekIntoCalendar(current, weekStart, updated)) }} onSave={updated => { const weekStart = weekStartForDate(updated[0]?.date ?? selectedWeekStart); saveWeekCache(weekStart, updated); setCalendar(current => mergeWeekIntoCalendar(current, weekStart, updated)); setShowCalendarEditor(false) }} />}</AnimatePresence>
-      <AnimatePresence>{showMonthCalendar && <MonthCalendarOverlay exams={exams} onClose={() => setShowMonthCalendar(false)} />}</AnimatePresence>
       <AnimatePresence>
         {leagueUpgrade && (() => {
           const upgradedDiv = DIVISIONS.find(d => d.name === leagueUpgrade.to) ?? DIVISIONS[DIVISIONS.length - 1]
@@ -2939,18 +2955,21 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
   const initialWeek = fillWeekGaps(weekStartISO, onNavigateWeek(weekStartISO))
   const initialSelectedDate = initialWeek.find(d => d.isToday)?.date ?? initialWeek[0]?.date ?? weekStartISO
   const [draft, setDraft] = useState<DayPlan[]>(() => initialWeek.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission })) })))
-  const [newMission, setNewMission] = useState({ day: initialSelectedDate, subject: safeSubjects[0] ?? 'Matemáticas II', kind: 'concept_explanation' as MissionKind, topic: '', minutes: 15, startTime: '', bonus: false })
+  const [newMission, setNewMission] = useState({ day: initialSelectedDate, subject: safeSubjects[0] ?? 'Matemáticas II', kind: 'concept_explanation' as MissionKind, topic: '', minutes: DEFAULT_MISSION_DURATION_MINUTES, startTime: '', bonus: false })
   const [draggedMissionId, setDraggedMissionId] = useState<string | null>(null)
   const [editorNotice, setEditorNotice] = useState('')
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [editorWeekStart, setEditorWeekStart] = useState(weekStartISO)
   const [missionPanelOpen, setMissionPanelOpen] = useState(false)
   const [selectedDayDate, setSelectedDayDate] = useState<string>(() => initialSelectedDate)
+  const [calendarView, setCalendarView] = useState<'week' | 'month'>('week')
+  const [monthCursor, setMonthCursor] = useState(() => monthStartISO(initialSelectedDate))
   const topics = curriculumForSubject(newMission.subject, curriculum)
   const orderedDraft = draft.slice().sort((a, b) => a.date.localeCompare(b.date))
   const selectedDay = orderedDraft.find(d => d.date === selectedDayDate) ?? orderedDraft[0]
   const mainMissionCount = orderedDraft.reduce((total, day) => total + day.missions.filter(mission => mission.role === 'main').length, 0)
   const bonusMissions = orderedDraft.flatMap(day => day.missions.filter(mission => mission.role === 'bonus').map(mission => ({ mission, day })))
+  const monthGrid = buildMonthGrid(monthCursor)
   const debugCalendarEditor = (...args: unknown[]) => {
     if (process.env.NODE_ENV !== 'production') console.debug(...args)
   }
@@ -2968,7 +2987,29 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
     setNewMission(current => ({ ...current, day: nextSelectedDate }))
     setDraggedMissionId(null)
     setSelectedDayDate(nextSelectedDate)
+    setMonthCursor(monthStartISO(nextSelectedDate))
     setSaveState('idle')
+  }
+
+  function selectEditorDay(dateISO: string) {
+    const nextWeekStart = weekStartForDate(dateISO)
+    if (nextWeekStart !== editorWeekStart) {
+      const nextWeek = fillWeekGaps(nextWeekStart, cloneWeek(onNavigateWeek(nextWeekStart)))
+      setEditorWeekStart(nextWeekStart)
+      setDraft(nextWeek)
+    }
+    setSelectedDayDate(dateISO)
+    setMonthCursor(monthStartISO(dateISO))
+    setNewMission(current => ({ ...current, day: dateISO }))
+    setSaveState('idle')
+    setEditorNotice('')
+  }
+
+  function missionsForEditorDate(dateISO: string) {
+    const editorWeekEnd = toISO(addDays(dateFromISO(editorWeekStart), 6))
+    return (dateISO >= editorWeekStart && dateISO <= editorWeekEnd)
+      ? (draft.find(day => day.date === dateISO)?.missions ?? [])
+      : (calendar.find(day => day.date === dateISO)?.missions ?? [])
   }
 
   function moveMission(missionId: string, nextDate: string) {
@@ -3002,7 +3043,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
       subject: current.subject || safeSubjects[0] || current.subject,
       topic: suggested ? '' : current.topic,
       kind: suggested ? 'concept_explanation' : current.kind,
-      minutes: suggested ? 15 : current.minutes,
+      minutes: DEFAULT_MISSION_DURATION_MINUTES,
       bonus: suggested ? false : current.bonus,
     }))
     setMissionPanelOpen(true)
@@ -3019,14 +3060,15 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
     openMissionForm(selectedDay?.date)
   }
 
-  function handleAddHereClick() {
-    debugCalendarEditor('[calendar-editor] ADD_HERE_CLICK')
-    openMissionForm(selectedDay?.date)
-  }
-
-  function handleSuggestedClick() {
+  function suggestTopicInForm() {
     debugCalendarEditor('[calendar-editor] SUGGESTED_CLICK')
-    if (selectedDay) openMissionForm(selectedDay.date, true)
+    setNewMission(current => ({
+      ...current,
+      topic: '',
+      kind: 'concept_explanation',
+      minutes: DEFAULT_MISSION_DURATION_MINUTES,
+      bonus: false,
+    }))
   }
 
   async function handleFormSubmitClick() {
@@ -3278,15 +3320,23 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
         <header className="shrink-0 bg-[#0f172a] px-6 py-5">
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
-              <p className="text-[8px] font-black uppercase tracking-[.24em] text-slate-500">Camino PAU · Editar calendario</p>
-              <h2 className="mt-1 text-[22px] font-black text-slate-100" style={{ letterSpacing: '-0.025em', lineHeight: 1 }}>Ajusta tu semana</h2>
+              <p className="text-[8px] font-black uppercase tracking-[.24em] text-slate-500">Camino PAU · Calendario</p>
+              <h2 className="mt-1 text-[22px] font-black text-slate-100" style={{ letterSpacing: '-0.025em', lineHeight: 1 }}>
+                {calendarView === 'week' ? weekRangeLabel(editorWeekStart) : monthLabel(monthCursor)}
+              </h2>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.06] p-1">
+                <button type="button" onClick={() => setCalendarView('week')} className="rounded-md px-3 py-1.5 text-[10px] font-black transition" style={{ background: calendarView === 'week' ? 'white' : 'transparent', color: calendarView === 'week' ? '#0f172a' : '#cbd5e1' }}>Semana</button>
+                <button type="button" onClick={() => setCalendarView('month')} className="rounded-md px-3 py-1.5 text-[10px] font-black transition" style={{ background: calendarView === 'month' ? 'white' : 'transparent', color: calendarView === 'month' ? '#0f172a' : '#cbd5e1' }}>Mes</button>
+              </div>
               <button onClick={onAddExam} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-400 transition hover:bg-white/[0.11]"><Plus size={13} /> Añadir parcial</button>
               <button type="button" data-calendar-editor-action="top-add" onClick={handleTopAddClick} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-black text-[#0f172a] transition hover:bg-slate-100" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}><Plus size={13} /> {missionPanelOpen ? 'Cerrar formulario' : 'Añadir misión'}</button>
             </div>
           </div>
 
+          {calendarView === 'week' && (
+          <>
           {/* Week grid — a plain grid-cols-7 never shrinks below each day's
               intrinsic content width, so on narrow phones it silently
               overflowed the header and got clipped by the section's
@@ -3306,9 +3356,9 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                 <button
                   key={day.date}
                   type="button"
-                  onClick={() => { setSelectedDayDate(day.date); setNewMission(current => ({ ...current, day: day.date })) }}
+                  onClick={() => selectEditorDay(day.date)}
                   onDragOver={e => e.preventDefault()}
-                  onDrop={e => { e.preventDefault(); if (draggedMissionId) { moveMission(draggedMissionId, day.date); setSelectedDayDate(day.date); setNewMission(current => ({ ...current, day: day.date })) }; setDraggedMissionId(null) }}
+                  onDrop={e => { e.preventDefault(); if (draggedMissionId) { moveMission(draggedMissionId, day.date); selectEditorDay(day.date) }; setDraggedMissionId(null) }}
                   className="w-14 shrink-0 rounded-lg py-2.5 text-center transition-all sm:w-auto"
                   style={{
                     background: isSelected ? '#2563eb' : 'rgba(255,255,255,0.04)',
@@ -3344,10 +3394,63 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             <button onClick={() => navigateEditorWeek(currentWeekStartISO())} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]"><RotateCcw size={11} /> Hoy</button>
             <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]">Sig <ArrowRight size={13} /></button>
           </div>
+          </>
+          )}
+
+          {calendarView === 'month' && (
+            <div className="mt-3 flex items-center gap-2">
+              <button type="button" onClick={() => setMonthCursor(addMonths(monthCursor, -1))} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]"><ChevronLeft size={13} /> Ant</button>
+              <span className="flex-1 text-center text-[11px] font-black text-slate-400">{monthLabel(monthCursor)}</span>
+              <button type="button" onClick={() => selectEditorDay(todayMadrid())} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]"><RotateCcw size={11} /> Hoy</button>
+              <button type="button" onClick={() => setMonthCursor(addMonths(monthCursor, 1))} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]">Sig <ArrowRight size={13} /></button>
+            </div>
+          )}
         </header>
 
         {/* ── Body ── */}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+
+          {calendarView === 'month' && (
+            <div className="shrink-0 border-b border-[#f1f5f9] bg-white px-6 py-5">
+              <div className="grid grid-cols-7 gap-1.5 text-center">
+                {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(label => (
+                  <div key={label} className="pb-1 text-[9px] font-black uppercase tracking-[.14em] text-slate-400">{label}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-1.5" style={{ gridAutoRows: 'minmax(64px, 1fr)' }}>
+                {monthGrid.map(dateISO => {
+                  const inMonth = dateISO.slice(0, 7) === monthCursor.slice(0, 7)
+                  const isSelected = dateISO === selectedDayDate
+                  const isToday = dateISO === todayMadrid()
+                  const missions = missionsForEditorDate(dateISO)
+                  return (
+                    <button
+                      key={dateISO}
+                      type="button"
+                      onClick={() => selectEditorDay(dateISO)}
+                      className="flex min-h-16 flex-col items-stretch rounded-lg p-1.5 text-left transition-all hover:border-blue-200 hover:bg-blue-50"
+                      style={{
+                        background: isSelected ? '#eff6ff' : 'white',
+                        border: `1.5px solid ${isSelected ? '#2563eb' : isToday ? 'rgba(37,99,235,.35)' : '#f1f5f9'}`,
+                        opacity: inMonth ? 1 : 0.4,
+                      }}
+                    >
+                      <span className="mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-black" style={{ background: isToday ? '#2563eb' : 'transparent', color: isToday ? 'white' : '#334155' }}>
+                        {parseInt(dateISO.slice(-2), 10)}
+                      </span>
+                      <div className="flex flex-1 flex-col gap-0.5 overflow-hidden">
+                        {missions.slice(0, 2).map(mission => {
+                          const theme = themeFor(mission.subject)
+                          return <span key={mission.id} className="truncate rounded px-1 py-0.5 text-[9px] font-bold" style={{ background: theme.bg, color: theme.text }}>{mission.title}</span>
+                        })}
+                        {missions.length > 2 && <span className="text-[9px] font-black text-slate-400">+{missions.length - 2} más</span>}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Day header */}
           <div className="shrink-0 border-b border-[#f1f5f9] px-6 py-5">
@@ -3372,26 +3475,6 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                 <p className="mt-2 text-[9px] font-black uppercase tracking-[.12em] text-slate-300">
                   {(selectedDay?.missions.filter(m => m.role === 'main').length ?? 0)} principales · {(selectedDay?.missions.filter(m => m.role === 'bonus').length ?? 0)} bonus
                 </p>
-              </div>
-              <div className="mt-1 flex flex-wrap items-center justify-end gap-2">
-                <button
-                  type="button"
-                  data-calendar-editor-action="suggested"
-                  onClick={handleSuggestedClick}
-                  disabled={!selectedDay || !safeSubjects.length}
-                  title="Añade una misión de repaso con el tema que Camino sugiere para este día, sin rellenar nada más."
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[11px] font-black text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <Plus size={13} /> Tema sugerido
-                </button>
-                <button
-                  type="button"
-                  data-calendar-editor-action="add-here"
-                  onClick={handleAddHereClick}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[11px] font-black text-slate-600 transition hover:bg-slate-50"
-                >
-                  <Plus size={13} /> Añadir aquí
-                </button>
               </div>
             </div>
           </div>
@@ -3419,14 +3502,14 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                     <option value="">Sugerido</option>
                     {topics.map(t => <option key={`${t.subject}-${t.sortOrder}`} value={t.topic}>{t.block} · {t.topic}</option>)}
                   </select>
+                  <button type="button" data-calendar-editor-action="suggested" onClick={suggestTopicInForm} className="mt-2 text-[10px] font-black text-blue-600 transition hover:text-blue-700">
+                    Sugerir tema
+                  </button>
                 </Field>
                 <Field label="Tipo">
                   <select value={newMission.kind} onChange={e => setNewMission({ ...newMission, kind: e.target.value as MissionKind })} className="inputish">
                     {kindOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
-                </Field>
-                <Field label="Duración (min)">
-                  <input type="number" min={5} max={90} value={newMission.minutes} onChange={e => setNewMission({ ...newMission, minutes: Number(e.target.value) })} className="inputish" />
                 </Field>
                 <Field label="Empieza">
                   <input type="time" value={newMission.startTime} onChange={e => setNewMission({ ...newMission, startTime: e.target.value })} className="inputish" />
@@ -3499,16 +3582,10 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
               })}
 
               {(selectedDay?.missions.filter(m => m.role === 'main').length ?? 0) === 0 && (
-                <button type="button" onClick={() => { setNewMission(c => ({ ...c, day: selectedDay?.date ?? c.day })); setMissionPanelOpen(true) }} className="flex w-full items-center gap-3 rounded-xl border-2 border-dashed border-[#e2e8f0] bg-[#fafbfc] px-5 py-4 text-left transition hover:border-slate-300">
+                <div className="flex w-full items-center gap-3 rounded-xl border-2 border-dashed border-[#e2e8f0] bg-[#fafbfc] px-5 py-4 text-left">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#e2e8f0] bg-white text-[15px] font-black text-slate-400">+</span>
-                  <span className="text-[12px] font-bold text-slate-400">Sin misiones · Añadir una</span>
-                </button>
-              )}
-              {(selectedDay?.missions.filter(m => m.role === 'main').length ?? 0) > 0 && (
-                <button type="button" onClick={() => { setNewMission(c => ({ ...c, day: selectedDay?.date ?? c.day })); setMissionPanelOpen(true) }} className="flex w-full items-center gap-3 rounded-xl border-2 border-dashed border-[#e2e8f0] bg-white px-5 py-3 text-left transition hover:border-slate-300">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-[#e2e8f0] bg-[#fafbfc] text-[13px] font-black text-slate-400">+</span>
-                  <span className="text-[11px] font-bold text-slate-400">Añadir otra misión a este día</span>
-                </button>
+                  <span className="text-[12px] font-bold text-slate-400">Sin misiones este día.</span>
+                </div>
               )}
             </div>
 
@@ -3546,9 +3623,6 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
           <p className="text-[11px] font-bold text-slate-400">{mainMissionCount} misiones principales · {bonusMissions.length} bonus opcionales</p>
           <div className="flex gap-2">
             <button onClick={onClose} className="rounded-lg border border-[#e2e8f0] bg-white px-5 py-2.5 text-[12px] font-black text-slate-500 transition hover:bg-slate-50">Cancelar</button>
-            <button onClick={handleSave} disabled={saveState === 'saving'} className="rounded-lg bg-[#0f172a] px-5 py-2.5 text-[12px] font-black text-white transition hover:bg-slate-800 disabled:opacity-50">
-              {saveState === 'saving' ? 'Guardando...' : saveState === 'saved' ? '✓ Guardada' : saveState === 'error' ? 'Reintentar' : 'Guardar cambios'}
-            </button>
           </div>
         </footer>
 

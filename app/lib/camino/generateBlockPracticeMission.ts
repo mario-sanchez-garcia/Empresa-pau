@@ -1,23 +1,27 @@
 import 'server-only'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { SIMULACRO_SUBJECT } from './partialExamSubjects'
 import { createDayScheduler, estimatedMinutesForMissionType } from './scheduleTimeSlot'
 import { getMadridToday, getStudyDays } from './studyDays'
 
-const HISTORIA_SUBJECT = 'historia_espana'
-
 // Cuando el alumno completa el ÚLTIMO tema fino de Curso de un bloque de
-// Historia (todas sus lecciones en 'completed'), genera automáticamente UNA
-// misión de "ejercicios de bloque" que combina práctica de todos sus temas
-// — sin depender de que exista ningún examen/Parcial; es una recompensa
-// automática por terminar el bloque, no una preparación de examen.
+// cualquier asignatura (todas sus lecciones en 'completed'), genera
+// automáticamente UNA misión de "ejercicios de bloque" que combina práctica
+// de todos sus temas — sin depender de que exista ningún examen/Parcial; es
+// una recompensa automática por terminar el bloque, no una preparación de
+// examen. No hace falta ninguna lista de asignaturas soportadas: una
+// asignatura sin topic_id poblado en curriculum_content_v2 (Física, Mates)
+// simplemente nunca llena `denominator` abajo y la función no hace nada —
+// mismo criterio de "computable" que ya usa el resto del motor
+// (examCoverage.ts, resolveExamHistoriaTopics.ts).
 //
 // mission_type='pau_practice' y source='algorithm' ya están permitidos por
 // camino_calendar_mission_type_check/camino_calendar_source_check, y
 // 'pau_practice' ya tiene XP definido en xpMap.ts — cero migración de
 // esquema necesaria.
 //
-// El denominador se calcula sobre curriculum_content_v2.block_slug (los 14
+// El denominador se calcula sobre curriculum_content_v2.block_slug (los
 // bloques finos reales con teoría), nunca sobre curriculum_topics.block_key
 // — ese último mezcla algunos temas genéricos de betaCurriculum.ts con los
 // finos bajo la misma clave (p. ej. "restauracion"), y el genérico nunca
@@ -29,12 +33,12 @@ export async function maybeGenerateBlockPracticeMission(
   subject: string,
   v2SortOrder: number | null,
 ): Promise<void> {
-  if (subject !== HISTORIA_SUBJECT || v2SortOrder == null) return
+  if (v2SortOrder == null) return
 
   const { data: completedRow } = await db
     .from('curriculum_content_v2')
     .select('block_slug, block_key')
-    .eq('subject', HISTORIA_SUBJECT)
+    .eq('subject', subject)
     .eq('sort_order', v2SortOrder)
     .maybeSingle()
   const blockSlug = completedRow?.block_slug as string | undefined
@@ -44,7 +48,7 @@ export async function maybeGenerateBlockPracticeMission(
   const { data: blockRows } = await db
     .from('curriculum_content_v2')
     .select('sort_order, topic_id')
-    .eq('subject', HISTORIA_SUBJECT)
+    .eq('subject', subject)
     .eq('block_slug', blockSlug)
     .not('topic_id', 'is', null)
   const denominator = blockRows ?? []
@@ -55,7 +59,7 @@ export async function maybeGenerateBlockPracticeMission(
     .from('camino_calendar')
     .select('v2_sort_order')
     .eq('user_id', userId)
-    .eq('subject', HISTORIA_SUBJECT)
+    .eq('subject', subject)
     .eq('status', 'completed')
     .in('v2_sort_order', sortOrders)
 
@@ -69,7 +73,7 @@ export async function maybeGenerateBlockPracticeMission(
     .from('camino_calendar')
     .select('id')
     .eq('user_id', userId)
-    .eq('subject', HISTORIA_SUBJECT)
+    .eq('subject', subject)
     .eq('metadata->>block_practice_for', blockSlug)
     .limit(1)
     .maybeSingle()
@@ -93,7 +97,7 @@ export async function maybeGenerateBlockPracticeMission(
     await db.from('camino_calendar').insert({
       user_id: userId,
       scheduled_date: dateStr,
-      subject: HISTORIA_SUBJECT,
+      subject,
       v2_sort_order: null, // misión agregada de varios temas, no de uno solo
       title: `Ejercicios de bloque: ${blockKey ?? blockSlug}`,
       block_key: blockKey ?? null,
@@ -109,7 +113,7 @@ export async function maybeGenerateBlockPracticeMission(
       metadata: {
         block_practice_for: blockSlug,
         topicSlugs,
-        simulacro_subject: 'historia',
+        simulacro_subject: SIMULACRO_SUBJECT[subject] ?? subject,
       },
     })
     return

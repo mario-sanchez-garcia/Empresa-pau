@@ -24,14 +24,6 @@ function weekdaysBefore(examDate: string, fromDate: string): string[] {
   return days
 }
 
-// Historia only for now — curriculum_content_v2.topic_id (migration
-// 20260825220000) is the only place a real Parcial's exam_topics can be
-// resolved to a v2_sort_order today. Other subjects have no topic_id
-// populated, so `computable` comes back false and every caller (see
-// injectPartialExamMissions.ts, ensureCaminoCalendar.ts) treats that exactly
-// like "no exam" — no coverage gating, no Simulacro-date restriction.
-const COVERAGE_SUBJECT = 'historia_espana'
-
 export type ExamCoverage = {
   computable: boolean
   totalCount: number
@@ -74,11 +66,26 @@ async function getDeclaredDailyMinutes(db: SupabaseClient, userId: string): Prom
 
 /**
  * Computes, for a single exam, how many of its exam_topics-linked Curso
- * lessons are still pending and whether compressing the student's Historia
- * schedule to every remaining weekday could realistically reach 80%/100%
- * coverage before the exam date. Pure read — no writes. Callers
+ * lessons are still pending and whether compressing the student's schedule
+ * for that subject to every remaining weekday could realistically reach
+ * 80%/100% coverage before the exam date. Pure read — no writes. Callers
  * (ensureCaminoCalendar.ts, injectPartialExamMissions.ts) decide what to do
  * with the result; this only measures it.
+ *
+ * Subject-agnostic by construction, same pattern as
+ * generateBlockPracticeMission.ts: no fixed subject allowlist. A subject
+ * only becomes "computable" once it actually has exam_topics AND matching
+ * curriculum_content_v2.topic_id rows — both queries below fall through to
+ * NOT_COMPUTABLE on their own when either is empty, so a subject without
+ * topic_id populated yet (Física, Matemáticas CCSS) automatically gets the
+ * exact same "no coverage gating" behavior it already had, without needing
+ * to be named here. Deliberate: blocking practice/Simulacro for those
+ * subjects until they get topic_id data would regress functionality that
+ * works today, for a labeling gap that isn't their fault. The trade-off
+ * (no "never before Curso" safety net for them yet) is the same one that
+ * silently existed for every non-Historia subject before this fix — nothing
+ * new, just correctly scoped instead of accidentally including subjects
+ * that DO have the data (Lengua) alongside ones that genuinely don't.
  */
 export async function computeExamCoverage(
   db: SupabaseClient,
@@ -88,8 +95,6 @@ export async function computeExamCoverage(
   examDate: string,
   today: string,
 ): Promise<ExamCoverage> {
-  if (subjectSlug !== COVERAGE_SUBJECT) return NOT_COMPUTABLE
-
   const { data: examTopicRows } = await db.from('exam_topics').select('topic_id').eq('exam_id', examId)
   const topicIds = (examTopicRows ?? []).map(r => r.topic_id as string).filter(Boolean)
   if (topicIds.length === 0) return NOT_COMPUTABLE

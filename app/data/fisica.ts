@@ -21,6 +21,7 @@ export interface PreguntaFisica {
   apartados: string[];
   datos?: string[];
   puntos: number;
+  topicSlugs?: string[];
 }
 
 function numeroPreguntaFisica(pregunta: PreguntaFisica) {
@@ -59,6 +60,7 @@ export const examenesF: PreguntaFisica[] = [
 
   {
     id: "f-2025-jun-1",
+    topicSlugs: ["intensidad-del-campo-gravitatorio", "energia-mecanica-en-el-campo-gravitatorio", "velocidad-orbital"],
     año: 2025, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "1",
     enunciado: `Eris es un planeta enano del sistema solar descubierto en enero de 2005 por un equipo
@@ -83,6 +85,7 @@ Datos: Constante de gravitación universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{
   },
   {
     id: "f-2025-jun-2A",
+    topicSlugs: ["movimiento-de-cargas-en-campos-uniformes"],
     año: 2025, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "2.A",
     enunciado: `Un electrón de carga $-e$ y un positrón de carga $+e$ se encuentran inicialmente fijos en
@@ -100,6 +103,7 @@ $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$; Masa del electrón y del positrón, $m_e
   },
   {
     id: "f-2025-jun-2B",
+    topicSlugs: ["flujo-magnetico-e-induccion-electromagnetica"],
     año: 2025, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "2.B",
     enunciado: `Una espira conductora circular de radio 20 cm se en-
@@ -119,6 +123,7 @@ magnético varía con el tiempo conforme a $B = B_0\\sin(\\omega t)$, con $B_0 =
   },
   {
     id: "f-2025-jun-3A",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2025, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "3.A",
     enunciado: `Una ballena sumergida en el mar a una cierta profundidad emite un potente sonido
@@ -137,6 +142,7 @@ Dato: Intensidad umbral, $I_0 = 1 \\cdot 10^{-12}\ \\text{W m}^{-2}$.`,
   },
   {
     id: "f-2025-jun-3B",
+    topicSlugs: ["aumento-lateral-en-lentes-y-espejos", "lentes-delgadas-ecuacion-fundamental"],
     año: 2025, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "3.B",
     enunciado: `Considere la imagen formada por una lente delgada de distancia focal $f'$ de un objeto
@@ -156,6 +162,7 @@ lente divergente si el objeto se sitúa a una distancia dos veces su distancia f
   },
   {
     id: "f-2025-jun-4A",
+    topicSlugs: ["hipotesis-de-planck-y-cuantizacion-de-la-energia"],
     año: 2025, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "4.A",
     enunciado: `Las moléculas de ozono absorben luz ultravioleta (UV) de alta energía, lo que evita que
@@ -175,6 +182,7 @@ luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$.`,
   },
   {
     id: "f-2025-jun-4B",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2025, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "4.B",
     enunciado: `El mineral de cuarzo (SiO$_2$) sobre la superficie de la Tierra contiene impurezas de
@@ -193,6 +201,7 @@ la formación de dichos sedimentos.`,
   },
   {
     id: "f-2024-jun-A1",
+    topicSlugs: ["energia-mecanica-en-el-campo-gravitatorio", "trabajo-y-caracter-conservativo-del-campo-gravitatorio"],
     año: 2024, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: `La distancia del satélite Halimede a Neptuno, planeta alrededor del cual orbita, varía
@@ -211,6 +220,7 @@ Neptuno, $M_N = 1{,}02 \\cdot 10^{26}\ \\text{kg}$.`,
   },
   {
     id: "f-2024-jun-A2",
+    topicSlugs: ["movimiento-armonico-simple-mas-elongacion-y-ecuacion"],
     año: 2024, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "A.2",
     enunciado: `Por una cuerda tensa dispuesta a lo largo del eje $x$ se propaga, a una velocidad de
@@ -226,6 +236,7 @@ b) La fase inicial de la onda.`,
   },
   {
     id: "f-2024-jun-A3",
+    topicSlugs: ["fuerza-magnetica-sobre-una-corriente-y-momento-sobre-una-espira"],
     año: 2024, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
     enunciado: `Un hilo conductor de longitud indefinida se extiende a lo largo del eje $z$. Otro hilo de
@@ -243,6 +254,7 @@ Dato: Permeabilidad magnética del vacío, $\\mu_0 = 4\\pi \\cdot 10^{-7}\ \\tex
   },
   {
     id: "f-2024-jun-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"],
     año: 2024, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Optica", numero: "A.4",
     enunciado: "Un objeto de 4 mm de altura está situado 20 cm a la izquierda de una lente delgada.\nLa imagen que se forma es derecha y tiene una altura de 2 mm.\n\na) Calcule la potencia de la lente e indique si es convergente o divergente.\n\nb) Elabore el trazado de rayos correspondiente a la situación descrita.",
@@ -251,6 +263,7 @@ Dato: Permeabilidad magnética del vacío, $\\mu_0 = 4\\pi \\cdot 10^{-7}\ \\tex
   },
   {
     id: "f-2024-jun-A5",
+    topicSlugs: ["efecto-fotoelectrico"],
     año: 2024, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: `Una placa de cobalto se expone a luz de una determinada intensidad y de frecuencia
@@ -270,6 +283,7 @@ Datos: Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\t
   },
   {
     id: "f-2024-jun-B1",
+    topicSlugs: ["velocidad-orbital", "momento-angular-y-fuerzas-centrales"],
     año: 2024, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
     enunciado: `Un satélite de 200 kg de masa se mueve en una órbita cerrada alrededor de la Tierra.
@@ -288,6 +302,7 @@ Tierra, $R_T = 6{,}37 \\cdot 10^6\ \\text{m}$.`,
   },
   {
     id: "f-2024-jun-B2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2024, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Ondas", numero: "B.2",
     enunciado: `El campanario de una iglesia medieval, situado a 35 m de altura, consta de 4 campanas.
@@ -306,6 +321,7 @@ Dato: Intensidad umbral, $I_0 = 1 \\cdot 10^{-12}\ \\text{W m}^{-2}$.`,
   },
   {
     id: "f-2024-jun-B3",
+    topicSlugs: ["potencial-electrico"],
     año: 2024, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
     enunciado: `Dos partículas situadas en los puntos $(-6, 0)$ mm y $(6, 0)$ mm del plano $xy$ poseen
@@ -321,6 +337,7 @@ Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{
   },
   {
     id: "f-2024-jun-B4",
+    topicSlugs: ["reflexion-total-y-angulo-limite", "refraccion-y-ley-de-snell"],
     año: 2024, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "B.4",
     enunciado: "El prisma de sección triangular mostrado en la figura está hecho\nde un material con índice de refracción np. Se halla inmerso en aire, con índice\nde refracción igual a 1.\n\na) Determine el índice de refracción np si se sabe que el ángulo límite para la\nreflexión total en el paso del prisma al aire vale 45, 58◦.\n\nb) Considere un rayo de luz que incide perpendicularmente sobre la superficie\ndel prisma desde el aire, en el punto P. Elabore un diagrama mostrando su\nrecorrido en el interior del prisma hasta que vuelve a emerger al aire, y\ncalcule el ángulo de refracción a la salida.\n\n![Esquema óptico del paralelepípedo](/fisica-imgs/madrid/2024/ordinaria/fisica-2024-ordinaria-b4.png)",
@@ -329,6 +346,7 @@ Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{
   },
   {
     id: "f-2024-jun-B5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2024, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: `Dos muestras, cada una de un radioisótopo distinto (radioisótopo
@@ -350,6 +368,7 @@ $M_2/M_1$.
   },
   {
     id: "f-2023-jun-A1",
+    topicSlugs: ["velocidad-orbital"],
     año: 2023, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: `Un satélite de la constelación OneWeb, de 150 kg de masa, se encuentra en una
@@ -367,6 +386,7 @@ Tierra, $R_T = 6{,}37 \\cdot 10^6\ \\text{m}$.`,
   },
   {
     id: "f-2023-jun-A2",
+    topicSlugs: ["movimiento-armonico-simple-mas-elongacion-y-ecuacion"],
     año: 2023, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "A.2",
     enunciado: `A lo largo de una cuerda se propaga en el sentido $+x$ una onda transversal. El periodo
@@ -383,6 +403,7 @@ b) Obtenga la expresión matemática que describe a la onda.`,
   },
   {
     id: "f-2023-jun-A3",
+    topicSlugs: ["intensidad-del-campo-electrico", "trabajo-y-caracter-conservativo-del-campo-electrico", "teorema-de-gauss"],
     año: 2023, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
     enunciado: `Tres cargas $-q$, $-q$ y $+2q$ se encuentran situadas en los
@@ -406,6 +427,7 @@ Dato: Permitividad eléctrica del vacío; $\\varepsilon_0 = 1/(4\\pi K)$.
   },
   {
     id: "f-2023-jun-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"],
     año: 2023, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Optica", numero: "A.4",
     enunciado: "Un objeto de 2 cm de altura se sitúa a 18 cm a la izquierda de una pantalla. Entre la\npantalla y el objeto, a 14,2 cm de este, se sitúa una lente convergente.\n\na) \tDetermine la distancia focal que debe tener la lente para que se enfoque la imagen del objeto\nsobre la pantalla y el tamaño de la imagen.\n\nb) \tA continuación, se retira la pantalla y se sitúa a 5 cm a la derecha de la primera lente otra lente\nconvergente de distancia focal 1,2 cm. ¿Dónde se formará la nueva imagen? Realice el\ncorrespondiente trazado de rayos.",
@@ -414,6 +436,7 @@ Dato: Permitividad eléctrica del vacío; $\\varepsilon_0 = 1/(4\\pi K)$.
   },
   {
     id: "f-2023-jun-A5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2023, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: `Se sospecha que un acuífero recibe aportes intermitentes de radón ($^{222}$Rn). Para
@@ -433,6 +456,7 @@ Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
   },
   {
     id: "f-2023-jun-B1",
+    topicSlugs: ["velocidad-orbital"],
     año: 2023, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
     enunciado: `En la película Space Cowboys un
@@ -458,6 +482,7 @@ Tierra, $R_T = 6{,}37 \\cdot 10^3$ km; Masa de la Luna, $M_L = 7{,}35 \\cdot 10^
   },
   {
     id: "f-2023-jun-B2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2023, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Ondas", numero: "B.2",
     enunciado: `Un observador que se encuentra a 3 m de una fuente puntual sonora que emite en
@@ -475,6 +500,7 @@ Dato: Intensidad umbral, $I_0 = 10^{-12}\ \\text{W m}^{-2}$.`,
   },
   {
     id: "f-2023-jun-B3",
+    topicSlugs: ["intensidad-del-campo-electrico"],
     año: 2023, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
     enunciado: `Un ion de He$^+$ se sitúa inicialmente en reposo dentro de una región del espacio donde
@@ -492,6 +518,7 @@ del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$.`,
   },
   {
     id: "f-2023-jun-B4",
+    topicSlugs: ["refraccion-y-ley-de-snell", "reflexion-total-y-angulo-limite"],
     año: 2023, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "B.4",
     enunciado: "Un rayo de luz incide sobre la cara izquierda del\nprisma de la figura, el cual está construido con un material cuyo\níndice de refracción vale 1,66.\n\na) \tDetermine los ángulos α y\nβ de la trayectoria que sigue\nel rayo de luz que entra en el prisma desde el aire con\nun ángulo de incidencia de 50º.\n\nb) \tCalcule el ángulo límite con el que deberá incidir desde\nel aire el rayo de luz para que este no emerja del prisma.\n\nDato: Índice de refracción del aire, n = 1.\n\n![Esquema de lentes delgadas](/fisica-imgs/madrid/2023/ordinaria/fisica-2023-ordinaria-b4.png)",
@@ -500,6 +527,7 @@ del electrón, $e = 1{,}6 \\cdot 10^{-19}\ \\text{C}$.`,
   },
   {
     id: "f-2023-jun-B5",
+    topicSlugs: ["efecto-fotoelectrico"],
     año: 2023, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: `Para estudiar el efecto fotoeléctrico se
@@ -527,6 +555,7 @@ Datos: Velocidad de la luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$; 
   },
   {
     id: "f-2022-jun-A1",
+    topicSlugs: ["intensidad-del-campo-gravitatorio"],
     año: 2022, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: `Una partícula de masa 20 kg permanece fija en el origen de coordenadas.
@@ -544,6 +573,7 @@ Datos: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{
   },
   {
     id: "f-2022-jun-A2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"],
     año: 2022, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "A.2",
     enunciado: `Por una cuerda dispuesta a lo largo del eje $x$ viaja una onda armónica que desplaza
@@ -561,6 +591,7 @@ nula.`,
   },
   {
     id: "f-2022-jun-A3",
+    topicSlugs: ["flujo-magnetico-e-induccion-electromagnetica", "fuerza-magnetica-sobre-una-corriente-y-momento-sobre-una-espira"],
     año: 2022, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
     enunciado: `La figura representa una varilla metálica de 20 cm de longitud, cuyos extremos deslizan
@@ -581,6 +612,7 @@ varilla.
   },
   {
     id: "f-2022-jun-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"],
     año: 2022, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Optica", numero: "A.4",
     enunciado: "Dos lentes convergentes idénticas están separadas 16 cm. Cuando un objeto se sitúa\na una cierta distancia a la izquierda de la primera lente, se encuentra que cada una de ellas opera con\naumento igual a -1.\n\na) \tDetermine la potencia de las lentes.\n\nb) \t¿Cuánto y hacia dónde debe desplazarse la segunda lente para lograr que la imagen del\nsistema se forme en el infinito?",
@@ -589,6 +621,7 @@ varilla.
   },
   {
     id: "f-2022-jun-A5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2022, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: `Una muestra contiene inicialmente una masa de 30 mg de $^{210}$Po. Sabiendo que su
@@ -605,6 +638,7 @@ Datos: Masa atómica del $^{210}$Po, $M_{\\text{Po}} = 210$ u; Número de Avogad
   },
   {
     id: "f-2022-jun-B1",
+    topicSlugs: ["velocidad-de-escape"],
     año: 2022, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
     enunciado: `Marte posee la décima parte de la masa de la Tierra y la mitad de su diámetro.
@@ -622,6 +656,7 @@ Dato: Radio de la Tierra, $R_T = 6{,}37 \\cdot 10^6$ m.`,
   },
   {
     id: "f-2022-jun-B2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2022, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Ondas", numero: "B.2",
     enunciado: `Un foco sonoro de potencia $P$ se coloca a una
@@ -644,6 +679,7 @@ Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \\text{W m}^{-2}$.
   },
   {
     id: "f-2022-jun-B3",
+    topicSlugs: ["ley-de-coulomb"],
     año: 2022, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
     enunciado: `Una carga puntual positiva está situada en el punto $(3, 4)$ m del plano $xy$. En otro
@@ -660,6 +696,7 @@ Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{
   },
   {
     id: "f-2022-jun-B4",
+    topicSlugs: ["refraccion-y-ley-de-snell"],
     año: 2022, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "B.4",
     enunciado: "Una lámina de vidrio se halla sobre un líquido\nde índice de refracción desconocido. La longitud de onda de la\nluz en el vidrio se reduce a un 70 % de su valor en el aire. Si se\nemite luz desde el líquido, los rayos con ángulos de incidencia\nsuperiores a 30º en la cara inferior de la lámina no se refractan\nal aire por su cara superior. Calcule:\n\na) \tEl índice de refracción del vidrio.\n\nb) \tEl índice de refracción del líquido.\n\nDato: Índice de refracción del aire, naire = 1.\n\n![Esquema de lámina de vidrio sobre líquido](/fisica-imgs/madrid/2022/ordinaria/fisica-2022-ordinaria-b4.png)",
@@ -668,6 +705,7 @@ Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{
   },
   {
     id: "f-2022-jun-B5",
+    topicSlugs: ["hipotesis-de-planck-y-cuantizacion-de-la-energia"],
     año: 2022, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: `Un electrón relativista ha llegado a adquirir una energía cinética equivalente a la energía
@@ -684,6 +722,7 @@ Velocidad de la luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$; Masa de
   },
   {
     id: "f-2021-jun-A1",
+    topicSlugs: ["potencial-gravitatorio", "intensidad-del-campo-gravitatorio", "trabajo-y-caracter-conservativo-del-campo-gravitatorio"],
     año: 2021, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: `Una masa puntual de 50 g se encuentra situada en la posición $(8, 0)$ m del plano $xy$.
@@ -701,6 +740,7 @@ Dato: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N
   },
   {
     id: "f-2021-jun-A2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2021, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "A.2",
     enunciado: `Al explotar, un cohete de fuegos artificiales genera una onda sonora esférica con
@@ -719,6 +759,7 @@ Datos: Velocidad del sonido en el aire, $v_s = 340$ m s$^{-1}$; Valor umbral de 
   },
   {
     id: "f-2021-jun-A3",
+    topicSlugs: ["teorema-de-gauss"],
     año: 2021, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
     enunciado: `Una carga puntual de 2 μC se encuentra situada en el origen de coordenadas.
@@ -735,6 +776,7 @@ Dato: Permitividad eléctrica del vacío, $\\varepsilon_0 = 8{,}85 \\cdot 10^{-1
   },
   {
     id: "f-2021-jun-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"],
     año: 2021, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Optica", numero: "A.4",
     enunciado: "Un objeto vertical de 2 mm de altura se encuentra situado 15 cm a la izquierda de\nuna lente convergente de 40 dioptrías. Calcule:\n\na) \tLa posición y tamaño de la imagen que forma la lente.\n\nb) \tLa posición de una segunda lente convergente de 6 cm de distancia focal, situada a la\nderecha de la primera lente, para que el sistema óptico genere una imagen en el infinito.",
@@ -743,6 +785,7 @@ Dato: Permitividad eléctrica del vacío, $\\varepsilon_0 = 8{,}85 \\cdot 10^{-1
   },
   {
     id: "f-2021-jun-A5",
+    topicSlugs: ["hipotesis-de-planck-y-cuantizacion-de-la-energia"],
     año: 2021, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: `Un material posee un sistema de tres niveles energéticos electrónicos (nivel
@@ -763,6 +806,7 @@ luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$.`,
   },
   {
     id: "f-2021-jun-B1",
+    topicSlugs: ["velocidad-orbital", "energia-mecanica-en-el-campo-gravitatorio", "velocidad-de-escape"],
     año: 2021, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
     enunciado: `Una sonda espacial de 3500 kg se encuentra en órbita circular alrededor de
@@ -779,6 +823,7 @@ Datos: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{
   },
   {
     id: "f-2021-jun-B2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"],
     año: 2021, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Ondas", numero: "B.2",
     enunciado: `El valor del campo eléctrico asociado a una onda electromagnética que se propaga
@@ -797,6 +842,7 @@ Dato: Velocidad de la luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$.`,
   },
   {
     id: "f-2021-jun-B3",
+    topicSlugs: ["campo-magnetico-creado-por-corrientes"],
     año: 2021, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
     enunciado: `Un hilo conductor rectilíneo indefinido situado a lo largo del eje $x$ transporta una
@@ -814,6 +860,7 @@ $\\mu_0 = 4\\pi \\cdot 10^{-7}\ \\text{T m A}^{-1}$.`,
   },
   {
     id: "f-2021-jun-B4",
+    topicSlugs: ["refraccion-y-ley-de-snell", "reflexion-total-y-angulo-limite"],
     año: 2021, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "B.4",
     enunciado: "Un rayo láser, que emite luz de longitud de onda de 488 nm en el vacío, incide\ndesde el aire sobre la superficie plana de un material con un índice de refracción de 1,55. El rayo\nincidente y el reflejado forman entre sí un ángulo de 60º.\n\na) \tDetermine la frecuencia y la longitud de onda del rayo luminoso en el aire y dentro del\nmedio material.\n\nb) \tCalcule el ángulo que formará el rayo refractado en el material con el rayo reflejado en el\naire. ¿Existirá algún ángulo de incidencia para el cual el rayo láser sufra reflexión total?\nJustifique la respuesta.\n\nDatos: Índice de refracción del aire, n aire = 1; Velocidad de la luz en el vacío, c = 3·10 8 m s-1 .",
@@ -822,6 +869,7 @@ $\\mu_0 = 4\\pi \\cdot 10^{-7}\ \\text{T m A}^{-1}$.`,
   },
   {
     id: "f-2021-jun-B5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2021, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: `Un isótopo de una muestra radiactiva posee un periodo de semidesintegración de
@@ -837,6 +885,7 @@ parte.`,
   },
   {
     id: "f-2020-jun-A1",
+    topicSlugs: ["velocidad-orbital"],
     año: 2020, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: `Un satélite sigue una órbita circular sincrónica (es decir, del mismo período que el de
@@ -852,6 +901,7 @@ Dato: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N
   },
   {
     id: "f-2020-jun-A2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"],
     año: 2020, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "A.2",
     enunciado: `Una onda armónica unidimensional, que se propaga en un medio con una velocidad
@@ -868,6 +918,7 @@ b) La aceleración máxima de oscilación de un punto genérico del eje $x$.`,
   },
   {
     id: "f-2020-jun-A3",
+    topicSlugs: ["flujo-magnetico-e-induccion-electromagnetica"],
     año: 2020, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
     enunciado: `Una barra conductora, de 30 cm de longitud y paralela al eje $y$, se mueve en el plano
@@ -888,6 +939,7 @@ constante e igual a $\\vec{a} = 5\ \\hat{i}$ m s$^{-2}$.
   },
   {
     id: "f-2020-jun-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental", "aumento-lateral-en-lentes-y-espejos"],
     año: 2020, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Optica", numero: "A.4",
     enunciado: "Un objeto está situado en una posición s1 a la izquierda de una lente convergente de\ndistancia focal 50 mm, de modo que forma una imagen real, invertida y de tamaño doble que el objeto.\nA continuación, el objeto se va moviendo hacia la lente hasta una posición s2 en la que la imagen es\nvirtual, derecha y de tamaño doble que la del objeto. Calcule:\n\na) \tLa posición s1 inicial del objeto y la distancia inicial entre la imagen y la lente.\n\nb) \tLa posición s2 final del objeto y la distancia final entre la imagen y la lente.",
@@ -896,6 +948,7 @@ constante e igual a $\\vec{a} = 5\ \\hat{i}$ m s$^{-2}$.
   },
   {
     id: "f-2020-jun-A5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2020, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: `Se tienen dos fuentes radiactivas cuya actividad a día de hoy es la misma. Se sabe
@@ -909,6 +962,7 @@ b) La relación entre las actividades de dichas fuentes dentro de 20 años.`,
   },
   {
     id: "f-2020-jun-B1",
+    topicSlugs: ["velocidad-de-escape", "intensidad-del-campo-gravitatorio"],
     año: 2020, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
     enunciado: `Se tiene un planeta de masa $1{,}95 \\cdot 10^{25}$ kg y radio 5500 km. Determine:
@@ -923,6 +977,7 @@ Dato: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N
   },
   {
     id: "f-2020-jun-B2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2020, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Ondas", numero: "B.2",
     enunciado: `A una distancia de 10 m, el nivel de intensidad sonora producida por un foco puntual
@@ -938,6 +993,7 @@ Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \\text{W m}^{-2}$.`,
   },
   {
     id: "f-2020-jun-B3",
+    topicSlugs: ["ley-de-coulomb"],
     año: 2020, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
     enunciado: `Se tienen cuatro cargas cuyo valor absoluto es $|q| = 1 \\cdot 10^{-6}$ C, situadas en los vértices
@@ -954,6 +1010,7 @@ Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{
   },
   {
     id: "f-2020-jun-B4",
+    topicSlugs: ["reflexion-total-y-angulo-limite", "refraccion-y-ley-de-snell"],
     año: 2020, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "B.4",
     enunciado: "Una placa de vidrio de 4 cm de espesor\ny de índice de refracción 1,5 se encuentra sumergida\nentre dos aceites de índices de refracción 1,4 y 1,2\nrespectivamente. Proveniente del aceite de índice 1,4\nincide sobre el vidrio un haz de luz con un ángulo de\nincidencia de 30º. Calcule:\n\na) \tLa distancia, d, entre el rayo reflejado por la cara\nsuperior del vidrio y el refractado después de\nreflejarse en la cara inferior del vidrio.\n\nb) \tEl ángulo de incidencia mínimo en la cara\nsuperior \tdel \tvidrio \tnecesario \tpara \tque \tse\nproduzca el fenómeno de reflexión total en la cara inferior de la placa de vidrio.\n\n![Esquema de refracción y reflexión en una placa de vidrio](/fisica-imgs/madrid/2020/ordinaria/fisica-2020-ordinaria-b4.png)",
@@ -962,6 +1019,7 @@ Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{
   },
   {
     id: "f-2020-jun-B5",
+    topicSlugs: ["efecto-fotoelectrico", "hipotesis-de-de-broglie-dualidad-onda-corpusculo"],
     año: 2020, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: `Se hace incidir un haz de
@@ -990,6 +1048,7 @@ Planck, $h = 6{,}63 \\cdot 10^{-34}\ \\text{J s}$.
   },
   {
     id: "f-2019-jun-A1",
+    topicSlugs: ["intensidad-del-campo-gravitatorio", "trabajo-y-caracter-conservativo-del-campo-gravitatorio"],
     año: 2019, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: `Una masa puntual $m_1 = 5$ kg está situada en el punto $(4, 3)$ m.
@@ -1007,6 +1066,7 @@ Dato: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\ \\text{N
   },
   {
     id: "f-2019-jun-A2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2019, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Ondas", numero: "A.2",
     enunciado: `Un detector situado a cierta distancia de una fuente sonora puntual mide un nivel de
@@ -1023,6 +1083,7 @@ Dato: Intensidad umbral de audición, $I_0 = 10^{-12}\ \\text{W m}^{-2}$.`,
   },
   {
     id: "f-2019-jun-A3",
+    topicSlugs: ["campo-magnetico-creado-por-corrientes", "fuerza-magnetica-sobre-una-corriente-y-momento-sobre-una-espira"],
     año: 2019, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
     enunciado: `Se tienen dos hilos conductores rectilíneos, indefinidos y paralelos al eje $z$ que cortan
@@ -1040,6 +1101,7 @@ Dato: Permeabilidad magnética del vacío, $\\mu_0 = 4\\pi \\cdot 10^{-7}$ N A$^
   },
   {
     id: "f-2019-jun-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"],
     año: 2019, convocatoria: "Ordinaria", opcion: "A",
     tipo: "Optica", numero: "A.4",
     enunciado: "a) \tDetermine a qué distancia debe colocarse un objeto delante de una lente convergente de\n0,30 m de distancia focal, para que se forme una imagen virtual, derecha y dos veces mayor\nque el objeto.\n\nb) \tEl punto remoto de un ojo miope se encuentra 0,5 m delante de sus ojos. Determine la\npotencia de la lente que debe utilizar para ver nítido un objeto situado en el infinito.",
@@ -1048,6 +1110,7 @@ Dato: Permeabilidad magnética del vacío, $\\mu_0 = 4\\pi \\cdot 10^{-7}$ N A$^
   },
   {
     id: "f-2019-jun-A5",
+    topicSlugs: ["efecto-fotoelectrico"],
     año: 2019, convocatoria: "Ordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: `a) La longitud de onda umbral de un metal para el efecto fotoeléctrico es 579 nm. Calcule el
@@ -1065,6 +1128,7 @@ luz en el vacío, $c = 3 \\cdot 10^8\ \\text{m s}^{-1}$.`,
   },
   {
     id: "f-2019-jun-B1",
+    topicSlugs: ["velocidad-orbital"],
     año: 2019, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
     enunciado: `El Amazonas 5 es un satélite geoestacionario de comunicaciones de 5900 kg puesto en
@@ -1082,6 +1146,7 @@ Tierra, $R_T = 6{,}37 \\cdot 10^6$ m.`,
   },
   {
     id: "f-2019-jun-B2",
+    topicSlugs: ["movimiento-armonico-simple-mas-elongacion-y-ecuacion"],
     año: 2019, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Ondas", numero: "B.2",
     enunciado: `Una onda armónica transversal de frecuencia $f = 0{,}25$ Hz y longitud de onda $\\lambda = 2$ m se
@@ -1099,6 +1164,7 @@ de fase, en un mismo instante, entre dos puntos situados en el eje $x$ que dista
   },
   {
     id: "f-2019-jun-B3",
+    topicSlugs: ["potencial-electrico"],
     año: 2019, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
     enunciado: `Dos cargas puntuales, con valores $q_1 = -4$ nC y $q_2 = +2$ nC respectivamente, están
@@ -1115,6 +1181,7 @@ Dato: Constante de la Ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{
   },
   {
     id: "f-2019-jun-B4",
+    topicSlugs: ["refraccion-y-ley-de-snell"],
     año: 2019, convocatoria: "Ordinaria", opcion: "B",
     tipo: "Optica", numero: "B.4",
     enunciado: "Un rayo de luz se propaga según muestra el esquema de la\nfigura. Primero incide con un ángulo i₁ desde un medio de índice de\nrefracción n₁ = 1,6 sobre un medio de índice de refracción n₂ = 1,3 de\nmanera que el rayo reflejado y el rayo refractado forman entre sí un ángulo\nde 90º. El rayo refractado incide con el ángulo crítico $i_{c}$ sobre otro medio\nde índice de refracción n₃ desconocido. Determine:\n\na) \tLos ángulos de incidencia i₁ e $i_{c}$.\n\nb) \tEl índice de refracción n₃.",
@@ -1123,6 +1190,7 @@ Dato: Constante de la Ley de Coulomb, $K = 9 \\cdot 10^9\ \\text{N m}^2\ \\text{
   },
   {
     id: "f-2019-jun-B5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2019, convocatoria: "Ordinaria", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: `Se dispone de una muestra de 10 mg de $^{238}$Pu cuyo período de semidesintegración es
@@ -1148,6 +1216,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
 
   {
     id: "f-2025-jul-1",
+    topicSlugs: ["hipotesis-de-de-broglie-dualidad-onda-corpusculo"],
     año: 2025, convocatoria: "Extraordinaria", opcion: "A",
     tipo: "RadioactividadModerna", numero: "1",
     enunciado: `En Lund, Suecia, se está construyendo la futura Fuente Europea de Neutrones por Espalación. En sus instalaciones se aceleran protones, $H^+$, hasta alcanzar una energía cinética de $2\ \text{GeV}$. Posteriormente, el haz impacta sobre un blanco de tungsteno que emite neutrones, que atraviesan moderadores para modificar su energía cinética.`,
@@ -1160,6 +1229,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
   },
   {
     id: "f-2025-jul-2A",
+    topicSlugs: ["velocidad-de-escape", "velocidad-orbital"],
     año: 2025, convocatoria: "Extraordinaria", opcion: "A",
     tipo: "Gravitacion", numero: "2.A",
     enunciado: `Una nave alienígena se sitúa en una órbita circular de radio $r$ en torno a la Tierra. Los tripulantes observan que tardan $1{,}59$ h en dar una vuelta completa y saben que la velocidad de escape desde la órbita es $10{,}7\\ \text{km s}^{-1}$.`,
@@ -1172,6 +1242,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
   },
   {
     id: "f-2025-jul-2B",
+    topicSlugs: ["intensidad-del-campo-gravitatorio", "trabajo-y-caracter-conservativo-del-campo-gravitatorio"],
     año: 2025, convocatoria: "Extraordinaria", opcion: "B",
     tipo: "Gravitacion", numero: "2.B",
     enunciado: `Sean dos partículas idénticas de masas $m_1=m_2=3\\ \text{kg}$, situadas en los puntos $P_1(0,0)$ m y $P_2(6,0)$ m del plano $xy$.`,
@@ -1184,6 +1255,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
   },
   {
     id: "f-2025-jul-3A",
+    topicSlugs: ["dinamica-del-mas-fuerza-recuperadora"],
     año: 2025, convocatoria: "Extraordinaria", opcion: "A",
     tipo: "Ondas", numero: "3.A",
     enunciado: `Un muelle de constante elástica $k$ tiene uno de sus extremos unido a una pared y el otro a un bloque de masa $m$. El bloque se mueve sobre una superficie horizontal sin rozamiento. Se separa $5$ cm de la posición de equilibrio y se suelta; al pasar por el equilibrio su energía cinética es $0{,}02$ J.`,
@@ -1195,6 +1267,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
   },
   {
     id: "f-2025-jul-3B",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"],
     año: 2025, convocatoria: "Extraordinaria", opcion: "B",
     tipo: "Optica", numero: "3.B",
     enunciado: `Se sitúa a la izquierda de una lente convergente un objeto de $4$ cm de altura, formándose una imagen real de tamaño $2$ cm. La distancia entre la posición del objeto y la imagen es de $45$ cm.`,
@@ -1206,6 +1279,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
   },
   {
     id: "f-2025-jul-4A",
+    topicSlugs: ["fuerza-de-lorentz"],
     año: 2025, convocatoria: "Extraordinaria", opcion: "A",
     tipo: "Electricidad", numero: "4.A",
     enunciado: `Un espectrómetro de masas consta de un selector de velocidades y de un detector de iones. En el selector hay un campo eléctrico y un campo magnético mutuamente perpendiculares para que solo los iones con cierta velocidad viajen en línea recta. Se inyectan iones $Ca^{2+}$ con $\\vec v=2{,}4\\cdot10^5\\,\\vec i\\ \text{m s}^{-1}$ y el campo magnético es $\\vec B_1=1{,}0\\,\\vec j\\ \text{mT}$. A la salida penetran en una región con $\\vec B_2=1{,}5\\,\\vec j\\ \text{T}$.\n\n![Selector de velocidades del espectrómetro](/fisica-imgs/madrid/2025/extraordinaria/fisica-2025-extraordinaria-4a-parte-a.png)\n\n![Detector de iones del espectrómetro](/fisica-imgs/madrid/2025/extraordinaria/fisica-2025-extraordinaria-4a-parte-b.png)`,
@@ -1218,6 +1292,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
   },
   {
     id: "f-2025-jul-4B",
+    topicSlugs: ["campo-magnetico-creado-por-corrientes"],
     año: 2025, convocatoria: "Extraordinaria", opcion: "B",
     tipo: "Electricidad", numero: "4.B",
     enunciado: `Un hilo rectilíneo infinito paralelo al eje $z$ pasa por el punto $(0,6,0)$ cm y transporta una corriente $I=5$ A en el sentido positivo del eje $z$.\n\n![Dos hilos rectilíneos en el plano xy](/fisica-imgs/madrid/2025/extraordinaria/fisica-2025-extraordinaria-4b.png)`,
@@ -1230,235 +1305,275 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
   },
 
   {
-    id: "f-2021-jul-A1", año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "Gravitacion", numero: "A.1",
+    id: "f-2021-jul-A1",
+    topicSlugs: ["velocidad-orbital"], año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "Gravitacion", numero: "A.1",
     enunciado: `Una nave espacial queda atrapada en una órbita circular alrededor de un planeta esférico desconocido. Su velocidad orbital es $25000\\ \text{km h}^{-1}$ y tarda $5$ h en dar una vuelta completa.`,
     apartados: ["Determine el radio de la órbita circular y la masa del planeta.", "Si la densidad del planeta es $16150\\ \text{kg m}^{-3}$, calcule el radio del planeta y la gravedad en su superficie."],
     datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$"], puntos: 2,
   },
   {
-    id: "f-2021-jul-A2", año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "Ondas", numero: "A.2",
+    id: "f-2021-jul-A2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"], año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "Ondas", numero: "A.2",
     enunciado: `Anacleto graba con un teléfono inteligente, a través de una pared, una conversación situada a $5$ m. Por efecto de la pared, al teléfono solo llega un $2\%$ de la intensidad que llegaría sin pared. El nivel de una conversación a $1$ m es $50$ dB.`,
     apartados: ["Calcule el nivel de intensidad sonora que llega al teléfono.", "Si el teléfono graba conversaciones a $100$ m, calcule el nivel más bajo que puede medir."],
     datos: ["$I_0=10^{-12}\\ \text{W m}^{-2}$"], puntos: 2,
   },
   {
-    id: "f-2021-jul-A3", año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "Electricidad", numero: "A.3",
+    id: "f-2021-jul-A3",
+    topicSlugs: ["campo-magnetico-creado-por-corrientes"], año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "Electricidad", numero: "A.3",
     enunciado: `Se tienen tres hilos indefinidos de corriente. Los hilos de intensidades $I_1=2$ A e $I_2=2$ A son paralelos al eje $x$ y pasan por $(0,0,0)$ y $(0,0,4)$ m. El tercer hilo, de intensidad $I_3=3$ A, pasa por el origen y es paralelo al eje $y$. Todas las corrientes van en el sentido positivo de los ejes.\n\n![Tres hilos indefinidos de corriente](/fisica-imgs/madrid/2021/extraordinaria/fisica-2021-extraordinaria-a3.png)`,
     apartados: ["Calcule el campo magnético total creado por los tres hilos en $(0,0,2)$ m.", "Calcule la fuerza magnética por unidad de longitud que ejerce el hilo $I_1$ sobre el hilo $I_2$ e indique si es atractiva o repulsiva."],
     datos: ["$\\mu_0=4\\pi\\cdot10^{-7}\\ \text{N A}^{-2}$"], puntos: 2,
   },
   {
-    id: "f-2021-jul-A4", año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "Optica", numero: "A.4",
+    id: "f-2021-jul-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"], año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "Optica", numero: "A.4",
     enunciado: `Sistema óptico formado por dos lentes convergentes: una lente A de distancia focal $f'_A$ y otra lente B, situada $80$ cm a la derecha de A, con $f'_B=30$ cm. Un objeto de $5$ cm de altura está $15$ cm a la izquierda de A.`,
     apartados: ["Si la imagen final aparece $75$ cm a la derecha de B, calcule $f'_A$ y el tamaño de la imagen final.", "Determine dónde situar el objeto a la izquierda de A para que el sistema forme la imagen en el infinito."], puntos: 2,
   },
   {
-    id: "f-2021-jul-A5", año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "RadioactividadModerna", numero: "A.5",
+    id: "f-2021-jul-A5",
+    topicSlugs: ["hipotesis-de-de-broglie-dualidad-onda-corpusculo"], año: 2021, convocatoria: "Extraordinaria", opcion: "A", tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: `En un acelerador se originan un electrón relativista de velocidad $0{,}75c$ y un fotón de $15$ MeV.`,
     apartados: ["Calcule la masa relativista y la energía cinética del electrón.", "Determine la longitud de onda del fotón y la longitud de de Broglie del electrón."],
     datos: ["$e=1{,}6\\cdot10^{-19}\\ \text{C}$", "$m_e=9{,}1\\cdot10^{-31}\\ \text{kg}$", "$h=6{,}63\\cdot10^{-34}\\ \text{J s}$", "$c=3\\cdot10^8\\ \text{m s}^{-1}$"], puntos: 2,
   },
   {
-    id: "f-2021-jul-B1", año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "Gravitacion", numero: "B.1",
+    id: "f-2021-jul-B1",
+    topicSlugs: ["intensidad-del-campo-gravitatorio"], año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "Gravitacion", numero: "B.1",
     enunciado: `Una partícula de masa $m$ está en el origen. La componente $x$ del campo gravitatorio creado en el punto $(2,2)$ m es $-1{,}18\\cdot10^{-11}\\ \text{N kg}^{-1}$.`,
     apartados: ["Calcule la masa $m$.", "Calcule el trabajo del campo para llevar una masa $M=5$ kg desde $(4,0)$ m a $(2,2)$ m."],
     datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$"], puntos: 2,
   },
   {
-    id: "f-2021-jul-B2", año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "Ondas", numero: "B.2",
+    id: "f-2021-jul-B2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"], año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "Ondas", numero: "B.2",
     enunciado: `Una onda transversal se propaga por una cuerda en el sentido positivo del eje $x$. En los instantes $t=0$ s y $t=2$ s: $y(x,0)=0{,}1\\cos(\\pi-4\\pi x)$ m e $y(x,2)=0{,}1\\cos(11\\pi-4\\pi x)$ m.`,
     apartados: ["Calcule la frecuencia angular y la expresión matemática de la onda.", "Calcule la velocidad de propagación y la aceleración máxima de oscilación."], puntos: 2,
   },
   {
-    id: "f-2021-jul-B3", año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "Electricidad", numero: "B.3",
+    id: "f-2021-jul-B3",
+    topicSlugs: ["fuerza-de-lorentz"], año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "Electricidad", numero: "B.3",
     enunciado: `Un espectrómetro de masas selecciona iones positivos de oxígeno $^{18}O^+$ mediante un selector con campos perpendiculares $\\vec E=4{,}0\\cdot10^5\\,\\vec j\\ \text{V m}^{-1}$ y $\\vec B_1=2\\,\\vec k\\ \text{T}$. Después pasan a una región con $\\vec B_2=5\\,\\vec k\\ \text{T}$.\n\n![Esquema de espectrómetro de masas](/fisica-imgs/madrid/2021/extraordinaria/fisica-2021-extraordinaria-b3.png)`,
     apartados: ["Calcule la velocidad de los iones que viajan en línea recta.", "Calcule el radio de la órbita circular en la segunda región."],
     datos: ["$m=2{,}7\\cdot10^{-26}\\ \text{kg}$", "$q=+e$", "$e=1{,}6\\cdot10^{-19}\\ \text{C}$"], puntos: 2,
   },
   {
-    id: "f-2021-jul-B4", año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "Optica", numero: "B.4",
+    id: "f-2021-jul-B4",
+    topicSlugs: ["reflexion-total-y-angulo-limite", "refraccion-y-ley-de-snell"], año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "Optica", numero: "B.4",
     enunciado: `Dos medios A y B tienen índices $n_A$ y $n_B$. Un rayo de frecuencia $6{,}04\\cdot10^{14}$ Hz incide desde A hacia B. El ángulo límite para reflexión total es $45{,}58^\\circ$ y $n_A-n_B=0{,}6$.`,
     apartados: ["Determine los índices de refracción $n_A$ y $n_B$.", "Determine las longitudes de onda en los medios A y B."],
     datos: ["$c=3\\cdot10^8\\ \text{m s}^{-1}$"], puntos: 2,
   },
   {
-    id: "f-2021-jul-B5", año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "RadioactividadModerna", numero: "B.5",
+    id: "f-2021-jul-B5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"], año: 2021, convocatoria: "Extraordinaria", opcion: "B", tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: `El patrón del kilogramo es un cilindro de platino-iridio con un $90\%$ en masa de Pt. El isótopo $^{190}$Pt es radiactivo, con tiempo de semidesintegración $6{,}5\\cdot10^{11}$ años, y representa el $0{,}012\%$ en masa de una muestra de platino.`,
     apartados: ["Calcule la actividad inicial del patrón del kilogramo.", "Calcule la masa final de $^{190}$Pt transcurridos mil millones de años."],
     datos: ["$M(^{190}Pt)=189{,}96\\ \text{u}$", "$N_A=6{,}02\\cdot10^{23}\\ \text{mol}^{-1}$"], puntos: 2,
   },
 
   {
-    id: "f-2020-jul-A1", año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "Gravitacion", numero: "A.1",
+    id: "f-2020-jul-A1",
+    topicSlugs: ["energia-mecanica-en-el-campo-gravitatorio"], año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "Gravitacion", numero: "A.1",
     enunciado: `Calisto, satélite de Júpiter, tiene densidad $1{,}83\\ \text{g cm}^{-3}$ y radio $2410$ km. Da una revolución alrededor de Júpiter cada $16{,}89$ días.`,
     apartados: ["Calcule la masa del satélite y la aceleración de la gravedad en su superficie.", "Obtenga la energía cinética y la energía mecánica de Calisto en su órbita circular."],
     datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$", "$M_J=1{,}90\\cdot10^{27}\\ \text{kg}$"], puntos: 2,
   },
   {
-    id: "f-2020-jul-A2", año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "Ondas", numero: "A.2",
+    id: "f-2020-jul-A2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"], año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "Ondas", numero: "A.2",
     enunciado: `Un violín emite ondas sonoras con una potencia de $5\\cdot10^{-3}$ W al tocar la nota Fa de $698$ Hz.`,
     apartados: ["Indique si la onda es longitudinal o transversal y obtenga su longitud de onda.", "Calcule el nivel sonoro percibido a $20$ m por $15$ violines tocando al unísono."],
     datos: ["$I_0=10^{-12}\\ \text{W m}^{-2}$", "$v_s=340\\ \text{m s}^{-1}$"], puntos: 2,
   },
   {
-    id: "f-2020-jul-A3", año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "Electricidad", numero: "A.3",
+    id: "f-2020-jul-A3",
+    topicSlugs: ["intensidad-del-campo-electrico"], año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "Electricidad", numero: "A.3",
     enunciado: `Dos cargas puntuales $q_A=+5$ nC y $q_B=-5$ nC están en $(-4,0)$ cm y $(4,0)$ cm.`,
     apartados: ["Determine el potencial y el campo eléctrico en el origen.", "Determine el potencial y el campo eléctrico en el punto $(0,3)$ cm."],
     datos: ["$K=9\\cdot10^9\\ \text{N m}^2\\text{C}^{-2}$"], puntos: 2,
   },
   {
-    id: "f-2020-jul-A4", año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "Optica", numero: "A.4",
+    id: "f-2020-jul-A4",
+    topicSlugs: ["refraccion-y-ley-de-snell"], año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "Optica", numero: "A.4",
     enunciado: `Sobre la cara A de un prisma transparente incide perpendicularmente desde el aire un rayo de luz a $5$ cm del vértice superior, cuyo ángulo es de $30^\\circ$.\n\n![Prisma de material transparente](/fisica-imgs/madrid/2020/extraordinaria/fisica-2020-extraordinaria-a4.png)`,
     apartados: ["Calcule el tiempo que tarda el rayo en alcanzar la cara B y el ángulo de emergencia si el material es vidrio de índice $1{,}5$.", "Razone si el rayo emergerá por la cara B si el prisma es de diamante, de índice $2{,}5$."],
     datos: ["$c=3\\cdot10^8\\ \text{m s}^{-1}$", "$n_{aire}=1$"], puntos: 2,
   },
   {
-    id: "f-2020-jul-A5", año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "RadioactividadModerna", numero: "A.5",
+    id: "f-2020-jul-A5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"], año: 2020, convocatoria: "Extraordinaria", opcion: "A", tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: `Para obtener imágenes del corazón se utiliza $^{201}$Tl, que emite rayos gamma con periodo de semidesintegración de $3{,}04$ días. Se recomienda inyectar $0{,}9\\ \text{MBq kg}^{-1}$.`,
     apartados: ["Obtenga la constante de desintegración y la masa recomendada para un paciente de $75$ kg.", "Calcule el tiempo para que la actividad se reduzca al $1\%$ de la inicial."],
     datos: ["$N_A=6{,}02\\cdot10^{23}\\ \text{mol}^{-1}$", "$M(^{201}Tl)=201\\ \text{u}$"], puntos: 2,
   },
   {
-    id: "f-2020-jul-B1", año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "Gravitacion", numero: "B.1",
+    id: "f-2020-jul-B1",
+    topicSlugs: ["velocidad-orbital"], año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "Gravitacion", numero: "B.1",
     enunciado: `La sonda Mars Reconnaissance Orbiter se situó en 2006 en una órbita circular alrededor de Marte a $290$ km de altura. Actualmente tiene una masa de $1031$ kg.`,
     apartados: ["Calcule el periodo de revolución y la velocidad orbital alrededor de Marte.", "Obtenga la energía mínima necesaria para que escape del campo gravitatorio marciano."],
     datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$", "$M_{Marte}=6{,}42\\cdot10^{23}\\ \text{kg}$", "$R_{Marte}=3{,}39\\cdot10^6\\ \text{m}$"], puntos: 2,
   },
   {
-    id: "f-2020-jul-B2", año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "Ondas", numero: "B.2",
+    id: "f-2020-jul-B2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"], año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "Ondas", numero: "B.2",
     enunciado: `Un oscilador de frecuencia $1000$ Hz genera en una cuerda una onda transversal que se propaga en sentido positivo del eje $x$, con longitud de onda $1{,}5$ m. La velocidad máxima de oscilación es $100\\ \text{m s}^{-1}$. En $x=0$ m y $t=600\\ \mu$s, la elongación es $1$ cm y la velocidad de oscilación es positiva.`,
     apartados: ["Determine la velocidad de propagación y la amplitud.", "Halle la fase inicial y escriba la expresión matemática de la onda."], puntos: 2,
   },
   {
-    id: "f-2020-jul-B3", año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "Electricidad", numero: "B.3",
+    id: "f-2020-jul-B3",
+    topicSlugs: ["flujo-magnetico-e-induccion-electromagnetica"], año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "Electricidad", numero: "B.3",
     enunciado: `Una espira circular de radio $6$ cm, inicialmente en el plano $xy$, está inmersa en un campo magnético homogéneo dirigido según $+z$.`,
     apartados: ["Calcule el flujo y la fem inducida en $t=7$ ms si $B=3t^2$.", "Calcule el flujo y la fem inducida en $t=7$ ms si $B=8$ mT y la espira gira a $60\\ \text{rad s}^{-1}$ alrededor del eje $y$."], puntos: 2,
   },
   {
-    id: "f-2020-jul-B4", año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "Optica", numero: "B.4",
+    id: "f-2020-jul-B4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"], año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "Optica", numero: "B.4",
     enunciado: `Determine las posiciones donde debe colocarse un objeto real a la izquierda de una lente convergente de potencia $2{,}5$ dioptrías para que el tamaño de la imagen sea el indicado.`,
     apartados: ["Imagen derecha y del doble que el objeto.", "Imagen invertida y de la mitad que el objeto. Indique la naturaleza de la imagen y trace los rayos."], puntos: 2,
   },
   {
-    id: "f-2020-jul-B5", año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "RadioactividadModerna", numero: "B.5",
+    id: "f-2020-jul-B5",
+    topicSlugs: ["hipotesis-de-planck-y-cuantizacion-de-la-energia"], año: 2020, convocatoria: "Extraordinaria", opcion: "B", tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: `Un sistema atómico de tres niveles energéticos se utiliza para obtener radiación láser. Respecto al fundamental, el segundo y tercer nivel están a $2{,}07$ eV y $2{,}76$ eV. La absorción se produce del nivel 1 al 3 y la emisión láser del 2 al 1.`,
     apartados: ["Halle la longitud de onda y frecuencia del fotón necesario para la absorción.", "Calcule la longitud de onda emitida y la potencia del láser si se emiten $2\\cdot10^{16}$ fotones/s."],
     datos: ["$h=6{,}63\\cdot10^{-34}\\ \text{J s}$", "$c=3\\cdot10^8\\ \text{m s}^{-1}$", "$e=1{,}6\\cdot10^{-19}\\ \text{C}$"], puntos: 2,
   },
 
   {
-    id: "f-2019-jul-A1", año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "Gravitacion", numero: "A.1",
+    id: "f-2019-jul-A1",
+    topicSlugs: ["velocidad-orbital"], año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "Gravitacion", numero: "A.1",
     enunciado: `Los satélites LAGEOS son cuerpos esféricos de masa $405$ kg en órbita circular alrededor de la Tierra a $5900$ km sobre su superficie.`,
     apartados: ["Determine el periodo de estos satélites.", "Calcule la energía requerida para pasar desde la superficie terrestre a dicha órbita."],
     datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$", "$M_T=5{,}97\\cdot10^{24}\\ \text{kg}$", "$R_T=6{,}37\\cdot10^6\\ \text{m}$"], puntos: 2,
   },
   {
-    id: "f-2019-jul-A2", año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "Ondas", numero: "A.2",
+    id: "f-2019-jul-A2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"], año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "Ondas", numero: "A.2",
     enunciado: `Un detector situado a $200$ m de una sirena mide $80$ dB. Suponga que la sirena emite como fuente puntual.`,
     apartados: ["Determine la potencia sonora de la sirena.", "Calcule a qué distancia mediría la misma intensidad si la sirena tuviese el doble de potencia."],
     datos: ["$I_0=10^{-12}\\ \text{W m}^{-2}$"], puntos: 2,
   },
   {
-    id: "f-2019-jul-A3", año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "Electricidad", numero: "A.3",
+    id: "f-2019-jul-A3",
+    topicSlugs: ["intensidad-del-campo-electrico", "trabajo-y-caracter-conservativo-del-campo-electrico"], año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "Electricidad", numero: "A.3",
     enunciado: `Una carga $q_1=10\\ \mu$C está en el origen y otra carga $q_2=20\\ \mu$C en $(3,0)$ m.`,
     apartados: ["Calcule el punto donde el campo eléctrico total es nulo.", "Calcule el trabajo del campo para transportar un electrón desde $(3,4)$ m hasta $(2,0)$ m."],
     datos: ["$e=1{,}6\\cdot10^{-19}\\ \text{C}$", "$K=9\\cdot10^9\\ \text{N m}^2\\text{C}^{-2}$"], puntos: 2,
   },
   {
-    id: "f-2019-jul-A4", año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "Optica", numero: "A.4",
+    id: "f-2019-jul-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental", "aumento-lateral-en-lentes-y-espejos"], año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "Optica", numero: "A.4",
     enunciado: `Una lente convergente de $10$ cm de distancia focal forma la imagen de un objeto de tamaño $y=1$ cm. Se quiere que la imagen se forme $14$ cm a la derecha de la lente.`,
     apartados: ["Determine dónde situar el objeto y el tamaño de la imagen.", "Realice el trazado de rayos correspondiente."], puntos: 2,
   },
   {
-    id: "f-2019-jul-A5", año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "RadioactividadModerna", numero: "A.5",
+    id: "f-2019-jul-A5",
+    topicSlugs: ["efecto-fotoelectrico", "hipotesis-de-de-broglie-dualidad-onda-corpusculo"], año: 2019, convocatoria: "Extraordinaria", opcion: "A", tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: `Al iluminar un material con luz de $\\lambda=589$ nm se liberan electrones con energía cinética máxima $0{,}577$ eV; con luz ultravioleta de $\\lambda=179{,}76$ nm la energía máxima es $5{,}38$ eV.`,
     apartados: ["Determine la constante de Planck y el trabajo de extracción.", "Calcule la longitud de onda de de Broglie del electrón de energía cinética máxima en el caso ultravioleta."],
     datos: ["$e=1{,}6\\cdot10^{-19}\\ \text{C}$", "$m_e=9{,}1\\cdot10^{-31}\\ \text{kg}$", "$c=3\\cdot10^8\\ \text{m s}^{-1}$"], puntos: 2,
   },
   {
-    id: "f-2019-jul-B1", año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "Gravitacion", numero: "B.1",
+    id: "f-2019-jul-B1",
+    topicSlugs: ["velocidad-orbital", "velocidad-de-escape"], año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "Gravitacion", numero: "B.1",
     enunciado: `El satélite Europa describe una órbita circular alrededor de Júpiter de radio $671100$ km y periodo $3{,}55$ días terrestres.`,
     apartados: ["Determine la masa de Júpiter.", "Determine la velocidad de escape desde la superficie de Júpiter."],
     datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$", "$R_{Júpiter}=69911$ km"], puntos: 2,
   },
   {
-    id: "f-2019-jul-B2", año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "Ondas", numero: "B.2",
+    id: "f-2019-jul-B2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"], año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "Ondas", numero: "B.2",
     enunciado: `Una onda transversal que se propaga por el eje $x$ viene dada por $y(x,t)=0{,}05\\cos(8\\pi t-4\\pi x+\\varphi_0)$ en unidades SI.`,
     apartados: ["Determine $\\varphi_0$ si en $t=5$ s la velocidad de oscilación de $x=3$ m es nula y su aceleración es positiva.", "Determine el tiempo que tarda la onda en llegar a $x=8$ m si la fuente comienza a emitir en $t=0$ en el origen."], puntos: 2,
   },
   {
-    id: "f-2019-jul-B3", año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "Electricidad", numero: "B.3",
+    id: "f-2019-jul-B3",
+    topicSlugs: ["trabajo-y-caracter-conservativo-del-campo-electrico"], año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "Electricidad", numero: "B.3",
     enunciado: `Un positrón se acelera mediante una diferencia de potencial $\\Delta V$ y entra en una región con un campo magnético $B=5\\ \mu$T perpendicular a su velocidad. El radio de la órbita circular es $50$ cm.`,
     apartados: ["Obtenga la diferencia de potencial utilizada para acelerar el positrón.", "Obtenga la frecuencia angular de giro del positrón."],
     datos: ["$e=1{,}6\\cdot10^{-19}\\ \text{C}$", "$m_p=9{,}1\\cdot10^{-31}\\ \text{kg}$"], puntos: 2,
   },
   {
-    id: "f-2019-jul-B4", año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "Optica", numero: "B.4",
+    id: "f-2019-jul-B4",
+    topicSlugs: ["reflexion-total-y-angulo-limite"], año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "Optica", numero: "B.4",
     enunciado: `Desde lo alto de un trampolín, Carlos ve a Laura en el fondo de la piscina mirando con un ángulo de $30^\\circ$ respecto a la vertical. La altura de observación es $4$ m, la piscina tiene $3$ m de profundidad y $n_{agua}=1{,}33$.`,
     apartados: ["Determine la distancia respecto a la vertical del trampolín a la que se encuentra Laura.", "Determine el ángulo límite entre agua y aire y realice un esquema del rayo."],
     datos: ["$n_{aire}=1$"], puntos: 2,
   },
   {
-    id: "f-2019-jul-B5", año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "RadioactividadModerna", numero: "B.5",
+    id: "f-2019-jul-B5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"], año: 2019, convocatoria: "Extraordinaria", opcion: "B", tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: `Una muestra de madera de un sarcófago se ha datado por $^{14}$C con edad de $3200$ años. En la muestra se ha detectado que la cantidad de $^{14}$C ha disminuido un $32\%$ respecto a la original.`,
     apartados: ["Calcule la vida media del $^{14}$C y el periodo de semidesintegración.", "Si la muestra actual contiene $8\\ \mu$g de $^{14}$C, calcule su actividad."],
     datos: ["$N_A=6{,}02\\cdot10^{23}\\ \text{mol}^{-1}$", "$M(^{14}C)=14{,}0\\ \text{u}$"], puntos: 2,
   },
 
   {
-    id: "f-2018-jul-A1", año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "Gravitacion", numero: "A.1",
+    id: "f-2018-jul-A1",
+    topicSlugs: ["intensidad-del-campo-gravitatorio"], año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "Gravitacion", numero: "A.1",
     enunciado: `La masa de un objeto en la superficie terrestre es de $50$ kg.`,
     apartados: ["Determine la masa y el peso del objeto en la superficie de Mercurio.", "Calcule a qué altura sobre Mercurio su peso se reduce a la tercera parte."],
     datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$", "$M_M=3{,}30\\cdot10^{23}\\ \text{kg}$", "$R_M=2{,}44\\cdot10^6\\ \text{m}$"], puntos: 2,
   },
   {
-    id: "f-2018-jul-A2", año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "Ondas", numero: "A.2",
+    id: "f-2018-jul-A2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"], año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "Ondas", numero: "A.2",
     enunciado: `El nivel de intensidad sonora de la sirena de un barco es $80$ dB a $10$ m. Suponga que la sirena es un foco puntual.`,
     apartados: ["Calcule la potencia de la sirena y la intensidad a $1$ km.", "Calcule las distancias donde se alcanza $70$ dB y donde el sonido deja de ser audible."],
     datos: ["$I_0=10^{-12}\\ \text{W m}^{-2}$"], puntos: 2,
   },
   {
-    id: "f-2018-jul-A3", año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "Electricidad", numero: "A.3",
+    id: "f-2018-jul-A3",
+    topicSlugs: ["trabajo-y-caracter-conservativo-del-campo-electrico"], año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "Electricidad", numero: "A.3",
     enunciado: `Dos cargas positivas e iguales situadas en $(2,2)$ m y $(-2,-2)$ m generan en $(1,1)$ m un campo de módulo $E=5\\cdot10^3\\ \text{N C}^{-1}$.`,
     apartados: ["Determine el valor de las cargas y el vector campo eléctrico en $(-1,-1)$ m.", "Calcule el trabajo necesario para traer una carga de $2\\ \mu$C desde el infinito hasta $(-1,-1)$ m."],
     datos: ["$K=9\\cdot10^9\\ \text{N m}^2\\text{C}^{-2}$"], puntos: 2,
   },
   {
-    id: "f-2018-jul-A4", año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "Optica", numero: "A.4",
+    id: "f-2018-jul-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"], año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "Optica", numero: "A.4",
     enunciado: `Un sistema óptico centrado está formado por dos lentes delgadas divergentes iguales, de distancia focal $f'=-20$ cm, separadas $5$ cm. Un objeto luminoso de tamaño $y=2$ cm se sitúa a $60$ cm a la izquierda de la primera lente.`,
     apartados: ["Determine la posición de la imagen formada por la primera lente y realice la construcción geométrica.", "Determine la posición y tamaño de la imagen final formada por las dos lentes."], puntos: 2,
   },
   {
-    id: "f-2018-jul-A5", año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "RadioactividadModerna", numero: "A.5",
+    id: "f-2018-jul-A5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"], año: 2018, convocatoria: "Extraordinaria", opcion: "A", tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: `El $^{14}$C tiene un periodo de semidesintegración de $5730$ años. Inicialmente se tiene una muestra de $2$ mg.`,
     apartados: ["Determine el tiempo para que la muestra se reduzca a $0{,}5$ mg.", "Calcule la actividad inicial."],
     datos: ["$N_A=6{,}02\\cdot10^{23}\\ \text{mol}^{-1}$", "$M(^{14}C)=14{,}00\\ \text{u}$"], puntos: 2,
   },
   {
-    id: "f-2018-jul-B1", año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "Gravitacion", numero: "B.1",
+    id: "f-2018-jul-B1",
+    topicSlugs: ["velocidad-orbital"], año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "Gravitacion", numero: "B.1",
     enunciado: `Un satélite artificial de masa $712$ kg describe una órbita circular alrededor de la Tierra a $694$ km de altura.`,
     apartados: ["Calcule la velocidad y el periodo del satélite.", "Calcule la energía necesaria para trasladarlo a otra órbita circular a $1000$ km de altura."],
     datos: ["$G=6{,}67\\cdot10^{-11}\\ \text{N m}^2\\text{kg}^{-2}$", "$M_T=5{,}97\\cdot10^{24}\\ \text{kg}$", "$R_T=6{,}37\\cdot10^6\\ \text{m}$"], puntos: 2,
   },
   {
-    id: "f-2018-jul-B2", año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "Ondas", numero: "B.2",
+    id: "f-2018-jul-B2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica", "velocidad-y-aceleracion-en-el-mas"], año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "Ondas", numero: "B.2",
     enunciado: `Una onda armónica transversal de periodo $T=4$ s se propaga en el sentido positivo del eje $x$. En $t=0$, $Y(x,0)=0{,}2\\sin(-4\\pi x+\\pi/3)$, con $x$ e $Y$ en metros.`,
     apartados: ["Determine amplitud, frecuencia, longitud de onda y velocidad de propagación.", "Determine la velocidad y aceleración de oscilación del punto $x=0{,}40$ m en $t=8$ s."], puntos: 2,
   },
   {
-    id: "f-2018-jul-B3", año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "Electricidad", numero: "B.3",
+    id: "f-2018-jul-B3",
+    topicSlugs: ["campo-magnetico-creado-por-corrientes"], año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "Electricidad", numero: "B.3",
     enunciado: `Dos hilos rectilíneos indefinidos y paralelos al eje $z$ están en el plano $yz$. Uno pasa por $(0,-5,0)$ cm con $I_1=30$ A en sentido $+z$; el otro pasa por $(0,5,0)$ cm con corriente $I_2$ en sentido $-z$. En el origen, $B=2{,}8\\cdot10^{-4}$ T.`,
     apartados: ["Calcule $I_2$ y el campo magnético en $(0,10,0)$ cm.", "Calcule la fuerza magnética por unidad de longitud sobre el conductor de $(0,-5,0)$ cm debida al otro."],
     datos: ["$\\mu_0=4\\pi\\cdot10^{-7}\\ \text{N A}^{-2}$"], puntos: 2,
   },
   {
-    id: "f-2018-jul-B4", año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "Optica", numero: "B.4",
+    id: "f-2018-jul-B4",
+    topicSlugs: ["reflexion-total-y-angulo-limite"], año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "Optica", numero: "B.4",
     enunciado: `Un material transparente de índice $n=2$ está en aire y limitado por dos superficies planas no paralelas que forman un ángulo $\\alpha$. Un rayo incide perpendicularmente sobre la primera superficie y emerge por la segunda con $90^\\circ$ respecto a la normal, como se muestra en la figura.\n\n![Material transparente limitado por dos superficies no paralelas](/fisica-imgs/madrid/2018/extraordinaria/fisica-2018-extraordinaria-b4.png)`,
     apartados: ["Calcule el ángulo límite material-aire y el ángulo $\\alpha$.", "Calcule el ángulo de incidencia en la primera superficie para que el ángulo de emergencia por la segunda sea igual que él."],
     datos: ["$n_{aire}=1$"], puntos: 2,
   },
   {
-    id: "f-2018-jul-B5", año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "RadioactividadModerna", numero: "B.5",
+    id: "f-2018-jul-B5",
+    topicSlugs: ["efecto-fotoelectrico"], año: 2018, convocatoria: "Extraordinaria", opcion: "B", tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: `Al iluminar un metal con luz de longitud de onda en el vacío $\\lambda=700$ nm, se emiten electrones con energía cinética máxima $0{,}45$ eV. Al cambiar la longitud de onda, la energía cinética máxima es $1{,}49$ eV.`,
     apartados: ["Calcule la frecuencia de la luz utilizada en la segunda medida.", "Determine a partir de qué frecuencia no se observará efecto fotoeléctrico."],
     datos: ["$e=1{,}6\\cdot10^{-19}\\ \text{C}$", "$c=3\\cdot10^8\\ \text{m s}^{-1}$", "$h=6{,}63\\cdot10^{-34}\\ \text{J s}$"], puntos: 2,
@@ -1466,6 +1581,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
 
   {
       id: "f-2024-jul-A1",
+    topicSlugs: ["velocidad-orbital"],
       año: 2024, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Gravitacion", numero: "A.1",
       enunciado: "Un satélite de comunicaciones orbita alrededor de la Tierra en una trayectoria elíptica cuyo apogeo se encuentra a 39700 km de altitud. El satélite da una vuelta completa cada 12 h.",
@@ -1478,6 +1594,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2024-jul-A2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
       año: 2024, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Ondas", numero: "A.2",
       enunciado: "Dos focos sonoros puntuales F₁ y F₂ están situados en las posiciones (0, 3) m y (4, 0) m del plano xy. El nivel de intensidad sonora debido a F₁ a 2 m es β₁ = 55 dB, y el de F₂ a 2 m es β₂ = 65 dB.",
@@ -1490,6 +1607,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2024-jul-A3",
+    topicSlugs: ["intensidad-del-campo-electrico", "trabajo-y-caracter-conservativo-del-campo-electrico"],
       año: 2024, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Electricidad", numero: "A.3",
       enunciado: "Una partícula con carga 2 nC está situada en el origen de coordenadas y una segunda partícula con carga 4 nC está en el punto (6, 0) m del plano xy.",
@@ -1502,6 +1620,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2024-jul-A4",
+    topicSlugs: ["refraccion-y-ley-de-snell"],
       año: 2024, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Optica", numero: "A.4",
       enunciado: `Dos cristales de grosor 10 cm e índices de refracción n₁ = 1,40 y n₂ = 1,50 están separados por una capa de aire de espesor desconocido e. Un rayo incide por el punto A con ángulo de 30° y sale por el punto B. La distancia horizontal entre A y B es d = 9,2 cm.
@@ -1516,6 +1635,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2024-jul-A5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
       año: 2024, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "RadioactividadModerna", numero: "A.5",
       enunciado: "Para una prueba diagnóstica se utiliza el isótopo ⁹⁹Tc cuyo tiempo de semidesintegración es de 6 h. La actividad de la dosis que hay que inocular al paciente es de 5·10⁸ Bq.",
@@ -1528,6 +1648,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2024-jul-B1",
+    topicSlugs: ["velocidad-orbital", "energia-mecanica-en-el-campo-gravitatorio", "leyes-de-kepler"],
       año: 2024, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Gravitacion", numero: "B.1",
       enunciado: "Dos planetas de masas iguales orbitan en torno a una estrella. El primero tiene una órbita circular de radio 1,2·10¹¹ m y período de 3 años. El segundo sigue una órbita elíptica con distancia mínima 1,0·10¹¹ m y máxima 1,8·10¹¹ m.",
@@ -1540,6 +1661,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2024-jul-B2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"],
       año: 2024, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Ondas", numero: "B.2",
       enunciado: `En la figura se representa la elongación de una onda transversal en t = 0 en función de la posición x. La onda se propaga en el sentido negativo del eje x. El tiempo que tarda el punto en x = 0 desde que sale de su posición inicial hasta que vuelve a la misma es de 0,5 s. La amplitud es 3 cm y la longitud de onda 1,5 m.
@@ -1553,6 +1675,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2024-jul-B3",
+    topicSlugs: ["campo-magnetico-creado-por-corrientes"],
       año: 2024, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Electricidad", numero: "B.3",
       enunciado: "Dos hilos indefinidos paralelos al eje z llevan intensidades iguales I₁ = I₂ = 2 A y cortan el plano xy en los puntos (0, 0) m y (4, 0) m. El primer hilo lleva su intensidad en sentido positivo del eje z y el segundo en sentido negativo.",
@@ -1565,6 +1688,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2024-jul-B4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"],
       año: 2024, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Optica", numero: "B.4",
       enunciado: "Un objeto se encuentra a una distancia de 4 m de una pantalla. Entre el objeto y la pantalla se coloca una lente delgada que produce una imagen en la pantalla 3 veces mayor que el objeto.",
@@ -1576,6 +1700,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2024-jul-B5",
+    topicSlugs: ["efecto-fotoelectrico"],
       año: 2024, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "RadioactividadModerna", numero: "B.5",
       enunciado: "Al hacer incidir fotones de frecuencia variable sobre un material se obtiene la recta: V(V) = 4,16·10⁻¹⁵ f(Hz) − 2,16.",
@@ -1588,6 +1713,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2022-jul-A1",
+    topicSlugs: ["intensidad-del-campo-gravitatorio"],
       año: 2022, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Gravitacion", numero: "A.1",
       enunciado: "Una partícula de masa 20 kg permanece fija en el origen de coordenadas.",
@@ -1600,6 +1726,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2022-jul-A2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"],
       año: 2022, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Ondas", numero: "A.2",
       enunciado: `Por una cuerda dispuesta a lo largo del eje x viaja una onda armónica. Los elementos A (xA = 0 m) y B (xB = 2 m) oscilan en fase y cortan al eje x cada 4 s. No hay entre A y B ningún otro elemento que oscile en fase con ellos.
@@ -1613,6 +1740,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2022-jul-A3",
+    topicSlugs: ["flujo-magnetico-e-induccion-electromagnetica"],
       año: 2022, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Electricidad", numero: "A.3",
       enunciado: "Una varilla metálica de 20 cm de longitud cuyos extremos deslizan sobre unos raíles horizontales. La varilla tiene velocidad v = 2 î m s⁻¹. Los raíles están conectados en x = 0 por R = 0,5 Ω. En la región hay un campo magnético uniforme B = −0,4 k̂ T.",
@@ -1624,6 +1752,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2022-jul-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"],
       año: 2022, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Optica", numero: "A.4",
       enunciado: "Dos lentes convergentes idénticas están separadas 16 cm. Cuando un objeto se sitúa a cierta distancia de la primera lente, cada una de ellas opera con aumento igual a −1.",
@@ -1635,6 +1764,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2022-jul-A5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
       año: 2022, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "RadioactividadModerna", numero: "A.5",
       enunciado: "Una muestra contiene inicialmente 30 mg de ²¹⁰Po. Su período de semidesintegración es de 138,38 días.",
@@ -1647,6 +1777,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2022-jul-B1",
+    topicSlugs: ["velocidad-de-escape"],
       año: 2022, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Gravitacion", numero: "B.1",
       enunciado: "Marte posee la décima parte de la masa de la Tierra y la mitad de su diámetro.",
@@ -1659,6 +1790,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2022-jul-B2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
       año: 2022, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Ondas", numero: "B.2",
       enunciado: "Un foco sonoro de potencia P se coloca a una altura h sobre el suelo. El nivel de intensidad vale 60 dB en el punto A (a 100 m del foco) y 80 dB en el punto B (en el suelo en la vertical del foco).",
@@ -1671,6 +1803,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2022-jul-B3",
+    topicSlugs: ["intensidad-del-campo-electrico", "potencial-electrico"],
       año: 2022, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Electricidad", numero: "B.3",
       enunciado: "Una carga puntual positiva está situada en el punto (3, 4) m del plano xy. En otro punto del plano se coloca una segunda carga positiva de magnitud cuádruple de la primera, haciendo que el campo se anule en el origen de coordenadas.",
@@ -1683,6 +1816,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2022-jul-B4",
+    topicSlugs: ["refraccion-y-ley-de-snell"],
       año: 2022, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Optica", numero: "B.4",
       enunciado: "Una lámina de vidrio se halla sobre un líquido de índice desconocido. La longitud de onda de la luz en el vidrio se reduce a un 70% de su valor en el aire. Los rayos con ángulos de incidencia superiores a 30° en la cara inferior de la lámina no se refractan al aire por su cara superior.",
@@ -1695,6 +1829,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2022-jul-B5",
+    topicSlugs: ["hipotesis-de-planck-y-cuantizacion-de-la-energia"],
       año: 2022, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "RadioactividadModerna", numero: "B.5",
       enunciado: "Un electrón relativista ha llegado a adquirir una energía cinética equivalente a la energía de un fotón de 5·10⁻¹² m de longitud de onda en el vacío.",
@@ -1707,6 +1842,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2023-jul-A1",
+    topicSlugs: ["velocidad-orbital"],
       año: 2023, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Gravitacion", numero: "A.1",
       enunciado: "El satélite UPM-Sat2 se lanzó el 3 de septiembre de 2020 a una órbita circular con un período de 5710 s. El satélite tiene una masa de 50 kg.",
@@ -1719,6 +1855,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2023-jul-A2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"],
       año: 2023, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Ondas", numero: "A.2",
       enunciado: "Por una cuerda dispuesta a lo largo del eje x viaja una onda armónica transversal con velocidad de propagación v = −400 î m s⁻¹. La onda produce en la cuerda una aceleración máxima de 2·10⁴ m s⁻². Los puntos con elongación nula se repiten cada 0,4 m a lo largo del eje x.",
@@ -1730,6 +1867,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2023-jul-A3",
+    topicSlugs: ["trabajo-y-caracter-conservativo-del-campo-electrico"],
       año: 2023, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Electricidad", numero: "A.3",
       enunciado: "Una carga situada en un punto del plano xy da lugar a un potencial de 54 V y a un campo eléctrico E = −180 ĵ V m⁻¹ en el origen de coordenadas.",
@@ -1742,6 +1880,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2023-jul-A4",
+    topicSlugs: ["refraccion-y-ley-de-snell"],
       año: 2023, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "Optica", numero: "A.4",
       enunciado: `Un observador está situado al borde de un estanque de profundidad H = 2 m. Su visual está a H' = 1,6 m sobre la superficie del agua. En el fondo hay un foco puntual de luz. El observador lo ve cuando mira hacia el punto A de la superficie a d = 1,2 m del borde.
@@ -1756,6 +1895,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2023-jul-A5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
       año: 2023, convocatoria: "Extraordinaria", opcion: "A",
       tipo: "RadioactividadModerna", numero: "A.5",
       enunciado: "En un laboratorio de preparación de radiofármacos se rompe accidentalmente una ampolla de una solución que contenía ¹⁸F con una actividad de 18,5 MBq.",
@@ -1768,6 +1908,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2023-jul-B1",
+    topicSlugs: ["ley-de-gravitacion-universal"],
       año: 2023, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Gravitacion", numero: "B.1",
       enunciado: `En su aproximación al planeta Fomalhaut II, el astronauta Rocannon avista Fomalhautillo según un ángulo α = 53,13° con respecto de la radial hacia el planeta. La fuerza total es F = (9,5 î − 66,4 ĵ) N sobre una nave de masa conjunta 8000 kg.
@@ -1782,6 +1923,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2023-jul-B2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
       año: 2023, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Ondas", numero: "B.2",
       enunciado: "Dos focos sonoros puntuales F₁ y F₂ están respectivamente en los puntos (−6, 0) m y (6, 0) m. En el punto (2, 0) m la intensidad debida a cada foco vale lo mismo. En el punto (0, 2) m el nivel de intensidad sonora es de 80 dB.",
@@ -1794,6 +1936,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2023-jul-B3",
+    topicSlugs: ["campo-magnetico-creado-por-corrientes"],
       año: 2023, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Electricidad", numero: "B.3",
       enunciado: "Dos hilos rectilíneos indefinidos, paralelos al eje y, están en x = −0,1 m y x = 0,1 m. El primero conduce 10 A en sentido positivo del eje y. Un electrón viaja en línea recta con velocidad v = 2·10⁶ ĵ m s⁻¹ a lo largo de x = 0,4 m sin desviarse.",
@@ -1806,6 +1949,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2023-jul-B4",
+    topicSlugs: ["aumento-lateral-en-lentes-y-espejos", "lentes-delgadas-ecuacion-fundamental"],
       año: 2023, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "Optica", numero: "B.4",
       enunciado: "Un objeto situado 30 cm a la izquierda de una lente produce una imagen con un aumento lateral de −2.",
@@ -1817,6 +1961,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2023-jul-B5",
+    topicSlugs: ["efecto-fotoelectrico"],
       año: 2023, convocatoria: "Extraordinaria", opcion: "B",
       tipo: "RadioactividadModerna", numero: "B.5",
       enunciado: "Una placa metálica es irradiada con luz de 400 nm. La máxima corriente eléctrica debida al efecto fotoeléctrico es de 15 nA.",
@@ -1829,6 +1974,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2018-jun-A1",
+    topicSlugs: ["ley-de-gravitacion-universal"],
       año: 2018, convocatoria: "Ordinaria", opcion: "A",
       tipo: "Gravitacion", numero: "A.1",
       enunciado: "Dos masas m₁ = 10 kg y m₂ = 20 kg cuelgan del techo y están separadas 1 m de distancia.",
@@ -1841,6 +1987,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2018-jun-A2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
       año: 2018, convocatoria: "Ordinaria", opcion: "A",
       tipo: "Ondas", numero: "A.2",
       enunciado: "Dos altavoces de 60 W y 40 W de potencia están situados respectivamente en los puntos (0, 0, 0) y (4, 0, 0) m.",
@@ -1853,6 +2000,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2018-jun-A3",
+    topicSlugs: ["flujo-magnetico-e-induccion-electromagnetica"],
       año: 2018, convocatoria: "Ordinaria", opcion: "A",
       tipo: "Electricidad", numero: "A.3",
       enunciado: "Campo magnético uniforme B = −B₀k̂ con B₀ = 0,3 T. En el plano xy hay una espira rectangular con lados a = 1 m y b = 0,5 m. La varilla de longitud b puede desplazarse en la dirección del eje x.",
@@ -1864,6 +2012,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2018-jun-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"],
       año: 2018, convocatoria: "Ordinaria", opcion: "A",
       tipo: "Optica", numero: "A.4",
       enunciado: "Un sistema óptico está constituido por dos lentes separadas 50 cm. La primera es de 10 dioptrías y la segunda de −10 dioptrías. Un objeto de altura 10 cm está a 15 cm de la primera lente.",
@@ -1875,6 +2024,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2018-jun-A5",
+    topicSlugs: ["efecto-fotoelectrico"],
       año: 2018, convocatoria: "Ordinaria", opcion: "A",
       tipo: "RadioactividadModerna", numero: "A.5",
       enunciado: "Efecto fotoeléctrico y trabajo de extracción.",
@@ -1887,6 +2037,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2018-jun-B1",
+    topicSlugs: ["velocidad-orbital"],
       año: 2018, convocatoria: "Ordinaria", opcion: "B",
       tipo: "Gravitacion", numero: "B.1",
       enunciado: "Satélite de masa 10³ kg que orbita alrededor de la Tierra en una órbita circular geoestacionaria.",
@@ -1899,6 +2050,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2018-jun-B2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"],
       año: 2018, convocatoria: "Ordinaria", opcion: "B",
       tipo: "Ondas", numero: "B.2",
       enunciado: "Onda armónica transversal que se propaga en el sentido positivo del eje x. De las gráficas se obtiene: amplitud 3 cm, longitud de onda 4 m, periodo 6 s.",
@@ -1910,6 +2062,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2018-jun-B3",
+    topicSlugs: ["trabajo-y-caracter-conservativo-del-campo-electrico"],
       año: 2018, convocatoria: "Ordinaria", opcion: "B",
       tipo: "Electricidad", numero: "B.3",
       enunciado: "Carga q₁ = 6 μC situada en el origen de coordenadas.",
@@ -1922,6 +2075,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2018-jun-B4",
+    topicSlugs: ["refraccion-y-ley-de-snell"],
       año: 2018, convocatoria: "Ordinaria", opcion: "B",
       tipo: "Optica", numero: "B.4",
       enunciado: "En un medio de índice de refracción n₁ = 1 se propaga un rayo luminoso de frecuencia f₁ = 6·10¹⁴ Hz.",
@@ -1934,6 +2088,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
     },
   {
       id: "f-2018-jun-B5",
+    topicSlugs: ["hipotesis-de-de-broglie-dualidad-onda-corpusculo"],
       año: 2018, convocatoria: "Ordinaria", opcion: "B",
       tipo: "RadioactividadModerna", numero: "B.5",
       enunciado: "Longitud de onda de de Broglie y energía relativista.",
@@ -1951,6 +2106,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\ \\text{mol}^{-1}$.`,
 
   {
     id: "f-2026-modelo-1",
+    topicSlugs: ["aumento-lateral-en-lentes-y-espejos", "lentes-delgadas-ecuacion-fundamental"],
     año: 2026, convocatoria: "Modelo", opcion: "A",
     tipo: "Optica", numero: "1",
     enunciado: `Un sistema óptico está compuesto por un foco luminoso, un objeto iluminado por éste, una
@@ -1974,6 +2130,7 @@ el aumento lateral es igual a -4. Realice el trazado de rayos en esta situación
   },
   {
     id: "f-2026-modelo-2A",
+    topicSlugs: ["intensidad-del-campo-gravitatorio"],
     año: 2026, convocatoria: "Modelo", opcion: "A",
     tipo: "Gravitacion", numero: "2.A",
     enunciado: `Consideremos el planeta extrasolar G-876d, que tiene una masa igual a 6 veces la masa
@@ -1993,6 +2150,7 @@ $M_T = 5{,}97 \\cdot 10^{24}$ kg; Radio de la Tierra, $R_T = 6{,}37 \\cdot 10^6$
   },
   {
     id: "f-2026-modelo-2B",
+    topicSlugs: ["leyes-de-kepler"],
     año: 2026, convocatoria: "Modelo", opcion: "B",
     tipo: "Gravitacion", numero: "2.B",
     enunciado: `Plutón es un planeta enano del sistema solar que describe una órbita con un periodo de
@@ -2014,6 +2172,7 @@ $M_{Sol} = 1{,}99 \\cdot 10^{30}$ kg.`,
   },
   {
     id: "f-2026-modelo-3A",
+    topicSlugs: ["intensidad-del-campo-electrico", "potencial-electrico", "trabajo-y-caracter-conservativo-del-campo-electrico"],
     año: 2026, convocatoria: "Modelo", opcion: "A",
     tipo: "Electricidad", numero: "3.A",
     enunciado: `Una partícula con carga $-2$ nC está situada en el punto $(-5, 0)$ m del plano $xy$. Otra
@@ -2030,6 +2189,7 @@ Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\\ \\text{N m}^2\\ \\tex
   },
   {
     id: "f-2026-modelo-3B",
+    topicSlugs: ["flujo-magnetico-e-induccion-electromagnetica"],
     año: 2026, convocatoria: "Modelo", opcion: "B",
     tipo: "Electricidad", numero: "3.B",
     enunciado: `Una espira cuadrada de lado $L = 20$ cm está situada en el plano $xy$ y penetra en un
@@ -2049,6 +2209,7 @@ c) (0,5 puntos) La intensidad que recorre la espira en $t = 200$ ms si su resist
   },
   {
     id: "f-2026-modelo-4A",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2026, convocatoria: "Modelo", opcion: "A",
     tipo: "RadioactividadModerna", numero: "4.A",
     enunciado: `El isótopo del cobalto $^{60}$Co tiene un periodo de semidesintegración de 1925,2 días y
@@ -2067,6 +2228,7 @@ Dato: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$.`,
   },
   {
     id: "f-2026-modelo-4B",
+    topicSlugs: ["equivalencia-masa-energia", "energia-y-cantidad-de-movimiento-relativistas"],
     año: 2026, convocatoria: "Modelo", opcion: "B",
     tipo: "RadioactividadModerna", numero: "4.B",
     enunciado: `Dentro del complejo de aceleradores que suministran protones al LHC (Large Hadron
@@ -2085,6 +2247,7 @@ $c = 3 \\cdot 10^8\\ \\text{m s}^{-1}$; Masa en reposo del protón, $m_p = 1{,}6
 
   {
     id: "f-2025-modelo-1",
+    topicSlugs: ["intensidad-del-campo-gravitatorio"],
     año: 2025, convocatoria: "Modelo", opcion: "A",
     tipo: "Gravitacion", numero: "1",
     enunciado: `Un equipo de astronautas se dirige a un planeta de masa desconocida. Con el objetivo
@@ -2112,6 +2275,7 @@ Dato: Constante de Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\\ \\text{
   },
   {
     id: "f-2025-modelo-2A",
+    topicSlugs: ["ley-de-coulomb"],
     año: 2025, convocatoria: "Modelo", opcion: "A",
     tipo: "Electricidad", numero: "2.A",
     enunciado: `Sea una distribución de tres cargas puntuales fijas, situadas en los vértices de un
@@ -2128,6 +2292,7 @@ Dato: Constante de la ley de Coulomb, $K = 9 \\cdot 10^9\\ \\text{N m}^2\\ \\tex
   },
   {
     id: "f-2025-modelo-2B",
+    topicSlugs: ["campo-magnetico-creado-por-corrientes", "fuerza-magnetica-sobre-una-corriente-y-momento-sobre-una-espira"],
     año: 2025, convocatoria: "Modelo", opcion: "B",
     tipo: "Electricidad", numero: "2.B",
     enunciado: `Un hilo rectilíneo infinito situado paralelo al eje $x$, que pasa por el punto $(0, 0, 2)$
@@ -2146,6 +2311,7 @@ Dato: Permeabilidad magnética del vacío, $\\mu_0 = 4\\pi \\cdot 10^{-7}\\ \\te
   },
   {
     id: "f-2025-modelo-3A",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2025, convocatoria: "Modelo", opcion: "A",
     tipo: "Ondas", numero: "3.A",
     enunciado: `Sean dos fuentes sonoras puntuales de potencias $P_1$ y $P_2$ separadas 8 m. La suma
@@ -2163,6 +2329,7 @@ Dato: Intensidad umbral, $I_0 = 1 \\cdot 10^{-12}\\ \\text{W m}^{-2}$.`,
   },
   {
     id: "f-2025-modelo-3B",
+    topicSlugs: ["reflexion-de-la-luz-y-espejos"],
     año: 2025, convocatoria: "Modelo", opcion: "B",
     tipo: "Optica", numero: "3.B",
     enunciado: `Se desea fabricar un espejo convexo tal que, al situar un objeto a la izquierda del
@@ -2178,6 +2345,7 @@ b) (1 punto) Realice el correspondiente diagrama de rayos.`,
   },
   {
     id: "f-2025-modelo-4A",
+    topicSlugs: ["equivalencia-masa-energia", "energia-y-cantidad-de-movimiento-relativistas"],
     año: 2025, convocatoria: "Modelo", opcion: "A",
     tipo: "RadioactividadModerna", numero: "4.A",
     enunciado: `Un protón tiene una masa en reposo equivalente a una energía de 938,2 MeV. El protón
@@ -2194,6 +2362,7 @@ electrón, $e = 1{,}6 \\cdot 10^{-19}$ C.`,
   },
   {
     id: "f-2025-modelo-4B",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2025, convocatoria: "Modelo", opcion: "B",
     tipo: "RadioactividadModerna", numero: "4.B",
     enunciado: `En el interior del recinto de la central nuclear de Springfield, en una zona
@@ -2218,6 +2387,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
 
   {
     id: "f-2018-modelo-A1",
+    topicSlugs: ["potencial-gravitatorio"],
     año: 2018, convocatoria: "Modelo", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: "Dos partículas puntuales de masas m₁ = 2 kg y m₂ = 10 kg están situadas en el eje X: m₁ en el origen (x₁ = 0) y m₂ en x₂ = 5 m.",
@@ -2230,6 +2400,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2018-modelo-A2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2018, convocatoria: "Modelo", opcion: "A",
     tipo: "Ondas", numero: "A.2",
     enunciado: "Disponemos de n altavoces iguales que emiten como fuentes puntuales. En un punto P situado a una distancia r, el nivel de intensidad sonora total es 70 dB.",
@@ -2241,6 +2412,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2018-modelo-A3",
+    topicSlugs: ["trabajo-y-caracter-conservativo-del-campo-electrico"],
     año: 2018, convocatoria: "Modelo", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
     enunciado: "Una carga puntual q = 5 nC está situada en el centro de una esfera de radio R = 10 cm.",
@@ -2253,6 +2425,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2018-modelo-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"],
     año: 2018, convocatoria: "Modelo", opcion: "A",
     tipo: "Optica", numero: "A.4",
     enunciado: "Una lente convergente forma de un objeto real una imagen real aumentada dos veces. Al desplazar el objeto 20 cm hacia la lente, la imagen que se obtiene es virtual y con el mismo aumento en valor absoluto.",
@@ -2264,6 +2437,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2018-modelo-A5",
+    topicSlugs: ["hipotesis-de-de-broglie-dualidad-onda-corpusculo"],
     año: 2018, convocatoria: "Modelo", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: "Un electrón posee una energía cinética de 40 eV y, en otro caso, alcanza en un ciclotrón una energía cinética de 2 GeV.",
@@ -2276,6 +2450,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2018-modelo-B1",
+    topicSlugs: ["introduccion-a-la-cosmologia-y-astrofisica"],
     año: 2018, convocatoria: "Modelo", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
     enunciado: "Un sistema doble formado por una estrella y un planeta: el planeta gira en órbita circular con periodo de 210 días y masa 5·10⁻⁶ M, donde M es la masa de la estrella (M = 1,3·10³⁰ kg).",
@@ -2288,6 +2463,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2018-modelo-B2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"],
     año: 2018, convocatoria: "Modelo", opcion: "B",
     tipo: "Ondas", numero: "B.2",
     enunciado: "En el extremo izquierdo de una cuerda tensa y horizontal se aplica un movimiento armónico simple perpendicular a la cuerda, propagándose una onda transversal Y(x,t) = 0,01 sen[π(100t − 2,5x)] (S.I.).",
@@ -2299,6 +2475,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2018-modelo-B3",
+    topicSlugs: ["flujo-magnetico-e-induccion-electromagnetica"],
     año: 2018, convocatoria: "Modelo", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
     enunciado: "Una varilla conductora desliza sin rozamiento por dos alambres conductores paralelos separados L = 5 cm, cerrando un circuito con una resistencia R = 150 Ω, inmersos en un campo magnético uniforme. Inicialmente la varilla está a d = 10 cm de la resistencia.\n\n![Circuito con varilla conductora deslizante en campo magnético uniforme](/fisica-imgs/2018-modelo/pregunta-B3-circuito-varilla.png)\n\nCalcule, para t = 0,2 s, el flujo magnético y la corriente en los siguientes casos:",
@@ -2310,6 +2487,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2018-modelo-B4",
+    topicSlugs: ["refraccion-y-ley-de-snell"],
     año: 2018, convocatoria: "Modelo", opcion: "B",
     tipo: "Optica", numero: "B.4",
     enunciado: "Sobre un material transparente limitado por dos superficies planas que forman un ángulo de 60°, incide desde el aire un rayo de luz monocromática con ángulo i = 45°. El índice de refracción del material es 1,5.\n\n![Prisma con rayo incidente a 45° y ángulo de 60° entre superficies](/fisica-imgs/2018-modelo/pregunta-B4-refraccion-prisma.png)",
@@ -2322,6 +2500,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2018-modelo-B5",
+    topicSlugs: ["efecto-fotoelectrico"],
     año: 2018, convocatoria: "Modelo", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: "Un metal es iluminado con luz de frecuencia 9·10¹⁴ Hz, emitiendo por efecto fotoeléctrico electrones que pueden ser detenidos con un potencial de frenado de 0,6 V. Con luz de longitud de onda λ = 2,38·10⁻⁷ m, el potencial de frenado pasa a ser de 2,1 V.",
@@ -2339,6 +2518,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
 
   {
     id: "f-2019-modelo-A1",
+    topicSlugs: ["velocidad-orbital"],
     año: 2019, convocatoria: "Modelo", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: "Un satélite de 150 kg describe una órbita circular con un periodo de 30 min cuando se mueve con una velocidad de 2,3·10⁴ m s⁻¹.",
@@ -2351,6 +2531,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2019-modelo-A2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2019, convocatoria: "Modelo", opcion: "A",
     tipo: "Ondas", numero: "A.2",
     enunciado: "En una mina a cielo abierto se provoca una explosión de forma que un detector situado a 20 m del punto de la explosión mide una intensidad de onda sonora de 100 W m⁻².",
@@ -2363,6 +2544,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2019-modelo-A3",
+    topicSlugs: ["campo-magnetico-creado-por-corrientes"],
     año: 2019, convocatoria: "Modelo", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
     enunciado: "Un hilo conductor indefinido situado a lo largo del eje z transporta una corriente de 20 mA en sentido positivo del eje.",
@@ -2375,6 +2557,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2019-modelo-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"],
     año: 2019, convocatoria: "Modelo", opcion: "A",
     tipo: "Optica", numero: "A.4",
     enunciado: "Una persona con presbicia (vista cansada) tiene su punto próximo situado a 1 m y quiere leer a una distancia de 0,25 m.",
@@ -2386,6 +2569,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2019-modelo-A5",
+    topicSlugs: ["hipotesis-de-de-broglie-dualidad-onda-corpusculo"],
     año: 2019, convocatoria: "Modelo", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: "Una pelota de 20 g de masa posee una energía cinética de 4 J. Los electrones ultrarelativistas en el Acelerador Lineal de Stanford (SLAC) alcanzan una energía cinética máxima de 5·10⁴ MeV.",
@@ -2398,6 +2582,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2019-modelo-B1",
+    topicSlugs: ["introduccion-a-la-cosmologia-y-astrofisica"],
     año: 2019, convocatoria: "Modelo", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
     enunciado: "El planeta Cibeles tiene un radio Rc = 8,5·10³ km y gira en torno a una estrella Aya describiendo una órbita circular de radio R = 1,8·10⁸ km. Un objeto soltado desde 10 m de altura tarda 1,58 s en tocar el suelo. Cibeles completa una vuelta a Aya en 395 días terrestres.",
@@ -2410,6 +2595,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2019-modelo-B2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"],
     año: 2019, convocatoria: "Modelo", opcion: "B",
     tipo: "Ondas", numero: "B.2",
     enunciado: "Una onda armónica transversal se propaga por una cuerda tensa en el sentido positivo del eje y con longitud de onda λ = 0,1 m. En y = 0 m, el movimiento vibratorio en z es z(0,t) = 0,5 sen(π/4·t + π/2) (S.I.).",
@@ -2421,6 +2607,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2019-modelo-B3",
+    topicSlugs: ["teorema-de-gauss"],
     año: 2019, convocatoria: "Modelo", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
     enunciado: "Considérese una carga puntual q en el origen de coordenadas.",
@@ -2432,6 +2619,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2019-modelo-B4",
+    topicSlugs: ["refraccion-y-ley-de-snell"],
     año: 2019, convocatoria: "Modelo", opcion: "B",
     tipo: "Optica", numero: "B.4",
     enunciado: "Un pez se encuentra dentro del agua de un estanque observando lo que hay fuera del agua. El índice de refracción del agua es 1,33.",
@@ -2444,6 +2632,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2019-modelo-B5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2019, convocatoria: "Modelo", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: "El período de semidesintegración del isótopo más estable del radio, ²²⁶Ra, es de 1602 años. Se dispone inicialmente de una muestra de 20 mg.",
@@ -2460,6 +2649,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
 
   {
     id: "f-2020-modelo-A1",
+    topicSlugs: ["velocidad-orbital"],
     año: 2020, convocatoria: "Modelo", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: "El satélite UARS se puso en órbita en 1991 para estudiar la entrada y salida de energía en la atmósfera superior. Su masa era de 5800 kg y realizaba 15 órbitas diarias.",
@@ -2472,6 +2662,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2020-modelo-A2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"],
     año: 2020, convocatoria: "Modelo", opcion: "A",
     tipo: "Ondas", numero: "A.2",
     enunciado: "Una onda armónica unidimensional se propaga a lo largo del sentido positivo del eje x con una velocidad de propagación de 1500 m s⁻¹. La gráfica adjunta muestra la elongación de la onda para el instante t = 0 s.\n\n![Gráfica de elongación de la onda en t=0s](/fisica-imgs/2020-modelo/pregunta-A2-grafica-onda.png)",
@@ -2483,6 +2674,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2020-modelo-A3",
+    topicSlugs: ["movimiento-de-cargas-en-campos-uniformes"],
     año: 2020, convocatoria: "Modelo", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
     enunciado: "Un electrón, situado inicialmente en el origen de coordenadas, se mueve con una velocidad inicial v₀ = 2î m s⁻¹, en presencia de un campo magnético uniforme B = 3k̂ T y de un campo eléctrico uniforme E = −î N C⁻¹.",
@@ -2495,6 +2687,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2020-modelo-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental", "defectos-visuales-e-instrumentos-opticos"],
     año: 2020, convocatoria: "Modelo", opcion: "A",
     tipo: "Optica", numero: "A.4",
     enunciado: "Un objeto real está situado 20 cm delante de una lente delgada planoconvexa de 10 dioptrías de potencia e índice de refracción n = 1,6.",
@@ -2506,6 +2699,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2020-modelo-A5",
+    topicSlugs: ["efecto-fotoelectrico", "hipotesis-de-de-broglie-dualidad-onda-corpusculo"],
     año: 2020, convocatoria: "Modelo", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: "Un haz luminoso monocromático de 400 nm de longitud de onda incide sobre un material cuyo trabajo de extracción para el efecto fotoeléctrico es de 2,5 eV. El haz incidente tiene una intensidad de 5·10⁻⁹ W m⁻².",
@@ -2518,6 +2712,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2020-modelo-B1",
+    topicSlugs: ["velocidad-de-escape", "velocidad-orbital", "intensidad-del-campo-gravitatorio"],
     año: 2020, convocatoria: "Modelo", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
     enunciado: "Unos astrónomos han descubierto un nuevo sistema solar formado por una estrella de masa 6,0·10³⁰ kg y un planeta que gira en torno a ella en órbita circular, tardando 3 años terrestres en dar una vuelta completa.",
@@ -2530,6 +2725,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2020-modelo-B2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2020, convocatoria: "Modelo", opcion: "B",
     tipo: "Ondas", numero: "B.2",
     enunciado: "Se mide el nivel de intensidad sonora de una sirena, considerada foco puntual, a una distancia r, alcanzando un valor de 50 dB. Al medir 50 m más cerca, en dirección radial, el nivel de intensidad medida es de 70 dB.",
@@ -2542,6 +2738,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2020-modelo-B3",
+    topicSlugs: ["trabajo-y-caracter-conservativo-del-campo-electrico"],
     año: 2020, convocatoria: "Modelo", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
     enunciado: "Dos cargas puntuales de +10 nC y −10 nC se encuentran situadas en el plano xy en las posiciones (0,−6) µm y (0,6) µm, respectivamente.",
@@ -2554,6 +2751,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2020-modelo-B4",
+    topicSlugs: ["reflexion-total-y-angulo-limite", "refraccion-y-ley-de-snell"],
     año: 2020, convocatoria: "Modelo", opcion: "B",
     tipo: "Optica", numero: "B.4",
     enunciado: "Un rayo de luz monocromático que se propaga por el medio 1 (n₁ = 1,6) con longitud de onda 460 nm incide sobre la superficie de separación con el medio 2 (n₂ = 1,4).\n\n![Tres medios con índices de refracción n1=1,6, n2=1,4 y n3=1,2](/fisica-imgs/2020-modelo/pregunta-B4-tres-medios.png)",
@@ -2566,6 +2764,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2020-modelo-B5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2020, convocatoria: "Modelo", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: "Un isótopo radiactivo utilizado en medicina nuclear tiene una vida media de 6 h. Se inyecta inicialmente a un paciente una cantidad de 1 mg de dicho isótopo.",
@@ -2583,6 +2782,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
 
   {
     id: "f-2021-modelo-A1",
+    topicSlugs: ["velocidad-orbital"],
     año: 2021, convocatoria: "Modelo", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: "El Sol orbita alrededor del centro galáctico siguiendo una órbita circular de radio 2,4·10¹⁷ km y periodo de 203 millones de años.",
@@ -2595,6 +2795,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2021-modelo-A2",
+    topicSlugs: ["energia-e-intensidad-de-una-onda", "ecuacion-de-una-onda-armonica"],
     año: 2021, convocatoria: "Modelo", opcion: "A",
     tipo: "Ondas", numero: "A.2",
     enunciado: "La potencia media transferida por una onda armónica en una cuerda viene dada por P = ½μω²A²v, donde μ es la densidad lineal de masa, ω la frecuencia angular, A la amplitud y v la velocidad de propagación. Una onda armónica y(x,t) = 0,01 sen(20πt − 5πx + π/2) (S.I.) se propaga por una cuerda cuya densidad lineal es de 2 g cm⁻¹.",
@@ -2606,6 +2807,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2021-modelo-A3",
+    topicSlugs: ["intensidad-del-campo-electrico"],
     año: 2021, convocatoria: "Modelo", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
     enunciado: "Dos cargas puntuales iguales de 5 nC se encuentran en el plano (x,y) en los puntos (0,3) m y (0,−3) m.",
@@ -2618,6 +2820,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2021-modelo-A4",
+    topicSlugs: ["lentes-delgadas-ecuacion-fundamental"],
     año: 2021, convocatoria: "Modelo", opcion: "A",
     tipo: "Optica", numero: "A.4",
     enunciado: "Un sistema óptico está formado por dos lentes convergentes idénticas de distancia focal 20 cm, separadas una cierta distancia desconocida. Un objeto luminoso se sitúa 25 cm a la izquierda de la primera lente.",
@@ -2629,6 +2832,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2021-modelo-A5",
+    topicSlugs: ["efecto-fotoelectrico", "hipotesis-de-de-broglie-dualidad-onda-corpusculo"],
     año: 2021, convocatoria: "Modelo", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: "Cuando un haz de luz de longitud de onda 150 nm incide sobre una lámina de oro, se emiten electrones cuya energía cinética máxima es de 3,17 eV.",
@@ -2641,6 +2845,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2021-modelo-B1",
+    topicSlugs: ["velocidad-de-escape", "intensidad-del-campo-gravitatorio"],
     año: 2021, convocatoria: "Modelo", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
     enunciado: "Un planeta esférico tiene una masa igual a 360 veces la masa de la Tierra, y la velocidad de escape para objetos cerca de su superficie es 6 veces la velocidad de escape terrestre.",
@@ -2652,6 +2857,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2021-modelo-B2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2021, convocatoria: "Modelo", opcion: "B",
     tipo: "Ondas", numero: "B.2",
     enunciado: "La gráfica adjunta representa las curvas de umbral de audición y umbral de dolor del oído humano medio en función de la frecuencia del sonido.\n\n![Curvas de umbral de audición y umbral de dolor frente a la frecuencia](/fisica-imgs/2021-modelo/pregunta-B2-umbrales-audicion.png)",
@@ -2664,6 +2870,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2021-modelo-B3",
+    topicSlugs: ["flujo-magnetico-e-induccion-electromagnetica", "fuerza-magnetica-sobre-una-corriente-y-momento-sobre-una-espira"],
     año: 2021, convocatoria: "Modelo", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
     enunciado: "En una región del espacio existe un campo magnético uniforme de 0,5 T perpendicular al plano del papel. Se sitúa un alambre conductor en forma de U, de resistencia despreciable, cerrado por una varilla de longitud l = 20 cm y resistencia 2 Ω.\n\n![Circuito en U con varilla conductora en campo magnético uniforme](/fisica-imgs/2021-modelo/pregunta-B3-circuito-U.png)",
@@ -2675,6 +2882,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2021-modelo-B4",
+    topicSlugs: ["refraccion-y-ley-de-snell"],
     año: 2021, convocatoria: "Modelo", opcion: "B",
     tipo: "Optica", numero: "B.4",
     enunciado: "Sobre la cara AB de un prisma incide perpendicularmente desde el aire un haz de luz monocromática de frecuencia 4,6·10¹⁴ Hz.\n\n![Prisma con ángulo de 45° en la cara de incidencia](/fisica-imgs/2021-modelo/pregunta-B4-prisma.png)",
@@ -2687,6 +2895,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2021-modelo-B5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2021, convocatoria: "Modelo", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: "El tecnecio 99 es un isótopo radiactivo empleado en radiodiagnóstico, con un período de semidesintegración de 6 horas.",
@@ -2704,6 +2913,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
 
   {
     id: "f-2022-modelo-A1",
+    topicSlugs: ["energia-mecanica-en-el-campo-gravitatorio", "trabajo-y-caracter-conservativo-del-campo-gravitatorio"],
     año: 2022, convocatoria: "Modelo", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: "La distancia de la Tierra al Sol varía a lo largo de su órbita entre 1,52·10¹¹ m en el afelio y 1,47·10¹¹ m en el perihelio.",
@@ -2716,6 +2926,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2022-modelo-A2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"],
     año: 2022, convocatoria: "Modelo", opcion: "A",
     tipo: "Ondas", numero: "A.2",
     enunciado: "Una onda transversal que se propaga en el sentido positivo del eje x, con velocidad de propagación 4/3 m s⁻¹, es y(x,t) = A cos(ωt − kx + φ). En t = 1 s el punto x = 1 m tiene una aceleración de −32π² cm s⁻² y un desplazamiento de +2 cm. En t = 0 s, el punto x = 0 tiene el desplazamiento máximo de valor −2 cm.",
@@ -2727,6 +2938,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2022-modelo-A3",
+    topicSlugs: ["campo-magnetico-creado-por-corrientes"],
     año: 2022, convocatoria: "Modelo", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
     enunciado: "Dos hilos indefinidos, paralelos al eje z, están recorridos por una intensidad I = 2 A. El hilo 1 corta el plano xy en (0,a) y el hilo 2 en (2a,0), siendo a = 20 cm.\n\n![Dos hilos conductores paralelos con corrientes en sentidos opuestos](/fisica-imgs/2022-modelo/pregunta-A3-dos-hilos.png)",
@@ -2739,6 +2951,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2022-modelo-A4",
+    topicSlugs: ["aumento-lateral-en-lentes-y-espejos", "lentes-delgadas-ecuacion-fundamental"],
     año: 2022, convocatoria: "Modelo", opcion: "A",
     tipo: "Optica", numero: "A.4",
     enunciado: "Se sitúa un objeto a la izquierda de una lente convergente, colocado verticalmente sobre el eje óptico. Determine el aumento lateral de la imagen y realice el trazado de rayos si el objeto se sitúa a:",
@@ -2750,6 +2963,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2022-modelo-A5",
+    topicSlugs: ["efecto-fotoelectrico"],
     año: 2022, convocatoria: "Modelo", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: "Al iluminar un metal con luz de 120 nm de longitud de onda se emiten electrones frenados por un potencial de 7,2 V. Con luz de frecuencia 1,67·10¹⁵ Hz, el potencial de frenado se reduce a 3,8 V.",
@@ -2762,6 +2976,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2022-modelo-B1",
+    topicSlugs: ["ley-de-gravitacion-universal"],
     año: 2022, convocatoria: "Modelo", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
     enunciado: "En un experimento similar al de Cavendish, una pequeña esfera A de masa m se sitúa ante dos esferas B y C de igual masa M, formando los centros de las tres un triángulo rectángulo de catetos D y d.\n\n![Triángulo rectángulo con esferas A, B y C de catetos D y d](/fisica-imgs/2022-modelo/pregunta-B1-cavendish.png)",
@@ -2774,6 +2989,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2022-modelo-B2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2022, convocatoria: "Modelo", opcion: "B",
     tipo: "Ondas", numero: "B.2",
     enunciado: "En el centro de una pista de circo circular hay un sonómetro. Un faquir actúa a 5 m del centro y grita marcando 80 dB; un espectador del público grita marcando 73,98 dB; todo el público grita al unísono marcando 90,97 dB. Todos gritan con la misma potencia.",
@@ -2786,6 +3002,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2022-modelo-B3",
+    topicSlugs: ["flujo-magnetico-e-induccion-electromagnetica"],
     año: 2022, convocatoria: "Modelo", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
     enunciado: "Una espira cuadrada de lado a = 30 cm penetra con velocidad constante v = 3î cm s⁻¹ en una zona (x > 0) con campo magnético B = 1·10⁻³k̂ T. Inicialmente la espira está completamente fuera del campo, con un lado sobre el eje y.\n\n![Espira cuadrada penetrando en una región con campo magnético uniforme](/fisica-imgs/2022-modelo/pregunta-B3-espira.png)",
@@ -2797,6 +3014,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2022-modelo-B4",
+    topicSlugs: ["refraccion-y-ley-de-snell"],
     año: 2022, convocatoria: "Modelo", opcion: "B",
     tipo: "Optica", numero: "B.4",
     enunciado: "Un haz de luz con dos rayos monocromáticos incide desde el aire con ángulo de 40° sobre un vidrio de 20 cm de espesor. El índice de refracción del vidrio es n₁ = 1,61 para el primer rayo y n₂ = 1,67 para el segundo.",
@@ -2809,6 +3027,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2022-modelo-B5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2022, convocatoria: "Modelo", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: "Un trozo de madera con 25 g de carbono, tallado como empuñadura, se encontró en ruinas antiguas con una actividad en ¹⁴C de 5,2 Bq. En organismos vivos hay 1,3·10⁻¹² átomos de ¹⁴C por cada átomo de ¹²C, y el período de semidesintegración del ¹⁴C es 5730 años.",
@@ -2826,6 +3045,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
 
   {
     id: "f-2023-modelo-A1",
+    topicSlugs: ["velocidad-orbital"],
     año: 2023, convocatoria: "Modelo", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: "Un satélite de 400 kg orbita alrededor de la Tierra describiendo una órbita circular a una altura de 15000 km.",
@@ -2838,6 +3058,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2023-modelo-A2",
+    topicSlugs: ["ecuacion-de-una-onda-armonica"],
     año: 2023, convocatoria: "Modelo", opcion: "A",
     tipo: "Ondas", numero: "A.2",
     enunciado: "Una onda transversal se propaga en el sentido negativo del eje x con velocidad 2 m s⁻¹. En el origen y en t = 0, la elongación es nula y la velocidad de oscilación es −40π cm s⁻¹. La separación entre dos puntos que oscilan en fase es de 50 cm.",
@@ -2849,6 +3070,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2023-modelo-A3",
+    topicSlugs: ["trabajo-y-caracter-conservativo-del-campo-electrico"],
     año: 2023, convocatoria: "Modelo", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
     enunciado: "Una corteza esférica hueca de radio 3 cm, centrada en el origen, está cargada con densidad superficial homogénea σ = 2 µC m⁻².",
@@ -2861,6 +3083,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2023-modelo-A4",
+    topicSlugs: ["aumento-lateral-en-lentes-y-espejos", "lentes-delgadas-ecuacion-fundamental"],
     año: 2023, convocatoria: "Modelo", opcion: "A",
     tipo: "Optica", numero: "A.4",
     enunciado: "A 15 cm a la izquierda de una lente se sitúa un objeto, cuya imagen se forma 30 cm a la derecha de la lente.",
@@ -2872,6 +3095,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2023-modelo-A5",
+    topicSlugs: ["trabajo-y-caracter-conservativo-del-campo-electrico", "energia-y-cantidad-de-movimiento-relativistas"],
     año: 2023, convocatoria: "Modelo", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: "Un positrón en reposo se acelera en un acelerador lineal a través de una diferencia de potencial de 3 MV.",
@@ -2884,6 +3108,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2023-modelo-B1",
+    topicSlugs: ["intensidad-del-campo-gravitatorio", "trabajo-y-caracter-conservativo-del-campo-gravitatorio"],
     año: 2023, convocatoria: "Modelo", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
     enunciado: "Dos masas m₁ = 10 kg y m₂ = 15 kg se encuentran en los puntos (0,0) m y (2,0) m del plano xy.\n\n![Tres trayectorias A, B y C entre los puntos (2,0) y (0,1)](/fisica-imgs/2023-modelo/pregunta-B1-trayectorias.png)",
@@ -2896,6 +3121,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2023-modelo-B2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2023, convocatoria: "Modelo", opcion: "B",
     tipo: "Ondas", numero: "B.2",
     enunciado: "Un foco sonoro puntual emite ondas esféricas: a una distancia desconocida x el nivel de intensidad es 60 dB, y a x + 10 m es 47,96 dB.",
@@ -2908,6 +3134,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2023-modelo-B3",
+    topicSlugs: ["campo-magnetico-creado-por-corrientes"],
     año: 2023, convocatoria: "Modelo", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
     enunciado: "Por un hilo rectilíneo infinito sobre el eje x circula una corriente de 3 A en sentido positivo. Una segunda corriente paralela, del mismo sentido, pasa por (0,−2,0) m.",
@@ -2920,6 +3147,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2023-modelo-B4",
+    topicSlugs: ["refraccion-y-ley-de-snell"],
     año: 2023, convocatoria: "Modelo", opcion: "B",
     tipo: "Optica", numero: "B.4",
     enunciado: "Un rayo de luz de frecuencia f = 2,94·10¹⁴ Hz incide desde el medio A hacia el medio B, reflejándose totalmente para un ángulo de incidencia igual o superior a 49,88°. Las velocidades de propagación cumplen vA + vB = 4,07·10⁸ m s⁻¹.",
@@ -2932,6 +3160,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2023-modelo-B5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2023, convocatoria: "Modelo", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: "En la figura se presenta la evolución temporal de la actividad de una muestra que contiene Yodo-131.\n\n![Gráfica de actividad del Yodo-131 frente al tiempo](/fisica-imgs/2023-modelo/pregunta-B5-actividad-yodo.png)",
@@ -2949,6 +3178,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
 
   {
     id: "f-2024-modelo-A1",
+    topicSlugs: ["leyes-de-kepler"],
     año: 2024, convocatoria: "Modelo", opcion: "A",
     tipo: "Gravitacion", numero: "A.1",
     enunciado: "La sonda Parker de la NASA describe una órbita elíptica alrededor del Sol con un afelio de 1,1·10⁸ km y un perihelio de 7,6·10⁶ km.",
@@ -2961,6 +3191,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2024-modelo-A2",
+    topicSlugs: ["ondas-definicion-y-tipos"],
     año: 2024, convocatoria: "Modelo", opcion: "A",
     tipo: "Ondas", numero: "A.2",
     enunciado: "Un objeto de masa desconocida cuelga de un muelle de constante elástica 750 N m⁻¹, oscilando según el eje y en un MAS de frecuencia 3 Hz y energía 1 J. Posteriormente, se coloca una cuerda tensa en el objeto, por la que se propagan ondas transversales con velocidad 5 m s⁻¹ en el sentido positivo del eje x. En el instante inicial y en el origen, el desplazamiento es nulo y la velocidad es negativa.",
@@ -2972,6 +3203,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2024-modelo-A3",
+    topicSlugs: ["trabajo-y-caracter-conservativo-del-campo-electrico", "intensidad-del-campo-electrico"],
     año: 2024, convocatoria: "Modelo", opcion: "A",
     tipo: "Electricidad", numero: "A.3",
     enunciado: "Dos cargas de 2 nC cada una están fijas en (0,0) m y (4,0) m del plano xy.",
@@ -2984,6 +3216,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2024-modelo-A4",
+    topicSlugs: ["reflexion-de-la-luz-y-espejos"],
     año: 2024, convocatoria: "Modelo", opcion: "A",
     tipo: "Optica", numero: "A.4",
     enunciado: "Un espejo esférico cóncavo de 60 cm de radio de curvatura tiene situado a 80 cm frente a él, sobre su eje óptico, un objeto de 5 cm de altura.",
@@ -2995,6 +3228,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2024-modelo-A5",
+    topicSlugs: ["ley-de-desintegracion-radiactiva"],
     año: 2024, convocatoria: "Modelo", opcion: "A",
     tipo: "RadioactividadModerna", numero: "A.5",
     enunciado: "El isótopo ¹⁹⁸Au reduce su actividad a la sexta parte en el transcurso de una semana.",
@@ -3006,6 +3240,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2024-modelo-B1",
+    topicSlugs: ["intensidad-del-campo-gravitatorio"],
     año: 2024, convocatoria: "Modelo", opcion: "B",
     tipo: "Gravitacion", numero: "B.1",
     enunciado: "Un astronauta aterriza sobre un planeta esférico de radio 1800 km. En su superficie deja caer un objeto desde 2 m de altura y tarda 1,5 s en llegar al suelo.",
@@ -3018,6 +3253,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2024-modelo-B2",
+    topicSlugs: ["el-sonido-velocidad-y-cualidades"],
     año: 2024, convocatoria: "Modelo", opcion: "B",
     tipo: "Ondas", numero: "B.2",
     enunciado: "Un foco sonoro puntual F₁ emite ondas esféricas: el nivel de intensidad percibido por un observador a 3 m es de 60 dB. Un segundo foco F₂, con el doble de potencia que F₁, emite simultáneamente, y el nivel percibido pasa a ser 70 dB.",
@@ -3030,6 +3266,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2024-modelo-B3",
+    topicSlugs: ["flujo-magnetico-e-induccion-electromagnetica"],
     año: 2024, convocatoria: "Modelo", opcion: "B",
     tipo: "Electricidad", numero: "B.3",
     enunciado: "Por un solenoide infinitamente largo de 250 espiras por metro, con eje en z, circula una corriente variable en el tiempo según la gráfica.\n\n![Gráfica de intensidad de corriente frente al tiempo](/fisica-imgs/2024-modelo/pregunta-B3-corriente-tiempo.png)",
@@ -3042,6 +3279,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2024-modelo-B4",
+    topicSlugs: ["refraccion-y-ley-de-snell", "reflexion-total-y-angulo-limite"],
     año: 2024, convocatoria: "Modelo", opcion: "B",
     tipo: "Optica", numero: "B.4",
     enunciado: "Un rayo de luz incide desde el aire sobre la superficie lateral de un paralelepípedo a mitad de altura. La altura del paralelepípedo es H = 4 cm y su índice de refracción vale 1,34.\n\n![Rayo incidiendo sobre la superficie lateral de un paralelepípedo](/fisica-imgs/2024-modelo/pregunta-B4-paralelepipedo.png)",
@@ -3054,6 +3292,7 @@ $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Período de semidesintegració
   },
   {
     id: "f-2024-modelo-B5",
+    topicSlugs: ["efecto-fotoelectrico"],
     año: 2024, convocatoria: "Modelo", opcion: "B",
     tipo: "RadioactividadModerna", numero: "B.5",
     enunciado: "En la gráfica se representa el potencial de frenado para el cobre al iluminarlo con fotones de longitudes de onda entre 100 y 200 nm.\n\n![Gráfica del potencial de frenado del cobre frente a la longitud de onda](/fisica-imgs/2024-modelo/pregunta-B5-potencial-frenado.png)",
@@ -3074,6 +3313,7 @@ export interface PreguntaFisicaApp {
   enunciado: string
   puntuacion: number
   criterios: string
+  topicSlugs?: string[]
 }
 
 export interface ExamenFisica {
@@ -3107,6 +3347,7 @@ export const examenesFisica: ExamenFisica[] = Object.values(
       enunciado: enunciadoFisica(p),
       puntuacion: p.puntos,
       criterios: "Se valorará el planteamiento físico, el uso correcto de fórmulas, unidades, sustitución numérica, resultado final y justificación razonada.",
+      topicSlugs: p.topicSlugs,
     })
 
     return acc

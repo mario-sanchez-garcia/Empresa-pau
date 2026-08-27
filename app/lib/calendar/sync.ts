@@ -274,6 +274,65 @@ export async function syncKairoMissionsToGoogle(userId: string, db = createServi
   return { pushed, skippedNoTime, failed }
 }
 
+export async function syncExistingKairoMissionToGoogle(userId: string, missionId: string, db = createServiceClient()) {
+  const connection = await getConnection(db, userId)
+  if (!connection || !connection.sync_enabled) return { updated: false as const, reason: 'not_connected' as const }
+  const { provider } = await ensureExternalCalendar(db, connection)
+  const { data: missionData, error: missionError } = await db
+    .from('camino_calendar')
+    .select('id, user_id, scheduled_date, subject, title, block_key, block_slug, mission_type, status, start_time, end_time, updated_at, metadata')
+    .eq('user_id', userId)
+    .eq('id', missionId)
+    .maybeSingle()
+  if (missionError) throw missionError
+  const mission = missionData as CaminoMissionRow | null
+  if (!mission || mission.status !== 'pending') return { updated: false as const, reason: 'missing_mission' as const }
+  const eventInput = eventFromMission(mission)
+  if (!eventInput) {
+    await db.from('camino_calendar').update({
+      metadata: mergeMetadata(mission.metadata, { calendar_synced: false, calendar_sync_status: 'pending_no_time' }),
+    }).eq('id', mission.id).eq('user_id', userId)
+    return { updated: false as const, reason: 'no_time' as const }
+  }
+  const { data: linkData, error: linkError } = await db
+    .from('calendar_event_links')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('provider', 'google')
+    .eq('entity_type', 'mission')
+    .eq('entity_id', mission.id)
+    .maybeSingle()
+  if (linkError) throw linkError
+  const link = linkData as CalendarEventLink | null
+  if (!link?.external_event_id) {
+    await db.from('camino_calendar').update({
+      metadata: mergeMetadata(mission.metadata, { calendar_synced: false, calendar_sync_status: 'pending' }),
+    }).eq('id', mission.id).eq('user_id', userId)
+    return { updated: false as const, reason: 'no_existing_link' as const }
+  }
+  try {
+    const event = await provider.updateEvent(link.external_calendar_id, link.external_event_id, eventInput)
+    await db.from('calendar_event_links').update({
+      external_etag: event.etag ?? null,
+      last_local_update: mission.updated_at ?? nowISO(),
+      last_external_update: event.updated ?? nowISO(),
+      last_sync_source: 'kairo',
+      last_synced_at: nowISO(),
+      sync_status: 'synced',
+    }).eq('id', link.id)
+    await db.from('camino_calendar').update({
+      metadata: mergeMetadata(mission.metadata, { calendar_synced: true, calendar_sync_status: 'synced' }),
+      updated_at: mission.updated_at ?? nowISO(),
+    }).eq('id', mission.id).eq('user_id', userId)
+    return { updated: true as const }
+  } catch (error) {
+    await db.from('camino_calendar').update({
+      metadata: mergeMetadata(mission.metadata, { calendar_synced: false, calendar_sync_status: 'error' }),
+    }).eq('id', mission.id).eq('user_id', userId)
+    throw error
+  }
+}
+
 async function applyExternalEvent(db: SupabaseClient, connection: CalendarConnection, event: CalendarEvent) {
   const calendarId = connection.external_calendar_id
   if (!calendarId) return
@@ -431,7 +490,7 @@ export async function findConnectionByGoogleChannel(channelId: string | null, re
 export async function getGoogleAvailability(userId: string, timeMin: string, timeMax: string) {
   const db = createServiceClient()
   const connection = await getConnection(db, userId)
-  if (!connection || !connection.sync_enabled || !connection.external_calendar_id) return []
+  if (!connection || !connection.sync_enabled) return []
   const provider = await providerForConnection(db, connection)
-  return provider.getAvailability([connection.external_calendar_id], timeMin, timeMax, MADRID_TZ)
+  return provider.getAvailability(['primary'], timeMin, timeMax, MADRID_TZ)
 }

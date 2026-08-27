@@ -1,5 +1,6 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 
+import { getAvailabilityForDate, type LocalBusyRange } from './calendar/availability'
 import { PRIVATE_BETA_SUBJECTS, isPrivateBetaSubject } from './camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from './camino/caminoCurriculumPlan'
 import { cleanStudentExams } from './camino/cleanStudentExams'
@@ -24,6 +25,20 @@ const EXAM_DATE = '2027-06-07'
 // (~1 mes) cubre con margen la ventana de lanzamiento sin cambiar el
 // resto de la lógica de programación (que ya escala con esta constante).
 const CALENDAR_HORIZON = 30
+
+async function createAvailabilityAwareScheduler(
+  userId: string,
+  supabase: SupabaseClient,
+  dateStr: string,
+  externalBusyByDate: Map<string, LocalBusyRange[]>,
+) {
+  let externalBusy = externalBusyByDate.get(dateStr)
+  if (!externalBusy) {
+    externalBusy = await getAvailabilityForDate(userId, dateStr)
+    externalBusyByDate.set(dateStr, externalBusy)
+  }
+  return createDayScheduler(userId, supabase, dateStr, { externalBusy })
+}
 
 // `orderedSubjects` decide qué asignatura le toca cada día del ciclo
 // rotativo (dow-1 % length) — el llamador la calcula una vez por ejecución
@@ -178,8 +193,9 @@ async function maybeInjectCommentText(
 
   let candidate: string | null = null
   let timeSlot: { start: string; end: string } | null = null
+  const externalBusyByDate = new Map<string, LocalBusyRange[]>()
   for (const d of candidates) {
-    const scheduler = await createDayScheduler(userId, supabase, d)
+    const scheduler = await createAvailabilityAwareScheduler(userId, supabase, d, externalBusyByDate)
     const slot = scheduler.place(estimatedMinutesForMissionType('comment_text'))
     if (slot) { candidate = d; timeSlot = slot; break }
   }
@@ -207,6 +223,7 @@ export async function ensureCaminoCalendar(
   supabase: SupabaseClient,
 ): Promise<void> {
   const today = getMadridToday()
+  const externalBusyByDate = new Map<string, LocalBusyRange[]>()
 
   // PASO 1 — Marcar misiones pasadas pendientes (no bonus) como missed
   await supabase
@@ -544,7 +561,7 @@ export async function ensureCaminoCalendar(
           // día genuinamente sin hueco (agenda propia + otra misión ya lo
           // llenan) se salta sin avanzar el cursor, igual que el bucle
           // principal.
-          const scheduler = await createDayScheduler(userId, supabase, dateStr)
+          const scheduler = await createAvailabilityAwareScheduler(userId, supabase, dateStr, externalBusyByDate)
           const timeSlot = scheduler.place(estimatedMinutesForSlot(dailyMinutesForSlots, 0))
           if (!timeSlot) continue
           const itemMeta = item.metadata ?? {}
@@ -753,7 +770,7 @@ export async function ensureCaminoCalendar(
     // (camino_custom_events, incluidas sus recurrencias semanales) — cada
     // misión que coloca este bucle ocupa el hueco elegido antes de buscar el
     // siguiente, así dos misiones del mismo día tampoco se pisan entre sí.
-    const scheduler = await createDayScheduler(userId, supabase, dateStr)
+    const scheduler = await createAvailabilityAwareScheduler(userId, supabase, dateStr, externalBusyByDate)
 
     for (let slot = 0; slot < itemsPerDay; slot++) {
       if (cursor >= queue.length) break

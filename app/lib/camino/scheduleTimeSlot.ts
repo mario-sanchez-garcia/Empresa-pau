@@ -168,8 +168,10 @@ export async function createDayScheduler(
   userId: string,
   supabase: SupabaseClient,
   dateStr: string,
-  options: { excludeCalendarRowIds?: Set<string> } = {},
+  options: { excludeCalendarRowIds?: Set<string>; externalBusy?: TimeRange[] | null } = {},
 ): Promise<DayScheduler> {
-  const busy = await getBusyIntervalsForDate(userId, supabase, dateStr, options)
+  const localBusy = await getBusyIntervalsForDate(userId, supabase, dateStr, options)
+  const externalBusy = options.externalBusy ?? []
+  const busy = [...localBusy, ...externalBusy]
   return new DayScheduler(busy, studyWindowFor(dateStr))
 }

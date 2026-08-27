@@ -88,6 +88,7 @@ type CalendarWeekCache = Record<string, DayPlan[]>
 type TopicProgress = Record<string, { explanation?: boolean; guided?: boolean; evau?: boolean; xp: number; score?: number }>
 type CalendarSource = 'server' | 'client' | 'cache' | 'server_empty' | 'server_error'
 type CalendarSourceContext = 'initial_load' | 'week_navigation' | 'exam_change' | 'postpone'
+type CalendarConflict = { missionId: string; date: string; title: string | null; start: string; end: string; busyStart: string; busyEnd: string }
 
 const EXAMS_KEY = 'kairo_camino_student_exams_v1'
 const WEAK_AREAS_KEY = 'kairo_camino_weak_areas_v1'
@@ -1017,6 +1018,9 @@ export default function CaminoCalendarClient() {
   const [expandedDayDate, setExpandedDayDate] = useState<string | null>(null)
   const [showPastExams, setShowPastExams] = useState(false)
   const [selectedWeekStart, setSelectedWeekStart] = useState(currentWeekStartISO())
+  const [calendarConflicts, setCalendarConflicts] = useState<CalendarConflict[]>([])
+  const [calendarConflictStatus, setCalendarConflictStatus] = useState<'idle' | 'loading' | 'ready' | 'unavailable'>('idle')
+  const [calendarReorganizeStatus, setCalendarReorganizeStatus] = useState<'idle' | 'saving' | 'done' | 'error'>('idle')
   const [caminoPlanId, setCaminoPlanId] = useState<CaminoPlanId>('free')
   const [ligas, setLigas] = useState<LigaInfo[]>([])
   const [ligaLoading, setLigaLoading] = useState(true)
@@ -1452,6 +1456,36 @@ export default function CaminoCalendarClient() {
   useEffect(() => {
     if (onboardingChecked && !hasProfile) router.push('/onboarding')
   }, [onboardingChecked, hasProfile, router])
+
+  useEffect(() => {
+    if (!hasProfile) return
+    let cancelled = false
+    async function loadCalendarConflicts() {
+      setCalendarConflictStatus('loading')
+      setCalendarReorganizeStatus('idle')
+      const { data } = await supabase.auth.getSession()
+      const token = data.session?.access_token
+      if (!token || cancelled) return
+      const weekEnd = toISO(addDays(dateFromISO(selectedWeekStart), 6))
+      try {
+        const res = await fetch(`/api/camino/calendar-conflicts?start=${selectedWeekStart}&end=${weekEnd}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const json = await res.json().catch(() => null) as { conflicts?: CalendarConflict[]; unavailable?: boolean } | null
+        if (cancelled) return
+        setCalendarConflicts(Array.isArray(json?.conflicts) ? json.conflicts : [])
+        setCalendarConflictStatus(json?.unavailable ? 'unavailable' : 'ready')
+      } catch {
+        if (!cancelled) {
+          setCalendarConflicts([])
+          setCalendarConflictStatus('unavailable')
+        }
+      }
+    }
+    loadCalendarConflicts()
+    return () => { cancelled = true }
+  }, [hasProfile, selectedWeekStart, calendar])
+
   const visibleCalendar = visibleCalendarForOnboarding(calendar, onboarding)
   const realToday = todayMadrid()
   const today = visibleCalendar.find(day => day.date === realToday) ?? { date: realToday, label: calendarDayLabel(realToday), isToday: true, missions: [] }
@@ -1773,6 +1807,45 @@ export default function CaminoCalendarClient() {
   }
   function goToCurrentWeek() {
     goToWeek(currentWeekStartISO())
+  }
+  async function reorganizeCalendarConflicts() {
+    if (calendarReorganizeStatus === 'saving' || calendarConflicts.length === 0) return
+    setCalendarReorganizeStatus('saving')
+    const { data } = await supabase.auth.getSession()
+    const token = data.session?.access_token
+    const userId = data.session?.user.id
+    if (!token || !userId) {
+      setCalendarReorganizeStatus('error')
+      setToast('No se pudo verificar tu sesión. Recarga la página e inténtalo de nuevo.')
+      return
+    }
+    try {
+      const res = await fetch('/api/camino/calendar-conflicts/reorganize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ missionIds: calendarConflicts.map(conflict => conflict.missionId) }),
+      })
+      const payload = await res.json().catch(() => null) as { moved?: number; unscheduled?: string[]; error?: string } | null
+      if (!res.ok) throw new Error(payload?.error ?? 'calendar_reorganize_failed')
+      const calDays = await fetchCaminoCalendar(userId)
+      if (calDays) {
+        setCalendar(calDays)
+        saveCalendarWeeksToCache(calDays)
+        setSupabaseCalLoaded(true)
+      }
+      setCalendarConflicts([])
+      setCalendarReorganizeStatus('done')
+      const moved = payload?.moved ?? 0
+      const unscheduled = payload?.unscheduled?.length ?? 0
+      setToast(unscheduled > 0
+        ? `${unscheduled} misión queda pendiente de programar porque no hay hueco libre.`
+        : moved > 0
+          ? 'Misiones reorganizadas en huecos libres.'
+          : 'No había conflictos activos que reorganizar.')
+    } catch {
+      setCalendarReorganizeStatus('error')
+      setToast('No se pudieron reorganizar las misiones afectadas.')
+    }
   }
   function regenerate(nextExams = exams) {
     if (!onboarding) return
@@ -2454,6 +2527,24 @@ export default function CaminoCalendarClient() {
                 <button onClick={() => goToWeek(weekOffset(selectedWeekStart, 1))} style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6 }}>Sig →</button>
               </div>
             </div>
+            {calendarConflicts.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '10px 12px', borderRadius: 12, border: '1px solid #fed7aa', background: '#fff7ed' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 900, color: '#9a3412' }}>
+                    Tu calendario ha cambiado. Hay {calendarConflicts.length} {calendarConflicts.length === 1 ? 'misión afectada' : 'misiones afectadas'}.
+                  </div>
+                  <div style={{ marginTop: 2, fontSize: 10, fontWeight: 700, color: '#c2410c' }}>
+                    {calendarConflicts[0].date} · {calendarConflicts[0].start}-{calendarConflicts[0].end} coincide con {calendarConflicts[0].busyStart}-{calendarConflicts[0].busyEnd} Ocupado.
+                  </div>
+                </div>
+                <button type="button" onClick={reorganizeCalendarConflicts} disabled={calendarReorganizeStatus === 'saving'} style={{ flexShrink: 0, border: 'none', borderRadius: 10, background: '#ea580c', color: 'white', padding: '8px 12px', fontSize: 11, fontWeight: 900, cursor: calendarReorganizeStatus === 'saving' ? 'default' : 'pointer', opacity: calendarReorganizeStatus === 'saving' ? 0.7 : 1 }}>
+                  {calendarReorganizeStatus === 'saving' ? 'Reorganizando...' : calendarReorganizeStatus === 'done' ? '✓ Reorganizado' : calendarReorganizeStatus === 'error' ? 'Reintentar' : 'Reorganizar'}
+                </button>
+              </div>
+            )}
+            {calendarConflictStatus === 'unavailable' && (
+              <div style={{ marginBottom: 12, fontSize: 10, fontWeight: 700, color: '#94a3b8' }}>Disponibilidad externa no disponible; Camino sigue usando tu calendario Kairo.</div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
               {weekCalendar.map((day, i) => {
                 const isPast = day.date < realToday

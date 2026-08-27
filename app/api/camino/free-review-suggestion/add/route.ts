@@ -4,6 +4,7 @@ import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { normalizeCaminoSlug, normalizeSubjectSlug, sanitizeLessonTitle, subjectLabelFromSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 import { createDayScheduler } from '@/app/lib/camino/scheduleTimeSlot'
+import { getAvailabilityForDate } from '@/app/lib/calendar/availability'
 import { syncKairoMissionsToGoogle } from '@/app/lib/calendar/sync'
 
 export const dynamic = 'force-dynamic'
@@ -71,7 +72,9 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    const scheduler = await createDayScheduler(auth.user.id, db, scheduledDate)
+    const scheduler = await createDayScheduler(auth.user.id, db, scheduledDate, {
+      externalBusy: await getAvailabilityForDate(auth.user.id, scheduledDate),
+    })
     const slot = scheduler.place(DEFAULT_MINUTES)
     const metadata = {
       free_review_suggestion: true,

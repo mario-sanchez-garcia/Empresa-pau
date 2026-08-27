@@ -1,6 +1,7 @@
 import 'server-only'
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { getAvailabilityForDate } from '@/app/lib/calendar/availability'
 import { SIMULACRO_SUBJECT } from './partialExamSubjects'
 import { createDayScheduler, estimatedMinutesForMissionType } from './scheduleTimeSlot'
 import { getMadridToday, getStudyDays } from './studyDays'
@@ -90,7 +91,9 @@ export async function maybeGenerateBlockPracticeMission(
   const today = getMadridToday()
   const candidateDays = getStudyDays(today, 14)
   for (const dateStr of candidateDays) {
-    const scheduler = await createDayScheduler(userId, db, dateStr)
+    const scheduler = await createDayScheduler(userId, db, dateStr, {
+      externalBusy: await getAvailabilityForDate(userId, dateStr),
+    })
     const timeSlot = scheduler.place(estimatedMinutesForMissionType('pau_practice'))
     if (!timeSlot) continue // día sin hueco libre — se prueba el siguiente
 

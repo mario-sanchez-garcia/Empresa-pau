@@ -16,6 +16,11 @@ function assert(name, condition) {
 const client = read('app/components/camino/CaminoCalendarClient.tsx')
 const route = read('app/api/camino/calendar-editor/mission/route.ts')
 const config = read('app/lib/camino/calendarEditorConfig.ts')
+const availability = read('app/lib/calendar/availability.ts')
+const scheduleTimeSlot = read('app/lib/camino/scheduleTimeSlot.ts')
+const conflictRoute = read('app/api/camino/calendar-conflicts/route.ts')
+const reorganizeRoute = read('app/api/camino/calendar-conflicts/reorganize/route.ts')
+const calendarSync = read('app/lib/calendar/sync.ts')
 const existingMissionUpdatePayload = client.slice(
   client.indexOf('const toUpdate = draft.flatMap'),
   client.indexOf('// INSERT new missions'),
@@ -114,7 +119,7 @@ assert(
 assert(
   'calendar editor computes end_time from start_time plus duration',
   route.includes('function addMinutesToTime') &&
-    route.includes('const endTime = addMinutesToTime(startTime, durationMinutes)') &&
+    route.includes('const requestedEndTime = addMinutesToTime(requestedStartTime, durationMinutes)') &&
     route.includes("return NextResponse.json({ error: 'end_time_after_midnight' }") &&
     route.includes('start_time: startTime') &&
     route.includes('end_time: endTime') &&
@@ -135,4 +140,74 @@ assert(
   existingMissionUpdatePayload.includes('scheduled_date: day.date') &&
     existingMissionUpdatePayload.includes('locked: true') &&
     !existingMissionUpdatePayload.includes('source:')
+)
+
+assert(
+  'calendar availability keeps external busy abstract and private',
+  availability.includes('export type LocalBusyRange') &&
+    availability.includes('export async function getAvailability(') &&
+    availability.includes('busySlotsForMadridDate') &&
+    availability.includes('hasTimeConflict') &&
+    availability.includes("console.warn('[calendar/availability] freebusy skipped:'") &&
+    !availability.includes('summary') &&
+    calendarSync.includes("provider.getAvailability(['primary']")
+)
+
+assert(
+  'day scheduler can receive external busy slots without importing server-only',
+  scheduleTimeSlot.includes('externalBusy?: TimeRange[] | null') &&
+    scheduleTimeSlot.includes('const externalBusy = options.externalBusy ?? []') &&
+    scheduleTimeSlot.includes('const busy = [...localBusy, ...externalBusy]') &&
+    !scheduleTimeSlot.includes("import 'server-only'") &&
+    !scheduleTimeSlot.includes("from '@/app/lib/calendar/availability'")
+)
+
+assert(
+  'calendar conflicts endpoint detects overlaps without exposing private titles',
+  conflictRoute.includes('getAvailability(auth.user.id, start, end)') &&
+    conflictRoute.includes('busySlotsForMadridDate') &&
+    conflictRoute.includes('hasTimeConflict') &&
+    conflictRoute.includes('busyStart') &&
+    conflictRoute.includes('busyEnd') &&
+    !conflictRoute.includes('description') &&
+    !conflictRoute.includes('location')
+)
+
+assert(
+  'Camino calendar warns about external conflicts without polling',
+  client.includes("fetch(`/api/camino/calendar-conflicts?start=${selectedWeekStart}&end=${weekEnd}`") &&
+    client.includes('Tu calendario ha cambiado. Hay') &&
+    client.includes('Ocupado') &&
+    client.includes('reorganizeCalendarConflicts') &&
+    !client.includes('setInterval(')
+)
+
+assert(
+  'calendar conflict reorganize revalidates conflicts and only moves affected missions',
+  reorganizeRoute.includes('const stillConflicts = currentBusy.some') &&
+    reorganizeRoute.includes('if (!stillConflicts)') &&
+    reorganizeRoute.includes('unchangedIds.push(mission.id)') &&
+    reorganizeRoute.includes('excludeCalendarRowIds: new Set([mission.id])') &&
+    reorganizeRoute.includes('start_time: null') &&
+    reorganizeRoute.includes('pending_no_time') &&
+    !reorganizeRoute.includes('.delete(')
+)
+
+assert(
+  'calendar conflict reorganize updates existing Google events without creating duplicates',
+  reorganizeRoute.includes('syncExistingKairoMissionToGoogle(auth.user.id, mission.id, db)') &&
+    calendarSync.includes('export async function syncExistingKairoMissionToGoogle') &&
+    calendarSync.includes('if (!link?.external_event_id)') &&
+    calendarSync.includes("reason: 'no_existing_link'") &&
+    calendarSync.includes('await provider.updateEvent(link.external_calendar_id, link.external_event_id, eventInput)') &&
+    !calendarSync.slice(calendarSync.indexOf('export async function syncExistingKairoMissionToGoogle')).includes('provider.createEvent')
+)
+
+assert(
+  'Camino conflict UI calls reorganize endpoint with clear states',
+  client.includes("fetch('/api/camino/calendar-conflicts/reorganize'") &&
+    client.includes('calendarReorganizeStatus') &&
+    client.includes('Reorganizando...') &&
+    client.includes('✓ Reorganizado') &&
+    client.includes('Reintentar')
 )

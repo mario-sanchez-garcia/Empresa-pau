@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { normalizeSubjectSlug, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
+import { getAvailabilityForDate, hasTimeConflict } from '@/app/lib/calendar/availability'
 import { syncKairoMissionsToGoogle } from '@/app/lib/calendar/sync'
 import { DEFAULT_MISSION_DURATION_MINUTES } from '@/app/lib/camino/calendarEditorConfig'
 
@@ -79,11 +80,19 @@ export async function POST(request: NextRequest) {
     }
 
     const durationMinutes = cleanNumber(body.estimatedMinutes, DEFAULT_MISSION_DURATION_MINUTES, 5, 180)
-    const startTime = normalizeTime(body.startTime)
-    const endTime = addMinutesToTime(startTime, durationMinutes)
-    if (startTime && !endTime) {
+    const requestedStartTime = normalizeTime(body.startTime)
+    const requestedEndTime = addMinutesToTime(requestedStartTime, durationMinutes)
+    if (requestedStartTime && !requestedEndTime) {
       return NextResponse.json({ error: 'end_time_after_midnight' }, { status: 400 })
     }
+    const externalBusy = requestedStartTime && requestedEndTime
+      ? await getAvailabilityForDate(auth.user.id, scheduledDate)
+      : []
+    const requestedSlotConflicts = requestedStartTime && requestedEndTime
+      ? externalBusy.some(slot => hasTimeConflict({ start: requestedStartTime, end: requestedEndTime }, slot))
+      : false
+    const startTime = requestedSlotConflicts ? null : requestedStartTime
+    const endTime = requestedSlotConflicts ? null : requestedEndTime
 
     const role = cleanString(body.role, 20) === 'bonus' ? 'bonus' : 'main'
     const kind = cleanString(body.kind, 80)
@@ -121,6 +130,8 @@ export async function POST(request: NextRequest) {
       topic_slug: topicSlug || undefined,
       start_time: startTime || undefined,
       end_time: endTime || undefined,
+      requested_start_time: requestedSlotConflicts ? requestedStartTime : undefined,
+      calendar_conflict_avoided: requestedSlotConflicts || undefined,
       calendar_sync_status: startTime && endTime ? 'pending' : 'pending_no_time',
     }
 

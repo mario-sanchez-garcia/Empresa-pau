@@ -71,17 +71,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "1.1",
             "puntos": 2.5,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "1.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "1.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja."
+            "enunciado": "Elabore un texto argumentativo sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -147,13 +150,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "3.1",
             "puntos": 1.5,
             "enunciado": "Literatura de fin de siglo: la generación del 98 y el modernismo. La novela y el teatro anterior a 1936.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-modernismo","la-generacion-del-98","la-novela-anterior-a-1936-unamuno-baroja-y-azorin","el-teatro-anterior-a-1939-valle-inclan-y-el-esperpento"]
           },
           {
             "id": "3.2",
             "puntos": 1.5,
             "enunciado": "La lírica y el teatro posteriores a 1936.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-poesia-de-1939-a-la-actualidad","el-teatro-de-1939-a-la-actualidad"]
           },
           {
             "id": "3.3",
@@ -199,17 +204,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "1.1",
             "puntos": 2.5,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "1.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "1.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja."
+            "enunciado": "Elabore un texto argumentativo sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -275,13 +283,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "3.1",
             "puntos": 1.5,
             "enunciado": "La generación del 27: características y trayectoria poética de los poetas del 27. El teatro lorquiano.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-generacion-del-27-caracteristicas","los-poetas-del-27-trayectorias-individuales","el-teatro-de-lorca"]
           },
           {
             "id": "3.2",
             "puntos": 1.5,
             "enunciado": "La literatura hispanoamericana contemporánea: poesía americana después de las vanguardias, la novela regionalista, la novela del boom, la narrativa posterior al boom.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-literatura-hispanoamericana-del-siglo-xx"]
           },
           {
             "id": "3.3",
@@ -327,32 +337,38 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2.5,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,50 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,50 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de recurrir a terapias para superar los traumas y las dificultades."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de recurrir a terapias para superar los traumas y las dificultades.",
+            "topicSlugs": ["texto-argumentativo"]
           },
           {
             "id": "B.1",
             "puntos": 2.5,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de que se adapten los horarios escolares y laborales a los ritmos naturales del sueño."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de que se adapten los horarios escolares y laborales a los ritmos naturales del sueño.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -418,7 +434,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 1.5,
             "enunciado": "El realismo y el naturalismo: la novela. La poesía y el teatro en la segunda mitad del siglo XIX.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-realismo-y-el-naturalismo"]
           },
           {
             "id": "A.7",
@@ -430,7 +447,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 1.5,
             "enunciado": "La lírica y el teatro posteriores a 1936.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-poesia-de-1939-a-la-actualidad","el-teatro-de-1939-a-la-actualidad"]
           },
           {
             "id": "B.7",
@@ -470,32 +488,38 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2.5,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de que el silencio favorezca la concentración y la reflexión."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de que el silencio favorezca la concentración y la reflexión.",
+            "topicSlugs": ["texto-argumentativo"]
           },
           {
             "id": "B.1",
             "puntos": 2.5,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra del uso del patinete en las calles y en el transporte público."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra del uso del patinete en las calles y en el transporte público.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -561,7 +585,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 1.5,
             "enunciado": "El novecentismo y la generación del 14: el ensayo, la novela novecentista. Juan Ramón Jiménez.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-novecentismo-y-la-generacion-del-14"]
           },
           {
             "id": "A.7",
@@ -573,7 +598,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 1.5,
             "enunciado": "La generación del 27: características y trayectoria poética de los poetas del 27. El teatro lorquiano.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-generacion-del-27-caracteristicas","los-poetas-del-27-trayectorias-individuales","el-teatro-de-lorca"]
           },
           {
             "id": "B.7",
@@ -613,32 +639,38 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de la obligatoriedad de adoptar medidas preventivas en cuestiones de salud."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de la obligatoriedad de adoptar medidas preventivas en cuestiones de salud.",
+            "topicSlugs": ["texto-argumentativo"]
           },
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de que los robots puedan sustituir a las mascotas."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de que los robots puedan sustituir a las mascotas.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -704,7 +736,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "El novecentismo y las vanguardias.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-novecentismo-y-la-generacion-del-14","las-vanguardias"]
           },
           {
             "id": "A.7",
@@ -716,7 +749,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "El teatro de 1939 hasta la actualidad. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-teatro-de-1939-a-la-actualidad"]
           },
           {
             "id": "B.7",
@@ -756,32 +790,38 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de mantener las tradiciones culturales."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de mantener las tradiciones culturales.",
+            "topicSlugs": ["texto-argumentativo"]
           },
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de asociar la elección de los estudios a la empleabilidad."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de asociar la elección de los estudios a la empleabilidad.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -847,7 +887,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "El teatro anterior a 1939. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-teatro-anterior-a-1939-valle-inclan-y-el-esperpento"]
           },
           {
             "id": "A.7",
@@ -859,7 +900,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "La poesía de 1939 hasta la actualidad. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-poesia-de-1939-a-la-actualidad"]
           },
           {
             "id": "B.7",
@@ -899,32 +941,38 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de la explotación turística de monumentos o lugares históricos."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de la explotación turística de monumentos o lugares históricos.",
+            "topicSlugs": ["texto-argumentativo"]
           },
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de suprimir el uso de combustibles fósiles."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de suprimir el uso de combustibles fósiles.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -990,7 +1038,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "El modernismo y la generación del 98.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-modernismo","la-generacion-del-98"]
           },
           {
             "id": "A.7",
@@ -1002,7 +1051,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "El teatro de 1939 hasta la actualidad. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-teatro-de-1939-a-la-actualidad"]
           },
           {
             "id": "B.7",
@@ -1042,32 +1092,38 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de disimular los sentimientos auténticos por razones sociales."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de disimular los sentimientos auténticos por razones sociales.",
+            "topicSlugs": ["texto-argumentativo"]
           },
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de afrontar la vida confiando en que el futuro siempre será mejor."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de afrontar la vida confiando en que el futuro siempre será mejor.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -1133,7 +1189,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "La poesía de la generación del 27.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-generacion-del-27-caracteristicas","los-poetas-del-27-trayectorias-individuales"]
           },
           {
             "id": "A.7",
@@ -1145,7 +1202,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "La novela española de 1939 a 1974. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1939-a-1974"]
           },
           {
             "id": "B.7",
@@ -1185,32 +1243,38 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)"
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de restringir derechos por causas sanitarias."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de restringir derechos por causas sanitarias.",
+            "topicSlugs": ["texto-argumentativo"]
           },
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)"
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de la importancia del silencio en nuestra vida."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de la importancia del silencio en nuestra vida.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -1276,7 +1340,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "La novela española de 1939 a 1974. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1939-a-1974"]
           },
           {
             "id": "A.7",
@@ -1288,7 +1353,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "La poesía de 1939 hasta la actualidad. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-poesia-de-1939-a-la-actualidad"]
           },
           {
             "id": "B.7",
@@ -1328,32 +1394,38 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de que el azar condiciona nuestras vidas."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de que el azar condiciona nuestras vidas.",
+            "topicSlugs": ["texto-argumentativo"]
           },
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de la denominada telebasura."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de la denominada telebasura.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -1419,7 +1491,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "El novecentismo y las vanguardias.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-novecentismo-y-la-generacion-del-14","las-vanguardias"]
           },
           {
             "id": "A.7",
@@ -1431,7 +1504,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "La novela española de 1975 hasta la actualidad. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1975-a-la-actualidad"]
           },
           {
             "id": "B.7",
@@ -1471,17 +1545,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "1.1",
             "puntos": 2,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,3 puntos); c) indique qué tipo de texto es (0,2 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,3 puntos); c) indique qué tipo de texto es (0,2 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "1.2",
             "puntos": 0.6,
-            "enunciado": "Redacte un resumen de entre 40 y 50 palabras del contenido del texto."
+            "enunciado": "Redacte un resumen de entre 40 y 50 palabras del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "1.3",
             "puntos": 1.4,
-            "enunciado": "Elabore un texto argumentativo de entre 100 y 150 palabras sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja."
+            "enunciado": "Elabore un texto argumentativo de entre 100 y 150 palabras sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -1551,13 +1628,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "3.1",
             "puntos": 2,
             "enunciado": "Lea el siguiente texto y realice la actividad que se propone a continuación:\n\n\"De mi niñez no son precisamente buenos recuerdos los que guardo. Mi padre se llamaba Esteban Duarte Diniz, y era portugués, cuarentón cuando yo niño, y alto y gordo como un monte. […] Cuando se enfurecía, cosa que le ocurría con mayor frecuencia de lo que se necesitaba, nos pegaba a mi madre y a mí las grandes palizas por cualquier cosa, palizas que mi madre procuraba devolverle por ver de corregirlo, pero ante las cuales a mí no me quedaba sino resignación dados mis pocos años. ¡Se tienen las carnes muy tiernas a tan corta edad!\"\n\nEl fragmento pertenece a la novela La familia de Pascual Duarte (1942), escrita por Camilo José Cela. Escriba cuatro rasgos de la novela tremendista y ejemplifique, con citas, su presencia en el texto.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-comentario-de-un-fragmento-literario-pregunta-3-1"]
           },
           {
             "id": "3.2",
             "puntos": 2,
             "enunciado": "La generación del 27: características y trayectoria poética de los poetas del 27. El teatro lorquiano.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-generacion-del-27-caracteristicas","los-poetas-del-27-trayectorias-individuales","el-teatro-de-lorca"]
           },
           {
             "id": "3.3",
@@ -1603,17 +1682,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "1.1",
             "puntos": 2.5,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "1.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "1.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja."
+            "enunciado": "Elabore un texto argumentativo sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -1678,13 +1760,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "3.1",
             "puntos": 1.5,
             "enunciado": "La novela española de 1939 a 1975.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1939-a-1974"]
           },
           {
             "id": "3.2",
             "puntos": 1.5,
             "enunciado": "La generación del 27: características y trayectoria poética de los poetas del 27. El teatro lorquiano.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-generacion-del-27-caracteristicas","los-poetas-del-27-trayectorias-individuales","el-teatro-de-lorca"]
           },
           {
             "id": "3.3",
@@ -1730,17 +1814,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "1.1",
             "puntos": 2.5,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "1.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "1.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja."
+            "enunciado": "Elabore un texto argumentativo sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -1804,13 +1891,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "3.1",
             "puntos": 1.5,
             "enunciado": "El novecentismo y la generación del 14: el ensayo, la novela novecentista. Juan Ramón Jiménez.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-novecentismo-y-la-generacion-del-14"]
           },
           {
             "id": "3.2",
             "puntos": 1.5,
             "enunciado": "La generación del 27: características y trayectoria poética de los poetas del 27. El teatro lorquiano.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-generacion-del-27-caracteristicas","los-poetas-del-27-trayectorias-individuales","el-teatro-de-lorca"]
           },
           {
             "id": "3.3",
@@ -1856,17 +1945,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2.5,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de considerar que alcanzar la felicidad depende solo de uno mismo."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de considerar que alcanzar la felicidad depende solo de uno mismo.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -1917,7 +2009,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 1.5,
             "enunciado": "Las vanguardias en Europa, España e Hispanoamérica.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["las-vanguardias"]
           },
           {
             "id": "A.7",
@@ -1957,17 +2050,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2.5,
-            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos)."
+            "enunciado": "Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,5 puntos); c) indique qué tipo de texto es (0,5 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "Redacte un resumen del contenido del texto."
+            "enunciado": "Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "Elabore un texto argumentativo a favor o en contra de que en el deporte las mujeres y los hombres perciban las mismas retribuciones."
+            "enunciado": "Elabore un texto argumentativo a favor o en contra de que en el deporte las mujeres y los hombres perciban las mismas retribuciones.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -2018,7 +2114,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 1.5,
             "enunciado": "La novela española de 1939 a 1975.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1939-a-1974"]
           },
           {
             "id": "B.7",
@@ -2058,17 +2155,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)"
+            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de la manifestación de los sentimientos en público. (1,5 puntos)"
+            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de la manifestación de los sentimientos en público. (1,5 puntos)",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -2114,7 +2214,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "5.a. La novela española de 1975 a finales del siglo XX. Tendencias, autores y obras principales. (2 puntos)",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1975-a-la-actualidad"]
           },
           {
             "id": "A.7",
@@ -2154,17 +2255,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)"
+            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de prejuzgar a la gente por su aspecto físico. (1,5 puntos)"
+            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de prejuzgar a la gente por su aspecto físico. (1,5 puntos)",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -2210,7 +2314,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "5.a. El Modernismo y la Generación del 98. (2 puntos)",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-modernismo","la-generacion-del-98"]
           },
           {
             "id": "B.7",
@@ -2250,17 +2355,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)"
+            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de que la felicidad dependa de la prosperidad económica. (1,5 puntos)"
+            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de que la felicidad dependa de la prosperidad económica. (1,5 puntos)",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -2306,7 +2414,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "5.a. La novela española de 1975 a finales del siglo XX. Tendencias, autores y obras principales. (2 puntos)",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1975-a-la-actualidad"]
           },
           {
             "id": "A.7",
@@ -2346,17 +2455,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto. (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto. (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)"
+            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de que deba existir una cuota femenina en los altos cargos de las grandes empresas. (1,5 puntos)"
+            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de que deba existir una cuota femenina en los altos cargos de las grandes empresas. (1,5 puntos)",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -2402,7 +2514,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "5.a. El Modernismo y la Generación del 98. (2 puntos)",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-modernismo","la-generacion-del-98"]
           },
           {
             "id": "B.7",
@@ -2442,17 +2555,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)"
+            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de que la forma de expresión de las adolescentes sea diferente a la de los chicos de su misma edad. (1,5 puntos)"
+            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de que la forma de expresión de las adolescentes sea diferente a la de los chicos de su misma edad. (1,5 puntos)",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -2498,7 +2614,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "5.a. El Novecentismo y las Vanguardias. (2 puntos)",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-novecentismo-y-la-generacion-del-14","las-vanguardias"]
           },
           {
             "id": "A.7",
@@ -2538,17 +2655,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "23/10/2017)\n\n**CUESTIONES**\n\n1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "23/10/2017)\n\n**CUESTIONES**\n\n1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de que el respeto a la naturaleza deba anteponerse al desarrollo económico incontrolado. (1,5 puntos)"
+            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de que el respeto a la naturaleza deba anteponerse al desarrollo económico incontrolado. (1,5 puntos)",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -2594,7 +2714,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "5.a. La poesía de la Generación del 27. (2 puntos)",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-generacion-del-27-caracteristicas","los-poetas-del-27-trayectorias-individuales"]
           },
           {
             "id": "B.7",
@@ -2634,17 +2755,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)"
+            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de mostrarse optimista ante las situaciones adversas. (1,5 puntos)"
+            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de mostrarse optimista ante las situaciones adversas. (1,5 puntos)",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -2690,7 +2814,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "5.a. La novela española de 1939 a 1974. Tendencias, autores y obras principales. (2 puntos)",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1939-a-1974"]
           },
           {
             "id": "A.7",
@@ -2730,17 +2855,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)"
+            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de que los estudios superiores se elijan solo para conseguir un trabajo bien remunerado. (1,5 puntos)"
+            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de que los estudios superiores se elijan solo para conseguir un trabajo bien remunerado. (1,5 puntos)",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -2786,7 +2914,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "5.a. La poesía de la generación del 27. (2 puntos)",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-generacion-del-27-caracteristicas","los-poetas-del-27-trayectorias-individuales"]
           },
           {
             "id": "B.7",
@@ -2826,17 +2955,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)"
+            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de que las catástrofes naturales sean una posibilidad de negocio. (1,5 puntos)"
+            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de que las catástrofes naturales sean una posibilidad de negocio. (1,5 puntos)",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -2882,7 +3014,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "5.a. El modernismo y la generación del 98. (2 puntos)",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-modernismo","la-generacion-del-98"]
           },
           {
             "id": "A.7",
@@ -2922,17 +3055,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "1. Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)"
+            "enunciado": "2. Redacte un resumen del contenido del texto. (1 punto)",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de vivir de la imagen. (1,5 puntos)"
+            "enunciado": "3. Elabore un texto argumentativo a favor o en contra de vivir de la imagen. (1,5 puntos)",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -2978,7 +3114,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "5.a. La novela española de 1939 a 1974. Tendencias, autores y obras principales. (2 puntos)",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1939-a-1974"]
           },
           {
             "id": "B.7",
@@ -3018,17 +3155,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "A.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "A.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "A.2. (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "A.2. (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "A.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra del uso de medicamentos sin prescripción médica."
+            "enunciado": "A.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra del uso de medicamentos sin prescripción médica.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -3080,7 +3220,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "A.6. (2 puntos) La novela española de 1939 a 1974. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1939-a-1974"]
           },
           {
             "id": "A.7",
@@ -3120,17 +3261,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "B.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "B.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "B.2. (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "B.2. (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "B.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de la necesidad de fomentar los debates en las aulas."
+            "enunciado": "B.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de la necesidad de fomentar los debates en las aulas.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -3182,7 +3326,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "B.6. (2 puntos) La poesía de la generación del 27.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-generacion-del-27-caracteristicas","los-poetas-del-27-trayectorias-individuales"]
           },
           {
             "id": "B.7",
@@ -3222,17 +3367,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "A.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "A.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "A.2. (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "A.2. (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "A.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de que la conversación presencial se esté perdiendo."
+            "enunciado": "A.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de que la conversación presencial se esté perdiendo.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -3284,7 +3432,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "A.6. (2 puntos) La poesía española de 1939 a finales del siglo XX. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-poesia-de-1939-a-la-actualidad"]
           },
           {
             "id": "A.7",
@@ -3324,17 +3473,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "B.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "B.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "B.2. (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "B.2. (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "B.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra del poder de la lectura para fomentar la fantasía."
+            "enunciado": "B.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra del poder de la lectura para fomentar la fantasía.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -3386,7 +3538,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "B.6. (2 puntos) El teatro anterior a 1939. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-teatro-anterior-a-1939-valle-inclan-y-el-esperpento"]
           },
           {
             "id": "B.7",
@@ -3426,17 +3579,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "A.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)"
+            "enunciado": "A.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "A.2 (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "A.2 (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "A.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra del uso de dispositivos electrónicos para promover la alfabetización."
+            "enunciado": "A.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra del uso de dispositivos electrónicos para promover la alfabetización.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -3488,7 +3644,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "A.6 (2 puntos) La novela española de 1939 a 1974. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1939-a-1974"]
           },
           {
             "id": "A.7",
@@ -3528,17 +3685,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "B.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)"
+            "enunciado": "B.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "B.2 (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "B.2 (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "B.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de que las innovaciones tecnológicas sean siempre positivas."
+            "enunciado": "B.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de que las innovaciones tecnológicas sean siempre positivas.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -3590,7 +3750,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "B.6 (2 puntos) El teatro de 1939 hasta la actualidad. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-teatro-de-1939-a-la-actualidad"]
           },
           {
             "id": "B.7",
@@ -3630,17 +3791,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "A.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "A.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "A.2 (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "A.2 (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "A.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de la modificación genética."
+            "enunciado": "A.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de la modificación genética.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -3692,7 +3856,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "A.6 (2 puntos) El teatro anterior a 1939. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-teatro-anterior-a-1939-valle-inclan-y-el-esperpento"]
           },
           {
             "id": "A.7",
@@ -3732,17 +3897,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "B.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "B.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "B.2 (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "B.2 (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "B.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de que las innovaciones tecnológicas sean siempre positivas."
+            "enunciado": "B.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de que las innovaciones tecnológicas sean siempre positivas.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -3794,7 +3962,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "B.6 (2 puntos) La novela española de 1939 a 1974. Tendencias, autores y obras principales",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1939-a-1974"]
           },
           {
             "id": "B.7",
@@ -3834,17 +4003,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "A.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "A.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "A.2. (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "A.2. (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "A.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de tener en cuenta solo las impresiones personales a la hora de tomar decisiones."
+            "enunciado": "A.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de tener en cuenta solo las impresiones personales a la hora de tomar decisiones.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -3896,7 +4068,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "A.6. (2 puntos) El novecentismo y las vanguardias.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-novecentismo-y-la-generacion-del-14","las-vanguardias"]
           },
           {
             "id": "A.7",
@@ -3936,17 +4109,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "B.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "B.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "B.2. (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "B.2. (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "B.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de la incorporación de los últimos avances tecnológicos a las relaciones laborales."
+            "enunciado": "B.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de la incorporación de los últimos avances tecnológicos a las relaciones laborales.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -3998,7 +4174,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "B.6. (2 puntos) La poesía de 1939 hasta la actualidad. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-poesia-de-1939-a-la-actualidad"]
           },
           {
             "id": "B.7",
@@ -4038,17 +4215,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "A.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)"
+            "enunciado": "A.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "A.2 (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "A.2 (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "A.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de considerar que cualquier tiempo pasado fue mejor."
+            "enunciado": "A.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de considerar que cualquier tiempo pasado fue mejor.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -4100,7 +4280,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "A.6 (2 puntos) La novela española de 1939 a 1974. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1939-a-1974"]
           },
           {
             "id": "A.7",
@@ -4140,17 +4321,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "B.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)"
+            "enunciado": "B.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "B.2 (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "B.2 (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "B.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de contra de considerar las adversidades como una oportunidad de mejora."
+            "enunciado": "B.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de contra de considerar las adversidades como una oportunidad de mejora.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -4202,7 +4386,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "B.6 (2 puntos) La poesía de la generación del 27.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-generacion-del-27-caracteristicas","los-poetas-del-27-trayectorias-individuales"]
           },
           {
             "id": "B.7",
@@ -4242,17 +4427,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "A.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos)."
+            "enunciado": "A.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es (0,25 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "A.2. (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "A.2. (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "A.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de que los gobiernos tengan que tomar medidas impopulares en ocasiones."
+            "enunciado": "A.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de que los gobiernos tengan que tomar medidas impopulares en ocasiones.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -4304,7 +4492,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "A.6. (2 puntos) La novela española de 1975 hasta la actualidad. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1975-a-la-actualidad"]
           },
           {
             "id": "A.7",
@@ -4344,17 +4533,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "B.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)"
+            "enunciado": "B.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "B.2. (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "B.2. (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "B.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de comprar ropa en tiendas de segunda mano."
+            "enunciado": "B.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de comprar ropa en tiendas de segunda mano.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -4406,7 +4598,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "B.6. (2 puntos) El modernismo y la generación del 98.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-modernismo","la-generacion-del-98"]
           },
           {
             "id": "B.7",
@@ -4446,17 +4639,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "A.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)"
+            "enunciado": "A.1 (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "A.2 (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "A.2 (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "A.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de los alimentos precocinados."
+            "enunciado": "A.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de los alimentos precocinados.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -4508,7 +4704,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "A.6 (2 puntos) La poesía de 1939 hasta la actualidad. Tendencias, autores y obras principales.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-poesia-de-1939-a-la-actualidad"]
           },
           {
             "id": "A.7",
@@ -4548,17 +4745,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "B.1 (2 puntos). Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)"
+            "enunciado": "B.1 (2 puntos). Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,25 puntos); c) indique qué tipo de texto es. (0,25 puntos)",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "B.2 (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "B.2 (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "B.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de considerar que el comportamiento social de mujeres y hombres está condicionado solo por los genes."
+            "enunciado": "B.3 (1,5 puntos) Elabore un texto argumentativo a favor o en contra de considerar que el comportamiento social de mujeres y hombres está condicionado solo por los genes.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -4610,7 +4810,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "B.6 (2 puntos) El novecentismo y las vanguardias.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["el-novecentismo-y-la-generacion-del-14","las-vanguardias"]
           },
           {
             "id": "B.7",
@@ -4650,17 +4851,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "A.1",
             "puntos": 2,
-            "enunciado": "A.1. (2,5 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,50 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,50 puntos); c) indique qué tipo de texto es (0,50 puntos)."
+            "enunciado": "A.1. (2,5 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,50 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,50 puntos); c) indique qué tipo de texto es (0,50 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "A.2",
             "puntos": 1,
-            "enunciado": "A.2. (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "A.2. (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "A.3",
             "puntos": 1.5,
-            "enunciado": "A.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de que las crisis representen una oportunidad para el progreso."
+            "enunciado": "A.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de que las crisis representen una oportunidad para el progreso.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -4712,7 +4916,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.6",
             "puntos": 2,
             "enunciado": "A.6. (1,5 puntos) La generación del 27: características y trayectoria poética de los poetas del 27. El teatro lorquiano.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-generacion-del-27-caracteristicas","los-poetas-del-27-trayectorias-individuales","el-teatro-de-lorca"]
           },
           {
             "id": "A.7",
@@ -4752,17 +4957,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "B.1",
             "puntos": 2,
-            "enunciado": "B.1. (2,5 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,50 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,50 puntos); c) indique qué tipo de texto es (0,50 puntos)."
+            "enunciado": "B.1. (2,5 puntos) Haga un comentario de texto del fragmento que se propone contestando a las siguientes preguntas: a) enuncie el tema del texto (0,50 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,50 puntos); c) indique qué tipo de texto es (0,50 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "B.2",
             "puntos": 1,
-            "enunciado": "B.2. (1 punto) Redacte un resumen del contenido del texto."
+            "enunciado": "B.2. (1 punto) Redacte un resumen del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "B.3",
             "puntos": 1.5,
-            "enunciado": "B.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de la decisión de no tener hijos."
+            "enunciado": "B.3. (1,5 puntos) Elabore un texto argumentativo a favor o en contra de la decisión de no tener hijos.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -4814,7 +5022,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.6",
             "puntos": 2,
             "enunciado": "B.6. (1,5 puntos) La novela española de 1939 a 1975.",
-            "grupo": "literatura"
+            "grupo": "literatura",
+            "topicSlugs": ["la-novela-espanola-de-1939-a-1974"]
           },
           {
             "id": "B.7",
@@ -4854,17 +5063,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "1.1",
             "puntos": 2,
-            "enunciado": "1.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,3 puntos); c) indique qué tipo de texto es (0,2 puntos)."
+            "enunciado": "1.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,3 puntos); c) indique qué tipo de texto es (0,2 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "1.2",
             "puntos": 0.6,
-            "enunciado": "1.2. (0,6 puntos) Redacte un resumen de entre 40 y 50 palabras del contenido del texto."
+            "enunciado": "1.2. (0,6 puntos) Redacte un resumen de entre 40 y 50 palabras del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "1.3",
             "puntos": 1.4,
-            "enunciado": "1.3. (1,4 puntos) Elabore un texto argumentativo de entre 100 y 150 palabras sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja."
+            "enunciado": "1.3. (1,4 puntos) Elabore un texto argumentativo de entre 100 y 150 palabras sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -4929,12 +5141,14 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "3.1",
             "puntos": 2,
-            "enunciado": "3.1. (2 puntos) Lea el siguiente texto y realice la actividad que se propone a continuación: Y mientras no solo a los conventos, y a los palacios, sino también a los árboles se les dejaba campo abierto para alargarse y ensancharse como querían, los míseros plebeyos que a fuerza de pobres no habían podido huir los codazos del egoísmo noble o regular, vivían hacinados en casas de tierra que el municipio obligaba a tapar con una capa de cal; y era de ver cómo aquellas casuchas, apiñadas, se enchufaban, y saltaban unas sobre otras, y se metían los tejados por los ojos...\n\nEl fragmento pertenece al libro La Regenta (1885), de Leopoldo Alas “Clarín”. Escriba dos rasgos de la novela realista/naturalista y ejemplifique, con citas, su presencia en el texto."
+            "enunciado": "3.1. (2 puntos) Lea el siguiente texto y realice la actividad que se propone a continuación: Y mientras no solo a los conventos, y a los palacios, sino también a los árboles se les dejaba campo abierto para alargarse y ensancharse como querían, los míseros plebeyos que a fuerza de pobres no habían podido huir los codazos del egoísmo noble o regular, vivían hacinados en casas de tierra que el municipio obligaba a tapar con una capa de cal; y era de ver cómo aquellas casuchas, apiñadas, se enchufaban, y saltaban unas sobre otras, y se metían los tejados por los ojos...\n\nEl fragmento pertenece al libro La Regenta (1885), de Leopoldo Alas “Clarín”. Escriba dos rasgos de la novela realista/naturalista y ejemplifique, con citas, su presencia en el texto.",
+            "topicSlugs": ["el-comentario-de-un-fragmento-literario-pregunta-3-1"]
           },
           {
             "id": "3.2",
             "puntos": 2,
-            "enunciado": "3.2. (2 puntos) La literatura hispanoamericana contemporánea: poesía americana después de las vanguardias, la novela regionalista, la novela del boom, la narrativa posterior al boom."
+            "enunciado": "3.2. (2 puntos) La literatura hispanoamericana contemporánea: poesía americana después de las vanguardias, la novela regionalista, la novela del boom, la narrativa posterior al boom.",
+            "topicSlugs": ["la-literatura-hispanoamericana-del-siglo-xx"]
           },
           {
             "id": "3.3",
@@ -4978,17 +5192,20 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "1.1",
             "puntos": 2,
-            "enunciado": "1.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,3 puntos); c) indique qué tipo de texto es (0,2 puntos)."
+            "enunciado": "1.1. (2 puntos) Haga un comentario de texto del fragmento que se propone contestando a las preguntas siguientes: a) enuncie el tema del texto (0,5 puntos); b) detalle sus características lingüísticas y estilísticas más sobresalientes (1,3 puntos); c) indique qué tipo de texto es (0,2 puntos).",
+            "topicSlugs": ["comentario-de-texto"]
           },
           {
             "id": "1.2",
             "puntos": 0.6,
-            "enunciado": "1.2. (0,6 puntos) Redacte un resumen de entre 40 y 50 palabras del contenido del texto."
+            "enunciado": "1.2. (0,6 puntos) Redacte un resumen de entre 40 y 50 palabras del contenido del texto.",
+            "topicSlugs": ["resumen"]
           },
           {
             "id": "1.3",
             "puntos": 1.4,
-            "enunciado": "1.3. (1,4 puntos) Elabore un texto argumentativo de entre 100 y 150 palabras sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja."
+            "enunciado": "1.3. (1,4 puntos) Elabore un texto argumentativo de entre 100 y 150 palabras sobre el contenido del texto, manifestando acuerdo o desacuerdo con alguna de las ideas que refleja.",
+            "topicSlugs": ["texto-argumentativo"]
           }
         ]
       },
@@ -5053,12 +5270,14 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "3.1",
             "puntos": 2,
-            "enunciado": "3.1. (2 puntos) Lea el siguiente texto y realice la actividad que se propone a continuación:\n\nCuando iba a la floresta, junto al corzo o jabalí herido y sangriento, hacía improvisar a sus profesores de retórica canciones alusivas; los criados llenaban las copas del vino de oro que hierve, y las mujeres batían palmas con movimientos rítmicos y gallardos. (…) El rey tenía un palacio soberbio donde había acumulado riquezas y objetos de arte maravillosos. (...) ¡Japonerías! ¡Chinerías! Por moda y nada más.\n\nEl fragmento pertenece al libro Azul (1888), de Rubén Darío. Escriba dos rasgos del modernismo y ejemplifique, con citas, su presencia en el texto."
+            "enunciado": "3.1. (2 puntos) Lea el siguiente texto y realice la actividad que se propone a continuación:\n\nCuando iba a la floresta, junto al corzo o jabalí herido y sangriento, hacía improvisar a sus profesores de retórica canciones alusivas; los criados llenaban las copas del vino de oro que hierve, y las mujeres batían palmas con movimientos rítmicos y gallardos. (…) El rey tenía un palacio soberbio donde había acumulado riquezas y objetos de arte maravillosos. (...) ¡Japonerías! ¡Chinerías! Por moda y nada más.\n\nEl fragmento pertenece al libro Azul (1888), de Rubén Darío. Escriba dos rasgos del modernismo y ejemplifique, con citas, su presencia en el texto.",
+            "topicSlugs": ["el-comentario-de-un-fragmento-literario-pregunta-3-1"]
           },
           {
             "id": "3.2",
             "puntos": 2,
-            "enunciado": "3.2. (2 puntos) El novecentismo y la generación del 14: el ensayo, la novela novecentista. Juan Ramón Jiménez."
+            "enunciado": "3.2. (2 puntos) El novecentismo y la generación del 14: el ensayo, la novela novecentista. Juan Ramón Jiménez.",
+            "topicSlugs": ["el-novecentismo-y-la-generacion-del-14"]
           },
           {
             "id": "3.3",

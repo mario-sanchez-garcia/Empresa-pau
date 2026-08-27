@@ -2811,7 +2811,7 @@ export default function CaminoCalendarClient() {
         )}
       </AnimatePresence>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} saving={savingExam} />}</AnimatePresence>
-      <AnimatePresence>{showCalendarEditor && <CalendarEditorOverlay calendar={calendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems} planId={caminoPlanId} onNavigateWeek={generateWeek} onClose={() => setShowCalendarEditor(false)} onAddExam={() => { setShowCalendarEditor(false); openNewExam() }} onPersist={updated => { const weekStart = weekStartForDate(updated[0]?.date ?? selectedWeekStart); saveWeekCache(weekStart, updated); setCalendar(current => mergeWeekIntoCalendar(current, weekStart, updated)) }} onSave={updated => { const weekStart = weekStartForDate(updated[0]?.date ?? selectedWeekStart); saveWeekCache(weekStart, updated); setCalendar(current => mergeWeekIntoCalendar(current, weekStart, updated)); setShowCalendarEditor(false) }} />}</AnimatePresence>
+      <AnimatePresence>{showCalendarEditor && <CalendarEditorOverlay calendar={calendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems} planId={caminoPlanId} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} reorganizeStatus={calendarReorganizeStatus} onReorganize={reorganizeCalendarConflicts} onEditorWeekChange={weekStart => { applyWeekNavigation(weekStart); setCalendarAvailabilityRefreshKey(key => key + 1) }} onNavigateWeek={generateWeek} onClose={() => setShowCalendarEditor(false)} onAddExam={() => { setShowCalendarEditor(false); openNewExam() }} onPersist={updated => { const weekStart = weekStartForDate(updated[0]?.date ?? selectedWeekStart); saveWeekCache(weekStart, updated); setCalendar(current => mergeWeekIntoCalendar(current, weekStart, updated)); setCalendarAvailabilityRefreshKey(key => key + 1) }} onSave={updated => { const weekStart = weekStartForDate(updated[0]?.date ?? selectedWeekStart); saveWeekCache(weekStart, updated); setCalendar(current => mergeWeekIntoCalendar(current, weekStart, updated)); setShowCalendarEditor(false); setCalendarAvailabilityRefreshKey(key => key + 1) }} />}</AnimatePresence>
       <AnimatePresence>
         {leagueUpgrade && (() => {
           const upgradedDiv = DIVISIONS.find(d => d.name === leagueUpgrade.to) ?? DIVISIONS[DIVISIONS.length - 1]
@@ -3054,7 +3054,7 @@ function fillWeekGaps(weekStartISO: string, days: DayPlan[]): DayPlan[] {
   })
 }
 
-function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, planId, onNavigateWeek, onClose, onAddExam, onPersist, onSave }: { calendar: DayPlan[]; weekStartISO: string; subjects: string[]; curriculum: CurriculumItem[]; planId: CaminoPlanId; onNavigateWeek: (weekStartISO: string) => DayPlan[]; onClose: () => void; onAddExam: () => void; onPersist: (calendar: DayPlan[]) => void; onSave: (calendar: DayPlan[]) => void }) {
+function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, planId, externalBusyByDate, conflicts, reorganizeStatus, onReorganize, onEditorWeekChange, onNavigateWeek, onClose, onAddExam, onPersist, onSave }: { calendar: DayPlan[]; weekStartISO: string; subjects: string[]; curriculum: CurriculumItem[]; planId: CaminoPlanId; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[]; reorganizeStatus: 'idle' | 'saving' | 'done' | 'error'; onReorganize: () => void; onEditorWeekChange: (weekStartISO: string) => void; onNavigateWeek: (weekStartISO: string) => DayPlan[]; onClose: () => void; onAddExam: () => void; onPersist: (calendar: DayPlan[]) => void; onSave: (calendar: DayPlan[]) => void }) {
   const safeSubjects: string[] = subjects
   // `calendar` is the whole multi-week calendar loaded in the parent, not
   // just this week — seeding the editor's draft from it directly (instead of
@@ -3079,6 +3079,8 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
   const selectedDay = orderedDraft.find(d => d.date === selectedDayDate) ?? orderedDraft[0]
   const mainMissionCount = orderedDraft.reduce((total, day) => total + day.missions.filter(mission => mission.role === 'main').length, 0)
   const bonusMissions = orderedDraft.flatMap(day => day.missions.filter(mission => mission.role === 'bonus').map(mission => ({ mission, day })))
+  const selectedDayBusy = selectedDay ? externalBusyByDate[selectedDay.date] ?? [] : []
+  const selectedDayConflicts = selectedDay ? conflicts.filter(conflict => conflict.date === selectedDay.date) : []
   const monthGrid = buildMonthGrid(monthCursor)
   const debugCalendarEditor = (...args: unknown[]) => {
     if (process.env.NODE_ENV !== 'production') console.debug(...args)
@@ -3099,6 +3101,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
     setSelectedDayDate(nextSelectedDate)
     setMonthCursor(monthStartISO(nextSelectedDate))
     setSaveState('idle')
+    onEditorWeekChange(nextWeekStart)
   }
 
   function selectEditorDay(dateISO: string) {
@@ -3107,6 +3110,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
       const nextWeek = fillWeekGaps(nextWeekStart, cloneWeek(onNavigateWeek(nextWeekStart)))
       setEditorWeekStart(nextWeekStart)
       setDraft(nextWeek)
+      onEditorWeekChange(nextWeekStart)
     }
     setSelectedDayDate(dateISO)
     setMonthCursor(monthStartISO(dateISO))
@@ -3459,6 +3463,8 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
               const isSelected = day.date === selectedDayDate
               const isToday = day.isToday
               const dayMains = day.missions.filter(m => m.role === 'main')
+              const dayBusyCount = externalBusyByDate[day.date]?.length ?? 0
+              const dayConflictCount = conflicts.filter(conflict => conflict.date === day.date).length
               const dayDate = new Date(day.date + 'T12:00:00')
               const prevDate = idx > 0 ? new Date(orderedDraft[idx - 1].date + 'T12:00:00') : null
               const showMonth = idx === 0 || (prevDate && dayDate.getMonth() !== prevDate.getMonth())
@@ -3492,6 +3498,12 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                       <div key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: isSelected ? 'rgba(255,255,255,.45)' : themeFor(m.subject).text }} />
                     ))}
                   </div>
+                  {(dayBusyCount > 0 || dayConflictCount > 0) && (
+                    <div className="mt-1 flex justify-center gap-1">
+                      {dayBusyCount > 0 && <span className="h-1.5 w-1.5 rounded-full" style={{ background: isSelected ? 'rgba(255,255,255,.6)' : '#94a3b8' }} aria-label="Ocupado" />}
+                      {dayConflictCount > 0 && <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#fb923c' }} aria-label="Conflicto" />}
+                    </div>
+                  )}
                 </button>
               )
             })}
@@ -3504,6 +3516,17 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             <button onClick={() => navigateEditorWeek(currentWeekStartISO())} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]"><RotateCcw size={11} /> Hoy</button>
             <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]">Sig <ArrowRight size={13} /></button>
           </div>
+          {conflicts.length > 0 && (
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-orange-300/30 bg-orange-400/10 px-3 py-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-black text-orange-100">Tu calendario ha cambiado · {conflicts.length} {conflicts.length === 1 ? 'misión afectada' : 'misiones afectadas'}</p>
+                <p className="mt-0.5 text-[9px] font-bold text-orange-200/80">{conflicts[0].date} · {conflicts[0].start}–{conflicts[0].end} coincide con {conflicts[0].busyStart}–{conflicts[0].busyEnd} Ocupado</p>
+              </div>
+              <button type="button" onClick={onReorganize} disabled={reorganizeStatus === 'saving'} className="shrink-0 rounded-lg bg-orange-500 px-3 py-1.5 text-[10px] font-black text-white transition hover:bg-orange-600 disabled:opacity-60">
+                {reorganizeStatus === 'saving' ? 'Reorganizando...' : reorganizeStatus === 'done' ? '✓ Reorganizado' : reorganizeStatus === 'error' ? 'Reintentar' : 'Reorganizar'}
+              </button>
+            </div>
+          )}
           </>
           )}
 
@@ -3585,6 +3608,19 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                 <p className="mt-2 text-[9px] font-black uppercase tracking-[.12em] text-slate-300">
                   {(selectedDay?.missions.filter(m => m.role === 'main').length ?? 0)} principales · {(selectedDay?.missions.filter(m => m.role === 'bonus').length ?? 0)} bonus
                 </p>
+                {selectedDayBusy.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {selectedDayBusy.map((slot, index) => (
+                      <span key={`${slot.start}-${slot.end}-${index}`} className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-500">
+                        <Clock3 size={11} />
+                        {formatTimeRange(slot.start, slot.end)} · Ocupado
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {selectedDayConflicts.length > 0 && (
+                  <p className="mt-2 text-[10px] font-black text-orange-600">{selectedDayConflicts.length} {selectedDayConflicts.length === 1 ? 'misión coincide' : 'misiones coinciden'} con tu disponibilidad externa.</p>
+                )}
               </div>
             </div>
           </div>
@@ -3652,6 +3688,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             <div className="flex flex-col gap-2">
               {(selectedDay?.missions.filter(m => m.role === 'main') ?? []).map(mission => {
                 const theme = themeFor(mission.subject)
+                const conflict = missionConflictFor(mission, selectedDayConflicts)
                 return (
                   <div
                     key={mission.id}
@@ -3664,8 +3701,13 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                     <div style={{ background: theme.text }} />
                     <div className="p-3.5">
                       <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-0.5 text-[9px] font-black text-slate-500">
+                          <Clock3 size={11} />
+                          {formatTimeRange(mission.startTime, mission.endTime)}
+                        </span>
                         <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[.08em]" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span>
                         <span className="rounded-full bg-slate-50 px-2.5 py-0.5 text-[8px] font-black uppercase tracking-[.1em] text-slate-400">{missionKindLabel(mission.kind, mission.missionType)}</span>
+                        {conflict && <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-[9px] font-black text-orange-700">Conflicto</span>}
                         <div className="ml-auto flex items-center gap-1">
                           <button type="button" onClick={() => updateMission(mission.id, { role: 'bonus' })} aria-label="Mover a bonus" className="flex h-6 w-6 items-center justify-center rounded-md border border-[#f1f5f9] bg-transparent text-slate-300 transition hover:bg-slate-50 hover:text-slate-500"><Bookmark size={12} /></button>
                           <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar" className="flex h-6 w-6 items-center justify-center rounded-md border border-[#f1f5f9] bg-transparent text-red-200 transition hover:bg-red-50 hover:text-red-500"><Trash2 size={12} /></button>
@@ -3676,6 +3718,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                         <span className="text-[10px] font-semibold text-slate-400">{mission.estimatedMinutes} min</span>
                         <span className="text-[10px] font-black text-blue-600">+{mission.baseXP} XP</span>
                       </div>
+                      {conflict && <p className="mt-1.5 text-[10px] font-bold text-orange-700">Coincide con {formatTimeRange(conflict.busyStart, conflict.busyEnd)} ocupado.</p>}
                       <select
                         value=""
                         onChange={e => { if (e.target.value) moveMission(mission.id, e.target.value) }}
@@ -3709,10 +3752,13 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                 <div className="flex flex-col gap-2">
                   {bonusMissions.map(({ mission, day: bonusDay }) => {
                     const theme = themeFor(mission.subject)
+                    const conflict = missionConflictFor(mission, conflicts.filter(item => item.date === bonusDay.date))
                     return (
                       <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="flex items-center gap-3 rounded-xl border border-[#f1f5f9] bg-[#fafbfc] px-4 py-2.5" style={{ cursor: 'grab' }}>
                         <GripVertical size={12} className="shrink-0 text-slate-300" />
+                        <span className="shrink-0 text-[10px] font-black text-slate-400">{formatTimeRange(mission.startTime, mission.endTime)}</span>
                         <span className="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject.split(' ')[0]}</span>
+                        {conflict && <span className="shrink-0 rounded-full bg-orange-100 px-2 py-0.5 text-[9px] font-black text-orange-700">Conflicto</span>}
                         <p className="min-w-0 flex-1 truncate text-[12px] font-bold text-slate-700">{mission.title}</p>
                         <span className="shrink-0 text-[10px] font-semibold text-slate-400">{bonusDay.label.split(',')[0]}</span>
                         <button type="button" onClick={() => updateMission(mission.id, { role: 'main' })} aria-label="Hacer principal" className="shrink-0 rounded-md p-1.5 text-slate-300 transition hover:bg-white hover:text-[#0f172a]"><Bookmark size={13} /></button>

@@ -201,6 +201,22 @@ assert(
 )
 
 assert(
+  'Calendar editor overlay receives and renders conflict payload from parent state',
+  client.includes('externalBusyByDate={externalBusyByDate}') &&
+    client.includes('conflicts={calendarConflicts}') &&
+    client.includes('onEditorWeekChange={weekStart =>') &&
+    calendarEditorOverlay.includes('externalBusyByDate: ExternalBusyByDate') &&
+    calendarEditorOverlay.includes('conflicts: CalendarConflict[]') &&
+    calendarEditorOverlay.includes('const selectedDayBusy = selectedDay ? externalBusyByDate[selectedDay.date] ?? [] : []') &&
+    calendarEditorOverlay.includes('const selectedDayConflicts = selectedDay ? conflicts.filter(conflict => conflict.date === selectedDay.date) : []') &&
+    calendarEditorOverlay.includes('missionConflictFor(mission, selectedDayConflicts)') &&
+    calendarEditorOverlay.includes('Tu calendario ha cambiado · {conflicts.length}') &&
+    calendarEditorOverlay.includes('onClick={onReorganize}') &&
+    calendarEditorOverlay.includes('formatTimeRange(slot.start, slot.end)} · Ocupado') &&
+    calendarEditorOverlay.includes('formatTimeRange(mission.startTime, mission.endTime)')
+)
+
+assert(
   'Camino availability refreshes on visible week interactions without aggressive polling',
   client.includes('calendarAvailabilityRefreshKey') &&
     client.includes("document.addEventListener('visibilitychange', refreshAvailability)") &&
@@ -208,6 +224,7 @@ assert(
     client.includes('setCalendarAvailabilityRefreshKey(key => key + 1)') &&
     client.includes('externalBusyByDate={externalBusyByDate}') &&
     client.includes('conflicts={calendarConflicts}') &&
+    client.includes('onEditorWeekChange(nextWeekStart)') &&
     !client.includes('setInterval(')
 )
 

@@ -6,6 +6,10 @@ export interface PreguntaOpcionalLengua {
   puntos: number
   enunciado: string
   grupo?: "sintaxis" | "morfologia" | "literatura" | "obra"
+  // Propuesto en propuesta-topics-lengua.md — de momento solo aplicado a los
+  // ejercicios de sintaxis (grupo: "sintaxis"), revisados y corregidos a
+  // mano; el resto de bloques sigue siendo propuesta sin aplicar.
+  topicSlugs?: string[]
 }
 
 export interface PreguntaLengua {
@@ -100,13 +104,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "2.1",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: El tiempo nos permite reposo cuando necesitamos calma.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adverbiales-propias-tiempo-lugar-y-modo"]
           },
           {
             "id": "2.2",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Necesitamos rescatar los valores que perdimos en esta sociedad materialista.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           },
           {
             "id": "2.3",
@@ -226,13 +232,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "2.1",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Con una escalera se improvisó una camilla para poder trasladarlo.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["los-valores-de-se","subordinadas-adverbiales-impropias"]
           },
           {
             "id": "2.2",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: No hay un animal que sobreviva a una pata rota.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           },
           {
             "id": "2.3",
@@ -367,7 +375,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: El hombre necesita herramientas para superar los traumas del pasado.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adverbiales-impropias"]
           },
           {
             "id": "A.5",
@@ -379,7 +388,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Hay quien llega al insomnio porque se deprime.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones","subordinadas-adverbiales-impropias"]
           },
           {
             "id": "B.5",
@@ -508,7 +518,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: El ingeniero le explicó que el agudo era el ruido de su sistema nervioso.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           },
           {
             "id": "A.5",
@@ -520,7 +531,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: No hay duda de que descendemos del mono.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           },
           {
             "id": "B.5",
@@ -649,7 +661,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: La política está obligada a tramitar incertidumbres.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["clasificacion-de-la-oracion-simple"]
           },
           {
             "id": "A.5",
@@ -661,7 +674,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Gatos y perros no solían sentarse en el regazo de los humanos para ser acariciados.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adverbiales-impropias","las-perifrasis-verbales"]
           },
           {
             "id": "B.5",
@@ -790,7 +804,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Todo depende de qué criterios utilicemos.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones","el-complemento-de-regimen-suplemento"]
           },
           {
             "id": "A.5",
@@ -802,7 +817,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Observo que el mundo cultural se nutre de entusiastas becarios sin sueldo.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           },
           {
             "id": "B.5",
@@ -931,7 +947,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: La frontera que durante décadas representó la opresión totalitaria es hoy un mausoleo lúdico.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           },
           {
             "id": "A.5",
@@ -943,7 +960,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: En mi familia se decía que la tozudez era hija de la tontería.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["los-valores-de-se","subordinadas-sustantivas-funciones"]
           },
           {
             "id": "B.5",
@@ -1072,7 +1090,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Cumplo con todos los requisitos que debe cumplir un adulto.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           },
           {
             "id": "A.5",
@@ -1084,7 +1103,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Los seres humanos somos seres sociales y buscamos influenciar desde las emociones.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["la-oracion-compuesta-coordinacion-y-yuxtaposicion","predicado-nominal-y-atributo-las-copulativas"]
           },
           {
             "id": "B.5",
@@ -1213,7 +1233,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: La historia nos muestra que las situaciones adversas conforman la vida del ser humano.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           },
           {
             "id": "A.5",
@@ -1225,7 +1246,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Una posibilidad es que utilicemos un ascensor muy grande.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones","predicado-nominal-y-atributo-las-copulativas"]
           },
           {
             "id": "B.5",
@@ -1354,7 +1376,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Descubrió que aquel hongo podía aniquilar todas las bacterias de la muestra.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           },
           {
             "id": "A.5",
@@ -1366,7 +1389,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Algunos críticos defienden que uno es dueño absoluto de todas las cosas.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           },
           {
             "id": "B.5",
@@ -1479,13 +1503,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "2.1",
             "puntos": 1.4,
             "enunciado": "Analice sintácticamente: Perseguían un prestigio que convertía cada logro en un impulso.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           },
           {
             "id": "2.2",
             "puntos": 1.4,
             "enunciado": "Realice los siguientes ejercicios de reflexión lingüística:\n\na) (0,6 puntos) Observe el siguiente par mínimo y explique a qué se debe la diferencia de gramaticalidad:\n\n- a. Pone sus beneficios por encima de la salud mental.\n- b. \\*Pone sus beneficios por encima de la mental salud.\n\nb) (0,8 puntos) Escriba una secuencia gramatical de no más de quince palabras que contenga los siguientes elementos en el orden que considere oportuno: determinante interrogativo; verbo intransitivo; nombre contable; complemento de régimen. A continuación, complete una tabla con los elementos que haya usado en la secuencia.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["el-sintagma-tipos-y-estructura","el-complemento-de-regimen-suplemento"]
           },
           {
             "id": "2.3",
@@ -1610,13 +1636,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "2.1",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: La cultura que reduce todo a hechos es una cultura miope.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo","predicado-nominal-y-atributo-las-copulativas"]
           },
           {
             "id": "2.2",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Tal vez alguien crea que se trata de una definición poco científica.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           },
           {
             "id": "2.3",
@@ -1734,13 +1762,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "2.1",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Me explicó que, a cierta edad, los cuerpos se convierten en un desparrame.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           },
           {
             "id": "2.2",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Tú, que practicas mindfulness, eres catalogada de madre que pierde los nervios.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           },
           {
             "id": "2.3",
@@ -1858,7 +1888,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Debemos insistir en que la felicidad es una búsqueda.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones","el-complemento-de-regimen-suplemento"]
           },
           {
             "id": "A.5",
@@ -1958,7 +1989,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "Analice sintácticamente: Las mujeres tenemos que lidiar con el malestar que sienten los hombres.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["las-perifrasis-verbales","subordinadas-adjetivas-o-de-relativo"]
           },
           {
             "id": "B.5",
@@ -2059,7 +2091,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "4.a. Analice sintácticamente: La gran paradoja es esa banalidad cínica que ha contagiado a los medios de comunicación. (1,5 puntos)",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["predicado-nominal-y-atributo-las-copulativas","subordinadas-adjetivas-o-de-relativo"]
           }
         ]
       },
@@ -2154,7 +2187,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "4.a. Analice sintácticamente: Estas realidades sociales necesitan nombres que nos permitan reconocerlas. (1,5 puntos)",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           }
         ]
       },
@@ -2249,7 +2283,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "4.a. Analice sintácticamente: Necesitábamos imaginar que las cosas eran sólidas. (1,5 puntos)",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           }
         ]
       },
@@ -2344,7 +2379,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "4.a. Analice sintácticamente: La materia oscura que descubrió Rubin explica el 25% del universo. (1,5 puntos)",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           }
         ]
       },
@@ -2439,7 +2475,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "4.a. Analice sintácticamente: La cultura se ha encargado de crear una imagen del habla de la mujer que pervive en nuestros días. (1,5 puntos)",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["el-complemento-de-regimen-suplemento","subordinadas-adjetivas-o-de-relativo"]
           }
         ]
       },
@@ -2534,7 +2571,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "4.a. Analice sintácticamente: Esa tierra calcinada que dejan los incendios es la expresión más sórdida del abandono de nuestras raíces. (1,5 puntos)",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           }
         ]
       },
@@ -2629,7 +2667,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "4.a. Analice sintácticamente: Si no eres resiliente, eres una loca y una cascarrabias. (1,5 puntos)",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adverbiales-impropias","predicado-nominal-y-atributo-las-copulativas"]
           }
         ]
       },
@@ -2724,7 +2763,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "4.a. Analice sintácticamente: Sus padres decidieron que el niño iría a un instituto de Huesca el curso siguiente. (1,5 puntos)",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           }
         ]
       },
@@ -2819,7 +2859,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "4.a. Analice sintácticamente: El dolor que causan los terremotos y huracanes ha sido analizado por las mentes financieras como una posibilidad de negocio. (1,5 puntos)",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo","circunstancial-predicativo-y-agente"]
           }
         ]
       },
@@ -2914,7 +2955,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "4.a. Analice sintácticamente: Son estas prendas las que lo han convertido en un modelo aspiracional para la gente. (1,5 puntos)",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           }
         ]
       },
@@ -3009,7 +3051,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "A.4. (1,5 puntos) Analice sintácticamente: Floreció entonces un boyante mercado negro que alguien proveía.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           },
           {
             "id": "A.5",
@@ -3110,7 +3153,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "B.4. (1,5 puntos) Analice sintácticamente: La argumentación consiste en dar razones de peso para convencer.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["el-complemento-de-regimen-suplemento"]
           },
           {
             "id": "B.5",
@@ -3211,7 +3255,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "A.4. (1,5 puntos) Analice sintácticamente: El reloj es su enemigo más acérrimo y no lo pueden remediar.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["la-oracion-compuesta-coordinacion-y-yuxtaposicion"]
           },
           {
             "id": "A.5",
@@ -3312,7 +3357,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "B.4. (1,5 puntos) Analice sintácticamente: Entonces recuerdo los escritores que yo conocí cuando era una simple lectora.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo","subordinadas-adverbiales-propias-tiempo-lugar-y-modo"]
           },
           {
             "id": "B.5",
@@ -3413,7 +3459,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "A.4 (1,5 puntos) Analice sintácticamente: Nuestros días están atravesados por letras escritas y alarmas que anuncian su llegada.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo","circunstancial-predicativo-y-agente"]
           },
           {
             "id": "A.5",
@@ -3514,7 +3561,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "B.4 (1,5 puntos) Analice sintácticamente: Un amigo de Burgos me habló el año pasado de que había comprado unos gorrinos.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones","el-complemento-de-regimen-suplemento"]
           },
           {
             "id": "B.5",
@@ -3615,7 +3663,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "A.4 (1,5 puntos) Analice sintácticamente: Las especies humanas cuyo genoma hemos secuenciado muestran evidencias de hibridación.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           },
           {
             "id": "A.5",
@@ -3716,7 +3765,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "B.4 (1,5 puntos) Analice sintácticamente: Explicar qué es un like es muy sencillo.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           },
           {
             "id": "B.5",
@@ -3817,7 +3867,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "A.4. (1,5 puntos) Analice sintácticamente: Cuando leo estas cosas, me pongo a recordar qué cené ayer.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adverbiales-propias-tiempo-lugar-y-modo","subordinadas-sustantivas-funciones"]
           },
           {
             "id": "A.5",
@@ -3918,7 +3969,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "B.4. (1,5 puntos) Analice sintácticamente: Nos hallamos lejos del código ético y la corporalidad que desplegaban los héroes.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           },
           {
             "id": "B.5",
@@ -4019,7 +4071,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "A.4 (1,5 puntos) Analice sintácticamente: Me contó que había sido un directivo de agenda colapsada.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           },
           {
             "id": "A.5",
@@ -4120,7 +4173,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "B.4 (1,5 puntos) Analice sintácticamente: Muchas respuestas políticas han consistido en desvincularnos del prójimo.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["el-complemento-de-regimen-suplemento"]
           },
           {
             "id": "B.5",
@@ -4221,7 +4275,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "A.4. (1,5 puntos) Analice sintácticamente: Aún queda mucha gente que apuesta siempre por el lado positivo de las cosas.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adjetivas-o-de-relativo"]
           },
           {
             "id": "A.5",
@@ -4322,7 +4377,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "B.4. (1,5 puntos) Analice sintácticamente: Unos y otros me demostraron que escoger un camino diferente es difícil.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           },
           {
             "id": "B.5",
@@ -4423,7 +4479,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "A.4 (1,5 puntos) Analice sintácticamente: Mi madre se escandalizaría si viera estos garbanzos de bote.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adverbiales-impropias"]
           },
           {
             "id": "A.5",
@@ -4524,7 +4581,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "B.4 (1,5 puntos) Analice sintácticamente: La historia biológica sería la llave para entender nuestra naturaleza.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-adverbiales-impropias","predicado-nominal-y-atributo-las-copulativas"]
           },
           {
             "id": "B.5",
@@ -4625,7 +4683,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.4",
             "puntos": 1.5,
             "enunciado": "A.4. (1,5 puntos) Analice sintácticamente: Cayó en picado y las aguas azules lo engulleron.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["la-oracion-compuesta-coordinacion-y-yuxtaposicion"]
           },
           {
             "id": "A.5",
@@ -4726,7 +4785,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.4",
             "puntos": 1.5,
             "enunciado": "B.4. (1,5 puntos) Analice sintácticamente: Está extendida la percepción de que antes de los treinta eres joven.",
-            "grupo": "sintaxis"
+            "grupo": "sintaxis",
+            "topicSlugs": ["subordinadas-sustantivas-funciones"]
           },
           {
             "id": "B.5",
@@ -4826,12 +4886,14 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "2.1",
             "puntos": 1.4,
-            "enunciado": "2.1. (1,4 puntos) Analice sintácticamente: Tu cuerpo te obligará a parar para recuperar tu salud."
+            "enunciado": "2.1. (1,4 puntos) Analice sintácticamente: Tu cuerpo te obligará a parar para recuperar tu salud.",
+            "topicSlugs": ["subordinadas-adverbiales-impropias"]
           },
           {
             "id": "2.2",
             "puntos": 1.4,
-            "enunciado": "2.2. (1,4 puntos) Realice los siguientes ejercicios de reflexión lingüística:\n\na) (0,6 puntos) Observe el siguiente par mínimo y explique a qué se debe la diferencia de gramaticalidad:\n\n- a. La profesora ha entrado ya\n- b. \\*La profesora ha entrada ya\n\nb) (0,8 puntos) Escriba una secuencia gramatical de no más de quince palabras que contenga los siguientes elementos en el orden que considere oportuno: conjunción subordinante, perífrasis verbal y complemento de régimen (o suplemento). A continuación, complete una tabla como la siguiente con los elementos que haya usado en la secuencia.\n\n- Conjunción subordinante\n- Perífrasis verbal\n- Complemento de régimen (o suplemento)"
+            "enunciado": "2.2. (1,4 puntos) Realice los siguientes ejercicios de reflexión lingüística:\n\na) (0,6 puntos) Observe el siguiente par mínimo y explique a qué se debe la diferencia de gramaticalidad:\n\n- a. La profesora ha entrado ya\n- b. \\*La profesora ha entrada ya\n\nb) (0,8 puntos) Escriba una secuencia gramatical de no más de quince palabras que contenga los siguientes elementos en el orden que considere oportuno: conjunción subordinante, perífrasis verbal y complemento de régimen (o suplemento). A continuación, complete una tabla como la siguiente con los elementos que haya usado en la secuencia.\n\n- Conjunción subordinante\n- Perífrasis verbal\n- Complemento de régimen (o suplemento)",
+            "topicSlugs": ["las-perifrasis-verbales","el-complemento-de-regimen-suplemento"]
           },
           {
             "id": "2.3",
@@ -4948,12 +5010,14 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "2.1",
             "puntos": 1.4,
-            "enunciado": "2.1. (1,4 puntos) Analice sintácticamente: La pedagogía actual se centra en educar las emociones."
+            "enunciado": "2.1. (1,4 puntos) Analice sintácticamente: La pedagogía actual se centra en educar las emociones.",
+            "topicSlugs": ["el-complemento-de-regimen-suplemento"]
           },
           {
             "id": "2.2",
             "puntos": 1.4,
-            "enunciado": "2.2. (1,4 puntos) Realice los siguientes ejercicios de reflexión lingüística:\n\na) (0,6 puntos) Considere el siguiente par de secuencias y explique las diferencias sintácticas y/o de significado que observe:\n\n- a. Debo dinero\n- b. Debo estudiar\n\nb) (0,8 puntos) Escriba una secuencia gramatical de no más de quince palabras que contenga los siguientes elementos en el orden que considere oportuno: conjunción coordinante, verbo en voz pasiva y complemento agente. A continuación, complete una tabla como la siguiente con los elementos que haya usado en la secuencia.\n\n- Conjunción coordinante\n- Verbo en voz pasiva\n- Complemento agente"
+            "enunciado": "2.2. (1,4 puntos) Realice los siguientes ejercicios de reflexión lingüística:\n\na) (0,6 puntos) Considere el siguiente par de secuencias y explique las diferencias sintácticas y/o de significado que observe:\n\n- a. Debo dinero\n- b. Debo estudiar\n\nb) (0,8 puntos) Escriba una secuencia gramatical de no más de quince palabras que contenga los siguientes elementos en el orden que considere oportuno: conjunción coordinante, verbo en voz pasiva y complemento agente. A continuación, complete una tabla como la siguiente con los elementos que haya usado en la secuencia.\n\n- Conjunción coordinante\n- Verbo en voz pasiva\n- Complemento agente",
+            "topicSlugs": ["las-perifrasis-verbales","circunstancial-predicativo-y-agente"]
           },
           {
             "id": "2.3",

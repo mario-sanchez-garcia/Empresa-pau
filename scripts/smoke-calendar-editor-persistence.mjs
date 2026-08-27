@@ -33,6 +33,10 @@ const addMissionFunction = calendarEditorOverlay.slice(
   calendarEditorOverlay.indexOf('async function addMission'),
   calendarEditorOverlay.indexOf('const kindOptions'),
 )
+const calendarWeekTimeline = client.slice(
+  client.indexOf('function CalendarWeekTimeline'),
+  client.indexOf('function CompactWeekView'),
+)
 
 assert(
   'calendar editor creates missions through backend before painting them',
@@ -214,6 +218,46 @@ assert(
     calendarEditorOverlay.includes('onClick={onReorganize}') &&
     calendarEditorOverlay.includes('formatTimeRange(slot.start, slot.end)} · Ocupado') &&
     calendarEditorOverlay.includes('formatTimeRange(mission.startTime, mission.endTime)')
+)
+
+assert(
+  'Calendar editor week timeline maps real times into vertical positions',
+  client.includes('function timeToMinutes') &&
+    client.includes('function minutesToHHMM') &&
+    client.includes('function snapMinutes') &&
+    client.includes('const TIMELINE_PX_PER_MINUTE') &&
+    client.includes('function buildTimelineRange') &&
+    client.includes('function buildTimelineBlocks') &&
+    client.includes('function positionTimelineBlocks') &&
+    client.includes('(block.start - range.start) * TIMELINE_PX_PER_MINUTE') &&
+    client.includes('(block.end - block.start) * TIMELINE_PX_PER_MINUTE') &&
+    client.includes('TIMELINE_MIN_BLOCK_HEIGHT')
+)
+
+assert(
+  'Calendar editor week timeline renders Kairo, busy, unprogrammed and overlaps',
+  calendarWeekTimeline.includes('function CalendarWeekTimeline') &&
+    client.includes("kind: 'mission'") &&
+    client.includes("kind: 'busy'") &&
+    calendarWeekTimeline.includes('positionTimelineBlocks(blocksByDate.get(day.date) ?? [])') &&
+    calendarWeekTimeline.includes('left: `calc(${left}% + 4px)`') &&
+    calendarWeekTimeline.includes('width: `calc(${width}% - 8px)`') &&
+    calendarWeekTimeline.includes('Sin programar') &&
+    calendarWeekTimeline.includes('Ocupado') &&
+    calendarWeekTimeline.includes('Conflicto') &&
+    calendarWeekTimeline.includes('formatTimeRange(block.mission.startTime, block.mission.endTime)') &&
+    !calendarWeekTimeline.includes('summary') &&
+    !calendarWeekTimeline.includes('location')
+)
+
+assert(
+  'Calendar editor empty slot click reuses existing add mission form with date and time',
+  calendarEditorOverlay.includes('onEmptySlotClick={(date, startTime) => {') &&
+    calendarEditorOverlay.includes('selectEditorDay(date)') &&
+    calendarEditorOverlay.includes('openMissionForm(date)') &&
+    calendarEditorOverlay.includes('setNewMission(current => ({ ...current, day: date, startTime }))') &&
+    client.includes('onClick={event => {') &&
+    client.includes('snapMinutes(range.start + ((event.clientY - rect.top) / TIMELINE_PX_PER_MINUTE))')
 )
 
 assert(

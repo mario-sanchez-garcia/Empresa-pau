@@ -2811,7 +2811,7 @@ export default function CaminoCalendarClient() {
         )}
       </AnimatePresence>
       <AnimatePresence>{showExamForm && <ExamModal subjects={onboardingSubjects} draft={examDraft} setDraft={setExamDraft} onClose={resetExamDraft} onSave={saveExam} editing={Boolean(editingExamId)} curriculum={curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM} saving={savingExam} />}</AnimatePresence>
-      <AnimatePresence>{showCalendarEditor && <CalendarEditorOverlay calendar={calendar} weekStartISO={selectedWeekStart} subjects={onboardingSubjects} curriculum={curriculumItems} planId={caminoPlanId} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} reorganizeStatus={calendarReorganizeStatus} onReorganize={reorganizeCalendarConflicts} onEditorWeekChange={weekStart => { applyWeekNavigation(weekStart); setCalendarAvailabilityRefreshKey(key => key + 1) }} onNavigateWeek={generateWeek} onClose={() => setShowCalendarEditor(false)} onAddExam={() => { setShowCalendarEditor(false); openNewExam() }} onPersist={updated => { const weekStart = weekStartForDate(updated[0]?.date ?? selectedWeekStart); saveWeekCache(weekStart, updated); setCalendar(current => mergeWeekIntoCalendar(current, weekStart, updated)); setCalendarAvailabilityRefreshKey(key => key + 1) }} onSave={updated => { const weekStart = weekStartForDate(updated[0]?.date ?? selectedWeekStart); saveWeekCache(weekStart, updated); setCalendar(current => mergeWeekIntoCalendar(current, weekStart, updated)); setShowCalendarEditor(false); setCalendarAvailabilityRefreshKey(key => key + 1) }} />}</AnimatePresence>
+      <AnimatePresence>{showCalendarEditor && <CalendarEditorOverlay calendar={calendar} weekStartISO={selectedWeekStart} exams={exams} subjects={onboardingSubjects} curriculum={curriculumItems} planId={caminoPlanId} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} reorganizeStatus={calendarReorganizeStatus} onReorganize={reorganizeCalendarConflicts} onEditorWeekChange={weekStart => { applyWeekNavigation(weekStart); setCalendarAvailabilityRefreshKey(key => key + 1) }} onNavigateWeek={generateWeek} onClose={() => setShowCalendarEditor(false)} onAddExam={() => { setShowCalendarEditor(false); openNewExam() }} onPersist={updated => { const weekStart = weekStartForDate(updated[0]?.date ?? selectedWeekStart); saveWeekCache(weekStart, updated); setCalendar(current => mergeWeekIntoCalendar(current, weekStart, updated)); setCalendarAvailabilityRefreshKey(key => key + 1) }} onSave={updated => { const weekStart = weekStartForDate(updated[0]?.date ?? selectedWeekStart); saveWeekCache(weekStart, updated); setCalendar(current => mergeWeekIntoCalendar(current, weekStart, updated)); setShowCalendarEditor(false); setCalendarAvailabilityRefreshKey(key => key + 1) }} />}</AnimatePresence>
       <AnimatePresence>
         {leagueUpgrade && (() => {
           const upgradedDiv = DIVISIONS.find(d => d.name === leagueUpgrade.to) ?? DIVISIONS[DIVISIONS.length - 1]
@@ -3054,7 +3054,7 @@ function fillWeekGaps(weekStartISO: string, days: DayPlan[]): DayPlan[] {
   })
 }
 
-function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, planId, externalBusyByDate, conflicts, reorganizeStatus, onReorganize, onEditorWeekChange, onNavigateWeek, onClose, onAddExam, onPersist, onSave }: { calendar: DayPlan[]; weekStartISO: string; subjects: string[]; curriculum: CurriculumItem[]; planId: CaminoPlanId; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[]; reorganizeStatus: 'idle' | 'saving' | 'done' | 'error'; onReorganize: () => void; onEditorWeekChange: (weekStartISO: string) => void; onNavigateWeek: (weekStartISO: string) => DayPlan[]; onClose: () => void; onAddExam: () => void; onPersist: (calendar: DayPlan[]) => void; onSave: (calendar: DayPlan[]) => void }) {
+function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curriculum, planId, externalBusyByDate, conflicts, reorganizeStatus, onReorganize, onEditorWeekChange, onNavigateWeek, onClose, onAddExam, onPersist, onSave }: { calendar: DayPlan[]; weekStartISO: string; exams: StudentExam[]; subjects: string[]; curriculum: CurriculumItem[]; planId: CaminoPlanId; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[]; reorganizeStatus: 'idle' | 'saving' | 'done' | 'error'; onReorganize: () => void; onEditorWeekChange: (weekStartISO: string) => void; onNavigateWeek: (weekStartISO: string) => DayPlan[]; onClose: () => void; onAddExam: () => void; onPersist: (calendar: DayPlan[]) => void; onSave: (calendar: DayPlan[]) => void }) {
   const safeSubjects: string[] = subjects
   // `calendar` is the whole multi-week calendar loaded in the parent, not
   // just this week — seeding the editor's draft from it directly (instead of
@@ -3684,6 +3684,23 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             onDragOver={e => e.preventDefault()}
             onDrop={e => { e.preventDefault(); if (draggedMissionId && selectedDay) moveMission(draggedMissionId, selectedDay.date); setDraggedMissionId(null) }}
           >
+            {calendarView === 'week' && (
+              <CalendarWeekTimeline
+                days={orderedDraft}
+                exams={exams}
+                externalBusyByDate={externalBusyByDate}
+                conflicts={conflicts}
+                selectedDayDate={selectedDayDate}
+                onSelectDay={selectEditorDay}
+                onEmptySlotClick={(date, startTime) => {
+                  selectEditorDay(date)
+                  openMissionForm(date)
+                  setNewMission(current => ({ ...current, day: date, startTime }))
+                }}
+                onDeleteMission={deleteMission}
+                onToggleRole={(missionId, role) => updateMission(missionId, { role })}
+              />
+            )}
             <p className="mb-3 text-[8px] font-black uppercase tracking-[.22em] text-slate-300">Misiones principales</p>
             <div className="flex flex-col gap-2">
               {(selectedDay?.missions.filter(m => m.role === 'main') ?? []).map(mission => {
@@ -4345,9 +4362,225 @@ function formatTimeRange(start?: string | null, end?: string | null) {
   return start && end ? `${start.slice(0, 5)}–${end.slice(0, 5)}` : 'Sin hora'
 }
 
+function timeToMinutes(value?: string | null) {
+  if (!value || !/^\d{2}:\d{2}/.test(value)) return null
+  const [hours, minutes] = value.slice(0, 5).split(':').map(Number)
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null
+  return Math.max(0, Math.min(24 * 60, hours * 60 + minutes))
+}
+
+function minutesToHHMM(totalMinutes: number) {
+  const minutes = Math.max(0, Math.min(24 * 60 - 1, totalMinutes))
+  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
+}
+
+function snapMinutes(totalMinutes: number, step = 15) {
+  return Math.max(0, Math.min(24 * 60 - step, Math.round(totalMinutes / step) * step))
+}
+
 function missionConflictFor(mission: Mission, conflicts: CalendarConflict[]) {
   const rowId = mission.calendarRowId ?? mission.id
   return conflicts.find(conflict => conflict.missionId === rowId)
+}
+
+type TimelineKairoBlock = {
+  id: string
+  kind: 'mission'
+  mission: Mission
+  date: string
+  start: number
+  end: number
+  hasConflict: boolean
+}
+
+type TimelineBusyBlock = {
+  id: string
+  kind: 'busy'
+  date: string
+  start: number
+  end: number
+}
+
+type TimelineBlock = TimelineKairoBlock | TimelineBusyBlock
+type PositionedTimelineBlock = TimelineBlock & { lane: number; laneCount: number }
+
+const TIMELINE_PX_PER_MINUTE = 1.25
+const TIMELINE_MIN_BLOCK_HEIGHT = 28
+
+function buildTimelineRange(days: DayPlan[], externalBusyByDate: ExternalBusyByDate) {
+  const times: number[] = []
+  for (const day of days) {
+    for (const mission of day.missions) {
+      const start = timeToMinutes(mission.startTime)
+      const end = timeToMinutes(mission.endTime)
+      if (start !== null && end !== null && end > start) times.push(start, end)
+    }
+    for (const slot of externalBusyByDate[day.date] ?? []) {
+      const start = timeToMinutes(slot.start)
+      const end = timeToMinutes(slot.end)
+      if (start !== null && end !== null && end > start) times.push(start, end)
+    }
+  }
+  if (!times.length) return { start: 8 * 60, end: 22 * 60 }
+  const start = Math.max(7 * 60, Math.floor((Math.min(...times) - 45) / 60) * 60)
+  const end = Math.min(23 * 60, Math.ceil((Math.max(...times) + 45) / 60) * 60)
+  return end - start < 180 ? { start: Math.max(0, start - 60), end: Math.min(24 * 60, start + 240) } : { start, end }
+}
+
+function buildTimelineBlocks(days: DayPlan[], externalBusyByDate: ExternalBusyByDate, conflicts: CalendarConflict[]) {
+  const blocksByDate = new Map<string, TimelineBlock[]>()
+  for (const day of days) {
+    const blocks: TimelineBlock[] = []
+    for (const mission of day.missions) {
+      const start = timeToMinutes(mission.startTime)
+      const end = timeToMinutes(mission.endTime)
+      if (start === null || end === null || end <= start) continue
+      blocks.push({ id: `mission-${mission.id}`, kind: 'mission', mission, date: day.date, start, end, hasConflict: Boolean(missionConflictFor(mission, conflicts)) })
+    }
+    for (const [index, slot] of (externalBusyByDate[day.date] ?? []).entries()) {
+      const start = timeToMinutes(slot.start)
+      const end = timeToMinutes(slot.end)
+      if (start === null || end === null || end <= start) continue
+      blocks.push({ id: `busy-${day.date}-${slot.start}-${slot.end}-${index}`, kind: 'busy', date: day.date, start, end })
+    }
+    blocksByDate.set(day.date, blocks.sort((a, b) => a.start - b.start || b.end - a.end))
+  }
+  return blocksByDate
+}
+
+function positionTimelineBlocks(blocks: TimelineBlock[]): PositionedTimelineBlock[] {
+  const laneEnds: number[] = []
+  const positioned = blocks.map(block => {
+    const lane = laneEnds.findIndex(end => end <= block.start)
+    const nextLane = lane >= 0 ? lane : laneEnds.length
+    laneEnds[nextLane] = block.end
+    return { ...block, lane: nextLane, laneCount: 1 }
+  })
+  const laneCount = Math.max(1, laneEnds.length)
+  return positioned.map(block => ({ ...block, laneCount }))
+}
+
+function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, selectedDayDate, onSelectDay, onEmptySlotClick, onDeleteMission, onToggleRole }: { days: DayPlan[]; exams: StudentExam[]; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[]; selectedDayDate: string | null; onSelectDay: (date: string) => void; onEmptySlotClick: (date: string, startTime: string) => void; onDeleteMission: (missionId: string) => void; onToggleRole: (missionId: string, role: MissionRole) => void }) {
+  const range = buildTimelineRange(days, externalBusyByDate)
+  const height = Math.max(360, (range.end - range.start) * TIMELINE_PX_PER_MINUTE)
+  const hours = Array.from({ length: Math.floor((range.end - range.start) / 60) + 1 }, (_, index) => range.start + index * 60)
+  const blocksByDate = buildTimelineBlocks(days, externalBusyByDate, conflicts)
+  const unprogrammed = days.map(day => ({ day, missions: day.missions.filter(mission => timeToMinutes(mission.startTime) === null || timeToMinutes(mission.endTime) === null) })).filter(item => item.missions.length > 0)
+
+  return (
+    <section className="mb-5 rounded-2xl border border-slate-100 bg-white shadow-sm">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
+        <div>
+          <p className="text-[8px] font-black uppercase tracking-[.22em] text-slate-400">Semana temporal</p>
+          <p className="mt-1 text-xs font-bold text-slate-500">Misiones Kairo y disponibilidad externa, sin detalles privados.</p>
+        </div>
+        {conflicts.length > 0 && <span className="rounded-full bg-orange-100 px-2.5 py-1 text-[10px] font-black text-orange-700">{conflicts.length} conflicto{conflicts.length !== 1 ? 's' : ''}</span>}
+      </div>
+      <div className="overflow-x-auto">
+        <div className="min-w-[820px]">
+          <div className="grid border-b border-slate-100 bg-slate-50/80" style={{ gridTemplateColumns: '56px repeat(7, minmax(104px, 1fr))' }}>
+            <div className="px-2 py-2 text-[9px] font-black uppercase tracking-[.12em] text-slate-300">Hora</div>
+            {days.map(day => {
+              const dayConflicts = conflicts.filter(conflict => conflict.date === day.date).length
+              return (
+                <button key={day.date} type="button" onClick={() => onSelectDay(day.date)} className="border-l border-slate-100 px-2 py-2 text-left transition hover:bg-blue-50" style={{ background: selectedDayDate === day.date ? '#eff6ff' : 'transparent' }}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-[.1em] text-slate-500">{compactDayLabel(day.date)}</span>
+                    {dayConflicts > 0 && <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[9px] font-black text-orange-700">!</span>}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+          <div className="grid" style={{ gridTemplateColumns: '56px repeat(7, minmax(104px, 1fr))' }}>
+            <div className="relative bg-slate-50/50" style={{ height }}>
+              {hours.map(hour => (
+                <div key={hour} className="absolute right-2 text-[10px] font-bold text-slate-400" style={{ top: Math.max(0, (hour - range.start) * TIMELINE_PX_PER_MINUTE - 7) }}>
+                  {minutesToHHMM(hour)}
+                </div>
+              ))}
+            </div>
+            {days.map(day => {
+              const positioned = positionTimelineBlocks(blocksByDate.get(day.date) ?? [])
+              return (
+                <div
+                  key={day.date}
+                  role="button"
+                  tabIndex={0}
+                  className="relative border-l border-slate-100 bg-white text-left transition hover:bg-blue-50/30"
+                  style={{ height }}
+                  onClick={event => {
+                    const rect = event.currentTarget.getBoundingClientRect()
+                    const minutes = snapMinutes(range.start + ((event.clientY - rect.top) / TIMELINE_PX_PER_MINUTE))
+                    onEmptySlotClick(day.date, minutesToHHMM(minutes))
+                  }}
+                  onKeyDown={event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      onEmptySlotClick(day.date, minutesToHHMM(range.start))
+                    }
+                  }}
+                >
+                  {hours.map(hour => (
+                    <div key={hour} className="absolute left-0 right-0 border-t border-slate-100" style={{ top: (hour - range.start) * TIMELINE_PX_PER_MINUTE }} />
+                  ))}
+                  {exams.filter(exam => exam.date === day.date).map((exam, index) => (
+                    <div key={exam.id} className="absolute left-1 right-1 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-[9px] font-black text-amber-800" style={{ top: 4 + index * 24 }}>
+                      Parcial · {exam.subject}
+                    </div>
+                  ))}
+                  {positioned.map(block => {
+                    const top = Math.max(0, (block.start - range.start) * TIMELINE_PX_PER_MINUTE)
+                    const blockHeight = Math.max(TIMELINE_MIN_BLOCK_HEIGHT, (block.end - block.start) * TIMELINE_PX_PER_MINUTE)
+                    const width = 100 / block.laneCount
+                    const left = block.lane * width
+                    if (block.kind === 'busy') {
+                      return (
+                        <div key={block.id} className="absolute rounded-lg border border-slate-200 bg-slate-100/90 px-2 py-1 text-[10px] font-black text-slate-500" style={{ top, height: blockHeight, left: `calc(${left}% + 4px)`, width: `calc(${width}% - 8px)` }} onClick={event => event.stopPropagation()}>
+                          <div>{formatTimeRange(minutesToHHMM(block.start), minutesToHHMM(block.end))}</div>
+                          <div>Ocupado</div>
+                        </div>
+                      )
+                    }
+                    const theme = themeFor(block.mission.subject)
+                    return (
+                      <div key={block.id} className="absolute overflow-hidden rounded-lg border bg-white px-2 py-1 shadow-sm" style={{ top, height: blockHeight, left: `calc(${left}% + 4px)`, width: `calc(${width}% - 8px)`, borderColor: block.hasConflict ? '#fdba74' : theme.border }} onClick={event => { event.stopPropagation(); onSelectDay(day.date) }}>
+                        <div className="flex items-center gap-1 text-[9px] font-black" style={{ color: block.hasConflict ? '#c2410c' : theme.text }}>
+                          <span>{formatTimeRange(block.mission.startTime, block.mission.endTime)}</span>
+                          {block.hasConflict && <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[8px] text-orange-700">Conflicto</span>}
+                        </div>
+                        <div className="truncate text-[10px] font-black" style={{ color: theme.text }}>{block.mission.subject}</div>
+                        {blockHeight >= 46 && <div className="truncate text-[10px] font-bold text-slate-700">{block.mission.title}</div>}
+                        {blockHeight >= 62 && (
+                          <div className="mt-1 flex gap-1">
+                            <button type="button" onClick={event => { event.stopPropagation(); onToggleRole(block.mission.id, block.mission.role === 'main' ? 'bonus' : 'main') }} className="rounded bg-slate-50 px-1.5 py-0.5 text-[8px] font-black text-slate-500">{block.mission.role === 'main' ? 'Bonus' : 'Principal'}</button>
+                            <button type="button" onClick={event => { event.stopPropagation(); onDeleteMission(block.mission.id) }} className="rounded bg-red-50 px-1.5 py-0.5 text-[8px] font-black text-red-500">Eliminar</button>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+      {unprogrammed.length > 0 && (
+        <div className="border-t border-slate-100 px-4 py-3">
+          <p className="mb-2 text-[8px] font-black uppercase tracking-[.22em] text-slate-400">Sin programar</p>
+          <div className="flex flex-wrap gap-2">
+            {unprogrammed.flatMap(({ day, missions }) => missions.map(mission => (
+              <button key={`${day.date}-${mission.id}`} type="button" onClick={() => { onSelectDay(day.date); onEmptySlotClick(day.date, '') }} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left text-[11px] font-bold text-slate-600">
+                <span className="font-black text-slate-400">{compactDayLabel(day.date)} · Sin hora</span>
+                <span className="block max-w-[220px] truncate">{mission.subject} · {mission.title}</span>
+              </button>
+            )))}
+          </div>
+        </div>
+      )}
+    </section>
+  )
 }
 
 function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusyByDate, conflicts }: { days: DayPlan[]; exams: StudentExam[]; initialExpandedDate?: string | null; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[] }) {

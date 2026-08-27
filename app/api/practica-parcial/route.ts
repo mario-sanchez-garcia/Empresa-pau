@@ -9,6 +9,11 @@ import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
 import { BILLING_BLOCK_CODE, monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { resolveExamHistoriaTopics } from '@/app/lib/camino/resolveExamHistoriaTopics'
+import { filterObraLeidaExercisesForStudent } from '@/app/lib/camino/filterObraLeidaExercises'
+import type { ObraLeidaDeclarada } from '@/app/components/camino/LenguaObrasLeidasSelector'
+import { examenesLengua } from '@/app/data/lengua'
+
+const LENGUA_OBRA_LEIDA_BLOCK = 'Educación literaria — Obra leída'
 
 export const dynamic = 'force-dynamic'
 
@@ -275,10 +280,38 @@ export async function POST(request: NextRequest) {
       strictHistoriaMatch = true
     }
   }
-  const session = generatePracticeSession(subject as SimulacroSubject, block, comunidad, numQuestions, historiaTopicSlugs, strictHistoriaMatch)
+  // Lengua "Educación literaria — Obra leída": no hay chips de tema como en
+  // Historia (obraSlug no existe hoy en ningún ejercicio real, ver
+  // propuesta-obra-leida-lengua.md), así que se filtra por el periodo de
+  // el/los libro(s) que el alumno ya haya declarado en su perfil
+  // (perfiles.lengua_obras_leidas, ver LenguaObrasLeidasSelector). Sin
+  // libro declarado, no se genera nada al azar — se pide que declare uno
+  // primero, mismo principio que "needs_topics" en Historia.
+  let lenguaObraPeriodos: string[] | undefined
+  if (subject === 'lengua' && block === LENGUA_OBRA_LEIDA_BLOCK) {
+    const { data: perfilRow } = await db.from('perfiles').select('lengua_obras_leidas').eq('id', user.id).maybeSingle()
+    const declaradas = Array.isArray(perfilRow?.lengua_obras_leidas)
+      ? perfilRow.lengua_obras_leidas as ObraLeidaDeclarada[]
+      : []
+    if (declaradas.length === 0) {
+      return NextResponse.json({ error: 'needs_book', message: 'Declara qué obra has leído antes de practicar este bloque.' }, { status: 422 })
+    }
+    const allObraExercises = examenesLengua.flatMap(exam =>
+      exam.bloques
+        .filter(bloque => bloque.tipo === 'EducacionLiteraria')
+        .flatMap(bloque => bloque.preguntas_opcionales.filter(pq => pq.grupo === 'obra')),
+    )
+    const matching = filterObraLeidaExercisesForStudent(allObraExercises, declaradas)
+    lenguaObraPeriodos = [...new Set(matching.map(pq => pq.periodo).filter((p): p is NonNullable<typeof p> => Boolean(p)))]
+  }
+
+  const session = generatePracticeSession(subject as SimulacroSubject, block, comunidad, numQuestions, historiaTopicSlugs, strictHistoriaMatch, lenguaObraPeriodos)
   if (!session) {
     if (strictHistoriaMatch && examId && !historiaTopicSlugs?.length) {
       return NextResponse.json({ error: 'needs_topics', message: 'Este examen necesita que elijas los temas.', examId }, { status: 422 })
+    }
+    if (subject === 'lengua' && block === LENGUA_OBRA_LEIDA_BLOCK) {
+      return NextResponse.json({ error: 'needs_book', message: 'No hay ejercicios de obra leída disponibles para el periodo del libro que declaraste.' }, { status: 422 })
     }
     return NextResponse.json({ error: 'No hay preguntas disponibles para este bloque' }, { status: 422 })
   }

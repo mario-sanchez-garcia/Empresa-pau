@@ -18,10 +18,19 @@ export interface SimulacroBlock {
   conceptos?: string[]
   imagenes?: string[]
   requiereImagen?: boolean
-  // Historia only for now (examenesHistoria) — real curriculum_topics slugs
-  // for this exercise, used to filter by the chips a student picked when
-  // creating a Parcial instead of the free-text block/theme match.
+  // Real curriculum_topics slugs for this exercise, used to filter by the
+  // chips/temas a student picked when creating a Parcial instead of the
+  // free-text block/theme match. Historia (examenesHistoria) and, since the
+  // Lengua topic-tagging pass, Comunicación/Reflexión-sintaxis/Educación
+  // literaria-Tema (examenesLengua) — never obra leída, see obraPeriodos.
   topicSlugs?: string[]
+  // Lengua "Educación literaria" only — el bloque en sí mezcla la pregunta de
+  // tema (3.1/3.2) y la de obra leída (3.3/3.4) en un único item de
+  // práctica; esto recoge los `periodo` de las sub-preguntas de obra leída
+  // que trae ese item, para poder filtrar por el periodo del libro que el
+  // alumno haya declarado en su perfil sin poder aún filtrar por libro
+  // exacto (obraSlug) — ver filterObraLeidaExercises.ts.
+  obraPeriodos?: string[]
 }
 
 export interface SimulacroAnswer {

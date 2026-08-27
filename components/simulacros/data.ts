@@ -467,7 +467,19 @@ function toItem(subject: SimulacroSubject, exam: any, p: any, rawTheme: string) 
     conceptos: p.conceptos,
     imagenes: p.imagenes,
     requiereImagen: p.requiereImagen,
-    topicSlugs: Array.isArray(p.topicSlugs) ? p.topicSlugs : undefined
+    topicSlugs: Array.isArray(p.topicSlugs) ? p.topicSlugs : undefined,
+    // Lengua "Educación literaria" bloques traen preguntas_opcionales
+    // anidadas (tema + obra leída juntas) — extrae el periodo de las de
+    // grupo "obra" para poder filtrar este item por libro declarado.
+    obraPeriodos: Array.isArray(p.preguntas_opcionales)
+      ? [...new Set<string>(
+          p.preguntas_opcionales
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .filter((pq: any) => pq?.grupo === 'obra' && typeof pq?.periodo === 'string')
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map((pq: any): string => pq.periodo),
+        )]
+      : undefined,
   }
   return { rawTheme, year: block.year, option, block }
 }
@@ -552,6 +564,15 @@ export function generatePracticeSession(
   // (sunday_mock's free block practice, any other subject) keep the old
   // fallback untouched.
   strictHistoriaMatch = false,
+  // Lengua "Educación literaria — Obra leída" only. Resolved server-side
+  // (route) from the student's perfiles.lengua_obras_leidas via
+  // filterObraLeidaExercises.ts, never computed here. Presence of this
+  // parameter (even []) is itself the signal that the caller wants the
+  // obra-leída-specific pool instead of the normal Educación literaria
+  // (tema) match — an empty array means the student has a declared book but
+  // no exercise matches its period, and must return null (never fall back
+  // to unrelated/random content, same principle as strictHistoriaMatch).
+  lenguaObraPeriodos?: string[],
 ): PracticeSession | null {
   const normalizedFilter = normalizeBlockKey(blockFilter)
   const allQuestions = normalizeQuestions(subject, comunidad)
@@ -562,9 +583,25 @@ export function generatePracticeSession(
       item => (item.block.topicSlugs ?? []).some(slug => historiaTopicSlugs.includes(slug)) && !isIncompleteOfficialExercise(item.block),
     )
   }
-  // Either not a topic-filtered Historia request, or the topic filter
-  // matched nothing (still very rare — 207/209 exercises have topicSlugs —
-  // but never worse than before): fall back to the original block match.
+  if (subject === 'lengua' && lenguaObraPeriodos !== undefined) {
+    pool = allQuestions.filter(
+      item => normalizeTheme(subject, item.rawTheme) === 'EducacionLiteraria'
+        && (item.block.obraPeriodos ?? []).some(periodo => lenguaObraPeriodos.includes(periodo))
+        && !isIncompleteOfficialExercise(item.block),
+    )
+    // usedBlock se deja tal cual (normalizedFilter) para que la sesión
+    // guarde el bloque real que pidió el caller ("Educación literaria —
+    // Obra leída"), igual que Historia no reescribe usedBlock cuando filtra
+    // por topicSlugs.
+    // Nunca caer al fallback de "cualquier bloque disponible" de más abajo
+    // — mostrar contenido de otro periodo (o de otro bloque) sería peor que
+    // no generar nada; el caller (route) traduce este null en un mensaje
+    // claro de "no hay ejercicios de obra leída para el libro declarado".
+    if (pool.length === 0) return null
+  }
+  // Ni Historia con topicSlugs ni Lengua con obra leída (los dos casos de
+  // arriba dejan pool con algo o retornan null antes de llegar aquí): cae al
+  // match de bloque de siempre.
   if (pool.length === 0) {
     pool = allQuestions.filter(
       item => normalizeTheme(subject, item.rawTheme) === normalizedFilter && !isIncompleteOfficialExercise(item.block),

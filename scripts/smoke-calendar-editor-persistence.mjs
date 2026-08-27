@@ -15,6 +15,10 @@ function assert(name, condition) {
 
 const client = read('app/components/camino/CaminoCalendarClient.tsx')
 const route = read('app/api/camino/calendar-editor/mission/route.ts')
+const existingMissionUpdatePayload = client.slice(
+  client.indexOf('const toUpdate = draft.flatMap'),
+  client.indexOf('// INSERT new missions'),
+)
 
 assert(
   'calendar editor creates missions through backend before painting them',
@@ -60,4 +64,11 @@ assert(
     route.includes('if (startTime && endTime)') &&
     route.includes('syncKairoMissionsToGoogle(auth.user.id, db)') &&
     route.includes("calendar_sync_status: startTime && endTime ? 'pending' : 'pending_no_time'")
+)
+
+assert(
+  'calendar editor PATCH does not overwrite camino_calendar source',
+  existingMissionUpdatePayload.includes('scheduled_date: day.date') &&
+    existingMissionUpdatePayload.includes('locked: true') &&
+    !existingMissionUpdatePayload.includes('source:')
 )

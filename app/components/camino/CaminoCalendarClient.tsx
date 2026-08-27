@@ -3120,7 +3120,6 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             is_main: m.role === 'main',
             is_bonus: m.role !== 'main',
             title: m.title,
-            source: 'manual',
             locked: true,
             start_time: m.startTime ?? (typeof m.metadata?.start_time === 'string' ? m.metadata.start_time : null),
             end_time: m.endTime ?? (typeof m.metadata?.end_time === 'string' ? m.metadata.end_time : null),

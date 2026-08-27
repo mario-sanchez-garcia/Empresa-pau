@@ -26,6 +26,20 @@ function normalizeTime(value: string | null) {
   return value ? value.slice(0, 5) : null
 }
 
+function addDays(date: string, days: number) {
+  const d = new Date(`${date}T12:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
+function datesInRange(start: string, end: string) {
+  const dates: string[] = []
+  for (let cursor = start; cursor <= end; cursor = addDays(cursor, 1)) {
+    dates.push(cursor)
+  }
+  return dates
+}
+
 export async function GET(request: NextRequest) {
   try {
     const auth = await getAuthContext(request)
@@ -50,12 +64,16 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error
 
-    const busySlots = await getAvailability(auth.user.id, start, end)
+    const forceRefresh = request.nextUrl.searchParams.get('refresh') === '1'
+    const busySlots = await getAvailability(auth.user.id, start, end, { forceRefresh })
+    const busyByDate = Object.fromEntries(
+      datesInRange(start, end).map(date => [date, busySlotsForMadridDate(busySlots, date)])
+    )
     const conflicts = ((data ?? []) as MissionRow[]).flatMap(mission => {
       const startTime = normalizeTime(mission.start_time)
       const endTime = normalizeTime(mission.end_time)
       if (!startTime || !endTime) return []
-      const externalBusy = busySlotsForMadridDate(busySlots, mission.scheduled_date)
+      const externalBusy = busyByDate[mission.scheduled_date] ?? []
       const conflict = externalBusy.find(slot => hasTimeConflict({ start: startTime, end: endTime }, slot))
       if (!conflict) return []
       return [{
@@ -69,9 +87,9 @@ export async function GET(request: NextRequest) {
       }]
     })
 
-    return NextResponse.json({ conflicts })
+    return NextResponse.json({ conflicts, busyByDate })
   } catch (error) {
     console.warn('[camino/calendar-conflicts]', error)
-    return NextResponse.json({ conflicts: [], unavailable: true })
+    return NextResponse.json({ conflicts: [], busyByDate: {}, unavailable: true })
   }
 }

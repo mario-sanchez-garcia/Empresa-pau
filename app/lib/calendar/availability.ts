@@ -92,10 +92,10 @@ export function hasTimeConflict(a: LocalBusyRange, b: LocalBusyRange) {
   return Math.max(toMinutes(a.start), toMinutes(b.start)) < Math.min(toMinutes(a.end), toMinutes(b.end))
 }
 
-export async function getAvailability(userId: string, startDate: string, endDate: string): Promise<BusySlot[]> {
+export async function getAvailability(userId: string, startDate: string, endDate: string, options: { forceRefresh?: boolean } = {}): Promise<BusySlot[]> {
   const key = `${userId}:${startDate}:${endDate}`
   const cached = availabilityCache.get(key)
-  if (cached && cached.expiresAt > Date.now()) return cached.busy
+  if (!options.forceRefresh && cached && cached.expiresAt > Date.now()) return cached.busy
   const timeMin = madridLocalToUtcIso(startDate, '00:00')
   const timeMax = madridLocalToUtcIso(addDays(endDate, 1), '00:00')
   try {

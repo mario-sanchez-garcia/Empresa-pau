@@ -146,6 +146,8 @@ assert(
   'calendar availability keeps external busy abstract and private',
   availability.includes('export type LocalBusyRange') &&
     availability.includes('export async function getAvailability(') &&
+    availability.includes('forceRefresh?: boolean') &&
+    availability.includes('!options.forceRefresh') &&
     availability.includes('busySlotsForMadridDate') &&
     availability.includes('hasTimeConflict') &&
     availability.includes("console.warn('[calendar/availability] freebusy skipped:'") &&
@@ -164,21 +166,48 @@ assert(
 
 assert(
   'calendar conflicts endpoint detects overlaps without exposing private titles',
-  conflictRoute.includes('getAvailability(auth.user.id, start, end)') &&
+  conflictRoute.includes("request.nextUrl.searchParams.get('refresh') === '1'") &&
+    conflictRoute.includes('getAvailability(auth.user.id, start, end, { forceRefresh })') &&
     conflictRoute.includes('busySlotsForMadridDate') &&
     conflictRoute.includes('hasTimeConflict') &&
     conflictRoute.includes('busyStart') &&
     conflictRoute.includes('busyEnd') &&
+    conflictRoute.includes('busyByDate') &&
     !conflictRoute.includes('description') &&
     !conflictRoute.includes('location')
 )
 
 assert(
   'Camino calendar warns about external conflicts without polling',
-  client.includes("fetch(`/api/camino/calendar-conflicts?start=${selectedWeekStart}&end=${weekEnd}`") &&
-    client.includes('Tu calendario ha cambiado. Hay') &&
+  client.includes("fetch(`/api/camino/calendar-conflicts?start=${selectedWeekStart}&end=${weekEnd}&refresh=1`") &&
+    client.includes('Tu calendario ha cambiado ·') &&
     client.includes('Ocupado') &&
     client.includes('reorganizeCalendarConflicts') &&
+    !client.includes('setInterval(')
+)
+
+assert(
+  'Camino week view renders private busy slots and Kairo mission times',
+  client.includes('type ExternalBusyByDate = Record<string, ExternalBusySlot[]>') &&
+    client.includes('setExternalBusyByDate') &&
+    client.includes('function formatTimeRange') &&
+    client.includes('formatTimeRange(mission.startTime, mission.endTime)') &&
+    client.includes('formatTimeRange(slot.start, slot.end)') &&
+    client.includes('· Ocupado') &&
+    client.includes('Sin hora') &&
+    client.includes('missionConflictFor(mission, conflicts)') &&
+    !client.includes('externalBusy.title') &&
+    !client.includes('busy.summary')
+)
+
+assert(
+  'Camino availability refreshes on visible week interactions without aggressive polling',
+  client.includes('calendarAvailabilityRefreshKey') &&
+    client.includes("document.addEventListener('visibilitychange', refreshAvailability)") &&
+    client.includes("window.addEventListener('focus', refreshAvailability)") &&
+    client.includes('setCalendarAvailabilityRefreshKey(key => key + 1)') &&
+    client.includes('externalBusyByDate={externalBusyByDate}') &&
+    client.includes('conflicts={calendarConflicts}') &&
     !client.includes('setInterval(')
 )
 

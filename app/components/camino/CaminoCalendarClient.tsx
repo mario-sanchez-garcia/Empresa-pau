@@ -89,6 +89,8 @@ type TopicProgress = Record<string, { explanation?: boolean; guided?: boolean; e
 type CalendarSource = 'server' | 'client' | 'cache' | 'server_empty' | 'server_error'
 type CalendarSourceContext = 'initial_load' | 'week_navigation' | 'exam_change' | 'postpone'
 type CalendarConflict = { missionId: string; date: string; title: string | null; start: string; end: string; busyStart: string; busyEnd: string }
+type ExternalBusySlot = { start: string; end: string }
+type ExternalBusyByDate = Record<string, ExternalBusySlot[]>
 
 const EXAMS_KEY = 'kairo_camino_student_exams_v1'
 const WEAK_AREAS_KEY = 'kairo_camino_weak_areas_v1'
@@ -1019,8 +1021,10 @@ export default function CaminoCalendarClient() {
   const [showPastExams, setShowPastExams] = useState(false)
   const [selectedWeekStart, setSelectedWeekStart] = useState(currentWeekStartISO())
   const [calendarConflicts, setCalendarConflicts] = useState<CalendarConflict[]>([])
+  const [externalBusyByDate, setExternalBusyByDate] = useState<ExternalBusyByDate>({})
   const [calendarConflictStatus, setCalendarConflictStatus] = useState<'idle' | 'loading' | 'ready' | 'unavailable'>('idle')
   const [calendarReorganizeStatus, setCalendarReorganizeStatus] = useState<'idle' | 'saving' | 'done' | 'error'>('idle')
+  const [calendarAvailabilityRefreshKey, setCalendarAvailabilityRefreshKey] = useState(0)
   const [caminoPlanId, setCaminoPlanId] = useState<CaminoPlanId>('free')
   const [ligas, setLigas] = useState<LigaInfo[]>([])
   const [ligaLoading, setLigaLoading] = useState(true)
@@ -1468,23 +1472,38 @@ export default function CaminoCalendarClient() {
       if (!token || cancelled) return
       const weekEnd = toISO(addDays(dateFromISO(selectedWeekStart), 6))
       try {
-        const res = await fetch(`/api/camino/calendar-conflicts?start=${selectedWeekStart}&end=${weekEnd}`, {
+        const res = await fetch(`/api/camino/calendar-conflicts?start=${selectedWeekStart}&end=${weekEnd}&refresh=1`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        const json = await res.json().catch(() => null) as { conflicts?: CalendarConflict[]; unavailable?: boolean } | null
+        const json = await res.json().catch(() => null) as { conflicts?: CalendarConflict[]; busyByDate?: ExternalBusyByDate; unavailable?: boolean } | null
         if (cancelled) return
         setCalendarConflicts(Array.isArray(json?.conflicts) ? json.conflicts : [])
+        setExternalBusyByDate(json?.busyByDate && typeof json.busyByDate === 'object' ? json.busyByDate : {})
         setCalendarConflictStatus(json?.unavailable ? 'unavailable' : 'ready')
       } catch {
         if (!cancelled) {
           setCalendarConflicts([])
+          setExternalBusyByDate({})
           setCalendarConflictStatus('unavailable')
         }
       }
     }
     loadCalendarConflicts()
     return () => { cancelled = true }
-  }, [hasProfile, selectedWeekStart, calendar])
+  }, [hasProfile, selectedWeekStart, calendar, calendarExpanded, calendarAvailabilityRefreshKey])
+
+  useEffect(() => {
+    if (!hasProfile) return
+    const refreshAvailability = () => {
+      if (document.visibilityState === 'visible') setCalendarAvailabilityRefreshKey(key => key + 1)
+    }
+    document.addEventListener('visibilitychange', refreshAvailability)
+    window.addEventListener('focus', refreshAvailability)
+    return () => {
+      document.removeEventListener('visibilitychange', refreshAvailability)
+      window.removeEventListener('focus', refreshAvailability)
+    }
+  }, [hasProfile])
 
   const visibleCalendar = visibleCalendarForOnboarding(calendar, onboarding)
   const realToday = todayMadrid()
@@ -1834,6 +1853,7 @@ export default function CaminoCalendarClient() {
         setSupabaseCalLoaded(true)
       }
       setCalendarConflicts([])
+      setCalendarAvailabilityRefreshKey(key => key + 1)
       setCalendarReorganizeStatus('done')
       const moved = payload?.moved ?? 0
       const unscheduled = payload?.unscheduled?.length ?? 0
@@ -1857,11 +1877,10 @@ export default function CaminoCalendarClient() {
     return saved
   }
   function toggleCalendarExpanded() {
-    setCalendarExpanded(current => {
-      const next = !current
-      saveJson(CALENDAR_VISIBILITY_KEY, next)
-      return next
-    })
+    const next = !calendarExpanded
+    setCalendarExpanded(next)
+    saveJson(CALENDAR_VISIBILITY_KEY, next)
+    if (next) setCalendarAvailabilityRefreshKey(key => key + 1)
   }
   function postponeMission(missionId: string) {
     const dayIndex = calendar.findIndex(day => day.missions.some(mission => mission.id === missionId))
@@ -2531,7 +2550,7 @@ export default function CaminoCalendarClient() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '10px 12px', borderRadius: 12, border: '1px solid #fed7aa', background: '#fff7ed' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 900, color: '#9a3412' }}>
-                    Tu calendario ha cambiado. Hay {calendarConflicts.length} {calendarConflicts.length === 1 ? 'misión afectada' : 'misiones afectadas'}.
+                    Tu calendario ha cambiado · {calendarConflicts.length} {calendarConflicts.length === 1 ? 'misión afectada' : 'misiones afectadas'}.
                   </div>
                   <div style={{ marginTop: 2, fontSize: 10, fontWeight: 700, color: '#c2410c' }}>
                     {calendarConflicts[0].date} · {calendarConflicts[0].start}-{calendarConflicts[0].end} coincide con {calendarConflicts[0].busyStart}-{calendarConflicts[0].busyEnd} Ocupado.
@@ -2563,7 +2582,7 @@ export default function CaminoCalendarClient() {
                   <button
                     key={i}
                     type="button"
-                    onClick={() => { setExpandedDayDate(day.date); setCalendarExpanded(true) }}
+                    onClick={() => { setExpandedDayDate(day.date); setCalendarExpanded(true); setCalendarAvailabilityRefreshKey(key => key + 1) }}
                     style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                   >
                     <span style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{dayLetter}</span>
@@ -2583,7 +2602,7 @@ export default function CaminoCalendarClient() {
               <ChevronDown style={{ transition: 'transform 200ms', transform: calendarExpanded ? 'rotate(180deg)' : 'none' }} size={12} />
               {calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}
             </button>
-            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} />}
+            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} />}
             <FreeReviewPanel subjects={onboardingSubjects} />
           </div>
 
@@ -4276,7 +4295,16 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
   )
 }
 
-function CompactWeekView({ days, exams, initialExpandedDate = null }: { days: DayPlan[]; exams: StudentExam[]; initialExpandedDate?: string | null }) {
+function formatTimeRange(start?: string | null, end?: string | null) {
+  return start && end ? `${start.slice(0, 5)}–${end.slice(0, 5)}` : 'Sin hora'
+}
+
+function missionConflictFor(mission: Mission, conflicts: CalendarConflict[]) {
+  const rowId = mission.calendarRowId ?? mission.id
+  return conflicts.find(conflict => conflict.missionId === rowId)
+}
+
+function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusyByDate, conflicts }: { days: DayPlan[]; exams: StudentExam[]; initialExpandedDate?: string | null; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[] }) {
   // Only used as the useState initializer, not a live-controlled prop: this
   // component remounts fresh every time the parent's "Ver semana completa"
   // toggle opens it (conditional render, not display:none), so seeding from
@@ -4303,6 +4331,8 @@ function CompactWeekView({ days, exams, initialExpandedDate = null }: { days: Da
         const subjects = [...new Set(main.map(m => m.subject))]
         const subjectLabel = subjects.length ? subjects.map(shortSubjectLabel).join(', ') : 'Repaso libre'
         const missionCount = main.length
+        const busyCount = externalBusyByDate[day.date]?.length ?? 0
+        const conflictCount = conflicts.filter(conflict => conflict.date === day.date).length
         const isExpanded = expandedDate === day.date
         const isToday = day.isToday
         // La sugerencia es un añadido opcional al lado de "Repaso libre", no
@@ -4323,6 +4353,12 @@ function CompactWeekView({ days, exams, initialExpandedDate = null }: { days: Da
               {isToday && <span className="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}
               {main.some(m => m.missionType === 'partial_practice') && (
                 <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>
+              )}
+              {busyCount > 0 && (
+                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-500">{busyCount} ocupado{busyCount !== 1 ? 's' : ''}</span>
+              )}
+              {conflictCount > 0 && (
+                <span className="shrink-0 rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-black text-orange-700">Conflicto</span>
               )}
               <span className={`shrink-0 text-xs font-bold ${done ? 'text-emerald-600' : missionCount === 0 ? 'text-slate-300' : 'text-slate-400'}`}>
                 {done ? '✅ Hecho' : missionCount === 0 ? 'Repaso libre' : `${missionCount} misión${missionCount !== 1 ? 'es' : ''}`}
@@ -4345,7 +4381,7 @@ function CompactWeekView({ days, exams, initialExpandedDate = null }: { days: Da
             </button>
             {isExpanded && (
               <div className="border-t border-slate-100 bg-slate-50/50 p-3">
-                <DayCard day={day} exams={exams.filter(e => e.date === day.date)} />
+                <DayCard day={day} exams={exams.filter(e => e.date === day.date)} externalBusy={externalBusyByDate[day.date] ?? []} conflicts={conflicts.filter(conflict => conflict.date === day.date)} />
               </div>
             )}
           </div>
@@ -4389,7 +4425,7 @@ function MissionRow({ mission, onPostpone, onComplete, compact = false }: { miss
   return <div className={`rounded-2xl border p-4 ${mission.status === 'done' ? 'bg-emerald-50 border-emerald-100' : 'bg-white'}`} style={{ borderColor: mission.status === 'done' ? '#bbf7d0' : theme.border }}><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0 flex-1"><div className="mb-2 flex flex-wrap items-center gap-2"><span className="rounded-full px-2.5 py-1 text-[11px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span><span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400"><Clock3 size={12} /> {mission.estimatedMinutes} min</span>{mission.block && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-500">{mission.block}</span>}{mission.missionType === 'review' && <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-black text-indigo-700">Repaso</span>}{mission.metadata?.free_initiative ? <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-black text-emerald-700">✎ Por tu cuenta</span> : mission.role === 'bonus' && <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-black text-violet-700">Bonus</span>}{!!mission.metadata?.express && <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-black text-amber-700">⚡ Repaso Express</span>}</div><h3 className={`${compact ? 'text-sm' : 'text-base'} font-black text-slate-900`}>{mission.title}</h3><p className="mt-1 text-xs font-semibold text-slate-500">{mission.reason}</p>{target.fallback && <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">Todavía no hemos preparado este contenido.</p>}</div><div className="flex shrink-0 flex-wrap gap-2">{mission.status === 'done' ? <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Completada</span> : target.href ? <a href={target.href} className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white">Ir a practicar <ArrowRight size={13} /></a> : <span className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-black text-slate-400">Sin pantalla</span>}{mission.status !== 'done' && mission.calendarRowId && onComplete && <button onClick={() => onComplete(mission)} className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700"><Check size={13} /> Hecha</button>}{mission.status !== 'done' && mission.role === 'main' && <button onClick={() => onPostpone(mission.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500"><RotateCcw size={13} /> Posponer</button>}</div></div></div>
 }
 
-function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
+function DayCard({ day, exams, externalBusy, conflicts }: { day: DayPlan; exams: StudentExam[]; externalBusy: ExternalBusySlot[]; conflicts: CalendarConflict[] }) {
   // Las misiones 'bonus' con metadata.free_initiative (trabajo hecho por
   // iniciativa propia, ver /api/camino/complete-mission) cuentan aquí igual
   // que una misión 'main' — si no, un día donde el alumno solo trabajó por
@@ -4397,7 +4433,57 @@ function DayCard({ day, exams }: { day: DayPlan; exams: StudentExam[] }) {
   // algo real.
   const main = day.missions.filter(mission => mission.role === 'main' || mission.metadata?.free_initiative)
   const done = main.length > 0 && main.every(mission => mission.status === 'done')
-  return <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}><div className="mb-3 flex items-center justify-between"><h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3><div className="flex items-center gap-1.5">{day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}{done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}</div></div>{exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}<div className="grid gap-2">{main.length ? main.map(mission => { const target = hrefForMission(mission); const content = <><p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>{mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}{!!mission.metadata?.free_initiative && <span className="mb-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">✎ Por tu cuenta</span>}<p className={`mt-1 text-xs font-bold ${mission.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{mission.title}</p><p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p></>; return target.href ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: themeFor(mission.subject).border }}>{content}</a> : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: themeFor(mission.subject).border }}>{content}</div> }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}</div></article>
+  return (
+    <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3>
+        <div className="flex items-center gap-1.5">
+          {day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}
+          {done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}
+        </div>
+      </div>
+
+      {exams.map(exam => <p key={exam.id} className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-[11px] font-black text-amber-800">Parcial: {exam.subject} · {exam.block || exam.topic || priorityLabel(exam.priority)}</p>)}
+
+      {externalBusy.length > 0 && (
+        <div className="mb-2 grid gap-1.5">
+          {externalBusy.map((slot, index) => (
+            <div key={`${slot.start}-${slot.end}-${index}`} className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-100/80 px-3 py-2 text-[11px] font-black text-slate-500">
+              <Clock3 size={12} />
+              <span>{formatTimeRange(slot.start, slot.end)} · Ocupado</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="grid gap-2">
+        {main.length ? main.map(mission => {
+          const target = hrefForMission(mission)
+          const conflict = missionConflictFor(mission, conflicts)
+          const content = (
+            <>
+              <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-500">
+                  <Clock3 size={11} />
+                  {formatTimeRange(mission.startTime, mission.endTime)}
+                </span>
+                {conflict && <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-black text-orange-700">Conflicto</span>}
+              </div>
+              <p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>
+              {mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}
+              {!!mission.metadata?.free_initiative && <span className="mb-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">✎ Por tu cuenta</span>}
+              <p className={`mt-1 text-xs font-bold ${mission.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{mission.title}</p>
+              {conflict && <p className="mt-1 text-[10px] font-bold text-orange-700">Coincide con {formatTimeRange(conflict.busyStart, conflict.busyEnd)} ocupado.</p>}
+              <p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p>
+            </>
+          )
+          return target.href
+            ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: conflict ? '#fdba74' : themeFor(mission.subject).border }}>{content}</a>
+            : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: conflict ? '#fdba74' : themeFor(mission.subject).border }}>{content}</div>
+        }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}
+      </div>
+    </article>
+  )
 }
 
 type ExamDraft = { subject: string; date: string; block: string; topic: string; topicIds: string[]; examScope: ExamScope; name: string; priority: ExamPriority; confidence: ExamConfidence; content: string }

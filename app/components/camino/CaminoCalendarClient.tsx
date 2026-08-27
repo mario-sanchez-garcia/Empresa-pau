@@ -2991,9 +2991,24 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
     setDraft(current => current.map(day => ({ ...day, missions: day.missions.filter(mission => mission.id !== missionId) })))
   }
 
-  // Accepts overrides so a one-tap shortcut (e.g. "Tema sugerido") can add a
-  // mission for a specific day without first pushing that day/topic through
-  // the shared newMission panel state.
+  function openMissionForm(day?: string, suggested = false) {
+    const targetDay = day ?? selectedDay?.date ?? newMission.day
+    setNewMission(current => ({
+      ...current,
+      day: targetDay,
+      subject: current.subject || safeSubjects[0] || current.subject,
+      topic: suggested ? '' : current.topic,
+      kind: suggested ? 'concept_explanation' : current.kind,
+      minutes: suggested ? 15 : current.minutes,
+      bonus: suggested ? false : current.bonus,
+    }))
+    setMissionPanelOpen(true)
+    setSaveState('idle')
+    setEditorNotice('')
+  }
+
+  // The only UI path that persists a new editor mission is the form submit
+  // button. Header/day shortcuts only prepare this shared form state.
   async function addMission(overrides: Partial<typeof newMission> = {}) {
     if (saveState === 'saving') return
     const effective = { ...newMission, ...overrides }
@@ -3239,7 +3254,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             </div>
             <div className="flex items-center gap-2">
               <button onClick={onAddExam} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-400 transition hover:bg-white/[0.11]"><Plus size={13} /> Añadir parcial</button>
-              <button onClick={() => { setNewMission(c => ({ ...c, day: selectedDay?.date ?? c.day })); setMissionPanelOpen(c => !c) }} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-black text-[#0f172a] transition hover:bg-slate-100" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}><Plus size={13} /> Añadir misión</button>
+              <button onClick={() => missionPanelOpen ? setMissionPanelOpen(false) : openMissionForm(selectedDay?.date)} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-black text-[#0f172a] transition hover:bg-slate-100" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}><Plus size={13} /> Añadir misión</button>
             </div>
           </div>
 
@@ -3331,7 +3346,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
               </div>
               <div className="mt-1 flex flex-wrap items-center justify-end gap-2">
                 <button
-                  onClick={() => selectedDay && addMission({ day: selectedDay.date, subject: newMission.subject || safeSubjects[0], topic: '', kind: 'concept_explanation', minutes: 15, bonus: false })}
+                  onClick={() => selectedDay && openMissionForm(selectedDay.date, true)}
                   disabled={!selectedDay || !safeSubjects.length}
                   title="Añade una misión de repaso con el tema que Camino sugiere para este día, sin rellenar nada más."
                   className="inline-flex items-center gap-1.5 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[11px] font-black text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
@@ -3339,7 +3354,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                   <Plus size={13} /> Tema sugerido
                 </button>
                 <button
-                  onClick={() => { setNewMission(c => ({ ...c, day: selectedDay?.date ?? c.day })); setMissionPanelOpen(c => !c) }}
+                  onClick={() => openMissionForm(selectedDay?.date)}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[11px] font-black text-slate-600 transition hover:bg-slate-50"
                 >
                   <Plus size={13} /> Añadir aquí

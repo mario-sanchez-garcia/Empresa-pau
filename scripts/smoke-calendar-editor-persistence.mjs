@@ -19,6 +19,14 @@ const existingMissionUpdatePayload = client.slice(
   client.indexOf('const toUpdate = draft.flatMap'),
   client.indexOf('// INSERT new missions'),
 )
+const calendarEditorOverlay = client.slice(
+  client.indexOf('function CalendarEditorOverlay'),
+  client.indexOf('function formatBlockLabel'),
+)
+const addMissionFunction = calendarEditorOverlay.slice(
+  calendarEditorOverlay.indexOf('async function addMission'),
+  calendarEditorOverlay.indexOf('const kindOptions'),
+)
 
 assert(
   'calendar editor creates missions through backend before painting them',
@@ -29,6 +37,16 @@ assert(
     client.includes('onPersist(updatedDraft)') &&
     !client.includes("manual-${draft.reduce") &&
     !client.includes('<Field label="Termina">')
+)
+
+assert(
+  'calendar editor form button is the only new-mission submit path',
+  addMissionFunction.includes("fetch('/api/camino/calendar-editor/mission'") &&
+    client.includes('<button onClick={() => addMission()} disabled={!safeSubjects.length || saveState === \'saving\'} title="Añade esta misión al día y con los ajustes configurados arriba."') &&
+    client.includes('onClick={() => missionPanelOpen ? setMissionPanelOpen(false) : openMissionForm(selectedDay?.date)}') &&
+    client.includes('onClick={() => selectedDay && openMissionForm(selectedDay.date, true)}') &&
+    client.includes('onClick={() => openMissionForm(selectedDay?.date)}') &&
+    !client.includes('onClick={() => selectedDay && addMission(')
 )
 
 assert(

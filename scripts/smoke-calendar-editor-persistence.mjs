@@ -42,11 +42,38 @@ assert(
 assert(
   'calendar editor form button is the only new-mission submit path',
   addMissionFunction.includes("fetch('/api/camino/calendar-editor/mission'") &&
-    client.includes('<button onClick={() => addMission()} disabled={!safeSubjects.length || saveState === \'saving\'} title="Añade esta misión al día y con los ajustes configurados arriba."') &&
-    client.includes('onClick={() => missionPanelOpen ? setMissionPanelOpen(false) : openMissionForm(selectedDay?.date)}') &&
-    client.includes('onClick={() => selectedDay && openMissionForm(selectedDay.date, true)}') &&
-    client.includes('onClick={() => openMissionForm(selectedDay?.date)}') &&
+    client.includes('async function handleFormSubmitClick()') &&
+    client.includes('await addMission()') &&
+    client.includes('<button type="button" data-calendar-editor-action="form-submit" onClick={handleFormSubmitClick} disabled={!safeSubjects.length || saveState === \'saving\'} title="Añade esta misión al día y con los ajustes configurados arriba."') &&
+    client.includes('function handleTopAddClick()') &&
+    client.includes('data-calendar-editor-action="top-add" onClick={handleTopAddClick}') &&
+    client.includes("{missionPanelOpen ? 'Cerrar formulario' : 'Añadir misión'}") &&
+    client.includes('function handleAddHereClick()') &&
+    client.includes('data-calendar-editor-action="add-here"') &&
+    client.includes('onClick={handleAddHereClick}') &&
+    client.includes('function handleSuggestedClick()') &&
+    client.includes('data-calendar-editor-action="suggested"') &&
+    client.includes('onClick={handleSuggestedClick}') &&
     !client.includes('onClick={() => selectedDay && addMission(')
+)
+
+assert(
+  'calendar editor exposes one traceable persistent submit control',
+  (client.match(/data-calendar-editor-action="form-submit"/g) ?? []).length === 1 &&
+    (client.match(/data-calendar-editor-action="top-add"/g) ?? []).length === 1 &&
+    (client.match(/data-calendar-editor-action="add-here"/g) ?? []).length === 1 &&
+    (client.match(/data-calendar-editor-action="suggested"/g) ?? []).length === 1
+)
+
+assert(
+  'calendar editor dev trace covers real button path to fetch',
+  client.includes("[calendar-editor] TOP_ADD_CLICK") &&
+    client.includes("[calendar-editor] ADD_HERE_CLICK") &&
+    client.includes("[calendar-editor] SUGGESTED_CLICK") &&
+    client.includes("[calendar-editor] FORM_SUBMIT_CLICK") &&
+    client.includes("[calendar-editor] ADD_MISSION_HANDLER_ENTER") &&
+    client.includes("[calendar-editor] FETCH_START") &&
+    client.includes("process.env.NODE_ENV !== 'production'")
 )
 
 assert(

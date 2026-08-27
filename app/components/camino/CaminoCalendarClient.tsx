@@ -2951,6 +2951,9 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
   const selectedDay = orderedDraft.find(d => d.date === selectedDayDate) ?? orderedDraft[0]
   const mainMissionCount = orderedDraft.reduce((total, day) => total + day.missions.filter(mission => mission.role === 'main').length, 0)
   const bonusMissions = orderedDraft.flatMap(day => day.missions.filter(mission => mission.role === 'bonus').map(mission => ({ mission, day })))
+  const debugCalendarEditor = (...args: unknown[]) => {
+    if (process.env.NODE_ENV !== 'production') console.debug(...args)
+  }
 
   function cloneWeek(days: DayPlan[]) {
     return days.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission })) }))
@@ -3007,9 +3010,34 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
     setEditorNotice('')
   }
 
+  function handleTopAddClick() {
+    debugCalendarEditor('[calendar-editor] TOP_ADD_CLICK')
+    if (missionPanelOpen) {
+      setMissionPanelOpen(false)
+      return
+    }
+    openMissionForm(selectedDay?.date)
+  }
+
+  function handleAddHereClick() {
+    debugCalendarEditor('[calendar-editor] ADD_HERE_CLICK')
+    openMissionForm(selectedDay?.date)
+  }
+
+  function handleSuggestedClick() {
+    debugCalendarEditor('[calendar-editor] SUGGESTED_CLICK')
+    if (selectedDay) openMissionForm(selectedDay.date, true)
+  }
+
+  async function handleFormSubmitClick() {
+    debugCalendarEditor('[calendar-editor] FORM_SUBMIT_CLICK')
+    await addMission()
+  }
+
   // The only UI path that persists a new editor mission is the form submit
   // button. Header/day shortcuts only prepare this shared form state.
   async function addMission(overrides: Partial<typeof newMission> = {}) {
+    debugCalendarEditor('[calendar-editor] ADD_MISSION_HANDLER_ENTER')
     if (saveState === 'saving') return
     const effective = { ...newMission, ...overrides }
     if (!effective.subject || !effective.day) return
@@ -3054,6 +3082,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
         setSaveState('error')
         return
       }
+      debugCalendarEditor('[calendar-editor] FETCH_START')
       const response = await fetch('/api/camino/calendar-editor/mission', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
@@ -3254,7 +3283,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             </div>
             <div className="flex items-center gap-2">
               <button onClick={onAddExam} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-400 transition hover:bg-white/[0.11]"><Plus size={13} /> Añadir parcial</button>
-              <button onClick={() => missionPanelOpen ? setMissionPanelOpen(false) : openMissionForm(selectedDay?.date)} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-black text-[#0f172a] transition hover:bg-slate-100" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}><Plus size={13} /> Añadir misión</button>
+              <button type="button" data-calendar-editor-action="top-add" onClick={handleTopAddClick} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-black text-[#0f172a] transition hover:bg-slate-100" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}><Plus size={13} /> {missionPanelOpen ? 'Cerrar formulario' : 'Añadir misión'}</button>
             </div>
           </div>
 
@@ -3346,7 +3375,9 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
               </div>
               <div className="mt-1 flex flex-wrap items-center justify-end gap-2">
                 <button
-                  onClick={() => selectedDay && openMissionForm(selectedDay.date, true)}
+                  type="button"
+                  data-calendar-editor-action="suggested"
+                  onClick={handleSuggestedClick}
                   disabled={!selectedDay || !safeSubjects.length}
                   title="Añade una misión de repaso con el tema que Camino sugiere para este día, sin rellenar nada más."
                   className="inline-flex items-center gap-1.5 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[11px] font-black text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
@@ -3354,7 +3385,9 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                   <Plus size={13} /> Tema sugerido
                 </button>
                 <button
-                  onClick={() => openMissionForm(selectedDay?.date)}
+                  type="button"
+                  data-calendar-editor-action="add-here"
+                  onClick={handleAddHereClick}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-[#e2e8f0] bg-white px-3 py-2 text-[11px] font-black text-slate-600 transition hover:bg-slate-50"
                 >
                   <Plus size={13} /> Añadir aquí
@@ -3368,7 +3401,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
             <div className="shrink-0 border-b border-[#e2e8f0] bg-[#fafbfc] px-6 py-4">
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-[9px] font-black uppercase tracking-[.14em] text-slate-400">Añadir misión</p>
-                <button onClick={() => setMissionPanelOpen(false)} className="rounded-lg border border-[#e2e8f0] bg-white px-2.5 py-1 text-[10px] font-black text-slate-500 transition hover:bg-slate-50">Cerrar</button>
+                <button type="button" onClick={() => setMissionPanelOpen(false)} className="rounded-lg border border-[#e2e8f0] bg-white px-2.5 py-1 text-[10px] font-black text-slate-500 transition hover:bg-slate-50">Cerrar</button>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <Field label="Día">
@@ -3403,7 +3436,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, subjects, curriculum, p
                     <input type="checkbox" checked={newMission.bonus} onChange={e => setNewMission({ ...newMission, bonus: e.target.checked })} />
                     Opcional / bonus
                   </label>
-                  <button onClick={() => addMission()} disabled={!safeSubjects.length || saveState === 'saving'} title="Añade esta misión al día y con los ajustes configurados arriba." className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0f172a] px-4 py-2.5 text-[11px] font-black text-white transition hover:bg-slate-800 disabled:opacity-40">
+                  <button type="button" data-calendar-editor-action="form-submit" onClick={handleFormSubmitClick} disabled={!safeSubjects.length || saveState === 'saving'} title="Añade esta misión al día y con los ajustes configurados arriba." className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0f172a] px-4 py-2.5 text-[11px] font-black text-white transition hover:bg-slate-800 disabled:opacity-40">
                     {saveState === 'saving' ? 'Guardando...' : saveState === 'saved' ? '✓ Guardada' : saveState === 'error' ? 'Reintentar' : <><Plus size={12} /> Añadir misión</>}
                   </button>
                 </div>

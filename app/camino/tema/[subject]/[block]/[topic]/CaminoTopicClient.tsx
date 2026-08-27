@@ -20,6 +20,7 @@ import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import KairoMapCard from '@/components/shared/KairoMapCard'
 import MathEditor from '@/components/shared/MathEditor'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
+import LenguaObrasLeidasSelector from '@/app/components/camino/LenguaObrasLeidasSelector'
 
 const TOPIC_VIDEO_MAP: Record<string, string> = {
   'matematicas_ii:algebra-lineal:matrices-operaciones':      'wMEHXzOvln0',
@@ -1019,6 +1020,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU relacionado.
             </p>
           </header>
+
+          {currentTopic.subject === 'lengua' && currentTopic.blockSlug === 'educacion-literaria' && (
+            <LenguaObrasLeidasSelector />
+          )}
 
           {/* ── Content sections ── */}
           {currentTopic.contentStatus === 'flashcard_v2' ? (

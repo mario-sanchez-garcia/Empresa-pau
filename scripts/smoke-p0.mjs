@@ -55,6 +55,7 @@ const qaCorrectionsChecklist = read('docs/qa/p0-corrections-checklist.md')
 const stripeQaChecklist = read('docs/qa/stripe-test-mode-checklist.md')
 const stripeSmoke = read('scripts/smoke-stripe-p0.mjs')
 const practicaParcialRoute = read('app/api/practica-parcial/route.ts')
+const calendarEditorMissionRoute = read('app/api/camino/calendar-editor/mission/route.ts')
 const generateWeekSource = caminoCalendar.slice(
   caminoCalendar.indexOf('function generateWeek'),
   caminoCalendar.indexOf('function applyWeekNavigation'),
@@ -585,10 +586,18 @@ assert(
     applyWeekNavigationSource.includes('saveWeekCache(weekStartISO, nextCalendar)') &&
     applyWeekNavigationSource.includes('setCalendar(current => mergeWeekIntoCalendar(current, weekStartISO, nextCalendar))') &&
     caminoCalendar.includes("setSaveState('saving')") &&
+    caminoCalendar.includes("fetch('/api/camino/calendar-editor/mission'") &&
+    caminoCalendar.includes('payload.mission?.id') &&
+    caminoCalendar.includes('calRowToMission(payload.mission)') &&
+    caminoCalendar.includes('onPersist(updatedDraft)') &&
+    caminoCalendar.includes('addMinutesToHHMM(effective.startTime || null, effective.minutes)') &&
+    !caminoCalendar.includes('<Field label="Termina">') &&
     caminoCalendar.includes('locked: true') &&
-    caminoCalendar.includes('start_time: startTime || null') &&
-    caminoCalendar.includes('end_time: endTime || null') &&
-    caminoCalendar.includes(".select('id, start_time, end_time')") &&
+    calendarEditorMissionRoute.includes("from('camino_calendar')") &&
+    calendarEditorMissionRoute.includes('.insert({') &&
+    calendarEditorMissionRoute.includes('const endTime = addMinutesToTime(startTime, durationMinutes)') &&
+    calendarEditorMissionRoute.includes(".eq('id', inserted.id)") &&
+    calendarEditorMissionRoute.includes('syncKairoMissionsToGoogle(auth.user.id, db)') &&
     caminoCalendar.includes("calendar_sync_status: startTime && endTime ? 'pending' : 'pending_no_time'") &&
     caminoCalendar.includes('hasTimedMission') &&
     !caminoCalendar.includes('moved-${day.missions.length + 1}')

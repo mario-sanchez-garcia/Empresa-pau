@@ -6,10 +6,20 @@ export interface PreguntaOpcionalLengua {
   puntos: number
   enunciado: string
   grupo?: "sintaxis" | "morfologia" | "literatura" | "obra"
-  // Propuesto en propuesta-topics-lengua.md — de momento solo aplicado a los
-  // ejercicios de sintaxis (grupo: "sintaxis"), revisados y corregidos a
-  // mano; el resto de bloques sigue siendo propuesta sin aplicar.
+  // Propuesto en propuesta-topics-lengua.md, aplicado a Comunicación,
+  // Reflexión — sintaxis y Educación literaria — Tema. Reflexión —
+  // morfología/léxico y obra leída (ver campos de abajo) siguen sin aplicar.
   topicSlugs?: string[]
+  // Solo para grupo: "obra" — ver propuesta-obra-leida-lengua.md. periodo se
+  // puede derivar del propio enunciado (siempre nombra el tramo cronológico,
+  // nunca un libro) y coincide con el CHECK de lengua_obras_lectura.periodo.
+  // obraSlug (referencia a lengua_obras_lectura.slug/id) NO es determinable
+  // desde el ejercicio — el examen real nunca dice qué libro corresponde,
+  // cada centro asignaba uno distinto — así que queda sin poblar en ningún
+  // ejercicio hoy; el campo existe para cuando haya una fuente real que lo
+  // permita.
+  periodo?: "anterior_1936" | "1937_1974" | "posterior_1975"
+  obraSlug?: string
 }
 
 export interface PreguntaLengua {
@@ -164,13 +174,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "3.3",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española o hispanoamericana que haya leído escrita en el período posterior a 1975 hasta la actualidad, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "posterior_1975"
           },
           {
             "id": "3.4",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937 y 1974, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           }
         ]
       }
@@ -297,13 +309,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "3.3",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875 y 1936, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           },
           {
             "id": "3.4",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937 y 1974, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           }
         ]
       }
@@ -441,7 +455,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937 y 1974, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           },
           {
             "id": "B.6",
@@ -454,7 +469,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875 y 1936, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -592,7 +608,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937 y 1974, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           },
           {
             "id": "B.6",
@@ -605,7 +622,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española o hispanoamericana que haya leído escrita en el período posterior a 1974 hasta la actualidad, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "posterior_1975"
           }
         ]
       }
@@ -743,7 +761,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita en el período posterior a 1974 hasta la actualidad, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "posterior_1975"
           },
           {
             "id": "B.6",
@@ -756,7 +775,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1900 y 1939, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -894,7 +914,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1940 y 1974, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           },
           {
             "id": "B.6",
@@ -907,7 +928,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1900 y 1939, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -1045,7 +1067,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1940 y 1974, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           },
           {
             "id": "B.6",
@@ -1058,7 +1081,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1900 y 1939, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -1196,7 +1220,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita en el período posterior a 1974 hasta la actualidad, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "posterior_1975"
           },
           {
             "id": "B.6",
@@ -1209,7 +1234,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1900 y 1939, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -1347,7 +1373,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1900 y 1939.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           },
           {
             "id": "B.6",
@@ -1360,7 +1387,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1940 y 1974.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           }
         ]
       }
@@ -1498,7 +1526,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita desde 1940 hasta 1974.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           },
           {
             "id": "B.6",
@@ -1511,7 +1540,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita desde 1900 hasta 1939.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -1642,13 +1672,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "3.3",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875 y 1936, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           },
           {
             "id": "3.4",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937 y 1974, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           }
         ]
       }
@@ -1774,13 +1806,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "3.3",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875 y 1936, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           },
           {
             "id": "3.4",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937 y 1974, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           }
         ]
       }
@@ -1905,13 +1939,15 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "3.3",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875 y 1936, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           },
           {
             "id": "3.4",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española o hispanoamericana que haya leído escrita en el período posterior a 1975 hasta la actualidad, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "posterior_1975"
           }
         ]
       }
@@ -2016,7 +2052,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937 y 1974, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           }
         ]
       }
@@ -2121,7 +2158,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875 y 1936, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -2221,7 +2259,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "5.b. Comente los aspectos más relevantes de la obra española publicada entre 1940 y 1974 que haya leído en relación con su contexto histórico y literario. (1 punto)",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           }
         ]
       }
@@ -2321,7 +2360,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "5.b. Comente los aspectos más relevantes de la obra española posterior a 1975 que haya leído en relación con su contexto histórico y literario. (1 punto)",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "posterior_1975"
           }
         ]
       }
@@ -2421,7 +2461,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "5.b. Comente los aspectos más relevantes de la obra española del siglo XX anterior a 1940 que haya leído en relación con su contexto histórico y literario. (1 punto)",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -2621,7 +2662,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "5.b. Comente los aspectos más relevantes de la obra española posterior a 1975 que haya leído en relación con su contexto histórico y literario. (1 punto)",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "posterior_1975"
           }
         ]
       }
@@ -2721,7 +2763,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "5.b. Comente los aspectos más relevantes de la obra española publicada entre 1940 y 1974 que haya leído en relación con su contexto histórico y literario. (1 punto)",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           }
         ]
       }
@@ -2821,7 +2864,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "5.b. Comente los aspectos más relevantes de la obra española del siglo XX anterior a 1939 que haya leído en relación con su contexto histórico y literario. (1 punto)",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -2921,7 +2965,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "5.b. Comente los aspectos más relevantes de la obra española posterior a 1974 que haya leído en relación con su contexto histórico y literario. (1 punto)",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "posterior_1975"
           }
         ]
       }
@@ -3021,7 +3066,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "5.b. Comente los aspectos más relevantes de la obra española posterior a 1974 que haya leído en relación con su contexto histórico y literario. (1 punto)",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "posterior_1975"
           }
         ]
       }
@@ -3121,7 +3167,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "5.b. Comente los aspectos más relevantes de la obra española del siglo XX anterior a 1940 que haya leído en relación con su contexto histórico y literario. (1 punto)",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -3227,7 +3274,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "A.7. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1900 y 1939.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -3333,7 +3381,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "B.7. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita desde 1975 hasta la actualidad.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "posterior_1975"
           }
         ]
       }
@@ -3439,7 +3488,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "A.7. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1900 y 1939, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -3545,7 +3595,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "B.7. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1940 y 1974, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           }
         ]
       }
@@ -3651,7 +3702,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "A.7 (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita en el periodo posterior a 1974 hasta la actualidad.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "posterior_1975"
           }
         ]
       }
@@ -3757,7 +3809,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "B.7 (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1900 y 1939.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -3863,7 +3916,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "A.7 (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita desde 1975 hasta la actualidad.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "posterior_1975"
           }
         ]
       }
@@ -3969,7 +4023,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "B.7 (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1900 y 1939.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -4075,7 +4130,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "A.7. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1940 y 1974, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           }
         ]
       }
@@ -4181,7 +4237,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "B.7. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1900 y 1939, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -4287,7 +4344,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "A.7 (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1900 y 1939 en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -4393,7 +4451,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "B.7 (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita en el período posterior a 1974 hasta la actualidad en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "posterior_1975"
           }
         ]
       }
@@ -4499,7 +4558,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "A.7. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1900 y 1939, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -4605,7 +4665,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "B.7. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1940 y 1974, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           }
         ]
       }
@@ -4711,7 +4772,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "A.7 (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1900 y 1939, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -4817,7 +4879,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "B.7 (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1940 y 1974, en relación con su contexto histórico y literario.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           }
         ]
       }
@@ -4923,7 +4986,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "A.7",
             "puntos": 1,
             "enunciado": "A.7. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937 y 1974, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "1937_1974"
           }
         ]
       }
@@ -5029,7 +5093,8 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
             "id": "B.7",
             "puntos": 1,
             "enunciado": "B.7. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875 y 1936, en relación con su contexto sociohistórico y la tradición literaria.",
-            "grupo": "obra"
+            "grupo": "obra",
+            "periodo": "anterior_1936"
           }
         ]
       }
@@ -5153,12 +5218,14 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "3.3",
             "puntos": 1,
-            "enunciado": "3.3. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937 y 1974, en relación con su contexto sociohistórico y la tradición literaria."
+            "enunciado": "3.3. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937 y 1974, en relación con su contexto sociohistórico y la tradición literaria.",
+            "periodo": "1937_1974"
           },
           {
             "id": "3.4",
             "puntos": 1,
-            "enunciado": "3.4. (1 punto) Comente los aspectos más relevantes de la obra española o hispanoamericana que haya leído escrita en el período desde 1975 hasta la actualidad, en relación con su contexto sociohistórico y la tradición literaria."
+            "enunciado": "3.4. (1 punto) Comente los aspectos más relevantes de la obra española o hispanoamericana que haya leído escrita en el período desde 1975 hasta la actualidad, en relación con su contexto sociohistórico y la tradición literaria.",
+            "periodo": "posterior_1975"
           }
         ]
       }
@@ -5282,12 +5349,14 @@ const examenesLenguaBase: Omit<ExamenLengua, "preguntas">[] = [
           {
             "id": "3.3",
             "puntos": 1,
-            "enunciado": "3.3. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875 y 1936, en relación con su contexto sociohistórico y la tradición literaria."
+            "enunciado": "3.3. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1875 y 1936, en relación con su contexto sociohistórico y la tradición literaria.",
+            "periodo": "anterior_1936"
           },
           {
             "id": "3.4",
             "puntos": 1,
-            "enunciado": "3.4. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937 y 1974, en relación con su contexto sociohistórico y la tradición literaria."
+            "enunciado": "3.4. (1 punto) Comente los aspectos más relevantes de la obra española que haya leído escrita entre 1937 y 1974, en relación con su contexto sociohistórico y la tradición literaria.",
+            "periodo": "1937_1974"
           }
         ]
       }

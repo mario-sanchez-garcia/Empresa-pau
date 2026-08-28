@@ -4,7 +4,7 @@ import { createServiceClient } from '@/app/lib/billing/supabase'
 import { busySlotsForMadridDate, getAvailability, hasTimeConflict } from '@/app/lib/calendar/availability'
 import { syncExistingKairoMissionToGoogle } from '@/app/lib/calendar/sync'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
-import { createDayScheduler, estimatedMinutesForMissionType } from '@/app/lib/camino/scheduleTimeSlot'
+import { estimatedMinutesForMissionType, placeBestAcrossDates, type TimeRange } from '@/app/lib/camino/scheduleTimeSlot'
 
 export const dynamic = 'force-dynamic'
 
@@ -108,19 +108,20 @@ export async function POST(request: NextRequest) {
       }
 
       const duration = minutesBetween(startTime, endTime, estimatedMinutesForMissionType(mission.mission_type))
-      let placed: { date: string; start: string; end: string } | null = null
-      for (let offset = 0; offset <= 7; offset += 1) {
-        const candidateDate = addDays(mission.scheduled_date, offset)
-        const scheduler = await createDayScheduler(auth.user.id, db, candidateDate, {
-          excludeCalendarRowIds: new Set([mission.id]),
-          externalBusy: busySlotsForMadridDate(busySlots, candidateDate),
-        })
-        const slot = scheduler.place(duration)
-        if (slot) {
-          placed = { date: candidateDate, start: slot.start, end: slot.end }
-          break
-        }
-      }
+      const candidateDates = Array.from({ length: 8 }, (_, offset) => addDays(mission.scheduled_date, offset))
+      const externalBusyByDate = new Map<string, TimeRange[]>(
+        candidateDates.map(candidateDate => [candidateDate, busySlotsForMadridDate(busySlots, candidateDate)]),
+      )
+      const placed = await placeBestAcrossDates(auth.user.id, db, candidateDates, duration, {
+        excludeCalendarRowIds: new Set([mission.id]),
+        externalBusyByDate,
+        context: {
+          subject: mission.subject,
+          missionType: mission.mission_type,
+          deadlineDate: typeof mission.metadata?.partial_exam_date === 'string' ? mission.metadata.partial_exam_date : null,
+          priority: typeof mission.metadata?.priority === 'string' ? mission.metadata.priority : null,
+        },
+      })
 
       const metadata = mergeMetadata(mission.metadata, {
         calendar_reorganized_at: new Date().toISOString(),
@@ -129,6 +130,8 @@ export async function POST(request: NextRequest) {
           start: startTime,
           end: endTime,
         },
+        calendar_reorganized_score: placed?.score ?? null,
+        calendar_reorganized_reasons: placed?.reasons ?? [],
         calendar_sync_status: placed ? 'pending' : 'pending_no_time',
       })
       const patch = placed

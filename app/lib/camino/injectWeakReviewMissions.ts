@@ -184,7 +184,11 @@ export async function injectWeakReviewMissions(
         if (!candidate || attemptedDates.has(candidate)) break
         attemptedDates.add(candidate)
         const scheduler = await schedulerFor(candidate)
-        const slot = scheduler.place(estimatedMinutesForMissionType('review'))
+        const slot = scheduler.placeBest(estimatedMinutesForMissionType('review'), {
+          date: candidate,
+          subject: normalizeSubjectSlug(topic.subject),
+          missionType: 'review',
+        })
         if (slot) { scheduledDate = candidate; timeSlot = slot; break }
       }
       if (!scheduledDate || !timeSlot) continue

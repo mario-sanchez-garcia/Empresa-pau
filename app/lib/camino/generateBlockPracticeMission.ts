@@ -94,7 +94,11 @@ export async function maybeGenerateBlockPracticeMission(
     const scheduler = await createDayScheduler(userId, db, dateStr, {
       externalBusy: await getAvailabilityForDate(userId, dateStr),
     })
-    const timeSlot = scheduler.place(estimatedMinutesForMissionType('pau_practice'))
+    const timeSlot = scheduler.placeBest(estimatedMinutesForMissionType('pau_practice'), {
+      date: dateStr,
+      subject,
+      missionType: 'pau_practice',
+    })
     if (!timeSlot) continue // día sin hueco libre — se prueba el siguiente
 
     await db.from('camino_calendar').insert({

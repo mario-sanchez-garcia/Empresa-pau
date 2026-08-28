@@ -75,7 +75,11 @@ export async function POST(request: NextRequest) {
     const scheduler = await createDayScheduler(auth.user.id, db, scheduledDate, {
       externalBusy: await getAvailabilityForDate(auth.user.id, scheduledDate),
     })
-    const slot = scheduler.place(DEFAULT_MINUTES)
+    const slot = scheduler.placeBest(DEFAULT_MINUTES, {
+      date: scheduledDate,
+      subject,
+      missionType: 'review',
+    })
     const metadata = {
       free_review_suggestion: true,
       suggestion_key: suggestionKey,

@@ -2,8 +2,9 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { PARCIAL_MINUTES, REFERENCE_MISSION_MINUTES } from './xpMap'
 import { mondayBasedDayIndex } from './studyDays'
+import { findBestScoredSlot, scoreCandidateSlots, scoreDateSlot, type MissionSlotScoringContext } from './slotScoring'
 
-export type TimeRange = { start: string; end: string } // "HH:MM", 24h
+export type TimeRange = { start: string; end: string; subject?: string | null; missionType?: string | null } // "HH:MM", 24h
 
 // Ventana de estudio por defecto donde el motor intenta colocar misiones,
 // evitando lo que el alumno ya tenga ocupado (cole, extraescolares) dentro
@@ -125,7 +126,7 @@ export async function getBusyIntervalsForDate(
       .not('end_time', 'is', null),
     supabase
       .from('camino_calendar')
-      .select('id, start_time, end_time')
+      .select('id, start_time, end_time, subject, mission_type')
       .eq('user_id', userId)
       .eq('scheduled_date', dateStr)
       .not('start_time', 'is', null)
@@ -136,9 +137,9 @@ export async function getBusyIntervalsForDate(
   for (const row of [...(oneOffRes.data ?? []), ...(weeklyRes.data ?? [])] as { start_time: string; end_time: string }[]) {
     busy.push({ start: normalizeTime(row.start_time), end: normalizeTime(row.end_time) })
   }
-  for (const row of (calendarRes.data ?? []) as { id: string; start_time: string; end_time: string }[]) {
+  for (const row of (calendarRes.data ?? []) as { id: string; start_time: string; end_time: string; subject: string | null; mission_type: string | null }[]) {
     if (options.excludeCalendarRowIds?.has(row.id)) continue
-    busy.push({ start: normalizeTime(row.start_time), end: normalizeTime(row.end_time) })
+    busy.push({ start: normalizeTime(row.start_time), end: normalizeTime(row.end_time), subject: row.subject, missionType: row.mission_type })
   }
   return busy
 }
@@ -162,6 +163,16 @@ export class DayScheduler {
     if (slot) this.busy.push(slot)
     return slot
   }
+
+  placeBest(durationMinutes: number, context: MissionSlotScoringContext = {}): TimeRange | null {
+    const slot = findBestScoredSlot(durationMinutes, this.busy, this.window, context)
+    if (slot) this.busy.push({ start: slot.start, end: slot.end, subject: context.subject, missionType: context.missionType })
+    return slot ? { start: slot.start, end: slot.end } : null
+  }
+
+  debugBestCandidates(durationMinutes: number, context: MissionSlotScoringContext = {}) {
+    return scoreCandidateSlots(durationMinutes, this.busy, this.window, context)
+  }
 }
 
 export async function createDayScheduler(
@@ -174,4 +185,32 @@ export async function createDayScheduler(
   const externalBusy = options.externalBusy ?? []
   const busy = [...localBusy, ...externalBusy]
   return new DayScheduler(busy, studyWindowFor(dateStr))
+}
+
+export async function placeBestAcrossDates(
+  userId: string,
+  supabase: SupabaseClient,
+  dates: string[],
+  durationMinutes: number,
+  options: {
+    excludeCalendarRowIds?: Set<string>
+    externalBusyByDate?: Map<string, TimeRange[]>
+    context?: MissionSlotScoringContext
+  } = {},
+): Promise<{ date: string; start: string; end: string; score: number; reasons: string[] } | null> {
+  let best: { date: string; start: string; end: string; score: number; reasons: string[] } | null = null
+  for (let index = 0; index < dates.length; index += 1) {
+    const date = dates[index]
+    const localBusy = await getBusyIntervalsForDate(userId, supabase, date, { excludeCalendarRowIds: options.excludeCalendarRowIds })
+    const externalBusy = options.externalBusyByDate?.get(date) ?? []
+    const busy = [...localBusy, ...externalBusy]
+    const slot = findBestScoredSlot(durationMinutes, busy, studyWindowFor(date), { ...(options.context ?? {}), date })
+    if (!slot) continue
+    const scored = scoreDateSlot({ date, slot, busy, context: options.context, dateIndex: index })
+    const candidate = { date, start: slot.start, end: slot.end, score: scored.score, reasons: scored.reasons }
+    if (!best || candidate.score > best.score || (candidate.score === best.score && `${candidate.date} ${candidate.start}` < `${best.date} ${best.start}`)) {
+      best = candidate
+    }
+  }
+  return best
 }

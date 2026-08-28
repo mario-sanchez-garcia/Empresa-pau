@@ -168,7 +168,13 @@ export async function applyCalendarPersonalization(
       for (let slot = 0; slot < capacity && rowIndex < rows.length; slot += 1) {
         const row = rows[rowIndex]
         const meta = metadataObject(row.metadata)
-        const timeSlot = scheduler.place(estimatedMinutesForSlot(prefs.dailyMinutes, slot))
+        const timeSlot = scheduler.placeBest(estimatedMinutesForSlot(prefs.dailyMinutes, slot), {
+          date,
+          subject: row.subject,
+          missionType: typeof meta.mission_type === 'string' ? meta.mission_type : null,
+          deadlineDate: typeof meta.partial_exam_date === 'string' ? meta.partial_exam_date : null,
+          priority: typeof meta.priority === 'string' ? meta.priority : null,
+        })
         // Sin hueco libre este día (agenda propia ya lo llena) -> no se
         // reubica esta misión aquí; se prueba en el siguiente día preferido
         // en vez de forzarla sin hora en un día completo.

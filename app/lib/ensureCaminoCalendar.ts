@@ -119,6 +119,10 @@ function commentTextIntervalDays(today: string): number | null {
   return null
 }
 
+function daysBetween(from: string, to: string) {
+  return Math.floor((new Date(`${to}T12:00:00Z`).getTime() - new Date(`${from}T12:00:00Z`).getTime()) / 86400000)
+}
+
 async function maybeInjectCommentText(
   userId: string,
   supabase: SupabaseClient,
@@ -196,7 +200,11 @@ async function maybeInjectCommentText(
   const externalBusyByDate = new Map<string, LocalBusyRange[]>()
   for (const d of candidates) {
     const scheduler = await createAvailabilityAwareScheduler(userId, supabase, d, externalBusyByDate)
-    const slot = scheduler.place(estimatedMinutesForMissionType('comment_text'))
+    const slot = scheduler.placeBest(estimatedMinutesForMissionType('comment_text'), {
+      date: d,
+      subject: 'historia_espana',
+      missionType: 'comment_text',
+    })
     if (slot) { candidate = d; timeSlot = slot; break }
   }
   if (!candidate || !timeSlot) return
@@ -562,7 +570,12 @@ export async function ensureCaminoCalendar(
           // llenan) se salta sin avanzar el cursor, igual que el bucle
           // principal.
           const scheduler = await createAvailabilityAwareScheduler(userId, supabase, dateStr, externalBusyByDate)
-          const timeSlot = scheduler.place(estimatedMinutesForSlot(dailyMinutesForSlots, 0))
+          const timeSlot = scheduler.placeBest(estimatedMinutesForSlot(dailyMinutesForSlots, 0), {
+            date: dateStr,
+            subject: item.subject,
+            missionType: (item.metadata?.mission_type as string) ?? 'concept',
+            deadlineDate: historiaSortOrderMockDate.get(item.v2_sort_order) ?? null,
+          })
           if (!timeSlot) continue
           const itemMeta = item.metadata ?? {}
           const topicMeta = queueTopicMeta(item)
@@ -800,7 +813,15 @@ export async function ensureCaminoCalendar(
       if (topicId) calMetadata.topic_id = topicId
       if (itemMeta.express) calMetadata.express = true
       if (rescueMode) calMetadata.plan_mode = 'rescue'
-      const timeSlot = scheduler.place(estimatedMinutesForSlot(dailyMinutesForSlots, slot))
+      const timeSlot = scheduler.placeBest(estimatedMinutesForSlot(dailyMinutesForSlots, slot), {
+        date: dateStr,
+        subject: item.subject,
+        missionType,
+        deadlineDate: item.subject === 'historia_espana' ? historiaSortOrderMockDate.get(item.v2_sort_order) ?? null : null,
+        daysUntilExam: item.subject === 'historia_espana' && historiaSortOrderMockDate.get(item.v2_sort_order)
+          ? daysBetween(dateStr, historiaSortOrderMockDate.get(item.v2_sort_order)!)
+          : null,
+      })
       // Sin hueco libre en la ventana de estudio de este día (agenda propia
       // — cole/extraescolares — ya lo llena) -> no se fuerza la misión aquí.
       // Se deja en la cola sin avanzar el cursor, así un día futuro con

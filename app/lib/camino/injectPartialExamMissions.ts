@@ -515,7 +515,15 @@ export async function injectPartialExamMissions(
     // aviso claro en vez de desaparecer sin explicación.
     const isFinalSimulacroLink = mType === 'final_mini_mock' && fate === 'generate'
     const scheduler = await createDayScheduler(userId, supabase, slot)
-    const timeSlot = scheduler.place(isFinalSimulacroLink ? SIMULACRO_MINUTES : estimatedMinutesForMissionType('partial_practice'))
+    const scheduledMissionType = isFinalSimulacroLink ? 'pau_practice' : 'partial_practice'
+    const timeSlot = scheduler.placeBest(isFinalSimulacroLink ? SIMULACRO_MINUTES : estimatedMinutesForMissionType('partial_practice'), {
+      date: slot,
+      subject: subjectSlug,
+      missionType: scheduledMissionType,
+      daysUntilExam,
+      deadlineDate: partialExam.date,
+      priority: partialExam.priority ?? 'normal',
+    })
 
     const title = fate === 'monthly_limit'
       ? `Simulacro pospuesto: ya usaste tus Simulacros de este mes`
@@ -542,7 +550,7 @@ export async function injectPartialExamMissions(
       // abra el Simulacro real de 90 min en vez del flujo de práctica de 45
       // — ver hrefForMission en CaminoCalendarClient.tsx, que decide la URL
       // mirando mission_type + metadata.links_to_simulacro_exam_id.
-      mission_type: isFinalSimulacroLink ? 'pau_practice' : 'partial_practice',
+      mission_type: scheduledMissionType,
       is_main: true,
       is_bonus: false,
       status: 'pending',

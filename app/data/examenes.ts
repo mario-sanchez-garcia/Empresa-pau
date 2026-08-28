@@ -6,6 +6,7 @@ export interface Pregunta {
   imagenes?: string[]
   puntuacion: number
   criterios: string
+  topicSlugs?: string[]
 }
 
 export interface Examen {
@@ -21,6 +22,7 @@ const criteriosModeloMates = "Se valorará el planteamiento correcto, la justifi
 
 const preguntaModelo = (
   id: string,
+  topicSlugs: string[],
   bloque: string,
   opcion: "A" | "B",
   enunciado: string,
@@ -33,6 +35,7 @@ const preguntaModelo = (
   enunciado,
   puntuacion,
   criterios: criteriosModeloMates,
+  topicSlugs,
   ...(imagenes ? { imagenes } : {})
 })
 
@@ -40,7 +43,7 @@ const examenesModeloMates: Examen[] = [
   {
     id: 101, año: 2026, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      preguntaModelo("M2026-P1A", "Pregunta 1", "A", `Un equipo de ingenieros está trabajando en un nuevo modelo de dron para tomar fotografías del estado del tráfico. Elegido un sistema de coordenadas, el dron tiene $A(1,0,2)$ como punto de partida y un cierto tramo de autopista está contenido en el plano $\\pi: x+y+2z+1=0$. Las fotografías se deben tomar perpendicularmente al plano $\\pi$. Se toma el punto $C(0,-3,1)$ de $\\pi$ para calibrar el dron.
+      preguntaModelo("M2026-P1A", ["el-plano-en-el-espacio","distancias-en-el-espacio","la-recta-en-el-espacio-ecuaciones","angulos-en-el-espacio"], "Pregunta 1", "A", `Un equipo de ingenieros está trabajando en un nuevo modelo de dron para tomar fotografías del estado del tráfico. Elegido un sistema de coordenadas, el dron tiene $A(1,0,2)$ como punto de partida y un cierto tramo de autopista está contenido en el plano $\\pi: x+y+2z+1=0$. Las fotografías se deben tomar perpendicularmente al plano $\\pi$. Se toma el punto $C(0,-3,1)$ de $\\pi$ para calibrar el dron.
 
 a) (1 punto) Determine la distancia del dron en el punto de partida $A$ al plano $\\pi$ y halle una ecuación del plano en el que el dron vuela manteniendo en todo momento la misma distancia al plano $\\pi$. Este plano recibe el nombre de plano de vuelo.
 
@@ -49,22 +52,22 @@ b) (1 punto) Responda solo a uno de los dos apartados siguientes:
 b1) El dron se mueve en línea recta en el plano de vuelo desde el punto de partida $A$ al punto más cercano a $C$. Halle una ecuación de la recta que contiene la trayectoria lineal que recorre el dron para fotografiar $C$.
 
 b2) La fotografía obtenida de $C$ a esa distancia no tiene buena definición. Se decide acercar el dron desde el punto de partida $A$ descendiendo perpendicularmente al plano $\\pi$ para situarse en $A'$, a la mitad de la distancia original. Calcule el ángulo formado por el plano $\\pi$ y la recta que pasa por $C$ y $A'$.`, 2),
-      preguntaModelo("M2026-P2A", "Pregunta 2", "A", `Dada $f(x)=\\dfrac{x^2+1}{|x|+1}$, se pide:
+      preguntaModelo("M2026-P2A", ["informacion-extraida-de-la-propia-funcion","informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], "Pregunta 2", "A", `Dada $f(x)=\\dfrac{x^2+1}{|x|+1}$, se pide:
 
 a) (1 punto) Analizar la paridad y los extremos relativos de $f(x)$.
 
 b) (1 punto) Hallar $\\displaystyle\\int_{-1}^{0} f(x)\\,dx$.`, 2),
-      preguntaModelo("M2026-P3A", "Pregunta 3", "A", `Una envasadora de aceitunas comercializa bolsas con 12 aceitunas. La cosecha de este año ha sido atacada por el hongo *Sphaeropsis dalmatica* y una de cada veinte aceitunas presenta la enfermedad escudete. Se pide:
+      preguntaModelo("M2026-P3A", ["distribucion-binomial-variable-discreta","aproximacion-de-la-binomial-a-la-normal-moivre-gauss"], "Pregunta 3", "A", `Una envasadora de aceitunas comercializa bolsas con 12 aceitunas. La cosecha de este año ha sido atacada por el hongo *Sphaeropsis dalmatica* y una de cada veinte aceitunas presenta la enfermedad escudete. Se pide:
 
 a) (1 punto) Calcular la probabilidad de que una bolsa no tenga aceitunas con la enfermedad.
 
 b) (1 punto) Los controles sanitarios han fallado y se han distribuido 100 bolsas de aceitunas de esta cosecha. Calcular, aproximando por una distribución normal adecuada, la probabilidad de que al menos el 60% de las bolsas distribuidas tenga alguna aceituna con escudete.`, 2),
-      preguntaModelo("M2026-P4A", "Pregunta 4", "A", `Sean $a\\in\\mathbb{R}$, $A=\\begin{pmatrix}2a&-2\\\\a&1\\end{pmatrix}$ y $B=\\begin{pmatrix}1&2\\\\-1&2\\end{pmatrix}$. Se pide:
+      preguntaModelo("M2026-P4A", ["propiedades-de-la-matriz-traspuesta-a-t","multiplicacion-de-matrices-a-b","potencias-de-matrices-a-n"], "Pregunta 4", "A", `Sean $a\\in\\mathbb{R}$, $A=\\begin{pmatrix}2a&-2\\\\a&1\\end{pmatrix}$ y $B=\\begin{pmatrix}1&2\\\\-1&2\\end{pmatrix}$. Se pide:
 
 a) (1 punto) Calcular, si existen, los valores de $a$ tales que la matriz $AA^t$ sea una matriz diagonal.
 
 b) (1 punto) Calcular, si existen, los valores de $a$ tales que $(A-B)(A+B)=A^2-B^2$.`, 2),
-      preguntaModelo("M2026-P4B", "Pregunta 4", "B", `Sea el sistema de ecuaciones
+      preguntaModelo("M2026-P4B", ["teorema-de-rouche-frobenius-discusion","analisis-de-sistemas-por-el-metodo-de-gauss"], "Pregunta 4", "B", `Sea el sistema de ecuaciones
 
 $$\\begin{cases}
 x+2y-z=2\\\\
@@ -75,7 +78,7 @@ x+2y+\\lambda z=2
 a) (1 punto) Discutir el sistema en función del parámetro real $\\lambda$.
 
 b) (1 punto) Resolver el sistema si $\\lambda=-1$.`, 2),
-      preguntaModelo("M2026-P5A", "Pregunta 5", "A", `Sea la función
+      preguntaModelo("M2026-P5A", ["continuidad-y-tipos-de-discontinuidad"], "Pregunta 5", "A", `Sea la función
 
 $$f(x)=\\begin{cases}
 \\dfrac{1}{2}(-8+\\cos x), & 0\\leq x<\\dfrac{\\pi}{2}\\\\
@@ -86,7 +89,7 @@ a\\,\\sin(x)+4, & \\dfrac{\\pi}{2}\\leq x<\\pi\\\\
 a) (1 punto) Halle los valores de $a$ y $b$ para que se verifiquen las hipótesis del Teorema de Bolzano en $[0,2\\pi]$.
 
 b) (1 punto) Justifique razonadamente que la función $f(x)$ tiene una única raíz en el intervalo $(0,2\\pi)$ y calcule dicha raíz.`, 2),
-      preguntaModelo("M2026-P5B", "Pregunta 5", "B", `Se considera la función
+      preguntaModelo("M2026-P5B", ["continuidad-y-tipos-de-discontinuidad","concepto-de-derivada-e-interpretacion-geometrica"], "Pregunta 5", "B", `Se considera la función
 
 $$f(x)=\\begin{cases}
 \\dfrac{\\ln(x^2+1)}{x}, & x\\neq 0\\\\
@@ -101,7 +104,7 @@ b) (1 punto) Determinar si $f(x)$ es derivable en el punto $x=0$ y, si existe, c
   {
     id: 102, año: 2025, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      preguntaModelo("M2025-1A", "Algebra", "A", `Sea $\\lambda$ un número real y considérese las matrices
+      preguntaModelo("M2025-1A", ["matriz-inversa-por-gauss-jordan","rango-de-una-matriz-metodo-de-gauss","teorema-de-rouche-frobenius-discusion"], "Algebra", "A", `Sea $\\lambda$ un número real y considérese las matrices
 
 $$A=\\begin{pmatrix}\\lambda&1&\\lambda\\\\0&\\lambda&-1\\end{pmatrix},\\qquad B=\\begin{pmatrix}1&\\lambda\\\\0&-1\\\\1&-\\lambda\\end{pmatrix}.$$
 
@@ -112,8 +115,8 @@ a) (0.5 puntos) Estudiar si existe algún valor de $\\lambda$ para el cual la ma
 b) (1 punto) Estudiar el rango de la matriz $BA$ en función del parámetro $\\lambda$.
 
 c) (1 punto) Para $\\lambda=1$, discutir el sistema $$(A^tA)\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}=\\begin{pmatrix}a^2\\\\a^2\\\\2a\\end{pmatrix}$$ según los valores de $a$.`),
-      preguntaModelo("M2025-1B", "Algebra", "B", `Se tienen garrafas de tres tamaños diferentes para llenar un aljibe. Con seis garrafas pequeñas y 2 L se llenan exactamente una garrafa mediana y una grande. Con dos garrafas grandes llenamos dos medianas, una pequeña y sobra 1 L. El aljibe se llena al completo bien con catorce garrafas pequeñas más seis medianas, bien con cinco medianas junto con cinco grandes. Se pide calcular la capacidad de cada tipo de garrafa y, una vez conocidas estas, la del aljibe.`),
-      preguntaModelo("M2025-2A", "Analisis", "A", `Sea la función
+      preguntaModelo("M2025-1B", ["analisis-de-sistemas-por-el-metodo-de-gauss"], "Algebra", "B", `Se tienen garrafas de tres tamaños diferentes para llenar un aljibe. Con seis garrafas pequeñas y 2 L se llenan exactamente una garrafa mediana y una grande. Con dos garrafas grandes llenamos dos medianas, una pequeña y sobra 1 L. El aljibe se llena al completo bien con catorce garrafas pequeñas más seis medianas, bien con cinco medianas junto con cinco grandes. Se pide calcular la capacidad de cada tipo de garrafa y, una vez conocidas estas, la del aljibe.`),
+      preguntaModelo("M2025-2A", ["continuidad-y-tipos-de-discontinuidad","informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], "Analisis", "A", `Sea la función
 
 $$f(x)=\\begin{cases}
 x^2-6x+11, & x<2\\\\
@@ -125,26 +128,26 @@ a) (0.5 puntos) Estudie la continuidad de la función en $\\mathbb{R}$.
 b) (1 punto) Estudie los extremos relativos de la función en el intervalo $(1,3)$.
 
 c) (1 punto) Calcule el área encerrada por la función y el eje OX entre $x=1$ y $x=3$.`),
-      preguntaModelo("M2025-2B", "Analisis", "B", `Dada la función $f(x)=\\sin\\left(\\dfrac{\\pi}{2}x\\right)$, se pide:
+      preguntaModelo("M2025-2B", ["informacion-extraida-de-la-propia-funcion"], "Analisis", "B", `Dada la función $f(x)=\\sin\\left(\\dfrac{\\pi}{2}x\\right)$, se pide:
 
 a) (0.5 puntos) Estudiar la paridad de la función $g(x)=f\\bigl(xf(x)\\bigr)$.
 
 b) (1 punto) Calcular $\\displaystyle\\lim_{x\\to 0}\\dfrac{\\sqrt{4+3f(x)}-2}{x}$.
 
 c) (1 punto) Calcular $\\displaystyle\\int_0^1 x f(x)\\,dx$.`),
-      preguntaModelo("M2025-3A", "Geometria", "A", `Sean los puntos $A(0,0,0)$ y $B(1,1,1)$, y la recta $r\\equiv (x,y,z)=(\\lambda,\\lambda,\\lambda+1)$, $\\lambda\\in\\mathbb{R}$.
+      preguntaModelo("M2025-3A", ["el-plano-en-el-espacio"], "Geometria", "A", `Sean los puntos $A(0,0,0)$ y $B(1,1,1)$, y la recta $r\\equiv (x,y,z)=(\\lambda,\\lambda,\\lambda+1)$, $\\lambda\\in\\mathbb{R}$.
 
 a) (1 punto) Halle una ecuación del plano respecto del cual los puntos $A$ y $B$ son simétricos.
 
 b) (1 punto) Halle una ecuación del plano que contiene a la recta $r$ y pasa por el punto $B$.
 
 c) (0.5 puntos) Halle una ecuación de una recta que sea paralela a $r$ y pase por $A$.`),
-      preguntaModelo("M2025-3B", "Geometria", "B", `Dados los tres planos $\\pi_1:-2x-2y+z=0$, $\\pi_2:-2x+y-2z=0$ y $\\pi_3:x-2y-2z=0$, se pide:
+      preguntaModelo("M2025-3B", ["angulos-en-el-espacio","posiciones-relativas-rectas-y-planos","proyecciones-ortogonales-y-puntos-simetricos"], "Geometria", "B", `Dados los tres planos $\\pi_1:-2x-2y+z=0$, $\\pi_2:-2x+y-2z=0$ y $\\pi_3:x-2y-2z=0$, se pide:
 
 a) (1 punto) Determinar el ángulo que forman los planos dos a dos. Determinar la intersección de los tres planos.
 
 b) (1.5 puntos) Determinar el punto $P$ en el espacio del que se sabe que su proyección ortogonal sobre $\\pi_1$ es el punto $Q_1\\left(\\dfrac{1}{3},\\dfrac{4}{3},\\dfrac{10}{3}\\right)$ y que su proyección ortogonal sobre $\\pi_2$ es el punto $Q_2\\left(-\\dfrac{1}{3},\\dfrac{8}{3},\\dfrac{5}{3}\\right)$. Determinar la proyección ortogonal $Q_3$ del punto $P$ sobre el plano $\\pi_3$.`),
-      preguntaModelo("M2025-4A", "Probabilidad", "A", `Según los datos de la Comunidad de Madrid, en la temporada 2021-2022 la cobertura de la vacuna de la gripe entre mayores de 65 años fue de un 73.2%.
+      preguntaModelo("M2025-4A", ["distribucion-binomial-variable-discreta","aproximacion-de-la-binomial-a-la-normal-moivre-gauss"], "Probabilidad", "A", `Según los datos de la Comunidad de Madrid, en la temporada 2021-2022 la cobertura de la vacuna de la gripe entre mayores de 65 años fue de un 73.2%.
 
 a) (1.5 puntos) Ante una situación de brote epidémico, las autoridades deciden restringir aquellas reuniones en las que la probabilidad de que haya más de una persona no vacunada sea mayor de 0.5. Suponiendo que los asistentes a una reunión suponen una muestra aleatoria, ¿se deberían restringir las reuniones de 5 personas mayores de 65 años? ¿Y las reuniones de 7 personas mayores de 65 años?
 
@@ -154,13 +157,13 @@ b) (1 punto) Se toma una muestra aleatoria de 500 personas mayores de 65 años. 
   {
     id: 103, año: 2024, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      preguntaModelo("M2024-1A", "Algebra", "A", `La primera interpretación en EE.UU. de la octava sinfonía de Mahler tuvo lugar en Filadelfia en 1916 con la participación de una orquesta, dos coros con el mismo número de miembros, un tercer coro infantil y, además, ocho cantantes solistas invitados especialmente y que no pertenecían a ninguno de los coros. La décima parte del número total de intérpretes de los tres coros era menor en 15 unidades al de miembros de la orquesta. Los miembros de cada uno de los dos coros no infantiles superaban en 140 unidades a la suma de componentes del coro infantil y los de la orquesta. El número de miembros de la orquesta excedía en 21 unidades a la doceava parte del total de intérpretes. ¿Cuántos intérpretes tenía la orquesta y cada uno de los coros? ¿Cuántos intérpretes había en total?`),
-      preguntaModelo("M2024-2A", "Analisis", "A", `Sea la función $f(x)=x\\sqrt[3]{(x^2-1)^2}$.
+      preguntaModelo("M2024-1A", ["analisis-de-sistemas-por-el-metodo-de-gauss"], "Algebra", "A", `La primera interpretación en EE.UU. de la octava sinfonía de Mahler tuvo lugar en Filadelfia en 1916 con la participación de una orquesta, dos coros con el mismo número de miembros, un tercer coro infantil y, además, ocho cantantes solistas invitados especialmente y que no pertenecían a ninguno de los coros. La décima parte del número total de intérpretes de los tres coros era menor en 15 unidades al de miembros de la orquesta. Los miembros de cada uno de los dos coros no infantiles superaban en 140 unidades a la suma de componentes del coro infantil y los de la orquesta. El número de miembros de la orquesta excedía en 21 unidades a la doceava parte del total de intérpretes. ¿Cuántos intérpretes tenía la orquesta y cada uno de los coros? ¿Cuántos intérpretes había en total?`),
+      preguntaModelo("M2024-2A", ["indeterminacion-0-0","la-integral-definida-regla-de-barrow-y-areas"], "Analisis", "A", `Sea la función $f(x)=x\\sqrt[3]{(x^2-1)^2}$.
 
 a) (0.75 puntos) Halle $\\displaystyle\\lim_{x\\to 1}\\dfrac{f(x)}{(x-1)^{2/3}}$.
 
 b) (1.75 puntos) Halle el área, en el primer cuadrante, comprendida entre la recta $y=x$ y la gráfica de la función $f(x)$.`),
-      preguntaModelo("M2024-3A", "Geometria", "A", `Sea la recta
+      preguntaModelo("M2024-3A", ["la-recta-en-el-espacio-ecuaciones"], "Geometria", "A", `Sea la recta
 
 $$r\\equiv\\begin{cases}
 x=\\lambda\\\\
@@ -173,14 +176,14 @@ y el plano $\\pi:z=0$.
 a) (1 punto) Halle una ecuación de la recta paralela al plano $\\pi$ cuya dirección sea perpendicular a $r$ y que pase por el punto $(1,1,1)$.
 
 b) (1.5 puntos) Halle una ecuación de una recta que forme un ángulo de $\\dfrac{\\pi}{4}$ radianes con la recta $r$, que esté contenida en el plano $\\pi$ y pase por el punto $(0,0,0)$.`),
-      preguntaModelo("M2024-4A", "Probabilidad", "A", `La selección española competirá en la Copa Mundial Femenina de Fútbol 2023. En los dos primeros partidos de la fase de grupos, que consta de tres partidos, la probabilidad de ganar cada uno de ellos es del 80%. Sin embargo, debido al aumento en la moral de las jugadoras, si ganan los dos primeros partidos la probabilidad de ganar el tercero asciende al 90%. En caso contrario, la probabilidad de ganar el tercer partido se mantendrá en el 80%. Se pide:
+      preguntaModelo("M2024-4A", ["diagramas-de-arbol-y-tablas-de-contingencia","teoremas-de-la-probabilidad-total-y-de-bayes"], "Probabilidad", "A", `La selección española competirá en la Copa Mundial Femenina de Fútbol 2023. En los dos primeros partidos de la fase de grupos, que consta de tres partidos, la probabilidad de ganar cada uno de ellos es del 80%. Sin embargo, debido al aumento en la moral de las jugadoras, si ganan los dos primeros partidos la probabilidad de ganar el tercero asciende al 90%. En caso contrario, la probabilidad de ganar el tercer partido se mantendrá en el 80%. Se pide:
 
 a) (0.5 puntos) Determinar la probabilidad de que la selección española no gane ningún partido durante la fase de grupos.
 
 b) (1 punto) Calcular la probabilidad de que la selección gane el tercer partido de la fase de grupos.
 
 c) (1 punto) Si sabemos que la selección ha ganado el tercer partido, determinar la probabilidad de que no haya ganado alguno de los dos encuentros anteriores.`),
-      preguntaModelo("M2024-1B", "Algebra", "B", `Consideremos las matrices reales
+      preguntaModelo("M2024-1B", ["matriz-inversa-por-gauss-jordan","rango-de-una-matriz-metodo-de-gauss","teorema-de-rouche-frobenius-discusion"], "Algebra", "B", `Consideremos las matrices reales
 
 $$A=\\begin{pmatrix}m&1&1\\\\0&m&3\\end{pmatrix},\\qquad B=\\begin{pmatrix}1&m\\\\0&m\\\\0&1\\end{pmatrix}.$$
 
@@ -191,21 +194,21 @@ a) (0.75 puntos) Estudiar si existe algún valor de $m$ para el cual la matriz $
 b) (0.75 puntos) Estudiar el rango de la matriz $AB$ en función del parámetro $m$.
 
 c) (1 punto) Para $m=1$, discutir el sistema $$(A^tA)\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}=\\begin{pmatrix}a\\\\a\\\\a^2\\end{pmatrix}$$ según los valores de $a$.`),
-      preguntaModelo("M2024-2B", "Analisis", "B", `Dada la función real de variable real $f(x)=x-\\dfrac{4}{(x-1)^2}$, se pide:
+      preguntaModelo("M2024-2B", ["limites-infinitos","informacion-extraida-de-la-1-y-2-derivada","concepto-de-derivada-e-interpretacion-geometrica"], "Analisis", "B", `Dada la función real de variable real $f(x)=x-\\dfrac{4}{(x-1)^2}$, se pide:
 
 a) (0.75 puntos) Hallar el dominio de definición de $f(x)$ y determinar, en el caso de que existan, las ecuaciones de las asíntotas de su gráfica.
 
 b) (1 punto) Determinar los extremos relativos de la función, así como sus intervalos de crecimiento y de decrecimiento.
 
 c) (0.75 puntos) Calcular la ecuación de una recta tangente a la gráfica de $f(x)$ que sea paralela a la recta de ecuación $9x-8y=6$.`),
-      preguntaModelo("M2024-3B", "Geometria", "B", `Dados los puntos $A(0,0,1)$, $B(1,1,0)$, $C(1,0,-1)$, $D(1,1,2)$, se pide:
+      preguntaModelo("M2024-3B", ["producto-mixto","angulos-en-el-espacio","areas-y-volumenes"], "Geometria", "B", `Dados los puntos $A(0,0,1)$, $B(1,1,0)$, $C(1,0,-1)$, $D(1,1,2)$, se pide:
 
 a) (0.75 puntos) Comprobar que los puntos $A$, $B$, $C$ y $D$ no son coplanarios y hallar el volumen del tetraedro que forman.
 
 b) (0.75 puntos) Hallar el área del triángulo que forman los puntos $B$, $C$ y $D$ y el ángulo $\\widehat{B}$ del mismo.
 
 c) (1 punto) Hallar uno de los puntos $E$ del plano determinado por $A$, $B$ y $C$ tales que el cuadrilátero $ABCE$ sea un paralelogramo. Hallar el área de dicho paralelogramo.`),
-      preguntaModelo("M2024-4B", "Probabilidad", "B", `En un espacio muestral se tienen dos sucesos incompatibles, $A_1$ de probabilidad 0.5 y $A_2$ de probabilidad 0.3 y se considera $A_3=\\overline{A_1\\cup A_2}$. De cierto suceso $B$ de probabilidad 0.4 se sabe que es independiente de $A_1$ y que la probabilidad del suceso $A_3\\cap B$ es 0.1. Con estos datos se pide:
+      preguntaModelo("M2024-4B", ["algebra-de-sucesos-y-tipos-de-experimentos"], "Probabilidad", "B", `En un espacio muestral se tienen dos sucesos incompatibles, $A_1$ de probabilidad 0.5 y $A_2$ de probabilidad 0.3 y se considera $A_3=\\overline{A_1\\cup A_2}$. De cierto suceso $B$ de probabilidad 0.4 se sabe que es independiente de $A_1$ y que la probabilidad del suceso $A_3\\cap B$ es 0.1. Con estos datos se pide:
 
 a) (1 punto) Calcular la probabilidad de $A_3$.
 
@@ -215,8 +218,8 @@ b) (1.5 puntos) Decidir si $B$ y $A_2$ son independientes.`)
   {
     id: 104, año: 2023, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      preguntaModelo("M2023-1A", "Algebra", "A", `En la liga de fútbol profesional de Libertonia compiten veinte equipos. Cada equipo debe tener exactamente veinticinco jugadores de los que tres, y no más, han de ser porteros. Se sabe que la tercera parte del número de defensas coincide con la diferencia entre el número de centrocampistas y el número de delanteros. Por otro lado, la suma de la mitad del número de centrocampistas y el doble del número de delanteros excede en 25 unidades al número de defensas. Calcule el número de defensas, el número de centrocampistas y el número de delanteros que juegan en la liga.`),
-      preguntaModelo("M2023-2A", "Analisis", "A", `Para la función
+      preguntaModelo("M2023-1A", ["analisis-de-sistemas-por-el-metodo-de-gauss"], "Algebra", "A", `En la liga de fútbol profesional de Libertonia compiten veinte equipos. Cada equipo debe tener exactamente veinticinco jugadores de los que tres, y no más, han de ser porteros. Se sabe que la tercera parte del número de defensas coincide con la diferencia entre el número de centrocampistas y el número de delanteros. Por otro lado, la suma de la mitad del número de centrocampistas y el doble del número de delanteros excede en 25 unidades al número de defensas. Calcule el número de defensas, el número de centrocampistas y el número de delanteros que juegan en la liga.`),
+      preguntaModelo("M2023-2A", ["continuidad-y-tipos-de-discontinuidad","limites-infinitos","calculo-de-derivadas-y-regla-de-la-cadena","la-integral-definida-regla-de-barrow-y-areas"], "Analisis", "A", `Para la función
 
 $$f(x)=\\begin{cases}
 \\dfrac{e(x-1)}{e^x-e}, & x<1\\\\
@@ -230,21 +233,21 @@ a) (1 punto) Estudiar su continuidad en $\\mathbb{R}$ y determinar, en el caso d
 b) (0.5 puntos) Para la función $g(x)=(e^x-e)f(x)$, calcular el valor de $g'(0)$.
 
 c) (1 punto) Calcular $\\displaystyle\\int_1^5 \\sqrt{f(x)}\\,dx$.`),
-      preguntaModelo("M2023-3A", "Geometria", "A", `Un depósito en forma de paralelepípedo, de base cuadrada $ABCD$, apoya completamente su base sobre una rampa en un local, quedando una arista superior pegada al techo. Se considera un sistema de ejes, con los semiejes positivos en un rincón del local. La arista inferior paralela a la que se apoya en el techo y no en su misma cara, tiene vértices de coordenadas $A(1,1,1)$ y $B(1,3,1)$. La ecuación del plano que contiene a la rampa es $4x-3z=1$ y el vértice sobre el punto $A$ es $A'(1,1,6)$. Se pide:
+      preguntaModelo("M2023-3A", ["el-plano-en-el-espacio"], "Geometria", "A", `Un depósito en forma de paralelepípedo, de base cuadrada $ABCD$, apoya completamente su base sobre una rampa en un local, quedando una arista superior pegada al techo. Se considera un sistema de ejes, con los semiejes positivos en un rincón del local. La arista inferior paralela a la que se apoya en el techo y no en su misma cara, tiene vértices de coordenadas $A(1,1,1)$ y $B(1,3,1)$. La ecuación del plano que contiene a la rampa es $4x-3z=1$ y el vértice sobre el punto $A$ es $A'(1,1,6)$. Se pide:
 
 a) (0.5 puntos) Calcular una ecuación del plano que contiene a las aristas $AB$ y $AA'$.
 
 b) (1 punto) Calcular los otros dos vértices, $C$ y $D$, de la base.
 
 c) (1 punto) Calcular el volumen del depósito.`),
-      preguntaModelo("M2023-4A", "Probabilidad", "A", `Una empresa complementa el sueldo de sus empleados según la consecución de ciertos objetivos valorados en función de una puntuación que sigue una distribución normal $N(100,35)$. Se pide:
+      preguntaModelo("M2023-4A", ["distribucion-normal-y-tipificacion"], "Probabilidad", "A", `Una empresa complementa el sueldo de sus empleados según la consecución de ciertos objetivos valorados en función de una puntuación que sigue una distribución normal $N(100,35)$. Se pide:
 
 a) (0.75 puntos) Calcular el porcentaje de empleados con una puntuación comprendida entre 100 y 140.
 
 b) (0.75 puntos) Hallar la probabilidad de que un trabajador obtenga una puntuación inferior a 95 puntos.
 
 c) (1 punto) Determinar la puntuación mínima necesaria para cobrar los objetivos si el 75.17% de la plantilla ha recibido dicho incentivo.`),
-      preguntaModelo("M2023-1B", "Algebra", "B", `Dadas las matrices reales
+      preguntaModelo("M2023-1B", ["propiedades-de-la-matriz-traspuesta-a-t","multiplicacion-de-matrices-a-b","matriz-inversa-por-gauss-jordan","potencias-de-matrices-a-n"], "Algebra", "B", `Dadas las matrices reales
 
 $$A=\\begin{pmatrix}m&-1&1\\\\-2&0&m\\end{pmatrix},\\quad B=\\begin{pmatrix}2m&-1\\\\1&0\\end{pmatrix},\\quad C=\\begin{pmatrix}0&-1\\\\-2&1\\\\3&-1\\end{pmatrix},$$
 
@@ -255,12 +258,12 @@ a) (0.75 puntos) Calcular, si existe, el valor de $m$ para el cual se verifica q
 b) (1 punto) Calcular, si existen, los valores de $m$ para los que existe la inversa de $AC$ y calcular para $m=0$ la inversa de $AC$.
 
 c) (0.75 puntos) Calcular, si existe, el valor de $m$ para el cual se cumple que $B^2=B-I$, siendo $I$ la matriz identidad de orden 2.`),
-      preguntaModelo("M2023-2B", "Analisis", "B", `Un ayuntamiento ha dividido en parcelas parte del terreno municipal no urbanizable y lo ha cedido a los vecinos para su cultivo. Uno de los vecinos ha decidido que en su parcela asignada utilizará como huerto una zona rectangular de 72 metros cuadrados, dejando el resto para plantar frutales e instalar una caseta donde guardar las herramientas necesarias. La zona de huerto estará dividida en dos partes: la parte dedicada al cultivo de hortalizas será un rectángulo interior separado de los lados que delimitan el huerto. La separación será de medio metro entre cada uno de los lados de mayor longitud y un metro entre cada uno de los lados de menor longitud. La franja que delimita la zona de hortalizas la dedicará al cultivo de flores y plantas aromáticas.
+      preguntaModelo("M2023-2B", ["la-integral-definida-regla-de-barrow-y-areas"], "Analisis", "B", `Un ayuntamiento ha dividido en parcelas parte del terreno municipal no urbanizable y lo ha cedido a los vecinos para su cultivo. Uno de los vecinos ha decidido que en su parcela asignada utilizará como huerto una zona rectangular de 72 metros cuadrados, dejando el resto para plantar frutales e instalar una caseta donde guardar las herramientas necesarias. La zona de huerto estará dividida en dos partes: la parte dedicada al cultivo de hortalizas será un rectángulo interior separado de los lados que delimitan el huerto. La separación será de medio metro entre cada uno de los lados de mayor longitud y un metro entre cada uno de los lados de menor longitud. La franja que delimita la zona de hortalizas la dedicará al cultivo de flores y plantas aromáticas.
 
 a) (2 puntos) Calcule las dimensiones del huerto para que el área de la zona para el cultivo de hortalizas sea máxima.
 
 b) (0.5 puntos) Calcule el área de la zona de cultivo de hortalizas.`),
-      preguntaModelo("M2023-3B", "Geometria", "B", `Se consideran las siguientes rectas:
+      preguntaModelo("M2023-3B", ["posiciones-relativas-rectas-y-planos","angulos-en-el-espacio","proyecciones-ortogonales-y-puntos-simetricos"], "Geometria", "B", `Se consideran las siguientes rectas:
 
 - $r$, la recta que pasa por el punto $P(1,1,2)$ y tiene como vector director $\\vec{u}=(0,1,2)$.
 - $s$, la recta de ecuaciones $$s\\equiv\\begin{cases}x+y-4=0\\\\x-2z+2=0\\end{cases}$$.
@@ -271,7 +274,7 @@ a) (0.75 puntos) Estudie la posición relativa de $r$ y $s$.
 b) (0.75 puntos) Calcule el ángulo que forman las rectas $r$ y $t$.
 
 c) (1 punto) Calcule la proyección ortogonal del punto $P$ sobre la recta $s$.`),
-      preguntaModelo("M2023-4B", "Probabilidad", "B", `Sabiendo que $P(A\\cup B)=\\dfrac{4}{5}$, $P(\\overline{A})=\\dfrac{9}{20}$ y $P(\\overline{B})=\\dfrac{7}{20}$, se pide:
+      preguntaModelo("M2023-4B", ["algebra-de-sucesos-y-tipos-de-experimentos"], "Probabilidad", "B", `Sabiendo que $P(A\\cup B)=\\dfrac{4}{5}$, $P(\\overline{A})=\\dfrac{9}{20}$ y $P(\\overline{B})=\\dfrac{7}{20}$, se pide:
 
 a) (0.75 puntos) Calcular razonadamente $P(\\overline{A}\\cap\\overline{B})$.
 
@@ -287,8 +290,8 @@ Nota: $\\overline{A}$ y $A-B$ denotan, respectivamente, el suceso contrario de $
   {
     id: 105, año: 2022, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      preguntaModelo("M2022-1A", "Algebra", "A", `En una academia de idiomas se imparten clases de inglés, francés y alemán. Cada alumno está matriculado en un único idioma. El número de alumnos matriculados en inglés representa el 60% del total de alumnos de la academia. Si diez alumnos de francés se hubiesen matriculado en alemán, ambos idiomas tendrían el mismo número de alumnos. Además, la cuarta parte de los alumnos de inglés excede en ocho al doble de la diferencia entre los alumnos matriculados en francés y alemán. Calcule el número de alumnos matriculados en cada idioma.`),
-      preguntaModelo("M2022-2A", "Analisis", "A", `Sea la función
+      preguntaModelo("M2022-1A", ["analisis-de-sistemas-por-el-metodo-de-gauss"], "Algebra", "A", `En una academia de idiomas se imparten clases de inglés, francés y alemán. Cada alumno está matriculado en un único idioma. El número de alumnos matriculados en inglés representa el 60% del total de alumnos de la academia. Si diez alumnos de francés se hubiesen matriculado en alemán, ambos idiomas tendrían el mismo número de alumnos. Además, la cuarta parte de los alumnos de inglés excede en ocho al doble de la diferencia entre los alumnos matriculados en francés y alemán. Calcule el número de alumnos matriculados en cada idioma.`),
+      preguntaModelo("M2022-2A", ["continuidad-y-tipos-de-discontinuidad","informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], "Analisis", "A", `Sea la función
 
 $$f(x)=\\begin{cases}
 1-\\dfrac{\\sin x}{x}, & x<0\\\\
@@ -300,19 +303,19 @@ a) (0.75 puntos) Estudie la continuidad y la derivabilidad de $f$ en $x=0$.
 b) (1 punto) Determine los extremos relativos de $f(x)$ en $(0,\\infty)$.
 
 c) (0.75 puntos) Calcule $\\displaystyle\\int_0^2 f(x)\\,dx$.`),
-      preguntaModelo("M2022-3A", "Geometria", "A", `Una sonda planetaria se lanza desde el punto $P(1,0,2)$ y sigue una trayectoria rectilínea que pasa por el punto $Q(3,1,0)$ antes de impactar en una zona plana de la superficie del planeta, que tiene por ecuación $\\pi\\equiv 2x-y+2z+5=0$. Se pide:
+      preguntaModelo("M2022-3A", ["posiciones-relativas-rectas-y-planos","angulos-en-el-espacio","distancias-en-el-espacio"], "Geometria", "A", `Una sonda planetaria se lanza desde el punto $P(1,0,2)$ y sigue una trayectoria rectilínea que pasa por el punto $Q(3,1,0)$ antes de impactar en una zona plana de la superficie del planeta, que tiene por ecuación $\\pi\\equiv 2x-y+2z+5=0$. Se pide:
 
 a) (1.5 puntos) Calcular las coordenadas del punto de impacto y el coseno del ángulo entre la trayectoria de la sonda y el vector normal al plano $\\pi$.
 
 b) (1 punto) Sabiendo que la alarma de proximidad se dispara antes de llegar a la superficie cuando la distancia al planeta es 1, determinar en qué punto estará la sonda al sonar la alarma.`),
-      preguntaModelo("M2022-4A", "Probabilidad", "A", `Una urna contiene 7 bolas blancas y 12 bolas negras. Se extrae al azar una bola de la urna y se sustituye por dos del otro color. A continuación, se extrae una segunda bola de la urna. Se pide:
+      preguntaModelo("M2022-4A", ["teoremas-de-la-probabilidad-total-y-de-bayes"], "Probabilidad", "A", `Una urna contiene 7 bolas blancas y 12 bolas negras. Se extrae al azar una bola de la urna y se sustituye por dos del otro color. A continuación, se extrae una segunda bola de la urna. Se pide:
 
 a) (1 punto) Calcular la probabilidad de que la segunda bola extraída sea blanca.
 
 b) (0.75 puntos) Calcular la probabilidad de que la segunda bola extraída sea de distinto color que la primera.
 
 c) (0.75 puntos) Calcular la probabilidad de que la primera bola extraída haya sido negra, sabiendo que la segunda bola fue blanca.`),
-      preguntaModelo("M2022-1B", "Algebra", "B", `Sean las matrices
+      preguntaModelo("M2022-1B", ["matriz-inversa-por-gauss-jordan","analisis-de-sistemas-por-el-metodo-de-gauss"], "Algebra", "B", `Sean las matrices
 
 $$A=\\begin{pmatrix}0&1&a\\\\1&0&a\\\\a&1&0\\end{pmatrix},\\qquad B=\\begin{pmatrix}3\\\\-1\\\\-2\\end{pmatrix}.$$
 
@@ -323,19 +326,19 @@ a) (0.5 puntos) Calcular los valores de $a$ para los que la matriz $A$ no tiene 
 b) (1 punto) Para $a=1$, calcular la inversa de la matriz $A$.
 
 c) (1 punto) Para $a=2$, resolver el sistema $A\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}=B$.`),
-      preguntaModelo("M2022-2B", "Analisis", "B", `Sea $f(x)=x+x^2$. Se pide:
+      preguntaModelo("M2022-2B", ["concepto-de-derivada-e-interpretacion-geometrica","la-integral-definida-regla-de-barrow-y-areas"], "Analisis", "B", `Sea $f(x)=x+x^2$. Se pide:
 
 a) (1 punto) Hallar el área de la región acotada que está limitada por la gráfica de $f$ y la recta $y=2x$.
 
 b) (1.5 puntos) Una partícula en movimiento parte del origen y sigue la trayectoria determinada por la gráfica de $f$. En el punto $(1,f(1))$ la partícula sale despedida en la dirección de la recta tangente. Determinar en qué punto choca con la recta vertical $x=2$.`),
-      preguntaModelo("M2022-3B", "Geometria", "B", `Dados los planos $\\pi_1\\equiv x-2y+3z=6$, $\\pi_2\\equiv 3x-z=2$ y el punto $A(1,7,1)$, se pide:
+      preguntaModelo("M2022-3B", ["posiciones-relativas-rectas-y-planos","areas-y-volumenes","proyecciones-ortogonales-y-puntos-simetricos"], "Geometria", "B", `Dados los planos $\\pi_1\\equiv x-2y+3z=6$, $\\pi_2\\equiv 3x-z=2$ y el punto $A(1,7,1)$, se pide:
 
 a) (0.5 puntos) Comprobar que $\\pi_1$ y $\\pi_2$ son perpendiculares.
 
 b) (1 punto) Calcular el volumen de un cubo que tenga una cara en el plano $\\pi_1$, otra cara en el plano $\\pi_2$, y un vértice en el punto $A$.
 
 c) (1 punto) Calcular el punto simétrico de $A$ respecto de $\\pi_1$.`),
-      preguntaModelo("M2022-4B", "Probabilidad", "B", `Dos características genéticas $A$ y $B$ aparecen en una especie animal con probabilidades respectivas de 0.2 y 0.3. Sabiendo que la aparición de una de ellas es independiente de la aparición de la otra, se pide calcular:
+      preguntaModelo("M2022-4B", ["teoremas-de-la-probabilidad-total-y-de-bayes"], "Probabilidad", "B", `Dos características genéticas $A$ y $B$ aparecen en una especie animal con probabilidades respectivas de 0.2 y 0.3. Sabiendo que la aparición de una de ellas es independiente de la aparición de la otra, se pide calcular:
 
 a) (0.5 puntos) La probabilidad de que un individuo elegido al azar presente ambas características.
 
@@ -349,7 +352,7 @@ d) (0.75 puntos) La probabilidad de que, si elegimos al azar 10 individuos, exac
   {
     id: 106, año: 2021, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      preguntaModelo("M2021-1A", "Algebra", "A", `Dadas las matrices
+      preguntaModelo("M2021-1A", ["matriz-inversa-por-gauss-jordan","potencias-de-matrices-a-n"], "Algebra", "A", `Dadas las matrices
 
 $$A=\\begin{pmatrix}0&1&x\\\\1&0&x-1\\\\x+1&0&3\\end{pmatrix},\\qquad B=\\begin{pmatrix}0&\\frac{1}{3}&-\\frac{1}{3}\\\\0&1&0\\\\1&\\frac{2}{3}&-\\frac{2}{3}\\end{pmatrix},$$
 
@@ -360,7 +363,7 @@ a) (0.5 puntos) Determinar los valores de $x\\in\\mathbb{R}$ para los cuales $A$
 b) (0.75 puntos) Para $x=-1$, calcular la inversa de $A$.
 
 c) (1.25 puntos) Para $x=1$, calcular $(AB^t)^{2020}$.`),
-      preguntaModelo("M2021-2A", "Analisis", "A", `Sea la función
+      preguntaModelo("M2021-2A", ["limites-infinitos","continuidad-y-tipos-de-discontinuidad","concepto-de-derivada-e-interpretacion-geometrica"], "Analisis", "A", `Sea la función
 
 $$f(x)=\\begin{cases}
 \\dfrac{2}{x+1}, & x\\leq 1\\\\
@@ -372,21 +375,21 @@ a) (0.5 puntos) Estudia la continuidad de $f$.
 b) (1 punto) Halla las asíntotas de $f$.
 
 c) (1 punto) Determina el valor de $x_0<1$ que verifica que la recta tangente a la gráfica de $f$ en el punto $(x_0,f(x_0))$ tiene pendiente $-\\dfrac{1}{2}$. Escribe la ecuación de dicha recta tangente.`),
-      preguntaModelo("M2021-3A", "Geometria", "A", `Se consideran los puntos $A(3,1,2)$, $B(0,3,4)$ y $P(-1,1,0)$. Se pide:
+      preguntaModelo("M2021-3A", ["posiciones-relativas-rectas-y-planos","angulos-en-el-espacio"], "Geometria", "A", `Se consideran los puntos $A(3,1,2)$, $B(0,3,4)$ y $P(-1,1,0)$. Se pide:
 
 a) (0.75 puntos) Determinar las coordenadas de un punto $Q$ sabiendo que los vectores $\\overrightarrow{AB}$ y $\\overrightarrow{PQ}$ son linealmente dependientes, tienen sentidos opuestos y tienen el mismo módulo.
 
 b) (1 punto) Determinar las coordenadas del punto de intersección de la recta $r$ que contiene a $A$ y $P$, y de la recta $s$ que contiene a $B$ y al punto $C(2,-1,-2)$.
 
 c) (0.75 puntos) Calcular el coseno del ángulo formado por $\\overrightarrow{PA}$ y $\\overrightarrow{PB}$.`),
-      preguntaModelo("M2021-4A", "Probabilidad", "A", `En un instituto uno de cada cuatro alumnos practica baloncesto. Se eligen 6 alumnos al azar y se considera la variable aleatoria $X$ que representa el número de estudiantes entre estos 6 que practican baloncesto. Se pide:
+      preguntaModelo("M2021-4A", ["distribucion-binomial-variable-discreta"], "Probabilidad", "A", `En un instituto uno de cada cuatro alumnos practica baloncesto. Se eligen 6 alumnos al azar y se considera la variable aleatoria $X$ que representa el número de estudiantes entre estos 6 que practican baloncesto. Se pide:
 
 a) (1 punto) Identificar la distribución de la variable aleatoria $X$ y calcular $P(X=0)$.
 
 b) (0.75 puntos) Calcular la probabilidad de que al menos 5 de los 6 elegidos practiquen baloncesto.
 
 c) (0.75 puntos) Calcular la probabilidad de que al menos 1 de los 6 practique baloncesto.`),
-      preguntaModelo("M2021-1B", "Algebra", "B", `Dados la matriz
+      preguntaModelo("M2021-1B", ["propiedades-de-la-matriz-traspuesta-a-t","teorema-de-rouche-frobenius-discusion","matriz-inversa-por-gauss-jordan"], "Algebra", "B", `Dados la matriz
 
 $$A=\\begin{pmatrix}0&1&-1\\\\a&-3&a\\\\a-1&-3&a\\end{pmatrix}$$
 
@@ -397,14 +400,14 @@ a) (0.5 puntos) $B^t(A+A^t)B=6$.
 b) (1 punto) El sistema $AX=B$ no tiene solución.
 
 c) (1 punto) $A=A^{-1}$.`),
-      preguntaModelo("M2021-2B", "Analisis", "B", `Dada la función $f(x)=x^6-4x^4$, se pide:
+      preguntaModelo("M2021-2B", ["informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], "Analisis", "B", `Dada la función $f(x)=x^6-4x^4$, se pide:
 
 a) (0.5 puntos) Estudiar sus intervalos de crecimiento y decrecimiento.
 
 b) (1 punto) Encontrar sus máximos y mínimos locales, y determinar si son o no globales.
 
 c) (1 punto) Hallar el área de la región acotada limitada por el eje $y=0$ y la gráfica de $f$.`),
-      preguntaModelo("M2021-3B", "Geometria", "B", `Dadas las rectas
+      preguntaModelo("M2021-3B", ["posiciones-relativas-rectas-y-planos","distancias-en-el-espacio","la-recta-en-el-espacio-ecuaciones"], "Geometria", "B", `Dadas las rectas
 
 $$r:\\begin{cases}x+2z=1\\\\y+z=2\\end{cases},\\qquad s:\\begin{cases}x=-3+2\\lambda\\\\y=2-\\lambda\\\\z=1+\\lambda\\end{cases}$$
 
@@ -413,7 +416,7 @@ a) (0.75 puntos) Hallar la distancia del origen a la recta $s$.
 b) (0.5 puntos) Determinar la posición relativa de $r$ y $s$.
 
 c) (1.25 puntos) Escribir la ecuación de una recta perpendicular común a ambas rectas.`),
-      preguntaModelo("M2021-4B", "Probabilidad", "B", `Una médico experto diagnostica posibles enfermos de una dolencia, fallando en reconocerla en el 5% de los casos que la padecen y diagnosticándola equivocadamente en el 10% de los sanos. Las estadísticas muestran que dicha enfermedad es padecida por 50 de cada diez mil personas. Si una persona al azar se somete a reconocimiento, calcule la probabilidad de:
+      preguntaModelo("M2021-4B", ["teoremas-de-la-probabilidad-total-y-de-bayes"], "Probabilidad", "B", `Una médico experto diagnostica posibles enfermos de una dolencia, fallando en reconocerla en el 5% de los casos que la padecen y diagnosticándola equivocadamente en el 10% de los sanos. Las estadísticas muestran que dicha enfermedad es padecida por 50 de cada diez mil personas. Si una persona al azar se somete a reconocimiento, calcule la probabilidad de:
 
 a) (0.5 puntos) Que sea diagnosticada como enferma.
 
@@ -427,7 +430,7 @@ d) (0.5 puntos) Que sea mal diagnosticada.`)
   {
     id: 107, año: 2020, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      preguntaModelo("M2020-1A", "Algebra", "A", `Se quiere construir un invernadero para el cultivo de semillas con ambiente controlado de temperatura, humedad y composición del aire. El aire que hay que suministrar debe contener un 78% de nitrógeno, un 21% de oxígeno y un 1% de argón.
+      preguntaModelo("M2020-1A", ["analisis-de-sistemas-por-el-metodo-de-gauss"], "Algebra", "A", `Se quiere construir un invernadero para el cultivo de semillas con ambiente controlado de temperatura, humedad y composición del aire. El aire que hay que suministrar debe contener un 78% de nitrógeno, un 21% de oxígeno y un 1% de argón.
 
 a) (0.5 puntos) Si la capacidad del invernadero es 2000 litros, determine cuántos litros de nitrógeno, cuántos de oxígeno y cuántos de argón son necesarios.
 
@@ -440,14 +443,14 @@ b) (2 puntos) Para suministrar el aire se dispone de tres mezclas gaseosas $A$, 
 | C | 60% | 40% | 0% |
 
 Obtenga la cantidad que hay que utilizar de cada mezcla para llenar el invernadero de aire con la composición requerida.`),
-      preguntaModelo("M2020-2A", "Analisis", "A", `Dada la función $f(x)=e^{3x-2}$, se pide:
+      preguntaModelo("M2020-2A", ["concepto-de-derivada-e-interpretacion-geometrica","indeterminacion-0-0","la-integral-definida-regla-de-barrow-y-areas"], "Analisis", "A", `Dada la función $f(x)=e^{3x-2}$, se pide:
 
 a) (1 punto) Determinar el punto en el que la tangente a la curva $y=f(x)$ tiene pendiente igual a $\\dfrac{3}{e}$ y escribir la ecuación de esta recta tangente.
 
 b) (0.5 puntos) Calcular $\\displaystyle\\lim_{x\\to 2/3}\\dfrac{1-f(x)}{6x-4}$.
 
 c) (1 punto) Calcular el área de la superficie acotada por la curva $y=f(x)$ y las rectas $x=0$, $y=1$.`),
-      preguntaModelo("M2020-3A", "Geometria", "A", `Dadas las rectas
+      preguntaModelo("M2020-3A", ["posiciones-relativas-rectas-y-planos","distancias-en-el-espacio","el-plano-en-el-espacio"], "Geometria", "A", `Dadas las rectas
 
 $$r_1\\equiv\\begin{cases}x=z-1\\\\y=2-3z\\end{cases},\\qquad r_2\\equiv\\begin{cases}x=4+5z\\\\y=4z-3\\end{cases},$$
 
@@ -456,12 +459,12 @@ se pide:
 a) (1.5 puntos) Estudiar su posición relativa y hallar la distancia entre ellas.
 
 b) (1 punto) Hallar el punto de corte entre la recta $r_2$ y el plano que contiene a $r_1$ y pasa por el origen de coordenadas.`),
-      preguntaModelo("M2020-4A", "Probabilidad", "A", `Dados dos sucesos $A$ y $B$, se conocen las siguientes probabilidades: $P(A\\cup B)=0.55$, $P(\\overline{A}\\cup\\overline{B})=0.90$ y $P(B\\mid A)=0.25$. Se pide:
+      preguntaModelo("M2020-4A", ["teoremas-de-la-probabilidad-total-y-de-bayes"], "Probabilidad", "A", `Dados dos sucesos $A$ y $B$, se conocen las siguientes probabilidades: $P(A\\cup B)=0.55$, $P(\\overline{A}\\cup\\overline{B})=0.90$ y $P(B\\mid A)=0.25$. Se pide:
 
 a) (2 puntos) Calcular $P(A\\cap B)$, $P(A)$, $P(B)$ y $P(B\\mid\\overline{A})$.
 
 b) (0.5 puntos) Deducir de manera razonada si los sucesos $A$ y $B$ son independientes.`),
-      preguntaModelo("M2020-1B", "Algebra", "B", `Dadas las matrices
+      preguntaModelo("M2020-1B", ["rango-de-una-matriz-metodo-de-gauss","teorema-de-rouche-frobenius-discusion","analisis-de-sistemas-por-el-metodo-de-gauss"], "Algebra", "B", `Dadas las matrices
 
 $$A=\\begin{pmatrix}1&2+t\\\\5&10+3t\\\\-1&-2\\end{pmatrix},\\qquad X=\\begin{pmatrix}x\\\\y\\end{pmatrix},\\qquad B=\\begin{pmatrix}3\\\\9\\\\3t+3\\end{pmatrix},$$
 
@@ -470,14 +473,14 @@ se pide:
 a) (1 punto) Calcular el rango de la matriz $A$ en función del parámetro $t$.
 
 b) (1.5 puntos) Resolver el sistema $AX=B$, para los valores de $t$ que lo hagan compatible y determinado.`),
-      preguntaModelo("M2020-2B", "Analisis", "B", `Dada la función $f(x)=\\dfrac{3}{x+1}$, se pide:
+      preguntaModelo("M2020-2B", ["concepto-de-derivada-e-interpretacion-geometrica","limites-infinitos","informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], "Analisis", "B", `Dada la función $f(x)=\\dfrac{3}{x+1}$, se pide:
 
 a) (1 punto) Calcular el área del triángulo formado por los ejes de coordenadas y la recta tangente a la curva $y=f(x)$ en $x=2$.
 
 b) (0.75 puntos) Determinar las posibles asíntotas de la curva $y=f(x)$ y estudiar los intervalos de crecimiento y decrecimiento de $f(x)$.
 
 c) (0.75 puntos) Calcular $\\displaystyle\\int_0^2 x f(x)\\,dx$.`),
-      preguntaModelo("M2020-3B", "Geometria", "B", `Dados los puntos $A(1,1,-2)$, $B(3,-1,4)$ y la recta
+      preguntaModelo("M2020-3B", ["posiciones-relativas-rectas-y-planos","areas-y-volumenes","el-plano-en-el-espacio","angulos-en-el-espacio"], "Geometria", "B", `Dados los puntos $A(1,1,-2)$, $B(3,-1,4)$ y la recta
 
 $$r\\equiv\\begin{cases}x=1+3\\lambda\\\\y=-2+5\\lambda\\\\z=3\\end{cases}$$
 
@@ -488,7 +491,7 @@ a) (1.5 puntos) Calcular el área del triángulo $OPQ$, siendo $O(0,0,0)$, $P$ e
 b) (0.5 puntos) Hallar la ecuación del plano que pasa por $A$ y es perpendicular a la recta $r$.
 
 c) (0.5 puntos) Calcular el coseno del ángulo que forman la recta $r$ y la recta que pasa por $A$ y $B$.`),
-      preguntaModelo("M2020-4B", "Probabilidad", "B", `En cierta ciudad se estima que la temperatura máxima de cada día, en el mes de junio, sigue una distribución normal de media $30^{\\circ}\\mathrm{C}$ y varianza 25. Se pide:
+      preguntaModelo("M2020-4B", ["distribucion-normal-y-tipificacion"], "Probabilidad", "B", `En cierta ciudad se estima que la temperatura máxima de cada día, en el mes de junio, sigue una distribución normal de media $30^{\\circ}\\mathrm{C}$ y varianza 25. Se pide:
 
 a) (0.75 puntos) Calcular la probabilidad de que un día cualquiera del mes la temperatura máxima esté entre $28^{\\circ}\\mathrm{C}$ y $32^{\\circ}\\mathrm{C}$.
 
@@ -500,7 +503,7 @@ c) (0.75 puntos) Determinar la temperatura máxima alcanzada el día 10 de junio
   {
     id: 108, año: 2019, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      preguntaModelo("M2019-1A", "Algebra", "A", `Para cada uno de los siguientes apartados, proponga un ejemplo de matriz cuadrada $A$, de dimensión $3\\times 3$, con todos sus números distintos de cero y con sus tres filas y columnas diferentes, que cumpla la condición pedida.
+      preguntaModelo("M2019-1A", ["determinantes-de-orden-2-y-3-regla-de-sarrus","propiedades-de-la-matriz-traspuesta-a-t","multiplicacion-de-matrices-a-b"], "Algebra", "A", `Para cada uno de los siguientes apartados, proponga un ejemplo de matriz cuadrada $A$, de dimensión $3\\times 3$, con todos sus números distintos de cero y con sus tres filas y columnas diferentes, que cumpla la condición pedida.
 
 a) (0.5 puntos) El determinante de $A$ vale 0.
 
@@ -509,7 +512,7 @@ b) (0.5 puntos) El determinante de $A$ vale 1.
 c) (0.5 puntos) La matriz $A$ coincide con su traspuesta.
 
 d) (1 punto) Para una cierta matriz cuadrada $C$, distinta de la matriz nula y de la identidad, se verifica que $A\\cdot C=C\\cdot A$. (Debe proponer ejemplos concretos para las dos matrices $A$ y $C$.)`),
-      preguntaModelo("M2019-2A", "Analisis", "A", `La contaminación por dióxido de nitrógeno, $NO_2$, en cierta estación de medición de una ciudad, durante el pasado mes de abril, se puede modelar por la función
+      preguntaModelo("M2019-2A", ["informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], "Analisis", "A", `La contaminación por dióxido de nitrógeno, $NO_2$, en cierta estación de medición de una ciudad, durante el pasado mes de abril, se puede modelar por la función
 
 $$c(t)=80-6t+\\dfrac{23t^2}{20}-\\dfrac{t^3}{30}\\ \\mathrm{mg/m^3},$$
 
@@ -520,19 +523,19 @@ a) (0.5 puntos) ¿Qué nivel de $NO_2$ había a las 12 horas del día 10 de abri
 b) (1.25 puntos) ¿En qué momento se alcanzó el máximo nivel de $NO_2$?, ¿cuál fue ese nivel máximo?
 
 c) (0.75 puntos) Calcule, mediante $\\displaystyle\\dfrac{1}{30}\\int_0^{30} c(t)\\,dt$, el nivel promedio del mes.`),
-      preguntaModelo("M2019-3A", "Geometria", "A", `Dados los puntos $A(1,2,-3)$, $B(1,5,0)$, $C(5,6,-1)$ y $D(4,-1,3)$, se pide:
+      preguntaModelo("M2019-3A", ["el-plano-en-el-espacio","distancias-en-el-espacio","areas-y-volumenes"], "Geometria", "A", `Dados los puntos $A(1,2,-3)$, $B(1,5,0)$, $C(5,6,-1)$ y $D(4,-1,3)$, se pide:
 
 a) (1.5 puntos) Calcular el plano $\\pi$ que contiene a los puntos $A$, $B$, $C$ y la distancia del punto $D$ a dicho plano.
 
 b) (0.5 puntos) Calcular el volumen del tetraedro definido por los cuatro puntos dados.
 
 c) (0.5 puntos) Calcular el área del triángulo definido por $A$, $B$ y $C$.`),
-      preguntaModelo("M2019-4A", "Probabilidad", "A", `El examen de oposición a la Administración Local de cierta ciudad consta de 300 preguntas, con respuesta verdadero o falso. Un opositor responde al azar todas las preguntas. Se considera la variable aleatoria $X$ = “número de respuestas acertadas” y se pide:
+      preguntaModelo("M2019-4A", ["aproximacion-de-la-binomial-a-la-normal-moivre-gauss"], "Probabilidad", "A", `El examen de oposición a la Administración Local de cierta ciudad consta de 300 preguntas, con respuesta verdadero o falso. Un opositor responde al azar todas las preguntas. Se considera la variable aleatoria $X$ = “número de respuestas acertadas” y se pide:
 
 a) (1.5 puntos) Justificar que la variable $X$ se puede aproximar por una normal y obtener los parámetros correspondientes.
 
 b) (1 punto) Utilizando la aproximación por la normal, hallar la probabilidad de que el opositor acierte a lo sumo 130 preguntas y la probabilidad de que acierte exactamente 160 preguntas.`),
-      preguntaModelo("M2019-1B", "Algebra", "B", `Dado el sistema de ecuaciones
+      preguntaModelo("M2019-1B", ["teorema-de-rouche-frobenius-discusion","analisis-de-sistemas-por-el-metodo-de-gauss"], "Algebra", "B", `Dado el sistema de ecuaciones
 
 $$\\begin{cases}
 x-my-z=0\\\\
@@ -545,7 +548,7 @@ se pide:
 a) (2 puntos) Discutir el sistema en función de los valores del parámetro $m$.
 
 b) (0.5 puntos) Resolver el sistema en el caso $m=6$.`),
-      preguntaModelo("M2019-2B", "Analisis", "B", `a) (1 punto) A partir de la gráfica adjunta de la función $f$, determine los valores de $f'(-1)$, $\\displaystyle\\lim_{x\\to -2^+}f(x)$, $\\displaystyle\\lim_{x\\to -2^-}f(x)$ y $\\displaystyle\\lim_{x\\to 0}f(x)$.
+      preguntaModelo("M2019-2B", ["definicion-de-limite-y-limites-laterales","concepto-de-derivada-e-interpretacion-geometrica","la-integral-definida-regla-de-barrow-y-areas"], "Analisis", "B", `a) (1 punto) A partir de la gráfica adjunta de la función $f$, determine los valores de $f'(-1)$, $\\displaystyle\\lim_{x\\to -2^+}f(x)$, $\\displaystyle\\lim_{x\\to -2^-}f(x)$ y $\\displaystyle\\lim_{x\\to 0}f(x)$.
 
 b) (1.5 puntos) Calcule $\\displaystyle\\int_{-3}^{\\pi} g(x)\\,dx$, donde
 
@@ -553,7 +556,7 @@ $$g(x)=\\begin{cases}
 x^2+2x+1, & -3\\leq x\\leq 0\\\\
 1+\\sin x, & 0<x\\leq 4
 \\end{cases}.$$`, 2.5, ["/mates-imgs/madrid/2019/modelo/2019-modelo-2b-grafica.png"]),
-      preguntaModelo("M2019-3B", "Geometria", "B", `Dadas las rectas
+      preguntaModelo("M2019-3B", ["posiciones-relativas-rectas-y-planos"], "Geometria", "B", `Dadas las rectas
 
 $$r\\equiv\\begin{cases}x=2+\\lambda\\\\y=3+\\lambda\\\\z=1-\\lambda\\end{cases},\\qquad s\\equiv\\begin{cases}x-y=2\\\\y+z=1\\end{cases},$$
 
@@ -564,7 +567,7 @@ a) (1 punto) Determinar la posición relativa de $r$ y $s$.
 b) (1 punto) Obtener un plano que contenga a las dos rectas.
 
 c) (0.5 puntos) Dado el punto $A(3,1,0)$, de la recta $s$, obtener un punto $B$, de la recta $r$, de modo que el vector $\\overrightarrow{AB}$ sea perpendicular a la recta $r$.`),
-      preguntaModelo("M2019-4B", "Probabilidad", "B", `El grupo de WhatsApp, formado por los alumnos de una escuela de idiomas, está compuesto por un 60% de mujeres y el resto varones. Se sabe que el 30% del grupo estudia alemán y que la cuarta parte de las mujeres estudia alemán. Se recibe un mensaje en el grupo. Se pide:
+      preguntaModelo("M2019-4B", ["teoremas-de-la-probabilidad-total-y-de-bayes"], "Probabilidad", "B", `El grupo de WhatsApp, formado por los alumnos de una escuela de idiomas, está compuesto por un 60% de mujeres y el resto varones. Se sabe que el 30% del grupo estudia alemán y que la cuarta parte de las mujeres estudia alemán. Se recibe un mensaje en el grupo. Se pide:
 
 a) (1.25 puntos) Calcular la probabilidad de que lo haya enviado una mujer, si se sabe que el o la remitente estudia alemán.
 
@@ -574,7 +577,7 @@ b) (1.25 puntos) Si en el mensaje no hay ninguna información sobre el sexo y es
   {
     id: 109, año: 2018, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      preguntaModelo("M2018-1A", "Algebra", "A", `Dadas las matrices
+      preguntaModelo("M2018-1A", ["matriz-inversa-por-gauss-jordan"], "Algebra", "A", `Dadas las matrices
 
 $$A=\\begin{pmatrix}0&1&1\\\\0&3&0\\\\0&-1&3\\end{pmatrix},\\qquad I=\\begin{pmatrix}1&0&0\\\\0&1&0\\\\0&0&1\\end{pmatrix},$$
 
@@ -583,14 +586,14 @@ se pide:
 a) (1.5 puntos) Obtener los valores de $m$ para los que la matriz $A-mI$ admite inversa.
 
 b) (1 punto) Calcular la matriz inversa de $A-2I$.`),
-      preguntaModelo("M2018-2A", "Analisis", "A", `Dada la función $f(x)=2\\cos(x)+|x-1|$, se pide:
+      preguntaModelo("M2018-2A", ["concepto-de-derivada-e-interpretacion-geometrica"], "Analisis", "A", `Dada la función $f(x)=2\\cos(x)+|x-1|$, se pide:
 
 a) (0.5 puntos) Determinar el valor de $f'(0)$.
 
 b) (1 punto) Calcular la ecuación de la recta tangente a la curva $y=f(x)$ en el punto de abscisa $x=\\pi$.
 
 c) (1 punto) Hallar el área del recinto plano limitado por la curva $y=f(x)$, el eje OX y las rectas $x=\\pi$ y $x=2\\pi$.`),
-      preguntaModelo("M2018-3A", "Geometria", "A", `Dados los planos $\\pi_1\\equiv 3x+y+2z-1=0$, $\\pi_2\\equiv 2x-y+3z-1=0$ y la recta
+      preguntaModelo("M2018-3A", ["distancias-en-el-espacio","posiciones-relativas-rectas-y-planos","areas-y-volumenes"], "Geometria", "A", `Dados los planos $\\pi_1\\equiv 3x+y+2z-1=0$, $\\pi_2\\equiv 2x-y+3z-1=0$ y la recta
 
 $$r\\equiv\\begin{cases}
 x=1-2t\\\\
@@ -603,14 +606,14 @@ se pide:
 a) (1.5 puntos) Hallar los puntos de la recta $r$ equidistantes de $\\pi_1$ y $\\pi_2$.
 
 b) (1 punto) Hallar el área del triángulo que forma el punto $P(-2,3,2)$ con los puntos de intersección de $r$ con $\\pi_1$ y $\\pi_2$.`),
-      preguntaModelo("M2018-4A", "Probabilidad", "A", `Sabiendo que el peso de los estudiantes varones de segundo de bachillerato se puede aproximar por una variable aleatoria con distribución normal, de media 74 kg y desviación típica 6 kg, se pide:
+      preguntaModelo("M2018-4A", ["distribucion-normal-y-tipificacion"], "Probabilidad", "A", `Sabiendo que el peso de los estudiantes varones de segundo de bachillerato se puede aproximar por una variable aleatoria con distribución normal, de media 74 kg y desviación típica 6 kg, se pide:
 
 a) (1 punto) Determinar el porcentaje de estudiantes varones cuyo peso está comprendido entre los 68 y 80 kg.
 
 b) (0.5 puntos) Estimar cuántos de los 1500 estudiantes varones, que se han presentado a las pruebas de la EvAU en una cierta universidad, pesan más de 80 kg.
 
 c) (1 punto) Si se sabe que uno de estos estudiantes pesa más de 76 kg, ¿cuál es la probabilidad de que pese más de 86 kg?`),
-      preguntaModelo("M2018-1B", "Algebra", "B", `Dada la matriz $A$ y los vectores $X$ y $B$ siguientes:
+      preguntaModelo("M2018-1B", ["teorema-de-rouche-frobenius-discusion","analisis-de-sistemas-por-el-metodo-de-gauss"], "Algebra", "B", `Dada la matriz $A$ y los vectores $X$ y $B$ siguientes:
 
 $$A=\\begin{pmatrix}1&1&1\\\\m&1&m+1\\\\1&m&m\\end{pmatrix},\\qquad X=\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix},\\qquad B=\\begin{pmatrix}1\\\\1\\\\2+m\\end{pmatrix},$$
 
@@ -619,7 +622,7 @@ se pide:
 a) (2 puntos) Discutir el sistema lineal $AX=B$ en función de los valores del parámetro $m$.
 
 b) (0.5 puntos) Resolver el sistema lineal $AX=B$ cuando $m=-1$.`),
-      preguntaModelo("M2018-2B", "Analisis", "B", `El dibujo adjunto muestra la gráfica de la función
+      preguntaModelo("M2018-2B", ["la-integral-definida-regla-de-barrow-y-areas","informacion-extraida-de-la-1-y-2-derivada","limites-infinitos"], "Analisis", "B", `El dibujo adjunto muestra la gráfica de la función
 
 $$f(x)=(6-x)e^{\\frac{x-4}{3}}-1.$$
 
@@ -630,14 +633,14 @@ a) (1 punto) Calcular el área de la región sombreada.
 b) (1 punto) Determinar la abscisa del punto de la gráfica donde la recta tangente tiene pendiente máxima.
 
 c) (0.5 puntos) Efectuando los cálculos necesarios, obtener la ecuación de la asíntota que se muestra en el dibujo.`, 2.5, ["/mates-imgs/madrid/2018/modelo/2018-modelo-2b-grafica.png"]),
-      preguntaModelo("M2018-3B", "Geometria", "B", `Dados los planos $\\pi_1\\equiv x+y=0$, $\\pi_2\\equiv x=0$ y el punto $B(-1,1,1)$, se pide:
+      preguntaModelo("M2018-3B", ["la-recta-en-el-espacio-ecuaciones","angulos-en-el-espacio","proyecciones-ortogonales-y-puntos-simetricos"], "Geometria", "B", `Dados los planos $\\pi_1\\equiv x+y=0$, $\\pi_2\\equiv x=0$ y el punto $B(-1,1,1)$, se pide:
 
 a) (1 punto) Determinar el punto $B'$, simétrico de $B$ respecto del plano $\\pi_2$.
 
 b) (1 punto) Obtener una ecuación de la recta $r$, contenida en el plano $\\pi_1$, paralela al plano $\\pi_2$ y que pasa por el punto $B$.
 
 c) (0.5 puntos) Hallar el ángulo que forman los planos $\\pi_1$ y $\\pi_2$.`),
-      preguntaModelo("M2018-4B", "Probabilidad", "B", `En una bolsa hay 10 caramelos de fresa, 15 de menta y 5 de limón. Se extraen sucesivamente de la bolsa dos caramelos. Se pide:
+      preguntaModelo("M2018-4B", ["teoremas-de-la-probabilidad-total-y-de-bayes"], "Probabilidad", "B", `En una bolsa hay 10 caramelos de fresa, 15 de menta y 5 de limón. Se extraen sucesivamente de la bolsa dos caramelos. Se pide:
 
 a) (1 punto) Determinar la probabilidad de que el segundo de ellos sea de fresa.
 
@@ -653,10 +656,11 @@ export const examenes: Examen[] = [
   {
     id: 2, año: 2025, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id: "2025-J-11", bloque: "Algebra", opcion: "A",
+      { id: "2025-J-11", topicSlugs: ["analisis-de-sistemas-por-el-metodo-de-gauss"], bloque: "Algebra", opcion: "A",
         enunciado: "En el baloncesto existen canastas que valen un punto, otras que valen dos y otras\nque valen tres puntos. Calcule el número de lanzamientos de uno, de dos y de tres puntos que realizó un equipo\nen un partido sabiendo que:\n• El equipo anotó 80 puntos con un acierto del 80% en tiros de uno, del 50% en tiros de dos y del 40% en tiros\nde tres.\n• La tercera parte del número de lanzamientos de dos fue igual a la quinta parte del resto de lanzamientos.\n• El doble del número de lanzamientos de tres es menor en cinco unidades al resto de lanzamientos.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2025-J-12", bloque: "Algebra", opcion: "B",
+      // EXCLUIDO del banco por topic_slug: evalúa valores/vectores propios (diagonalización), tema que no existe en ninguno de los 63 temas finos de curriculum_content_v2 ni en el temario oficial actual de Matemáticas II Madrid. Se mantiene el ejercicio (es un examen real) pero topicSlugs queda vacío a propósito — no se debe seleccionar por tema.
+      { id: "2025-J-12", topicSlugs: [], bloque: "Algebra", opcion: "B",
         enunciado: `Sean la matriz
 
 $$
@@ -683,7 +687,7 @@ $$
 
 que satisfaga que $(A - \\lambda I)\\vec{v} = \\vec{0}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2025-J-2", bloque: "Analisis", opcion: "A",
+      { id: "2025-J-2", topicSlugs: ["informacion-extraida-de-la-1-y-2-derivada"], bloque: "Analisis", opcion: "A",
         enunciado: `Un muro rectangular de la biblioteca pública del barrio se va a pintar con la ayuda de unos grafiteros. La dimensión del muro es de 3 metros de alto y 12 metros de largo. Colocando la esquina inferior izquierda del muro en el origen de coordenadas, se va a utilizar la curva $f(x) = \\cos\\left(\\dfrac{\\pi x}{9}\\right) + 2$ para diferenciar dos regiones del muro que serán pintadas con dos colores distintos. Se sabe que con un bote de spray se pueden pintar 3 metros cuadrados de superficie.
 
 a) (0.75 puntos) Halle el valor máximo y el valor mínimo de la función $f(x)$ en el intervalo $[0, 12]$. ¿Está la curva en este intervalo $[0, 12]$ contenida completamente en el muro?
@@ -692,7 +696,7 @@ b) (1.25 puntos) Halle el área que tienen que pintar de cada color.
 
 c) (0.5 puntos) ¿Cuántos botes de spray se tienen que comprar como mínimo para pintar toda el área bajo la curva $f(x)$?`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2025-J-31", bloque: "Geometria", opcion: "A",
+      { id: "2025-J-31", topicSlugs: ["el-plano-en-el-espacio","la-recta-en-el-espacio-ecuaciones","distancias-en-el-espacio"], bloque: "Geometria", opcion: "A",
         enunciado: `Dados la recta $r \\equiv \\dfrac{x-1}{2} = \\dfrac{y}{0} = \\dfrac{z-2}{1}$ y el plano $\\pi: x + 2y - 3z = 1$, se pide:
 
 a) (0.75 puntos) Hallar una ecuación del plano que contiene a $r$ y es perpendicular a $\\pi$.
@@ -701,10 +705,10 @@ b) (0.75 puntos) Hallar una ecuación de la recta contenida en $\\pi$ que corta 
 
 c) (1 punto) Calcular los puntos de la recta $r$ cuya distancia al plano $\\pi$ es $\\sqrt{14}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2025-J-32", bloque: "Geometria", opcion: "B",
+      { id: "2025-J-32", topicSlugs: ["distancias-en-el-espacio","areas-y-volumenes"], bloque: "Geometria", opcion: "B",
         enunciado: "Sean el punto $P(0, 1, 1)$ y el plano $\\pi : x + y = 2$. Se pide:\n\na) (0.5 puntos) Hallar la distancia del punto $P$ al plano $\\pi$.\n\nb) (1 punto) Determinar el punto $Q$ del plano $\\pi$ cuya distancia a $P$ es igual que la distancia de $P$ a $\\pi$.\n\nc) (1 punto) Hallar el área del triángulo formado por $P$ y los puntos de corte del plano $\\pi$ con los ejes coordenados.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2025-J-41", bloque: "Probabilidad", opcion: "A",
+      { id: "2025-J-41", topicSlugs: ["algebra-de-sucesos-y-tipos-de-experimentos"], bloque: "Probabilidad", opcion: "A",
         enunciado: `Sea $E = \\{2, 3, 5, 7, 11, 13, 17, 19\\}$ un espacio muestral y $P$ una medida de probabilidad en $E$ definida por: $P(7) = P(3) = \\dfrac{1}{4}$ y con el resto de sucesos elementales equiprobables.
 
 Se consideran los sucesos $A = \\{7, 11, 13, 19\\}$, $B = \\{2, 5, 7, 13, 17\\}$ y $C = \\{3, 5, 7, 11, 13\\}$. Se pide calcular:
@@ -713,7 +717,7 @@ a) (1.25 puntos) $P\\bigl(\\overline{(A - C)} \\cap B\\bigr)$.
 
 b) (1.25 puntos) $P\\bigl((A \\cap B) \\mid \\overline{C}\\bigr)$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2025-J-42", bloque: "Probabilidad", opcion: "B",
+      { id: "2025-J-42", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque: "Probabilidad", opcion: "B",
         enunciado: "Entre los ciudadanos de 14 años o más de cierto país, el 20% de la población tiene entre 14 y 24\naños, el 50% entre 25 y 64 y el resto más de 64 años. Según datos recogidos por el ministerio de cultura de ese\npaís, el 74% de sus ciudadanos de entre 14 y 24 es lector habitual, mientras que el porcentaje decrece hasta el\n65.8% entre los de 25 a 64 y al 53.7% entre los mayores de 64. Elegido un ciudadano al azar del país en cuestión\nde 14 años o más, se pide:\n\na) (1.25 puntos) Calcular la probabilidad de que sea lector habitual.\n\nb) (1.25 puntos) Si no es lector habitual, calcular la probabilidad de que tenga entre 25 y 64 años.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
     ]
@@ -721,14 +725,14 @@ b) (1.25 puntos) $P\\bigl((A \\cap B) \\mid \\overline{C}\\bigr)$.`,
   {
     id: 3, año: 2025, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"2025-Ext-11", bloque:"Algebra", opcion:"A",
+      { id:"2025-Ext-11", topicSlugs: ["analisis-de-sistemas-por-el-metodo-de-gauss"], bloque:"Algebra", opcion:"A",
         enunciado:`En una granja se crían conejos, gallinas y pavos. El coste diario de la comida por animal es de 1,50 euros si es conejo, de 4 céntimos de euro si es gallina, y de 30 céntimos de euro si se trata de un pavo. El coste diario en comida para estos animales en la granja asciende a 44 euros.
 
 Se sabe que hay tantas gallinas como cuatro veces el número de pavos más la cuarta parte de los conejos. Además, el doble del número de gallinas es igual a la suma de conejos y pavos más diez veces el número de conejos.
 
 Se pide averiguar el número de animales de cada tipo en la granja.`,
         puntuacion:2.5, criterios:"Por cada ecuación correctamente planteada: 0.5 pts. Resolución del sistema: 1 punto. Si una ecuación está mal planteada, pero el sistema resultante se resuelve correctamente, se podrá valorar la resolución hasta 0.5 pts." },
-      { id:"2025-Ext-12", bloque:"Algebra", opcion:"B",
+      { id:"2025-Ext-12", topicSlugs: ["matriz-inversa-por-gauss-jordan"], bloque:"Algebra", opcion:"B",
         enunciado:`Dadas las matrices reales
 
 $$A=\\begin{pmatrix}0&1&2\\\\1&3&a\\\\a&0&0\\end{pmatrix},\\quad B=\\begin{pmatrix}1&3&0\\\\a&1&0\\\\0&0&1\\end{pmatrix}$$
@@ -739,7 +743,7 @@ a) (1.25 puntos) Estudiar para qué valores del parámetro real $a$ se cumple qu
 
 b) (1.25 puntos) Calcular la inversa de $B$ para los valores de $a$ para los que sea posible.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.75 pts; resolución: 0.5 pts. b) Planteamiento: 0.75 pts; resolución: 0.5 pts." },
-      { id:"2025-Ext-21", bloque:"Analisis", opcion:"A",
+      { id:"2025-Ext-21", topicSlugs: ["indeterminacion-inf-menos-inf","informacion-extraida-de-la-1-y-2-derivada","limites-infinitos"], bloque:"Analisis", opcion:"A",
         enunciado:`Sean las funciones
 
 $$f(x)=\\dfrac{e}{e^x-e},\\quad g(x)=\\dfrac{1}{x-1}.$$
@@ -752,14 +756,14 @@ b) (0.75 puntos) Estudiar los intervalos de crecimiento y decrecimiento de $f$ e
 
 c) (0.75 puntos) Calcular las asíntotas de la función $g(x)+g(-x)$.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts; resolución: 0.5 pts. b) Derivada: 0.25 pts; determinación del decrecimiento en el dominio: 0.5 pts. c) Cada asíntota: 0.25 pts." },
-      { id:"2025-Ext-22", bloque:"Analisis", opcion:"B",
+      { id:"2025-Ext-22", topicSlugs: ["informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], bloque:"Analisis", opcion:"B",
         enunciado:`Se considera la parábola $f(x)=-x^2+4$.
 
 a) (1 punto) Calcular el área de la región limitada por la recta $y=0$ y la gráfica de $f$.
 
 b) (1.5 puntos) Determinar las dimensiones del rectángulo de mayor área que puede construirse apoyado sobre el eje $OX$, inscrito bajo la parábola y con los lados paralelos a los ejes de coordenadas. Calcular también dicha área máxima.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts; resolución: 0.5 pts. b) Función área de una variable: 0.5 pts; punto crítico: 0.5 pts; discusión de máximo local: 0.25 pts; área correcta: 0.25 pts." },
-      { id:"2025-Ext-31", bloque:"Geometria", opcion:"A",
+      { id:"2025-Ext-31", topicSlugs: ["distancias-en-el-espacio","proyecciones-ortogonales-y-puntos-simetricos","areas-y-volumenes"], bloque:"Geometria", opcion:"A",
         enunciado:`Sean el punto $A(1,2,3)$, la recta
 
 $$r\\equiv \\dfrac{x-1}{2}=\\dfrac{y}{0}=\\dfrac{z-2}{1}$$
@@ -772,21 +776,21 @@ b) (0.75 puntos) Calcular la proyección ortogonal del punto $A$ sobre la recta 
 
 c) (1 punto) Calcular el volumen del tetraedro formado por el origen de coordenadas y los puntos de corte con los ejes de un plano que pasa por $A$ y es paralelo a $\\pi$.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts; resolución: 0.25 pts. b) Planteamiento: 0.5 pts; resolución: 0.25 pts. c) Planteamiento: 0.5 pts; resolución: 0.5 pts." },
-      { id:"2025-Ext-32", bloque:"Geometria", opcion:"B",
+      { id:"2025-Ext-32", topicSlugs: ["el-plano-en-el-espacio"], bloque:"Geometria", opcion:"B",
         enunciado:`Sea $S$ el segmento de extremos $A(0,1,0)$ y $B(1,0,1)$.
 
 a) (1.5 puntos) Determinar el punto de $S$ cuya distancia a $A$ sea el doble de su distancia a $B$.
 
 b) (1 punto) Hallar la ecuación del plano perpendicular a $S$ que pasa por el punto medio del segmento.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 1 punto; resolución: 0.5 pts. Se penalizará con 0.25 pts si el punto obtenido no pertenece al segmento. b) Planteamiento: 0.5 pts; resolución: 0.5 pts." },
-      { id:"2025-Ext-4A", bloque:"Probabilidad", opcion:"A",
+      { id:"2025-Ext-4A", topicSlugs: ["distribucion-normal-y-tipificacion"], bloque:"Probabilidad", opcion:"A",
         enunciado:`En una línea de tren, el 80% de los trenes llegan puntuales o con menos de 30 minutos de retraso, el 15% llegan con un retraso de entre 30 y 60 minutos, y el resto llega con más de una hora de retraso.
 
 a) (1 punto) Un usuario realiza 40 viajes y en 10 de ellos el retraso fue superior a una hora. El usuario afirma que la probabilidad de que ocurra esto es menor que una entre un millón. ¿Ha calculado correctamente dicha probabilidad?
 
 b) (1.5 puntos) En enero de 2025 un viajero hizo 6 trayectos diarios en esta línea. Aproximando mediante una distribución normal, calcular la probabilidad de que como mucho la sexta parte de sus viajes dieran derecho a devolución.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts; resolución: 0.5 pts. b) Parámetros de la normal: 0.25 pts cada uno; probabilidad: 1 punto (planteamiento 0.5 pts, resolución 0.5 pts). Sin corrección por continuidad se penaliza 0.25 pts." },
-      { id:"2025-Ext-4B", bloque:"Probabilidad", opcion:"B",
+      { id:"2025-Ext-4B", topicSlugs: ["distribucion-normal-y-tipificacion"], bloque:"Probabilidad", opcion:"B",
         enunciado:`En una línea de tren, el 80% de los trenes llegan puntuales o con menos de 30 minutos de retraso, el 15% llegan con un retraso de entre 30 y 60 minutos, y el resto llega con más de una hora de retraso.
 
 a) (1 punto) Un usuario realiza 40 viajes y en 10 de ellos el retraso fue superior a una hora. El usuario afirma que la probabilidad de que ocurra esto es menor que una entre un millón. ¿Ha calculado correctamente dicha probabilidad?
@@ -798,10 +802,10 @@ b) (1.5 puntos) En enero de 2025 un viajero hizo 6 trayectos diarios en esta lí
   {
     id: 4, año: 2024, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id: "2024-J-A1", bloque: "Algebra", opcion: "A",
+      { id: "2024-J-A1", topicSlugs: ["analisis-de-sistemas-por-el-metodo-de-gauss"], bloque: "Algebra", opcion: "A",
         enunciado: "Se tienen listones de madera de tres longitudes diferentes: largos, intermedios y cortos. Puestos uno tras otro,\ntanto con dos listones largos y cuatro intermedios como con tres intermedios y quince cortos se consigue la\nmisma longitud total. Un listón largo supera en 17 cm la medida de uno intermedio más uno corto. Y con nueve\nlistones cortos hemos de añadir 7 cm para igualar la longitud de uno intermedio seguido por uno largo. Se pide\ncalcular la longitud de cada tipo de listón.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2024-J-A2", bloque: "Analisis", opcion: "A",
+      { id: "2024-J-A2", topicSlugs: ["concepto-de-derivada-e-interpretacion-geometrica","teoremas-de-rolle-y-del-valor-medio-lagrange","la-integral-definida-regla-de-barrow-y-areas"], bloque: "Analisis", opcion: "A",
         enunciado: `Para la función $f(x) = x^4 + \\pi x^3 + \\pi^2 x^2 + \\pi^3 x + \\pi^4$, se pide:
 
 a) (0.5 puntos) Calcular la ecuación de la recta tangente a la gráfica de $f(x)$ en $x = \\pi$.
@@ -810,21 +814,21 @@ b) (1 punto) Probar que $f(x)$ tiene, al menos, un punto con derivada nula en el
 
 c) (1 punto) Si $g(x) = f(-x)$, calcular el área entre las gráficas de $f(x)$ y $g(x)$ en el intervalo $[0, \\pi]$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2024-J-A3", bloque: "Geometria", opcion: "A",
+      { id: "2024-J-A3", topicSlugs: ["el-plano-en-el-espacio","la-recta-en-el-espacio-ecuaciones","distancias-en-el-espacio"], bloque: "Geometria", opcion: "A",
         enunciado: `Dados los puntos $A(0, 0, 1)$ y $B(1, 1, 0)$, se pide:
 
 a) (1 punto) Hallar una ecuación del plano que pasa por los puntos $A$ y $B$ y es perpendicular al plano $z = 0$.
 
 b) (1.5 puntos) Hallar ecuaciones de dos rectas paralelas, $r_1$ y $r_2$, que pasen por los puntos $A$ y $B$ respectivamente, estén en el plano $x + z = 1$ y tales que la distancia entre ellas sea $1$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2024-J-A4", bloque: "Probabilidad", opcion: "A",
+      { id: "2024-J-A4", topicSlugs: ["algebra-de-sucesos-y-tipos-de-experimentos"], bloque: "Probabilidad", opcion: "A",
         enunciado: `Sabiendo que $P(\\overline{A}) = \\dfrac{11}{20}$, $P(A|B) - P(B|A) = \\dfrac{1}{24}$ y $P(A \\cap \\overline{B}) = \\dfrac{3}{10}$, se pide:
 
 a) (1.5 puntos) Calcular $P(A \\cap B)$ y $P(B)$.
 
 b) (1 punto) Calcular $P(C)$, siendo $C$ otro suceso del espacio muestral, independiente de $A$ y que verifica que $P(A \\cup C) = \\dfrac{14}{25}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2024-J-B1", bloque: "Algebra", opcion: "B",
+      { id: "2024-J-B1", topicSlugs: ["despejar-en-ecuaciones-matriciales","determinantes-de-orden-2-y-3-regla-de-sarrus","analisis-de-sistemas-por-el-metodo-de-gauss"], bloque: "Algebra", opcion: "B",
         enunciado: `Consideremos las matrices reales
 
 $$A = \\begin{pmatrix}3&-1&1\\\\1&1&1\\\\1&-1&3\\end{pmatrix}, \\quad B = \\begin{pmatrix}b&2b&b\\\\2b&3b&b\\\\b&b&b\\end{pmatrix}, \\quad C = \\begin{pmatrix}2&0&0\\\\0&2&0\\\\0&0&3\\end{pmatrix}$$
@@ -843,21 +847,21 @@ $$B\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix} = \\begin{pmatrix}3\\\\-1\\\\1\\end
 
 para $b = 1$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2024-J-B2", bloque: "Analisis", opcion: "B",
+      { id: "2024-J-B2", topicSlugs: ["metodos-de-integracion","indeterminacion-1-inf"], bloque: "Analisis", opcion: "B",
         enunciado: `Calcule:
 
 a) (1.25 puntos) $\\displaystyle\\int_1^e (x+2)\\ln x\,dx$.
 
 b) (1.25 puntos) $\\displaystyle\\lim_{x \\to \\frac{\\pi}{2}} \\left(\\tan\\frac{x}{2}\\right)^{\\frac{1}{\\cos x}}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2024-J-B3", bloque: "Geometria", opcion: "B",
+      { id: "2024-J-B3", topicSlugs: ["areas-y-volumenes"], bloque: "Geometria", opcion: "B",
         enunciado: `Al ordenador de una impresora 3D se le suministraron ayer las coordenadas de los cuatro vértices $P_1$, $P_2$, $P_3$ y $P_4$ de un tetraedro sólido, el cual construyó al momento. Se sabe que $P_1(1, 1, 1)$, $P_2(2, 1, 0)$ y $P_3(1, 3, 2)$, pero del cuarto punto $P_4(3, a, 3)$ hoy no estamos seguros del valor de su segunda coordenada.
 
 a) (1.5 puntos) A partir de la cantidad de material utilizado por la impresora sabemos que el volumen del tetraedro es $V = 1$. También sabemos que la longitud de ninguna de sus aristas supera la altura de la impresora, que es de $10$. Determine los posibles valores de $a$.
 
 b) (1 punto) Dado el punto $Q(3, 3, 3)$, se quiere imprimir ahora el paralelepípedo que tiene a los segmentos $P_1P_2$, $P_1P_3$ y $P_1Q$ como aristas. ¿Cuáles serían los valores de las coordenadas de los ocho vértices del paralelepípedo que habría que suministrar al ordenador?`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2024-J-B4", bloque: "Probabilidad", opcion: "B",
+      { id: "2024-J-B4", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque: "Probabilidad", opcion: "B",
         enunciado: `Tenemos dos dados no trucados de seis caras, uno azul y uno rojo. Las caras están numeradas del $1$ al $6$. En un determinado juego, lanzamos los dos dados. Para calcular la puntuación obtenida, se sigue el siguiente procedimiento: si el número obtenido en el dado azul es par, se le suma el doble del número obtenido en el dado rojo; si el número obtenido en el dado azul es impar, se le suma el número obtenido en el dado rojo. Se pide:
 
 a) (1 punto) Calcular la probabilidad de obtener una puntuación de $10$. Calcular la probabilidad de obtener una puntuación impar.
@@ -869,28 +873,29 @@ b) (1.5 puntos) Calcular la probabilidad de haber obtenido un número par en el 
   {
     id: 5, año: 2024, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"2024-Jl-1A", bloque:"Algebra", opcion:"A",
+      { id:"2024-Jl-1A", topicSlugs: ["teorema-de-rouche-frobenius-discusion"], bloque:"Algebra", opcion:"A",
         enunciado:`Sistema segun $a$ y $b$:\n$$\\begin{cases} x+2y-z=1 \\\\ 2x+ay+z=3 \\\\ x+y+az=b \\end{cases}$$\nDiscute y resuelve para $a=1$.`,
         puntuacion:2.5, criterios:"Rouche-Frobenius (1 pt), discusion segun a (0.75 pts), resolucion a=1 (0.75 pts)." },
-      { id:"2024-Jl-1B", bloque:"Algebra", opcion:"B",
+      { id:"2024-Jl-1B", topicSlugs: ["matriz-inversa-por-gauss-jordan","determinantes-de-orden-2-y-3-regla-de-sarrus"], bloque:"Algebra", opcion:"B",
         enunciado:`$A=\\begin{pmatrix}1&-1&0\\\\2&1&1\\\\0&1&-1\\end{pmatrix}$.\n\na) $\\det(A)$\n\nb) $A^{-1}$`,
         puntuacion:2.5, criterios:"Determinante (0.75 pts), cofactores (1 pt), inversa (0.75 pts)." },
-      { id:"2024-Jl-2A", bloque:"Analisis", opcion:"A",
+      { id:"2024-Jl-2A", topicSlugs: ["limites-infinitos"], bloque:"Analisis", opcion:"A",
         enunciado:`$f(x)=xe^{-x}$: dominio, asintotas, monotonia, extremos, inflexion y grafica.`,
         puntuacion:2.5, criterios:"Dominio y asintotas (0.5 pts), monotonia y extremos (0.75 pts), inflexion (0.75 pts), grafica (0.5 pts)." },
-      { id:"2024-Jl-2B", bloque:"Analisis", opcion:"B",
+      { id:"2024-Jl-2B", topicSlugs: ["la-integral-definida-regla-de-barrow-y-areas"], bloque:"Analisis", opcion:"B",
         enunciado:`$\\displaystyle\\int_1^e \\dfrac{\\ln x}{x}\\,dx$ y area de la region acotada.`,
         puntuacion:2.5, criterios:"Integral por sustitucion (1.5 pts), area (1 pt)." },
-      { id:"2024-Jl-3A", bloque:"Geometria", opcion:"A",
+      { id:"2024-Jl-3A", topicSlugs: ["distancias-en-el-espacio","proyecciones-ortogonales-y-puntos-simetricos","la-recta-en-el-espacio-ecuaciones"], bloque:"Geometria", opcion:"A",
         enunciado:`$P(2,1,-1)$ y $\\pi: x-2y+2z+3=0$.\n\na) Distancia de $P$ a $\\pi$.\n\nb) Punto simetrico.\n\nc) Recta perpendicular.`,
         puntuacion:2.5, criterios:"Distancia (0.75 pts), pie perpendicular (0.75 pts), simetrico (0.5 pts), recta (0.5 pts)." },
-      { id:"2024-Jl-3B", bloque:"Geometria", opcion:"B",
+      { id:"2024-Jl-3B", topicSlugs: ["el-plano-en-el-espacio","distancias-en-el-espacio","areas-y-volumenes"], bloque:"Geometria", opcion:"B",
         enunciado:`$A(1,0,1)$, $B(0,1,1)$, $C(1,1,0)$.\n\na) Plano por $A$, $B$, $C$.\n\nb) Area del triangulo $ABC$.\n\nc) Distancia del origen al plano.`,
         puntuacion:2.5, criterios:"Plano (1 pt), area (0.75 pts), distancia (0.75 pts)." },
-      { id:"2024-Jl-4A", bloque:"Probabilidad", opcion:"A",
+      // EXCLUIDO del banco por topic_slug: evalúa la distribución de Poisson, tema que no existe en ninguno de los 63 temas finos de curriculum_content_v2 ni en el temario oficial actual de Matemáticas II Madrid. Se mantiene el ejercicio (es un examen real) pero topicSlugs queda vacío a propósito — no se debe seleccionar por tema.
+      { id:"2024-Jl-4A", topicSlugs: [], bloque:"Probabilidad", opcion:"A",
         enunciado:`Piezas defectuosas siguen Poisson $\\lambda=2$/hora.\n\na) P(exactamente 3 defectuosas en 1 h)\n\nb) P(maximo 2 en 1 h)\n\nc) En 8 h, P(mas de 20) — aproxima por normal`,
         puntuacion:2.5, criterios:"Poisson (0.5 pts), a (0.75 pts), b (0.75 pts), aproximacion normal (0.5 pts)." },
-      { id:"2024-Jl-4B", bloque:"Probabilidad", opcion:"B",
+      { id:"2024-Jl-4B", topicSlugs: ["distribucion-normal-y-tipificacion"], bloque:"Probabilidad", opcion:"B",
         enunciado:`$X\\sim N(75, 8)$.\n\na) $P(67<X<91)$\n\nb) $P(X<60)$\n\nc) $k$: $P(X<k)=0{,}9$`,
         puntuacion:2.5, criterios:"Tipificacion (0.5 pts), a (0.75 pts), b (0.75 pts), c (0.5 pts)." }
     ]
@@ -898,10 +903,10 @@ b) (1.5 puntos) Calcular la probabilidad de haber obtenido un número par en el 
   {
     id: 6, año: 2023, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id: "2023-J-A1", bloque: "Algebra", opcion: "A",
+      { id: "2023-J-A1", topicSlugs: ["analisis-de-sistemas-por-el-metodo-de-gauss"], bloque: "Algebra", opcion: "A",
         enunciado: "En una obra, para transportar la tierra extraída para la construcción de los cimientos de un edificio, se usan tres\ntipos de camiones diferentes: A, B y C. Los camiones de tipo A tienen una capacidad de 14 toneladas, los de\ntipo B, de 24 toneladas y los de tipo C, de 28 toneladas. Habría que traer un camión más de tipo A para igualar\nal número de camiones restantes. El 10 % de la capacidad de todos los camiones tipo B supone un séptimo de la\nde los de mayor tonelaje. Hoy, realizando un único viaje cada camión a máxima capacidad, se han extraído de la\nobra 302 toneladas de tierra. ¿Cuánta tierra ha sido transportada hoy por los camiones de cada tipo?",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2023-J-A2", bloque: "Analisis", opcion: "A",
+      { id: "2023-J-A2", topicSlugs: ["informacion-extraida-de-la-1-y-2-derivada"], bloque: "Analisis", opcion: "A",
         enunciado: `Dada la función $f(x) = \\sqrt[3]{(x^2-1)^2}$, se pide:
 
 a) (0.25 puntos) Estudiar si es par o impar.
@@ -910,13 +915,13 @@ b) (0.75 puntos) Estudiar su derivabilidad en el punto $x = 1$.
 
 c) (1.5 puntos) Estudiar sus extremos relativos y absolutos.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2023-J-A3", bloque: "Geometria", opcion: "A",
+      { id: "2023-J-A3", topicSlugs: ["el-plano-en-el-espacio","posiciones-relativas-rectas-y-planos","distancias-en-el-espacio"], bloque: "Geometria", opcion: "A",
         enunciado: "Sean los puntos $A(1, -2, 3)$, $B(0, 2, -1)$ y $C(2, 1, 0)$. Se pide:\n\na) (1.25 puntos) Comprobar que forman un triángulo $T$ y hallar una ecuación del plano que los contiene.\n\nb) (0.75 puntos) Calcular el corte de la recta que pasa por los puntos $A$ y $B$ con el plano $z = 1$.\n\nc) (0.5 puntos) Determinar el perímetro del triángulo $T$.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2023-J-A4", bloque: "Probabilidad", opcion: "A",
+      { id: "2023-J-A4", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque: "Probabilidad", opcion: "A",
         enunciado: `Se tiene un suceso $A$ de probabilidad $P(A) = 0.3$.\n\na) (0.75 puntos) Un suceso $B$ de probabilidad $P(B) = 0.5$ es independiente de $A$. Calcule $P(A \\cup B)$.\n\nb) (0.75 puntos) Otro suceso $C$ cumple $P(C \\mid A) = 0.5$. Determine $P(A \\cap C)$.\n\nc) (1 punto) Si se tiene un suceso $D$ tal que $P(A \\mid D) = 0.2$ y $P(D \\mid A) = 0.5$, calcule $P(D)$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2023-J-B1", bloque: "Algebra", opcion: "B",
+      { id: "2023-J-B1", topicSlugs: ["teorema-de-rouche-frobenius-discusion"], bloque: "Algebra", opcion: "B",
         enunciado: `Dado el sistema
 $$\\begin{cases}(a+1)x + 4y = 0 \\\\ (a-1)y + z = 3 \\\\ 4x + 2ay + z = 3\\end{cases}$$
 se pide:
@@ -927,7 +932,7 @@ b) (0.5 puntos) Resolverlo para $a = 3$.
 
 c) (0.75 puntos) Resolverlo para $a = 5$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2023-J-B2", bloque: "Analisis", opcion: "B",
+      { id: "2023-J-B2", topicSlugs: ["continuidad-y-tipos-de-discontinuidad"], bloque: "Analisis", opcion: "B",
         enunciado: `Dada la función real de variable real definida sobre su dominio como
 $$f(x) = \\begin{cases} \\dfrac{x^2}{2+x^2} & \\text{si } x \\leq -1 \\\\ \\dfrac{2x^2}{3} - 3x & \\text{si } x > -1 \\end{cases}$$
 se pide:
@@ -938,7 +943,7 @@ b) (1 punto) Calcular el siguiente límite: $\\displaystyle\\lim_{x \\to -\\inft
 
 c) (0.75 puntos) Calcular la siguiente integral: $\\displaystyle\\int_{-1}^{0} f(x)\,dx$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2023-J-B3", bloque: "Geometria", opcion: "B",
+      { id: "2023-J-B3", topicSlugs: ["posiciones-relativas-rectas-y-planos","proyecciones-ortogonales-y-puntos-simetricos"], bloque: "Geometria", opcion: "B",
         enunciado: `Dada la recta $r \\equiv \\dfrac{x-1}{2} = \\dfrac{y}{1} = \\dfrac{z+1}{-2}$, el plano $\\pi: x - z = 2$ y el punto $A(1, 1, 1)$, se pide:
 
 a) (0.75 puntos) Estudiar la posición relativa de $r$ y $\\pi$ y calcular su intersección, si existe.
@@ -947,7 +952,7 @@ b) (0.75 puntos) Calcular la proyección ortogonal del punto $A$ sobre el plano 
 
 c) (1 punto) Calcular el punto simétrico del punto $A$ con respecto a la recta $r$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2023-J-B4", bloque: "Probabilidad", opcion: "B",
+      { id: "2023-J-B4", topicSlugs: ["distribucion-normal-y-tipificacion","distribucion-binomial-variable-discreta"], bloque: "Probabilidad", opcion: "B",
         enunciado: "La longitud de la sardina del Pacífico (Sardinops sagax) se puede considerar que es una variable aleatoria con\ndistribución normal de media 175 mm y desviación típica 25.75 mm.\n\na) (1 punto) Una empresa envasadora de esta variedad de sardinas solo admite como sardinas de calidad\naquellas con una longitud superior a 16 cm. ¿Qué porcentaje de las sardinas capturadas por un buque\npesquero serán de la calidad que espera la empresa envasadora?\n\nb) (0.5 puntos) Hallar una longitud t < 175 mm tal que entre t y 175 mm estén el 18 % de las sardinas cap-\nturadas.\n\nc) (1 punto) En altamar se procesan las sardinas en lotes de 10. Posteriormente se devuelven al mar las\nsardinas de cada lote que son menores de 15 cm por considerarlas pequeñas. ¿Cuál es la probabilidad de\nque en un lote haya al menos una sardina devuelta por pequeña?",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
     ]
@@ -955,28 +960,28 @@ c) (1 punto) Calcular el punto simétrico del punto $A$ con respecto a la recta 
   {
     id: 7, año: 2023, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"2023-Jl-1A", bloque:"Algebra", opcion:"A",
+      { id:"2023-Jl-1A", topicSlugs: ["matriz-inversa-por-gauss-jordan","determinantes-de-orden-2-y-3-regla-de-sarrus"], bloque:"Algebra", opcion:"A",
         enunciado:`$A=\\begin{pmatrix}1&-1&0\\\\2&1&3\\\\0&1&-1\\end{pmatrix}$.\n\na) $\\det(A)$\n\nb) $A^{-1}$`,
         puntuacion:2.5, criterios:"Determinante (1 pt), inversa (1.5 pts)." },
-      { id:"2023-Jl-1B", bloque:"Algebra", opcion:"B",
+      { id:"2023-Jl-1B", topicSlugs: ["teorema-de-rouche-frobenius-discusion"], bloque:"Algebra", opcion:"B",
         enunciado:`Sistema segun $a$ y $b$:\n$$\\begin{cases} x+2y+z=3 \\\\ 2x-y+az=1 \\\\ x+y+2z=b \\end{cases}$$`,
         puntuacion:2.5, criterios:"Rouche-Frobenius (1 pt), discusion (1 pt), resolucion (0.5 pts)." },
-      { id:"2023-Jl-2A", bloque:"Analisis", opcion:"A",
+      { id:"2023-Jl-2A", topicSlugs: ["la-integral-definida-regla-de-barrow-y-areas"], bloque:"Analisis", opcion:"A",
         enunciado:`Area acotada por $y=x^2$ e $y=2x$.`,
         puntuacion:2.5, criterios:"Interseccion (0.5 pts), integral (1.5 pts), resultado (0.5 pts)." },
-      { id:"2023-Jl-2B", bloque:"Analisis", opcion:"B",
+      { id:"2023-Jl-2B", topicSlugs: ["informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], bloque:"Analisis", opcion:"B",
         enunciado:`$f(x)=x^3-3x^2+2$: extremos, inflexion, grafica y $\\displaystyle\\int_0^2 f(x)\\,dx$.`,
         puntuacion:2.5, criterios:"Extremos (0.75 pts), inflexion (0.5 pts), grafica (0.5 pts), integral (0.75 pts)." },
-      { id:"2023-Jl-3A", bloque:"Geometria", opcion:"A",
+      { id:"2023-Jl-3A", topicSlugs: ["posiciones-relativas-rectas-y-planos"], bloque:"Geometria", opcion:"A",
         enunciado:`$r: \\frac{x-1}{1}=\\frac{y}{2}=\\frac{z+1}{-1}$ y $s: \\frac{x}{2}=\\frac{y-1}{1}=\\frac{z}{1}$.\n\na) Posicion relativa.\n\nb) Distancia si se cruzan.`,
         puntuacion:2.5, criterios:"Paralelismo (0.5 pts), interseccion (0.75 pts), cruzadas (0.25 pts), distancia (1 pt)." },
-      { id:"2023-Jl-3B", bloque:"Geometria", opcion:"B",
+      { id:"2023-Jl-3B", topicSlugs: ["proyecciones-ortogonales-y-puntos-simetricos"], bloque:"Geometria", opcion:"B",
         enunciado:`$P(1,-1,2)$ y $\\pi: 2x-y+2z-7=0$.\n\na) Distancia $P$ a $\\pi$.\n\nb) Simetrico de $P$.`,
         puntuacion:2.5, criterios:"Distancia (0.75 pts), pie perpendicular (0.75 pts), simetrico (1 pt)." },
-      { id:"2023-Jl-4A", bloque:"Probabilidad", opcion:"A",
+      { id:"2023-Jl-4A", topicSlugs: ["parametros-de-una-distribucion-media-varianza-y-desviacion-tipica","distribucion-binomial-variable-discreta"], bloque:"Probabilidad", opcion:"A",
         enunciado:`$X\\sim B(n=10, p=0{,}3)$.\n\na) $P(X=3)$\n\nb) $P(X\\geq 2)$\n\nc) Esperanza y varianza`,
         puntuacion:2.5, criterios:"Binomial (0.5 pts), a (0.75 pts), b por complementario (0.75 pts), E y V (0.5 pts)." },
-      { id:"2023-Jl-4B", bloque:"Probabilidad", opcion:"B",
+      { id:"2023-Jl-4B", topicSlugs: ["distribucion-normal-y-tipificacion"], bloque:"Probabilidad", opcion:"B",
         enunciado:`$X\\sim N(50,10)$.\n\na) $P(40<X<65)$\n\nb) $k$: $P(X>k)=0{,}1587$\n\nc) Con $n=25$, P(media $> 53$)`,
         puntuacion:2.5, criterios:"Tipificacion (0.5 pts), a (0.75 pts), b (0.75 pts), media muestral (0.5 pts)." }
     ]
@@ -984,7 +989,7 @@ c) (1 punto) Calcular el punto simétrico del punto $A$ con respecto a la recta 
   {
     id: 8, año: 2022, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id: "2022-J-A1", bloque: "Algebra", opcion: "A",
+      { id: "2022-J-A1", topicSlugs: ["teorema-de-rouche-frobenius-discusion","analisis-de-sistemas-por-el-metodo-de-gauss"], bloque: "Algebra", opcion: "A",
         enunciado: `Dado el siguiente sistema de ecuaciones lineales dependientes del parámetro real $m$:
 $$\\begin{cases} x - 2my + z = 1 \\\\ mx + 2y - z = -1 \\\\ x - y + z = 1 \\end{cases}$$
 
@@ -992,7 +997,7 @@ a) (2 puntos) Discuta el sistema en función de los valores de $m$.
 
 b) (0.5 puntos) Resuelva el sistema para el valor $m = \\dfrac{1}{2}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2022-J-A2", bloque: "Analisis", opcion: "A",
+      { id: "2022-J-A2", topicSlugs: ["continuidad-y-tipos-de-discontinuidad","informacion-extraida-de-la-propia-funcion","la-integral-definida-regla-de-barrow-y-areas"], bloque: "Analisis", opcion: "A",
         enunciado: `Sea la función
 $$f(x) = \\begin{cases} x^3 e^{-1/x^2} & \\text{si } x \\neq 0 \\\\ 0 & \\text{si } x = 0 \\end{cases}$$
 
@@ -1002,7 +1007,7 @@ b) (0.5 puntos) Estudie si $f(x)$ presenta algún tipo de simetría par o impar.
 
 c) (1 punto) Calcule la siguiente integral: $\\displaystyle\\int_1^2 \\dfrac{f(x)}{x^6}\,dx$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2022-J-A3", bloque: "Geometria", opcion: "A",
+      { id: "2022-J-A3", topicSlugs: ["angulos-en-el-espacio"], bloque: "Geometria", opcion: "A",
         enunciado: `Con un dispositivo láser situado en el punto $P(1, 1, 1)$ se ha podido seguir la trayectoria de una partícula que se desplaza sobre la recta de ecuaciones $$r \\equiv \\begin{cases} 2x - y = 10 \\\\ x - z = -90 \\end{cases}$$.
 
 a) (0.5 puntos) Calcule un vector director de $r$ y la posición de la partícula cuando su trayectoria incide con el plano $z = 0$.
@@ -1011,13 +1016,13 @@ b) (1.25 puntos) Calcule la posición más próxima de la partícula al disposit
 
 c) (0.75 puntos) Determine el ángulo entre el plano de ecuación $x + y = 2$ y la recta $r$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2022-J-A4", bloque: "Probabilidad", opcion: "A",
+      { id: "2022-J-A4", topicSlugs: ["distribucion-normal-y-tipificacion"], bloque: "Probabilidad", opcion: "A",
         enunciado: "Según el Instituto Nacional de Estadística, durante el último trimestre de 2020, el porcentaje de mujeres que\npertenecía al conjunto de Consejos de Administración de las empresas que componen el Ibex-35 fue del 27.7 %.\nSe reunieron 10 de estos consejeros.\n\na) (0.75 puntos) Halle la probabilidad de que la mitad fueran mujeres.\n\nb) (0.75 puntos) Calcule la probabilidad de que hubiese al menos un hombre.\n\nc) (1 punto) Determine, aproximando mediante una distribución normal, la probabilidad de que en un congreso\nde doscientos consejeros de estas empresas hubiera como mínimo un 35 % de representación femenina.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2022-J-B1", bloque: "Algebra", opcion: "B",
+      { id: "2022-J-B1", topicSlugs: ["analisis-de-sistemas-por-el-metodo-de-gauss"], bloque: "Algebra", opcion: "B",
         enunciado: "Tres primos, Pablo, Alejandro y Alicia, se van a repartir un premio de 9450 euros de forma directamente propor-\ncional a sus edades. La suma de las edades de Pablo y Alejandro excede en tres años al doble de la edad de\nAlicia. Además, la edad de los tres primos juntos es de 45 años. Sabiendo que en el reparto del premio Pablo\nrecibe 420 euros más que Alicia, calcule las edades de los tres primos y el dinero que recibe cada uno por el\npremio.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2022-J-B2", bloque: "Analisis", opcion: "B",
+      { id: "2022-J-B2", topicSlugs: ["continuidad-y-tipos-de-discontinuidad","informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], bloque: "Analisis", opcion: "B",
         enunciado: `Sea la función $f(x) = \\dfrac{x}{x^2+1}$.
 
 a) (0.5 puntos) Compruebe si $f(x)$ verifica las hipótesis del Teorema de Bolzano en el intervalo $[-1, 1]$.
@@ -1026,7 +1031,7 @@ b) (1 punto) Calcule y clasifique los extremos relativos de $f(x)$ en $\\mathbb{
 
 c) (1 punto) Determine el área comprendida entre la gráfica de la función $f(x)$ y el eje $OX$ en el intervalo $[-1, 1]$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2022-J-B3", bloque: "Geometria", opcion: "B",
+      { id: "2022-J-B3", topicSlugs: ["la-recta-en-el-espacio-ecuaciones"], bloque: "Geometria", opcion: "B",
         enunciado: `Sean el plano $\\pi \\equiv x + y + z = 1$, la recta\n$$r_1 \\equiv \\begin{cases} x = 1 + \\lambda \\\\ y = 1 - \\lambda \\\\ z = -1 \\end{cases}, \\quad \\lambda \\in \\mathbb{R}$$\ny el punto $P(0, 1, 0)$.
 
 a) (0.5 puntos) Verifique que la recta $r_1$ está contenida en el plano $\\pi$ y que el punto $P$ pertenece al mismo plano.
@@ -1035,7 +1040,7 @@ b) (0.75 puntos) Halle una ecuación de la recta contenida en el plano $\\pi$ qu
 
 c) (1.25 puntos) Calcule una ecuación de la recta $r_2$ que pase por $P$ y sea paralela a $r_1$. Halle el área de un cuadrado que tenga dos de sus lados sobre las rectas $r_1$ y $r_2$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2022-J-B4", bloque: "Probabilidad", opcion: "B",
+      { id: "2022-J-B4", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque: "Probabilidad", opcion: "B",
         enunciado: "De una cesta con 6 sombreros blancos y 3 negros se elige uno al azar. Si el sombrero es blanco, se toma, al azar,\nun pañuelo de un cajón que contiene 2 blancos, 2 negros y 5 con cuadros blancos y negros. Si el sombrero es\nnegro, se elige, al azar, un pañuelo de otro cajón que contiene 2 pañuelos blancos, 4 negros y 4 con cuadros\nblancos y negros. Se pide:\n\na) (1 punto) Calcular la probabilidad de que en el pañuelo aparezca algún color que no sea el del sombrero.\n\nb) (0.5 puntos) Calcular la probabilidad de que en al menos uno de los complementos (sombrero o pañuelo)\naparezca el color negro.\n\nc) (1 punto) Calcular la probabilidad de que el sombrero haya sido negro, sabiendo que el pañuelo ha sido de\ncuadros.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
     ]
@@ -1043,12 +1048,12 @@ c) (1.25 puntos) Calcule una ecuación de la recta $r_2$ que pase por $P$ y sea 
   {
     id: 9, año: 2022, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"2022-Ext-A1", bloque:"Algebra", opcion:"A",
+      { id:"2022-Ext-A1", topicSlugs: ["analisis-de-sistemas-por-el-metodo-de-gauss"], bloque:"Algebra", opcion:"A",
         enunciado:`En una estantería de una biblioteca hay ensayos, novelas y biografías. Tres de cada dieciséis libros de la estantería son ensayos. Las biografías junto con la tercera parte de los ensayos exceden en dos a las novelas. Si retiráramos la mitad de los ensayos y la quinta parte de las novelas quedarían ciento cinco libros.
 
 Calcule el número de libros de cada clase que hay en la estantería.`,
         puntuacion:2.5, criterios:"Planteamiento correcto del sistema: 1.5 pts (0.5 por ecuación). Resolución: 0.5 pts. Interpretación del resultado: 0.5 pts. Si alguna ecuación está mal planteada pero se resuelve correctamente el sistema resultante, se podrá valorar la resolución hasta 0.5 pts." },
-      { id:"2022-Ext-A2", bloque:"Analisis", opcion:"A",
+      { id:"2022-Ext-A2", topicSlugs: ["limites-infinitos","continuidad-y-tipos-de-discontinuidad","concepto-de-derivada-e-interpretacion-geometrica","informacion-extraida-de-la-1-y-2-derivada"], bloque:"Analisis", opcion:"A",
         enunciado:`Sea la función
 
 $$f(x)=\\begin{cases}\\dfrac{2x+1}{x} & \\text{si } x<0\\\\ x^2-4x+3 & \\text{si } x\\ge 0\\end{cases}$$
@@ -1063,14 +1068,14 @@ c) (0.75 puntos) Calcular las asíntotas horizontales y verticales de $f$.
 
 d) (0.75 puntos) Para $x\\in(0,+\\infty)$, hallar el punto de la gráfica en el que la recta tangente tiene pendiente nula, escribir la ecuación de dicha tangente y clasificar el extremo relativo correspondiente.`,
         puntuacion:2.5, criterios:"a) Continuidad: 0.75 pts. b) Derivabilidad en 0: 0.25 pts. c) Asíntotas: 0.75 pts. d) Punto de tangente horizontal, ecuación de la tangente y clasificación del extremo relativo: 0.75 pts." },
-      { id:"2022-Ext-A3", bloque:"Geometria", opcion:"A",
+      { id:"2022-Ext-A3", topicSlugs: ["producto-escalar-de-dos-vectores-u-v"], bloque:"Geometria", opcion:"A",
         enunciado:`Sean el plano $\\pi\\equiv z=x$ y los puntos $A(0,-1,0)$ y $B(0,1,0)$, contenidos en $\\pi$.
 
 a) (1.25 puntos) Si $A$ y $B$ son vértices contiguos de un cuadrado contenido en $\\pi$, determinar los posibles vértices restantes $C$ y $D$.
 
 b) (1.25 puntos) Si $A$ y $B$ son vértices opuestos de un cuadrado contenido en $\\pi$, determinar los otros dos vértices.`,
         puntuacion:2.5, criterios:"Se valorará el planteamiento geométrico correcto en el plano dado, la construcción de vectores perpendiculares adecuados, los cálculos y la comprobación de que los vértices pertenecen al plano." },
-      { id:"2022-Ext-A4", bloque:"Probabilidad", opcion:"A",
+      { id:"2022-Ext-A4", topicSlugs: ["distribucion-binomial-variable-discreta"], bloque:"Probabilidad", opcion:"A",
         enunciado:`Tres quintas partes de los estudiantes de Bachillerato de un instituto están matriculados en Matemáticas II. Se eligen al azar 6 estudiantes.
 
 a) (0.75 puntos) Calcular la probabilidad de que exactamente 4 estén matriculados en Matemáticas II.
@@ -1079,7 +1084,7 @@ b) (0.75 puntos) Calcular la probabilidad de que al menos uno esté matriculado 
 
 c) (1 punto) En el instituto hay 120 estudiantes de Bachillerato. Aproximando la distribución binomial por una normal, calcular la probabilidad de que más de 60 estén matriculados en Matemáticas II.`,
         puntuacion:2.5, criterios:"a) Identificación binomial y cálculo de probabilidad: 0.75 pts. b) Probabilidad complementaria o suma adecuada: 0.75 pts. c) Parámetros de la normal, aproximación y cálculo de la probabilidad: 1 punto." },
-      { id:"2022-Ext-B1", bloque:"Algebra", opcion:"B",
+      { id:"2022-Ext-B1", topicSlugs: ["rango-de-una-matriz-metodo-de-gauss","matriz-inversa-por-gauss-jordan","teorema-de-rouche-frobenius-discusion"], bloque:"Algebra", opcion:"B",
         enunciado:`Sean las matrices
 
 $$A=\\begin{pmatrix}1&-1&k\\\\k&1&-1\\end{pmatrix},\\quad B=\\begin{pmatrix}1&1\\\\1&-1\\\\1&0\\end{pmatrix}.$$
@@ -1092,7 +1097,7 @@ b) (0.75 puntos) Calcular $BA$ y discutir su rango según los valores de $k$.
 
 c) (0.75 puntos) Para $k=1$, escribir un sistema incompatible de 3 ecuaciones lineales con 3 incógnitas cuya matriz de coeficientes sea $BA$.`,
         puntuacion:2.5, criterios:"a) Cálculo de $AB$ y discusión de invertibilidad; inversa para $k=1$. b) Cálculo de $BA$ y discusión del rango por valores de $k$. c) Construcción justificada de un sistema incompatible con matriz de coeficientes $BA$ para $k=1$." },
-      { id:"2022-Ext-B2", bloque:"Analisis", opcion:"B",
+      { id:"2022-Ext-B2", topicSlugs: ["continuidad-y-tipos-de-discontinuidad","informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], bloque:"Analisis", opcion:"B",
         enunciado:`Sea la función
 
 $$f(x)=\\begin{cases}x & \\text{si } x\\le 0\\\\ x\\ln x & \\text{si } x>0\\end{cases}$$
@@ -1105,7 +1110,7 @@ b) (1 punto) Estudiar los intervalos de crecimiento y decrecimiento, así como s
 
 c) (0.75 puntos) Calcular $\\displaystyle\\int_1^2 f(x)\\,dx$.`,
         puntuacion:2.5, criterios:"a) Continuidad y derivabilidad en 0: 0.75 pts. b) Derivada, intervalos de crecimiento/decrecimiento y extremos relativos: 1 punto. c) Planteamiento y cálculo de la integral: 0.75 pts." },
-      { id:"2022-Ext-B3", bloque:"Geometria", opcion:"B",
+      { id:"2022-Ext-B3", topicSlugs: ["la-recta-en-el-espacio-ecuaciones","el-plano-en-el-espacio","posiciones-relativas-rectas-y-planos","distancias-en-el-espacio"], bloque:"Geometria", opcion:"B",
         enunciado:`Sean las rectas
 
 $$r\\equiv\\begin{cases}x+y+2=0\\\\y-2z+1=0\\end{cases},\\quad s\\equiv\\begin{cases}x=2-2t\\\\y=5+2t\\\\z=t\\end{cases},\\quad t\\in\\mathbb{R}.$$
@@ -1118,7 +1123,7 @@ b) (0.75 puntos) Hallar la ecuación del plano $\\pi$ que contiene a $r$ y a $s$
 
 c) (0.75 puntos) Sean $P$ y $Q$ los puntos de $r$ y $s$, respectivamente, contenidos en el plano $z=0$. Hallar la ecuación de la recta que pasa por $P$ y $Q$.`,
         puntuacion:2.5, criterios:"a) Posición relativa y distancia: 1 punto. b) Plano que contiene ambas rectas: 0.75 pts. c) Puntos de corte con $z=0$ y recta que pasa por ellos: 0.75 pts." },
-      { id:"2022-Ext-B4", bloque:"Probabilidad", opcion:"B",
+      { id:"2022-Ext-B4", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque:"Probabilidad", opcion:"B",
         enunciado:`Una empresa fabrica productos de tres tipos, $A$, $B$ y $C$. Cuatro séptimas partes de los productos son de tipo $A$, dos séptimas partes son de tipo $B$ y el resto son de tipo $C$. Se exportan el 40% de los productos de tipo $A$, el 60% de los de tipo $B$ y el 20% de los de tipo $C$.
 
 a) (1.25 puntos) Calcular la probabilidad de que un producto elegido al azar sea exportado.
@@ -1130,13 +1135,13 @@ b) (1.25 puntos) Calcular la probabilidad de que un producto sea de tipo $C$ sab
   {
     id: 10, año: 2021, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id: "2021-J-A1", bloque: "Algebra", opcion: "A",
+      { id: "2021-J-A1", topicSlugs: ["analisis-de-sistemas-por-el-metodo-de-gauss"], bloque: "Algebra", opcion: "A",
         enunciado: "Tres hermanos quieren repartirse de forma equitativa un total de 540 acciones valoradas en 1560 euros, que\ncorresponden a tres empresas A,B y C. Sabiendo que el valor actual en bolsa de la acción A es el triple que el de\nB y la mitad que el de C, que el número de acciones de C es la mitad que el de B y que el actual valor en bolsa\nde la acción B es 1 euro, encuentre el número de cada tipo de acción que le corresponde a cada hermano.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2021-J-A2", bloque: "Analisis", opcion: "A",
+      { id: "2021-J-A2", topicSlugs: ["la-integral-definida-regla-de-barrow-y-areas"], bloque: "Analisis", opcion: "A",
         enunciado: "Calcule el área de la región delimitada por las gráficas de las funciones\n$$\nf(x)=2+x-x^{2},\\qquad g(x)=2x^{2}-4x.\n$$",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2021-J-A3", bloque: "Geometria", opcion: "A",
+      { id: "2021-J-A3", topicSlugs: ["posiciones-relativas-rectas-y-planos","angulos-en-el-espacio","proyecciones-ortogonales-y-puntos-simetricos"], bloque: "Geometria", opcion: "A",
         enunciado: `Sean la recta $$r \\equiv \\begin{cases} -x - y + z = 0 \\\\ 2x + 3y - z + 1 = 0 \\end{cases}$$ y el plano $\\pi \\equiv 2x + y - z + 3 = 0$. Se pide:
 
 a) (0.75 puntos) Calcular el ángulo que forman $r$ y $\\pi$.
@@ -1145,10 +1150,10 @@ b) (1 punto) Hallar el simétrico del punto de intersección de la recta $r$ y e
 
 c) (0.75 puntos) Determinar la proyección ortogonal de la recta $r$ sobre el plano $\\pi$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2021-J-A4", bloque: "Probabilidad", opcion: "A",
+      { id: "2021-J-A4", topicSlugs: ["distribucion-normal-y-tipificacion","distribucion-binomial-variable-discreta"], bloque: "Probabilidad", opcion: "A",
         enunciado: "El tiempo de vida de los individuos de cierta especie animal tiene una distribución normal con una media de 8.8\nmeses y una desviación típica de 3 meses.\n\na) (1 punto) ¿Qué porcentaje de individuos de esta especie supera los 10 meses? ¿Qué porcentaje de indivi-\nduos ha vivido entre 7 y 10 meses?\n\nb) (1 punto) Si se toman al azar 4 especímenes, ¿cuál es la probabilidad de que al menos uno no supere los\n10 meses de vida?\n\nc) (0.5 puntos) ¿Qué valor de c es tal que el intervalo (8.8 − c, 8.8 + c) incluye el tiempo de vida (medido en\nmeses) del 98 % de los individuos de esta especie?",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2021-J-B1", bloque: "Algebra", opcion: "B",
+      { id: "2021-J-B1", topicSlugs: ["teorema-de-rouche-frobenius-discusion","analisis-de-sistemas-por-el-metodo-de-gauss"], bloque: "Algebra", opcion: "B",
         enunciado: `Se considera el siguiente sistema de ecuaciones dependientes del parámetro real $a$:
 $$\\begin{cases} ax - 2y + (a-1)z = 4 \\\\ -2x + 3y - 6z = 2 \\\\ -ax + y - 6z = 6 \\end{cases}$$
 
@@ -1156,7 +1161,7 @@ a) (2 puntos) Discuta el sistema según los diferentes valores de $a$.
 
 b) (0.5 puntos) Resuelva el sistema para $a = 1$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2021-J-B2", bloque: "Analisis", opcion: "B",
+      { id: "2021-J-B2", topicSlugs: ["continuidad-y-tipos-de-discontinuidad","informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], bloque: "Analisis", opcion: "B",
         enunciado: `Se considera la función
 $$f(x) = \\begin{cases} \\sin x & \\text{si } x < 0 \\\\ x e^x & \\text{si } x \\geq 0 \\end{cases}$$
 
@@ -1166,10 +1171,10 @@ b) (1 punto) Estudie los intervalos de crecimiento y decrecimiento de $f$ restri
 
 c) (0.75 puntos) Calcule $\\displaystyle\\int_{-\\pi/2}^{1} f(x)\,dx$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2021-J-B3", bloque: "Geometria", opcion: "B",
+      { id: "2021-J-B3", topicSlugs: ["distancias-en-el-espacio","la-recta-en-el-espacio-ecuaciones","posiciones-relativas-rectas-y-planos"], bloque: "Geometria", opcion: "B",
         enunciado: "Sean los planos $\\pi_1 \\equiv x + y = 1$ y $\\pi_2 \\equiv x + z = 1$.\n\na) (1.5 puntos) Halle los planos paralelos al plano $\\pi_1$ tales que su distancia al origen de coordenadas sea $2$.\n\nb) (0.5 puntos) Halle la recta que pasa por el punto $(0, 2, 0)$ y es perpendicular al plano $\\pi_2$.\n\nc) (0.5 puntos) Halle la distancia entre los puntos de intersección del plano $\\pi_1$ con los ejes $x$ e $y$.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2021-J-B4", bloque: "Probabilidad", opcion: "B",
+      { id: "2021-J-B4", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque: "Probabilidad", opcion: "B",
         enunciado: "Una estación de medición de calidad del aire mide niveles de NO2 y de partículas en suspensión. La probabilidad\nde que en un día se mida un nivel de NO2 superior al permitido es 0.16. En los días en los que se supera el nivel\npermitido de NO2, la probabilidad de que se supere el nivel permitido de partículas es 0.33. En los días en los\nque no se supera el nivel de NO2, la probabilidad de que se supere el nivel de partículas es 0.08.\n\na) (0.5 puntos) ¿Cuál es la probabilidad de que en un día se superen los dos niveles permitidos?\n\nb) (0.75 puntos) ¿Cuál es la probabilidad de que se supere al menos uno de los dos?\n\nc) (0.5 puntos) ¿Son independientes los sucesos “en un día se supera el nivel permitido de NO2” y “en un día\nse supera el nivel permitido de partículas”?\n\nd) (0.75 puntos) ¿Cuál es la probabilidad de que en un día se supere el nivel permitido de NO2, sabiendo que\nno se ha superado el nivel permitido de partículas?",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
     ]
@@ -1177,7 +1182,7 @@ c) (0.75 puntos) Calcule $\\displaystyle\\int_{-\\pi/2}^{1} f(x)\,dx$.`,
   {
     id: 11, año: 2020, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id: "2020-J-A1", bloque: "Algebra", opcion: "A",
+      { id: "2020-J-A1", topicSlugs: ["teorema-de-rouche-frobenius-discusion","analisis-de-sistemas-por-el-metodo-de-gauss"], bloque: "Algebra", opcion: "A",
         enunciado: `Se considera el siguiente sistema de ecuaciones dependientes del parámetro real $a$:
 $$\\begin{cases} x + ay + z = a+1 \\\\ -ax + y - z = 2a \\\\ -y + z = a \\end{cases}$$
 
@@ -1187,7 +1192,7 @@ a) (2 puntos) Discutir el sistema según los diferentes valores de $a$.
 
 b) (0.5 puntos) Resolver el sistema para $a = 0$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2020-J-A2", bloque: "Analisis", opcion: "A",
+      { id: "2020-J-A2", topicSlugs: ["concepto-de-derivada-e-interpretacion-geometrica"], bloque: "Analisis", opcion: "A",
         enunciado: `Dadas las funciones $f(x) = x^3 + 3x^2 - 1$ y $g(x) = 6x$, se pide:
 
 a) (0.5 puntos) Justificar, usando el teorema adecuado, que existe algún punto en el intervalo $[1, 10]$ en el que ambas funciones toman el mismo valor.
@@ -1196,7 +1201,7 @@ b) (1 punto) Calcular la ecuación de la recta tangente a la curva $y = f(x)$ co
 
 c) (1 punto) Calcular $\\displaystyle\\int_1^2 \\dfrac{f(x)}{g(x)}\,dx$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2020-J-A3", bloque: "Geometria", opcion: "A",
+      { id: "2020-J-A3", topicSlugs: ["el-plano-en-el-espacio","posiciones-relativas-rectas-y-planos"], bloque: "Geometria", opcion: "A",
         enunciado: `Dadas las rectas $$r \\equiv \\begin{cases} x - y = 2 \\\\ 3x - z = -1 \\end{cases}, \\qquad s \\equiv \\begin{cases} x = -1 + 2\\lambda \\\\ y = -4 - \\lambda \\\\ z = \\lambda \\end{cases}$$, se pide:
 
 a) (1 punto) Calcular la posición relativa de las rectas $r$ y $s$.
@@ -1205,13 +1210,13 @@ b) (0.5 puntos) Hallar la ecuación del plano perpendicular a la recta $r$ y que
 
 c) (1 punto) Encontrar la ecuación del plano paralelo a la recta $r$ que contiene a la recta $s$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2020-J-A4", bloque: "Probabilidad", opcion: "A",
+      { id: "2020-J-A4", topicSlugs: ["diagramas-de-arbol-y-tablas-de-contingencia","distribucion-binomial-variable-discreta"], bloque: "Probabilidad", opcion: "A",
         enunciado: "Un arquero aficionado dispone de 4 flechas y dispara a un globo colocado en el centro de una diana. La proba-\nbilidad de alcanzar el blanco en el primer tiro es del 30%. En los lanzamientos sucesivos la puntería se va\nafinando, de manera que en el segundo es del 40%, en el tercero del 50% y en el cuarto del 60%. Se pide:\n\na) (1 punto) Calcular la probabilidad de que el globo haya explotado sin necesidad de hacer el cuarto disparo.\n\nb) (0.5 puntos) Calcular la probabilidad de que el globo siga intacto tras el cuarto disparo.\n\nc) (1 punto) En una exhibición participan diez arqueros profesionales, que aciertan un 85% de sus lanzamien-\ntos. Calcular la probabilidad de que entre los 10 hayan explotado exactamente 6 globos al primer disparo.\nTodas las respuestas deberán estar debidamente justificadas.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2020-J-B1", bloque: "Algebra", opcion: "B",
+      { id: "2020-J-B1", topicSlugs: ["analisis-de-sistemas-por-el-metodo-de-gauss"], bloque: "Algebra", opcion: "B",
         enunciado: "Según informa la Asociación Empresarial de Acuicultura de España, durante el año 2016 se comercializaron\nen España doradas, lubinas y rodaballos por un total de 275.8 millones de euros. En dicho informe figura que\nse comercializaron un total de 13740 toneladas de doradas y 23440 toneladas de lubinas. En cuanto a los\nrodaballos, se vendieron 7400 toneladas por un valor de 63.6 millones de euros. Sabiendo que el kilo de dorada\nfue 11 céntimos más caro que el kilo de lubina, se pide calcular el precio del kilo de cada uno de los tres tipos de\npescado anteriores.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2020-J-B2", bloque: "Analisis", opcion: "B",
+      { id: "2020-J-B2", topicSlugs: ["continuidad-y-tipos-de-discontinuidad","concepto-de-derivada-e-interpretacion-geometrica","informacion-extraida-de-la-1-y-2-derivada"], bloque: "Analisis", opcion: "B",
         enunciado: `Sea la función
 $$f(x) = \\begin{cases} (x-1)^2 & \\text{si } x \\leq 1 \\\\ (x-1)^3 & \\text{si } x > 1 \\end{cases}$$
 
@@ -1221,10 +1226,10 @@ b) (1 punto) Analice su derivabilidad y crecimiento en $[-4, 4]$.
 
 c) (1 punto) Determine si la función $g(x) = f'(x)$ está definida, es continua y es derivable en $x = 1$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2020-J-B3", bloque: "Geometria", opcion: "B",
+      { id: "2020-J-B3", topicSlugs: ["el-plano-en-el-espacio"], bloque: "Geometria", opcion: "B",
         enunciado: "Dados los puntos $P(-3, 1, 2)$ y $Q(-1, 0, 1)$ y el plano $\\pi$ de ecuación $x + 2y - 3z = 4$, se pide:\n\na) (1 punto) Hallar la proyección de $Q$ sobre $\\pi$.\n\nb) (0.5 puntos) Escribir la ecuación del plano paralelo a $\\pi$ que pasa por el punto $P$.\n\nc) (1 punto) Escribir la ecuación del plano perpendicular a $\\pi$ que contiene a los puntos $P$ y $Q$.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2020-J-B4", bloque: "Probabilidad", opcion: "B",
+      { id: "2020-J-B4", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque: "Probabilidad", opcion: "B",
         enunciado: "Se consideran dos sucesos $A$ y $B$ tales que $P(A) = 0.5$, $P(B) = 0.25$ y $P(A \\cap B) = 0.125$. Responder de manera razonada o calcular lo que se pide en los siguientes casos:\n\na) (0.5 puntos) Sea $C$ otro suceso, incompatible con $A$ y con $B$. ¿Son compatibles los sucesos $C$ y $A \\cup B$?\n\nb) (0.5 puntos) ¿Son $A$ y $B$ independientes?\n\nc) (0.75 puntos) Calcular la probabilidad $P(\\bar{A} \\cap \\bar{B})$ (donde $\\bar{A}$ denota el suceso complementario al suceso $A$).\n\nd) (0.75 puntos) Calcular $P(\\bar{B} | A)$.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
     ]
@@ -1232,14 +1237,14 @@ c) (1 punto) Determine si la función $g(x) = f'(x)$ está definida, es continua
   {
     id: 12, año: 2019, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id: "2019-J-A1", bloque: "Algebra", opcion: "A",
+      { id: "2019-J-A1", topicSlugs: ["rango-de-una-matriz-metodo-de-gauss","matriz-inversa-por-gauss-jordan"], bloque: "Algebra", opcion: "A",
         enunciado: `Dadas las matrices $A = \\begin{pmatrix}1&3&4&1\\\\1&a&2&2-a\\\\-1&2&a&a-2\\end{pmatrix}$ y $M = \\begin{pmatrix}1&0&0\\\\0&1&0\\\\0&0&0\\\\0&0&1\\end{pmatrix}$, se pide:
 
 a) (1.5 puntos) Estudiar el rango de $A$ en función del parámetro real $a$.
 
 b) (1 punto) Calcular, si es posible, la inversa de la matriz $AM$ para el caso $a = 0$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2019-J-A2", bloque: "Analisis", opcion: "A",
+      { id: "2019-J-A2", topicSlugs: ["limites-infinitos","concepto-de-derivada-e-interpretacion-geometrica","informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], bloque: "Analisis", opcion: "A",
         enunciado: `Dada $f(x) = \\dfrac{\\ln x}{x}$, donde $\\ln$ denota el logaritmo neperiano, definida para $x > 0$, se pide:
 
 a) (0.5 puntos) Calcular, en caso de que exista, una asíntota horizontal de la curva $y = f(x)$.
@@ -1248,7 +1253,7 @@ b) (1 punto) Encontrar un punto de la curva $y = f(x)$ en el que la recta tangen
 
 c) (1 punto) Calcular el área del recinto acotado limitado por la curva $y = f(x)$ y las rectas $y = 0$ y $x = e$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2019-J-A3", bloque: "Geometria", opcion: "A",
+      { id: "2019-J-A3", topicSlugs: ["posiciones-relativas-rectas-y-planos"], bloque: "Geometria", opcion: "A",
         enunciado: `Dadas la recta $r \\equiv \\dfrac{x-1}{2} = \\dfrac{y-3}{-2} = \\dfrac{z}{1}$ y la recta $s$ que pasa por el punto $(2, -5, 1)$ y tiene dirección $(-1, 0, -1)$, se pide:
 
 a) (1 punto) Estudiar la posición relativa de las dos rectas.
@@ -1257,13 +1262,13 @@ b) (1 punto) Calcular un plano que sea paralelo a $r$ y contenga a $s$.
 
 c) (0.5 puntos) Calcular un plano perpendicular a la recta $r$ y que pase por el origen de coordenadas.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2019-J-A4", bloque: "Probabilidad", opcion: "A",
+      { id: "2019-J-A4", topicSlugs: ["distribucion-binomial-variable-discreta"], bloque: "Probabilidad", opcion: "A",
         enunciado: "La probabilidad de que un pez de una determinada especie sobreviva más de 5 años es del 10 %. Se pide:\n\na) (1 punto) Si en un acuario tenemos 10 peces de esta especie nacidos este año, hallar la probabilidad de\nque al menos dos de ellos sigan vivos dentro de 5 años.\n\nb) (1.5 puntos) Si en un tanque de una piscifactoría hay 200 peces de esta especie nacidos este mismo año,\nusando una aproximación mediante la distribución normal correspondiente, hallar la probabilidad de que al\ncabo de 5 años hayan sobrevivido al menos 10 de ellos.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2019-J-B1", bloque: "Algebra", opcion: "B",
+      { id: "2019-J-B1", topicSlugs: ["analisis-de-sistemas-por-el-metodo-de-gauss"], bloque: "Algebra", opcion: "B",
         enunciado: "Una estudiante pidió en la cafetería 3 bocadillos, 2 refrescos y 2 bolsas de patatas y pagó un total de 19 euros.\nAl mirar la cuenta comprobó que le habían cobrado un bocadillo y una bolsa de patatas de más. Reclamó y le\ndevolvieron 4 euros.\nPara compensar el error, el vendedor le ofreció llevarse un bocadillo y un refresco por solo 3 euros, lo que suponía\nun descuento del 40 % respecto a sus precios originales. ¿Cuáles eran los respectivos precios sin descuento de\nun bocadillo, de un refresco y de una bolsa de patatas?",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2019-J-B2", bloque: "Analisis", opcion: "B",
+      { id: "2019-J-B2", topicSlugs: ["informacion-extraida-de-la-1-y-2-derivada","definicion-de-limite-y-limites-laterales"], bloque: "Analisis", opcion: "B",
         enunciado: `Dada la función $f(x) = \\sqrt{4x^2 - x^4}$, se pide:
 
 a) (0.5 puntos) Determinar su dominio.
@@ -1272,7 +1277,7 @@ b) (1.5 puntos) Determinar sus intervalos de crecimiento y de decrecimiento.
 
 c) (0.5 puntos) Calcular los límites laterales $\\displaystyle\\lim_{x \\to 0^-} \\dfrac{f(x)}{x}$ y $\\displaystyle\\lim_{x \\to 0^+} \\dfrac{f(x)}{x}$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2019-J-B3", bloque: "Geometria", opcion: "B",
+      { id: "2019-J-B3", topicSlugs: ["proyecciones-ortogonales-y-puntos-simetricos","distancias-en-el-espacio"], bloque: "Geometria", opcion: "B",
         enunciado: `Dados el punto $A(2, 1, 0)$ y el plano $\\pi \\equiv 2x + 3y + 4z = 36$, se pide:
 
 a) (0.75 puntos) Determinar la distancia del punto $A$ al plano $\\pi$.
@@ -1281,7 +1286,7 @@ b) (1 punto) Hallar las coordenadas del punto del plano $\\pi$ más próximo al 
 
 c) (0.75 puntos) Hallar el punto simétrico de $A$ respecto al plano $\\pi$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2019-J-B4", bloque: "Probabilidad", opcion: "B",
+      { id: "2019-J-B4", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque: "Probabilidad", opcion: "B",
         enunciado: "Una compañía farmacéutica vende un medicamento que alivia la dermatitis atópica en un 80 % de los casos.\nSi un enfermo es tratado con un placebo, la probabilidad de mejoría espontánea es del 10 %. En un estudio\nexperimental, la mitad de los pacientes han sido tratados con el medicamento y la otra mitad con un placebo.\n\na) (1 punto) Determinar cuál es la probabilidad de que un paciente elegido al azar haya mejorado.\n\nb) (1.5 puntos) Si un paciente elegido al azar ha mejorado, hallar la probabilidad de que haya sido tratado con\nel medicamento.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
     ]
@@ -1289,7 +1294,7 @@ c) (0.75 puntos) Hallar el punto simétrico de $A$ respecto al plano $\\pi$.`,
   {
     id: 13, año: 2018, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id: "2018-J-A1", bloque: "Algebra", opcion: "A",
+      { id: "2018-J-A1", topicSlugs: ["teorema-de-rouche-frobenius-discusion","analisis-de-sistemas-por-el-metodo-de-gauss"], bloque: "Algebra", opcion: "A",
         enunciado: `Dado el sistema de ecuaciones
 $$\\begin{cases} x + my = 1 \\\\ -2x - (m+1)y + z = -1 \\\\ x + (2m-1)y + (m+2)z = 2+2m \\end{cases}$$
 se pide:
@@ -1298,18 +1303,18 @@ a) (2 puntos) Discutir el sistema en función del parámetro $m$.
 
 b) (0.5 puntos) Resolver el sistema en el caso $m = 0$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2018-J-A2", bloque: "Analisis", opcion: "A",
+      { id: "2018-J-A2", topicSlugs: ["metodos-de-integracion"], bloque: "Analisis", opcion: "A",
         enunciado: `a) (1.5 puntos) En un experimento en un laboratorio se han realizado 5 medidas del mismo objeto, que han dado los resultados siguientes: $m_1 = 0.92$, $m_2 = 0.94$, $m_3 = 0.89$, $m_4 = 0.90$, $m_5 = 0.91$. Se tomará como resultado el valor de $x$ tal que la suma de los cuadrados de los errores sea mínima. Es decir, el valor para el que la función $E(x) = (x-m_1)^2 + (x-m_2)^2 + \\cdots + (x-m_5)^2$ alcanza el mínimo. Calcule dicho valor $x$.
 
 b) (1 punto) Aplique el método de integración por partes para calcular la integral $\\displaystyle\\int_1^2 x^2 \\ln(x)\,dx$, donde $\\ln$ significa logaritmo neperiano.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2018-J-A3", bloque: "Geometria", opcion: "A",
+      { id: "2018-J-A3", topicSlugs: ["posiciones-relativas-rectas-y-planos","distancias-en-el-espacio","areas-y-volumenes","producto-vectorial-u-v"], bloque: "Geometria", opcion: "A",
         enunciado: "Dados los planos $\\pi_1 \\equiv 4x + 6y - 12z + 1 = 0$ y $\\pi_2 \\equiv -2x - 3y + 6z - 5 = 0$, se pide:\n\na) (1 punto) Calcular el volumen de un cubo que tenga dos de sus caras en dichos planos.\n\nb) (1.5 puntos) Para el cuadrado de vértices consecutivos $ABCD$, con $A(2, 1, 3)$ y $B(1, 2, 3)$, calcular los vértices $C$ y $D$, sabiendo que $C$ pertenece a los planos $\\pi_2$ y $\\pi_3 \\equiv x - y + z = 2$.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2018-J-A4", bloque: "Probabilidad", opcion: "A",
+      { id: "2018-J-A4", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque: "Probabilidad", opcion: "A",
         enunciado: "El 60% de las ventas en unos grandes almacenes corresponden a artículos con precios rebajados. Los clientes\ndevuelven el 15% de los artículos que compran rebajados, porcentaje que disminuye al 8% si los artículos han\nsido adquiridos sin rebajas.\n\na) (1.25 puntos) Determine el porcentaje global de artículos devueltos.\n\nb) (1.25 puntos) ¿Qué porcentaje de artículos devueltos fueron adquiridos con precios rebajados?",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2018-J-B1", bloque: "Algebra", opcion: "B",
+      { id: "2018-J-B1", topicSlugs: ["matriz-inversa-por-gauss-jordan","propiedades-de-la-matriz-traspuesta-a-t"], bloque: "Algebra", opcion: "B",
         enunciado: `Dadas las matrices $A = \\begin{pmatrix}m&0&2\\\\-2&4&m\\\\0&1&-1\\end{pmatrix}$ y $B = \\begin{pmatrix}-2\\\\0\\\\0\\end{pmatrix}$, se pide:
 
 a) (1 punto) Obtener los valores del parámetro $m$ para los que la matriz $A$ admite inversa.
@@ -1318,7 +1323,7 @@ b) (1 punto) Para $m = 0$, calcular $A \\cdot B$ y $A^{-1} \\cdot B$.
 
 c) (0.5 puntos) Calcular $B \\cdot B^t$ y $B^t \\cdot B$, donde $B^t$ denota la matriz traspuesta de $B$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2018-J-B2", bloque: "Analisis", opcion: "B",
+      { id: "2018-J-B2", topicSlugs: ["limites-infinitos"], bloque: "Analisis", opcion: "B",
         enunciado: `Dada la función $f(x) = \\dfrac{|x|}{\\sqrt{x^2+9}}$, se pide:
 
 a) (0.5 puntos) Determinar, si existen, las asíntotas horizontales de $f(x)$.
@@ -1327,7 +1332,7 @@ b) (0.75 puntos) Calcular $f'(4)$.
 
 c) (1.25 puntos) Hallar el área del recinto limitado por la curva $y = f(x)$, el eje $OX$ y las rectas $x = -1$ y $x = 1$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2018-J-B3", bloque: "Geometria", opcion: "B",
+      { id: "2018-J-B3", topicSlugs: ["posiciones-relativas-rectas-y-planos","distancias-en-el-espacio","el-plano-en-el-espacio"], bloque: "Geometria", opcion: "B",
         enunciado: `Dados el punto $P(1, 1, 1)$ y las rectas $r \\equiv \\begin{cases} 2x + y = 2 \\\\ 5x + z = 6 \\end{cases}$ y $s \\equiv \\dfrac{x-2}{-1} = \\dfrac{y+1}{1} = \\dfrac{z-1}{1/3}$, se pide:
 
 a) (1 punto) Hallar la distancia del punto $P$ a la recta $r$.
@@ -1336,7 +1341,7 @@ b) (1 punto) Estudiar la posición relativa de las rectas $r$ y $s$.
 
 c) (0.5 puntos) Hallar el plano perpendicular a la recta $s$ y que pasa por el punto $P$.`,
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
-      { id: "2018-J-B4", bloque: "Probabilidad", opcion: "B",
+      { id: "2018-J-B4", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque: "Probabilidad", opcion: "B",
         enunciado: "En una fábrica se elaboran dos tipos de productos: A y B. El 75% de los productos fabricados son de tipo A y el\n25% de tipo B. Los productos de tipo B salen defectuosos un 5% de las veces, mientras que los de tipo A salen\ndefectuosos un 2.5% de las veces.\n\na) (1 punto) Si se fabrican 5000 productos en un mes, ¿cuántos de ellos se espera que sean defectuosos?\n\nb) (1.5 puntos) Un mes, por motivos logísticos, se cambió la producción, de modo que se fabricaron exclu-\nsivamente productos de tipo A. Sabiendo que se fabricaron 6000 unidades, determinar, aproximando la\ndistribución por una normal, la probabilidad de que haya más de 160 unidades defectuosas.",
         puntuacion: 2.5, criterios: "Se valorará el planteamiento correcto, la justificación razonada, el desarrollo matemático, los cálculos y la respuesta final." },
     ]
@@ -1344,28 +1349,28 @@ c) (0.5 puntos) Hallar el plano perpendicular a la recta $s$ y que pasa por el p
   {
     id: 14, año: 2017, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"2017-J-1A", bloque:"Algebra", opcion:"A",
+      { id:"2017-J-1A", topicSlugs: ["matriz-inversa-por-gauss-jordan","determinantes-de-orden-2-y-3-regla-de-sarrus","analisis-de-sistemas-por-el-metodo-de-gauss"], bloque:"Algebra", opcion:"A",
         enunciado:`$A=\\begin{pmatrix}2&1&-1\\\\1&0&1\\\\-1&1&2\\end{pmatrix}$. $\\det(A)$, $A^{-1}$, $AX=\\begin{pmatrix}1\\\\2\\\\0\\end{pmatrix}$.`,
         puntuacion:2.5, criterios:"Determinante (0.5 pts), inversa (1.25 pts), sistema (0.75 pts)." },
-      { id:"2017-J-1B", bloque:"Algebra", opcion:"B",
+      { id:"2017-J-1B", topicSlugs: ["teorema-de-rouche-frobenius-discusion"], bloque:"Algebra", opcion:"B",
         enunciado:`Sistema segun $a$:\n$$\\begin{cases}x+2y-z=1\\\\2x+ay+z=3\\\\x+y+az=2\\end{cases}$$`,
         puntuacion:2.5, criterios:"Rouche-Frobenius (1 pt), discusion (1 pt), resolucion SCD (0.5 pts)." },
-      { id:"2017-J-2A", bloque:"Analisis", opcion:"A",
+      { id:"2017-J-2A", topicSlugs: ["informacion-extraida-de-la-propia-funcion"], bloque:"Analisis", opcion:"A",
         enunciado:`$f(x)=x^4-8x^2$: simetria, extremos, inflexion y grafica.`,
         puntuacion:2.5, criterios:"Simetria (0.25 pts), extremos (1 pt), inflexion (0.75 pts), grafica (0.5 pts)." },
-      { id:"2017-J-2B", bloque:"Analisis", opcion:"B",
+      { id:"2017-J-2B", topicSlugs: ["metodos-de-integracion"], bloque:"Analisis", opcion:"B",
         enunciado:`Area acotada por $y=\\ln x$, $y=0$, $x=e$.`,
         puntuacion:2.5, criterios:"Planteamiento (0.75 pts), integracion por partes (1 pt), resultado (0.75 pts)." },
-      { id:"2017-J-3A", bloque:"Geometria", opcion:"A",
+      { id:"2017-J-3A", topicSlugs: ["proyecciones-ortogonales-y-puntos-simetricos"], bloque:"Geometria", opcion:"A",
         enunciado:`$\\pi:2x-y+3z=6$, $P(1,2,-1)$.\n\na) Distancia $P$ a $\\pi$.\n\nb) Recta perpendicular.\n\nc) Simetrico de $P$.`,
         puntuacion:2.5, criterios:"Distancia (0.75 pts), recta (0.5 pts), pie (0.5 pts), simetrico (0.75 pts)." },
-      { id:"2017-J-3B", bloque:"Geometria", opcion:"B",
+      { id:"2017-J-3B", topicSlugs: ["el-plano-en-el-espacio","distancias-en-el-espacio","areas-y-volumenes","producto-mixto"], bloque:"Geometria", opcion:"B",
         enunciado:`$A(0,0,0)$, $B(1,1,0)$, $C(1,0,1)$, $D(0,1,1)$.\n\na) Plano $BCD$.\n\nb) Distancia $A$ a $BCD$.\n\nc) Volumen tetraedro.`,
         puntuacion:2.5, criterios:"Plano BCD (1 pt), distancia A (0.75 pts), volumen (0.75 pts)." },
-      { id:"2017-J-4A", bloque:"Probabilidad", opcion:"A",
+      { id:"2017-J-4A", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque:"Probabilidad", opcion:"A",
         enunciado:`Caja $A$: 5 blancas, 3 negras. Caja $B$: 2 blancas, 6 negras. $P(A)=0.4$.\n\na) $P(\\text{blanca})$\n\nb) $P(A \\mid \\text{blanca})$`,
         puntuacion:2.5, criterios:"Prob. total (1 pt), Bayes (1.5 pts)." },
-      { id:"2017-J-4B", bloque:"Probabilidad", opcion:"B",
+      { id:"2017-J-4B", topicSlugs: ["distribucion-normal-y-tipificacion"], bloque:"Probabilidad", opcion:"B",
         enunciado:`$X\\sim N(500,50)$.\n\na) $P(450<X<600)$\n\nb) $P(X>550)$\n\nc) $k$: $P(X>k)=0{,}1$`,
         puntuacion:2.5, criterios:"Tipificacion (0.5 pts), a (0.75 pts), b (0.75 pts), c (0.5 pts)." }
     ]
@@ -1373,28 +1378,28 @@ c) (0.5 puntos) Hallar el plano perpendicular a la recta $s$ y que pasa por el p
   {
     id: 15, año: 2016, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"2016-J-1A", bloque:"Algebra", opcion:"A",
+      { id:"2016-J-1A", topicSlugs: ["matriz-inversa-por-gauss-jordan","determinantes-de-orden-2-y-3-regla-de-sarrus","analisis-de-sistemas-por-el-metodo-de-gauss"], bloque:"Algebra", opcion:"A",
         enunciado:`$A=\\begin{pmatrix}1&-1&0\\\\2&1&1\\\\0&-1&2\\end{pmatrix}$. $\\det(A)$, $A^{-1}$, $AX=\\begin{pmatrix}0\\\\3\\\\1\\end{pmatrix}$.`,
         puntuacion:2.5, criterios:"Determinante (0.5 pts), inversa (1.25 pts), sistema (0.75 pts)." },
-      { id:"2016-J-1B", bloque:"Algebra", opcion:"B",
+      { id:"2016-J-1B", topicSlugs: ["teorema-de-rouche-frobenius-discusion"], bloque:"Algebra", opcion:"B",
         enunciado:`Sistema segun $m$:\n$$\\begin{cases}x+y-z=2\\\\x+my+z=m\\\\2x+y+mz=3\\end{cases}$$`,
         puntuacion:2.5, criterios:"Rouche-Frobenius (1 pt), discusion (1 pt), resolucion (0.5 pts)." },
-      { id:"2016-J-2A", bloque:"Analisis", opcion:"A",
+      { id:"2016-J-2A", topicSlugs: ["limites-infinitos"], bloque:"Analisis", opcion:"A",
         enunciado:`$f(x)=\\dfrac{e^x}{1+e^x}$: dominio, asintotas, monotonia, inflexion y grafica.`,
         puntuacion:2.5, criterios:"Dominio y asintotas (0.75 pts), monotonia (0.75 pts), inflexion (0.5 pts), grafica (0.5 pts)." },
-      { id:"2016-J-2B", bloque:"Analisis", opcion:"B",
+      { id:"2016-J-2B", topicSlugs: ["la-integral-definida-regla-de-barrow-y-areas"], bloque:"Analisis", opcion:"B",
         enunciado:`Area entre $y=e^x$, $y=e^{2-x}$ y $x=0$.`,
         puntuacion:2.5, criterios:"Interseccion (0.5 pts), planteamiento (0.75 pts), calculo (1 pt), resultado (0.25 pts)." },
-      { id:"2016-J-3A", bloque:"Geometria", opcion:"A",
+      { id:"2016-J-3A", topicSlugs: ["posiciones-relativas-rectas-y-planos"], bloque:"Geometria", opcion:"A",
         enunciado:`$r:\\frac{x}{1}=\\frac{y-1}{2}=\\frac{z+1}{-1}$ y $\\pi:2x-y+z=4$.\n\na) Posicion relativa.\n\nb) Punto e angulo si se cortan.`,
         puntuacion:2.5, criterios:"Posicion (0.5 pts), punto (1 pt), angulo (1 pt)." },
-      { id:"2016-J-3B", bloque:"Geometria", opcion:"B",
+      { id:"2016-J-3B", topicSlugs: ["areas-y-volumenes","el-plano-en-el-espacio","distancias-en-el-espacio"], bloque:"Geometria", opcion:"B",
         enunciado:`$A(1,1,0)$, $B(0,1,1)$, $C(1,0,1)$.\n\na) Area del triangulo.\n\nb) Plano $ABC$.\n\nc) Distancia del origen al plano.`,
         puntuacion:2.5, criterios:"Area (1 pt), plano (0.75 pts), distancia (0.75 pts)." },
-      { id:"2016-J-4A", bloque:"Probabilidad", opcion:"A",
+      { id:"2016-J-4A", topicSlugs: ["distribucion-normal-y-tipificacion"], bloque:"Probabilidad", opcion:"A",
         enunciado:`$X\\sim N(10,2)$.\n\na) $P(8<X<13)$\n\nb) $P(X>12)$\n\nc) $k$: $P(X<k)=0{,}975$`,
         puntuacion:2.5, criterios:"Tipificacion (0.5 pts), a (0.75 pts), b (0.75 pts), c (0.5 pts)." },
-      { id:"2016-J-4B", bloque:"Probabilidad", opcion:"B",
+      { id:"2016-J-4B", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque:"Probabilidad", opcion:"B",
         enunciado:`$M_1$ (30%, 2% defectos), $M_2$ (70%, 5% defectos).\n\na) P(defectuosa)\n\nb) P($M_1$ | defectuosa)`,
         puntuacion:2.5, criterios:"Prob. total (1 pt), Bayes (1.5 pts)." }
     ]
@@ -1402,28 +1407,28 @@ c) (0.5 puntos) Hallar el plano perpendicular a la recta $s$ y que pasa por el p
   {
     id: 16, año: 2015, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"2015-J-1A", bloque:"Algebra", opcion:"A",
+      { id:"2015-J-1A", topicSlugs: ["matriz-inversa-por-gauss-jordan","determinantes-de-orden-2-y-3-regla-de-sarrus","analisis-de-sistemas-por-el-metodo-de-gauss"], bloque:"Algebra", opcion:"A",
         enunciado:`$A=\\begin{pmatrix}2&0&1\\\\1&-1&0\\\\0&1&2\\end{pmatrix}$. $\\det(A)$, $A^{-1}$, $AX=\\begin{pmatrix}1\\\\2\\\\1\\end{pmatrix}$.`,
         puntuacion:2.5, criterios:"Determinante (0.5 pts), inversa (1.25 pts), sistema (0.75 pts)." },
-      { id:"2015-J-1B", bloque:"Algebra", opcion:"B",
+      { id:"2015-J-1B", topicSlugs: ["teorema-de-rouche-frobenius-discusion"], bloque:"Algebra", opcion:"B",
         enunciado:`Sistema segun $a$:\n$$\\begin{cases}x+ay+z=1\\\\ax+y+z=1\\\\x+y+az=1\\end{cases}$$`,
         puntuacion:2.5, criterios:"Rouche-Frobenius (1 pt), casos a=1, a=-2, resto (1 pt), resolucion SCD (0.5 pts)." },
-      { id:"2015-J-2A", bloque:"Analisis", opcion:"A",
+      { id:"2015-J-2A", topicSlugs: ["informacion-extraida-de-la-1-y-2-derivada"], bloque:"Analisis", opcion:"A",
         enunciado:`$f(x)=x^3-3x^2-9x+2$: extremos, inflexion y grafica.`,
         puntuacion:2.5, criterios:"Derivada (0.5 pts), extremos (0.75 pts), inflexion (0.5 pts), grafica (0.75 pts)." },
-      { id:"2015-J-2B", bloque:"Analisis", opcion:"B",
+      { id:"2015-J-2B", topicSlugs: ["metodos-de-integracion"], bloque:"Analisis", opcion:"B",
         enunciado:`$\\displaystyle\\int_0^{\\pi} x\\sin x\\,dx$.`,
         puntuacion:2.5, criterios:"Integracion por partes (1.5 pts), evaluacion (0.75 pts), resultado (0.25 pts)." },
-      { id:"2015-J-3A", bloque:"Geometria", opcion:"A",
+      { id:"2015-J-3A", topicSlugs: ["posiciones-relativas-rectas-y-planos"], bloque:"Geometria", opcion:"A",
         enunciado:`$r:\\frac{x-2}{1}=\\frac{y}{2}=\\frac{z+1}{-2}$ y $s:\\frac{x-1}{2}=\\frac{y-3}{1}=\\frac{z}{1}$.\n\na) Posicion relativa.\n\nb) Distancia si se cruzan.`,
         puntuacion:2.5, criterios:"Posicion (0.5 pts), cruzadas (0.5 pts), distancia (1.5 pts)." },
-      { id:"2015-J-3B", bloque:"Geometria", opcion:"B",
+      { id:"2015-J-3B", topicSlugs: ["distancias-en-el-espacio"], bloque:"Geometria", opcion:"B",
         enunciado:`$A(2,1,0)$, $B(1,0,1)$, $C(0,2,1)$.\n\na) Plano $ABC$.\n\nb) Distancia de $D(1,1,1)$ al plano.\n\nc) ¿$D$ y origen en el mismo lado?`,
         puntuacion:2.5, criterios:"Plano (1 pt), distancia (0.75 pts), signo (0.75 pts)." },
-      { id:"2015-J-4A", bloque:"Probabilidad", opcion:"A",
+      { id:"2015-J-4A", topicSlugs: ["distribucion-normal-y-tipificacion"], bloque:"Probabilidad", opcion:"A",
         enunciado:`$X\\sim N(50,5)$.\n\na) $P(45<X<60)$\n\nb) $P(X>55)$\n\nc) $k$: $P(X<k)=0{,}9772$`,
         puntuacion:2.5, criterios:"Tipificacion (0.5 pts), a (0.75 pts), b (0.75 pts), c (0.5 pts)." },
-      { id:"2015-J-4B", bloque:"Probabilidad", opcion:"B",
+      { id:"2015-J-4B", topicSlugs: ["distribucion-binomial-variable-discreta","parametros-de-una-distribucion-media-varianza-y-desviacion-tipica"], bloque:"Probabilidad", opcion:"B",
         enunciado:`3 monedas. $X$ = num. de caras.\n\na) Tabla de distribucion.\n\nb) Esperanza y varianza.\n\nc) P(al menos 2 caras)`,
         puntuacion:2.5, criterios:"Tabla (1 pt), E y V (0.75 pts), P(X>=2) (0.75 pts)." }
     ]
@@ -1431,29 +1436,29 @@ c) (0.5 puntos) Hallar el plano perpendicular a la recta $s$ y que pasa por el p
   {
     id: 17, año: 2018, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"2018-Ext-1A", bloque:"Algebra", opcion:"A",
+      { id:"2018-Ext-1A", topicSlugs: ["rango-de-una-matriz-metodo-de-gauss","matriz-inversa-por-gauss-jordan","analisis-de-sistemas-por-el-metodo-de-gauss"], bloque:"Algebra", opcion:"A",
         enunciado:`Dadas las matrices $A=\\begin{pmatrix}14&0&10\\\\0&7&5\\\\3&4&5\\alpha\\end{pmatrix}$, $X=\\begin{pmatrix}x\\\\y\\\\z\\end{pmatrix}$ y $B=\\begin{pmatrix}2\\\\37/2\\\\11\\end{pmatrix}$, se pide:\n\na) (1.25 puntos) Discutir el rango de la matriz $A$, en función de los valores del parámetro $\\alpha$.\n\nb) (0.75 puntos) Para $\\alpha=0$, calcular, si es posible, $A^{-1}$.\n\nc) (0.5 puntos) Resolver, si es posible, el sistema $AX=B$, en el caso $\\alpha=1$.`,
         puntuacion:2.5, criterios:"a) Valor crítico α=1: 0.75 pts (planteamiento 0.5, resolución 0.25); rango en cada caso (α=1, α≠1): 0.25 pts cada uno. b) Procedimiento: 0.5 pts, cálculos: 0.25 pts. c) Procedimiento: 0.25 pts, cálculos: 0.25 pts." },
-      { id:"2018-Ext-2A", bloque:"Analisis", opcion:"A",
+      { id:"2018-Ext-2A", topicSlugs: ["continuidad-y-tipos-de-discontinuidad","limites-infinitos","la-integral-definida-regla-de-barrow-y-areas"], bloque:"Analisis", opcion:"A",
         enunciado:`Se considera la función $f(x)=\\begin{cases}8e^{2x-4} & \\text{si } x\\le 2\\\\ \\dfrac{x^3-4x}{x-2} & \\text{si } x>2\\end{cases}$ y se pide:\n\na) (0.75 puntos) Estudiar la continuidad de $f$ en $x=2$.\n\nb) (1 punto) Calcular las asíntotas horizontales de $f(x)$. ¿Hay alguna asíntota vertical?\n\nc) (0.75 puntos) Calcular $\\displaystyle\\int_0^2 f(x)\\,dx$.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.25 pts; cada límite lateral: 0.25 pts. b) Saber qué límites calcular: 0.25 pts, calcular cada uno: 0.25 pts, justificar que no hay A.V.: 0.25 pts. c) Sustituir f(x) adecuadamente: 0.25 pts, primitiva correcta: 0.25 pts, regla de Barrow: 0.25 pts." },
-      { id:"2018-Ext-3A", bloque:"Geometria", opcion:"A",
+      { id:"2018-Ext-3A", topicSlugs: ["producto-escalar-de-dos-vectores-u-v"], bloque:"Geometria", opcion:"A",
         enunciado:`Se consideran los vectores $\\vec u=(-1,2,3)$, $\\vec v=(2,0,-1)$ y el punto $A(-4,4,7)$. Se pide:\n\na) (1 punto) Determinar un vector $\\vec w_1$ que sea ortogonal a $\\vec u$ y $\\vec v$, unitario y con tercera coordenada negativa.\n\nb) (0.75 puntos) Hallar un vector no nulo $\\vec w_2$ que sea combinación lineal de $\\vec u$ y $\\vec v$ y ortogonal a $\\vec v$.\n\nc) (0.75 puntos) Determinar los vértices del paralelogramo cuyos lados tienen las direcciones de los vectores $\\vec u$ y $\\vec v$ y una de sus diagonales es el segmento $\\overrightarrow{OA}$.`,
         puntuacion:2.5, criterios:"a) Dirección ortogonal: 0.5 pts, hacerlo unitario: 0.25 pts, elegir signo adecuado: 0.25 pts. b) Planteamiento: 0.5 pts, resolución: 0.25 pts. c) Planteamiento: 0.5 pts, resolución: 0.25 pts." },
-      { id:"2018-Ext-4A", bloque:"Probabilidad", opcion:"A",
+      { id:"2018-Ext-4A", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque:"Probabilidad", opcion:"A",
         enunciado:`Según los datos de la Fundación para la Diabetes, el 13.8% de los españoles mayores de 18 años tiene diabetes, aunque el 43% de ellos no sabe que la tiene. Se elige al azar un español mayor de 18 años.\n\na) (1 punto) ¿Cuál es la probabilidad de que sea diabético y lo sepa?, ¿cuál la de que no sea diabético o no sepa que lo es?\n\nb) (1.5 puntos) Cierto test diagnostica correctamente el 96% de los casos positivos de diabetes, pero da un 2% de falsos positivos. Si un español mayor de 18 años da positivo en el test, ¿cuál es la probabilidad de que realmente sea diabético?`,
         puntuacion:2.5, criterios:"a) Cada probabilidad pedida: 0.5 pts (resultado 0.25, justificación 0.25). b) Probabilidad de dar positivo en el test: 0.5 pts; probabilidad de diabético condicionado a positivo (Bayes): 1 punto (procedimiento 0.5, resultado 0.5)." },
-      { id:"2018-Ext-1B", bloque:"Algebra", opcion:"B",
+      { id:"2018-Ext-1B", topicSlugs: ["analisis-de-sistemas-por-el-metodo-de-gauss"], bloque:"Algebra", opcion:"B",
         enunciado:`Un grupo de estudiantes ha realizado un viaje por tres países (Francia, Alemania y Suiza). En los hoteles cada estudiante ha pagado: 20 euros diarios en Francia, 25 euros diarios en Alemania y 30 euros diarios en Suiza. En comidas cada uno ha gastado: 20 euros diarios en Francia, 15 euros diarios en Alemania y 25 euros diarios en Suiza. Además, el transportista les ha cobrado 8 euros diarios a cada uno. Sabiendo que el gasto total del viaje ha sido 765 euros por persona, que ha durado 15 días y que han estado en Francia el doble de días que en Suiza, obtenga el número de días que han estado en cada uno de los tres países.`,
         puntuacion:2.5, criterios:"Planteamiento correcto del sistema (3 ecuaciones): 1.5 pts (0.5 por ecuación). Resolución del sistema: 1 punto (procedimiento 0.5, cálculos 0.5). Si alguna ecuación está mal planteada pero se obtiene un sistema de 3x3, se califica la parte correspondiente a su resolución." },
-      { id:"2018-Ext-2B", bloque:"Analisis", opcion:"B",
+      { id:"2018-Ext-2B", topicSlugs: ["concepto-de-derivada-e-interpretacion-geometrica","definicion-de-limite-y-limites-laterales","continuidad-y-tipos-de-discontinuidad","la-integral-definida-regla-de-barrow-y-areas"], bloque:"Analisis", opcion:"B",
         enunciado:`El dibujo adjunto muestra la gráfica de una función $y=f(x)$: para $x\\in[-2,-1]$ un segmento que sube linealmente desde $(-2,0)$ hasta el pico $(-1,1)$; para $x\\in[-1,0]$ un segmento que baja linealmente desde $(-1,1)$ hasta $(0,0)$; y para $x\\in[0,2]$ un arco de parábola creciente (tipo $y=x^2$) que pasa por $(1,1)$ y llega hasta aproximadamente $(2,4)$. Usando la información de la figura, se pide:\n\na) (0.5 puntos) Indicar los valores de $f(-1)$ y $f'(1)$.\n\nb) (1 punto) Justificar, usando límites laterales, si $f$ es continua en los puntos $x=-1$ y $x=0$.\n\nc) (0.5 puntos) Indicar razonadamente si $f$ es derivable en los puntos $x=-1$ y $x=0$.\n\nd) (0.5 puntos) Determinar el valor de $\\displaystyle\\int_{-2}^0 f(x)\\,dx$.`,
         imagenes:["/mates-imgs/madrid/2018/extraordinaria/2018-extra-2b-grafica.png"],
         puntuacion:2.5, criterios:"a) Cada valor correcto: 0.25 pts. b) Estudiar continuidad en cada punto: 0.5 pts. c) Justificar no derivabilidad en cada punto: 0.25 pts. d) Resultado: 0.25 pts, justificación: 0.25 pts." },
-      { id:"2018-Ext-3B", bloque:"Geometria", opcion:"B",
+      { id:"2018-Ext-3B", topicSlugs: ["el-plano-en-el-espacio","proyecciones-ortogonales-y-puntos-simetricos","distancias-en-el-espacio","areas-y-volumenes"], bloque:"Geometria", opcion:"B",
         enunciado:`Dados el punto $P(0,-1,1)$ y la recta $r$, que pasa por el punto $Q(1,0,1)$ y tiene como vector director $\\vec v=(0,1,2)$, se pide:\n\na) (0.5 puntos) Hallar la ecuación implícita del plano que contiene a $r$ y pasa por $P$.\n\nb) (0.5 puntos) Encontrar el punto $S$ contenido en $r$ tal que el vector $\\overrightarrow{SP}$ sea perpendicular a la recta $r$.\n\nc) (1.5 puntos) Hallar el área del triángulo cuyos vértices son el punto $P$ y dos puntos $T_1$, $T_2$, contenidos en la recta $r$, que están a distancia $\\sqrt{5}$ de $P$.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.25 pts, resolución: 0.25 pts. b) Planteamiento: 0.25 pts, resolución: 0.25 pts. c) Hallar T1 y T2: 1 punto; área del triángulo: 0.5 pts." },
-      { id:"2018-Ext-4B", bloque:"Probabilidad", opcion:"B",
+      { id:"2018-Ext-4B", topicSlugs: ["distribucion-normal-y-tipificacion"], bloque:"Probabilidad", opcion:"B",
         enunciado:`La variable aleatoria $X$ sigue una distribución normal de media $\\mu=8.5$ y desviación típica $\\sigma=2.5$. Se pide:\n\na) (1.25 puntos) Calcular el valor $a$ tal que $P(X\\le a)=0.05$.\n\nb) (1.25 puntos) Calcular la probabilidad de que la variable tome un valor comprendido entre 8 y 9.3.`,
         puntuacion:2.5, criterios:"a) Procedimiento: 0.75 pts, cálculos: 0.5 pts. b) Procedimiento: 0.75 pts, cálculos: 0.5 pts." }
     ]
@@ -1461,28 +1466,28 @@ c) (0.5 puntos) Hallar el plano perpendicular a la recta $s$ y que pasa por el p
   {
     id: 18, año: 2019, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"2019-Ext-1A", bloque:"Algebra", opcion:"A",
+      { id:"2019-Ext-1A", topicSlugs: ["teorema-de-rouche-frobenius-discusion","analisis-de-sistemas-por-el-metodo-de-gauss"], bloque:"Algebra", opcion:"A",
         enunciado:`Dado el sistema de ecuaciones $\\begin{cases}kx+(k+1)y+z=0\\\\-x+ky-z=0\\\\(k-1)x-y=-(k+1)\\end{cases}$, se pide:\n\na) (2 puntos) Discutir el sistema según los valores del parámetro real $k$.\n\nb) (0.5 puntos) Resolver el sistema para $k=-1$.`,
         puntuacion:2.5, criterios:"a) Obtener valores críticos k=±1: 0.5 pts (planteamiento 0.25, resolución 0.25). Discutir cada uno de los tres casos (k=-1, k=1, k≠±1): 0.5 pts cada uno (resultado 0.25, justificación 0.25). b) Procedimiento: 0.25 pts, cálculos: 0.25 pts." },
-      { id:"2019-Ext-2A", bloque:"Analisis", opcion:"A",
+      { id:"2019-Ext-2A", topicSlugs: ["calculo-de-derivadas-y-regla-de-la-cadena","metodos-de-integracion"], bloque:"Analisis", opcion:"A",
         enunciado:`a) (1.25 puntos) Sean $f$ y $g$ dos funciones derivables de las que se conocen los siguientes datos: $f(1)=1$, $f'(1)=2$, $g(1)=3$, $g'(1)=4$. Dada $h(x)=f((x+1)^2)$, use la regla de la cadena para calcular $h'(0)$. Dada $k(x)=\\dfrac{f(x)}{g(x)}$, calcule $k'(1)$.\n\nb) (1.25 puntos) Calcule la integral $\\displaystyle\\int (\\sin x)^4(\\cos x)^3\\,dx$ (se puede usar el cambio de variable $t=\\sin x$).`,
         puntuacion:2.5, criterios:"a) Calcular h'(0): 0.5 pts (regla de la cadena 0.25, resultado 0.25). Calcular k'(1): 0.75 pts (derivada del cociente 0.5, resultado 0.25). b) Planteamiento del cambio de variable: 0.5 pts, primitiva polinómica: 0.5 pts, deshacer el cambio: 0.25 pts." },
-      { id:"2019-Ext-3A", bloque:"Geometria", opcion:"A",
+      { id:"2019-Ext-3A", topicSlugs: ["dependencia-lineal-y-rango-de-vectores","el-plano-en-el-espacio","areas-y-volumenes"], bloque:"Geometria", opcion:"A",
         enunciado:`Dados los puntos $A(1,1,1)$, $B(1,3,-3)$ y $C(-3,-1,1)$, se pide:\n\na) (1 punto) Determinar la ecuación del plano que contiene a los tres puntos.\n\nb) (0.5 puntos) Obtener un punto $D$ (distinto de $A$, $B$ y $C$) tal que los vectores $\\overrightarrow{AB}$, $\\overrightarrow{AC}$ y $\\overrightarrow{AD}$ sean linealmente dependientes.\n\nc) (1 punto) Encontrar un punto $P$ del eje $OX$, de modo que el volumen del tetraedro de vértices $A$, $B$, $C$ y $P$ sea igual a 1.`,
         puntuacion:2.5, criterios:"a) Procedimiento: 0.5 pts, cálculos: 0.5 pts. b) Elección adecuada de D: 0.25 pts, justificación: 0.25 pts. c) Saber la forma de un punto del eje OX: 0.25 pts, planteamiento: 0.5 pts, resultado: 0.25 pts." },
-      { id:"2019-Ext-4A", bloque:"Probabilidad", opcion:"A",
+      { id:"2019-Ext-4A", topicSlugs: ["distribucion-binomial-variable-discreta","parametros-de-una-distribucion-media-varianza-y-desviacion-tipica","distribucion-normal-y-tipificacion"], bloque:"Probabilidad", opcion:"A",
         enunciado:`Una empresa ha llevado a cabo un proceso de selección de personal.\n\na) (1.25 puntos) Se sabe que el 40% del total de aspirantes han sido seleccionados en el proceso. Si entre los aspirantes había un grupo de 8 amigos, calcule la probabilidad de que al menos 2 de ellos hayan sido seleccionados.\n\nb) (1.25 puntos) Las puntuaciones obtenidas por los aspirantes siguen una distribución normal, $X$, de media $5.6$ y desviación típica $\\sigma$. Sabiendo que la probabilidad de obtener una puntuación $X\\le 8.2$ es $0.67$, calcule $\\sigma$.`,
         puntuacion:2.5, criterios:"a) Identificar la variable binomial: 0.5 pts, calcular la probabilidad: 0.75 pts (proceso 0.5, cálculos 0.25). b) Planteamiento: 0.75 pts, resolución: 0.5 pts." },
-      { id:"2019-Ext-1B", bloque:"Algebra", opcion:"B",
+      { id:"2019-Ext-1B", topicSlugs: ["potencias-de-matrices-a-n","matriz-inversa-por-gauss-jordan","determinantes-de-orden-2-y-3-regla-de-sarrus"], bloque:"Algebra", opcion:"B",
         enunciado:`Dadas las matrices $A=\\begin{pmatrix}1-a&1\\\\1&1+a\\end{pmatrix}$, $I=\\begin{pmatrix}1&0\\\\0&1\\end{pmatrix}$, se pide:\n\na) (1 punto) Calcular para qué valores $a\\in\\mathbb{R}$ se verifica $A^2-I=2A$.\n\nb) (0.75 puntos) Calcular los números reales $a$ para los que la matriz $A$ admite inversa y calcularla, cuando sea posible, en función del parámetro $a$.\n\nc) (0.75 puntos) Calcular, en función de $a$, el determinante de la matriz $(AA^t)^2$, donde $A^t$ denota la matriz traspuesta de $A$.`,
         puntuacion:2.5, criterios:"a) Calcular A²-I y 2A: 0.5 pts, obtener los valores de a: 0.5 pts. b) Obtener a: 0.25 pts, calcular la inversa en función del parámetro: 0.5 pts. c) Procedimiento: 0.5 pts, resultado: 0.25 pts." },
-      { id:"2019-Ext-2B", bloque:"Analisis", opcion:"B",
+      { id:"2019-Ext-2B", topicSlugs: ["primitiva-de-una-funcion-y-la-integral-indefinida","informacion-extraida-de-la-1-y-2-derivada","continuidad-y-tipos-de-discontinuidad"], bloque:"Analisis", opcion:"B",
         enunciado:`Un brote de una enfermedad se propaga a lo largo de unos días. El número de enfermos $t$ días después de iniciarse el brote viene dado por una función $F(t)$ tal que $F'(t)=t^2(10-t)$.\n\na) (1 punto) Sabiendo que inicialmente había 6 personas afectadas, calcule la función $F(t)$.\n\nb) (1 punto) Calcule cuántos días después de iniciarse el brote se alcanza el número máximo de enfermos y cuál es ese número.\n\nc) (0.5 puntos) Calcule, usando el teorema de Bolzano, cuántos días dura el brote.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.25 pts, primitiva: 0.5 pts, ajustar la constante: 0.25 pts. b) Puntos críticos: 0.5 pts, justificar máximo en t=10: 0.25 pts, número máximo de enfermos: 0.25 pts. c) Planteamiento: 0.25 pts, aplicar Bolzano: 0.25 pts." },
-      { id:"2019-Ext-3B", bloque:"Geometria", opcion:"B",
+      { id:"2019-Ext-3B", topicSlugs: ["la-recta-en-el-espacio-ecuaciones","posiciones-relativas-rectas-y-planos","angulos-en-el-espacio","proyecciones-ortogonales-y-puntos-simetricos"], bloque:"Geometria", opcion:"B",
         enunciado:`Dados el plano $\\pi\\equiv 2x+3y-z=4$, y las rectas $r\\equiv\\begin{cases}x+y-z=0\\\\x+y+z=2\\end{cases}$ y $s\\equiv(x,y,z)=(1,2,3)+\\lambda(1,0,1)$, con $\\lambda\\in\\mathbb{R}$, se pide:\n\na) (1 punto) Calcular el punto simétrico de $P(1,2,3)$ respecto de $\\pi$.\n\nb) (1 punto) Hallar la ecuación de la recta perpendicular al plano $\\pi$, que pasa por el punto intersección de las rectas $r$ y $s$.\n\nc) (0.5 puntos) Calcular el ángulo que forman entre sí las rectas $r$ y $s$.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.5 pts. b) Planteamiento: 0.5 pts, resolución: 0.5 pts. c) Planteamiento: 0.25 pts, resolución: 0.25 pts." },
-      { id:"2019-Ext-4B", bloque:"Probabilidad", opcion:"B",
+      { id:"2019-Ext-4B", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque:"Probabilidad", opcion:"B",
         enunciado:`Un concesionario dispone de vehículos de baja y alta gama, siendo los de alta gama 1/3 de las existencias. Entre los de baja gama, la probabilidad de tener un defecto de fabricación que obligue a revisarlos durante el rodaje es del 1.6%, mientras que para los de alta gama es del 0.9%. En un control de calidad preventa, se elige al azar un vehículo para examinarlo.\n\na) (1 punto) Calcule la probabilidad de que el vehículo elegido resulte defectuoso.\n\nb) (1.5 puntos) Si se comprueba que el vehículo elegido es defectuoso, calcule la probabilidad de que sea de gama baja.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.5 pts. b) Planteamiento: 0.75 pts, resolución: 0.75 pts." }
     ]
@@ -1490,28 +1495,28 @@ c) (0.5 puntos) Hallar el plano perpendicular a la recta $s$ y que pasa por el p
   {
     id: 19, año: 2020, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"2020-Ext-A1", bloque:"Algebra", opcion:"A",
+      { id:"2020-Ext-A1", topicSlugs: ["teorema-de-rouche-frobenius-discusion"], bloque:"Algebra", opcion:"A",
         enunciado:`Sea $A$ una matriz de tamaño $3\\times4$ tal que sus dos primeras filas son $(1,1,1,1)$ y $(1,2,3,4)$, y sin ningún cero en la tercera fila. En cada uno de los apartados siguientes, se pide poner un ejemplo de matriz $A$ que verifique la condición pedida, justificándolo apropiadamente:\n\na) (0.5 puntos) La tercera fila de $A$ es combinación lineal de las dos primeras.\n\nb) (0.5 puntos) Las tres filas de $A$ son linealmente independientes.\n\nc) (0.5 puntos) $A$ es la matriz ampliada de un sistema compatible determinado.\n\nd) (0.5 puntos) $A$ es la matriz ampliada de un sistema compatible indeterminado.\n\ne) (0.5 puntos) $A$ es la matriz ampliada de un sistema incompatible.`,
         puntuacion:2.5, criterios:"En cada apartado: dar el ejemplo 0.25 pts, justificar que cumple la condición 0.25 pts." },
-      { id:"2020-Ext-A2", bloque:"Analisis", opcion:"A",
+      { id:"2020-Ext-A2", topicSlugs: ["limites-infinitos","continuidad-y-tipos-de-discontinuidad","informacion-extraida-de-la-1-y-2-derivada"], bloque:"Analisis", opcion:"A",
         enunciado:`Dada la función $f(x)=\\begin{cases}\\dfrac{x-1}{x^2-1} & \\text{si } x<1,\\, x\\ne-1\\\\ \\dfrac{x^2+1}{4x} & \\text{si } x\\ge1\\end{cases}$, se pide:\n\na) (0.5 puntos) Calcular $f(0)$ y $(f\\circ f)(0)$.\n\nb) (1.25 puntos) Estudiar la continuidad y derivabilidad de $f(x)$ en $x=1$ y determinar si en dicho punto existe un extremo relativo.\n\nc) (0.75 puntos) Estudiar sus asíntotas.`,
         puntuacion:2.5, criterios:"a) Cada valor obtenido: 0.25 pts. b) Continuidad: 0.5 pts, derivabilidad: 0.5 pts, caracterizar el extremo: 0.25 pts. c) Cada asíntota: 0.25 pts." },
-      { id:"2020-Ext-A3", bloque:"Geometria", opcion:"A",
+      { id:"2020-Ext-A3", topicSlugs: ["el-plano-en-el-espacio","proyecciones-ortogonales-y-puntos-simetricos","angulos-en-el-espacio","areas-y-volumenes"], bloque:"Geometria", opcion:"A",
         enunciado:`Dados el punto $P(3,3,0)$ y la recta $r\\equiv\\dfrac{x-2}{-1}=\\dfrac{y}{1}=\\dfrac{z+1}{0}$, se pide:\n\na) (0.75 puntos) Escribir la ecuación del plano que contiene al punto $P$ y a la recta $r$.\n\nb) (1 punto) Calcular el punto simétrico de $P$ respecto de $r$.\n\nc) (0.75 puntos) Hallar dos puntos $A$ y $B$ de $r$ tales que el triángulo $ABP$ sea rectángulo, tenga área $\\dfrac{3}{\\sqrt2}$ y el ángulo recto en $A$.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.25 pts. b) Planteamiento: 0.5 pts, resolución: 0.5 pts. c) Planteamiento: 0.5 pts, encontrar una solución correcta: 0.25 pts." },
-      { id:"2020-Ext-A4", bloque:"Probabilidad", opcion:"A",
+      { id:"2020-Ext-A4", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque:"Probabilidad", opcion:"A",
         enunciado:`Se tienen tres urnas $A$, $B$ y $C$. La urna $A$ contiene 4 bolas rojas y 2 negras, la urna $B$ contiene 3 bolas de cada color y la urna $C$ contiene 6 bolas negras. Se elige una urna al azar y se extraen de ella dos bolas de manera consecutiva y sin reemplazamiento. Se pide:\n\na) (1 punto) Calcular la probabilidad de que la primera bola extraída sea roja.\n\nb) (1 punto) Calcular la probabilidad de que la primera bola extraída sea roja y la segunda sea negra.\n\nc) (0.5 puntos) Sabiendo que la primera bola extraída es roja, calcular la probabilidad de que la segunda sea negra.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.5 pts. b) Planteamiento: 0.5 pts, resolución: 0.5 pts. c) Planteamiento: 0.25 pts, resolución: 0.25 pts." },
-      { id:"2020-Ext-B1", bloque:"Algebra", opcion:"B",
+      { id:"2020-Ext-B1", topicSlugs: ["matriz-inversa-por-gauss-jordan","potencias-de-matrices-a-n","determinantes-de-orden-2-y-3-regla-de-sarrus"], bloque:"Algebra", opcion:"B",
         enunciado:`Sean las matrices $A=\\begin{pmatrix}0&-1&2\\\\2&1&-1\\\\1&0&1\\end{pmatrix}$, $I=\\begin{pmatrix}1&0&0\\\\0&1&0\\\\0&0&1\\end{pmatrix}$, $B=\\begin{pmatrix}2&-1\\\\1&0\\\\0&1\\end{pmatrix}$. Se pide:\n\na) (1 punto) Calcular, si es posible, la inversa de la matriz $A$.\n\nb) (0.5 puntos) Calcular la matriz $C=A^2-2I$.\n\nc) (1 punto) Calcular el determinante de la matriz $D=ABB^t$ (donde $B^t$ denota la matriz traspuesta de $B$).`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.5 pts. b) Planteamiento: 0.25 pts, resolución: 0.25 pts. c) Planteamiento: 0.5 pts, resolución: 0.5 pts." },
-      { id:"2020-Ext-B2", bloque:"Analisis", opcion:"B",
+      { id:"2020-Ext-B2", topicSlugs: ["limites-infinitos","informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], bloque:"Analisis", opcion:"B",
         enunciado:`La potencia generada por una pila viene dada por la expresión $P(t)=25\\,t\\,e^{-t^2/4}$, donde $t>0$ es el tiempo de funcionamiento.\n\na) (0.5 puntos) Calcular hacia qué valor tiende la potencia generada por la pila si se deja en funcionamiento indefinidamente.\n\nb) (0.75 puntos) Determinar la potencia máxima que genera la pila y el instante en el que se alcanza.\n\nc) (1.25 puntos) La energía total generada por la pila hasta el instante $t$, $E(t)$, se relaciona con la potencia mediante $E'(t)=P(t)$, con $E(0)=0$. Calcular la energía producida por la pila entre el instante $t=0$ y el instante $t=2$.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.25 pts, cálculo del límite: 0.25 pts. b) Planteamiento: 0.25 pts, cálculo del instante: 0.25 pts, cálculo del máximo: 0.25 pts. c) Planteamiento: 0.5 pts, primitiva: 0.5 pts, regla de Barrow: 0.25 pts." },
-      { id:"2020-Ext-B3", bloque:"Geometria", opcion:"B",
+      { id:"2020-Ext-B3", topicSlugs: ["la-recta-en-el-espacio-ecuaciones","angulos-en-el-espacio","areas-y-volumenes"], bloque:"Geometria", opcion:"B",
         enunciado:`Del paralelogramo $ABCD$, se conocen los vértices consecutivos $A(1,0,-1)$, $B(2,1,0)$ y $C(4,3,-2)$. Se pide:\n\na) (1 punto) Calcular una ecuación de la recta que pasa por el punto medio del segmento $AC$ y es perpendicular a los segmentos $AC$ y $BC$.\n\nb) (1 punto) Hallar las coordenadas del vértice $D$ y el área del paralelogramo resultante.\n\nc) (0.5 puntos) Calcular el coseno del ángulo que forman los vectores $\\overrightarrow{AB}$ y $\\overrightarrow{AC}$.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.5 pts. b) Determinar D: 0.5 pts, determinar el área: 0.5 pts. c) Planteamiento: 0.25 pts, resolución: 0.25 pts." },
-      { id:"2020-Ext-B4", bloque:"Probabilidad", opcion:"B",
+      { id:"2020-Ext-B4", topicSlugs: ["algebra-de-sucesos-y-tipos-de-experimentos","distribucion-binomial-variable-discreta"], bloque:"Probabilidad", opcion:"B",
         enunciado:`En un experimento aleatorio hay dos sucesos independientes $X$, $Y$. Sabemos que $P(X)=0.4$ y que $P(X\\cap\\overline Y)=0.08$ (donde $\\overline Y$ es el suceso complementario de $Y$). Se pide:\n\na) (1 punto) Calcular $P(Y)$.\n\nb) (0.5 puntos) Calcular $P(X\\cup Y)$.\n\nc) (1 punto) Si $X$ es un resultado no deseado, de manera que consideramos que el experimento es un éxito cuando NO sucede $X$, y repetimos el experimento en 8 ocasiones, hallar la probabilidad de haber tenido éxito al menos 2 veces.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.5 pts. b) Planteamiento: 0.25 pts, resolución: 0.25 pts. c) Identificar la binomial: 0.5 pts, resultado: 0.5 pts." }
     ]
@@ -1519,28 +1524,28 @@ c) (0.5 puntos) Hallar el plano perpendicular a la recta $s$ y que pasa por el p
   {
     id: 20, año: 2021, tipo: "Extraordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      { id:"2021-Ext-A1", bloque:"Algebra", opcion:"A",
+      { id:"2021-Ext-A1", topicSlugs: ["analisis-de-sistemas-por-el-metodo-de-gauss"], bloque:"Algebra", opcion:"A",
         enunciado:`Tres amigas, Sara, Cristina y Jimena, tienen un total de 15000 seguidores en una red social. Si Jimena perdiera el 25% de sus seguidores todavía tendría el triple de seguidores que Sara. Además, la mitad de los seguidores de Sara más la quinta parte de los de Cristina suponen la cuarta parte de los seguidores de Jimena. Calcule cuántos seguidores tiene cada una de las tres amigas.`,
         puntuacion:2.5, criterios:"Plantear correctamente cada ecuación: 0.5 pts. Resolución correcta del sistema: 1 punto. Máximo 0.5 pts si se resuelve correctamente un sistema mal planteado." },
-      { id:"2021-Ext-A2", bloque:"Analisis", opcion:"A",
+      { id:"2021-Ext-A2", topicSlugs: ["indeterminacion-0-0","limites-infinitos","metodos-de-integracion","la-integral-definida-regla-de-barrow-y-areas"], bloque:"Analisis", opcion:"A",
         enunciado:`a) (1.25 puntos) Calcule, en caso de existir, el valor de los siguientes límites:\n\na.1) (0.5 puntos) $\\displaystyle\\lim_{x\\to0}\\dfrac{x^2(1-2x)}{x-2x^2-\\sin x}$\n\na.2) (0.75 puntos) $\\displaystyle\\lim_{x\\to\\infty}\\dfrac1x\\left(\\dfrac3x-\\dfrac{2}{\\sin\\frac1x}\\right)$ (indicación: use el cambio de variable $t=1/x$ donde sea necesario).\n\nb) (1.25 puntos) Calcule las siguientes integrales:\n\nb.1) (0.5 puntos) $\\displaystyle\\int\\dfrac{x}{x^2-1}\\,dx$\n\nb.2) (0.75 puntos) $\\displaystyle\\int_0^1 x^2e^{-x}\\,dx$`,
         puntuacion:2.5, criterios:"a.1) Cada aplicación correcta de L'Hôpital: 0.25 pts. a.2) Cambio de variable: 0.5 pts, aplicación de L'Hôpital: 0.25 pts. b.1) Resolver correctamente: 0.5 pts. b.2) Cada integración por partes correcta: 0.25 pts, regla de Barrow: 0.25 pts." },
-      { id:"2021-Ext-A3", bloque:"Geometria", opcion:"A",
+      { id:"2021-Ext-A3", topicSlugs: ["la-recta-en-el-espacio-ecuaciones","angulos-en-el-espacio","distancias-en-el-espacio"], bloque:"Geometria", opcion:"A",
         enunciado:`Dado el punto $A(1,0,-1)$, la recta $r\\equiv x-1=y+1=\\dfrac{z-2}{2}$ y el plano $\\pi\\equiv x+y-z=6$, se pide:\n\na) (0.75 puntos) Hallar el ángulo que forman el plano $\\pi$ y el plano perpendicular a la recta $r$ que pasa por el punto $A$.\n\nb) (0.75 puntos) Determinar la distancia entre la recta $r$ y el plano $\\pi$.\n\nc) (1 punto) Calcular una ecuación de la recta que pasa por $A$, forma un ángulo recto con la recta $r$ y no corta al plano $\\pi$.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.5 pts, resolución: 0.25 pts. b) Planteamiento: 0.5 pts, resolución: 0.25 pts. c) Planteamiento: 0.5 pts, resolución: 0.5 pts." },
-      { id:"2021-Ext-A4", bloque:"Probabilidad", opcion:"A",
+      { id:"2021-Ext-A4", topicSlugs: ["teoremas-de-la-probabilidad-total-y-de-bayes"], bloque:"Probabilidad", opcion:"A",
         enunciado:`En una urna hay dos bolas blancas y cuatro bolas negras. Se extrae una bola al azar. Si la bola extraída es blanca, se devuelve a la urna y se añade otra bola blanca; si es negra, no se devuelve a la urna. A continuación, se vuelve a extraer una bola al azar de la urna.\n\na) (1 punto) ¿Cuál es la probabilidad de que las dos bolas extraídas sean de distinto color?\n\nb) (1.5 puntos) ¿Cuál es la probabilidad de que la primera bola extraída fuera negra, sabiendo que la segunda ha sido blanca?`,
         puntuacion:2.5, criterios:"a) Planteamiento: 0.75 pts, resolución: 0.25 pts. b) Uso correcto del teorema de Bayes y probabilidad total: 1 punto, resolución: 0.5 pts." },
-      { id:"2021-Ext-1B", bloque:"Algebra", opcion:"B",
+      { id:"2021-Ext-1B", topicSlugs: ["teorema-de-rouche-frobenius-discusion"], bloque:"Algebra", opcion:"B",
         enunciado:`a) (0.75 puntos) Encuentre un único sistema de dos ecuaciones lineales en las variables $x$ e $y$, que tenga como soluciones $\\{x=1,y=2\\}$ y $\\{x=0,y=0\\}$.\n\nb) (1 punto) Encuentre un sistema de dos ecuaciones lineales en las variables $x$, $y$ y $z$ cuyas soluciones sean, en función del parámetro $\\lambda\\in\\mathbb{R}$: $\\begin{cases}x=\\lambda\\\\y=\\lambda-2\\\\z=\\lambda-1\\end{cases}$\n\nc) (0.75 puntos) Encuentre un sistema de tres ecuaciones lineales con dos incógnitas, $x$ e $y$, que solo tenga como solución a $x=1$ e $y=2$.`,
         puntuacion:2.5, criterios:"a) y c) Dar el ejemplo: 0.5 pts, justificación: 0.25 pts. b) Llegar al sistema: 0.75 pts, justificación: 0.25 pts." },
-      { id:"2021-Ext-2B", bloque:"Analisis", opcion:"B",
+      { id:"2021-Ext-2B", topicSlugs: ["continuidad-y-tipos-de-discontinuidad","informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], bloque:"Analisis", opcion:"B",
         enunciado:`Sea la función $f(x)=x^3-|x|+2$.\n\na) (0.75 puntos) Estudie la continuidad y la derivabilidad de $f$ en $x=0$.\n\nb) (1 punto) Determine los extremos relativos de $f(x)$ en la recta real.\n\nc) (0.75 puntos) Calcule el área de la región delimitada por la gráfica de $f$, el eje de abcisas $y=0$, y las rectas $x=-1$ y $x=1$.`,
         puntuacion:2.5, criterios:"a) Continuidad: 0.25 pts, derivabilidad: 0.5 pts. b) Decidir que x=0 es extremo: 0.25 pts, hallar el otro punto crítico: 0.5 pts, demostrar que es mínimo: 0.25 pts. c) Primitiva: 0.25 pts, Barrow: 0.25 pts, resultado: 0.25 pts." },
-      { id:"2021-Ext-3B", bloque:"Geometria", opcion:"B",
+      { id:"2021-Ext-3B", topicSlugs: ["la-recta-en-el-espacio-ecuaciones","distancias-en-el-espacio"], bloque:"Geometria", opcion:"B",
         enunciado:`Dadas las rectas $r\\equiv\\dfrac{x-2}{1}=\\dfrac{y+1}{1}=\\dfrac{z+4}{-3}$, $s\\equiv\\begin{cases}x+z=2\\\\-2x+y-2z=1\\end{cases}$\n\na) (1.5 puntos) Escriba una ecuación de la recta perpendicular común a $r$ y a $s$.\n\nb) (1 punto) Calcule la distancia entre $r$ y $s$.`,
         puntuacion:2.5, criterios:"a) Planteamiento: 1 punto, resolución: 0.5 pts. b) Planteamiento: 0.75 pts, resolución: 0.25 pts." },
-      { id:"2021-Ext-4B", bloque:"Probabilidad", opcion:"B",
+      { id:"2021-Ext-4B", topicSlugs: ["distribucion-binomial-variable-discreta"], bloque:"Probabilidad", opcion:"B",
         enunciado:`Según las estadísticas meteorológicas, en una ciudad nórdica llueve un promedio del 45% de los días. Un climatólogo analiza los registros pluviométricos de 100 días elegidos al azar entre los de los últimos 50 años.\n\na) (1 punto) Exprese cómo calcular con exactitud la probabilidad de que en 40 de ellos haya llovido.\n\nb) (1.5 puntos) Calcule dicha probabilidad aproximándola mediante una normal.`,
         puntuacion:2.5, criterios:"a) Identificar la binomial: 0.5 pts, expresar la probabilidad: 0.5 pts. b) Cálculo de parámetros de la normal: 0.5 pts, cálculo de la probabilidad: 1 punto (planteamiento 0.5, resolución 0.5)." }
     ]

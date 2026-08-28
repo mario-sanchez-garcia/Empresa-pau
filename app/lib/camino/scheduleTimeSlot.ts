@@ -2,7 +2,8 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { PARCIAL_MINUTES, REFERENCE_MISSION_MINUTES } from './xpMap'
 import { mondayBasedDayIndex } from './studyDays'
-import { findBestScoredSlot, getSlotScoringDebug, scoreDateSlot, type MissionSlotScoringContext } from './slotScoring'
+import { loadSchedulingBehaviorProfile } from './schedulingBehaviorProfile'
+import { findBestScoredSlot, getSlotScoringDebug, scoreDateSlot, type MissionSlotScoringContext, type SchedulingBehaviorProfile } from './slotScoring'
 
 export type TimeRange = { start: string; end: string; subject?: string | null; missionType?: string | null } // "HH:MM", 24h
 
@@ -152,10 +153,12 @@ export async function getBusyIntervalsForDate(
 export class DayScheduler {
   private busy: TimeRange[]
   private readonly window: TimeRange
+  private readonly behaviorProfile: SchedulingBehaviorProfile | null
 
-  constructor(initialBusy: TimeRange[], window: TimeRange) {
+  constructor(initialBusy: TimeRange[], window: TimeRange, behaviorProfile: SchedulingBehaviorProfile | null = null) {
     this.busy = [...initialBusy]
     this.window = window
+    this.behaviorProfile = behaviorProfile
   }
 
   place(durationMinutes: number): TimeRange | null {
@@ -165,13 +168,13 @@ export class DayScheduler {
   }
 
   placeBest(durationMinutes: number, context: MissionSlotScoringContext = {}): TimeRange | null {
-    const slot = findBestScoredSlot(durationMinutes, this.busy, this.window, context)
+    const slot = findBestScoredSlot(durationMinutes, this.busy, this.window, { behaviorProfile: this.behaviorProfile, ...context })
     if (slot) this.busy.push({ start: slot.start, end: slot.end, subject: context.subject, missionType: context.missionType })
     return slot ? { start: slot.start, end: slot.end } : null
   }
 
   debugBestCandidates(durationMinutes: number, context: MissionSlotScoringContext = {}) {
-    return getSlotScoringDebug(durationMinutes, this.busy, this.window, context)
+    return getSlotScoringDebug(durationMinutes, this.busy, this.window, { behaviorProfile: this.behaviorProfile, ...context })
   }
 }
 
@@ -179,12 +182,15 @@ export async function createDayScheduler(
   userId: string,
   supabase: SupabaseClient,
   dateStr: string,
-  options: { excludeCalendarRowIds?: Set<string>; externalBusy?: TimeRange[] | null } = {},
+  options: { excludeCalendarRowIds?: Set<string>; externalBusy?: TimeRange[] | null; behaviorProfile?: SchedulingBehaviorProfile | null } = {},
 ): Promise<DayScheduler> {
   const localBusy = await getBusyIntervalsForDate(userId, supabase, dateStr, options)
   const externalBusy = options.externalBusy ?? []
   const busy = [...localBusy, ...externalBusy]
-  return new DayScheduler(busy, studyWindowFor(dateStr))
+  const behaviorProfile = options.behaviorProfile === undefined
+    ? await loadSchedulingBehaviorProfile(supabase, userId)
+    : options.behaviorProfile
+  return new DayScheduler(busy, studyWindowFor(dateStr), behaviorProfile)
 }
 
 export async function placeBestAcrossDates(
@@ -196,18 +202,22 @@ export async function placeBestAcrossDates(
     excludeCalendarRowIds?: Set<string>
     externalBusyByDate?: Map<string, TimeRange[]>
     context?: MissionSlotScoringContext
+    behaviorProfile?: SchedulingBehaviorProfile | null
   } = {},
 ): Promise<{ date: string; start: string; end: string; score: number; reasons: string[] } | null> {
   let best: { date: string; start: string; end: string; score: number; reasons: string[] } | null = null
+  const behaviorProfile = options.behaviorProfile === undefined
+    ? await loadSchedulingBehaviorProfile(supabase, userId)
+    : options.behaviorProfile
   for (let index = 0; index < dates.length; index += 1) {
     const date = dates[index]
     const localBusy = await getBusyIntervalsForDate(userId, supabase, date, { excludeCalendarRowIds: options.excludeCalendarRowIds })
     const externalBusy = options.externalBusyByDate?.get(date) ?? []
     const busy = [...localBusy, ...externalBusy]
-    const slot = findBestScoredSlot(durationMinutes, busy, studyWindowFor(date), { ...(options.context ?? {}), date })
+    const slot = findBestScoredSlot(durationMinutes, busy, studyWindowFor(date), { behaviorProfile, ...(options.context ?? {}), date })
     if (!slot) continue
-    const scored = scoreDateSlot({ date, slot, busy, context: options.context, dateIndex: index })
-    const candidate = { date, start: slot.start, end: slot.end, score: scored.score, reasons: scored.reasons }
+    const scored = scoreDateSlot({ date, slot, busy, context: { behaviorProfile, ...(options.context ?? {}) }, dateIndex: index })
+    const candidate = { date, start: slot.start, end: slot.end, score: scored.score, reasons: [...scored.reasons, ...scored.personalReasons] }
     if (!best || candidate.score > best.score || (candidate.score === best.score && `${candidate.date} ${candidate.start}` < `${best.date} ${best.start}`)) {
       best = candidate
     }

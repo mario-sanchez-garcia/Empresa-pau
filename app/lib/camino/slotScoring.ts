@@ -7,9 +7,34 @@ export type MissionSlotScoringContext = {
   daysUntilExam?: number | null
   deadlineDate?: string | null
   priority?: string | null
+  behaviorProfile?: SchedulingBehaviorProfile | null
 }
 
-export type ScoredTimeSlot = TimeRange & { score: number; reasons: string[] }
+export type TimeBucket = 'early' | 'middle' | 'late'
+export type DurationBucket = 'short' | 'medium' | 'long' | 'extraLong'
+export type BehaviorProfileSourceRow = {
+  scheduled_date?: string | null
+  status?: string | null
+  start_time?: string | null
+  end_time?: string | null
+  subject?: string | null
+  mission_type?: string | null
+}
+export type SchedulingBehaviorProfile = {
+  sampleSize: number
+  timeOfDay: Record<TimeBucket, number>
+  durationFit: Record<DurationBucket, number>
+  continuityAdjustment: number
+  confidence: number
+}
+export type ScoredTimeSlot = TimeRange & {
+  score: number
+  reasons: string[]
+  baseScore?: number
+  personalAdjustment?: number
+  finalScore?: number
+  personalReasons?: string[]
+}
 export type CandidateScoreComponents = {
   urgency: number
   difficultyFit: number
@@ -18,15 +43,35 @@ export type CandidateScoreComponents = {
   continuity: number
   tinyGap: number
   timeOfDay: number
+  personal: number
   tieBreak: number
 }
 export type CandidateScoreBreakdown = TimeRange & {
   valid: boolean
   score: number | null
+  baseScore: number | null
+  personalAdjustment: number
+  finalScore: number | null
   reasons: string[]
+  personalReasons: string[]
   components: CandidateScoreComponents
   rejectionReason?: string
 }
+
+export const ADAPTIVE_SLOT_SCORING_CONFIG = {
+  enabled: process.env.ENABLE_ADAPTIVE_SLOT_SCORING !== 'false',
+  historyLimit: 60,
+  maxPersonalAdjustment: 8,
+  minSampleTimeBucket: 6,
+  minSampleDurationBucket: 6,
+  minSampleContinuity: 5,
+  smoothingPriorRate: 0.65,
+  smoothingPriorWeight: 4,
+  timeBucketScale: 18,
+  durationBucketScale: 14,
+  continuityScale: 10,
+  minimumMeaningfulDelta: 0.12,
+} as const
 
 export const SLOT_SCORING_WEIGHTS = {
   baseScore: 100,
@@ -111,8 +156,156 @@ function emptyComponents(): CandidateScoreComponents {
     continuity: 0,
     tinyGap: 0,
     timeOfDay: 0,
+    personal: 0,
     tieBreak: 0,
   }
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value))
+}
+
+function rounded(value: number) {
+  return Math.round(value * 100) / 100
+}
+
+function durationMinutes(startTime: string | null | undefined, endTime: string | null | undefined) {
+  if (!startTime || !endTime) return null
+  const diff = toMinutes(endTime) - toMinutes(startTime)
+  return diff > 0 ? diff : null
+}
+
+function timeBucketFor(startTime: string, window: TimeRange): TimeBucket {
+  const start = toMinutes(startTime)
+  const windowStart = toMinutes(window.start)
+  const windowEnd = toMinutes(window.end)
+  const position = (start - windowStart) / Math.max(1, windowEnd - windowStart)
+  if (position < 1 / 3) return 'early'
+  if (position < 2 / 3) return 'middle'
+  return 'late'
+}
+
+function durationBucketFor(minutes: number): DurationBucket {
+  if (minutes <= 30) return 'short'
+  if (minutes <= 45) return 'medium'
+  if (minutes <= 60) return 'long'
+  return 'extraLong'
+}
+
+function smoothedRate(completed: number, total: number) {
+  const { smoothingPriorRate, smoothingPriorWeight } = ADAPTIVE_SLOT_SCORING_CONFIG
+  return (completed + smoothingPriorRate * smoothingPriorWeight) / (total + smoothingPriorWeight)
+}
+
+function bucketAdjustment(completed: number, total: number, baseline: number, minSample: number, scale: number) {
+  if (total < minSample) return 0
+  const delta = smoothedRate(completed, total) - baseline
+  if (Math.abs(delta) < ADAPTIVE_SLOT_SCORING_CONFIG.minimumMeaningfulDelta) return 0
+  return Math.round(delta * scale)
+}
+
+export function buildSchedulingBehaviorProfile(rows: BehaviorProfileSourceRow[]): SchedulingBehaviorProfile {
+  const stats = {
+    timeOfDay: {
+      early: { completed: 0, total: 0 },
+      middle: { completed: 0, total: 0 },
+      late: { completed: 0, total: 0 },
+    },
+    durationFit: {
+      short: { completed: 0, total: 0 },
+      medium: { completed: 0, total: 0 },
+      long: { completed: 0, total: 0 },
+      extraLong: { completed: 0, total: 0 },
+    },
+    continuity: { completed: 0, total: 0 },
+    totalCompleted: 0,
+    total: 0,
+  }
+  const relevant = rows
+    .filter(row => row.start_time && row.end_time && ['completed', 'missed', 'postponed'].includes(row.status ?? ''))
+    .slice(0, ADAPTIVE_SLOT_SCORING_CONFIG.historyLimit)
+    .sort((a, b) => `${a.scheduled_date ?? ''} ${a.start_time ?? ''}`.localeCompare(`${b.scheduled_date ?? ''} ${b.start_time ?? ''}`))
+
+  for (let index = 0; index < relevant.length; index += 1) {
+    const row = relevant[index]
+    const minutes = durationMinutes(row.start_time, row.end_time)
+    if (!row.start_time || !row.scheduled_date || !minutes) continue
+    const completed = row.status === 'completed'
+    const window = scoringStudyWindowFor(row.scheduled_date)
+    const timeBucket = timeBucketFor(row.start_time, window)
+    const durationBucket = durationBucketFor(minutes)
+    stats.timeOfDay[timeBucket].total += 1
+    stats.durationFit[durationBucket].total += 1
+    stats.total += 1
+    if (completed) {
+      stats.timeOfDay[timeBucket].completed += 1
+      stats.durationFit[durationBucket].completed += 1
+      stats.totalCompleted += 1
+    }
+
+    const previous = relevant[index - 1]
+    if (previous?.subject && row.subject && previous.subject === row.subject && previous.scheduled_date === row.scheduled_date) {
+      stats.continuity.total += 1
+      if (completed) stats.continuity.completed += 1
+    }
+  }
+
+  const baseline = stats.total > 0 ? smoothedRate(stats.totalCompleted, stats.total) : ADAPTIVE_SLOT_SCORING_CONFIG.smoothingPriorRate
+  const timeOfDay = {
+    early: bucketAdjustment(stats.timeOfDay.early.completed, stats.timeOfDay.early.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleTimeBucket, ADAPTIVE_SLOT_SCORING_CONFIG.timeBucketScale),
+    middle: bucketAdjustment(stats.timeOfDay.middle.completed, stats.timeOfDay.middle.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleTimeBucket, ADAPTIVE_SLOT_SCORING_CONFIG.timeBucketScale),
+    late: bucketAdjustment(stats.timeOfDay.late.completed, stats.timeOfDay.late.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleTimeBucket, ADAPTIVE_SLOT_SCORING_CONFIG.timeBucketScale),
+  }
+  const durationFit = {
+    short: bucketAdjustment(stats.durationFit.short.completed, stats.durationFit.short.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleDurationBucket, ADAPTIVE_SLOT_SCORING_CONFIG.durationBucketScale),
+    medium: bucketAdjustment(stats.durationFit.medium.completed, stats.durationFit.medium.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleDurationBucket, ADAPTIVE_SLOT_SCORING_CONFIG.durationBucketScale),
+    long: bucketAdjustment(stats.durationFit.long.completed, stats.durationFit.long.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleDurationBucket, ADAPTIVE_SLOT_SCORING_CONFIG.durationBucketScale),
+    extraLong: bucketAdjustment(stats.durationFit.extraLong.completed, stats.durationFit.extraLong.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleDurationBucket, ADAPTIVE_SLOT_SCORING_CONFIG.durationBucketScale),
+  }
+  const continuityAdjustment = bucketAdjustment(stats.continuity.completed, stats.continuity.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleContinuity, ADAPTIVE_SLOT_SCORING_CONFIG.continuityScale)
+  const confidence = clamp(stats.total / ADAPTIVE_SLOT_SCORING_CONFIG.historyLimit, 0, 1)
+  return {
+    sampleSize: stats.total,
+    timeOfDay,
+    durationFit,
+    continuityAdjustment,
+    confidence: rounded(confidence),
+  }
+}
+
+function capPersonalAdjustment(value: number) {
+  return clamp(value, -ADAPTIVE_SLOT_SCORING_CONFIG.maxPersonalAdjustment, ADAPTIVE_SLOT_SCORING_CONFIG.maxPersonalAdjustment)
+}
+
+function scorePersonalAdjustment(input: {
+  candidate: TimeRange
+  window: TimeRange
+  durationMinutes: number
+  touchesSameSubject: boolean
+  context: MissionSlotScoringContext
+}): { adjustment: number; reasons: string[] } {
+  if (!ADAPTIVE_SLOT_SCORING_CONFIG.enabled) return { adjustment: 0, reasons: [] }
+  const profile = input.context.behaviorProfile
+  if (!profile || profile.sampleSize <= 0) return { adjustment: 0, reasons: [] }
+  let adjustment = 0
+  const reasons: string[] = []
+  const timeBucket = timeBucketFor(input.candidate.start, input.window)
+  const timeAdjustment = profile.timeOfDay[timeBucket] ?? 0
+  if (timeAdjustment) {
+    adjustment += timeAdjustment
+    reasons.push(`personal_${timeBucket}_${timeAdjustment > 0 ? 'positive' : 'negative'}`)
+  }
+  const durationBucket = durationBucketFor(input.durationMinutes)
+  const durationAdjustment = profile.durationFit[durationBucket] ?? 0
+  if (durationAdjustment) {
+    adjustment += durationAdjustment
+    reasons.push(durationAdjustment > 0 ? 'personal_duration_fit' : 'personal_duration_low_adherence')
+  }
+  if (input.touchesSameSubject && profile.continuityAdjustment) {
+    adjustment += profile.continuityAdjustment
+    reasons.push(profile.continuityAdjustment > 0 ? 'personal_continuity_positive' : 'personal_continuity_negative')
+  }
+  return { adjustment: capPersonalAdjustment(adjustment), reasons }
 }
 
 export function scoreCandidateSlotBreakdown(input: {
@@ -136,7 +329,11 @@ export function scoreCandidateSlotBreakdown(input: {
     end: input.candidate.end,
     valid: false,
     score: null,
+    baseScore: null,
+    personalAdjustment: 0,
+    finalScore: null,
     reasons: [rejectionReason],
+    personalReasons: [],
     components,
     rejectionReason,
   })
@@ -212,12 +409,26 @@ export function scoreCandidateSlotBreakdown(input: {
   components.tieBreak = start * SLOT_SCORING_WEIGHTS.deterministicEarlyTieBreak
   score += components.tieBreak
   reasons.push(`load_${load}`)
+  const baseScore = rounded(score)
+  const personal = scorePersonalAdjustment({
+    candidate: input.candidate,
+    window: input.window,
+    durationMinutes: end - start,
+    touchesSameSubject,
+    context,
+  })
+  components.personal = personal.adjustment
+  const finalScore = rounded(baseScore + personal.adjustment)
   return {
     start: input.candidate.start,
     end: input.candidate.end,
     valid: true,
-    score: Math.round(score * 100) / 100,
+    score: finalScore,
+    baseScore,
+    personalAdjustment: personal.adjustment,
+    finalScore,
     reasons,
+    personalReasons: personal.reasons,
     components,
   }
 }
@@ -242,7 +453,7 @@ export function scoreCandidateSlots(durationMinutes: number, busy: TimeRange[], 
     const slot = { start: toHHMM(candidate.start), end: toHHMM(candidate.end) }
     const scored = scoreCandidateSlotBreakdown({ candidate: slot, busy, window, context })
     if (!scored.valid || scored.score == null) continue
-    candidates.push({ ...slot, score: scored.score, reasons: scored.reasons })
+    candidates.push({ ...slot, score: scored.score, reasons: scored.reasons, baseScore: scored.baseScore ?? undefined, personalAdjustment: scored.personalAdjustment, finalScore: scored.finalScore ?? undefined, personalReasons: scored.personalReasons })
   }
   return candidates.sort((a, b) => b.score - a.score || a.start.localeCompare(b.start))
 }
@@ -276,11 +487,17 @@ export function scoreDateSlot(input: {
   dateIndex?: number
 }) {
   const context = { ...(input.context ?? {}), date: input.date }
-  const base = scoreCandidateSlot({ candidate: input.slot, busy: input.busy, window: scoringStudyWindowFor(input.date), context })
+  const base = scoreCandidateSlotBreakdown({ candidate: input.slot, busy: input.busy, window: scoringStudyWindowFor(input.date), context })
   const urgent = context.daysUntilExam != null && context.daysUntilExam <= 7
   const datePenalty = (input.dateIndex ?? 0) * (urgent ? 3 : 1)
+  const baseScore = base.baseScore ?? base.score ?? Number.NEGATIVE_INFINITY
+  const finalScore = base.score ?? Number.NEGATIVE_INFINITY
   return {
-    score: Math.round((base.score - datePenalty) * 100) / 100,
+    score: rounded(finalScore - datePenalty),
+    baseScore: rounded(baseScore - datePenalty),
+    personalAdjustment: base.personalAdjustment,
+    finalScore: rounded(finalScore - datePenalty),
     reasons: datePenalty ? [...base.reasons, 'date_distance_penalty'] : base.reasons,
+    personalReasons: base.personalReasons,
   }
 }

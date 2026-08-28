@@ -10,12 +10,32 @@ export type MissionSlotScoringContext = {
 }
 
 export type ScoredTimeSlot = TimeRange & { score: number; reasons: string[] }
+export type CandidateScoreComponents = {
+  urgency: number
+  difficultyFit: number
+  dailyLoad: number
+  subjectRepetition: number
+  continuity: number
+  tinyGap: number
+  timeOfDay: number
+  tieBreak: number
+}
+export type CandidateScoreBreakdown = TimeRange & {
+  valid: boolean
+  score: number | null
+  reasons: string[]
+  components: CandidateScoreComponents
+  rejectionReason?: string
+}
 
 export const SLOT_SCORING_WEIGHTS = {
+  baseScore: 100,
+  candidateStepMinutes: 15,
   examWithin7Days: 42,
   examWithin14Days: 24,
   highPriorityExam: 12,
   mediumPriorityExam: 6,
+  maxDeadlineProximityPenalty: -28,
   highLoadEarly: 18,
   highLoadLatePenalty: -16,
   lowLoadLate: 10,
@@ -25,9 +45,16 @@ export const SLOT_SCORING_WEIGHTS = {
   repeatedSubjectPenalty: -7,
   excessiveSubjectPenalty: -10,
   continuityBonus: 6,
+  longContinuityPenalty: -12,
   tinyGapPenalty: -8,
   deadlineProximityPenalty: -4,
   deterministicEarlyTieBreak: -0.01,
+  highLoadEarlyMaxPosition: 0.35,
+  lateSlotMinPosition: 0.72,
+  lowLoadLateMinPosition: 0.62,
+  lowLoadEarlyMaxPosition: 0.25,
+  mediumSlotMinPosition: 0.28,
+  mediumSlotMaxPosition: 0.72,
 } as const
 
 function toMinutes(hhmm: string): number {
@@ -69,24 +96,54 @@ function tinyGapPenalty(candidate: { start: number; end: number }, busy: Array<{
   for (const item of busy) {
     const before = candidate.start - item.end
     const after = item.start - candidate.end
-    if (before > 0 && before < 15) penalty += SLOT_SCORING_WEIGHTS.tinyGapPenalty
-    if (after > 0 && after < 15) penalty += SLOT_SCORING_WEIGHTS.tinyGapPenalty
+    if (before > 0 && before <= SLOT_SCORING_WEIGHTS.candidateStepMinutes) penalty += SLOT_SCORING_WEIGHTS.tinyGapPenalty
+    if (after > 0 && after <= SLOT_SCORING_WEIGHTS.candidateStepMinutes) penalty += SLOT_SCORING_WEIGHTS.tinyGapPenalty
   }
   return penalty
 }
 
-export function scoreCandidateSlot(input: {
+function emptyComponents(): CandidateScoreComponents {
+  return {
+    urgency: 0,
+    difficultyFit: 0,
+    dailyLoad: 0,
+    subjectRepetition: 0,
+    continuity: 0,
+    tinyGap: 0,
+    timeOfDay: 0,
+    tieBreak: 0,
+  }
+}
+
+export function scoreCandidateSlotBreakdown(input: {
   candidate: TimeRange
   busy: TimeRange[]
   window: TimeRange
   context?: MissionSlotScoringContext
-}): { score: number; reasons: string[] } {
+}): CandidateScoreBreakdown {
   const context = input.context ?? {}
   const reasons: string[] = []
+  const components = emptyComponents()
   const start = toMinutes(input.candidate.start)
   const end = toMinutes(input.candidate.end)
   const windowStart = toMinutes(input.window.start)
   const windowEnd = toMinutes(input.window.end)
+  const numericBusy = input.busy.map(item => ({ start: toMinutes(item.start), end: toMinutes(item.end), subject: item.subject }))
+  const candidateRange = { start, end }
+
+  const invalid = (rejectionReason: string): CandidateScoreBreakdown => ({
+    start: input.candidate.start,
+    end: input.candidate.end,
+    valid: false,
+    score: null,
+    reasons: [rejectionReason],
+    components,
+    rejectionReason,
+  })
+  if (end <= start) return invalid('invalid_duration')
+  if (start < windowStart || end > windowEnd) return invalid('outside_study_window')
+  if (numericBusy.some(item => overlaps(candidateRange, item))) return invalid('time_conflict')
+
   const windowLength = Math.max(1, windowEnd - windowStart)
   const position = (start - windowStart) / windowLength
   const busyMinutes = input.busy.reduce((sum, item) => {
@@ -97,80 +154,113 @@ export function scoreCandidateSlot(input: {
   const sameSubjectBusy = context.subject
     ? input.busy.filter(item => item.subject === context.subject).length
     : 0
+  const sameSubjectMinutes = context.subject
+    ? input.busy.reduce((sum, item) => item.subject === context.subject ? sum + Math.max(0, toMinutes(item.end) - toMinutes(item.start)) : sum, 0)
+    : 0
   const load = loadLevel(context)
-  let score = 100
+  let score = SLOT_SCORING_WEIGHTS.baseScore
+
+  const add = (component: keyof CandidateScoreComponents, amount: number, reason: string) => {
+    components[component] += amount
+    score += amount
+    reasons.push(reason)
+  }
 
   const daysUntilExam = context.daysUntilExam ?? (context.date && context.deadlineDate ? dateDiffDays(context.date, context.deadlineDate) : null)
   if (daysUntilExam != null) {
-    if (daysUntilExam < 0) return { score: Number.NEGATIVE_INFINITY, reasons: ['after_deadline'] }
-    if (daysUntilExam <= 7) { score += SLOT_SCORING_WEIGHTS.examWithin7Days; reasons.push('exam_within_7_days') }
-    else if (daysUntilExam <= 14) { score += SLOT_SCORING_WEIGHTS.examWithin14Days; reasons.push('exam_within_14_days') }
-    score += Math.max(-28, daysUntilExam * SLOT_SCORING_WEIGHTS.deadlineProximityPenalty)
-    reasons.push('deadline_proximity')
+    if (daysUntilExam < 0) return invalid('after_deadline')
+    if (daysUntilExam <= 7) add('urgency', SLOT_SCORING_WEIGHTS.examWithin7Days, 'exam_within_7_days')
+    else if (daysUntilExam <= 14) add('urgency', SLOT_SCORING_WEIGHTS.examWithin14Days, 'exam_within_14_days')
+    add('urgency', Math.max(SLOT_SCORING_WEIGHTS.maxDeadlineProximityPenalty, daysUntilExam * SLOT_SCORING_WEIGHTS.deadlineProximityPenalty), 'deadline_proximity')
   }
 
   if (context.priority === 'alta' || context.priority === 'high' || context.priority === 'urgente') {
-    score += SLOT_SCORING_WEIGHTS.highPriorityExam
-    reasons.push('high_priority_exam')
+    add('urgency', SLOT_SCORING_WEIGHTS.highPriorityExam, 'high_priority_exam')
   } else if (context.priority === 'media' || context.priority === 'medium' || context.priority === 'normal') {
-    score += SLOT_SCORING_WEIGHTS.mediumPriorityExam
-    reasons.push('medium_priority_exam')
+    add('urgency', SLOT_SCORING_WEIGHTS.mediumPriorityExam, 'medium_priority_exam')
   }
 
   if (load === 'high') {
-    if (position <= 0.35) { score += SLOT_SCORING_WEIGHTS.highLoadEarly; reasons.push('high_load_early_slot') }
-    else if (position >= 0.72) { score += SLOT_SCORING_WEIGHTS.highLoadLatePenalty; reasons.push('high_load_late_penalty') }
+    if (position <= SLOT_SCORING_WEIGHTS.highLoadEarlyMaxPosition) add('difficultyFit', SLOT_SCORING_WEIGHTS.highLoadEarly, 'high_load_early_slot')
+    else if (position >= SLOT_SCORING_WEIGHTS.lateSlotMinPosition) add('difficultyFit', SLOT_SCORING_WEIGHTS.highLoadLatePenalty, 'high_load_late_penalty')
   } else if (load === 'low') {
-    if (position >= 0.62) { score += SLOT_SCORING_WEIGHTS.lowLoadLate; reasons.push('low_load_late_slot') }
-    else if (position <= 0.25) { score += SLOT_SCORING_WEIGHTS.lowLoadEarlyPenalty; reasons.push('low_load_early_penalty') }
-  } else if (position >= 0.28 && position <= 0.72) {
-    score += SLOT_SCORING_WEIGHTS.mediumMiddle
-    reasons.push('medium_load_middle_slot')
+    if (position >= SLOT_SCORING_WEIGHTS.lowLoadLateMinPosition) add('difficultyFit', SLOT_SCORING_WEIGHTS.lowLoadLate, 'low_load_late_slot')
+    else if (position <= SLOT_SCORING_WEIGHTS.lowLoadEarlyMaxPosition) add('difficultyFit', SLOT_SCORING_WEIGHTS.lowLoadEarlyPenalty, 'low_load_early_penalty')
+  } else if (position >= SLOT_SCORING_WEIGHTS.mediumSlotMinPosition && position <= SLOT_SCORING_WEIGHTS.mediumSlotMaxPosition) {
+    add('difficultyFit', SLOT_SCORING_WEIGHTS.mediumMiddle, 'medium_load_middle_slot')
   }
 
   const dailyLoadPenalty = Math.floor(busyMinutes / 60) * SLOT_SCORING_WEIGHTS.dailyLoadHourPenalty
-  if (dailyLoadPenalty) { score += dailyLoadPenalty; reasons.push('daily_load_penalty') }
+  if (dailyLoadPenalty) add('dailyLoad', dailyLoadPenalty, 'daily_load_penalty')
 
   if (sameSubjectBusy >= 3 && !(daysUntilExam != null && daysUntilExam <= 7)) {
-    score += SLOT_SCORING_WEIGHTS.excessiveSubjectPenalty
-    reasons.push('excessive_same_subject_penalty')
+    add('subjectRepetition', SLOT_SCORING_WEIGHTS.excessiveSubjectPenalty, 'excessive_same_subject_penalty')
   } else if (sameSubjectBusy >= 1 && !(daysUntilExam != null && daysUntilExam <= 7)) {
-    score += sameSubjectBusy * SLOT_SCORING_WEIGHTS.repeatedSubjectPenalty
-    reasons.push('repeated_subject_penalty')
+    add('subjectRepetition', sameSubjectBusy * SLOT_SCORING_WEIGHTS.repeatedSubjectPenalty, 'repeated_subject_penalty')
   }
 
-  const numericBusy = input.busy.map(item => ({ start: toMinutes(item.start), end: toMinutes(item.end), subject: item.subject }))
-  if (context.subject && numericBusy.some(item => item.subject === context.subject && (item.end === start || item.start === end))) {
-    score += SLOT_SCORING_WEIGHTS.continuityBonus
-    reasons.push('same_subject_continuity')
+  const touchesSameSubject = Boolean(context.subject && numericBusy.some(item => item.subject === context.subject && (item.end === start || item.start === end)))
+  if (touchesSameSubject && sameSubjectMinutes < 90) {
+    add('continuity', SLOT_SCORING_WEIGHTS.continuityBonus, 'same_subject_continuity')
+  } else if (touchesSameSubject && sameSubjectMinutes >= 90) {
+    add('continuity', SLOT_SCORING_WEIGHTS.longContinuityPenalty, 'long_same_subject_streak_penalty')
   }
 
   const gapPenalty = tinyGapPenalty({ start, end }, numericBusy)
-  if (gapPenalty) { score += gapPenalty; reasons.push('tiny_gap_penalty') }
+  if (gapPenalty) add('tinyGap', gapPenalty, 'tiny_gap_penalty')
 
-  score += start * SLOT_SCORING_WEIGHTS.deterministicEarlyTieBreak
+  components.tieBreak = start * SLOT_SCORING_WEIGHTS.deterministicEarlyTieBreak
+  score += components.tieBreak
   reasons.push(`load_${load}`)
-  return { score: Math.round(score * 100) / 100, reasons }
+  return {
+    start: input.candidate.start,
+    end: input.candidate.end,
+    valid: true,
+    score: Math.round(score * 100) / 100,
+    reasons,
+    components,
+  }
+}
+
+export function scoreCandidateSlot(input: {
+  candidate: TimeRange
+  busy: TimeRange[]
+  window: TimeRange
+  context?: MissionSlotScoringContext
+}): { score: number; reasons: string[] } {
+  const breakdown = scoreCandidateSlotBreakdown(input)
+  return { score: breakdown.score ?? Number.NEGATIVE_INFINITY, reasons: breakdown.reasons }
 }
 
 export function scoreCandidateSlots(durationMinutes: number, busy: TimeRange[], window: TimeRange, context: MissionSlotScoringContext = {}): ScoredTimeSlot[] {
   if (durationMinutes <= 0) return []
   const windowStart = toMinutes(window.start)
   const windowEnd = toMinutes(window.end)
-  const numericBusy = busy
-    .map(item => ({ start: toMinutes(item.start), end: toMinutes(item.end) }))
-    .filter(item => item.end > windowStart && item.start < windowEnd)
-
   const candidates: ScoredTimeSlot[] = []
-  for (let cursor = windowStart; cursor + durationMinutes <= windowEnd; cursor += 15) {
+  for (let cursor = windowStart; cursor + durationMinutes <= windowEnd; cursor += SLOT_SCORING_WEIGHTS.candidateStepMinutes) {
     const candidate = { start: cursor, end: cursor + durationMinutes }
-    if (numericBusy.some(item => overlaps(candidate, item))) continue
     const slot = { start: toHHMM(candidate.start), end: toHHMM(candidate.end) }
-    const scored = scoreCandidateSlot({ candidate: slot, busy, window, context })
-    if (!Number.isFinite(scored.score)) continue
+    const scored = scoreCandidateSlotBreakdown({ candidate: slot, busy, window, context })
+    if (!scored.valid || scored.score == null) continue
     candidates.push({ ...slot, score: scored.score, reasons: scored.reasons })
   }
   return candidates.sort((a, b) => b.score - a.score || a.start.localeCompare(b.start))
+}
+
+export function getSlotScoringDebug(durationMinutes: number, busy: TimeRange[], window: TimeRange, context: MissionSlotScoringContext = {}): CandidateScoreBreakdown[] {
+  if (durationMinutes <= 0) return []
+  const windowStart = toMinutes(window.start)
+  const windowEnd = toMinutes(window.end)
+  const candidates: CandidateScoreBreakdown[] = []
+  for (let cursor = windowStart; cursor + durationMinutes <= windowEnd; cursor += SLOT_SCORING_WEIGHTS.candidateStepMinutes) {
+    const slot = { start: toHHMM(cursor), end: toHHMM(cursor + durationMinutes) }
+    candidates.push(scoreCandidateSlotBreakdown({ candidate: slot, busy, window, context }))
+  }
+  return candidates.sort((a, b) => {
+    if (a.valid !== b.valid) return a.valid ? -1 : 1
+    if (a.score !== b.score) return (b.score ?? Number.NEGATIVE_INFINITY) - (a.score ?? Number.NEGATIVE_INFINITY)
+    return a.start.localeCompare(b.start)
+  })
 }
 
 export function findBestScoredSlot(durationMinutes: number, busy: TimeRange[], window: TimeRange, context: MissionSlotScoringContext = {}): ScoredTimeSlot | null {

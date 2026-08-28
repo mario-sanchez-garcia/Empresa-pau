@@ -2,7 +2,7 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { PARCIAL_MINUTES, REFERENCE_MISSION_MINUTES } from './xpMap'
 import { mondayBasedDayIndex } from './studyDays'
-import { findBestScoredSlot, scoreCandidateSlots, scoreDateSlot, type MissionSlotScoringContext } from './slotScoring'
+import { findBestScoredSlot, getSlotScoringDebug, scoreDateSlot, type MissionSlotScoringContext } from './slotScoring'
 
 export type TimeRange = { start: string; end: string; subject?: string | null; missionType?: string | null } // "HH:MM", 24h
 
@@ -171,7 +171,7 @@ export class DayScheduler {
   }
 
   debugBestCandidates(durationMinutes: number, context: MissionSlotScoringContext = {}) {
-    return scoreCandidateSlots(durationMinutes, this.busy, this.window, context)
+    return getSlotScoringDebug(durationMinutes, this.busy, this.window, context)
   }
 }
 

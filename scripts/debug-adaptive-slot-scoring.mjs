@@ -125,6 +125,15 @@ function describeSupabaseError(error) {
   return parts.length ? parts.join(':').slice(0, 220) : JSON.stringify(error).slice(0, 220)
 }
 
+const REAL_TELEMETRY_COLUMNS = 'user_id, scheduled_date, status, start_time, end_time, started_at, completed_at, actual_duration_minutes, completion_delay_minutes, postpone_count, last_postponed_at, manual_reschedule_count, conflict_reschedule_count, subject, mission_type'
+const PROFILE_TELEMETRY_COLUMNS = 'scheduled_date, status, start_time, end_time, started_at, completed_at, actual_duration_minutes, completion_delay_minutes, postpone_count, last_postponed_at, manual_reschedule_count, conflict_reschedule_count, subject, mission_type'
+const REAL_LEGACY_COLUMNS = 'user_id, scheduled_date, status, start_time, end_time, subject, mission_type'
+const PROFILE_LEGACY_COLUMNS = 'scheduled_date, status, start_time, end_time, subject, mission_type'
+
+function isMissingTelemetryColumn(error) {
+  return error?.code === '42703'
+}
+
 function signed(value) {
   if (value == null) return 'n/a'
   return value > 0 ? `+${value}` : String(value)
@@ -138,14 +147,28 @@ function printProfile(label, profile, stats) {
   }
   console.log(`sample total: ${profile.sampleSize}`)
   console.log(`confidence: ${profile.confidence}`)
-  console.log(`completion rate suavizado global: ${(stats.baselineSmoothedRate * 100).toFixed(1)}%`)
-  for (const [bucket, data] of Object.entries(stats.timeOfDay)) {
-    console.log(`${bucket}: ${data.completed}/${data.total} · suavizado ${(data.smoothedRate * 100).toFixed(1)}% · ajuste ${signed(profile.timeOfDay[bucket])}`)
+  if (profile.metrics) {
+    console.log(`telemetry rows: ${profile.metrics.telemetryRows}`)
+    console.log(`diversity: ${profile.metrics.diversity}`)
+    console.log(`baseline start: ${(profile.metrics.baseline.startRate * 100).toFixed(1)}%`)
+    console.log(`baseline completed/scheduled: ${(profile.metrics.baseline.completionRateScheduled * 100).toFixed(1)}%`)
+    console.log(`baseline completed/started: ${(profile.metrics.baseline.completionRateAfterStart * 100).toFixed(1)}%`)
+    for (const [bucket, data] of Object.entries(profile.metrics.timeOfDay)) {
+      console.log(`${bucket}: scheduled ${data.scheduled} · started ${(data.startRate * 100).toFixed(1)}% · completed/scheduled ${(data.completionRateScheduled * 100).toFixed(1)}% · completed/started ${(data.completionRateAfterStart * 100).toFixed(1)}% · postpone ${(data.manualPostponeRate * 100).toFixed(1)}% · manual reschedule ${(data.manualRescheduleRate * 100).toFixed(1)}% · avg delay ${data.averageCompletionDelayMinutes ?? 'n/a'} min · ajuste ${signed(profile.timeOfDay[bucket])}`)
+    }
+    for (const [bucket, data] of Object.entries(profile.metrics.durationFit)) {
+      console.log(`duracion ${bucket}: scheduled ${data.scheduled} · started ${data.started} · completed ${data.completed} · actual/planned ${data.averageActualToPlannedRatio ?? 'n/a'} · ajuste ${signed(profile.durationFit[bucket])}`)
+    }
+  } else {
+    console.log(`completion rate suavizado global: ${(stats.baselineSmoothedRate * 100).toFixed(1)}%`)
+    for (const [bucket, data] of Object.entries(stats.timeOfDay)) {
+      console.log(`${bucket}: ${data.completed}/${data.total} · suavizado ${(data.smoothedRate * 100).toFixed(1)}% · ajuste ${signed(profile.timeOfDay[bucket])}`)
+    }
+    for (const [bucket, data] of Object.entries(stats.durationFit)) {
+      console.log(`duracion ${bucket}: ${data.completed}/${data.total} · suavizado ${(data.smoothedRate * 100).toFixed(1)}% · ajuste ${signed(profile.durationFit[bucket])}`)
+    }
   }
-  for (const [bucket, data] of Object.entries(stats.durationFit)) {
-    console.log(`duracion ${bucket}: ${data.completed}/${data.total} · suavizado ${(data.smoothedRate * 100).toFixed(1)}% · ajuste ${signed(profile.durationFit[bucket])}`)
-  }
-  console.log(`continuidad: ${stats.continuity.completed}/${stats.continuity.total} · suavizado ${(stats.continuity.smoothedRate * 100).toFixed(1)}% · ajuste ${signed(profile.continuityAdjustment)}`)
+  console.log(`continuidad: ajuste ${signed(profile.continuityAdjustment)}${profile.continuityReason ? ` · ${profile.continuityReason}` : ''}`)
 }
 
 function busyOutside(starts, duration = 45, window = { start: '16:00', end: '21:00' }) {
@@ -170,21 +193,23 @@ function artificialRows({ early = { completed: 0, missed: 0 }, middle = { comple
   const add = (count, row) => {
     for (let i = 0; i < count; i += 1) rows.push({ scheduled_date: `2026-06-${String((rows.length % 20) + 1).padStart(2, '0')}`, ...row })
   }
-  add(early.completed, { status: 'completed', start_time: '16:30', end_time: '17:00', subject: 'matematicas_ii', mission_type: 'concept' })
-  add(early.missed, { status: 'missed', start_time: '16:30', end_time: '17:00', subject: 'matematicas_ii', mission_type: 'concept' })
-  add(middle.completed, { status: 'completed', start_time: '18:00', end_time: '18:30', subject: 'lengua', mission_type: 'concept' })
-  add(middle.missed, { status: 'missed', start_time: '18:00', end_time: '18:30', subject: 'lengua', mission_type: 'concept' })
-  add(late.completed, { status: 'completed', start_time: '20:00', end_time: '20:30', subject: 'historia_espana', mission_type: 'review' })
-  add(late.missed, { status: 'missed', start_time: '20:00', end_time: '20:30', subject: 'historia_espana', mission_type: 'review' })
-  add(long.completed, { status: 'completed', start_time: '17:30', end_time: '18:45', subject: 'fisica', mission_type: 'pau_practice' })
-  add(long.missed, { status: 'missed', start_time: '17:30', end_time: '18:45', subject: 'fisica', mission_type: 'pau_practice' })
+  const completedTelemetry = { started_at: '2026-06-01T16:30:00.000Z', completed_at: '2026-06-01T17:00:00.000Z' }
+  const missedTelemetry = { started_at: null, completed_at: null }
+  add(early.completed, { status: 'completed', start_time: '16:30', end_time: '17:00', subject: 'matematicas_ii', mission_type: 'concept', ...completedTelemetry })
+  add(early.missed, { status: 'missed', start_time: '16:30', end_time: '17:00', subject: 'matematicas_ii', mission_type: 'concept', ...missedTelemetry })
+  add(middle.completed, { status: 'completed', start_time: '18:00', end_time: '18:30', subject: 'lengua', mission_type: 'concept', ...completedTelemetry })
+  add(middle.missed, { status: 'missed', start_time: '18:00', end_time: '18:30', subject: 'lengua', mission_type: 'concept', ...missedTelemetry })
+  add(late.completed, { status: 'completed', start_time: '20:00', end_time: '20:30', subject: 'historia_espana', mission_type: 'review', ...completedTelemetry })
+  add(late.missed, { status: 'missed', start_time: '20:00', end_time: '20:30', subject: 'historia_espana', mission_type: 'review', ...missedTelemetry })
+  add(long.completed, { status: 'completed', start_time: '17:30', end_time: '18:45', subject: 'fisica', mission_type: 'pau_practice', ...completedTelemetry })
+  add(long.missed, { status: 'missed', start_time: '17:30', end_time: '18:45', subject: 'fisica', mission_type: 'pau_practice', ...missedTelemetry })
   for (let i = 0; i < continuity.completed; i += 1) {
-    rows.push({ scheduled_date: `2026-07-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:00', end_time: '16:30', subject: 'quimica', mission_type: 'concept' })
-    rows.push({ scheduled_date: `2026-07-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:30', end_time: '17:00', subject: 'quimica', mission_type: 'concept' })
+    rows.push({ scheduled_date: `2026-07-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:00', end_time: '16:30', subject: 'quimica', mission_type: 'concept', ...completedTelemetry })
+    rows.push({ scheduled_date: `2026-07-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:30', end_time: '17:00', subject: 'quimica', mission_type: 'concept', ...completedTelemetry })
   }
   for (let i = 0; i < continuity.missed; i += 1) {
-    rows.push({ scheduled_date: `2026-08-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:00', end_time: '16:30', subject: 'quimica', mission_type: 'concept' })
-    rows.push({ scheduled_date: `2026-08-${String((i % 20) + 1).padStart(2, '0')}`, status: 'missed', start_time: '16:30', end_time: '17:00', subject: 'quimica', mission_type: 'concept' })
+    rows.push({ scheduled_date: `2026-08-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:00', end_time: '16:30', subject: 'quimica', mission_type: 'concept', ...completedTelemetry })
+    rows.push({ scheduled_date: `2026-08-${String((i % 20) + 1).padStart(2, '0')}`, status: 'missed', start_time: '16:30', end_time: '17:00', subject: 'quimica', mission_type: 'concept', ...missedTelemetry })
   }
   return rows
 }
@@ -258,23 +283,35 @@ async function loadRealRows(config) {
   const db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
   let userId = process.env.KAIRO_DEBUG_USER_ID
   if (!userId) {
-    const { data, error } = await db
+    let { data, error } = await db
       .from('camino_calendar')
-      .select('user_id, scheduled_date, status, start_time, end_time, subject, mission_type')
+      .select(REAL_TELEMETRY_COLUMNS)
       .in('status', ['completed', 'missed', 'postponed'])
       .not('start_time', 'is', null)
       .not('end_time', 'is', null)
       .order('scheduled_date', { ascending: false })
       .limit(500)
+    if (isMissingTelemetryColumn(error)) {
+      const legacyResult = await db
+        .from('camino_calendar')
+        .select(REAL_LEGACY_COLUMNS)
+        .in('status', ['completed', 'missed', 'postponed'])
+        .not('start_time', 'is', null)
+        .not('end_time', 'is', null)
+        .order('scheduled_date', { ascending: false })
+        .limit(500)
+      data = legacyResult.data
+      error = legacyResult.error
+    }
     if (error) return { rows: [], reason: `supabase_user_lookup_error:${describeSupabaseError(error)}` }
     const counts = new Map()
     for (const row of data ?? []) counts.set(row.user_id, (counts.get(row.user_id) ?? 0) + 1)
     userId = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
   }
   if (!userId) return { rows: [], reason: 'no_timed_behavior_rows' }
-  const { data, error } = await db
+  let { data, error } = await db
     .from('camino_calendar')
-    .select('scheduled_date, status, start_time, end_time, subject, mission_type')
+    .select(PROFILE_TELEMETRY_COLUMNS)
     .eq('user_id', userId)
     .in('status', ['completed', 'missed', 'postponed'])
     .not('start_time', 'is', null)
@@ -282,6 +319,20 @@ async function loadRealRows(config) {
     .order('scheduled_date', { ascending: false })
     .order('start_time', { ascending: false })
     .limit(config.historyLimit)
+  if (isMissingTelemetryColumn(error)) {
+    const legacyResult = await db
+      .from('camino_calendar')
+      .select(PROFILE_LEGACY_COLUMNS)
+      .eq('user_id', userId)
+      .in('status', ['completed', 'missed', 'postponed'])
+      .not('start_time', 'is', null)
+      .not('end_time', 'is', null)
+      .order('scheduled_date', { ascending: false })
+      .order('start_time', { ascending: false })
+      .limit(config.historyLimit)
+    data = legacyResult.data
+    error = legacyResult.error
+  }
   if (error) return { rows: [], reason: `supabase_profile_error:${describeSupabaseError(error)}`, userHash: anonymize(userId) }
   return { rows: data ?? [], userHash: anonymize(userId) }
 }
@@ -311,6 +362,7 @@ async function main() {
     timeOfDay: { early: 99, middle: -99, late: 99 },
     durationFit: { short: 99, medium: 99, long: -99, extraLong: -99 },
     continuityAdjustment: 99,
+    continuityReason: 'personal_continuity_positive',
     confidence: 1,
   }
 

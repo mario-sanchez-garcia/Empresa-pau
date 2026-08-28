@@ -118,7 +118,8 @@ assert(
     slotScoring.includes('examWithin7Days') &&
     slotScoring.includes('examWithin14Days') &&
     slotScoring.includes('ADAPTIVE_SLOT_SCORING_CONFIG') &&
-    !slotScoring.includes('started_at') &&
-    !slotScoring.includes('postpone_count') &&
-    !slotScoring.includes('reschedule_count')
+    slotScoring.includes('maxPersonalAdjustment: 8') &&
+    slotScoring.includes('conflict_reschedule_count') &&
+    !slotScoring.includes('rescheduled_conflict') &&
+    !slotScoring.includes('calendar_event_links')
 )

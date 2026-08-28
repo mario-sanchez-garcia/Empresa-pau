@@ -17,14 +17,61 @@ export type BehaviorProfileSourceRow = {
   status?: string | null
   start_time?: string | null
   end_time?: string | null
+  started_at?: string | null
+  completed_at?: string | null
+  actual_duration_minutes?: number | null
+  completion_delay_minutes?: number | null
+  postpone_count?: number | null
+  last_postponed_at?: string | null
+  manual_reschedule_count?: number | null
+  conflict_reschedule_count?: number | null
   subject?: string | null
   mission_type?: string | null
+}
+export type BehaviorProfileBucketStats = {
+  scheduled: number
+  startKnown: number
+  started: number
+  completed: number
+  completedAfterStart: number
+  postponedManual: number
+  manuallyRescheduled: number
+  delayed: number
+  startRate: number
+  completionRateScheduled: number
+  completionRateAfterStart: number
+  manualPostponeRate: number
+  manualRescheduleRate: number
+  averageCompletionDelayMinutes: number | null
+}
+export type BehaviorDurationBucketStats = {
+  scheduled: number
+  started: number
+  completed: number
+  actualCount: number
+  averageActualToPlannedRatio: number | null
 }
 export type SchedulingBehaviorProfile = {
   sampleSize: number
   timeOfDay: Record<TimeBucket, number>
   durationFit: Record<DurationBucket, number>
   continuityAdjustment: number
+  timeOfDayReasons?: Record<TimeBucket, string[]>
+  durationFitReasons?: Record<DurationBucket, string[]>
+  continuityReason?: string | null
+  metrics?: {
+    timeOfDay: Record<TimeBucket, BehaviorProfileBucketStats>
+    durationFit: Record<DurationBucket, BehaviorDurationBucketStats>
+    baseline: {
+      startRate: number
+      completionRateScheduled: number
+      completionRateAfterStart: number
+      manualPostponeRate: number
+      manualRescheduleRate: number
+    }
+    telemetryRows: number
+    diversity: number
+  }
   confidence: number
 }
 export type ScoredTimeSlot = TimeRange & {
@@ -204,21 +251,84 @@ function bucketAdjustment(completed: number, total: number, baseline: number, mi
   return Math.round(delta * scale)
 }
 
+function emptyTimeStats() {
+  return {
+    scheduled: 0,
+    startKnown: 0,
+    started: 0,
+    completed: 0,
+    completedAfterStart: 0,
+    postponedManual: 0,
+    manuallyRescheduled: 0,
+    delayTotal: 0,
+    delayCount: 0,
+  }
+}
+
+function emptyDurationStats() {
+  return {
+    scheduled: 0,
+    started: 0,
+    completed: 0,
+    actualCount: 0,
+    actualToPlannedTotal: 0,
+  }
+}
+
+function rate(count: number, total: number) {
+  return total > 0 ? count / total : 0
+}
+
+function smoothedDelta(count: number, total: number, baseline: number) {
+  if (total <= 0) return 0
+  return smoothedRate(count, total) - baseline
+}
+
+function meaningfulAdjustment(delta: number, scale: number) {
+  if (Math.abs(delta) < ADAPTIVE_SLOT_SCORING_CONFIG.minimumMeaningfulDelta) return 0
+  return Math.round(delta * scale)
+}
+
+function averageDelayPenalty(delayTotal: number, delayCount: number) {
+  if (delayCount < ADAPTIVE_SLOT_SCORING_CONFIG.minSampleTimeBucket) return 0
+  const avg = delayTotal / delayCount
+  if (avg <= 30) return 0
+  if (avg <= 60) return -1
+  if (avg <= 120) return -2
+  return -3
+}
+
+function durationRatioAdjustment(actualToPlannedTotal: number, actualCount: number) {
+  if (actualCount < ADAPTIVE_SLOT_SCORING_CONFIG.minSampleDurationBucket) return 0
+  const avgRatio = actualToPlannedTotal / actualCount
+  if (avgRatio <= 1.15) return 2
+  if (avgRatio <= 1.35) return 1
+  if (avgRatio <= 1.65) return 0
+  if (avgRatio <= 2) return -1
+  return -2
+}
+
 export function buildSchedulingBehaviorProfile(rows: BehaviorProfileSourceRow[]): SchedulingBehaviorProfile {
   const stats = {
     timeOfDay: {
-      early: { completed: 0, total: 0 },
-      middle: { completed: 0, total: 0 },
-      late: { completed: 0, total: 0 },
+      early: emptyTimeStats(),
+      middle: emptyTimeStats(),
+      late: emptyTimeStats(),
     },
     durationFit: {
-      short: { completed: 0, total: 0 },
-      medium: { completed: 0, total: 0 },
-      long: { completed: 0, total: 0 },
-      extraLong: { completed: 0, total: 0 },
+      short: emptyDurationStats(),
+      medium: emptyDurationStats(),
+      long: emptyDurationStats(),
+      extraLong: emptyDurationStats(),
     },
-    continuity: { completed: 0, total: 0 },
+    continuity: { positive: 0, total: 0 },
     totalCompleted: 0,
+    totalStarted: 0,
+    totalCompletedAfterStart: 0,
+    totalPostponedManual: 0,
+    totalManualRescheduled: 0,
+    totalStartKnown: 0,
+    telemetryRows: 0,
     total: 0,
   }
   const relevant = rows
@@ -230,45 +340,231 @@ export function buildSchedulingBehaviorProfile(rows: BehaviorProfileSourceRow[])
     const row = relevant[index]
     const minutes = durationMinutes(row.start_time, row.end_time)
     if (!row.start_time || !row.scheduled_date || !minutes) continue
+    const hasStartTelemetryColumns = Object.prototype.hasOwnProperty.call(row, 'started_at') || Object.prototype.hasOwnProperty.call(row, 'completed_at')
     const completed = row.status === 'completed'
+    const started = Boolean(row.started_at || row.completed_at)
+    const conflictReschedules = row.conflict_reschedule_count ?? 0
+    const postponedManual = (row.postpone_count ?? 0) > 0 || Boolean(row.last_postponed_at) || (row.status === 'postponed' && conflictReschedules === 0)
+    const manuallyRescheduled = (row.manual_reschedule_count ?? 0) > 0
     const window = scoringStudyWindowFor(row.scheduled_date)
     const timeBucket = timeBucketFor(row.start_time, window)
     const durationBucket = durationBucketFor(minutes)
-    stats.timeOfDay[timeBucket].total += 1
-    stats.durationFit[durationBucket].total += 1
+    stats.timeOfDay[timeBucket].scheduled += 1
+    stats.durationFit[durationBucket].scheduled += 1
     stats.total += 1
+    if (hasStartTelemetryColumns || row.actual_duration_minutes != null || row.completion_delay_minutes != null || postponedManual || manuallyRescheduled) {
+      stats.telemetryRows += 1
+    }
+    if (hasStartTelemetryColumns) {
+      stats.timeOfDay[timeBucket].startKnown += 1
+      stats.totalStartKnown += 1
+    }
+    if (started) {
+      stats.timeOfDay[timeBucket].started += 1
+      stats.durationFit[durationBucket].started += 1
+      stats.totalStarted += 1
+    }
     if (completed) {
       stats.timeOfDay[timeBucket].completed += 1
       stats.durationFit[durationBucket].completed += 1
       stats.totalCompleted += 1
+      if (started) {
+        stats.timeOfDay[timeBucket].completedAfterStart += 1
+        stats.totalCompletedAfterStart += 1
+      }
+    }
+    if (postponedManual) {
+      stats.timeOfDay[timeBucket].postponedManual += 1
+      stats.totalPostponedManual += 1
+    }
+    if (manuallyRescheduled) {
+      stats.timeOfDay[timeBucket].manuallyRescheduled += 1
+      stats.totalManualRescheduled += 1
+    }
+    if (typeof row.completion_delay_minutes === 'number' && Number.isFinite(row.completion_delay_minutes)) {
+      stats.timeOfDay[timeBucket].delayTotal += Math.max(0, row.completion_delay_minutes)
+      stats.timeOfDay[timeBucket].delayCount += 1
+    }
+    if (typeof row.actual_duration_minutes === 'number' && Number.isFinite(row.actual_duration_minutes) && row.actual_duration_minutes > 0) {
+      stats.durationFit[durationBucket].actualCount += 1
+      stats.durationFit[durationBucket].actualToPlannedTotal += row.actual_duration_minutes / minutes
     }
 
     const previous = relevant[index - 1]
     if (previous?.subject && row.subject && previous.subject === row.subject && previous.scheduled_date === row.scheduled_date) {
       stats.continuity.total += 1
-      if (completed) stats.continuity.completed += 1
+      if ((started && completed) && !postponedManual) stats.continuity.positive += 1
     }
   }
 
-  const baseline = stats.total > 0 ? smoothedRate(stats.totalCompleted, stats.total) : ADAPTIVE_SLOT_SCORING_CONFIG.smoothingPriorRate
+  const baselineCompletion = stats.total > 0 ? smoothedRate(stats.totalCompleted, stats.total) : ADAPTIVE_SLOT_SCORING_CONFIG.smoothingPriorRate
+  const baselineStart = stats.totalStartKnown > 0 ? smoothedRate(stats.totalStarted, stats.totalStartKnown) : ADAPTIVE_SLOT_SCORING_CONFIG.smoothingPriorRate
+  const baselineAfterStart = stats.totalStarted > 0 ? smoothedRate(stats.totalCompletedAfterStart, stats.totalStarted) : ADAPTIVE_SLOT_SCORING_CONFIG.smoothingPriorRate
+  const baselinePostpone = stats.total > 0 ? smoothedRate(stats.totalPostponedManual, stats.total) : 0
+  const baselineManualReschedule = stats.total > 0 ? smoothedRate(stats.totalManualRescheduled, stats.total) : 0
+  const timeOfDayReasons: Record<TimeBucket, string[]> = { early: [], middle: [], late: [] }
+  const durationFitReasons: Record<DurationBucket, string[]> = { short: [], medium: [], long: [], extraLong: [] }
+  const timeAdjustmentFor = (bucket: TimeBucket) => {
+    const bucketStats = stats.timeOfDay[bucket]
+    if (bucketStats.scheduled < ADAPTIVE_SLOT_SCORING_CONFIG.minSampleTimeBucket) return 0
+    let adjustment = 0
+    const startAdj = bucketStats.startKnown >= ADAPTIVE_SLOT_SCORING_CONFIG.minSampleTimeBucket
+      ? meaningfulAdjustment(smoothedDelta(bucketStats.started, bucketStats.startKnown, baselineStart), 8)
+      : 0
+    if (startAdj) {
+      adjustment += startAdj
+      timeOfDayReasons[bucket].push(`personal_${bucket}_start_${startAdj > 0 ? 'positive' : 'negative'}`)
+    }
+    const afterStartAdj = bucketStats.started >= ADAPTIVE_SLOT_SCORING_CONFIG.minSampleTimeBucket
+      ? meaningfulAdjustment(smoothedDelta(bucketStats.completedAfterStart, bucketStats.started, baselineAfterStart), 5)
+      : 0
+    if (afterStartAdj) {
+      adjustment += afterStartAdj
+      timeOfDayReasons[bucket].push(`personal_${bucket}_completion_after_start_${afterStartAdj > 0 ? 'positive' : 'negative'}`)
+    }
+    const completionAdj = meaningfulAdjustment(smoothedDelta(bucketStats.completed, bucketStats.scheduled, baselineCompletion), 5)
+    if (completionAdj && Math.sign(completionAdj) !== Math.sign(startAdj + afterStartAdj)) {
+      adjustment += completionAdj
+      timeOfDayReasons[bucket].push(`personal_${bucket}_completion_${completionAdj > 0 ? 'positive' : 'negative'}`)
+    }
+    const postponeAdj = -Math.max(0, meaningfulAdjustment(smoothedDelta(bucketStats.postponedManual, bucketStats.scheduled, baselinePostpone), 6))
+    if (postponeAdj) {
+      adjustment += postponeAdj
+      timeOfDayReasons[bucket].push('personal_postpone_rate_negative')
+    }
+    const manualRescheduleAdj = -Math.max(0, meaningfulAdjustment(smoothedDelta(bucketStats.manuallyRescheduled, bucketStats.scheduled, baselineManualReschedule), 3))
+    if (manualRescheduleAdj) {
+      adjustment += manualRescheduleAdj
+      timeOfDayReasons[bucket].push('personal_manual_reschedule_negative')
+    }
+    const delayAdj = averageDelayPenalty(bucketStats.delayTotal, bucketStats.delayCount)
+    if (delayAdj) {
+      adjustment += delayAdj
+      timeOfDayReasons[bucket].push('personal_completion_delay_negative')
+    }
+    return clamp(adjustment, -5, 5)
+  }
   const timeOfDay = {
-    early: bucketAdjustment(stats.timeOfDay.early.completed, stats.timeOfDay.early.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleTimeBucket, ADAPTIVE_SLOT_SCORING_CONFIG.timeBucketScale),
-    middle: bucketAdjustment(stats.timeOfDay.middle.completed, stats.timeOfDay.middle.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleTimeBucket, ADAPTIVE_SLOT_SCORING_CONFIG.timeBucketScale),
-    late: bucketAdjustment(stats.timeOfDay.late.completed, stats.timeOfDay.late.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleTimeBucket, ADAPTIVE_SLOT_SCORING_CONFIG.timeBucketScale),
+    early: timeAdjustmentFor('early'),
+    middle: timeAdjustmentFor('middle'),
+    late: timeAdjustmentFor('late'),
+  }
+  const durationAdjustmentFor = (bucket: DurationBucket) => {
+    const bucketStats = stats.durationFit[bucket]
+    if (bucketStats.scheduled < ADAPTIVE_SLOT_SCORING_CONFIG.minSampleDurationBucket) return 0
+    let adjustment = 0
+    const ratioAdj = durationRatioAdjustment(bucketStats.actualToPlannedTotal, bucketStats.actualCount)
+    if (ratioAdj) {
+      adjustment += ratioAdj
+      durationFitReasons[bucket].push(ratioAdj > 0 ? 'personal_duration_fit' : 'personal_duration_actual_long_negative')
+    }
+    const afterStartAdj = bucketStats.started >= ADAPTIVE_SLOT_SCORING_CONFIG.minSampleDurationBucket
+      ? meaningfulAdjustment(smoothedDelta(bucketStats.completed, bucketStats.started, baselineAfterStart), 4)
+      : 0
+    if (afterStartAdj) {
+      adjustment += afterStartAdj
+      durationFitReasons[bucket].push(afterStartAdj > 0 ? 'personal_duration_completion_positive' : 'personal_duration_low_adherence')
+    }
+    const historicalCompletionAdj = !ratioAdj && !afterStartAdj
+      ? meaningfulAdjustment(smoothedDelta(bucketStats.completed, bucketStats.scheduled, baselineCompletion), 4)
+      : 0
+    if (historicalCompletionAdj) {
+      adjustment += historicalCompletionAdj
+      durationFitReasons[bucket].push(historicalCompletionAdj > 0 ? 'personal_duration_completion_positive' : 'personal_duration_low_adherence')
+    }
+    return clamp(adjustment, -3, 3)
   }
   const durationFit = {
-    short: bucketAdjustment(stats.durationFit.short.completed, stats.durationFit.short.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleDurationBucket, ADAPTIVE_SLOT_SCORING_CONFIG.durationBucketScale),
-    medium: bucketAdjustment(stats.durationFit.medium.completed, stats.durationFit.medium.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleDurationBucket, ADAPTIVE_SLOT_SCORING_CONFIG.durationBucketScale),
-    long: bucketAdjustment(stats.durationFit.long.completed, stats.durationFit.long.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleDurationBucket, ADAPTIVE_SLOT_SCORING_CONFIG.durationBucketScale),
-    extraLong: bucketAdjustment(stats.durationFit.extraLong.completed, stats.durationFit.extraLong.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleDurationBucket, ADAPTIVE_SLOT_SCORING_CONFIG.durationBucketScale),
+    short: durationAdjustmentFor('short'),
+    medium: durationAdjustmentFor('medium'),
+    long: durationAdjustmentFor('long'),
+    extraLong: durationAdjustmentFor('extraLong'),
   }
-  const continuityAdjustment = bucketAdjustment(stats.continuity.completed, stats.continuity.total, baseline, ADAPTIVE_SLOT_SCORING_CONFIG.minSampleContinuity, ADAPTIVE_SLOT_SCORING_CONFIG.continuityScale)
-  const confidence = clamp(stats.total / ADAPTIVE_SLOT_SCORING_CONFIG.historyLimit, 0, 1)
+  const continuityAdjustment = clamp(bucketAdjustment(
+    stats.continuity.positive,
+    stats.continuity.total,
+    ADAPTIVE_SLOT_SCORING_CONFIG.smoothingPriorRate,
+    ADAPTIVE_SLOT_SCORING_CONFIG.minSampleContinuity,
+    ADAPTIVE_SLOT_SCORING_CONFIG.continuityScale,
+  ), -4, 4)
+  const diversity = (['early', 'middle', 'late'] as TimeBucket[]).filter(bucket => stats.timeOfDay[bucket].scheduled > 0).length / 3
+  const reliability = stats.total > 0 ? stats.telemetryRows / stats.total : 0
+  const confidence = clamp((stats.total / ADAPTIVE_SLOT_SCORING_CONFIG.historyLimit) * 0.55 + diversity * 0.25 + reliability * 0.2, 0, 1)
   return {
     sampleSize: stats.total,
     timeOfDay,
     durationFit,
     continuityAdjustment,
+    timeOfDayReasons,
+    durationFitReasons,
+    continuityReason: continuityAdjustment ? (continuityAdjustment > 0 ? 'personal_continuity_positive' : 'personal_continuity_negative') : null,
+    metrics: {
+      timeOfDay: {
+        early: {
+          scheduled: stats.timeOfDay.early.scheduled,
+          startKnown: stats.timeOfDay.early.startKnown,
+          started: stats.timeOfDay.early.started,
+          completed: stats.timeOfDay.early.completed,
+          completedAfterStart: stats.timeOfDay.early.completedAfterStart,
+          postponedManual: stats.timeOfDay.early.postponedManual,
+          manuallyRescheduled: stats.timeOfDay.early.manuallyRescheduled,
+          delayed: stats.timeOfDay.early.delayCount,
+          startRate: rounded(rate(stats.timeOfDay.early.started, stats.timeOfDay.early.startKnown)),
+          completionRateScheduled: rounded(rate(stats.timeOfDay.early.completed, stats.timeOfDay.early.scheduled)),
+          completionRateAfterStart: rounded(rate(stats.timeOfDay.early.completedAfterStart, stats.timeOfDay.early.started)),
+          manualPostponeRate: rounded(rate(stats.timeOfDay.early.postponedManual, stats.timeOfDay.early.scheduled)),
+          manualRescheduleRate: rounded(rate(stats.timeOfDay.early.manuallyRescheduled, stats.timeOfDay.early.scheduled)),
+          averageCompletionDelayMinutes: stats.timeOfDay.early.delayCount ? rounded(stats.timeOfDay.early.delayTotal / stats.timeOfDay.early.delayCount) : null,
+        },
+        middle: {
+          scheduled: stats.timeOfDay.middle.scheduled,
+          startKnown: stats.timeOfDay.middle.startKnown,
+          started: stats.timeOfDay.middle.started,
+          completed: stats.timeOfDay.middle.completed,
+          completedAfterStart: stats.timeOfDay.middle.completedAfterStart,
+          postponedManual: stats.timeOfDay.middle.postponedManual,
+          manuallyRescheduled: stats.timeOfDay.middle.manuallyRescheduled,
+          delayed: stats.timeOfDay.middle.delayCount,
+          startRate: rounded(rate(stats.timeOfDay.middle.started, stats.timeOfDay.middle.startKnown)),
+          completionRateScheduled: rounded(rate(stats.timeOfDay.middle.completed, stats.timeOfDay.middle.scheduled)),
+          completionRateAfterStart: rounded(rate(stats.timeOfDay.middle.completedAfterStart, stats.timeOfDay.middle.started)),
+          manualPostponeRate: rounded(rate(stats.timeOfDay.middle.postponedManual, stats.timeOfDay.middle.scheduled)),
+          manualRescheduleRate: rounded(rate(stats.timeOfDay.middle.manuallyRescheduled, stats.timeOfDay.middle.scheduled)),
+          averageCompletionDelayMinutes: stats.timeOfDay.middle.delayCount ? rounded(stats.timeOfDay.middle.delayTotal / stats.timeOfDay.middle.delayCount) : null,
+        },
+        late: {
+          scheduled: stats.timeOfDay.late.scheduled,
+          startKnown: stats.timeOfDay.late.startKnown,
+          started: stats.timeOfDay.late.started,
+          completed: stats.timeOfDay.late.completed,
+          completedAfterStart: stats.timeOfDay.late.completedAfterStart,
+          postponedManual: stats.timeOfDay.late.postponedManual,
+          manuallyRescheduled: stats.timeOfDay.late.manuallyRescheduled,
+          delayed: stats.timeOfDay.late.delayCount,
+          startRate: rounded(rate(stats.timeOfDay.late.started, stats.timeOfDay.late.startKnown)),
+          completionRateScheduled: rounded(rate(stats.timeOfDay.late.completed, stats.timeOfDay.late.scheduled)),
+          completionRateAfterStart: rounded(rate(stats.timeOfDay.late.completedAfterStart, stats.timeOfDay.late.started)),
+          manualPostponeRate: rounded(rate(stats.timeOfDay.late.postponedManual, stats.timeOfDay.late.scheduled)),
+          manualRescheduleRate: rounded(rate(stats.timeOfDay.late.manuallyRescheduled, stats.timeOfDay.late.scheduled)),
+          averageCompletionDelayMinutes: stats.timeOfDay.late.delayCount ? rounded(stats.timeOfDay.late.delayTotal / stats.timeOfDay.late.delayCount) : null,
+        },
+      },
+      durationFit: {
+        short: { scheduled: stats.durationFit.short.scheduled, started: stats.durationFit.short.started, completed: stats.durationFit.short.completed, actualCount: stats.durationFit.short.actualCount, averageActualToPlannedRatio: stats.durationFit.short.actualCount ? rounded(stats.durationFit.short.actualToPlannedTotal / stats.durationFit.short.actualCount) : null },
+        medium: { scheduled: stats.durationFit.medium.scheduled, started: stats.durationFit.medium.started, completed: stats.durationFit.medium.completed, actualCount: stats.durationFit.medium.actualCount, averageActualToPlannedRatio: stats.durationFit.medium.actualCount ? rounded(stats.durationFit.medium.actualToPlannedTotal / stats.durationFit.medium.actualCount) : null },
+        long: { scheduled: stats.durationFit.long.scheduled, started: stats.durationFit.long.started, completed: stats.durationFit.long.completed, actualCount: stats.durationFit.long.actualCount, averageActualToPlannedRatio: stats.durationFit.long.actualCount ? rounded(stats.durationFit.long.actualToPlannedTotal / stats.durationFit.long.actualCount) : null },
+        extraLong: { scheduled: stats.durationFit.extraLong.scheduled, started: stats.durationFit.extraLong.started, completed: stats.durationFit.extraLong.completed, actualCount: stats.durationFit.extraLong.actualCount, averageActualToPlannedRatio: stats.durationFit.extraLong.actualCount ? rounded(stats.durationFit.extraLong.actualToPlannedTotal / stats.durationFit.extraLong.actualCount) : null },
+      },
+      baseline: {
+        startRate: rounded(baselineStart),
+        completionRateScheduled: rounded(baselineCompletion),
+        completionRateAfterStart: rounded(baselineAfterStart),
+        manualPostponeRate: rounded(baselinePostpone),
+        manualRescheduleRate: rounded(baselineManualReschedule),
+      },
+      telemetryRows: stats.telemetryRows,
+      diversity: rounded(diversity),
+    },
     confidence: rounded(confidence),
   }
 }
@@ -293,17 +589,17 @@ function scorePersonalAdjustment(input: {
   const timeAdjustment = profile.timeOfDay[timeBucket] ?? 0
   if (timeAdjustment) {
     adjustment += timeAdjustment
-    reasons.push(`personal_${timeBucket}_${timeAdjustment > 0 ? 'positive' : 'negative'}`)
+    reasons.push(...(profile.timeOfDayReasons?.[timeBucket]?.length ? profile.timeOfDayReasons[timeBucket] : [`personal_${timeBucket}_${timeAdjustment > 0 ? 'positive' : 'negative'}`]))
   }
   const durationBucket = durationBucketFor(input.durationMinutes)
   const durationAdjustment = profile.durationFit[durationBucket] ?? 0
   if (durationAdjustment) {
     adjustment += durationAdjustment
-    reasons.push(durationAdjustment > 0 ? 'personal_duration_fit' : 'personal_duration_low_adherence')
+    reasons.push(...(profile.durationFitReasons?.[durationBucket]?.length ? profile.durationFitReasons[durationBucket] : [durationAdjustment > 0 ? 'personal_duration_fit' : 'personal_duration_low_adherence']))
   }
   if (input.touchesSameSubject && profile.continuityAdjustment) {
     adjustment += profile.continuityAdjustment
-    reasons.push(profile.continuityAdjustment > 0 ? 'personal_continuity_positive' : 'personal_continuity_negative')
+    reasons.push(profile.continuityReason ?? (profile.continuityAdjustment > 0 ? 'personal_continuity_positive' : 'personal_continuity_negative'))
   }
   return { adjustment: capPersonalAdjustment(adjustment), reasons }
 }

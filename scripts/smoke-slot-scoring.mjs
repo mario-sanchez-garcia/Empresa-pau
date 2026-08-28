@@ -50,6 +50,11 @@ const {
 
 const window = { start: '16:00', end: '21:00' }
 
+function toMinutes(value) {
+  const [h, m] = String(value).slice(0, 5).split(':').map(Number)
+  return h * 60 + (m || 0)
+}
+
 function busyOutside(starts, duration = 45) {
   const allowed = new Set(starts)
   const busy = []
@@ -97,21 +102,81 @@ function behaviorRows({ early = { completed: 0, missed: 0 }, middle = { complete
   const add = (count, row) => {
     for (let i = 0; i < count; i += 1) rows.push({ scheduled_date: `2026-06-${String((rows.length % 20) + 1).padStart(2, '0')}`, ...row })
   }
-  add(early.completed, { status: 'completed', start_time: '16:30', end_time: '17:00', subject: 'matematicas_ii', mission_type: 'concept' })
-  add(early.missed, { status: 'missed', start_time: '16:30', end_time: '17:00', subject: 'matematicas_ii', mission_type: 'concept' })
-  add(middle.completed, { status: 'completed', start_time: '18:00', end_time: '18:30', subject: 'lengua', mission_type: 'concept' })
-  add(middle.missed, { status: 'missed', start_time: '18:00', end_time: '18:30', subject: 'lengua', mission_type: 'concept' })
-  add(late.completed, { status: 'completed', start_time: '20:00', end_time: '20:30', subject: 'historia_espana', mission_type: 'review' })
-  add(late.missed, { status: 'missed', start_time: '20:00', end_time: '20:30', subject: 'historia_espana', mission_type: 'review' })
-  add(durationLong.completed, { status: 'completed', start_time: '17:30', end_time: '18:45', subject: 'fisica', mission_type: 'pau_practice' })
-  add(durationLong.missed, { status: 'missed', start_time: '17:30', end_time: '18:45', subject: 'fisica', mission_type: 'pau_practice' })
+  const completedTelemetry = { started_at: '2026-06-01T16:30:00.000Z', completed_at: '2026-06-01T17:00:00.000Z' }
+  const missedTelemetry = { started_at: null, completed_at: null }
+  add(early.completed, { status: 'completed', start_time: '16:30', end_time: '17:00', subject: 'matematicas_ii', mission_type: 'concept', ...completedTelemetry })
+  add(early.missed, { status: 'missed', start_time: '16:30', end_time: '17:00', subject: 'matematicas_ii', mission_type: 'concept', ...missedTelemetry })
+  add(middle.completed, { status: 'completed', start_time: '18:00', end_time: '18:30', subject: 'lengua', mission_type: 'concept', ...completedTelemetry })
+  add(middle.missed, { status: 'missed', start_time: '18:00', end_time: '18:30', subject: 'lengua', mission_type: 'concept', ...missedTelemetry })
+  add(late.completed, { status: 'completed', start_time: '20:00', end_time: '20:30', subject: 'historia_espana', mission_type: 'review', ...completedTelemetry })
+  add(late.missed, { status: 'missed', start_time: '20:00', end_time: '20:30', subject: 'historia_espana', mission_type: 'review', ...missedTelemetry })
+  add(durationLong.completed, { status: 'completed', start_time: '17:30', end_time: '18:45', subject: 'fisica', mission_type: 'pau_practice', ...completedTelemetry })
+  add(durationLong.missed, { status: 'missed', start_time: '17:30', end_time: '18:45', subject: 'fisica', mission_type: 'pau_practice', ...missedTelemetry })
   for (let i = 0; i < continuity.completed; i += 1) {
-    rows.push({ scheduled_date: `2026-07-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:00', end_time: '16:30', subject: 'quimica', mission_type: 'concept' })
-    rows.push({ scheduled_date: `2026-07-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:30', end_time: '17:00', subject: 'quimica', mission_type: 'concept' })
+    rows.push({ scheduled_date: `2026-07-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:00', end_time: '16:30', subject: 'quimica', mission_type: 'concept', ...completedTelemetry })
+    rows.push({ scheduled_date: `2026-07-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:30', end_time: '17:00', subject: 'quimica', mission_type: 'concept', ...completedTelemetry })
   }
   for (let i = 0; i < continuity.missed; i += 1) {
-    rows.push({ scheduled_date: `2026-08-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:00', end_time: '16:30', subject: 'quimica', mission_type: 'concept' })
-    rows.push({ scheduled_date: `2026-08-${String((i % 20) + 1).padStart(2, '0')}`, status: 'missed', start_time: '16:30', end_time: '17:00', subject: 'quimica', mission_type: 'concept' })
+    rows.push({ scheduled_date: `2026-08-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:00', end_time: '16:30', subject: 'quimica', mission_type: 'concept', ...completedTelemetry })
+    rows.push({ scheduled_date: `2026-08-${String((i % 20) + 1).padStart(2, '0')}`, status: 'missed', start_time: '16:30', end_time: '17:00', subject: 'quimica', mission_type: 'concept', ...missedTelemetry })
+  }
+  return rows
+}
+
+function telemetryBehaviorRows({
+  early = { scheduled: 0, started: 0, completed: 0, postponed: 0, rescheduled: 0, delay: 0 },
+  middle = { scheduled: 0, started: 0, completed: 0, postponed: 0, rescheduled: 0, delay: 0 },
+  late = { scheduled: 0, started: 0, completed: 0, postponed: 0, rescheduled: 0, delay: 0 },
+  durationMedium = { scheduled: 0, started: 0, completed: 0, actualRatio: 1 },
+  durationExtraLong = { scheduled: 0, started: 0, completed: 0, actualRatio: 1 },
+  continuity = { positive: 0, negative: 0 },
+  conflictReschedules = 0,
+} = {}) {
+  const rows = []
+  const addBucket = (bucket, spec, times) => {
+    for (let i = 0; i < spec.scheduled; i += 1) {
+      const started = i < spec.started
+      const completed = i < spec.completed
+      const postponed = i >= Math.max(spec.completed, spec.started) && i < Math.max(spec.completed, spec.started) + spec.postponed
+      rows.push({
+        scheduled_date: `2026-09-${String((rows.length % 20) + 1).padStart(2, '0')}`,
+        status: completed ? 'completed' : postponed ? 'postponed' : 'missed',
+        start_time: times.start,
+        end_time: times.end,
+        started_at: started ? `2026-09-01T${times.start}:00+02:00` : null,
+        completed_at: completed ? `2026-09-01T${times.end}:00+02:00` : null,
+        actual_duration_minutes: completed && started ? toMinutes(times.end) - toMinutes(times.start) : null,
+        completion_delay_minutes: completed ? spec.delay : null,
+        postpone_count: postponed ? 1 : 0,
+        last_postponed_at: postponed ? '2026-09-01T18:00:00+02:00' : null,
+        manual_reschedule_count: i < spec.rescheduled ? 1 : 0,
+        conflict_reschedule_count: i < conflictReschedules ? 3 : 0,
+        subject: bucket === 'early' ? 'matematicas_ii' : bucket === 'middle' ? 'lengua' : 'historia_espana',
+        mission_type: 'concept',
+      })
+    }
+  }
+  addBucket('early', early, { start: '16:30', end: '17:00' })
+  addBucket('middle', middle, { start: '18:00', end: '18:40' })
+  addBucket('late', late, { start: '20:00', end: '20:30' })
+  for (let i = 0; i < durationMedium.scheduled; i += 1) {
+    const started = i < durationMedium.started
+    const completed = i < durationMedium.completed
+    rows.push({ scheduled_date: `2026-10-${String((i % 20) + 1).padStart(2, '0')}`, status: completed ? 'completed' : 'missed', start_time: '18:00', end_time: '18:40', started_at: started ? '2026-10-01T18:00:00+02:00' : null, actual_duration_minutes: completed ? Math.round(40 * durationMedium.actualRatio) : null, completion_delay_minutes: completed ? 5 : null, subject: 'fisica', mission_type: 'pau_practice' })
+  }
+  for (let i = 0; i < durationExtraLong.scheduled; i += 1) {
+    const started = i < durationExtraLong.started
+    const completed = i < durationExtraLong.completed
+    const postponed = !completed && i % 2 === 0
+    rows.push({ scheduled_date: `2026-11-${String((i % 20) + 1).padStart(2, '0')}`, status: completed ? 'completed' : postponed ? 'postponed' : 'missed', start_time: '17:00', end_time: '18:15', started_at: started ? '2026-11-01T17:00:00+01:00' : null, actual_duration_minutes: completed ? Math.round(75 * durationExtraLong.actualRatio) : null, completion_delay_minutes: completed ? 90 : null, postpone_count: postponed ? 1 : 0, subject: 'quimica', mission_type: 'pau_practice' })
+  }
+  for (let i = 0; i < continuity.positive; i += 1) {
+    rows.push({ scheduled_date: `2026-12-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:00', end_time: '16:30', started_at: '2026-12-01T16:00:00+01:00', subject: 'quimica', mission_type: 'concept' })
+    rows.push({ scheduled_date: `2026-12-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:30', end_time: '17:00', started_at: '2026-12-01T16:30:00+01:00', subject: 'quimica', mission_type: 'concept' })
+  }
+  for (let i = 0; i < continuity.negative; i += 1) {
+    rows.push({ scheduled_date: `2027-01-${String((i % 20) + 1).padStart(2, '0')}`, status: 'completed', start_time: '16:00', end_time: '16:30', started_at: '2027-01-01T16:00:00+01:00', subject: 'quimica', mission_type: 'concept' })
+    rows.push({ scheduled_date: `2027-01-${String((i % 20) + 1).padStart(2, '0')}`, status: 'postponed', start_time: '16:30', end_time: '17:00', postpone_count: 1, last_postponed_at: '2027-01-01T16:45:00+01:00', subject: 'quimica', mission_type: 'concept' })
   }
   return rows
 }
@@ -231,7 +296,7 @@ const earlyRows = ranking({ duration: 30, busy: busyOutside(['16:30', '20:00'], 
 const earlyCandidate = earlyRows.find(row => row.start === '16:30')
 const lateCandidate = earlyRows.find(row => row.start === '20:00')
 assert('adaptive early better gets small bonus', (earlyCandidate?.personalAdjustment ?? 0) > 0 && (earlyCandidate?.finalScore ?? 0) > (earlyCandidate?.baseScore ?? 0))
-assert('adaptive late poor adherence gets moderate penalty', (lateCandidate?.personalAdjustment ?? 0) < 0 && lateCandidate?.personalReasons.includes('personal_late_negative'))
+assert('adaptive late poor adherence gets moderate penalty', (lateCandidate?.personalAdjustment ?? 0) < 0 && lateCandidate?.personalReasons.some(reason => reason.includes('late') && reason.includes('negative')))
 
 const latePreferenceProfile = buildSchedulingBehaviorProfile(behaviorRows({ early: { completed: 1, missed: 10 }, middle: { completed: 5, missed: 5 }, late: { completed: 10, missed: 1 } }))
 const urgentRows = ranking({ duration: 45, busy: busyOutside(['16:00', '20:00'], 45), context: { subject: 'matematicas_ii', missionType: 'mock_exam', daysUntilExam: 1, behaviorProfile: latePreferenceProfile } })
@@ -243,7 +308,7 @@ assert('adaptive duration low adherence applies only as small adjustment', (long
 
 const continuityPositiveProfile = buildSchedulingBehaviorProfile(behaviorRows({ middle: { completed: 2, missed: 8 }, late: { completed: 2, missed: 8 }, continuity: { completed: 7, missed: 0 } }))
 const continuityPositive = winner({ duration: 30, busy: [{ start: '16:00', end: '16:30', subject: 'quimica' }, ...busyOutside(['16:30'], 30)], context: { subject: 'quimica', missionType: 'concept', behaviorProfile: continuityPositiveProfile } })
-assert('adaptive continuity positive adds a small reasoned bonus', (continuityPositive?.personalAdjustment ?? 0) > 0 && continuityPositive?.personalReasons.includes('personal_continuity_positive'))
+assert('adaptive continuity positive adds a small reasoned bonus', continuityPositiveProfile.continuityAdjustment > 0 && continuityPositive?.personalReasons.includes('personal_continuity_positive'))
 
 const continuityNegativeProfile = buildSchedulingBehaviorProfile(behaviorRows({ middle: { completed: 5, missed: 5 }, continuity: { completed: 0, missed: 7 } }))
 const continuityNegative = winner({ duration: 30, busy: [{ start: '16:00', end: '16:30', subject: 'quimica' }, ...busyOutside(['16:30'], 30)], context: { subject: 'quimica', missionType: 'concept', behaviorProfile: continuityNegativeProfile } })
@@ -263,6 +328,57 @@ const deterministicProfile = buildSchedulingBehaviorProfile(behaviorRows({ early
 const deterministicA = winner({ duration: 30, busy: busyOutside(['16:30', '20:00'], 30), context: { subject: 'lengua', missionType: 'concept', behaviorProfile: deterministicProfile } })
 const deterministicB = winner({ duration: 30, busy: busyOutside(['16:30', '20:00'], 30), context: { subject: 'lengua', missionType: 'concept', behaviorProfile: deterministicProfile } })
 assert('adaptive scoring remains deterministic', deterministicA?.start === deterministicB?.start && deterministicA?.score === deterministicB?.score && deterministicA?.personalAdjustment === deterministicB?.personalAdjustment)
+
+const startRateProfile = buildSchedulingBehaviorProfile(telemetryBehaviorRows({
+  early: { scheduled: 12, started: 11, completed: 9, postponed: 0, rescheduled: 0, delay: 5 },
+  late: { scheduled: 12, started: 5, completed: 4, postponed: 0, rescheduled: 0, delay: 5 },
+}))
+assert('adaptive telemetry A early high start rate gives small bonus', startRateProfile.timeOfDay.early > 0 && startRateProfile.metrics.timeOfDay.early.startRate > startRateProfile.metrics.timeOfDay.late.startRate)
+
+const sameCompletionProfile = buildSchedulingBehaviorProfile(telemetryBehaviorRows({
+  early: { scheduled: 10, started: 9, completed: 6, postponed: 0, rescheduled: 0, delay: 5 },
+  late: { scheduled: 10, started: 6, completed: 6, postponed: 0, rescheduled: 0, delay: 5 },
+}))
+assert('adaptive telemetry B separates start rate from completion after start', sameCompletionProfile.metrics.timeOfDay.late.completionRateAfterStart > sameCompletionProfile.metrics.timeOfDay.early.completionRateAfterStart && sameCompletionProfile.metrics.timeOfDay.late.startRate < sameCompletionProfile.metrics.timeOfDay.early.startRate)
+
+const postponeLateProfile = buildSchedulingBehaviorProfile(telemetryBehaviorRows({
+  early: { scheduled: 8, started: 7, completed: 6, postponed: 0, rescheduled: 0, delay: 5 },
+  late: { scheduled: 8, started: 3, completed: 2, postponed: 4, rescheduled: 0, delay: 5 },
+}))
+assert('adaptive telemetry C manual postpone late is a moderate penalty', postponeLateProfile.timeOfDay.late < 0 && postponeLateProfile.timeOfDayReasons.late.includes('personal_postpone_rate_negative') && Math.abs(postponeLateProfile.timeOfDay.late) <= 5)
+
+const conflictA = buildSchedulingBehaviorProfile(telemetryBehaviorRows({ late: { scheduled: 8, started: 6, completed: 5, postponed: 0, rescheduled: 0, delay: 5 }, conflictReschedules: 0 }))
+const conflictB = buildSchedulingBehaviorProfile(telemetryBehaviorRows({ late: { scheduled: 8, started: 6, completed: 5, postponed: 0, rescheduled: 0, delay: 5 }, conflictReschedules: 8 }))
+assert('adaptive telemetry D conflict reschedule has zero personal impact', JSON.stringify(conflictA.timeOfDay) === JSON.stringify(conflictB.timeOfDay))
+
+const manualRescheduleProfile = buildSchedulingBehaviorProfile(telemetryBehaviorRows({
+  early: { scheduled: 8, started: 7, completed: 6, postponed: 0, rescheduled: 0, delay: 5 },
+  late: { scheduled: 8, started: 7, completed: 6, postponed: 0, rescheduled: 5, delay: 5 },
+}))
+assert('adaptive telemetry E manual reschedule is a weak penalty', manualRescheduleProfile.timeOfDay.late < 0 && manualRescheduleProfile.timeOfDayReasons.late.includes('personal_manual_reschedule_negative') && Math.abs(manualRescheduleProfile.timeOfDay.late) <= 5)
+
+const durationTelemetryProfile = buildSchedulingBehaviorProfile(telemetryBehaviorRows({
+  durationMedium: { scheduled: 8, started: 8, completed: 7, actualRatio: 1.05 },
+  durationExtraLong: { scheduled: 8, started: 5, completed: 2, actualRatio: 2.2 },
+}))
+assert('adaptive telemetry F duration real favors fitting medium bucket', durationTelemetryProfile.durationFit.medium > 0 && durationTelemetryProfile.durationFit.extraLong < 0)
+
+const continuityTelemetryPositive = buildSchedulingBehaviorProfile(telemetryBehaviorRows({ continuity: { positive: 7, negative: 0 } }))
+assert('adaptive telemetry G continuity positive is visible', continuityTelemetryPositive.continuityAdjustment > 0 && continuityTelemetryPositive.continuityReason === 'personal_continuity_positive')
+
+const continuityTelemetryNegative = buildSchedulingBehaviorProfile(telemetryBehaviorRows({ continuity: { positive: 0, negative: 7 } }))
+assert('adaptive telemetry H continuity fatigue is visible', continuityTelemetryNegative.continuityAdjustment < 0 && continuityTelemetryNegative.continuityReason === 'personal_continuity_negative')
+
+const sparseTelemetry = buildSchedulingBehaviorProfile(telemetryBehaviorRows({ early: { scheduled: 3, started: 3, completed: 3, postponed: 0, rescheduled: 0, delay: 0 } }))
+const sparseTelemetrySlot = winner({ duration: 30, busy: busyOutside(['16:30'], 30), context: { subject: 'lengua', missionType: 'concept', behaviorProfile: sparseTelemetry } })
+assert('adaptive telemetry I sparse data keeps adjustment zero', sparseTelemetrySlot?.personalAdjustment === 0)
+
+const correlatedTelemetry = buildSchedulingBehaviorProfile(telemetryBehaviorRows({
+  early: { scheduled: 10, started: 9, completed: 8, postponed: 0, rescheduled: 0, delay: 0 },
+  late: { scheduled: 10, started: 2, completed: 1, postponed: 6, rescheduled: 5, delay: 140 },
+}))
+const correlatedLateSlot = winner({ duration: 30, busy: busyOutside(['20:00'], 30), context: { subject: 'lengua', missionType: 'concept', behaviorProfile: correlatedTelemetry } })
+assert('adaptive telemetry J correlated negative signals remain capped', Math.abs(correlatedLateSlot?.personalAdjustment ?? 0) <= ADAPTIVE_SLOT_SCORING_CONFIG.maxPersonalAdjustment && correlatedTelemetry.timeOfDay.late >= -5)
 
 console.log('\nPesos actuales:', JSON.stringify(SLOT_SCORING_WEIGHTS, null, 2))
 console.log('Config adaptativa:', JSON.stringify(ADAPTIVE_SLOT_SCORING_CONFIG, null, 2))

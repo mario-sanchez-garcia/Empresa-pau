@@ -284,6 +284,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const entryConfirmed = params.get('confirmed') === '1'
   const exerciseRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const startedMissionRef = useRef<string | null>(null)
   const [toast, setToast] = useState('')
   const [progress, setProgress] = useState<TopicProgress>(() => loadJson<TopicProgress>(TOPIC_PROGRESS_KEY, {}))
   const [answerMode, setAnswerMode] = useState<'texto' | 'imagen'>('texto')
@@ -327,6 +328,33 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   useEffect(() => {
     if (shouldStartExercise) exerciseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [shouldStartExercise])
+
+  async function recordMissionStart(accessToken: string) {
+    const calendarMissionId = pendingCalendarRowId ?? missionId
+    if (!calendarMissionId || startedMissionRef.current === calendarMissionId) return
+    startedMissionRef.current = calendarMissionId
+    await fetch('/api/camino/start-mission', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({ missionId: calendarMissionId }),
+    }).catch(() => undefined)
+  }
+
+  useEffect(() => {
+    if (!missionId || !shouldStartExercise || startedMissionRef.current === missionId) return
+    startedMissionRef.current = missionId
+    let cancelled = false
+    supabase.auth.getSession().then(async ({ data }) => {
+      const token = data.session?.access_token
+      if (!token || cancelled) return
+      await fetch('/api/camino/start-mission', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ missionId }),
+      }).catch(() => undefined)
+    }).catch(() => undefined)
+    return () => { cancelled = true }
+  }, [missionId, shouldStartExercise])
 
   useEffect(() => {
     if (!isFirstSession || score === null || !correction || firstSessionMarked) return
@@ -773,6 +801,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         setCorrection('Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.')
         return
       }
+      await recordMissionStart(accessToken)
       const statement = selectedV2Card?.practice_prompt ?? currentTopic.practicePrompt ?? currentTopic.guidedExample ?? ('Ejercicio de ' + selectedMissionTitle)
       const response = await fetch('/api/camino/correct', {
         method: 'POST',

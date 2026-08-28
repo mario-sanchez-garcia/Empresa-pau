@@ -3369,11 +3369,89 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
             end_time: m.endTime ?? (typeof m.metadata?.end_time === 'string' ? m.metadata.end_time : null),
           }))
       )
+      const existingRowsById = new Map<string, {
+        scheduled_date: string | null
+        start_time: string | null
+        end_time: string | null
+        manual_reschedule_count: number | null
+        metadata: Record<string, unknown> | null
+      }>()
+      const updateIds = toUpdate.map(item => item.id)
+      if (updateIds.length > 0) {
+        const { data: existingRows, error: existingRowsError } = await supabase
+          .from('camino_calendar')
+          .select('id, scheduled_date, start_time, end_time, manual_reschedule_count, metadata')
+          .in('id', updateIds)
+        if (existingRowsError) throw existingRowsError
+        for (const row of existingRows ?? []) {
+          existingRowsById.set(row.id, {
+            scheduled_date: row.scheduled_date ?? null,
+            start_time: row.start_time ? String(row.start_time).slice(0, 5) : null,
+            end_time: row.end_time ? String(row.end_time).slice(0, 5) : null,
+            manual_reschedule_count: typeof row.manual_reschedule_count === 'number' ? row.manual_reschedule_count : 0,
+            metadata: typeof row.metadata === 'object' && row.metadata ? row.metadata as Record<string, unknown> : null,
+          })
+        }
+      }
       const updateResults = await Promise.all(toUpdate.map(({ id, ...fields }) =>
-        supabase.from('camino_calendar').update(fields).eq('id', id),
+        {
+          const previous = existingRowsById.get(id)
+          const nextStart = fields.start_time ? String(fields.start_time).slice(0, 5) : null
+          const nextEnd = fields.end_time ? String(fields.end_time).slice(0, 5) : null
+          const scheduleChanged = Boolean(previous) && (
+            previous!.scheduled_date !== fields.scheduled_date ||
+            previous!.start_time !== nextStart ||
+            previous!.end_time !== nextEnd
+          )
+          const patch = scheduleChanged
+            ? {
+                ...fields,
+                manual_reschedule_count: (previous?.manual_reschedule_count ?? 0) + 1,
+                metadata: mergeMissionMetadata(previous?.metadata ?? undefined, {
+                  calendar_manual_rescheduled_at: new Date().toISOString(),
+                  calendar_manual_rescheduled_from: {
+                    date: previous?.scheduled_date ?? null,
+                    start: previous?.start_time ?? null,
+                    end: previous?.end_time ?? null,
+                  },
+                  calendar_manual_rescheduled_to: {
+                    date: fields.scheduled_date,
+                    start: nextStart,
+                    end: nextEnd,
+                  },
+                }),
+              }
+            : fields
+          return supabase.from('camino_calendar').update(patch).eq('id', id)
+        },
       ))
       const updateError = updateResults.find(result => result.error)?.error
       if (updateError) throw updateError
+      await Promise.all(toUpdate.map(async ({ id, ...fields }) => {
+        const previous = existingRowsById.get(id)
+        const nextStart = fields.start_time ? String(fields.start_time).slice(0, 5) : null
+        const nextEnd = fields.end_time ? String(fields.end_time).slice(0, 5) : null
+        const scheduleChanged = Boolean(previous) && (
+          previous!.scheduled_date !== fields.scheduled_date ||
+          previous!.start_time !== nextStart ||
+          previous!.end_time !== nextEnd
+        )
+        if (!scheduleChanged) return
+        try {
+          await supabase.from('camino_mission_events').insert({
+            user_id: userId,
+            mission_id: id,
+            event_type: 'rescheduled_manual',
+            idempotency_key: `manual-reschedule:${id}:${fields.scheduled_date}:${nextStart ?? 'no-start'}:${nextEnd ?? 'no-end'}`,
+            metadata: {
+              from: { date: previous?.scheduled_date ?? null, start: previous?.start_time ?? null, end: previous?.end_time ?? null },
+              to: { date: fields.scheduled_date, start: nextStart, end: nextEnd },
+            },
+          })
+        } catch {
+          // Best-effort: the mission save is authoritative; telemetry can retry later.
+        }
+      }))
 
       // INSERT new missions (no calendarRowId yet)
       type InsertEntry = { missionId: string; row: Record<string, unknown> }

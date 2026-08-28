@@ -7,6 +7,7 @@ import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { getTopicByV2SortOrder, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 import { resolveTopicIdentity } from '@/app/lib/camino/resolveTopicIdentity'
 import { maybeGenerateBlockPracticeMission } from '@/app/lib/camino/generateBlockPracticeMission'
+import { completionDelayMinutes, minutesBetweenIso, recordMissionBehaviorEvent } from '@/app/lib/camino/missionBehavior'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
     if (!targetId) {
       const { data: candidates } = await db
         .from('camino_calendar')
-        .select('id')
+        .select('id, started_at, scheduled_date, end_time')
         .eq('user_id', user.id)
         .eq('subject', subject)
         .eq('v2_sort_order', v2SortOrder)
@@ -163,12 +164,21 @@ export async function POST(request: NextRequest) {
     // tarde caía siempre en la rama "no_pending_mission" (sin XP, sin marcar
     // como hecha) aunque el alumno sí hubiera hecho el trabajo real.
     // Completar tarde sigue contando — pero solo la fila ya resuelta arriba.
+    const { data: targetRow } = await db
+      .from('camino_calendar')
+      .select('id, started_at, scheduled_date, end_time')
+      .eq('id', targetId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
     const { data: updated } = await db
       .from('camino_calendar')
       .update({
         status: 'completed',
         completed_at: now,
         xp_awarded: xp,
+        actual_duration_minutes: minutesBetweenIso(targetRow?.started_at, now),
+        completion_delay_minutes: completionDelayMinutes(targetRow?.scheduled_date, targetRow?.end_time, now),
         updated_at: now,
       })
       .eq('id', targetId)
@@ -180,6 +190,15 @@ export async function POST(request: NextRequest) {
     if (!updated || updated.length === 0) {
       return NextResponse.json({ success: false, reason: 'already_completed' })
     }
+
+    await recordMissionBehaviorEvent(db, user.id, updated[0].id, 'completed', 'completed', {
+      subject,
+      v2_sort_order: v2SortOrder,
+      mission_type: missionType,
+      had_started_at: Boolean(targetRow?.started_at),
+    }).catch(err => {
+      console.warn('[camino/complete-mission] mission behavior event skipped', err)
+    })
 
     // PASO 2a — Historia: si esta finalización completa TODO un bloque de
     // Curso (todos sus temas finos en 'completed'), genera automáticamente

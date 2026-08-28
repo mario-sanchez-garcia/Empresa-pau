@@ -3,6 +3,7 @@ import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { addDays, getMadridToday, isStudyDay } from '@/app/lib/camino/studyDays'
+import { recordMissionBehaviorEvent } from '@/app/lib/camino/missionBehavior'
 
 export const dynamic = 'force-dynamic'
 
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
     // la fila de hoy o pasada más reciente antes de escribir.
     const { data: postponeCandidates } = await db
       .from('camino_calendar')
-      .select('id')
+      .select('id, postpone_count')
       .eq('user_id', user.id)
       .eq('subject', subject)
       .eq('v2_sort_order', v2SortOrder)
@@ -134,12 +135,29 @@ export async function POST(request: NextRequest) {
       .limit(1)
 
     if (postponeCandidates?.[0]?.id) {
-      await db
+      const now = new Date().toISOString()
+      const nextPostponeCount = (postponeCandidates[0].postpone_count ?? 0) + 1
+      const { data: updatedPostpone } = await db
         .from('camino_calendar')
-        .update({ status: 'postponed', updated_at: new Date().toISOString() })
+        .update({
+          status: 'postponed',
+          last_postponed_at: now,
+          postpone_count: nextPostponeCount,
+          updated_at: now,
+        })
         .eq('id', postponeCandidates[0].id)
         .eq('user_id', user.id)
         .eq('status', 'pending')
+        .select('id, postpone_count')
+      if (updatedPostpone?.[0]?.id) {
+        await recordMissionBehaviorEvent(db, user.id, updatedPostpone[0].id, 'postponed_manual', `manual-postpone:${updatedPostpone[0].postpone_count}`, {
+          subject,
+          v2_sort_order: v2SortOrder,
+          block_key: queueItem.block_key,
+        }).catch(err => {
+          console.warn('[postpone-mission] mission behavior event skipped', err)
+        })
+      }
     }
 
     // PASO 4: Calcular ratio de postponed en el bloque (solo informativo

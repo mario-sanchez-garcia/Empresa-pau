@@ -5,6 +5,7 @@ import { busySlotsForMadridDate, getAvailability, hasTimeConflict } from '@/app/
 import { syncExistingKairoMissionToGoogle } from '@/app/lib/calendar/sync'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { estimatedMinutesForMissionType, placeBestAcrossDates, type TimeRange } from '@/app/lib/camino/scheduleTimeSlot'
+import { recordMissionBehaviorEvent } from '@/app/lib/camino/missionBehavior'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,10 +24,11 @@ type MissionRow = {
   xp_awarded: number | null
   start_time: string | null
   end_time: string | null
+  conflict_reschedule_count: number | null
   metadata: Record<string, unknown> | null
 }
 
-const SELECT_COLUMNS = 'id, scheduled_date, subject, title, block_key, block_slug, mission_type, is_main, is_bonus, status, v2_sort_order, xp_awarded, start_time, end_time, metadata'
+const SELECT_COLUMNS = 'id, scheduled_date, subject, title, block_key, block_slug, mission_type, is_main, is_bonus, status, v2_sort_order, xp_awarded, start_time, end_time, conflict_reschedule_count, metadata'
 
 function addDays(date: string, days: number) {
   const d = new Date(`${date}T12:00:00Z`)
@@ -123,8 +125,9 @@ export async function POST(request: NextRequest) {
         },
       })
 
+      const reorganizedAt = new Date().toISOString()
       const metadata = mergeMetadata(mission.metadata, {
-        calendar_reorganized_at: new Date().toISOString(),
+        calendar_reorganized_at: reorganizedAt,
         calendar_reorganized_from: {
           date: mission.scheduled_date,
           start: startTime,
@@ -135,14 +138,34 @@ export async function POST(request: NextRequest) {
         calendar_sync_status: placed ? 'pending' : 'pending_no_time',
       })
       const patch = placed
-        ? { scheduled_date: placed.date, start_time: placed.start, end_time: placed.end, metadata, updated_at: new Date().toISOString() }
-        : { start_time: null, end_time: null, metadata, updated_at: new Date().toISOString() }
+        ? {
+            scheduled_date: placed.date,
+            start_time: placed.start,
+            end_time: placed.end,
+            conflict_reschedule_count: (mission.conflict_reschedule_count ?? 0) + 1,
+            metadata,
+            updated_at: reorganizedAt,
+          }
+        : {
+            start_time: null,
+            end_time: null,
+            conflict_reschedule_count: (mission.conflict_reschedule_count ?? 0) + 1,
+            metadata,
+            updated_at: reorganizedAt,
+          }
       const { error: updateError } = await db
         .from('camino_calendar')
         .update(patch)
         .eq('id', mission.id)
         .eq('user_id', auth.user.id)
       if (updateError) throw updateError
+
+      await recordMissionBehaviorEvent(db, auth.user.id, mission.id, 'rescheduled_conflict', `conflict:${reorganizedAt}`, {
+        from: { date: mission.scheduled_date, start: startTime, end: endTime },
+        to: placed ? { date: placed.date, start: placed.start, end: placed.end } : { date: mission.scheduled_date, start: null, end: null },
+      }).catch(eventError => {
+        console.warn('[camino/calendar-conflicts/reorganize] mission behavior event skipped:', eventError)
+      })
 
       if (placed) {
         movedIds.push(mission.id)

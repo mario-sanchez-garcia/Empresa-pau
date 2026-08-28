@@ -3081,10 +3081,34 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
   const bonusMissions = orderedDraft.flatMap(day => day.missions.filter(mission => mission.role === 'bonus').map(mission => ({ mission, day })))
   const selectedDayBusy = selectedDay ? externalBusyByDate[selectedDay.date] ?? [] : []
   const selectedDayConflicts = selectedDay ? conflicts.filter(conflict => conflict.date === selectedDay.date) : []
+  const newMissionEndTime = addMinutesToHHMM(newMission.startTime || null, newMission.minutes)
+  const newMissionDay = draft.find(day => day.date === newMission.day)
+  const newMissionKairoBusy = (newMissionDay?.missions ?? [])
+    .flatMap(mission => mission.startTime && mission.endTime ? [{ start: mission.startTime.slice(0, 5), end: mission.endTime.slice(0, 5) }] : [])
+  const newMissionExternalBusy = externalBusyByDate[newMission.day] ?? []
+  const timeConflictNotice = (() => {
+    if (!newMission.startTime || !newMissionEndTime) return null
+    const requested = { start: newMission.startTime, end: newMissionEndTime }
+    const kairoConflict = newMissionKairoBusy.some(slot => localTimeConflict(requested, slot))
+    const externalConflict = newMissionExternalBusy.some(slot => localTimeConflict(requested, slot))
+    if (!kairoConflict && !externalConflict) return null
+    return {
+      type: kairoConflict ? 'kairo' as const : 'external' as const,
+      suggestedStart: nextFreeStart(newMission.startTime, newMission.minutes, [...newMissionKairoBusy, ...newMissionExternalBusy]),
+    }
+  })()
   const monthGrid = buildMonthGrid(monthCursor)
   const debugCalendarEditor = (...args: unknown[]) => {
     if (process.env.NODE_ENV !== 'production') console.debug(...args)
   }
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [])
 
   function cloneWeek(days: DayPlan[]) {
     return days.map(day => ({ ...day, missions: day.missions.map(mission => ({ ...mission })) }))
@@ -3228,6 +3252,21 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
       setSaveState('error')
       return
     }
+    if (effective.startTime && endTime) {
+      const requested = { start: effective.startTime, end: endTime }
+      const kairoBusy = (draft.find(day => day.date === effective.day)?.missions ?? [])
+        .flatMap(mission => mission.startTime && mission.endTime ? [{ start: mission.startTime.slice(0, 5), end: mission.endTime.slice(0, 5) }] : [])
+      const externalBusy = externalBusyByDate[effective.day] ?? []
+      const kairoConflict = kairoBusy.some(slot => localTimeConflict(requested, slot))
+      const externalConflict = externalBusy.some(slot => localTimeConflict(requested, slot))
+      if (kairoConflict || externalConflict) {
+        const suggestedStart = nextFreeStart(effective.startTime, effective.minutes, [...kairoBusy, ...externalBusy])
+        setEditorNotice(`${kairoConflict ? 'Ese horario ya está ocupado.' : 'Ese horario coincide con un evento de tu calendario.'}${suggestedStart ? ` Siguiente hueco disponible: ${suggestedStart}.` : ''}`)
+        setNewMission(current => ({ ...current, day: effective.day, startTime: effective.startTime }))
+        setSaveState('error')
+        return
+      }
+    }
     const meta = missionMeta(kind, subject, topic, item?.block, item?.planTopic)
     const title = titleFor(kind, subject, item ?? undefined)
     const requestKey = `${effective.day}:${normalizeSubjectSlug(subject)}:${dbMissionTypeFromKind(kind)}:${title}:${effective.startTime || 'no-time'}:${effective.minutes}:${effective.bonus ? 'bonus' : 'main'}`
@@ -3263,8 +3302,13 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
           }),
         }),
       })
-      const payload = await response.json().catch(() => null) as { ok?: boolean; mission?: CaminoCalRow; error?: string } | null
+      const payload = await response.json().catch(() => null) as { ok?: boolean; mission?: CaminoCalRow; error?: string; code?: string; conflictType?: 'kairo' | 'external'; suggestedStart?: string | null } | null
       if (!response.ok || !payload?.ok || !payload.mission?.id) {
+        if (payload?.code === 'TIME_CONFLICT') {
+          setEditorNotice(`${payload.conflictType === 'external' ? 'Ese horario coincide con un evento de tu calendario.' : 'Ese horario ya está ocupado.'}${payload.suggestedStart ? ` Siguiente hueco disponible: ${payload.suggestedStart}.` : ''}`)
+          setSaveState('error')
+          return
+        }
         throw new Error(payload?.error ?? 'calendar_editor_save_failed')
       }
       if (draft.some(day => day.missions.some(mission => mission.calendarRowId === payload.mission!.id))) {
@@ -3421,18 +3465,18 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed bottom-0 right-0 top-0 z-50 flex items-stretch bg-slate-950/25 p-3 backdrop-blur-[2px] max-lg:left-0 sm:p-5 lg:left-[248px]">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed bottom-0 right-0 top-0 z-50 flex items-stretch bg-slate-950/25 p-2 backdrop-blur-[2px] max-lg:left-0 sm:p-3 lg:left-[248px]" style={{ overscrollBehavior: 'contain' }}>
       <motion.section
         initial={{ opacity: 0, y: 14, scale: 0.987 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 14, scale: 0.987 }}
         transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-        className="mx-auto flex w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white"
-        style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.04), 0 20px 60px rgba(15,23,42,0.18), 0 4px 16px rgba(15,23,42,0.08)' }}
+        className="mx-auto flex w-full max-w-[1440px] flex-col overflow-hidden rounded-2xl bg-white"
+        style={{ width: 'min(96vw, 1440px)', height: '92dvh', maxHeight: '920px', boxShadow: '0 2px 4px rgba(0,0,0,0.04), 0 20px 60px rgba(15,23,42,0.18), 0 4px 16px rgba(15,23,42,0.08)' }}
       >
         {/* ── Dark header ── */}
-        <header className="shrink-0 bg-[#0f172a] px-6 py-5">
-          <div className="mb-5 flex items-start justify-between gap-4">
+        <header className="shrink-0 bg-[#0f172a] px-5 py-4">
+          <div className="mb-3 flex items-start justify-between gap-4">
             <div>
               <p className="text-[8px] font-black uppercase tracking-[.24em] text-slate-500">Camino PAU · Calendario</p>
               <h2 className="mt-1 text-[22px] font-black text-slate-100" style={{ letterSpacing: '-0.025em', lineHeight: 1 }}>
@@ -3586,7 +3630,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
           )}
 
           {/* Day header */}
-          <div className="shrink-0 border-b border-[#f1f5f9] px-6 py-5">
+          <div className="shrink-0 border-b border-[#f1f5f9] px-5 py-3">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2" style={{ marginBottom: 6 }}>
@@ -3598,7 +3642,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <div className="font-black text-slate-900 leading-none" style={{ fontSize: 48, letterSpacing: '-0.04em', lineHeight: 0.88 }}>
+                  <div className="font-black text-slate-900 leading-none" style={{ fontSize: 34, letterSpacing: '-0.04em', lineHeight: 0.88 }}>
                     {selectedDay?.date ? parseInt(selectedDay.date.slice(-2), 10) : ''}
                   </div>
                   <div className="text-[13px] uppercase tracking-[0em]" style={{ fontWeight: 800, color: '#64748b' }}>
@@ -3665,11 +3709,21 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                     <input type="checkbox" checked={newMission.bonus} onChange={e => setNewMission({ ...newMission, bonus: e.target.checked })} />
                     Opcional / bonus
                   </label>
-                  <button type="button" data-calendar-editor-action="form-submit" onClick={handleFormSubmitClick} disabled={!safeSubjects.length || saveState === 'saving'} title="Añade esta misión al día y con los ajustes configurados arriba." className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0f172a] px-4 py-2.5 text-[11px] font-black text-white transition hover:bg-slate-800 disabled:opacity-40">
+                  <button type="button" data-calendar-editor-action="form-submit" onClick={handleFormSubmitClick} disabled={!safeSubjects.length || saveState === 'saving' || Boolean(timeConflictNotice)} title="Añade esta misión al día y con los ajustes configurados arriba." className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0f172a] px-4 py-2.5 text-[11px] font-black text-white transition hover:bg-slate-800 disabled:opacity-40">
                     {saveState === 'saving' ? 'Guardando...' : saveState === 'saved' ? '✓ Guardada' : saveState === 'error' ? 'Reintentar' : <><Plus size={12} /> Añadir misión</>}
                   </button>
                 </div>
               </div>
+              {timeConflictNotice && (
+                <div className="mt-3 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-[11px] font-bold text-orange-800">
+                  <p>{timeConflictNotice.type === 'external' ? 'Ese horario coincide con un evento de tu calendario.' : 'Ese horario ya está ocupado.'}</p>
+                  {timeConflictNotice.suggestedStart && (
+                    <button type="button" onClick={() => setNewMission(current => ({ ...current, startTime: timeConflictNotice.suggestedStart ?? current.startTime }))} className="mt-1.5 rounded-lg bg-white px-2.5 py-1 text-[10px] font-black text-orange-700 shadow-sm">
+                      Usar {timeConflictNotice.suggestedStart}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -3680,7 +3734,8 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
 
           {/* Scrollable missions area */}
           <div
-            className="flex-1 overflow-y-auto px-6 py-5"
+            className="flex-1 overflow-y-auto px-5 py-4"
+            style={{ overscrollBehavior: 'contain' }}
             onDragOver={e => e.preventDefault()}
             onDrop={e => { e.preventDefault(); if (draggedMissionId && selectedDay) moveMission(draggedMissionId, selectedDay.date); setDraggedMissionId(null) }}
           >
@@ -4378,6 +4433,26 @@ function snapMinutes(totalMinutes: number, step = 15) {
   return Math.max(0, Math.min(24 * 60 - step, Math.round(totalMinutes / step) * step))
 }
 
+function localTimeConflict(a: { start: string; end: string }, b: { start: string; end: string }) {
+  const aStart = timeToMinutes(a.start)
+  const aEnd = timeToMinutes(a.end)
+  const bStart = timeToMinutes(b.start)
+  const bEnd = timeToMinutes(b.end)
+  if (aStart === null || aEnd === null || bStart === null || bEnd === null) return false
+  return Math.max(aStart, bStart) < Math.min(aEnd, bEnd)
+}
+
+function nextFreeStart(startTime: string, durationMinutes: number, busy: { start: string; end: string }[]) {
+  const start = timeToMinutes(startTime)
+  if (start === null) return null
+  for (let cursor = snapMinutes(start); cursor + durationMinutes <= 24 * 60; cursor += 15) {
+    const candidateStart = minutesToHHMM(cursor)
+    const candidateEnd = addMinutesToHHMM(candidateStart, durationMinutes)
+    if (candidateEnd && !busy.some(slot => localTimeConflict({ start: candidateStart, end: candidateEnd }, slot))) return candidateStart
+  }
+  return null
+}
+
 function missionConflictFor(mission: Mission, conflicts: CalendarConflict[]) {
   const rowId = mission.calendarRowId ?? mission.id
   return conflicts.find(conflict => conflict.missionId === rowId)
@@ -4404,7 +4479,7 @@ type TimelineBusyBlock = {
 type TimelineBlock = TimelineKairoBlock | TimelineBusyBlock
 type PositionedTimelineBlock = TimelineBlock & { lane: number; laneCount: number }
 
-const TIMELINE_PX_PER_MINUTE = 1.25
+const TIMELINE_PX_PER_MINUTE = 1.2
 const TIMELINE_MIN_BLOCK_HEIGHT = 28
 
 function buildTimelineRange(days: DayPlan[], externalBusyByDate: ExternalBusyByDate) {

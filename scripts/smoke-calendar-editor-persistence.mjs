@@ -54,7 +54,7 @@ assert(
   addMissionFunction.includes("fetch('/api/camino/calendar-editor/mission'") &&
     client.includes('async function handleFormSubmitClick()') &&
     client.includes('await addMission()') &&
-    client.includes('<button type="button" data-calendar-editor-action="form-submit" onClick={handleFormSubmitClick} disabled={!safeSubjects.length || saveState === \'saving\'} title="Añade esta misión al día y con los ajustes configurados arriba."') &&
+    client.includes('<button type="button" data-calendar-editor-action="form-submit" onClick={handleFormSubmitClick} disabled={!safeSubjects.length || saveState === \'saving\' || Boolean(timeConflictNotice)} title="Añade esta misión al día y con los ajustes configurados arriba."') &&
     client.includes('function handleTopAddClick()') &&
     client.includes('data-calendar-editor-action="top-add" onClick={handleTopAddClick}') &&
     client.includes("{missionPanelOpen ? 'Cerrar formulario' : 'Añadir misión'}") &&
@@ -250,6 +250,51 @@ assert(
     !calendarWeekTimeline.includes('location')
 )
 
+assert(
+  'calendar editor prevents manual overlaps before creating duplicate Kairo missions',
+  calendarEditorOverlay.includes('const newMissionKairoBusy = (newMissionDay?.missions ?? [])') &&
+    calendarEditorOverlay.includes('const newMissionExternalBusy = externalBusyByDate[newMission.day] ?? []') &&
+    calendarEditorOverlay.includes('const timeConflictNotice = (() => {') &&
+    calendarEditorOverlay.includes('localTimeConflict(requested, slot)') &&
+    calendarEditorOverlay.includes("disabled={!safeSubjects.length || saveState === 'saving' || Boolean(timeConflictNotice)}") &&
+    calendarEditorOverlay.includes('Ese horario ya está ocupado.') &&
+    calendarEditorOverlay.includes('Ese horario coincide con un evento de tu calendario.') &&
+    calendarEditorOverlay.includes('Siguiente hueco disponible:') &&
+    calendarEditorOverlay.includes('Usar {timeConflictNotice.suggestedStart}')
+)
+
+assert(
+  'calendar editor backend rejects stale overlapping timed missions without inserting',
+  route.includes(".eq('scheduled_date', scheduledDate)") &&
+    route.includes(".eq('status', 'pending')") &&
+    route.includes(".not('start_time', 'is', null)") &&
+    route.includes('const kairoBusy = ((sameDayRows ?? [])') &&
+    route.includes('const externalBusy = requestedStartTime && requestedEndTime') &&
+    route.includes("code: 'TIME_CONFLICT'") &&
+    route.includes("conflictType: kairoConflict ? 'kairo' : 'external'") &&
+    route.includes('suggestedStart: findNextFreeStart(requestedStartTime, durationMinutes, [...kairoBusy, ...externalBusy])')
+)
+
+assert(
+  'calendar editor time overlap logic allows exact boundaries and suggests next 15 minute slot',
+  client.includes('return Math.max(aStart, bStart) < Math.min(aEnd, bEnd)') &&
+    availability.includes('return Math.max(toMinutes(a.start), toMinutes(b.start)) < Math.min(toMinutes(a.end), toMinutes(b.end))') &&
+    client.includes('for (let cursor = snapMinutes(start); cursor + durationMinutes <= 24 * 60; cursor += 15)') &&
+    route.includes('for (let cursor = Math.ceil(minutesFromTime(startTime) / 15) * 15; cursor + durationMinutes <= MINUTES_PER_DAY; cursor += 15)')
+)
+
+assert(
+  'calendar editor overlay is larger and scroll is contained inside the modal',
+  client.includes('max-w-[1440px]') &&
+    client.includes("width: 'min(96vw, 1440px)'") &&
+    client.includes("height: '92dvh'") &&
+    client.includes("maxHeight: '920px'") &&
+    client.includes("document.body.style.overflow = 'hidden'") &&
+    client.includes("overscrollBehavior: 'contain'") &&
+    client.includes('px-5 py-4') &&
+    client.includes('fontSize: 34') &&
+    client.includes('const TIMELINE_PX_PER_MINUTE = 1.2')
+)
 assert(
   'Calendar editor empty slot click reuses existing add mission form with date and time',
   calendarEditorOverlay.includes('onEmptySlotClick={(date, startTime) => {') &&

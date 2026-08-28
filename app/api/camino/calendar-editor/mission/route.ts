@@ -41,6 +41,20 @@ function addMinutesToTime(startTime: string | null, durationMinutes: number) {
   return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`
 }
 
+function minutesFromTime(value: string) {
+  const [hours, minutes] = value.slice(0, 5).split(':').map(Number)
+  return hours * 60 + minutes
+}
+
+function findNextFreeStart(startTime: string, durationMinutes: number, busy: { start: string; end: string }[]) {
+  for (let cursor = Math.ceil(minutesFromTime(startTime) / 15) * 15; cursor + durationMinutes <= MINUTES_PER_DAY; cursor += 15) {
+    const start = `${String(Math.floor(cursor / 60)).padStart(2, '0')}:${String(cursor % 60).padStart(2, '0')}`
+    const end = addMinutesToTime(start, durationMinutes)
+    if (end && !busy.some(slot => hasTimeConflict({ start, end }, slot))) return start
+  }
+  return null
+}
+
 function dbMissionTypeFromKind(kind: string, missionType: string) {
   if (['concept', 'review', 'comment_text', 'pau_practice', 'partial_practice'].includes(missionType)) return missionType
   if (kind === 'evau_practice' || kind === 'mock_exam') return 'pau_practice'
@@ -85,15 +99,8 @@ export async function POST(request: NextRequest) {
     if (requestedStartTime && !requestedEndTime) {
       return NextResponse.json({ error: 'end_time_after_midnight' }, { status: 400 })
     }
-    const externalBusy = requestedStartTime && requestedEndTime
-      ? await getAvailabilityForDate(auth.user.id, scheduledDate)
-      : []
-    const requestedSlotConflicts = requestedStartTime && requestedEndTime
-      ? externalBusy.some(slot => hasTimeConflict({ start: requestedStartTime, end: requestedEndTime }, slot))
-      : false
-    const startTime = requestedSlotConflicts ? null : requestedStartTime
-    const endTime = requestedSlotConflicts ? null : requestedEndTime
-
+    const startTime = requestedStartTime
+    const endTime = requestedEndTime
     const role = cleanString(body.role, 20) === 'bonus' ? 'bonus' : 'main'
     const kind = cleanString(body.kind, 80)
     const missionType = dbMissionTypeFromKind(kind, cleanString(body.missionType, 80))
@@ -105,7 +112,6 @@ export async function POST(request: NextRequest) {
       ? body.v2SortOrder
       : stableManualSortOrder(`calendar_editor:${requestKey}`)
     const db = createServiceClient()
-
     const selectColumns = 'id, scheduled_date, subject, title, block_key, block_slug, mission_type, is_main, is_bonus, status, v2_sort_order, xp_awarded, start_time, end_time, metadata'
     const { data: existing, error: existingError } = await db
       .from('camino_calendar')
@@ -122,6 +128,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true, duplicate: true, mission: existing, calendarSync: existing.start_time && existing.end_time ? 'already_scheduled' : 'pending_no_time' })
     }
 
+    const { data: sameDayRows, error: sameDayError } = requestedStartTime && requestedEndTime
+      ? await db
+        .from('camino_calendar')
+        .select('id, start_time, end_time')
+        .eq('user_id', auth.user.id)
+        .eq('scheduled_date', scheduledDate)
+        .eq('status', 'pending')
+        .not('start_time', 'is', null)
+        .not('end_time', 'is', null)
+      : { data: [], error: null }
+    if (sameDayError) throw sameDayError
+    const kairoBusy = ((sameDayRows ?? []) as { start_time: string | null; end_time: string | null }[])
+      .flatMap(row => row.start_time && row.end_time ? [{ start: row.start_time.slice(0, 5), end: row.end_time.slice(0, 5) }] : [])
+    const externalBusy = requestedStartTime && requestedEndTime
+      ? await getAvailabilityForDate(auth.user.id, scheduledDate)
+      : []
+    if (requestedStartTime && requestedEndTime) {
+      const requestedSlot = { start: requestedStartTime, end: requestedEndTime }
+      const kairoConflict = kairoBusy.some(slot => hasTimeConflict(requestedSlot, slot))
+      const externalConflict = externalBusy.some(slot => hasTimeConflict(requestedSlot, slot))
+      if (kairoConflict || externalConflict) {
+        return NextResponse.json({
+          ok: false,
+          code: 'TIME_CONFLICT',
+          conflictType: kairoConflict ? 'kairo' : 'external',
+          suggestedStart: findNextFreeStart(requestedStartTime, durationMinutes, [...kairoBusy, ...externalBusy]),
+        }, { status: 409 })
+      }
+    }
+
     const metadata = {
       ...(typeof body.metadata === 'object' && body.metadata ? body.metadata : {}),
       manual_editor: true,
@@ -130,8 +166,6 @@ export async function POST(request: NextRequest) {
       topic_slug: topicSlug || undefined,
       start_time: startTime || undefined,
       end_time: endTime || undefined,
-      requested_start_time: requestedSlotConflicts ? requestedStartTime : undefined,
-      calendar_conflict_avoided: requestedSlotConflicts || undefined,
       calendar_sync_status: startTime && endTime ? 'pending' : 'pending_no_time',
     }
 

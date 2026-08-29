@@ -25,6 +25,8 @@ const googleCallbackRoute = read('app/api/calendar/google/callback/route.ts')
 const googleStatusRoute = read('app/api/calendar/google/status/route.ts')
 const googleConnectionClient = read('app/components/camino/GoogleCalendarConnection.tsx')
 const oauthState = read('app/lib/calendar/oauthState.ts')
+const watchRenewRoute = read('app/api/calendar/watch-renew/route.ts')
+const vercelConfig = read('vercel.json')
 const existingMissionUpdatePayload = client.slice(
   client.indexOf('const toUpdate = draft.flatMap'),
   client.indexOf('// INSERT new missions'),
@@ -235,6 +237,40 @@ assert(
     calendarSync.includes('if (connection.external_calendar_id)') &&
     calendarSync.includes('const existing = await provider.getCalendar(connection.external_calendar_id)') &&
     calendarSync.includes('if (existing) return { provider, calendarId: existing.id')
+)
+
+assert(
+  'Google Calendar watch renewal is scheduled by Vercel Cron against the real endpoint',
+  vercelConfig.includes('"path": "/api/calendar/watch-renew"') &&
+    vercelConfig.includes('"schedule": "15 */12 * * *"') &&
+    watchRenewRoute.includes('export async function GET(request: NextRequest)') &&
+    watchRenewRoute.includes('return handleWatchRenew(request)')
+)
+
+assert(
+  'Google Calendar watch renewal requires CRON_SECRET and rejects unauthenticated calls',
+  watchRenewRoute.includes("if (!process.env.CRON_SECRET)") &&
+    watchRenewRoute.includes("return NextResponse.json({ error: 'Cron not configured' }, { status: 500 })") &&
+    watchRenewRoute.includes("request.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`") &&
+    watchRenewRoute.includes("return NextResponse.json({ error: 'No autorizado' }, { status: 401 })")
+)
+
+assert(
+  'Google Calendar watch renewal only targets missing or near-expiring active watches',
+  calendarSync.includes('const WATCH_RENEWAL_WINDOW_MS = 36 * 60 * 60 * 1000') &&
+    calendarSync.includes("eq('provider', 'google')") &&
+    calendarSync.includes("eq('sync_enabled', true)") &&
+    calendarSync.includes('google_channel_expiration.is.null,google_channel_expiration.lt.${threshold}') &&
+    calendarSync.includes('return { renewed, failed, checked: data?.length ?? 0, threshold }')
+)
+
+assert(
+  'Google Calendar watch rotation creates the replacement before stopping the previous watch',
+  calendarSync.includes('const previousChannelId = connection.google_channel_id') &&
+    calendarSync.indexOf('const watch = await provider.watch(calendarId, webhookUrl, channelId)') <
+      calendarSync.indexOf('await provider.unwatch(previousChannelId, previousResourceId)') &&
+    calendarSync.includes("console.warn('[calendar] old watch stop skipped:'") &&
+    calendarSync.includes("console.log('[calendar] watch renewed'")
 )
 
 assert(

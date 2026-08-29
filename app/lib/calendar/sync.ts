@@ -11,6 +11,7 @@ import { GoogleCalendarProvider, refreshGoogleToken } from './google'
 
 const APP_CALENDAR_SUMMARY = 'Kairo – Estudio'
 const MADRID_TZ = 'Europe/Madrid'
+const WATCH_RENEWAL_WINDOW_MS = 36 * 60 * 60 * 1000
 
 type CalendarConnection = {
   id: string
@@ -425,9 +426,9 @@ export async function startGoogleWatch(userId: string, db = createServiceClient(
   const webhookUrl = process.env.GOOGLE_CALENDAR_WEBHOOK_URL
   if (!webhookUrl) return null
   const { provider, calendarId } = await ensureExternalCalendar(db, connection)
-  if (connection.google_channel_id && connection.google_resource_id) {
-    await provider.unwatch(connection.google_channel_id, connection.google_resource_id).catch(() => undefined)
-  }
+  const previousChannelId = connection.google_channel_id
+  const previousResourceId = connection.google_resource_id
+  const previousExpiration = connection.google_channel_expiration
   const channelId = crypto.randomUUID()
   const watch = await provider.watch(calendarId, webhookUrl, channelId)
   await db.from('calendar_connections').update({
@@ -435,22 +436,48 @@ export async function startGoogleWatch(userId: string, db = createServiceClient(
     google_resource_id: watch.resourceId,
     google_channel_expiration: watch.expiration ?? null,
   }).eq('id', connection.id)
+  if (previousChannelId && previousResourceId) {
+    await provider.unwatch(previousChannelId, previousResourceId).catch(error => {
+      console.warn('[calendar] old watch stop skipped:', {
+        connectionId: connection.id,
+        previousExpiration,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    })
+  }
+  console.log('[calendar] watch renewed', {
+    connectionId: connection.id,
+    previousExpiration,
+    nextExpiration: watch.expiration ?? null,
+  })
   return watch
 }
 
 export async function renewExpiringGoogleWatches(db = createServiceClient()) {
-  const threshold = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+  const threshold = new Date(Date.now() + WATCH_RENEWAL_WINDOW_MS).toISOString()
   const { data } = await db
     .from('calendar_connections')
-    .select('user_id')
+    .select('id, user_id, google_channel_expiration')
     .eq('provider', 'google')
     .eq('sync_enabled', true)
     .or(`google_channel_expiration.is.null,google_channel_expiration.lt.${threshold}`)
   let renewed = 0
-  for (const row of (data ?? []) as Array<{ user_id: string }>) {
-    await startGoogleWatch(row.user_id, db).then(() => { renewed++ }).catch(error => console.warn('[calendar] watch renew failed:', error))
+  let failed = 0
+  for (const row of (data ?? []) as Array<{ id: string; user_id: string; google_channel_expiration: string | null }>) {
+    await startGoogleWatch(row.user_id, db)
+      .then(watch => {
+        if (watch) renewed++
+      })
+      .catch(error => {
+        failed++
+        console.warn('[calendar] watch renew failed:', {
+          connectionId: row.id,
+          previousExpiration: row.google_channel_expiration,
+          error: error instanceof Error ? error.message : String(error),
+        })
+      })
   }
-  return { renewed }
+  return { renewed, failed, checked: data?.length ?? 0, threshold }
 }
 
 export async function disconnectGoogleCalendar(userId: string) {

@@ -114,6 +114,7 @@ type CaminoCorrectionResponse = {
   truncated?: boolean
   finishReason?: string
   score?: number | null
+  mock?: boolean
 }
 type LessonSegment =
   | { type: 'markdown'; text: string }
@@ -312,6 +313,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [studentAnswer, setStudentAnswer] = useState('')
   const [images, setImages] = useState<UploadedImage[]>([])
   const [correction, setCorrection] = useState('')
+  const [mockCorrection, setMockCorrection] = useState(false)
   const [notEvaluable, setNotEvaluable] = useState(false)
   const [imageError, setImageError] = useState('')
   const [score, setScore] = useState<number | null>(null)
@@ -385,7 +387,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   }, [missionId, shouldStartExercise])
 
   useEffect(() => {
-    if (!isFirstSession || score === null || !correction || firstSessionMarked) return
+    if (!isFirstSession || score === null || !correction || mockCorrection || firstSessionMarked) return
     setFirstSessionMarked(true)
     supabase.auth.getSession().then(({ data }) => {
       const token = data.session?.access_token
@@ -395,7 +397,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         headers: { Authorization: `Bearer ${token}` },
       }).catch(() => undefined)
     })
-  }, [isFirstSession, score, correction, firstSessionMarked])
+  }, [isFirstSession, score, correction, mockCorrection, firstSessionMarked])
 
   useEffect(() => {
     if (!topic) {
@@ -819,6 +821,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     const maxScore = 10
     setCorrecting(true)
     setCorrection('')
+    setMockCorrection(false)
     setNotEvaluable(false)
     setScore(null)
     setXpAwarded(null)
@@ -875,6 +878,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       setCorrection(storedCorrection)
       if (rawScore == null) {
         setToast('Corrección recibida sin nota clara. No se asigna XP hasta tener una nota.')
+      } else if (data.mock && process.env.NODE_ENV !== 'production') {
+        setScore(rawScore)
+        setMockCorrection(true)
+        setMissionXpStatus('free_practice')
+        setToast(`Modo prueba · corrección simulada · nota ${rawScore}/10`)
+        return
       } else if (repeatOfId) {
         // Repetir para mejorar (La Zona → Mis Cursos, ver DECISIONES en
         // gradeThreshold.ts): la misión de camino_calendar ya está
@@ -1349,8 +1358,13 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}
                   </p>
                 )}
+                {mockCorrection && process.env.NODE_ENV !== 'production' && (
+                  <p style={{ marginTop: 8, display: 'inline-flex', borderRadius: 999, background: '#f8fafc', border: '1px solid #e2e8f0', padding: '4px 10px', fontSize: 11, fontWeight: 900, color: '#64748b' }}>
+                    Modo prueba
+                  </p>
+                )}
                 {correction && <div style={{ marginTop: 14 }}><CorrectionResultCard correction={correction} officialMaxScore={10} className="p-5 text-sm leading-7" /></div>}
-                {isFirstSession && score !== null && correction && (
+                {isFirstSession && score !== null && correction && !mockCorrection && (
                   <div style={{ marginTop: 20, borderRadius: 12, background: '#0f172a', padding: '20px 22px', color: 'white' }}>
                     <p style={{ fontSize: 15, fontWeight: 900, lineHeight: 1.4, marginBottom: 10 }}>
                       {score < 5

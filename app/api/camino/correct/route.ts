@@ -24,6 +24,8 @@ const MODEL = 'claude-sonnet-4-6'
 const MAX_TOKENS = 2200
 const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
 const CORRECTION_UNAVAILABLE_MESSAGE = 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'
+const DEV_MOCK_CORRECTIONS = process.env.NODE_ENV !== 'production' && process.env.DEV_MOCK_CORRECTIONS === 'true'
+const DEV_MOCK_CORRECTIONS_ERROR = process.env.NODE_ENV !== 'production' && process.env.DEV_MOCK_CORRECTIONS_ERROR === 'true'
 
 type CaminoCorrectBody = {
   topicId?: unknown
@@ -144,6 +146,42 @@ export async function POST(request: NextRequest) {
     imageCount: allImages.length,
     imagePayloadChars,
     promptChars: statement.length,
+  }
+
+  if (DEV_MOCK_CORRECTIONS) {
+    if (DEV_MOCK_CORRECTIONS_ERROR) {
+      return NextResponse.json(
+        { error: 'dev_mock_correction_error', message: CORRECTION_UNAVAILABLE_MESSAGE, mock: true },
+        { status: 503 }
+      )
+    }
+
+    const mockCorrection = buildDevMockCorrection({
+      simulacroId: `Camino PAU · ${subjectLabel} · ${topic.blockTitle} · ${row?.title ?? topic.title}`,
+      subject: subjectLabel,
+      topicTitle: row?.title ?? topic.title,
+      blockTitle: topic.blockTitle,
+      year: new Date().getFullYear(),
+      maxScore,
+      responseMode,
+    })
+    const mockValidation = validateCorrectionJsonShape(mockCorrection)
+    if (!mockValidation.valid) {
+      return NextResponse.json(
+        { error: 'invalid_correction_format', message: 'La corrección mock no cumple el contrato esperado.', mock: true },
+        { status: 500 }
+      )
+    }
+    const normalized = normalizeCorrectionForOfficialScores(mockCorrection, [maxScore])
+    const publicCorrection = stripPrivateCorrectionFields(normalized)
+    return NextResponse.json({
+      correction: publicCorrection,
+      score: scoreFromCorrection(publicCorrection, maxScore),
+      notEvaluable: false,
+      truncated: false,
+      finishReason: 'dev_mock',
+      mock: true,
+    })
   }
 
   const anthropicApiKey = process.env.ANTHROPIC_API_KEY
@@ -395,6 +433,104 @@ function correctionUnavailableResponse() {
     { error: 'correction_unavailable', message: CORRECTION_UNAVAILABLE_MESSAGE },
     { status: 503 }
   )
+}
+
+function buildDevMockCorrection({
+  simulacroId,
+  subject,
+  topicTitle,
+  blockTitle,
+  year,
+  maxScore,
+  responseMode,
+}: {
+  simulacroId: string
+  subject: string
+  topicTitle: string
+  blockTitle: string
+  year: number
+  maxScore: number
+  responseMode: 'text' | 'image'
+}) {
+  const score = 7.5
+  return {
+    simulacro_id: simulacroId,
+    asignatura: subject,
+    nota_final: score,
+    tiempo_empleado_minutos: 0,
+    advertencia_tiempo: 'Práctica no cronometrada.',
+    dificultad_simulacro: 'Media',
+    contexto_dificultad: 'Corrección ficticia de desarrollo local para revisar la interfaz sin llamar al proveedor de IA.',
+    feedback_general: responseMode === 'image'
+      ? 'Modo prueba: la imagen se ha tratado como una entrega válida para comprobar la experiencia visual de corrección.'
+      : 'Modo prueba: la respuesta tiene una estructura razonable y permite revisar nota, feedback, desglose y teoría aplicada.',
+    fortalezas: [
+      'La respuesta ataca la idea principal del ejercicio.',
+      'Hay una explicación comprensible del procedimiento.',
+    ],
+    errores_principales: [
+      'Falta justificar un paso clave con más precisión.',
+      'Conviene cerrar con una conclusión explícita conectada al enunciado.',
+    ],
+    puntos_fuertes: 'Buena orientación general y vocabulario suficiente para una práctica de Camino PAU.',
+    puntos_mejora: 'Añade una justificación breve antes del resultado final y revisa que cada apartado responda exactamente a lo preguntado.',
+    plan_repaso: [
+      { prioridad: 1, tema: topicTitle, accion: 'Rehacer el ejercicio explicando cada paso en una frase corta.', tiempo_recomendado: '15 min', recurso_sugerido: 'Mini clase y ejemplo guiado del tema.' },
+      { prioridad: 2, tema: blockTitle, accion: 'Comparar tu respuesta con la solución orientativa.', tiempo_recomendado: '10 min', recurso_sugerido: 'Respuesta modelo de Kairo.' },
+      { prioridad: 3, tema: 'Presentación PAU', accion: 'Cerrar con una conclusión y unidades/notación cuando proceda.', tiempo_recomendado: '5 min', recurso_sugerido: 'Checklist de corrección.' },
+    ],
+    desglose_bloques: [
+      {
+        numero_bloque: 'Ejercicio de curso',
+        tema: topicTitle,
+        año_origen: year,
+        convocatoria_origen: 'Camino PAU',
+        nota: score,
+        max_puntos: maxScore,
+        puntos_conseguidos: score,
+        puntos_maximos: maxScore,
+        porcentaje_logrado: Math.round((score / maxScore) * 100),
+        que_hizo_bien: 'Identifica el objetivo del ejercicio y propone una línea de resolución coherente.',
+        errores_detectados: [
+          'Alguna afirmación queda sin justificar.',
+          'La conclusión final podría ser más directa.',
+        ],
+        que_faltaba: 'Una comprobación final o frase de cierre que conecte el resultado con el enunciado.',
+        penalizaciones_aplicadas: [
+          { motivo: 'Justificación incompleta en un paso intermedio.', puntos_descontados: -1.5 },
+          { motivo: 'Conclusión final poco explícita.', puntos_descontados: -1 },
+        ],
+        correccion_detalle: 'La respuesta es válida como borrador de examen, pero debe hacer visible el razonamiento. En PAU no basta con llegar a una idea correcta: hay que enseñar el camino y cerrar con precisión.',
+        solucion_correcta_corta: 'Plantea el método adecuado, desarrolla los pasos esenciales y concluye respondiendo exactamente a la pregunta.',
+        solucion_orientativa: 'Una solución completa incluiría: identificación de datos, procedimiento elegido, desarrollo ordenado, resultado o tesis final y comprobación breve.',
+        consejo_especifico: 'Antes de entregar, subraya mentalmente qué te pide el enunciado y revisa si tu última frase lo contesta.',
+        consejo_para_mejorar: 'Usa conectores de corrección: primero, por tanto, de ahí se deduce, en conclusión.',
+        teoria_ejercicio: '',
+        porqueEsAsi: {
+          title: '¿Por qué es así?',
+          keyIdea: 'La PAU premia tanto el resultado como el razonamiento verificable.',
+          whyHere: 'Este ejercicio exige mostrar cómo pasas de los datos o ideas iniciales a la conclusión.',
+          method: 'Identifica lo pedido, aplica el procedimiento del tema y justifica cada paso relevante.',
+          studentConnection: 'Tu respuesta va en la dirección correcta, pero necesita hacer más visible la justificación.',
+          commonMistake: 'Dar el resultado o la idea final sin explicar el puente lógico.',
+          miniExample: 'Si una pregunta pide justificar, escribe una frase de causa antes de concluir.',
+          examTip: 'Checklist: datos, método, desarrollo, conclusión.',
+          sourcesUsed: [],
+          status: 'generated',
+        },
+      },
+    ],
+    resumen_por_bloque_tematico: [
+      {
+        bloque: blockTitle,
+        puntos_conseguidos: score,
+        puntos_maximos: maxScore,
+        porcentaje: Math.round((score / maxScore) * 100),
+        nivel: 'En progreso',
+        aparece_en_plan_repaso: true,
+      },
+    ],
+  }
 }
 
 function shouldRepairCorrectionFormat(rawText: string, parsed: unknown) {

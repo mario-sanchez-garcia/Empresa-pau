@@ -564,8 +564,9 @@ assert(
     caminoCalendar.includes('Misiones extra · Bonus') &&
     caminoCalendar.includes('bonusMissions') &&
     caminoCalendar.includes('const [missionPanelOpen, setMissionPanelOpen]') &&
-    caminoCalendar.includes('setMissionPanelOpen(c => !c)') &&
-    caminoCalendar.includes('moveMission(draggedMissionId, day.date); setSelectedDayDate(day.date); setNewMission(current => ({ ...current, day: day.date }))') &&
+    caminoCalendar.includes('function handleTopAddClick()') &&
+    caminoCalendar.includes('data-calendar-editor-action="top-add" onClick={handleTopAddClick}') &&
+    caminoCalendar.includes('moveMission(draggedMissionId, day.date); selectEditorDay(day.date)') &&
     caminoCalendar.includes('draggable') &&
     caminoCalendar.includes('onDragStart={() => setDraggedMissionId(mission.id)}') &&
     caminoCalendar.includes('onChange={e => { if (e.target.value) moveMission(mission.id, e.target.value) }}') &&
@@ -595,7 +596,7 @@ assert(
     caminoCalendar.includes('locked: true') &&
     calendarEditorMissionRoute.includes("from('camino_calendar')") &&
     calendarEditorMissionRoute.includes('.insert({') &&
-    calendarEditorMissionRoute.includes('const endTime = addMinutesToTime(startTime, durationMinutes)') &&
+    calendarEditorMissionRoute.includes('const requestedEndTime = addMinutesToTime(requestedStartTime, durationMinutes)') &&
     calendarEditorMissionRoute.includes(".eq('id', inserted.id)") &&
     calendarEditorMissionRoute.includes('syncKairoMissionsToGoogle(auth.user.id, db)') &&
     caminoCalendar.includes("calendar_sync_status: startTime && endTime ? 'pending' : 'pending_no_time'") &&

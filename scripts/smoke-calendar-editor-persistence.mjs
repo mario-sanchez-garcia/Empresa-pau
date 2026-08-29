@@ -21,6 +21,10 @@ const scheduleTimeSlot = read('app/lib/camino/scheduleTimeSlot.ts')
 const conflictRoute = read('app/api/camino/calendar-conflicts/route.ts')
 const reorganizeRoute = read('app/api/camino/calendar-conflicts/reorganize/route.ts')
 const calendarSync = read('app/lib/calendar/sync.ts')
+const googleCallbackRoute = read('app/api/calendar/google/callback/route.ts')
+const googleStatusRoute = read('app/api/calendar/google/status/route.ts')
+const googleConnectionClient = read('app/components/camino/GoogleCalendarConnection.tsx')
+const oauthState = read('app/lib/calendar/oauthState.ts')
 const existingMissionUpdatePayload = client.slice(
   client.indexOf('const toUpdate = draft.flatMap'),
   client.indexOf('// INSERT new missions'),
@@ -202,6 +206,35 @@ assert(
     client.includes('missionConflictFor(mission, conflicts)') &&
     !client.includes('externalBusy.title') &&
     !client.includes('busy.summary')
+)
+
+assert(
+  'Google Calendar status returns disconnected state through normal 200 JSON path',
+  googleStatusRoute.includes('return NextResponse.json(await getCalendarConnectionStatus(auth.user.id))') &&
+    calendarSync.includes("if (!connection || !connection.sync_enabled) return { connected: false as const }")
+)
+
+assert(
+  'Google Calendar OAuth cancel is handled as a discreet Camino redirect',
+  googleCallbackRoute.includes("oauthError === 'access_denied' ? 'cancelled' : 'error'") &&
+    googleCallbackRoute.includes("status: 'connected' | 'error' | 'cancelled'") &&
+    googleConnectionClient.includes("if (calendarResult === 'cancelled') setMessage('Conexión cancelada')")
+)
+
+assert(
+  'Google Calendar OAuth state fails closed instead of throwing from callback verification',
+  oauthState.includes('export function verifyCalendarOAuthState') &&
+    oauthState.includes('try {') &&
+    oauthState.includes('return null') &&
+    oauthState.includes('crypto.timingSafeEqual')
+)
+
+assert(
+  'Google Calendar creates the branded Kairo study calendar and reuses stored calendar ids',
+  calendarSync.includes("const APP_CALENDAR_SUMMARY = 'Kairo – Estudio'") &&
+    calendarSync.includes('if (connection.external_calendar_id)') &&
+    calendarSync.includes('const existing = await provider.getCalendar(connection.external_calendar_id)') &&
+    calendarSync.includes('if (existing) return { provider, calendarId: existing.id')
 )
 
 assert(

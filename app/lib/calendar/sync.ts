@@ -9,7 +9,7 @@ import { decryptToken, encryptToken } from './tokenCrypto'
 import { CalendarSyncGoneError, type CalendarEvent, type CalendarEventInput } from './types'
 import { GoogleCalendarProvider, refreshGoogleToken } from './google'
 
-const APP_CALENDAR_SUMMARY = 'Kairo - Estudio'
+const APP_CALENDAR_SUMMARY = 'Kairo – Estudio'
 const MADRID_TZ = 'Europe/Madrid'
 
 type CalendarConnection = {

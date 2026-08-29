@@ -21,6 +21,7 @@ export default function GoogleCalendarConnection() {
     const params = new URLSearchParams(window.location.search)
     const calendarResult = params.get('calendar')
     if (calendarResult === 'connected') setMessage('Google Calendar conectado')
+    if (calendarResult === 'cancelled') setMessage('Conexión cancelada')
     if (calendarResult === 'error') setMessage('No se ha podido conectar. Reintentar')
     if (calendarResult) {
       params.delete('calendar')

@@ -31,14 +31,18 @@ export function createCalendarOAuthState(userId: string): string {
 }
 
 export function verifyCalendarOAuthState(state: string | null): CalendarOAuthState | null {
-  if (!state) return null
-  const [body, signature] = state.split('.')
-  if (!body || !signature) return null
-  const expected = sign(body)
-  const left = Buffer.from(signature)
-  const right = Buffer.from(expected)
-  if (left.length !== right.length || !crypto.timingSafeEqual(left, right)) return null
-  const parsed = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as CalendarOAuthState
-  if (parsed.provider !== 'google' || parsed.exp < Date.now()) return null
-  return parsed
+  try {
+    if (!state) return null
+    const [body, signature] = state.split('.')
+    if (!body || !signature) return null
+    const expected = sign(body)
+    const left = Buffer.from(signature)
+    const right = Buffer.from(expected)
+    if (left.length !== right.length || !crypto.timingSafeEqual(left, right)) return null
+    const parsed = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as CalendarOAuthState
+    if (parsed.provider !== 'google' || parsed.exp < Date.now()) return null
+    return parsed
+  } catch {
+    return null
+  }
 }

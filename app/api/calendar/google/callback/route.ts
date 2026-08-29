@@ -6,12 +6,15 @@ import { upsertCalendarConnection } from '@/app/lib/calendar/sync'
 
 export const dynamic = 'force-dynamic'
 
-function caminoRedirect(request: NextRequest, status: 'connected' | 'error') {
+function caminoRedirect(request: NextRequest, status: 'connected' | 'error' | 'cancelled') {
   const origin = process.env.NEXT_PUBLIC_APP_URL ?? request.nextUrl.origin
   return NextResponse.redirect(`${origin}/camino?calendar=${status}`)
 }
 
 export async function GET(request: NextRequest) {
+  const oauthError = request.nextUrl.searchParams.get('error')
+  if (oauthError) return caminoRedirect(request, oauthError === 'access_denied' ? 'cancelled' : 'error')
+
   const code = request.nextUrl.searchParams.get('code')
   const state = verifyCalendarOAuthState(request.nextUrl.searchParams.get('state'))
   if (!code || !state) return caminoRedirect(request, 'error')

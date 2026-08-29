@@ -13,7 +13,7 @@ import {
   subjectLabelFromSlug,
 } from '@/app/lib/camino/caminoCurriculumPlan'
 import { isOverloadedError, withAnthropicRetry } from '@/app/lib/ai/withAnthropicRetry'
-import { buildCorrectionPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson, scoreFromCorrection } from '@/app/lib/correctionPrompt'
+import { buildCorrectionPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson, scoreFromCorrection, validateCorrectionJsonShape, type CorrectionSchemaValidation } from '@/app/lib/correctionPrompt'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { BILLING_BLOCK_CODE, createRateLimitPayload, monthlyLimitResetNotice, type RateLimitAction } from '@/app/lib/rateLimitMessages'
@@ -254,7 +254,95 @@ export async function POST(request: NextRequest) {
     return correctionUnavailableResponse()
   }
 
-  const usage = extractAnthropicTokenUsage(message)
+  let usage = extractAnthropicTokenUsage(message)
+  let rawText = message.content[0]?.type === 'text' ? message.content[0].text : ''
+  let parsed = parseCorrectionJson(rawText)
+  let validation = validateCorrectionJsonShape(parsed)
+  let repairedFormat = false
+
+  if (!validation.valid && shouldRepairCorrectionFormat(rawText, parsed)) {
+    try {
+      const repairMessage = await withAnthropicRetry(
+        () => client.messages.create({
+          model: MODEL,
+          max_tokens: MAX_TOKENS,
+          messages: [{ role: 'user', content: buildCorrectionFormatRepairPrompt(rawText, validation) }],
+        }),
+        (intento, status) => console.warn('[camino/correct] reintento de formato por saturación', { intento, status }),
+      )
+      repairedFormat = true
+      usage = combineUsage(usage, extractAnthropicTokenUsage(repairMessage))
+      rawText = repairMessage.content[0]?.type === 'text' ? repairMessage.content[0].text : ''
+      parsed = parseCorrectionJson(rawText)
+      validation = validateCorrectionJsonShape(parsed)
+    } catch (error) {
+      await logAiUsageEvent({
+        userId: authContext.user.id,
+        route: '/api/camino/correct',
+        action,
+        model: MODEL,
+        status: 'error',
+        errorCode: getAiErrorCode(error),
+        metadata: { ...metadata, correctionFormatRepair: 'provider_error' },
+        accessToken: authContext.accessToken,
+      }).catch(logError => console.warn('[camino/correct] usage log skipped after format repair error', logError))
+
+      if (isOverloadedError(error)) {
+        return NextResponse.json(
+          {
+            error: 'ai_overloaded',
+            message: 'Hay mucha gente corrigiendo ahora mismo. Espera un minuto y vuelve a intentarlo — tu respuesta no se ha perdido.',
+          },
+          { status: 503, headers: { 'Retry-After': '60' } }
+        )
+      }
+      return correctionUnavailableResponse()
+    }
+  }
+
+  if (!validation.valid || !parsed) {
+    await logAiUsageEventForPhotos({
+      userId: authContext.user.id,
+      route: '/api/camino/correct',
+      action,
+      model: MODEL,
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+      totalTokens: usage.totalTokens,
+      status: 'error',
+      errorCode: 'invalid_correction_format',
+      metadata: {
+        ...metadata,
+        correctionParse: {
+          reason: validation.valid ? 'parse_error' : validation.reason,
+          rawLength: rawText.length,
+          fieldNames: validation.fieldNames,
+          missingFields: validation.valid ? [] : validation.missingFields,
+          repairedFormat,
+          providerStopReason: message.stop_reason ?? 'unknown',
+        },
+      },
+      photoCount: allImages.length,
+      accessToken: authContext.accessToken,
+    }).catch(logError => console.warn('[camino/correct] usage log skipped after invalid format', logError))
+
+    console.warn('[camino/correct] invalid correction format', {
+      reason: validation.valid ? 'parse_error' : validation.reason,
+      rawLength: rawText.length,
+      fieldCount: validation.fieldNames.length,
+      missingFields: validation.valid ? [] : validation.missingFields,
+      repairedFormat,
+      providerStopReason: message.stop_reason ?? 'unknown',
+    })
+    return NextResponse.json(
+      {
+        error: 'invalid_correction_format',
+        message: 'No hemos podido generar la corrección en el formato esperado. Vuelve a intentarlo — tu respuesta está guardada.',
+      },
+      { status: 502 }
+    )
+  }
+
   await logAiUsageEventForPhotos({
     userId: authContext.user.id,
     route: '/api/camino/correct',
@@ -264,19 +352,10 @@ export async function POST(request: NextRequest) {
     outputTokens: usage.outputTokens,
     totalTokens: usage.totalTokens,
     status: 'success',
-    metadata: { ...metadata, truncated: message.stop_reason === 'max_tokens' },
+    metadata: { ...metadata, truncated: message.stop_reason === 'max_tokens', repairedFormat },
     photoCount: allImages.length,
     accessToken: authContext.accessToken,
   })
-
-  const rawText = message.content[0]?.type === 'text' ? message.content[0].text : ''
-  const parsed = parseCorrectionJson(rawText)
-  if (!parsed) {
-    return NextResponse.json(
-      { error: 'correction_unavailable', message: 'No hemos podido formatear la corrección. Inténtalo de nuevo.' },
-      { status: 502 }
-    )
-  }
 
   const normalized = normalizeCorrectionForOfficialScores(parsed, [maxScore])
   const publicCorrection = stripPrivateCorrectionFields(normalized)
@@ -316,6 +395,57 @@ function correctionUnavailableResponse() {
     { error: 'correction_unavailable', message: CORRECTION_UNAVAILABLE_MESSAGE },
     { status: 503 }
   )
+}
+
+function shouldRepairCorrectionFormat(rawText: string, parsed: unknown) {
+  if (parsed && typeof parsed === 'object') return true
+  return /```json/i.test(rawText) ||
+    /^\s*\{/.test(rawText) ||
+    /"(?:nota_final|feedback_general|desglose_bloques|errores_principales|plan_repaso)"\s*:/.test(rawText)
+}
+
+function buildCorrectionFormatRepairPrompt(rawText: string, validation: CorrectionSchemaValidation) {
+  const missingFields = validation.valid ? [] : validation.missingFields
+  return `La respuesta anterior de corrección no cumple el formato técnico esperado.
+
+Tarea: reescribe la respuesta anterior como UN ÚNICO objeto JSON válido. No recalifiques desde cero, no cambies el criterio académico y no añadas explicación fuera del JSON.
+
+Campos críticos que deben existir si la información aparece en la respuesta anterior:
+- nota_final
+- feedback_general
+- desglose_bloques con al menos un bloque
+- desglose_bloques[].puntos_conseguidos
+- desglose_bloques[].puntos_maximos
+- desglose_bloques[].correccion_detalle o feedback equivalente
+
+Diagnóstico técnico:
+- reason: ${validation.valid ? 'parse_error' : validation.reason}
+- missingFields: ${missingFields.join(', ') || 'none'}
+- receivedFields: ${validation.fieldNames.join(', ') || 'none'}
+
+Devuelve únicamente JSON puro, sin markdown, sin \`\`\`, sin texto antes o después.
+
+Respuesta anterior:
+${rawText.slice(0, 12_000)}`
+}
+
+function combineUsage(
+  first: { inputTokens: number | null; outputTokens: number | null; totalTokens: number | null },
+  second: { inputTokens: number | null; outputTokens: number | null; totalTokens: number | null },
+) {
+  const inputTokens = sumNullable(first.inputTokens, second.inputTokens)
+  const outputTokens = sumNullable(first.outputTokens, second.outputTokens)
+  return {
+    inputTokens,
+    outputTokens,
+    totalTokens: inputTokens != null && outputTokens != null
+      ? inputTokens + outputTokens
+      : sumNullable(first.totalTokens, second.totalTokens),
+  }
+}
+
+function sumNullable(a: number | null, b: number | null) {
+  return a == null && b == null ? null : (a ?? 0) + (b ?? 0)
 }
 
 async function userCanAccessTopic({

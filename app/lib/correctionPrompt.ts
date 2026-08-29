@@ -429,19 +429,15 @@ REGLAS DE FORMATO LATEX — OBLIGATORIAS:
 
 export function parseCorrectionJson(text: string) {
   try {
-    const cleaned = text
-      .trim()
-      .replace(/^```json\s*/i, '')
-      .replace(/^```\s*/i, '')
-      .replace(/\s*```$/i, '')
-      .trim()
-    const firstBrace = cleaned.indexOf('{')
-    const lastBrace = cleaned.lastIndexOf('}')
-    const jsonText = firstBrace >= 0 && lastBrace > firstBrace ? cleaned.slice(firstBrace, lastBrace + 1) : cleaned
+    const jsonText = extractCorrectionJson(text)
+    if (!jsonText) return null
 
     const latexRepaired = repairLatexEscapes(jsonText)
-    const closedJson = closeTruncatedJson(jsonText)
-    const attempts = [jsonText, latexRepaired, closedJson, repairLatexEscapes(closedJson)]
+    const attempts = [jsonText, latexRepaired]
+    if (isLikelyTruncatedJson(jsonText)) {
+      const closedJson = closeTruncatedJson(jsonText)
+      attempts.push(closedJson, repairLatexEscapes(closedJson))
+    }
 
     for (const attempt of attempts) {
       try {
@@ -455,6 +451,116 @@ export function parseCorrectionJson(text: string) {
   } catch {
     return null
   }
+}
+
+export function extractCorrectionJson(text: string) {
+  const cleaned = stripOuterCodeFence(text.trim())
+  if (!cleaned) return null
+
+  if (cleaned.startsWith('{')) return cleaned
+
+  const fenced = extractSingleJsonFence(cleaned)
+  if (fenced) return fenced
+
+  const balanced = extractSingleBalancedJsonObject(cleaned)
+  if (balanced) return balanced
+
+  const firstBrace = cleaned.indexOf('{')
+  if (firstBrace >= 0 && looksLikeCorrectionJson(cleaned.slice(firstBrace))) {
+    return cleaned.slice(firstBrace).trim()
+  }
+
+  return null
+}
+
+export type CorrectionSchemaValidation =
+  | { valid: true; fieldNames: string[] }
+  | { valid: false; reason: 'parse_error' | 'missing_critical_fields'; fieldNames: string[]; missingFields: string[] }
+
+export function validateCorrectionJsonShape(parsed: unknown): CorrectionSchemaValidation {
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    return { valid: false, reason: 'parse_error', fieldNames: [], missingFields: ['root_object'] }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = parsed as any
+  const fieldNames = Object.keys(data)
+  const blocks: unknown[] = Array.isArray(data.desglose_bloques)
+    ? data.desglose_bloques
+    : hasSingleBlockShape(data)
+      ? [data]
+      : []
+  const hasEvaluation = normalizeScore(data.nota_final) != null ||
+    blocks.some(block => normalizeScore(blockScoreCandidate(block)) != null)
+  const hasFeedback = hasText(data.feedback_general) ||
+    hasNonEmptyArray(data.fortalezas) ||
+    hasNonEmptyArray(data.errores_principales) ||
+    hasText(data.puntos_fuertes) ||
+    hasText(data.puntos_mejora) ||
+    blocks.some(blockHasFeedback)
+
+  const missingFields: string[] = []
+  if (!hasEvaluation) missingFields.push('nota_final|desglose_bloques[].puntos_conseguidos')
+  if (!hasFeedback) missingFields.push('feedback_general|desglose_bloques[].correccion_detalle')
+  if (!blocks.length) missingFields.push('desglose_bloques')
+
+  return missingFields.length
+    ? { valid: false, reason: 'missing_critical_fields', fieldNames, missingFields }
+    : { valid: true, fieldNames }
+}
+
+function stripOuterCodeFence(value: string) {
+  const match = value.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i)
+  return (match ? match[1] : value).trim()
+}
+
+function extractSingleJsonFence(value: string) {
+  const matches = Array.from(value.matchAll(/```json\s*([\s\S]*?)\s*```/gi))
+  return matches.length === 1 ? matches[0][1].trim() : null
+}
+
+function extractSingleBalancedJsonObject(value: string) {
+  const objects: string[] = []
+  let depth = 0
+  let start = -1
+  let inString = false
+  let escaped = false
+
+  for (let index = 0; index < value.length; index += 1) {
+    const char = value[index]
+    if (inString) {
+      if (escaped) escaped = false
+      else if (char === '\\') escaped = true
+      else if (char === '"') inString = false
+      continue
+    }
+
+    if (char === '"') {
+      inString = true
+      continue
+    }
+    if (char === '{') {
+      if (depth === 0) start = index
+      depth += 1
+    } else if (char === '}' && depth > 0) {
+      depth -= 1
+      if (depth === 0 && start >= 0) {
+        objects.push(value.slice(start, index + 1))
+        start = -1
+      }
+    }
+  }
+
+  return objects.length === 1 ? objects[0].trim() : null
+}
+
+function looksLikeCorrectionJson(value: string) {
+  return /"(?:feedback_general|errores_principales|plan_repaso|simulacro_id|nota_final|desglose_bloques)"\s*:/.test(value)
+}
+
+function isLikelyTruncatedJson(value: string) {
+  const trimmed = value.trimEnd()
+  return trimmed.startsWith('{') && !trimmed.endsWith('}')
 }
 
 function repairLatexEscapes(jsonText: string) {
@@ -594,6 +700,47 @@ export function blockHasGenuineContent(block: unknown): boolean {
     (typeof b.que_faltaba === 'string' && b.que_faltaba.trim())
   )
   return hasScore || hasFeedback
+}
+
+function hasSingleBlockShape(data: Record<string, unknown>) {
+  return Boolean(
+    data.correccion_detalle ||
+    data.solucion_orientativa ||
+    data.que_hizo_bien ||
+    data.errores_detectados ||
+    data.porqueEsAsi ||
+    data.whyExplanation
+  )
+}
+
+function blockHasFeedback(block: unknown) {
+  if (!block || typeof block !== 'object') return false
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const b = block as any
+  return Boolean(
+    hasText(b.que_hizo_bien) ||
+    hasNonEmptyArray(b.errores_detectados) ||
+    hasText(b.correccion_detalle) ||
+    hasText(b.que_faltaba) ||
+    hasText(b.solucion_orientativa) ||
+    hasText(b.solucion_correcta_corta) ||
+    hasText(b.consejo_especifico) ||
+    hasText(b.consejo_para_mejorar)
+  )
+}
+
+function blockScoreCandidate(block: unknown) {
+  if (!block || typeof block !== 'object' || Array.isArray(block)) return null
+  const record = block as Record<string, unknown>
+  return record.puntos_conseguidos ?? record.nota
+}
+
+function hasText(value: unknown) {
+  return typeof value === 'string' && Boolean(value.trim())
+}
+
+function hasNonEmptyArray(value: unknown) {
+  return Array.isArray(value) && value.some(item => typeof item === 'string' ? Boolean(item.trim()) : Boolean(item))
 }
 
 export function normalizeCorrectionForOfficialScores(rawData: unknown, officialMaxScores: number[]) {

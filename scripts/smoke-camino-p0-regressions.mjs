@@ -81,6 +81,14 @@ assert(
 )
 
 assert(
+  'Camino correction route repairs only provider responses with invalid correction format',
+  correctRoute.includes('validateCorrectionJsonShape(parsed)') &&
+    correctRoute.includes('shouldRepairCorrectionFormat(rawText, parsed)') &&
+    correctRoute.includes('buildCorrectionFormatRepairPrompt(rawText, validation)') &&
+    correctRoute.includes("error: 'invalid_correction_format'")
+)
+
+assert(
   'Camino correction client parses empty or malformed bodies defensively',
   topicClient.includes('function parseCaminoCorrectionResponse') &&
     topicClient.includes('await response.text()') &&

@@ -104,6 +104,17 @@ type LessonMarkdownProps = {
   className?: string
   format?: boolean | 'raw'
 }
+type CaminoCorrectionResponse = {
+  error?: string
+  message?: string
+  code?: string
+  correction?: unknown
+  respuesta?: unknown
+  notEvaluable?: boolean
+  truncated?: boolean
+  finishReason?: string
+  score?: number | null
+}
 type LessonSegment =
   | { type: 'markdown'; text: string }
   | { type: 'table'; headers: string[]; rows: string[][] }
@@ -119,6 +130,16 @@ function loadJson<T>(key: string, fallback: T): T {
 
 function saveJson(key: string, value: unknown) {
   window.localStorage.setItem(key, JSON.stringify(value))
+}
+
+function parseCaminoCorrectionResponse(text: string): CaminoCorrectionResponse {
+  if (!text.trim()) return {}
+  try {
+    const parsed = JSON.parse(text)
+    return parsed && typeof parsed === 'object' ? parsed as CaminoCorrectionResponse : {}
+  } catch {
+    return {}
+  }
 }
 
 function progressKey(topic: CaminoCurriculumTopic) {
@@ -827,7 +848,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             : undefined,
         })
       })
-      const data = await response.json()
+      const data = parseCaminoCorrectionResponse(await response.text())
       if (!response.ok) {
         if (data.error === 'free_plan_expired' || data.error === 'correction_limit_reached' || data.error === 'photo_limit_reached') {
           setShowPaywall(true)

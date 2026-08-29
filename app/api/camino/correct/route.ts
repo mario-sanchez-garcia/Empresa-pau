@@ -20,10 +20,10 @@ import { BILLING_BLOCK_CODE, createRateLimitPayload, monthlyLimitResetNotice, ty
 
 export const dynamic = 'force-dynamic'
 
-const client = new Anthropic()
 const MODEL = 'claude-sonnet-4-6'
 const MAX_TOKENS = 2200
 const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
+const CORRECTION_UNAVAILABLE_MESSAGE = 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'
 
 type CaminoCorrectBody = {
   topicId?: unknown
@@ -146,6 +146,22 @@ export async function POST(request: NextRequest) {
     promptChars: statement.length,
   }
 
+  const anthropicApiKey = process.env.ANTHROPIC_API_KEY
+  if (!anthropicApiKey) {
+    await logAiUsageEvent({
+      userId: authContext.user.id,
+      route: '/api/camino/correct',
+      action,
+      model: MODEL,
+      status: 'error',
+      errorCode: 'anthropic_api_key_missing',
+      metadata,
+      accessToken: authContext.accessToken,
+    }).catch(error => console.warn('[camino/correct] usage log skipped after missing provider key', error))
+
+    return correctionUnavailableResponse()
+  }
+
   const internalUser = isInternalUser(authContext.user.email)
   if (!internalUser) {
     const limitResponse = await enforceUsageLimits({
@@ -160,6 +176,7 @@ export async function POST(request: NextRequest) {
     if (limitResponse) return limitResponse
   }
 
+  const client = new Anthropic({ apiKey: anthropicApiKey, timeout: 55_000 })
   const prompt = buildCorrectionPrompt({
     subject: subjectLabel,
     simulacroId: `Camino PAU · ${subjectLabel} · ${topic.blockTitle} · ${row?.title ?? topic.title}`,
@@ -216,7 +233,7 @@ export async function POST(request: NextRequest) {
       errorCode: getAiErrorCode(error),
       metadata,
       accessToken: authContext.accessToken,
-    })
+    }).catch(logError => console.warn('[camino/correct] usage log skipped after provider error', logError))
     // Saturación tras agotar los reintentos: el alumno tiene la foto hecha y
     // está esperando la nota, así que merece saber que es cuestión de esperar
     // y no que su respuesta esté mal. 503 + Retry-After para que el cliente
@@ -230,7 +247,11 @@ export async function POST(request: NextRequest) {
         { status: 503, headers: { 'Retry-After': '60' } }
       )
     }
-    throw error
+    console.error('[camino/correct] provider correction unavailable', {
+      errorCode: getAiErrorCode(error),
+      status: typeof error === 'object' && error && 'status' in error ? (error as { status?: unknown }).status : undefined,
+    })
+    return correctionUnavailableResponse()
   }
 
   const usage = extractAnthropicTokenUsage(message)
@@ -252,7 +273,7 @@ export async function POST(request: NextRequest) {
   const parsed = parseCorrectionJson(rawText)
   if (!parsed) {
     return NextResponse.json(
-      { error: 'No hemos podido formatear la corrección. Inténtalo de nuevo.' },
+      { error: 'correction_unavailable', message: 'No hemos podido formatear la corrección. Inténtalo de nuevo.' },
       { status: 502 }
     )
   }
@@ -288,6 +309,13 @@ export async function POST(request: NextRequest) {
     truncated: message.stop_reason === 'max_tokens',
     finishReason: message.stop_reason ?? 'unknown',
   })
+}
+
+function correctionUnavailableResponse() {
+  return NextResponse.json(
+    { error: 'correction_unavailable', message: CORRECTION_UNAVAILABLE_MESSAGE },
+    { status: 503 }
+  )
 }
 
 async function userCanAccessTopic({

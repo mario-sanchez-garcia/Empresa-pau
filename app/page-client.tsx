@@ -4861,7 +4861,9 @@ function cambiarTipo(t: Tipo) {
           overflow-y: auto;
           padding: 22px 18px 40px 22px;
           font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-          background: #fff;
+          background:
+            radial-gradient(circle at 12% 0%, rgba(219,234,254,.46), transparent 32%),
+            linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
         }
 
         .tutor-shell {
@@ -4961,10 +4963,12 @@ function cambiarTipo(t: Tipo) {
         }
 
         .tutor-chat-card {
-          background: rgba(255,255,255,.94);
-          border: 1px solid #dbe7fb;
-          border-radius: 22px;
-          box-shadow: 0 18px 50px rgba(37,99,235,.08);
+          background: rgba(255,255,255,.84);
+          border: 1px solid rgba(219,231,251,.82);
+          border-radius: 18px;
+          box-shadow: 0 16px 44px rgba(37,99,235,.08), inset 0 1px 0 rgba(255,255,255,.9);
+          backdrop-filter: blur(16px) saturate(1.1);
+          -webkit-backdrop-filter: blur(16px) saturate(1.1);
           display: flex;
           flex-direction: column;
           height: calc(100vh - 330px);
@@ -5023,15 +5027,16 @@ function cambiarTipo(t: Tipo) {
           align-items: center;
           gap: 7px;
           padding: 9px 14px;
-          border-radius: 10px;
-          border: 1px solid #dbe7fb;
-          background: #fff;
+          border-radius: 12px;
+          border: 1px solid rgba(191,219,254,.72);
+          background: #f8fbff;
           color: #334155;
           font-size: 12.5px;
           font-weight: 700;
           cursor: pointer;
           font-family: inherit;
-          transition: border-color 120ms, background 120ms;
+          box-shadow: var(--kairo-inset-soft);
+          transition: border-color 120ms, background 120ms, color 120ms;
         }
 
         .tutor-quick-action:hover {
@@ -5067,11 +5072,11 @@ function cambiarTipo(t: Tipo) {
         }
 
         .tutor-msg-ai-bubble {
-          border-radius: 22px;
+          border-radius: 16px;
           padding: 20px 22px;
-          background: #fff;
-          border: 1px solid #e8eef7;
-          box-shadow: 0 4px 20px rgba(15,23,42,.06);
+          background: rgba(255,255,255,.94);
+          border: 1px solid rgba(226,238,247,.95);
+          box-shadow: 0 8px 22px rgba(15,23,42,.055);
         }
 
         .tutor-msg-ai-label {
@@ -5162,8 +5167,8 @@ function cambiarTipo(t: Tipo) {
 
         .tutor-msg-user-bubble {
           padding: 13px 18px;
-          border-radius: 18px 18px 4px 18px;
-          background: #eff6ff;
+          border-radius: 16px 16px 6px 16px;
+          background: linear-gradient(180deg, #eff6ff, #eaf3ff);
           border: 1px solid #dbeafe;
           color: #0f172a;
           font-size: 14px;
@@ -5200,7 +5205,10 @@ function cambiarTipo(t: Tipo) {
         .tutor-input-zone {
           flex-shrink: 0;
           padding: 14px clamp(26px, 2.4vw, 42px) 22px;
-          border-top: 1px solid #eef2f7;
+          border-top: 1px solid rgba(219,231,251,.78);
+          background: rgba(255,255,255,.68);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
         }
 
         .tutor-input-hint {

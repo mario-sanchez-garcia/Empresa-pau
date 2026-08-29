@@ -217,7 +217,7 @@ const SIGNUP_FONT_MONO = signupDmMono.style.fontFamily
 
 const BASE_CSS = `
 *{box-sizing:border-box}
-.onb-input{width:100%;border:none;background:transparent;padding:0;font-size:13px;font-weight:700;color:#1c1c1c;font-family:'Inter',system-ui,sans-serif;outline:none}
+.onb-input{width:100%;border:none;background:transparent;padding:0;font-size:13px;font-weight:700;color:#0f172a;font-family:'Inter',system-ui,sans-serif;outline:none}
 .onb-input::placeholder{color:#94a3b8;font-weight:500}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes onb-top-slam{0%{transform:translateY(-50%);opacity:0}45%{opacity:1}72%{transform:translateY(3.5%)}86%{transform:translateY(-1%)}100%{transform:translateY(0)}}
@@ -868,7 +868,7 @@ export default function OnboardingFlow() {
         </div>
 
         {/* Right — editorial white panel */}
-        <div className="onb-form-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#f9f9f9', overflow: 'hidden' }}>
+        <div className="onb-form-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg,#ffffff 0%,#f8fbff 100%)', overflow: 'hidden' }}>
           {/* Progress track */}
           <div style={{ height: 2, background: '#e0e0e0', flexShrink: 0, position: 'relative' }}>
             <motion.div
@@ -879,7 +879,7 @@ export default function OnboardingFlow() {
           </div>
 
           {/* Header */}
-          <div className="onb-steps-header" style={{ padding: '16px 40px', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div className="onb-steps-header" style={{ padding: '16px 40px', borderBottom: '1px solid #dbe7fb', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, letterSpacing: '.04em', color: '#1c1c1c' }}>Kairo</span>
               <LoginAccessMobile />
@@ -894,7 +894,7 @@ export default function OnboardingFlow() {
                   const done = currentStep > i + 1
                   const active = currentStep === i + 1
                   return (
-                    <div key={label} style={{ padding: '5px 12px', borderLeft: i === 0 ? '1px solid #e0e0e0' : 'none', border: '1px solid #e0e0e0', borderRight: i === SIDEBAR_STEPS.length - 1 ? '1px solid #e0e0e0' : 'none', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: active ? '#fff' : done ? '#1c1c1c' : '#94a3b8', background: active ? '#1c1c1c' : done ? '#f0f0f0' : 'transparent', flexShrink: 0 }}>
+                    <div key={label} style={{ padding: '5px 12px', borderLeft: i === 0 ? '1px solid #dbe7fb' : 'none', border: '1px solid #dbe7fb', borderRight: i === SIDEBAR_STEPS.length - 1 ? '1px solid #dbe7fb' : 'none', fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.1em', textTransform: 'uppercase', color: active ? '#fff' : done ? '#1e293b' : '#94a3b8', background: active ? '#2563eb' : done ? '#eff6ff' : 'rgba(255,255,255,.52)', flexShrink: 0 }}>
                       {label}
                     </div>
                   )
@@ -939,10 +939,10 @@ export default function OnboardingFlow() {
           </div>
 
           {/* Footer */}
-          <div style={{ borderTop: '1px solid #e0e0e0', padding: '16px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, background: '#f9f9f9' }}>
+          <div style={{ borderTop: '1px solid #dbe7fb', padding: '16px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, background: 'rgba(255,255,255,.82)', backdropFilter: 'blur(12px)' }}>
             <div>
               {showBack && (
-                <button onClick={goBack} style={{ padding: '9px 18px', background: 'none', border: '1px solid #e0e0e0', fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase', color: '#94a3b8', cursor: 'pointer' }}>
+                <button onClick={goBack} style={{ padding: '9px 18px', background: '#f8fbff', border: '1px solid #dbe7fb', borderRadius: 12, fontFamily: "'DM Mono', monospace", fontSize: 9, letterSpacing: '.1em', textTransform: 'uppercase', color: '#64748b', cursor: 'pointer', boxShadow: 'var(--kairo-inset-soft)' }}>
                   ← Atrás
                 </button>
               )}
@@ -952,7 +952,7 @@ export default function OnboardingFlow() {
                 <button
                   onClick={goNext}
                   disabled={!canContinue}
-                  style={{ padding: '11px 28px', background: canContinue ? '#1c1c1c' : '#e0e0e0', border: 'none', color: canContinue ? '#fff' : '#94a3b8', fontSize: 13, fontWeight: 800, letterSpacing: '-.01em', cursor: canContinue ? 'pointer' : 'not-allowed', transition: 'background .12s' }}
+                  style={{ padding: '11px 28px', background: canContinue ? 'var(--kairo-clay-bg)' : '#e0e7ef', border: 'none', borderRadius: 12, color: canContinue ? '#fff' : '#94a3b8', fontSize: 13, fontWeight: 800, letterSpacing: '-.01em', cursor: canContinue ? 'pointer' : 'not-allowed', transition: 'background .12s', boxShadow: canContinue ? 'var(--kairo-shadow-clay)' : 'none' }}
                 >
                   Continuar →
                 </button>

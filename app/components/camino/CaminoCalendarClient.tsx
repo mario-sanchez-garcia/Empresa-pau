@@ -2218,7 +2218,7 @@ export default function CaminoCalendarClient() {
     <Shell>
       <UsernameGate />
       {/* ── HEADER ── */}
-      <header style={{ position: 'sticky', top: 0, zIndex: 30, background: 'white', borderBottom: '1px solid #e2e8f0' }}>
+      <header className="kairo-topbar" style={{ position: 'sticky', top: 0, zIndex: 30 }}>
         <div className="camino-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#2563eb' }}>Camino PAU</span>
@@ -2226,13 +2226,13 @@ export default function CaminoCalendarClient() {
           </div>
           <div className="camino-header-actions" style={{ display: 'flex', gap: 8 }}>
             <GoogleCalendarConnection />
-            <button onClick={() => setShowCalendarEditor(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
+            <button className="kairo-soft-control" onClick={() => setShowCalendarEditor(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', cursor: 'pointer', color: '#334155', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
               <CalendarDays size={13} /> Calendario
             </button>
-            <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
+            <button className="kairo-soft-control" onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', cursor: 'pointer', color: '#334155', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
               <Plus size={13} /> Examen
             </button>
-            <button onClick={() => setShowAddSubjectModal(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 10, cursor: 'pointer', border: 'none', background: '#2563eb', color: 'white', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
+            <button className="kairo-clay-action" onClick={() => setShowAddSubjectModal(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 12, cursor: 'pointer', border: 'none', color: 'white', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
               <BookPlus size={13} /> Asignatura
             </button>
           </div>
@@ -2261,7 +2261,7 @@ export default function CaminoCalendarClient() {
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
 
         {/* ── LEFT COLUMN ── */}
-        <div style={{ flex: 1, minWidth: 0, borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', background: 'white' }}>
+        <div style={{ flex: 1, minWidth: 0, borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,.86)' }}>
 
           {/* Banners */}
           {BETA_FEEDBACK_URL && (
@@ -2275,9 +2275,9 @@ export default function CaminoCalendarClient() {
           <ExamCoverageBanner />
 
           {/* ── HERO ── */}
-          <div className="camino-hero" style={{ position: 'relative', height: 230, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
-            <img src={heroImageUrl} alt="" loading="eager" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.52) saturate(0.7)', display: 'block' }} />
-            <div className="camino-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.9) 0%, rgba(10,15,30,0.25) 70%)', padding: '28px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          <div className="camino-hero" style={{ position: 'relative', height: 214, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
+            <img src={heroImageUrl} alt="" loading="eager" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.48) saturate(0.68)', display: 'block' }} />
+            <div className="camino-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.88) 0%, rgba(10,15,30,0.36) 72%, rgba(10,15,30,0.18) 100%)', padding: '24px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
               <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Días hasta selectividad</div>
               <div className="camino-hero-days" style={{ fontSize: 72, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 8 }}>Restan</div>
@@ -2355,7 +2355,7 @@ export default function CaminoCalendarClient() {
           })()}
 
           {/* ── MISSIONS HEADER ── */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid #f1f5f9', background: 'white' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid #eef2f7', background: 'rgba(255,255,255,.72)' }}>
             <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Haz esto ahora</span>
             {/* "principales" deja claro que este contador es solo del objetivo
                 semanal (role='main', tope de 5) — las bonus no cuentan aquí y
@@ -2380,7 +2380,7 @@ export default function CaminoCalendarClient() {
 
           {/* ── MISSION 01 — PRINCIPAL ── */}
           {mainMission ? (
-            <div className="camino-mission-card kairo-raised" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, margin: '16px 20px', padding: '20px', borderRadius: 16, borderLeft: '4px solid #2563eb', cursor: 'default' }}>
+            <div className="camino-mission-card kairo-raised" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, margin: '16px 20px', padding: '20px', borderRadius: 16, borderLeft: '3px solid #2563eb', cursor: 'default' }}>
               <div className="camino-mission-number" style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#93c5fd', flexShrink: 0, width: 48, paddingTop: 2, fontVariantNumeric: 'tabular-nums' }}>01</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6, alignItems: 'center' }}>
@@ -2798,8 +2798,8 @@ export default function CaminoCalendarClient() {
       {/* ── MODALS ── */}
       <AnimatePresence>
         {showNotSeenConfirm && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.96, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="kairo-subtle-backdrop fixed inset-0 z-50 grid place-items-center p-4">
+            <motion.div initial={{ scale: 0.96, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} className="kairo-modal-card w-full max-w-sm p-6">
               <h3 className="text-lg font-black text-slate-950">¿Aún no lo has dado en clase?</h3>
               <p className="mt-2 text-sm font-semibold text-slate-500">Lo guardamos para más adelante. Hoy te daremos una alternativa para que no pierdas el ritmo.</p>
               <div className="mt-5 flex justify-end gap-2">
@@ -2816,8 +2816,8 @@ export default function CaminoCalendarClient() {
         {leagueUpgrade && (() => {
           const upgradedDiv = DIVISIONS.find(d => d.name === leagueUpgrade.to) ?? DIVISIONS[DIVISIONS.length - 1]
           return (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-              <motion.div initial={{ scale: 0.96, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="kairo-subtle-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
+              <motion.div initial={{ scale: 0.96, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} className="kairo-modal-card w-full max-w-sm p-6">
                 <div className="mb-4 rounded-2xl px-4 py-5 text-center" style={{ background: upgradedDiv.bg }}>
                   <p className="text-3xl font-black" style={{ color: upgradedDiv.text }}>🏆 {leagueUpgrade.to}</p>
                   <p className="mt-1 text-sm font-bold" style={{ color: upgradedDiv.text, opacity: 0.75 }}>Nueva división</p>
@@ -2837,7 +2837,7 @@ export default function CaminoCalendarClient() {
           )
         })()}
       </AnimatePresence>
-      <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-2xl">{toast}</motion.div>}</AnimatePresence>
+      <AnimatePresence>{toast && <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} onAnimationComplete={() => setTimeout(() => setToast(null), 1600)} className="fixed bottom-6 right-6 z-50 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-[0_12px_30px_rgba(15,23,42,.24)]">{toast}</motion.div>}</AnimatePresence>
       <AnimatePresence>{showAddSubjectModal && onboarding && <AddSubjectModal currentSubjects={onboarding.subjects} onClose={() => setShowAddSubjectModal(false)} onAdd={addSubject} loading={addSubjectLoading} />}</AnimatePresence>
       {/* Antes vivía dentro del panel derecho (className="hidden lg:flex" en
           RIGHT PANEL más arriba) — un display:none en el ancestro oculta
@@ -2973,14 +2973,14 @@ function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: 
   const activeGroup = groups.find(group => group.subject === selectedSubject) ?? groups[0]
   const activeBlock = activeGroup?.blocks.find(block => block.block === selectedBlock) ?? activeGroup?.blocks[0]
   return (
-    <section className="mb-5 rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+    <section className="kairo-soft-panel mb-5 p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Temario guiado</p>
           <h2 className="text-xl font-black text-slate-950">Explorar temas</h2>
           <p className="mt-1 text-sm font-semibold text-slate-500">Elige asignatura, bloque y tema cuando quieras entrar manualmente a una ruta de aprendizaje.</p>
         </div>
-        <button onClick={() => setOpen(value => !value)} className="inline-flex items-center gap-2 rounded-2xl bg-blue-50 px-4 py-2 text-sm font-black text-blue-700"><BookOpen size={16} /> {open ? 'Cerrar cursos' : 'Ver cursos'}</button>
+        <button onClick={() => setOpen(value => !value)} className="kairo-soft-control inline-flex items-center gap-2 px-4 py-2 text-sm font-black text-blue-700"><BookOpen size={16} /> {open ? 'Cerrar cursos' : 'Ver cursos'}</button>
       </div>
       {groups.length ? (
         <div>
@@ -2993,7 +2993,7 @@ function CourseDirectory({ groups }: { groups: Array<{ subject: string; blocks: 
           </div>
           {!open && <p className="mt-4 rounded-2xl border border-dashed border-blue-200 bg-blue-50 px-4 py-4 text-sm font-bold text-blue-800">Tu calendario ya te lleva al tema que toca. Abre cursos sólo cuando quieras buscar manualmente un bloque concreto.</p>}
           {open && activeGroup && (
-            <article className="mt-4 rounded-3xl border border-slate-100 bg-slate-50 p-4">
+            <article className="kairo-quiet-card mt-4 p-4">
               <div className="mb-3 flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: themeFor(activeGroup.subject).text }} />
                 <h3 className="text-base font-black text-slate-900">{activeGroup.subject}</h3>
@@ -3989,7 +3989,7 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
   const reason = mission ? heroReason(mission, blockCompleted, nextMissionTitle) : null
 
   return (
-    <div className="h-full overflow-hidden rounded-[28px] border border-blue-100 bg-white shadow-[0_8px_30px_rgba(37,99,235,0.10)]">
+    <div className="kairo-soft-panel h-full overflow-hidden">
       {/* Blue header band — primary action context */}
       <div className="bg-blue-600 px-6 pt-5 pb-4">
         <div className="flex flex-wrap items-center gap-2">
@@ -4105,8 +4105,8 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
 
       <AnimatePresence>
         {showNotSeenConfirm && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.96, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="kairo-subtle-backdrop fixed inset-0 z-50 grid place-items-center p-4">
+            <motion.div initial={{ scale: 0.96, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} className="kairo-modal-card w-full max-w-sm p-6">
               <h3 className="text-lg font-black text-slate-950">¿Aún no lo has dado en clase?</h3>
               <p className="mt-2 text-sm font-semibold text-slate-500">Lo guardamos para más adelante. Hoy te daremos una alternativa para que no pierdas el ritmo.</p>
               <div className="mt-5 flex justify-end gap-2">
@@ -4830,7 +4830,7 @@ function WeeklyGoalCard({ completed, target }: { completed: number; target: numb
   const [open, setOpen] = useState(false)
   const remaining = Math.max(0, target - completed)
   return (
-    <div className="rounded-[28px] border border-blue-100 bg-white p-5 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+    <div className="kairo-soft-panel p-5">
       <button onClick={() => setOpen(!open)} className="flex w-full items-center justify-between gap-3 text-left">
         <span>
           <span className="block text-lg font-black text-slate-950">Ranking y divisiones</span>
@@ -4947,7 +4947,7 @@ function ExamModal({ subjects, draft, setDraft, onClose, onSave, editing, curric
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/30 p-4 backdrop-blur-sm"
+      className="kairo-subtle-backdrop fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4"
     >
       <motion.div
         initial={{ scale: 0.97, y: 14 }}
@@ -5280,8 +5280,8 @@ function AddSubjectModal({ currentSubjects, onClose, onAdd, loading }: {
 
   if (available.length === 0) {
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm">
-        <motion.div initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }} className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="kairo-subtle-backdrop fixed inset-0 z-50 grid place-items-center p-4">
+        <motion.div initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }} className="kairo-modal-card w-full max-w-md p-6">
           <h2 className="text-xl font-black text-slate-950">Todas las asignaturas añadidas</h2>
           <p className="mt-2 text-sm font-semibold text-slate-500">Ya tienes todas las asignaturas disponibles en tu Camino PAU.</p>
           <div className="mt-6 flex justify-end"><button onClick={onClose} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-black text-white">Cerrar</button></div>
@@ -5291,8 +5291,8 @@ function AddSubjectModal({ currentSubjects, onClose, onAdd, loading }: {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/30 p-4 backdrop-blur-sm">
-      <motion.div initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }} className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="kairo-subtle-backdrop fixed inset-0 z-50 grid place-items-center p-4">
+      <motion.div initial={{ scale: 0.96, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 16 }} className="kairo-modal-card w-full max-w-md p-6">
         <h2 className="text-xl font-black text-slate-950">Añadir asignatura</h2>
         <p className="mt-1 text-sm font-semibold text-slate-500">Selecciona una asignatura para añadir a tu Camino PAU. Las misiones aparecerán a partir de mañana.</p>
         <div className="mt-5 grid gap-2">

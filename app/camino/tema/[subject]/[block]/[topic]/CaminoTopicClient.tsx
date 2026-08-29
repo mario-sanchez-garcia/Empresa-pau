@@ -601,7 +601,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   }, [topic, activeV2Index])
 
   if (!topic) {
-    return <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="rounded-[28px] border border-blue-100 bg-white p-8 shadow-[0_18px_45px_rgba(37,99,235,0.08)]"><h1 className="text-2xl font-black text-slate-950">Tema no encontrado</h1><p className="mt-2 text-sm font-semibold text-slate-500">Este tema todavía no está conectado al itinerario de Camino PAU.</p><Link href="/camino" className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-black text-white"><ArrowLeft size={16} /> Volver a Camino</Link></section></main></Shell>
+    return <Shell><main className="mx-auto flex min-h-[70vh] max-w-3xl items-center px-5 py-10"><section className="kairo-soft-panel p-8"><h1 className="text-2xl font-black text-slate-950">Tema no encontrado</h1><p className="mt-2 text-sm font-semibold text-slate-500">Este tema todavía no está conectado al itinerario de Camino PAU.</p><Link href="/camino" className="kairo-clay-action mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-black text-white"><ArrowLeft size={16} /> Volver a Camino</Link></section></main></Shell>
   }
 
   const currentTopic = topic
@@ -1228,7 +1228,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     </div>
                   )}
                   {selectedV2Card?.practice_prompt && (
-                    <div style={{ marginTop: 16, background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, padding: '14px 16px' }}>
+                    <div className="kairo-soft-panel" style={{ marginTop: 16, background: '#eff6ff', padding: '14px 16px' }}>
                       <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.14em', color: '#2563eb', marginBottom: 8 }}>Ahora inténtalo tú</p>
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
                         <LessonMarkdown text={selectedV2Card.practice_prompt} format="raw" />
@@ -1249,7 +1249,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           )}
 
           {/* ── Exercise submission ── */}
-          <article ref={exerciseRef} id="course-exercise" style={{ paddingTop: 28, paddingBottom: 40, borderTop: '2px solid #0f172a', marginTop: 4 }}>
+          <article ref={exerciseRef} id="course-exercise" style={{ paddingTop: 28, paddingBottom: 40, borderTop: '1px solid #dbe7fb', marginTop: 4 }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
               <div>
                 <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em' }}>Entrega tu ejercicio</h2>
@@ -1288,17 +1288,17 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             ) : (
               <>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-                  <button type="button" onClick={() => setAnswerMode('texto')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: 'none', background: answerMode === 'texto' ? '#0f172a' : '#f1f5f9', color: answerMode === 'texto' ? 'white' : '#64748b' }}>
+                  <button type="button" onClick={() => setAnswerMode('texto')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 12, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: answerMode === 'texto' ? 'none' : '1px solid #dbe7fb', background: answerMode === 'texto' ? '#0f172a' : '#f8fbff', color: answerMode === 'texto' ? 'white' : '#64748b', boxShadow: answerMode === 'texto' ? '0 8px 18px rgba(15,23,42,.14)' : 'var(--kairo-inset-soft)' }}>
                     <PenLine size={13} /> Escribir respuesta
                   </button>
-                  <button type="button" onClick={() => setAnswerMode('imagen')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: 'none', background: answerMode === 'imagen' ? '#0f172a' : '#f1f5f9', color: answerMode === 'imagen' ? 'white' : '#64748b' }}>
+                  <button type="button" onClick={() => setAnswerMode('imagen')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 12, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: answerMode === 'imagen' ? 'none' : '1px solid #dbe7fb', background: answerMode === 'imagen' ? '#0f172a' : '#f8fbff', color: answerMode === 'imagen' ? 'white' : '#64748b', boxShadow: answerMode === 'imagen' ? '0 8px 18px rgba(15,23,42,.14)' : 'var(--kairo-inset-soft)' }}>
                     <Camera size={13} /> Subir foto
                   </button>
                 </div>
                 {answerMode === 'texto' ? (
                   <MathEditor subject={currentTopic.subject} value={studentAnswer} onChange={setStudentAnswer} placeholder="Escribe aquí tu desarrollo paso a paso..." minHeight={160} accentColor="#2563eb" />
                 ) : (
-                  <div style={{ borderRadius: 4, border: '1px dashed #cbd5e1', background: '#f8fafc', padding: 14 }}>
+                  <div className="kairo-inset" style={{ borderRadius: 14, borderStyle: 'dashed', padding: 14 }}>
                     <input ref={fileRef} type="file" accept="image/*" multiple capture="environment" onChange={handleImage} style={{ display: 'none' }} />
                     {images.length > 0 && (
                       <div style={{ marginBottom: 10, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))', gap: 8 }}>
@@ -1314,7 +1314,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                       </div>
                     )}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                      <button type="button" onClick={() => fileRef.current?.click()} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 4, background: 'white', border: '1px solid #e2e8f0', padding: '10px 16px', fontSize: 13, fontWeight: 900, color: '#2563eb', cursor: 'pointer' }}>
+                      <button type="button" onClick={() => fileRef.current?.click()} className="kairo-soft-control" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 16px', fontSize: 13, fontWeight: 900, color: '#2563eb', cursor: 'pointer' }}>
                         <UploadCloud size={15} /> {images.length > 0 ? 'Añadir otra página' : 'Hacer foto o elegir imagen'}
                       </button>
                       {images.length > 0 && (
@@ -1331,7 +1331,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     )}
                   </div>
                 )}
-                <button type="button" className="kairo-clay-action" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : images.length === 0)} style={{ marginTop: 12, display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 8, padding: '12px', fontSize: 13, fontWeight: 900, color: 'white', border: 'none', cursor: correcting ? 'not-allowed' : 'pointer', opacity: (correcting || (answerMode === 'texto' ? !studentAnswer.trim() : images.length === 0)) ? .5 : 1 }}>
+                <button type="button" className="kairo-clay-action" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : images.length === 0)} style={{ marginTop: 12, display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 12, padding: '12px', fontSize: 13, fontWeight: 900, color: 'white', border: 'none', cursor: correcting ? 'not-allowed' : 'pointer', opacity: (correcting || (answerMode === 'texto' ? !studentAnswer.trim() : images.length === 0)) ? .5 : 1 }}>
                   {correcting ? <><KairoLoadingDot /> Corrigiendo con Kairo...</> : <>Corregir con Kairo <Check size={15} /></>}
                 </button>
                 {notEvaluable && (
@@ -1389,7 +1389,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         </main>
 
         {/* ── Aside ── */}
-        <aside className="topic-aside" style={{ width: 264, flexShrink: 0, background: '#fafaf9', padding: '28px 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 0 }}>
+        <aside className="topic-aside" style={{ width: 264, flexShrink: 0, background: 'rgba(248,251,255,.82)', padding: '28px 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 0, borderLeft: '1px solid #dbe7fb' }}>
 
           {/* Streak + Liga */}
           <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
@@ -1428,7 +1428,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           </div>
 
           {/* Chat Kairo */}
-          <div className="kairo-glass" style={{ marginBottom: 18, padding: 14, borderRadius: 14 }}>
+          <div className="kairo-glass" style={{ marginBottom: 18, padding: 14, borderRadius: 16 }}>
             <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 10 }}>Pregunta a Kairo</p>
             <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>Pregunta sobre este tema con el contexto ya preparado.</p>
             <details style={{ marginBottom: 10 }}>
@@ -1460,7 +1460,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
 
       {/* Toast */}
       {toast && (
-        <div style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 50, borderRadius: 8, background: '#0f172a', padding: '12px 18px', fontSize: 13, fontWeight: 900, color: 'white', boxShadow: '0 8px 28px rgba(0,0,0,.25)', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 50, borderRadius: 14, background: '#0f172a', padding: '12px 18px', fontSize: 13, fontWeight: 900, color: 'white', boxShadow: '0 12px 30px rgba(15,23,42,.24)', display: 'flex', alignItems: 'center', gap: 10 }}>
           {toast}
           <button onClick={() => setToast('')} style={{ color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><RotateCcw size={13} /></button>
         </div>
@@ -1468,8 +1468,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
 
       {/* Paywall */}
       {showPaywall && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
+        <div className="kairo-subtle-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="kairo-modal-card w-full max-w-sm p-6">
             <div className="mb-5 flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-xl font-black text-slate-950">Tu plan gratuito ha terminado</h2>
@@ -1478,8 +1478,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               <button type="button" onClick={() => setShowPaywall(false)} className="shrink-0 rounded-full p-1 text-slate-400 hover:bg-slate-100"><X size={18} /></button>
             </div>
             <div className="grid gap-2">
-              <Link href="/pricing" className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white">Desbloquear acceso completo <ArrowRight size={14} /></Link>
-              <button type="button" onClick={() => setShowPaywall(false)} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-600">Seguir con el plan gratuito</button>
+              <Link href="/pricing" className="kairo-clay-action flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-black text-white">Desbloquear acceso completo <ArrowRight size={14} /></Link>
+              <button type="button" onClick={() => setShowPaywall(false)} className="kairo-soft-control flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-black text-slate-600">Seguir con el plan gratuito</button>
             </div>
             <Link href="/pricing" className="mt-3 block text-center text-sm font-black text-blue-700 hover:underline">Ver planes</Link>
           </div>
@@ -1490,8 +1490,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       {leagueUpgrade && (() => {
         const upgradedDiv = DIVISIONS.find(d => d.name === leagueUpgrade.to) ?? DIVISIONS[DIVISIONS.length - 1]
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-sm rounded-[28px] bg-white p-6 shadow-2xl">
+          <div className="kairo-subtle-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="kairo-modal-card w-full max-w-sm p-6">
               <div className="mb-4 rounded-2xl px-4 py-5 text-center" style={{ background: upgradedDiv.bg }}>
                 <p className="text-3xl font-black" style={{ color: upgradedDiv.text }}>🏆 {leagueUpgrade.to}</p>
                 <p className="mt-1 text-sm font-bold" style={{ color: upgradedDiv.text, opacity: 0.75 }}>Nueva división</p>
@@ -1583,7 +1583,7 @@ function V2FlashcardAccordion({ cards }: { cards: CurriculumV2Card[] }) {
 
 function V2MiniMissionSelector({ cards, activeIndex, onSelect }: { cards: CurriculumV2Card[]; activeIndex: number; onSelect: (index: number) => void }) {
   return (
-    <div style={{ border: '1px solid #e2e8f0', borderRadius: 5, overflow: 'hidden', padding: 14 }}>
+    <div className="kairo-soft-panel" style={{ overflow: 'hidden', padding: 14 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
         <div>
           <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.16em', textTransform: 'uppercase' as const, color: '#2563eb', marginBottom: 3 }}>Misiones de este tema</p>
@@ -1599,7 +1599,7 @@ function V2MiniMissionSelector({ cards, activeIndex, onSelect }: { cards: Curric
               key={card.sort_order}
               type="button"
               onClick={() => onSelect(index)}
-              style={{ border: isActive ? '1px solid #2563eb' : '1px solid #e2e8f0', borderRadius: 4, padding: '10px 12px', textAlign: 'left', cursor: 'pointer', background: isActive ? '#eff6ff' : '#fafafa', transition: 'all .1s' }}
+              style={{ border: isActive ? '1px solid #2563eb' : '1px solid #dbe7fb', borderRadius: 12, padding: '10px 12px', textAlign: 'left', cursor: 'pointer', background: isActive ? '#eff6ff' : '#ffffff', transition: 'all .1s', boxShadow: isActive ? '0 8px 20px rgba(37,99,235,.08)' : '0 3px 10px rgba(37,99,235,.035)' }}
             >
               <span style={{ display: 'block', fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.12em', color: isActive ? '#2563eb' : '#94a3b8', marginBottom: 4 }}>Mini-misión {index + 1}</span>
               <span style={{ display: 'block', fontSize: 12, fontWeight: 800, color: isActive ? '#1e40af' : '#334155', lineHeight: 1.4 }} className="[&_p]:m-0 [&_p]:inline">
@@ -1802,7 +1802,7 @@ function SuccessModal({ score, xp, streak, blockProgress, nextMissionTitle, onVi
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', minHeight: '100dvh', background: '#fdfdfc' }}>
+    <div className="kairo-premium-shell" style={{ display: 'flex', minHeight: '100dvh' }}>
       <style>{`
         @media (max-width: 767px) {
           .topic-topbar { padding: 10px 16px !important; }
@@ -1944,10 +1944,10 @@ function ContentSkeleton() {
 
 function LearningCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <article style={{ paddingTop: 28, paddingBottom: 28, borderTop: '1px solid #e2e8f0' }}>
+    <article className="kairo-quiet-card" style={{ padding: '22px 24px', marginBottom: 16 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 16 }}>
         <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em' }}>{title}</h2>
-        <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase' as const, color: '#94a3b8' }}>Paso de lectura</span>
+        <span className="kairo-soft-control" style={{ padding: '5px 10px', fontSize: 9, fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase' as const, color: '#64748b' }}>Paso de lectura</span>
       </div>
       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">{children}</div>
     </article>

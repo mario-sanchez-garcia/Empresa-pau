@@ -137,8 +137,8 @@ export default function SidebarNav() {
         @media (min-width: 768px) {
           .kairo-mobile-nav { display: none !important; }
         }
-        .kairo-nav-item:hover > div:first-child { background: rgba(37,99,235,.28) !important; }
-        .kairo-account-item:hover { background: #f1f5f9 !important; }
+        .kairo-nav-item:hover > div:first-child { background: rgba(96,165,250,.22) !important; }
+        .kairo-account-item:hover { background: #f8fbff !important; }
         .kairo-logout-item:hover { background: #fef2f2 !important; }
       `}</style>
 
@@ -152,12 +152,12 @@ export default function SidebarNav() {
             position: 'fixed', left: 0, top: 0, height: '100vh',
             zIndex: 200,
             width: open ? 212 : 60,
-            background: '#0f172a',
+            background: 'linear-gradient(180deg, rgba(15,23,42,.98), rgba(10,19,38,.96))',
             display: 'flex', flexDirection: 'column', alignItems: 'stretch',
             padding: '16px 0', gap: 2,
             overflow: 'hidden',
             transition: 'width 220ms cubic-bezier(0.4, 0, 0.2, 1)',
-            boxShadow: open ? '6px 0 28px rgba(0,0,0,.4)' : 'none',
+            boxShadow: open ? '8px 0 34px rgba(15,23,42,.34)' : 'inset -1px 0 0 rgba(255,255,255,.06)',
           }}
         >
           {/* Brand */}
@@ -194,10 +194,12 @@ export default function SidebarNav() {
                 <div style={{
                   width: 40, height: 40, flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  borderRadius: 10,
-                  background: active ? 'rgba(37,99,235,.18)' : 'rgba(37,99,235,.07)',
-                  color: active ? '#2563eb' : '#60a5fa',
-                  transition: 'background 120ms, color 120ms',
+                  borderRadius: 12,
+                  background: active ? 'rgba(96,165,250,.18)' : 'rgba(255,255,255,.045)',
+                  color: active ? '#bfdbfe' : '#60a5fa',
+                  border: active ? '1px solid rgba(147,197,253,.22)' : '1px solid transparent',
+                  boxShadow: active ? 'inset 0 1px 0 rgba(255,255,255,.08), 0 8px 18px rgba(37,99,235,.10)' : 'none',
+                  transition: 'background 120ms, color 120ms, border-color 120ms, box-shadow 120ms',
                 }}>
                   <Icon size={18} />
                 </div>
@@ -265,7 +267,7 @@ export default function SidebarNav() {
                 style={{
                   margin: '0 10px 12px', padding: open ? '12px' : '10px 0',
                   borderRadius: 12, textDecoration: 'none',
-                  background: 'linear-gradient(135deg, rgba(37,99,235,.22), rgba(37,99,235,.08))',
+                  background: 'linear-gradient(135deg, rgba(37,99,235,.20), rgba(56,189,248,.08))',
                   border: '1px solid rgba(37,99,235,.35)',
                   display: 'flex', flexDirection: open ? 'column' : 'row',
                   alignItems: open ? 'flex-start' : 'center', justifyContent: open ? 'flex-start' : 'center',
@@ -301,8 +303,9 @@ export default function SidebarNav() {
             >
               <div style={{
                 width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                background: '#2563eb', color: '#fff', fontSize: 13, fontWeight: 800,
+                background: 'linear-gradient(135deg, #2563eb, #38bdf8)', color: '#fff', fontSize: 13, fontWeight: 800,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 8px 18px rgba(37,99,235,.24)',
               }}>
                 {(profile?.label ?? '?')[0]?.toUpperCase()}
               </div>
@@ -324,8 +327,9 @@ export default function SidebarNav() {
             {accountMenuOpen && (
               <div style={{
                 position: 'fixed', left: 68, bottom: 16, zIndex: 300,
-                width: 216, borderRadius: 12, background: 'white',
-                boxShadow: '0 18px 44px rgba(0,0,0,.28)', border: '1px solid #e2e8f0',
+                width: 216, borderRadius: 14, background: 'rgba(255,255,255,.94)',
+                boxShadow: '0 18px 44px rgba(15,23,42,.20)', border: '1px solid rgba(219,231,251,.92)',
+                backdropFilter: 'blur(14px)',
                 padding: 6, overflow: 'hidden',
               }}>
                 {ACCOUNT_MENU.map(({ label, href, icon: Icon }) => (
@@ -372,7 +376,7 @@ export default function SidebarNav() {
           position: 'fixed', bottom: 0, left: 0, right: 0,
           zIndex: 200,
           height: 60,
-          background: '#0f172a',
+          background: 'linear-gradient(180deg, rgba(15,23,42,.98), rgba(10,19,38,.96))',
           borderTop: '1px solid rgba(255,255,255,.07)',
           alignItems: 'stretch',
           paddingBottom: 'env(safe-area-inset-bottom)',

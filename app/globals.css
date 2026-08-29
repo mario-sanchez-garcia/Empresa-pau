@@ -77,14 +77,18 @@
   --pau-orange-border: rgba(245, 158, 11, 0.22);
 
   /* Kairo visual evolution: subtle glass / raised / clay surfaces */
-  --kairo-glass-bg: rgba(255, 255, 255, 0.74);
-  --kairo-glass-border: rgba(191, 219, 254, 0.7);
-  --kairo-raised-bg: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  --kairo-clay-bg: linear-gradient(135deg, #2563eb 0%, #38bdf8 100%);
-  --kairo-shadow-soft: 0 10px 30px rgba(37, 99, 235, 0.08);
-  --kairo-shadow-raised: 6px 8px 18px rgba(37, 99, 235, 0.10), -6px -8px 18px rgba(255, 255, 255, 0.86);
-  --kairo-shadow-clay: 0 12px 22px rgba(37, 99, 235, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.28);
-  --kairo-inset-soft: inset 2px 2px 7px rgba(148, 163, 184, 0.12), inset -2px -2px 7px rgba(255, 255, 255, 0.9);
+  --kairo-glass-bg: rgba(255, 255, 255, 0.82);
+  --kairo-glass-border: rgba(191, 219, 254, 0.66);
+  --kairo-raised-bg: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,251,255,0.96) 100%);
+  --kairo-clay-bg: linear-gradient(135deg, #2457e6 0%, #2f7cf6 62%, #37b5ec 100%);
+  --kairo-shadow-soft: 0 10px 26px rgba(37, 99, 235, 0.07), 0 1px 3px rgba(15, 23, 42, 0.03);
+  --kairo-shadow-raised: 0 12px 34px rgba(37, 99, 235, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  --kairo-shadow-clay: 0 14px 26px rgba(37, 99, 235, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.30), inset 0 -1px 0 rgba(15, 23, 42, 0.08);
+  --kairo-inset-soft: inset 2px 2px 8px rgba(148, 163, 184, 0.13), inset -2px -2px 8px rgba(255, 255, 255, 0.9);
+  --kairo-radius-card: 16px;
+  --kairo-radius-control: 12px;
+  --kairo-border-soft: rgba(219, 231, 251, 0.84);
+  --kairo-backdrop: rgba(15, 23, 42, 0.48);
 }
 
 @theme inline {
@@ -230,7 +234,8 @@ button:active:not(:disabled),
   background: var(--kairo-glass-bg);
   border: 1px solid var(--kairo-glass-border);
   box-shadow: var(--kairo-shadow-soft);
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px) saturate(1.12);
+  -webkit-backdrop-filter: blur(16px) saturate(1.12);
 }
 
 .kairo-raised {
@@ -248,6 +253,50 @@ button:active:not(:disabled),
 .kairo-clay-action {
   background: var(--kairo-clay-bg);
   box-shadow: var(--kairo-shadow-clay);
+  transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), filter 160ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .kairo-clay-action:hover:not(:disabled) {
+    filter: saturate(1.04) brightness(1.02);
+    transform: translateY(-1px);
+  }
+}
+
+.kairo-soft-panel {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--kairo-border-soft);
+  border-radius: var(--kairo-radius-card);
+  box-shadow: var(--kairo-shadow-soft);
+}
+
+.kairo-quiet-card {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(226, 232, 240, 0.88);
+  border-radius: var(--kairo-radius-card);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.045);
+}
+
+.kairo-soft-control {
+  background: rgba(248, 251, 255, 0.92);
+  border: 1px solid rgba(191, 219, 254, 0.72);
+  border-radius: var(--kairo-radius-control);
+  box-shadow: var(--kairo-inset-soft);
+}
+
+.kairo-modal-card {
+  background: rgba(255,255,255,0.94);
+  border: 1px solid rgba(219,231,251,0.86);
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(15,23,42,0.18), 0 1px 0 rgba(255,255,255,0.86) inset;
+  backdrop-filter: blur(18px) saturate(1.12);
+  -webkit-backdrop-filter: blur(18px) saturate(1.12);
+}
+
+.kairo-subtle-backdrop {
+  background: var(--kairo-backdrop);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 /* ─── Back to top ──────────────────────────────────────────────────

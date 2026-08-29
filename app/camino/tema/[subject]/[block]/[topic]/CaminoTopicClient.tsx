@@ -1253,7 +1253,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
               <div>
                 <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em' }}>Entrega tu ejercicio</h2>
-                <p style={{ marginTop: 4, fontSize: 13, fontWeight: 500, color: '#64748b' }}>El XP se asigna sólo después de corregir con Kairo. Ganas la base saques la nota que saques; si apruebas sumas un 25% de bonus, con un 7 o más un 75%, con un 9 o más un 125%.</p>
+                <p style={{ marginTop: 4, fontSize: 13, fontWeight: 500, color: '#64748b' }}>Corrige el ejercicio para registrar XP. La nota ajusta el bonus.</p>
               </div>
               <span style={{ borderRadius: 999, background: missionXpStatus === 'pending' ? '#eff6ff' : missionXpStatus === 'already_completed' ? '#f0fdf4' : '#f8fafc', padding: '3px 10px', fontSize: 10, fontWeight: 900, color: missionXpStatus === 'pending' ? '#2563eb' : missionXpStatus === 'already_completed' ? '#059669' : '#64748b', border: `1px solid ${missionXpStatus === 'pending' ? '#bfdbfe' : missionXpStatus === 'already_completed' ? '#bbf7d0' : '#e2e8f0'}` }}>
                 {missionXpStatus === 'checking' ? 'Comprobando XP...' : missionXpStatus === 'pending' ? 'Misión con XP' : missionXpStatus === 'already_completed' ? 'Misión ya completada' : 'Práctica libre · no suma XP'}
@@ -1372,7 +1372,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                         : 'Buen comienzo. A partir de aquí Kairo ajusta tu Camino a lo que necesitas.'}
                     </p>
                     <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, marginBottom: 18 }}>
-                      Cada día Kairo te prepara una misión adaptada a tu nivel. Por cada ejercicio que corriges ganas XP y subes en el ranking de tu liga. Y si estudias varios días seguidos, construyes una racha.
+                      Kairo convierte tus correcciones en la siguiente misión: qué hacer ahora, cuánto suma y cómo seguir avanzando.
                     </p>
                     <KairoMapCard embedded />
                     <a
@@ -1431,7 +1431,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           {/* Chat Kairo */}
           <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
             <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 10 }}>Pregunta a Kairo</p>
-            <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>Abre el Chat con Kairo con esta asignatura, bloque y tema como contexto.</p>
+            <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>Pregunta sobre este tema con el contexto ya preparado.</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 10 }}>
               {['Explícamelo más fácil', 'Ponme otro ejemplo', 'No entiendo este paso', 'Hazme una pregunta parecida', '¿Por qué se hace así?'].map(item => (
                 <Link key={item} href={chatHref(item)} style={{ borderRadius: 999, border: '1px solid #e2e8f0', background: 'white', padding: '4px 9px', fontSize: 10, fontWeight: 700, color: '#334155', textDecoration: 'none' }}>
@@ -1448,7 +1448,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
             <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 8 }}>XP en este tema</p>
             <p style={{ fontSize: 26, fontWeight: 900, color: topicCompleted ? '#059669' : '#0f172a', lineHeight: 1, marginBottom: 4 }}>{current.xp ?? 0} XP</p>
-            <p style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>{topicCompleted ? 'Tema completado con corrección.' : 'El XP se asigna solo después de corregir el ejercicio final.'}</p>
+            <p style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>{topicCompleted ? 'Tema completado con corrección.' : 'Pendiente de corrección.'}</p>
           </div>
 
           <Link href="/pricing" style={{ display: 'block', textAlign: 'center', fontSize: 12, fontWeight: 900, color: '#2563eb', marginTop: 4, textDecoration: 'none' }}>Ver planes</Link>

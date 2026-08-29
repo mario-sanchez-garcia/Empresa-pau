@@ -75,6 +75,16 @@
   --pau-orange: #f59e0b;
   --pau-orange-50: rgba(245, 158, 11, 0.09);
   --pau-orange-border: rgba(245, 158, 11, 0.22);
+
+  /* Kairo visual evolution: subtle glass / raised / clay surfaces */
+  --kairo-glass-bg: rgba(255, 255, 255, 0.74);
+  --kairo-glass-border: rgba(191, 219, 254, 0.7);
+  --kairo-raised-bg: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  --kairo-clay-bg: linear-gradient(135deg, #2563eb 0%, #38bdf8 100%);
+  --kairo-shadow-soft: 0 10px 30px rgba(37, 99, 235, 0.08);
+  --kairo-shadow-raised: 6px 8px 18px rgba(37, 99, 235, 0.10), -6px -8px 18px rgba(255, 255, 255, 0.86);
+  --kairo-shadow-clay: 0 12px 22px rgba(37, 99, 235, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  --kairo-inset-soft: inset 2px 2px 7px rgba(148, 163, 184, 0.12), inset -2px -2px 7px rgba(255, 255, 255, 0.9);
 }
 
 @theme inline {
@@ -214,6 +224,31 @@ button:active:not(:disabled),
 .pau-reveal-delay-2 { animation-delay: 120ms; }
 .pau-reveal-delay-3 { animation-delay: 180ms; }
 .pau-reveal-delay-4 { animation-delay: 240ms; }
+
+/* ─── Kairo soft surfaces ───────────────────────────────────────── */
+.kairo-glass {
+  background: var(--kairo-glass-bg);
+  border: 1px solid var(--kairo-glass-border);
+  box-shadow: var(--kairo-shadow-soft);
+  backdrop-filter: blur(14px);
+}
+
+.kairo-raised {
+  background: var(--kairo-raised-bg);
+  border: 1px solid rgba(219, 234, 254, 0.95);
+  box-shadow: var(--kairo-shadow-raised);
+}
+
+.kairo-inset {
+  background: #f8fbff;
+  border: 1px solid rgba(219, 234, 254, 0.9);
+  box-shadow: var(--kairo-inset-soft);
+}
+
+.kairo-clay-action {
+  background: var(--kairo-clay-bg);
+  box-shadow: var(--kairo-shadow-clay);
+}
 
 /* ─── Back to top ──────────────────────────────────────────────────
    Bottom offset bumped on narrow screens so it clears two different

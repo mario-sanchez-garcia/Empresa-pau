@@ -3567,7 +3567,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                 <button type="button" onClick={() => setCalendarView('month')} className="rounded-md px-3 py-1.5 text-[10px] font-black transition" style={{ background: calendarView === 'month' ? 'white' : 'transparent', color: calendarView === 'month' ? '#0f172a' : '#cbd5e1' }}>Mes</button>
               </div>
               <button onClick={onAddExam} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-400 transition hover:bg-white/[0.11]"><Plus size={13} /> Añadir parcial</button>
-              <button type="button" data-calendar-editor-action="top-add" onClick={handleTopAddClick} className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-[11px] font-black text-[#0f172a] transition hover:bg-slate-100" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}><Plus size={13} /> {missionPanelOpen ? 'Cerrar formulario' : 'Añadir misión'}</button>
+              <button type="button" data-calendar-editor-action="top-add" onClick={handleTopAddClick} className="inline-flex items-center gap-1.5 rounded-lg border border-white/70 bg-white/90 px-3 py-2 text-[11px] font-black text-[#0f172a] transition hover:bg-white" style={{ boxShadow: 'var(--kairo-shadow-soft)' }}><Plus size={13} /> {missionPanelOpen ? 'Cerrar formulario' : 'Nueva misión'}</button>
             </div>
           </div>
 
@@ -3749,10 +3749,10 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
 
           {/* Add mission panel */}
           {missionPanelOpen && (
-            <div className="shrink-0 border-b border-[#e2e8f0] bg-[#fafbfc] px-6 py-4">
+            <div className="shrink-0 border-b border-[#dbeafe] bg-[#f8fbff] px-6 py-4">
               <div className="mb-3 flex items-center justify-between">
-                <p className="text-[9px] font-black uppercase tracking-[.14em] text-slate-400">Añadir misión</p>
-                <button type="button" onClick={() => setMissionPanelOpen(false)} className="rounded-lg border border-[#e2e8f0] bg-white px-2.5 py-1 text-[10px] font-black text-slate-500 transition hover:bg-slate-50">Cerrar</button>
+                <p className="text-[9px] font-black uppercase tracking-[.14em] text-slate-400">Nueva misión</p>
+                <button type="button" onClick={() => setMissionPanelOpen(false)} className="rounded-lg border border-[#dbeafe] bg-white px-2.5 py-1 text-[10px] font-black text-slate-500 transition hover:bg-blue-50">Cerrar</button>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <Field label="Día">
@@ -3787,7 +3787,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                     <input type="checkbox" checked={newMission.bonus} onChange={e => setNewMission({ ...newMission, bonus: e.target.checked })} />
                     Opcional / bonus
                   </label>
-                  <button type="button" data-calendar-editor-action="form-submit" onClick={handleFormSubmitClick} disabled={!safeSubjects.length || saveState === 'saving' || Boolean(timeConflictNotice)} title="Añade esta misión al día y con los ajustes configurados arriba." className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0f172a] px-4 py-2.5 text-[11px] font-black text-white transition hover:bg-slate-800 disabled:opacity-40">
+                  <button type="button" data-calendar-editor-action="form-submit" onClick={handleFormSubmitClick} disabled={!safeSubjects.length || saveState === 'saving' || Boolean(timeConflictNotice)} title="Añade esta misión al día y con los ajustes configurados arriba." className="kairo-clay-action inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-[11px] font-black text-white transition hover:brightness-105 disabled:opacity-40">
                     {saveState === 'saving' ? 'Guardando...' : saveState === 'saved' ? '✓ Guardada' : saveState === 'error' ? 'Reintentar' : <><Plus size={12} /> Añadir misión</>}
                   </button>
                 </div>
@@ -3845,7 +3845,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                     draggable
                     onDragStart={() => setDraggedMissionId(mission.id)}
                     onDragEnd={() => setDraggedMissionId(null)}
-                    className="overflow-hidden rounded-xl border border-[#f1f5f9] bg-white transition-shadow hover:shadow-sm"
+                    className="kairo-raised overflow-hidden rounded-xl transition-shadow hover:shadow-sm"
                     style={{ display: 'grid', gridTemplateColumns: '4px 1fr', cursor: 'grab' }}
                   >
                     <div style={{ background: theme.text }} />

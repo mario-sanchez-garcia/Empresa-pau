@@ -63,7 +63,7 @@ assert(
     client.includes('<button type="button" data-calendar-editor-action="form-submit" onClick={handleFormSubmitClick} disabled={!safeSubjects.length || saveState === \'saving\' || Boolean(timeConflictNotice)} title="Añade esta misión al día y con los ajustes configurados arriba."') &&
     client.includes('function handleTopAddClick()') &&
     client.includes('data-calendar-editor-action="top-add" onClick={handleTopAddClick}') &&
-    client.includes("{missionPanelOpen ? 'Cerrar formulario' : 'Añadir misión'}") &&
+    client.includes("{missionPanelOpen ? 'Cerrar formulario' : 'Nueva misión'}") &&
     client.includes('function suggestTopicInForm()') &&
     client.includes('data-calendar-editor-action="suggested"') &&
     client.includes('onClick={suggestTopicInForm}') &&

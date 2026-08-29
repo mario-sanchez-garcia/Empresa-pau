@@ -1,8 +1,10 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
+import { useIsInternalUser } from '@/app/hooks/useIsInternalUser'
 import { buildTopicHref, getTopicByV2SortOrder, normalizeCaminoSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
+import type { CaminoContentV2Row } from '@/app/api/admin/camino-content-v2/route'
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
 const C = {
@@ -17,17 +19,7 @@ const C = {
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type V2Row = {
-  sort_order: number
-  title: string
-  block_key: string
-  block_slug: string
-  subject: string
-  video_id: string | null
-  concept_markdown: string | null
-  worked_example_markdown: string | null
-  practice_prompt: string | null
-}
+type V2Row = CaminoContentV2Row
 
 type SubjectKey = 'matematicas_ii' | 'lengua' | 'historia_espana' | 'fisica' | 'quimica' | 'economia' | 'matematicas_ccss'
 
@@ -126,7 +118,10 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
                     const topicSlug = resolveTopicSlugAlias(row.subject, row.block_slug, textSlug(sanitizeLessonTitle(row.title)))
                     const href = linkedTopic ? buildTopicHref(linkedTopic) : `/camino-pau/curso/${row.subject}/${row.block_slug}/${topicSlug}`
                     return (
-                      <tr key={row.sort_order} style={{ background: i % 2 === 0 ? C.surface : '#fafcff' }}>
+                      // sort_order es único por subject en los datos actuales, pero
+                      // no hay una restricción UNIQUE que lo garantice en el esquema
+                      // — se combina con subject por si acaso, en vez de asumirlo.
+                      <tr key={`${row.subject}-${row.sort_order}`} style={{ background: i % 2 === 0 ? C.surface : '#fafcff' }}>
                         <td style={{ padding: '9px 14px', color: C.muted, fontWeight: 700, fontSize: 11, borderBottom: `1px solid ${C.border}`, whiteSpace: 'nowrap' }}>
                           {row.sort_order}
                         </td>
@@ -188,42 +183,72 @@ const SUBJECTS: { key: SubjectKey; label: string; blockOrder?: string[] }[] = [
 // ─── Page ────────────────────────────────────────────────────────────────────
 export default function CaminoPreviewPage() {
   const [activeSubject, setActiveSubject] = useState<SubjectKey>('matematicas_ii')
-  const [authChecked, setAuthChecked] = useState(false)
-  const [authed, setAuthed] = useState(false)
   const [cache, setCache] = useState<Partial<Record<SubjectKey, LoadState>>>({})
 
-  // Auth check once
+  // Autorización real: useIsInternalUser llama a /api/admin/me, que verifica
+  // el JWT del usuario en el servidor contra isInternalUser() (misma lista
+  // INTERNAL_USER_EMAILS que ya usan el resto de rutas /api/admin/*). No
+  // basta con esto para la seguridad real de los datos — ver
+  // /api/admin/camino-content-v2, que vuelve a comprobarlo en el servidor
+  // antes de servir ninguna fila — pero sí decide qué ve esta página.
+  const internalUser = useIsInternalUser()
+  // Sesión, solo para distinguir "no has iniciado sesión" de "has iniciado
+  // sesión pero no eres del equipo interno" en el mensaje mostrado — ambos
+  // casos ya están bloqueados igual por internalUser.isInternalUser=false.
+  const [hasSession, setHasSession] = useState<boolean | null>(null)
   useEffect(() => {
+    let cancelled = false
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setAuthed(Boolean(session))
-      setAuthChecked(true)
+      if (!cancelled) setHasSession(Boolean(session))
     })
+    return () => { cancelled = true }
   }, [])
 
-  // Load active subject when needed
-  useEffect(() => {
-    if (!authed) return
-    const already = cache[activeSubject]
-    if (already && already.status !== 'idle') return
+  // Ref sincronizada con cache en cada render, para poder consultar "¿ya
+  // está cargado este subject?" dentro del efecto de carga SIN declarar
+  // cache como dependencia — así cambiar de asignatura no repite peticiones
+  // ya cacheadas, y no hace falta silenciar exhaustive-deps.
+  const cacheRef = useRef(cache)
+  cacheRef.current = cache
 
+  const loadSubject = useCallback((subject: SubjectKey) => {
     let cancelled = false
-    queueMicrotask(() => { if (!cancelled) setCache(c => ({ ...c, [activeSubject]: { status: 'loading' } })) })
-    supabase
-      .from('curriculum_content_v2')
-      .select('sort_order, title, block_key, block_slug, subject, video_id, concept_markdown, worked_example_markdown, practice_prompt')
-      .eq('subject', activeSubject)
-      .order('sort_order', { ascending: true })
-      .then(({ data, error }) => {
+    setCache(c => ({ ...c, [subject]: { status: 'loading' } }))
+    ;(async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (cancelled) return
+      if (!session?.access_token) {
+        setCache(c => ({ ...c, [subject]: { status: 'error', message: 'No autorizado' } }))
+        return
+      }
+      try {
+        const res = await fetch(`/api/admin/camino-content-v2?subject=${encodeURIComponent(subject)}`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
         if (cancelled) return
-        if (error) {
-          setCache(c => ({ ...c, [activeSubject]: { status: 'error', message: error.message } }))
-        } else {
-          setCache(c => ({ ...c, [activeSubject]: { status: 'loaded', rows: (data ?? []) as V2Row[] } }))
+        const body = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          setCache(c => ({ ...c, [subject]: { status: 'error', message: body?.error || `HTTP ${res.status}` } }))
+          return
         }
-      })
-
+        setCache(c => ({ ...c, [subject]: { status: 'loaded', rows: (body.rows ?? []) as V2Row[] } }))
+      } catch (e) {
+        if (cancelled) return
+        setCache(c => ({ ...c, [subject]: { status: 'error', message: e instanceof Error ? e.message : String(e) } }))
+      }
+    })()
     return () => { cancelled = true }
-  }, [authed, activeSubject]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Carga la asignatura activa cuando hace falta (primera vez, o cambio de
+  // asignatura sin caché todavía) — loadSubject es estable (useCallback sin
+  // dependencias), así que incluirla aquí no repite el efecto de más.
+  useEffect(() => {
+    if (!internalUser.isInternalUser) return
+    const already = cacheRef.current[activeSubject]
+    if (already && already.status !== 'idle') return
+    return loadSubject(activeSubject)
+  }, [internalUser.isInternalUser, activeSubject, loadSubject])
 
   const subjectCfg = SUBJECTS.find(s => s.key === activeSubject)!
   const loadState = cache[activeSubject] ?? { status: 'idle' }
@@ -256,13 +281,14 @@ export default function CaminoPreviewPage() {
           </div>
 
           {/* ── Subject selector ── */}
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {SUBJECTS.map(s => {
               const active = s.key === activeSubject
               return (
                 <button
                   key={s.key}
                   onClick={() => setActiveSubject(s.key)}
+                  aria-pressed={active}
                   style={{
                     padding: '8px 18px',
                     borderRadius: 10,
@@ -287,36 +313,52 @@ export default function CaminoPreviewPage() {
       {/* ── Body ── */}
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '28px 24px 48px' }}>
 
-        {!authChecked && (
+        {internalUser.loading && (
           <div style={{ textAlign: 'center', marginTop: 80 }}>
-            <p style={{ color: C.muted, fontSize: 15 }}>Verificando sesión…</p>
+            <p style={{ color: C.muted, fontSize: 15 }}>Verificando acceso…</p>
           </div>
         )}
 
-        {authChecked && !authed && (
+        {!internalUser.loading && !internalUser.isInternalUser && hasSession === false && (
           <div style={{ textAlign: 'center', marginTop: 80 }}>
             <p style={{ fontSize: 18, color: C.ink, fontWeight: 700, marginBottom: 12 }}>Inicia sesión para acceder.</p>
             <a href="/login" style={{ color: C.bg, fontSize: 14, fontWeight: 700, textDecoration: 'underline' }}>Ir a login →</a>
           </div>
         )}
 
-        {authChecked && authed && (loadState.status === 'idle' || loadState.status === 'loading') && (
+        {!internalUser.loading && !internalUser.isInternalUser && hasSession !== false && (
+          <div style={{ textAlign: 'center', marginTop: 80 }}>
+            <p style={{ fontSize: 18, color: C.ink, fontWeight: 700, marginBottom: 8 }}>No tienes acceso a esta página.</p>
+            <p style={{ fontSize: 13, color: C.muted }}>Solo los usuarios del equipo interno pueden ver este panel.</p>
+            <Link href="/" style={{ color: C.bg, fontSize: 14, fontWeight: 700, textDecoration: 'underline', display: 'block', marginTop: 16 }}>← Volver a Kairo</Link>
+          </div>
+        )}
+
+        {internalUser.isInternalUser && (loadState.status === 'idle' || loadState.status === 'loading') && (
           <div style={{ textAlign: 'center', marginTop: 80 }}>
             <p style={{ color: C.muted, fontSize: 15 }}>Cargando {subjectCfg.label}…</p>
           </div>
         )}
 
-        {authChecked && authed && loadState.status === 'error' && (
+        {internalUser.isInternalUser && loadState.status === 'error' && (
           <div style={{ textAlign: 'center', marginTop: 80 }}>
-            <p style={{ fontSize: 15, color: '#dc2626', fontWeight: 700 }}>Error: {loadState.message}</p>
+            <p style={{ fontSize: 15, color: '#dc2626', fontWeight: 700, marginBottom: 4 }}>No se ha podido cargar esta asignatura.</p>
+            {/* Detalle técnico visible solo para depuración — nunca es el único mensaje mostrado. */}
+            <p style={{ fontSize: 12, color: C.muted, marginBottom: 12 }}>{loadState.message}</p>
+            <button
+              onClick={() => loadSubject(activeSubject)}
+              style={{ color: C.bg, fontSize: 14, fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              Reintentar
+            </button>
           </div>
         )}
 
-        {authChecked && authed && loadState.status === 'loaded' && (
+        {internalUser.isInternalUser && loadState.status === 'loaded' && (
           <>
             <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
               <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>
-                {loadState.rows.length} flashcards
+                {loadState.rows.length} misiones
                 {' · '}{loadState.rows.filter(r => r.video_id).length} con vídeo
                 {' · '}{loadState.rows.filter(r => r.concept_markdown?.trim()).length} con concepto
               </p>

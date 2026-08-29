@@ -1331,7 +1331,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     )}
                   </div>
                 )}
-                <button type="button" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : images.length === 0)} style={{ marginTop: 12, display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 4, background: '#0f172a', padding: '12px', fontSize: 13, fontWeight: 900, color: 'white', border: 'none', cursor: correcting ? 'not-allowed' : 'pointer', opacity: (correcting || (answerMode === 'texto' ? !studentAnswer.trim() : images.length === 0)) ? .5 : 1 }}>
+                <button type="button" className="kairo-clay-action" onClick={isFreeAndExpired ? () => setShowPaywall(true) : correctCourseExercise} disabled={correcting || (answerMode === 'texto' ? !studentAnswer.trim() : images.length === 0)} style={{ marginTop: 12, display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 8, padding: '12px', fontSize: 13, fontWeight: 900, color: 'white', border: 'none', cursor: correcting ? 'not-allowed' : 'pointer', opacity: (correcting || (answerMode === 'texto' ? !studentAnswer.trim() : images.length === 0)) ? .5 : 1 }}>
                   {correcting ? <><KairoLoadingDot /> Corrigiendo con Kairo...</> : <>Corregir con Kairo <Check size={15} /></>}
                 </button>
                 {notEvaluable && (
@@ -1416,38 +1416,40 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           </div>
 
           {/* Práctica PAU */}
-          <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
-            <div style={{ height: 2, background: '#0f172a', marginBottom: 10 }} />
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#0f172a', marginBottom: 8 }}>Práctica PAU</p>
-            <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.6, marginBottom: 12 }}>Abre Exámenes con asignatura, bloque, tema y modo aleatorio preparados.</p>
-            <Link href={buildEvauHref(currentTopic)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#0f172a', color: 'white', borderRadius: 4, padding: '10px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none', marginBottom: 6 }}>
-              Hacer ejercicio PAU de este tema <ArrowRight size={12} />
+          <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #e2e8f0' }}>
+            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 8 }}>Práctica PAU</p>
+            <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>Ejercicio real con este contexto.</p>
+            <Link href={buildEvauHref(currentTopic)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: 8, padding: '9px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none', marginBottom: 6 }}>
+              Practicar PAU <ArrowRight size={12} />
             </Link>
-            <a href="#course-exercise" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: 'transparent', color: '#0f172a', border: '1px solid #e2e8f0', borderRadius: 4, padding: '9px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none' }}>
-              Corregir ejercicio del curso <Check size={12} />
+            <a href="#course-exercise" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: 'transparent', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 12px', fontSize: 11, fontWeight: 800, textDecoration: 'none' }}>
+              Ir a la respuesta <Check size={12} />
             </a>
           </div>
 
           {/* Chat Kairo */}
-          <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
+          <div className="kairo-glass" style={{ marginBottom: 18, padding: 14, borderRadius: 14 }}>
             <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 10 }}>Pregunta a Kairo</p>
             <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>Pregunta sobre este tema con el contexto ya preparado.</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 10 }}>
-              {['Explícamelo más fácil', 'Ponme otro ejemplo', 'No entiendo este paso', 'Hazme una pregunta parecida', '¿Por qué se hace así?'].map(item => (
-                <Link key={item} href={chatHref(item)} style={{ borderRadius: 999, border: '1px solid #e2e8f0', background: 'white', padding: '4px 9px', fontSize: 10, fontWeight: 700, color: '#334155', textDecoration: 'none' }}>
-                  {item}
-                </Link>
-              ))}
-            </div>
-            <Link href={chatHref()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#7c3aed', color: 'white', borderRadius: 4, padding: '10px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none' }}>
+            <details style={{ marginBottom: 10 }}>
+              <summary style={{ cursor: 'pointer', fontSize: 10, fontWeight: 900, color: '#7c3aed' }}>Preguntas rápidas</summary>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
+                {['Explícamelo más fácil', 'Ponme otro ejemplo', 'No entiendo este paso', 'Hazme una pregunta parecida', '¿Por qué se hace así?'].map(item => (
+                  <Link key={item} href={chatHref(item)} style={{ borderRadius: 999, border: '1px solid #e2e8f0', background: 'white', padding: '4px 9px', fontSize: 10, fontWeight: 700, color: '#334155', textDecoration: 'none' }}>
+                    {item}
+                  </Link>
+                ))}
+              </div>
+            </details>
+            <Link href={chatHref()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#7c3aed', color: 'white', borderRadius: 8, padding: '9px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none' }}>
               Abrir Chat con Kairo <MessageCircle size={12} />
             </Link>
           </div>
 
           {/* XP */}
-          <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
+          <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #e2e8f0' }}>
             <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 8 }}>XP en este tema</p>
-            <p style={{ fontSize: 26, fontWeight: 900, color: topicCompleted ? '#059669' : '#0f172a', lineHeight: 1, marginBottom: 4 }}>{current.xp ?? 0} XP</p>
+            <p style={{ fontSize: 20, fontWeight: 900, color: topicCompleted ? '#059669' : '#334155', lineHeight: 1, marginBottom: 4 }}>{current.xp ?? 0} XP</p>
             <p style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>{topicCompleted ? 'Tema completado con corrección.' : 'Pendiente de corrección.'}</p>
           </div>
 

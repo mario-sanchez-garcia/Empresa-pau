@@ -2238,11 +2238,11 @@ export default function CaminoCalendarClient() {
           </div>
         </div>
         {/* Ticker */}
-        <div style={{ background: '#eff6ff', borderBottom: '1px solid #dbeafe', padding: '6px 20px', display: 'flex', gap: 20, overflowX: 'auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />🔥 {streak > 0 ? `${streak} días de racha` : 'Empieza tu racha hoy'}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />{completedMainWithSims}/{Math.min(totalMain, 5)} misiones esta semana</div>
-          {weeklyXP > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />+{weeklyXP} XP esta semana</div>}
-          {upcomingPartial && <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />Parcial próximo · {upcomingPartial.subject}</div>}
+        <div style={{ background: 'rgba(248,251,255,.82)', borderBottom: '1px solid #dbeafe', padding: '5px 20px', display: 'flex', gap: 16, overflowX: 'auto', backdropFilter: 'blur(10px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#93c5fd', flexShrink: 0, display: 'inline-block' }} />{streak > 0 ? `${streak} días de racha` : 'Empieza tu racha hoy'}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#93c5fd', flexShrink: 0, display: 'inline-block' }} />{completedMainWithSims}/{Math.min(totalMain, 5)} principales</div>
+          {weeklyXP > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#93c5fd', flexShrink: 0, display: 'inline-block' }} />+{weeklyXP} XP semana</div>}
+          {upcomingPartial && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 800, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />Parcial · {upcomingPartial.subject}</div>}
           {/* El botón "Clasificación →" de siempre vive en el panel derecho
               (RIGHT PANEL, hidden lg:flex) — invisible por debajo de lg. Este
               es el mismo punto de entrada (openFullRanking) para mobile/tablet;
@@ -2250,9 +2250,9 @@ export default function CaminoCalendarClient() {
           <button
             onClick={openFullRanking}
             className="lg:hidden"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: '#1e40af', whiteSpace: 'nowrap', background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
+            style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap', background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
           >
-            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />Clasificación →
+            <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#93c5fd', flexShrink: 0, display: 'inline-block' }} />Clasificación →
           </button>
         </div>
       </header>
@@ -2275,16 +2275,16 @@ export default function CaminoCalendarClient() {
           <ExamCoverageBanner />
 
           {/* ── HERO ── */}
-          <div className="camino-hero" style={{ position: 'relative', height: 340, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
+          <div className="camino-hero" style={{ position: 'relative', height: 230, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
             <img src={heroImageUrl} alt="" loading="eager" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.52) saturate(0.7)', display: 'block' }} />
             <div className="camino-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.9) 0%, rgba(10,15,30,0.25) 70%)', padding: '28px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
               <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Días hasta selectividad</div>
-              <div className="camino-hero-days" style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
+              <div className="camino-hero-days" style={{ fontSize: 72, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 8 }}>Restan</div>
-              <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>{streak > 0 ? `🔥 ${streak}` : '—'}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>{displayedXP.toLocaleString('es-ES')}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>XP total</span></div>
-                {heroRank != null && <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>#{heroRank}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div>}
+              <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}><span style={{ fontSize: 15, fontWeight: 900, color: 'white' }}>{streak > 0 ? streak : '—'}</span><span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.42)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}><span style={{ fontSize: 15, fontWeight: 900, color: 'white' }}>{displayedXP.toLocaleString('es-ES')}</span><span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.42)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>XP</span></div>
+                {heroRank != null && <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}><span style={{ fontSize: 15, fontWeight: 900, color: 'white' }}>#{heroRank}</span><span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.42)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div>}
               </div>
             </div>
           </div>
@@ -2356,12 +2356,12 @@ export default function CaminoCalendarClient() {
 
           {/* ── MISSIONS HEADER ── */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid #f1f5f9', background: 'white' }}>
-            <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Misiones de hoy</span>
+            <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Haz esto ahora</span>
             {/* "principales" deja claro que este contador es solo del objetivo
                 semanal (role='main', tope de 5) — las bonus no cuentan aquí y
                 nunca bloquean nada, así que "sigue con las bonus" evita que
                 llegar a 5/5 se lea como un tope duro de toda la app. */}
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{completedMainWithSims}/{Math.min(totalMain, 5)} principales · sigue con las bonus</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{completedMainWithSims}/{Math.min(totalMain, 5)} principales</span>
           </div>
 
           {/* Trabajo de hoy hecho por iniciativa propia fuera de Camino
@@ -2380,7 +2380,7 @@ export default function CaminoCalendarClient() {
 
           {/* ── MISSION 01 — PRINCIPAL ── */}
           {mainMission ? (
-            <div className="camino-mission-card" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid #f1f5f9', background: '#eff6ff', borderLeft: '3px solid #2563eb', cursor: 'default' }}>
+            <div className="camino-mission-card kairo-raised" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, margin: '16px 20px', padding: '20px', borderRadius: 16, borderLeft: '4px solid #2563eb', cursor: 'default' }}>
               <div className="camino-mission-number" style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#93c5fd', flexShrink: 0, width: 48, paddingTop: 2, fontVariantNumeric: 'tabular-nums' }}>01</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6, alignItems: 'center' }}>
@@ -2407,7 +2407,7 @@ export default function CaminoCalendarClient() {
                 )}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
-                <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb' }}>+{mainMission.baseXP} XP</span>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8' }}>+{mainMission.baseXP} XP</span>
                 {mainMission.status === 'done' ? (
                   mainMission.missionType === 'partial_practice' && mainTarget?.href ? (
                     <a href={mainTarget.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669', textDecoration: 'none' }}>✓ Hecha · Ver resultado</a>
@@ -2415,7 +2415,7 @@ export default function CaminoCalendarClient() {
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669' }}>✓ Hecha</span>
                   )
                 ) : mainTarget?.href ? (
-                  <a href={mainTarget.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#2563eb', color: 'white', textDecoration: 'none', boxShadow: '0 4px 14px rgba(37,99,235,.25)' }}>Empezar →</a>
+                  <a href={mainTarget.href} className="kairo-clay-action" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 900, padding: '10px 18px', borderRadius: 12, color: 'white', textDecoration: 'none' }}>Empezar misión →</a>
                 ) : (
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#94a3b8' }}>En preparación</span>
                 )}
@@ -3549,7 +3549,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 14, scale: 0.987 }}
         transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-        className="mx-auto flex w-full max-w-[1440px] flex-col overflow-hidden rounded-2xl bg-white"
+        className="kairo-glass mx-auto flex w-full max-w-[1440px] flex-col overflow-hidden rounded-2xl"
         style={{ width: 'min(96vw, 1440px)', height: '92dvh', maxHeight: '920px', boxShadow: '0 2px 4px rgba(0,0,0,0.04), 0 20px 60px rgba(15,23,42,0.18), 0 4px 16px rgba(15,23,42,0.08)' }}
       >
         {/* ── Dark header ── */}
@@ -3562,11 +3562,11 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
               </h2>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-2">
-              <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.06] p-1">
+              <div className="kairo-inset flex items-center gap-1 rounded-lg p-1">
                 <button type="button" onClick={() => setCalendarView('week')} className="rounded-md px-3 py-1.5 text-[10px] font-black transition" style={{ background: calendarView === 'week' ? 'white' : 'transparent', color: calendarView === 'week' ? '#0f172a' : '#cbd5e1' }}>Semana</button>
                 <button type="button" onClick={() => setCalendarView('month')} className="rounded-md px-3 py-1.5 text-[10px] font-black transition" style={{ background: calendarView === 'month' ? 'white' : 'transparent', color: calendarView === 'month' ? '#0f172a' : '#cbd5e1' }}>Mes</button>
               </div>
-              <button onClick={onAddExam} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-400 transition hover:bg-white/[0.11]"><Plus size={13} /> Añadir parcial</button>
+              <button onClick={onAddExam} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-black text-slate-400 transition hover:bg-white/[0.11]"><Plus size={13} /> Parcial</button>
               <button type="button" data-calendar-editor-action="top-add" onClick={handleTopAddClick} className="inline-flex items-center gap-1.5 rounded-lg border border-white/70 bg-white/90 px-3 py-2 text-[11px] font-black text-[#0f172a] transition hover:bg-white" style={{ boxShadow: 'var(--kairo-shadow-soft)' }}><Plus size={13} /> {missionPanelOpen ? 'Cerrar formulario' : 'Nueva misión'}</button>
             </div>
           </div>
@@ -3633,10 +3633,10 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
 
           {/* Week nav */}
           <div className="mt-3 flex items-center gap-2">
-            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, -1))} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]"><ChevronLeft size={13} /> Ant</button>
+            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, -1))} aria-label="Semana anterior" className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-black text-slate-400 transition hover:bg-white/[0.11]"><ChevronLeft size={13} /> Ant</button>
             <span className="flex-1 text-center text-[11px] font-black text-slate-400">{weekRangeLabel(editorWeekStart)}</span>
-            <button onClick={() => navigateEditorWeek(currentWeekStartISO())} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]"><RotateCcw size={11} /> Hoy</button>
-            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, 1))} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-[11px] font-black text-slate-300 transition hover:bg-white/[0.11]">Sig <ArrowRight size={13} /></button>
+            <button onClick={() => navigateEditorWeek(currentWeekStartISO())} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-black text-slate-400 transition hover:bg-white/[0.11]"><RotateCcw size={11} /> Hoy</button>
+            <button onClick={() => navigateEditorWeek(weekOffset(editorWeekStart, 1))} aria-label="Semana siguiente" className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-black text-slate-400 transition hover:bg-white/[0.11]">Sig <ArrowRight size={13} /></button>
           </div>
           {conflicts.length > 0 && (
             <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-orange-300/30 bg-orange-400/10 px-3 py-2">
@@ -4689,7 +4689,7 @@ function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, sele
                     const left = block.lane * width
                     if (block.kind === 'busy') {
                       return (
-                        <div key={block.id} className="absolute rounded-lg border border-slate-200 bg-slate-100/90 px-2 py-1 text-[10px] font-black text-slate-500" style={{ top, height: blockHeight, left: `calc(${left}% + 4px)`, width: `calc(${width}% - 8px)` }} onClick={event => event.stopPropagation()}>
+                        <div key={block.id} className="absolute rounded-lg border border-slate-200 bg-slate-100/70 px-2 py-1 text-[9px] font-bold text-slate-400" style={{ top, height: blockHeight, left: `calc(${left}% + 4px)`, width: `calc(${width}% - 8px)` }} onClick={event => event.stopPropagation()}>
                           <div>{formatTimeRange(minutesToHHMM(block.start), minutesToHHMM(block.end))}</div>
                           <div>Ocupado</div>
                         </div>
@@ -4703,7 +4703,7 @@ function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, sele
                           {block.hasConflict && <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[8px] text-orange-700">Conflicto</span>}
                         </div>
                         <div className="truncate text-[10px] font-black" style={{ color: theme.text }}>{block.mission.subject}</div>
-                        {blockHeight >= 46 && <div className="truncate text-[10px] font-bold text-slate-700">{block.mission.title}</div>}
+                        {blockHeight >= 54 && <div className="truncate text-[10px] font-bold text-slate-700">{block.mission.title}</div>}
                         {blockHeight >= 62 && (
                           <div className="mt-1 flex gap-1">
                             <button type="button" onClick={event => { event.stopPropagation(); onToggleRole(block.mission.id, block.mission.role === 'main' ? 'bonus' : 'main') }} className="rounded bg-slate-50 px-1.5 py-0.5 text-[8px] font-black text-slate-500">{block.mission.role === 'main' ? 'Bonus' : 'Principal'}</button>

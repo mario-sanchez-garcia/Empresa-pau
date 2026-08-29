@@ -3104,9 +3104,12 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
+    const previousOverscroll = document.documentElement.style.overscrollBehavior
     document.body.style.overflow = 'hidden'
+    document.documentElement.style.overscrollBehavior = 'none'
     return () => {
       document.body.style.overflow = previousOverflow
+      document.documentElement.style.overscrollBehavior = previousOverscroll
     }
   }, [])
 
@@ -3543,14 +3546,14 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed bottom-0 right-0 top-0 z-50 flex items-stretch bg-slate-950/25 p-2 backdrop-blur-[2px] max-lg:left-0 sm:p-3 lg:left-[248px]" style={{ overscrollBehavior: 'contain' }}>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-2 backdrop-blur-[3px] sm:p-4" style={{ overscrollBehavior: 'contain' }}>
       <motion.section
         initial={{ opacity: 0, y: 14, scale: 0.987 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 14, scale: 0.987 }}
         transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-        className="kairo-glass mx-auto flex w-full max-w-[1440px] flex-col overflow-hidden rounded-2xl"
-        style={{ width: 'min(96vw, 1440px)', height: '92dvh', maxHeight: '920px', boxShadow: '0 2px 4px rgba(0,0,0,0.04), 0 20px 60px rgba(15,23,42,0.18), 0 4px 16px rgba(15,23,42,0.08)' }}
+        className="kairo-glass flex w-full flex-col overflow-hidden rounded-2xl"
+        style={{ width: 'min(96vw, 1400px)', height: 'min(92dvh, 920px)', boxShadow: '0 6px 18px rgba(15,23,42,0.14), 0 30px 90px rgba(15,23,42,0.28)' }}
       >
         {/* ── Dark header ── */}
         <header className="shrink-0 bg-[#0f172a] px-5 py-4">

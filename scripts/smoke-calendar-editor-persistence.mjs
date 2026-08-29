@@ -353,12 +353,13 @@ assert(
 )
 
 assert(
-  'calendar editor overlay is larger and scroll is contained inside the modal',
-  client.includes('max-w-[1440px]') &&
-    client.includes("width: 'min(96vw, 1440px)'") &&
-    client.includes("height: '92dvh'") &&
-    client.includes("maxHeight: '920px'") &&
+  'calendar editor overlay is centered and scroll is contained inside the modal',
+  client.includes('className="fixed inset-0 z-50 flex items-center justify-center') &&
+    !client.includes('lg:left-[248px]') &&
+    client.includes("width: 'min(96vw, 1400px)'") &&
+    client.includes("height: 'min(92dvh, 920px)'") &&
     client.includes("document.body.style.overflow = 'hidden'") &&
+    client.includes("document.documentElement.style.overscrollBehavior = 'none'") &&
     client.includes("overscrollBehavior: 'contain'") &&
     client.includes('px-5 py-4') &&
     client.includes('fontSize: 34') &&

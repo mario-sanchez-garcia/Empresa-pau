@@ -162,6 +162,11 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
         .from('curriculum_content_v2')
         .select('sort_order, title, block_key, block_slug, subject')
         .in('subject', subjectsToQueue)
+        // Filas en borrador (review_status='draft', p.ej. el Curso de
+        // Matemáticas CCSS pendiente de revisión) no deben sembrar la cola
+        // de un alumno real todavía — sin este filtro caerían aquí en vez
+        // de en el fallback de betaSequenceItems, más abajo.
+        .eq('review_status', 'published')
         .order('subject', { ascending: true })
         .order('sort_order', { ascending: true })
 

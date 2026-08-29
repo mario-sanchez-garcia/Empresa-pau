@@ -81,6 +81,9 @@ export async function POST(request: NextRequest) {
       .from('curriculum_content_v2')
       .select('sort_order, title, block_key, block_slug, subject')
       .eq('subject', subject)
+      // Filas en borrador (review_status='draft') no deben sembrar la cola
+      // de un alumno real todavía — mismo filtro que generateCaminoPlan.ts.
+      .eq('review_status', 'published')
       .order('sort_order', { ascending: true })
 
     const items: QueueSourceItem[] = (flashcards ?? []).filter(fc => isPrivateBetaSubject(fc.subject))

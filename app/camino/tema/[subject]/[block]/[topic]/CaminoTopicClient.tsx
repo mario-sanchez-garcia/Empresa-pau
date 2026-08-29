@@ -333,11 +333,18 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     const calendarMissionId = pendingCalendarRowId ?? missionId
     if (!calendarMissionId || startedMissionRef.current === calendarMissionId) return
     startedMissionRef.current = calendarMissionId
-    await fetch('/api/camino/start-mission', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-      body: JSON.stringify({ missionId: calendarMissionId }),
-    }).catch(() => undefined)
+    try {
+      const response = await fetch('/api/camino/start-mission', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({ missionId: calendarMissionId }),
+      })
+      if (!response.ok) {
+        console.warn('[camino/topic] start mission telemetry skipped', { status: response.status })
+      }
+    } catch (error) {
+      console.warn('[camino/topic] start mission telemetry skipped', error)
+    }
   }
 
   useEffect(() => {
@@ -801,7 +808,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         setCorrection('Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.')
         return
       }
-      await recordMissionStart(accessToken)
+      void recordMissionStart(accessToken)
       const statement = selectedV2Card?.practice_prompt ?? currentTopic.practicePrompt ?? currentTopic.guidedExample ?? ('Ejercicio de ' + selectedMissionTitle)
       const response = await fetch('/api/camino/correct', {
         method: 'POST',
@@ -942,7 +949,9 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               setMissionXpStatus('free_practice')
               toastText = `Práctica libre guardada. El XP se gana con las misiones de tu Camino.`
             }
-          } catch { /* silent */ }
+          } catch (error) {
+            console.warn('[camino/topic] complete mission skipped', error)
+          }
         } else {
           setMissionXpStatus('free_practice')
           toastText = `Práctica libre guardada. El XP se gana con las misiones de tu Camino.`
@@ -994,6 +1003,9 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           setTimeout(() => setShowSuccessModal(true), 1000)
         }
       }
+    } catch (error) {
+      console.warn('[camino/topic] correction failed', error)
+      setCorrection('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
     } finally {
       setCorrecting(false)
     }

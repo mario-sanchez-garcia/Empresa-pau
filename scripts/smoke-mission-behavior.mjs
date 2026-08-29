@@ -21,6 +21,7 @@ const postponeRoute = read('app/api/camino/postpone-mission/route.ts')
 const reorganizeRoute = read('app/api/camino/calendar-conflicts/reorganize/route.ts')
 const topicClient = read('app/camino/tema/[subject]/[block]/[topic]/CaminoTopicClient.tsx')
 const calendarClient = read('app/components/camino/CaminoCalendarClient.tsx')
+const mathEditor = read('components/shared/MathEditor.tsx')
 const slotScoring = read('app/lib/camino/slotScoring.ts')
 const existingMissionUpdatePayload = calendarClient.slice(
   calendarClient.indexOf('const toUpdate = draft.flatMap'),
@@ -56,28 +57,50 @@ assert(
 )
 
 assert(
-  'start mission endpoint records explicit starts once',
+  'start mission endpoint records explicit starts once without blocking correction on legacy schemas',
   startRoute.includes("from('camino_calendar')") &&
     startRoute.includes("started_at: now") &&
     startRoute.includes(".is('started_at', null)") &&
     startRoute.includes(".in('status', ['pending', 'missed'])") &&
+    startRoute.includes('telemetrySkipped') &&
     startRoute.includes("recordMissionBehaviorEvent(db, auth.user.id, missionId, 'started', 'started'") &&
     topicClient.includes("fetch('/api/camino/start-mission'") &&
     topicClient.includes('!shouldStartExercise') &&
     topicClient.includes('async function recordMissionStart') &&
-    topicClient.includes('await recordMissionStart(accessToken)') &&
+    topicClient.includes('void recordMissionStart(accessToken)') &&
+    topicClient.includes("console.warn('[camino/topic] start mission telemetry skipped'") &&
     topicClient.includes('startedMissionRef.current === missionId')
 )
 
 assert(
-  'completion stores derived duration and delay only on first successful completion',
+  'completion stores derived duration and delay only on first successful completion when telemetry schema exists',
   helper.includes('export function minutesBetweenIso') &&
     helper.includes('export function completionDelayMinutes') &&
+    helper.includes("error.code === '42703' || error.code === '42P01'") &&
     completeRoute.includes(".select('id, started_at, scheduled_date, end_time')") &&
+    completeRoute.includes(".select('id, scheduled_date, end_time')") &&
     completeRoute.includes('actual_duration_minutes: minutesBetweenIso(targetRow?.started_at, now)') &&
     completeRoute.includes('completion_delay_minutes: completionDelayMinutes(targetRow?.scheduled_date, targetRow?.end_time, now)') &&
+    completeRoute.includes("telemetryAvailable = false") &&
     completeRoute.includes(".in('status', ['pending', 'missed'])") &&
     completeRoute.includes("recordMissionBehaviorEvent(db, user.id, updated[0].id, 'completed', 'completed'")
+)
+
+assert(
+  'course correction surfaces real failures and never waits for start telemetry',
+  topicClient.includes('void recordMissionStart(accessToken)') &&
+    topicClient.includes("console.warn('[camino/topic] correction failed'") &&
+    topicClient.includes("setCorrection('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')")
+)
+
+assert(
+  'math editor avoids mixed border shorthand and side-specific styles',
+  !mathEditor.includes('border: `1.5px solid') &&
+    !mathEditor.includes('border: showRendered') &&
+    mathEditor.includes('borderTop: "none"') &&
+    mathEditor.includes('borderRight:') &&
+    mathEditor.includes('borderBottom:') &&
+    mathEditor.includes('borderLeft:')
 )
 
 assert(

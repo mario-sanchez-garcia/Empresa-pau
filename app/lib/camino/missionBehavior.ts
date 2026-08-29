@@ -60,5 +60,7 @@ export async function recordMissionBehaviorEvent(
     idempotency_key: idempotencyKey,
     metadata,
   })
-  if (error && error.code !== '23505') throw error
+  if (!error || error.code === '23505') return
+  if (error.code === '42703' || error.code === '42P01') return
+  throw error
 }

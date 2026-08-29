@@ -11,6 +11,10 @@ import { completionDelayMinutes, minutesBetweenIso, recordMissionBehaviorEvent }
 
 export const dynamic = 'force-dynamic'
 
+function isMissingTelemetrySchema(error: { code?: string; message?: string } | null | undefined) {
+  return error?.code === '42703' || error?.code === '42P01'
+}
+
 export async function POST(request: NextRequest) {
   try {
     const authContext = await getAuthContext(request)
@@ -62,7 +66,7 @@ export async function POST(request: NextRequest) {
     // toca — nunca una fecha futura.
     let targetId = calendarRowId
     if (!targetId) {
-      const { data: candidates } = await db
+      const { data: candidates, error: candidatesError } = await db
         .from('camino_calendar')
         .select('id, started_at, scheduled_date, end_time')
         .eq('user_id', user.id)
@@ -72,7 +76,24 @@ export async function POST(request: NextRequest) {
         .lte('scheduled_date', today)
         .order('scheduled_date', { ascending: false })
         .limit(1)
-      targetId = candidates?.[0]?.id ?? null
+      if (isMissingTelemetrySchema(candidatesError)) {
+        const { data: legacyCandidates, error: legacyCandidatesError } = await db
+          .from('camino_calendar')
+          .select('id, scheduled_date, end_time')
+          .eq('user_id', user.id)
+          .eq('subject', subject)
+          .eq('v2_sort_order', v2SortOrder)
+          .in('status', ['pending', 'missed'])
+          .lte('scheduled_date', today)
+          .order('scheduled_date', { ascending: false })
+          .limit(1)
+        if (legacyCandidatesError) throw legacyCandidatesError
+        targetId = legacyCandidates?.[0]?.id ?? null
+      } else if (candidatesError) {
+        throw candidatesError
+      } else {
+        targetId = candidates?.[0]?.id ?? null
+      }
     }
 
     if (!targetId) {
@@ -164,41 +185,81 @@ export async function POST(request: NextRequest) {
     // tarde caía siempre en la rama "no_pending_mission" (sin XP, sin marcar
     // como hecha) aunque el alumno sí hubiera hecho el trabajo real.
     // Completar tarde sigue contando — pero solo la fila ya resuelta arriba.
-    const { data: targetRow } = await db
+    let telemetryAvailable = true
+    let { data: targetRow, error: targetRowError } = await db
       .from('camino_calendar')
       .select('id, started_at, scheduled_date, end_time')
       .eq('id', targetId)
       .eq('user_id', user.id)
       .maybeSingle()
 
-    const { data: updated } = await db
+    if (isMissingTelemetrySchema(targetRowError)) {
+      telemetryAvailable = false
+      const legacyTarget = await db
+        .from('camino_calendar')
+        .select('id, scheduled_date, end_time')
+        .eq('id', targetId)
+        .eq('user_id', user.id)
+        .maybeSingle()
+      targetRow = legacyTarget.data as typeof targetRow
+      targetRowError = legacyTarget.error
+    }
+    if (targetRowError) throw targetRowError
+
+    const completionPayload: Record<string, unknown> = telemetryAvailable
+      ? {
+          status: 'completed',
+          completed_at: now,
+          xp_awarded: xp,
+          actual_duration_minutes: minutesBetweenIso(targetRow?.started_at, now),
+          completion_delay_minutes: completionDelayMinutes(targetRow?.scheduled_date, targetRow?.end_time, now),
+          updated_at: now,
+        }
+      : {
+          status: 'completed',
+          xp_awarded: xp,
+          updated_at: now,
+        }
+
+    const updateResult = await db
       .from('camino_calendar')
-      .update({
-        status: 'completed',
-        completed_at: now,
-        xp_awarded: xp,
-        actual_duration_minutes: minutesBetweenIso(targetRow?.started_at, now),
-        completion_delay_minutes: completionDelayMinutes(targetRow?.scheduled_date, targetRow?.end_time, now),
-        updated_at: now,
-      })
+      .update(completionPayload)
       .eq('id', targetId)
       .eq('user_id', user.id)
       .in('status', ['pending', 'missed'])
       .select('id')
 
+    let updated = updateResult.data ?? []
+    let updateError = updateResult.error
+    if (isMissingTelemetrySchema(updateError)) {
+      telemetryAvailable = false
+      const legacyUpdate = await db
+        .from('camino_calendar')
+        .update({ status: 'completed', xp_awarded: xp, updated_at: now })
+        .eq('id', targetId)
+        .eq('user_id', user.id)
+        .in('status', ['pending', 'missed'])
+        .select('id')
+      updated = legacyUpdate.data ?? []
+      updateError = legacyUpdate.error
+    }
+    if (updateError) throw updateError
+
     // PASO 4 — Idempotencia: 0 filas afectadas = ya completada entre medias
-    if (!updated || updated.length === 0) {
+    if (updated.length === 0) {
       return NextResponse.json({ success: false, reason: 'already_completed' })
     }
 
-    await recordMissionBehaviorEvent(db, user.id, updated[0].id, 'completed', 'completed', {
-      subject,
-      v2_sort_order: v2SortOrder,
-      mission_type: missionType,
-      had_started_at: Boolean(targetRow?.started_at),
-    }).catch(err => {
-      console.warn('[camino/complete-mission] mission behavior event skipped', err)
-    })
+    if (telemetryAvailable) {
+      await recordMissionBehaviorEvent(db, user.id, updated[0].id, 'completed', 'completed', {
+        subject,
+        v2_sort_order: v2SortOrder,
+        mission_type: missionType,
+        had_started_at: Boolean(targetRow?.started_at),
+      }).catch(err => {
+        console.warn('[camino/complete-mission] mission behavior event skipped', err)
+      })
+    }
 
     // PASO 2a — Historia: si esta finalización completa TODO un bloque de
     // Curso (todos sus temas finos en 'completed'), genera automáticamente

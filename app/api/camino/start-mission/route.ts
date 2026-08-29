@@ -5,6 +5,10 @@ import { recordMissionBehaviorEvent } from '@/app/lib/camino/missionBehavior'
 
 export const dynamic = 'force-dynamic'
 
+function isMissingTelemetrySchema(error: { code?: string; message?: string } | null | undefined) {
+  return error?.code === '42703' || error?.code === '42P01'
+}
+
 export async function POST(request: NextRequest) {
   try {
     const auth = await getAuthContext(request)
@@ -32,6 +36,10 @@ export async function POST(request: NextRequest) {
       .in('status', ['pending', 'missed'])
       .select('id, started_at')
 
+    if (isMissingTelemetrySchema(error)) {
+      console.warn('[camino/start-mission] telemetry schema unavailable, skipped')
+      return NextResponse.json({ ok: true, started: false, telemetrySkipped: true })
+    }
     if (error) throw error
 
     const startedNow = Boolean(updated?.[0]?.id)

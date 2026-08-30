@@ -114,9 +114,18 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
                 </thead>
                 <tbody>
                   {blockRows.map((row, i) => {
+                    // v2SortOrder solo es una FK real a curriculum_content_v2 cuando
+                    // contentStatus === 'flashcard_v2' (topic publicado desde esta
+                    // misma tabla). Para el resto de contentStatus (p.ej. 'latex_notes'),
+                    // v2SortOrder es metadata de orden de calendario sin relación con
+                    // esta tabla, y coincide numéricamente por pura casualidad — de ahí
+                    // que los primeros temas de un borrador nuevo (sort_order 1, 2, 3…)
+                    // enlazasen a temas antiguos de beta no relacionados. Mismo guard
+                    // que ya usa CaminoTopicClient.tsx y /api/camino/correct.
                     const linkedTopic = getTopicByV2SortOrder(row.subject, row.sort_order)
+                    const trustedLinkedTopic = linkedTopic?.contentStatus === 'flashcard_v2' ? linkedTopic : null
                     const topicSlug = resolveTopicSlugAlias(row.subject, row.block_slug, textSlug(sanitizeLessonTitle(row.title)))
-                    const href = linkedTopic ? buildTopicHref(linkedTopic) : `/camino-pau/curso/${row.subject}/${row.block_slug}/${topicSlug}`
+                    const href = trustedLinkedTopic ? buildTopicHref(trustedLinkedTopic) : `/camino-pau/curso/${row.subject}/${row.block_slug}/${topicSlug}`
                     return (
                       // sort_order es único por subject en los datos actuales, pero
                       // no hay una restricción UNIQUE que lo garantice en el esquema

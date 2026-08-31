@@ -7,6 +7,7 @@ import { supabase } from '@/app/lib/supabase'
 import { calculateAdmissionScore, getTargetDifference } from './calculation'
 import { ORIENTATION_FIXTURES, type AdmissionSubject, type OfficialCriterion, type OrientationTarget, type SavedOrientationTarget } from './data'
 import OfficialCriterionCard from './OfficialCriterionCard'
+import OpportunitiesExplorer from './OpportunitiesExplorer'
 import styles from './orientation.module.css'
 
 const formatGrade = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -51,7 +52,7 @@ export default function OrientationSimulator() {
   const [showMethod, setShowMethod] = useState(false)
   const [activeTab, setActiveTab] = useState('objetivo')
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading')
-  const [catalogWarning, setCatalogWarning] = useState(false)
+  const [catalogAvailable, setCatalogAvailable] = useState<boolean | null>(null)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'error'>('idle')
   const [search, setSearch] = useState('')
 
@@ -79,7 +80,7 @@ export default function OrientationSimulator() {
       setOfficialTargets(realTargets)
       setCriteria(payload.criteria ?? [])
       setSavedTarget(payload.savedTarget ?? null)
-      setCatalogWarning(payload.catalogAvailable === false)
+      setCatalogAvailable(payload.catalogAvailable ?? true)
       if (payload.savedTarget) {
         const match = allTargets.find(item => item.degree === payload.savedTarget?.degree && item.university === payload.savedTarget?.university && item.source.type === payload.savedTarget?.sourceType)
         if (match) {
@@ -91,7 +92,7 @@ export default function OrientationSimulator() {
     } catch {
       setOfficialTargets([])
       setCriteria([])
-      setCatalogWarning(true)
+      setCatalogAvailable(false)
       setLoadState('error')
     }
   }, [])
@@ -113,6 +114,7 @@ export default function OrientationSimulator() {
 
   function retryLoad() {
     setLoadState('loading')
+    setCatalogAvailable(null)
     void loadOrientation()
   }
 
@@ -185,7 +187,7 @@ export default function OrientationSimulator() {
               {loadState === 'loading' ? <div className={styles.selectSkeleton} /> : <label>Carrera + universidad<span className={styles.selectWrap}><select value={targetId} onChange={event => selectTarget(event.target.value)}><option value="">Selecciona una opción</option>{officialTargets.length > 0 && <optgroup label="Datos oficiales verificados">{officialTargets.map(item => <option key={item.id} value={item.id}>{item.degree} · {item.university}</option>)}</optgroup>}<optgroup label="Simulador de demostración">{ORIENTATION_FIXTURES.map(item => <option key={item.id} value={item.id}>{item.degree} · {item.university}</option>)}</optgroup></select><ChevronDown size={17} aria-hidden="true" /></span></label>}
               <div className={styles.sourceBadge + ' ' + (target?.source.type === 'official' ? styles.officialBadge : '')}>{target?.source.type === 'official' ? 'Fuente oficial verificada' : 'Datos demo · no oficiales'}</div>
             </section>
-            {catalogWarning && <div className={styles.fallbackNotice}><Info size={15} /><span>No se pudo leer el catálogo verificado. El simulador local sigue disponible.</span><button onClick={retryLoad}>Reintentar</button></div>}
+            {catalogAvailable === false && <div className={styles.fallbackNotice}><Info size={15} /><span>No se pudo leer el catálogo verificado. El simulador local sigue disponible.</span><button onClick={retryLoad}>Reintentar</button></div>}
 
             {!target ? (
               <section className={styles.emptyState}><div><Target size={29} /></div><h2>Elige una carrera para empezar a simular.</h2><p>Verás tu estimación, la distancia al objetivo y qué cambios tienen más impacto.</p></section>
@@ -218,6 +220,14 @@ export default function OrientationSimulator() {
                 </aside>
               </div>
             )}
+            <OpportunitiesExplorer
+              estimatedScore={score}
+              officialTargets={officialTargets}
+              savedTarget={savedTarget}
+              loadState={loadState}
+              catalogAvailable={catalogAvailable}
+              onRetry={retryLoad}
+            />
           </>
         )}
       </main>

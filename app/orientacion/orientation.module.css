@@ -161,11 +161,84 @@
 .cutoffNote { margin: 9px 2px 0; color: #64748b; font-size: 9px; }.noWeightings { margin: 16px 0 0; padding: 13px; border-radius: 11px; background: #f8fafc; color: #64748b; font-size: 11px; }.saveError { margin: 9px 0 0; color: #b91c1c; text-align: center; font-size: 10px; font-weight: 750; }
 @keyframes shimmer { to { background-position: -220% 0; } }
 
+.opportunitiesPanel { width: min(1180px,100%); position: relative; overflow: hidden; margin: 24px auto 0; padding: 25px; border: 1px solid rgba(255,255,255,.95); border-radius: 22px; background: linear-gradient(145deg,rgba(255,255,255,.76),rgba(235,244,255,.62)); box-shadow: 0 26px 68px rgba(37,99,235,.14), inset 0 0 0 1px rgba(191,219,254,.45), inset 0 1px 0 white; backdrop-filter: blur(24px) saturate(1.2); }
+.opportunitiesPanel::before { content: ''; position: absolute; z-index: -1; width: 330px; height: 330px; top: -190px; right: -90px; border-radius: 50%; background: rgba(96,165,250,.2); filter: blur(18px); pointer-events: none; }
+.opportunitiesHero { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; }
+.opportunitiesHero > div:first-child { max-width: 650px; }
+.opportunitiesEyebrow { color: var(--pau-blue); font-size: 10px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
+.opportunitiesHero h2 { margin: 5px 0 7px; color: var(--pau-ink); font-size: clamp(22px,3vw,31px); letter-spacing: -.035em; }
+.opportunitiesHero p { margin: 0; color: var(--pau-muted); font-size: 12px; }
+.currentEstimate { min-width: 205px; display: flex; flex-direction: column; padding: 14px 17px; border: 1px solid rgba(147,197,253,.68); border-radius: 16px; background: rgba(255,255,255,.7); box-shadow: 0 14px 30px rgba(37,99,235,.12), inset 0 1px 0 white; backdrop-filter: blur(16px); }
+.currentEstimate > span { color: var(--pau-blue); font-size: 9px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.currentEstimate strong { margin: 3px 0 1px; color: var(--pau-blue); font-size: 28px; letter-spacing: -.04em; animation: scorePop 190ms var(--ease-out); }
+.currentEstimate strong small { font-size: 11px; }
+.currentEstimate > small { color: #64748b; font-size: 9px; }
+.opportunityFilters { display: grid; grid-template-columns: minmax(180px,.8fr) repeat(3,minmax(150px,1fr)); gap: 11px; align-items: end; margin-top: 22px; padding: 14px; border: 1px solid rgba(255,255,255,.9); border-radius: 16px; background: rgba(239,246,255,.66); box-shadow: inset 3px 3px 10px rgba(71,85,105,.08), inset -3px -3px 9px rgba(255,255,255,.9), 0 10px 25px rgba(37,99,235,.07); backdrop-filter: blur(15px); }
+.filterHeading { display: flex; flex-direction: column; gap: 3px; padding-bottom: 6px; }
+.filterHeading span { color: #334155; font-size: 11px; font-weight: 900; }
+.filterHeading small { color: #7b8aa0; font-size: 9px; }
+.opportunityFilter { display: flex; flex-direction: column; gap: 5px; color: #64748b; font-size: 9px; font-weight: 850; }
+.opportunitySelectWrap { position: relative; display: block; }
+.opportunitySelectWrap select { width: 100%; appearance: none; border: 1px solid #c3d7f3; border-radius: 11px; background: linear-gradient(145deg,#f1f6fd,#fff); padding: 9px 31px 9px 10px; color: #334155; font: inherit; font-size: 10px; font-weight: 800; cursor: pointer; box-shadow: inset 2px 2px 6px rgba(71,85,105,.11), inset -2px -2px 6px white; transition: border-color 180ms,box-shadow 180ms,transform 180ms; }
+.opportunitySelectWrap select:hover { border-color: #93c5fd; box-shadow: inset 1px 1px 4px rgba(71,85,105,.1),0 5px 12px rgba(37,99,235,.09); }
+.opportunitySelectWrap select:focus-visible { outline: 2px solid var(--pau-blue); outline-offset: 2px; }
+.opportunitySelectWrap svg { position: absolute; right: 9px; top: 50%; translate: 0 -50%; color: #64748b; pointer-events: none; }
+.categoryChips { display: flex; flex-wrap: wrap; gap: 7px; margin: 13px 0 15px; }
+.categoryChips button { display: inline-flex; align-items: center; gap: 5px; border: 1px solid #d2e0f4; border-radius: 999px; background: linear-gradient(145deg,#f2f6fc,#fff); padding: 7px 10px; color: #64748b; font-size: 9px; font-weight: 850; cursor: pointer; box-shadow: 2px 3px 8px rgba(71,85,105,.09), inset 0 1px 0 white; transition: color 180ms,border-color 180ms,box-shadow 180ms,transform 180ms; }
+.categoryChips button:hover { border-color: #93c5fd; color: var(--pau-blue); }
+.categoryChips button[aria-pressed='true'] { border-color: rgba(96,165,250,.62); background: #eaf3ff; color: var(--pau-blue); box-shadow: inset 2px 3px 7px rgba(37,99,235,.13), inset -1px -1px 4px white; transform: translateY(1px); }
+.categoryChips b { display: grid; place-items: center; min-width: 17px; height: 17px; border-radius: 999px; background: rgba(255,255,255,.8); font-size: 8px; }
+.opportunityList { display: grid; gap: 9px; }
+.opportunityCard { display: grid; grid-template-columns: minmax(260px,1.4fr) minmax(220px,.75fr) minmax(220px,.85fr); align-items: center; gap: 20px; min-height: 112px; padding: 15px 17px; border: 1px solid #dbe6f4; border-radius: 15px; background: rgba(255,255,255,.9); box-shadow: 0 7px 17px rgba(30,64,175,.045); transition: border-color 210ms,background 210ms,box-shadow 210ms,transform 180ms; }
+.opportunityCard:hover { transform: translateY(-1px); border-color: #bfdbfe; box-shadow: 0 12px 25px rgba(37,99,235,.09); }
+.opportunity_above { border-color: rgba(110,231,183,.6); background: linear-gradient(100deg,rgba(236,253,245,.9),rgba(255,255,255,.95) 40%); box-shadow: 0 9px 22px rgba(5,150,105,.08), inset 0 1px 0 white; }
+.opportunity_close { border-color: rgba(253,186,116,.62); }
+.opportunity_improve { border-color: rgba(191,219,254,.9); }
+.savedOpportunity { border-width: 2px; border-color: rgba(59,130,246,.68); border-radius: 18px; background: linear-gradient(105deg,#e9f3ff,#fff 46%); box-shadow: 0 13px 27px rgba(37,99,235,.15), inset 0 2px 0 white, inset 0 -2px 0 rgba(37,99,235,.05); }
+.opportunityIdentity { min-width: 0; display: flex; align-items: flex-start; gap: 11px; }
+.opportunityIcon { width: 37px; height: 37px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 11px; background: #edf4ff; color: var(--pau-blue); box-shadow: inset 2px 2px 6px rgba(37,99,235,.1),inset -2px -2px 5px white; }
+.opportunityIdentity > div:last-child { min-width: 0; }
+.opportunityBadges { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 5px; }
+.opportunityBadges span { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 4px 7px; font-size: 7px; font-weight: 950; letter-spacing: .055em; text-transform: uppercase; }
+.categoryLabel { background: #f1f5f9; color: #64748b; }
+.opportunity_above .categoryLabel { background: #d1fae5; color: #047857; }
+.opportunity_close .categoryLabel { background: #ffedd5; color: #c2410c; }
+.targetBadge { background: linear-gradient(145deg,#dbeafe,#fff); color: #1d4ed8; box-shadow: 0 4px 9px rgba(37,99,235,.12),inset 0 1px 0 white; }
+.opportunityIdentity h3 { overflow: hidden; margin: 0 0 2px; color: #172033; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.opportunityIdentity p { overflow: hidden; margin: 0; color: #64748b; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.opportunityIdentity small { display: inline-flex; align-items: center; gap: 3px; margin-top: 4px; color: #8492a6; font-size: 8px; }
+.referenceNumbers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.referenceNumbers > div { display: flex; flex-direction: column; gap: 3px; padding: 9px; border-radius: 10px; background: #f7f9fd; box-shadow: inset 2px 2px 6px rgba(71,85,105,.08), inset -2px -2px 5px white; }
+.referenceNumbers span { color: #7b8aa0; font-size: 8px; }
+.referenceNumbers b { color: #334155; font-size: 14px; }
+.referenceNumbers > div:last-child b { color: var(--pau-blue); transition: color 180ms; }
+.opportunityOutcome { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+.opportunityOutcome strong { color: #334155; font-size: 11px; transition: color 200ms; }
+.opportunity_above .opportunityOutcome strong { color: #047857; }
+.opportunity_close .opportunityOutcome strong { color: #c2410c; }
+.opportunityOutcome > span { color: #7b8aa0; font-size: 8px; }
+.opportunityOutcome a { display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; color: var(--pau-blue); font-size: 8px; font-weight: 850; text-decoration: none; }
+.showMoreButton { display: block; margin: 15px auto 0; border: 1px solid #bfd4f2; border-radius: 12px; background: linear-gradient(145deg,#eaf3ff,#fff); padding: 10px 15px; color: var(--pau-blue); font-size: 10px; font-weight: 900; cursor: pointer; box-shadow: 0 8px 17px rgba(37,99,235,.1),inset 0 1px 0 white; transition: transform 180ms,box-shadow 180ms; }
+.showMoreButton:active { transform: translateY(2px); box-shadow: 0 4px 9px rgba(37,99,235,.08),inset 0 2px 5px rgba(37,99,235,.08); }
+.opportunityDisclaimer { margin: 16px 0 0; padding-top: 12px; border-top: 1px solid rgba(203,213,225,.72); color: #7b8aa0; font-size: 9px; text-align: center; }
+.catalogEmpty,.filteredEmpty { min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; border: 1px dashed #bdd2ef; border-radius: 16px; background: rgba(248,251,255,.7); color: #64748b; text-align: center; }
+.catalogEmpty > svg,.filteredEmpty > svg { color: var(--pau-blue); }
+.catalogEmpty h3 { margin: 11px 0 5px; color: #25334a; font-size: 15px; }
+.catalogEmpty p { max-width: 540px; margin: 0; font-size: 10px; line-height: 1.55; }
+.catalogEmpty button { display: inline-flex; align-items: center; gap: 6px; margin-top: 13px; border: 1px solid #bfd4f2; border-radius: 9px; background: white; padding: 7px 10px; color: var(--pau-blue); font-size: 9px; font-weight: 850; cursor: pointer; }
+.filteredEmpty { min-height: 120px; gap: 8px; font-size: 10px; }
+.opportunitySkeleton { display: grid; gap: 9px; margin-top: 20px; }
+.opportunitySkeleton i { display: block; height: 105px; border-radius: 15px; background: linear-gradient(90deg,#e4edf9,#f8fbff,#e4edf9); background-size: 220% 100%; animation: shimmer 1.5s linear infinite; }
+
 @media (max-width: 1020px) {
   .simulatorGrid { grid-template-columns: 1fr; }
   .resultPanel { position: static; grid-row: 1; }
   .targetPicker { grid-template-columns: 1fr 1.4fr; }
   .sourceBadge { grid-column: 2; justify-self: start; }
+  .opportunityFilters { grid-template-columns: 1fr 1fr 1fr; }
+  .filterHeading { grid-column: 1 / -1; }
+  .opportunityCard { grid-template-columns: minmax(240px,1.2fr) minmax(200px,.8fr); }
+  .opportunityOutcome { grid-column: 1 / -1; padding-left: 48px; }
 }
 @media (max-width: 767px) {
   .appShell { display: block; }
@@ -192,4 +265,20 @@
   .formula { grid-template-columns: 1fr; }
   .formula i { transform: rotate(90deg); }
   .modal { max-height: calc(100dvh - 28px); overflow-y: auto; padding: 24px 20px; }
+  .opportunitiesPanel { margin-top: 16px; padding: 18px 14px; border-radius: 18px; }
+  .opportunitiesHero { align-items: stretch; flex-direction: column; gap: 14px; }
+  .currentEstimate { min-width: 0; }
+  .opportunityFilters { grid-template-columns: 1fr; }
+  .filterHeading { grid-column: 1; }
+  .categoryChips { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 3px; }
+  .categoryChips button { flex: 0 0 auto; }
+  .opportunityCard { grid-template-columns: 1fr; gap: 12px; padding: 14px; }
+  .opportunityOutcome { grid-column: 1; padding-left: 0; }
+  .referenceNumbers { max-width: 300px; }
+  .opportunityIdentity h3,.opportunityIdentity p { white-space: normal; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .currentEstimate strong,.opportunitySkeleton i { animation: none; }
+  .opportunityCard,.categoryChips button,.opportunitySelectWrap select { transition: none; }
 }

@@ -3,7 +3,7 @@ export type OrientationSource = { type: OrientationSourceType; label: string; ur
 export type AdmissionSubject = { id: string; name: string; weighting: 0.1 | 0.2; defaultGrade: number; enabled: boolean; source: OrientationSource }
 export type OrientationTarget = {
   id: string; degree: string; university: string; universityAcronym: string | null
-  referenceScore: number; referenceLabel: string; source: OrientationSource; subjects: AdmissionSubject[]
+  community: string | null; referenceScore: number; referenceLabel: string; source: OrientationSource; subjects: AdmissionSubject[]
 }
 export type SavedOrientationTarget = { degree: string; university: string; admissionScore: number; sourceType: OrientationSourceType; updatedAt: string | null }
 export type OfficialCriterion = {
@@ -17,7 +17,7 @@ export const FIXTURE_SOURCE: OrientationSource = { type: 'fixture', label: 'Dato
 // Datos exclusivamente visuales. Nunca se mezclan ni se etiquetan como oficiales.
 export const ORIENTATION_FIXTURES: OrientationTarget[] = [
   {
-    id: 'fixture:psicologia-demo', degree: 'Psicología', university: 'Universidad de ejemplo · Madrid', universityAcronym: null,
+    id: 'fixture:psicologia-demo', degree: 'Psicología', university: 'Universidad de ejemplo · Madrid', universityAcronym: null, community: null,
     referenceScore: 12.12, referenceLabel: 'Referencia de demostración', source: FIXTURE_SOURCE,
     subjects: [
       { id: 'matematicas', name: 'Matemáticas II', weighting: 0.2, defaultGrade: 7.5, enabled: true, source: FIXTURE_SOURCE },
@@ -26,7 +26,7 @@ export const ORIENTATION_FIXTURES: OrientationTarget[] = [
     ],
   },
   {
-    id: 'fixture:ingenieria-demo', degree: 'Ingeniería Informática', university: 'Universidad de ejemplo · Barcelona', universityAcronym: null,
+    id: 'fixture:ingenieria-demo', degree: 'Ingeniería Informática', university: 'Universidad de ejemplo · Barcelona', universityAcronym: null, community: null,
     referenceScore: 11.46, referenceLabel: 'Referencia de demostración', source: FIXTURE_SOURCE,
     subjects: [
       { id: 'matematicas', name: 'Matemáticas II', weighting: 0.2, defaultGrade: 8, enabled: true, source: FIXTURE_SOURCE },

@@ -38,9 +38,9 @@ export async function GET(request: NextRequest) {
   const [universitiesResult, degreesResult, cutoffsResult, weightingsResult, criteriaResult] = await Promise.all([
     db.from('orientation_universities').select('id,name,acronym,community,official_url').eq('active', true),
     db.from('orientation_degrees').select('id,university_id,name,campus,official_url').eq('active', true),
-    db.from('orientation_admission_cutoffs').select('id,degree_id,academic_year,cutoff_score,source_url,source_label,verified_at').eq('status', 'verified').not('verified_at', 'is', null).order('academic_year', { ascending: false }),
-    db.from('orientation_subject_weightings').select('id,degree_id,academic_year,subject,weighting,source_url,source_label,verified_at').eq('status', 'verified').not('verified_at', 'is', null),
-    db.from('orientation_official_criteria').select('id,community,academic_year,subject,criterion_type,official_text,kairo_explanation,source_url,source_document,published_at,verified_at,version').eq('status', 'verified').not('verified_at', 'is', null).limit(50),
+    db.from('orientation_admission_cutoffs').select('id,degree_id,academic_year,cutoff_score,source_url,source_label,verified_at').eq('status', 'verified').not('verified_at', 'is', null).neq('source_url', '').neq('source_label', '').order('academic_year', { ascending: false }),
+    db.from('orientation_subject_weightings').select('id,degree_id,academic_year,subject,weighting,source_url,source_label,verified_at').eq('status', 'verified').not('verified_at', 'is', null).neq('source_url', '').neq('source_label', ''),
+    db.from('orientation_official_criteria').select('id,community,academic_year,subject,criterion_type,official_text,kairo_explanation,source_url,source_document,published_at,verified_at,version').eq('status', 'verified').not('verified_at', 'is', null).neq('source_url', '').limit(50),
   ])
 
   const catalogError = universitiesResult.error || degreesResult.error || cutoffsResult.error || weightingsResult.error
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     if (seenDegrees.has(cutoff.degree_id)) return []
     const degree = degrees.get(cutoff.degree_id)
     const university = degree ? universities.get(degree.university_id) : null
-    if (!degree || !university || !cutoff.verified_at) return []
+    if (!degree || !university || !cutoff.verified_at || !degree.official_url.trim() || !university.official_url.trim()) return []
     seenDegrees.add(cutoff.degree_id)
     const subjects = (weightingsResult.data ?? [])
       .filter(row => row.degree_id === degree.id && row.academic_year === cutoff.academic_year && row.verified_at)
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       }))
     return [{
       id: `official:${degree.id}`, degree: degree.name, university: university.name,
-      universityAcronym: university.acronym, referenceScore: Number(cutoff.cutoff_score),
+      universityAcronym: university.acronym, community: university.community, referenceScore: Number(cutoff.cutoff_score),
       referenceLabel: `Nota de corte histórica · ${cutoff.academic_year}`,
       source: { type: 'official', label: cutoff.source_label, url: cutoff.source_url, academicYear: cutoff.academic_year, verifiedAt: cutoff.verified_at },
       subjects,

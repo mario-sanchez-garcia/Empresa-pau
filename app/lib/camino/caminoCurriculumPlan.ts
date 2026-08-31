@@ -264,8 +264,15 @@ export function getTopic(subject: string, blockSlug: string, topicSlug: string) 
 export function getTopicByV2SortOrder(subject: string, sortOrder?: number | null) {
   if (sortOrder == null) return null
   const subjectSlug = normalizeSubjectSlug(subject)
+  // v2SortOrder solo es una FK real a curriculum_content_v2.sort_order para
+  // topics con contentStatus === 'flashcard_v2' (ver hasLatexContent arriba).
+  // Para 'latex_notes' u otros contentStatus, v2SortOrder es metadata de
+  // orden de calendario (orderIndex de PRIVATE_BETA_CURRICULUM_TOPICS) que
+  // puede coincidir numéricamente por casualidad con el sort_order de un
+  // Curso fino distinto publicado más tarde para el mismo subject — sin este
+  // filtro, esa coincidencia numérica devuelve un topic completamente ajeno.
   return CAMINO_CURRICULUM_TOPICS.find(topic =>
-    topic.subject === subjectSlug && topic.v2SortOrder === sortOrder
+    topic.subject === subjectSlug && topic.contentStatus === 'flashcard_v2' && topic.v2SortOrder === sortOrder
   ) ?? null
 }
 

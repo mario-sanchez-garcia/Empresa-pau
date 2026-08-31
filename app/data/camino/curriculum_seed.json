@@ -8844,5 +8844,994 @@
       "lengua"
     ],
     "v2SortOrder": 60
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "algebra",
+    "blockTitle": "Álgebra",
+    "topicSlug": "matrices-definicion-y-tipos",
+    "title": "Matrices: Definición y Tipos",
+    "orderIndex": 1,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "algebra",
+      "topic": "matrices-definicion-y-tipos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 1
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "algebra",
+    "blockTitle": "Álgebra",
+    "topicSlug": "suma-resta-y-producto-por-un-escalar",
+    "title": "Suma, Resta y Producto por un Escalar",
+    "orderIndex": 2,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "algebra",
+      "topic": "suma-resta-y-producto-por-un-escalar"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 2
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "algebra",
+    "blockTitle": "Álgebra",
+    "topicSlug": "multiplicacion-de-matrices",
+    "title": "Multiplicación de Matrices",
+    "orderIndex": 3,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "algebra",
+      "topic": "multiplicacion-de-matrices"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 3
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "algebra",
+    "blockTitle": "Álgebra",
+    "topicSlug": "matriz-traspuesta",
+    "title": "La Matriz Traspuesta",
+    "orderIndex": 4,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "algebra",
+      "topic": "matriz-traspuesta"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 4
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "algebra",
+    "blockTitle": "Álgebra",
+    "topicSlug": "determinante-de-una-matriz",
+    "title": "El Determinante de una Matriz",
+    "orderIndex": 5,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "algebra",
+      "topic": "determinante-de-una-matriz"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 5
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "algebra",
+    "blockTitle": "Álgebra",
+    "topicSlug": "matriz-inversa",
+    "title": "La Matriz Inversa",
+    "orderIndex": 6,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "algebra",
+      "topic": "matriz-inversa"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 6
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "algebra",
+    "blockTitle": "Álgebra",
+    "topicSlug": "rango-de-una-matriz-metodo-de-gauss",
+    "title": "Rango de una Matriz por el Método de Gauss",
+    "orderIndex": 7,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "algebra",
+      "topic": "rango-de-una-matriz-metodo-de-gauss"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 7
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "algebra",
+    "blockTitle": "Álgebra",
+    "topicSlug": "expresion-matricial-de-un-sistema",
+    "title": "Expresión Matricial de un Sistema",
+    "orderIndex": 8,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "algebra",
+      "topic": "expresion-matricial-de-un-sistema"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 8
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "algebra",
+    "blockTitle": "Álgebra",
+    "topicSlug": "resolucion-de-sistemas-por-gauss",
+    "title": "Resolución de Sistemas por el Método de Gauss",
+    "orderIndex": 9,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "algebra",
+      "topic": "resolucion-de-sistemas-por-gauss"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 9
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "algebra",
+    "blockTitle": "Álgebra",
+    "topicSlug": "discusion-de-sistemas-rouche-frobenius",
+    "title": "Discusión de Sistemas: Teorema de Rouché-Frobenius",
+    "orderIndex": 10,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "algebra",
+      "topic": "discusion-de-sistemas-rouche-frobenius"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 10
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "algebra",
+    "blockTitle": "Álgebra",
+    "topicSlug": "programacion-lineal-region-factible-y-optimizacion",
+    "title": "Programación Lineal: Región Factible y Optimización",
+    "orderIndex": 11,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "algebra",
+      "topic": "programacion-lineal-region-factible-y-optimizacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 11
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "dominio-de-una-funcion",
+    "title": "Dominio de una Función",
+    "orderIndex": 12,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "dominio-de-una-funcion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 12
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "limites-de-una-funcion-e-indeterminaciones",
+    "title": "Límites de una Función e Indeterminaciones",
+    "orderIndex": 13,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "limites-de-una-funcion-e-indeterminaciones"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 13
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "asintotas-de-una-funcion",
+    "title": "Asíntotas de una Función",
+    "orderIndex": 14,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "asintotas-de-una-funcion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 14
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "continuidad-y-tipos-de-discontinuidad",
+    "title": "Continuidad y Tipos de Discontinuidad",
+    "orderIndex": 15,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "continuidad-y-tipos-de-discontinuidad"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 15
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "concepto-de-derivada-y-recta-tangente",
+    "title": "Concepto de Derivada y Recta Tangente",
+    "orderIndex": 16,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "concepto-de-derivada-y-recta-tangente"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 16
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "calculo-de-derivadas-y-reglas-de-derivacion",
+    "title": "Cálculo de Derivadas y Reglas de Derivación",
+    "orderIndex": 17,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "calculo-de-derivadas-y-reglas-de-derivacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 17
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "crecimiento-decrecimiento-y-extremos-relativos",
+    "title": "Crecimiento, Decrecimiento y Extremos Relativos",
+    "orderIndex": 18,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "crecimiento-decrecimiento-y-extremos-relativos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 18
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "concavidad-convexidad-y-puntos-de-inflexion",
+    "title": "Concavidad, Convexidad y Puntos de Inflexión",
+    "orderIndex": 19,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "concavidad-convexidad-y-puntos-de-inflexion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 19
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "representacion-grafica-de-funciones",
+    "title": "Representación Gráfica de Funciones",
+    "orderIndex": 20,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "representacion-grafica-de-funciones"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 20
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "funciones-de-coste-ingreso-y-beneficio",
+    "title": "Funciones de Coste, Ingreso y Beneficio",
+    "orderIndex": 21,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "funciones-de-coste-ingreso-y-beneficio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 21
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "optimizacion-economica-maximo-beneficio-y-minimo-coste",
+    "title": "Optimización Económica: Máximo Beneficio y Mínimo Coste",
+    "orderIndex": 22,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "optimizacion-economica-maximo-beneficio-y-minimo-coste"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 22
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "primitiva-de-una-funcion-y-la-integral-indefinida",
+    "title": "Primitiva de una Función y la Integral Indefinida",
+    "orderIndex": 23,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "primitiva-de-una-funcion-y-la-integral-indefinida"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 23
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "analisis",
+    "blockTitle": "Análisis",
+    "topicSlug": "la-integral-definida-regla-de-barrow-y-areas",
+    "title": "La Integral Definida: Regla de Barrow y Cálculo de Áreas",
+    "orderIndex": 24,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "analisis",
+      "topic": "la-integral-definida-regla-de-barrow-y-areas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 24
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "experimentos-aleatorios-y-espacio-muestral",
+    "title": "Experimentos Aleatorios y Espacio Muestral",
+    "orderIndex": 25,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "experimentos-aleatorios-y-espacio-muestral"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 25
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "algebra-de-sucesos",
+    "title": "Álgebra de Sucesos",
+    "orderIndex": 26,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "algebra-de-sucesos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 26
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "asignacion-de-probabilidades-regla-de-laplace",
+    "title": "Asignación de Probabilidades: Regla de Laplace",
+    "orderIndex": 27,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "asignacion-de-probabilidades-regla-de-laplace"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 27
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "probabilidad-condicionada-e-independencia",
+    "title": "Probabilidad Condicionada e Independencia",
+    "orderIndex": 28,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "probabilidad-condicionada-e-independencia"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 28
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "diagramas-de-arbol-y-tablas-de-contingencia",
+    "title": "Diagramas de Árbol y Tablas de Contingencia",
+    "orderIndex": 29,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "diagramas-de-arbol-y-tablas-de-contingencia"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 29
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "teorema-de-la-probabilidad-total",
+    "title": "Teorema de la Probabilidad Total",
+    "orderIndex": 30,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "teorema-de-la-probabilidad-total"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 30
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "teorema-de-bayes",
+    "title": "Teorema de Bayes",
+    "orderIndex": 31,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "teorema-de-bayes"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 31
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "variable-aleatoria-y-sus-parametros",
+    "title": "Variable Aleatoria y sus Parámetros: Esperanza y Varianza",
+    "orderIndex": 32,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "variable-aleatoria-y-sus-parametros"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 32
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "distribucion-binomial",
+    "title": "Distribución Binomial",
+    "orderIndex": 33,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "distribucion-binomial"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 33
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "distribucion-normal-y-tipificacion",
+    "title": "Distribución Normal y Tipificación",
+    "orderIndex": 34,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "distribucion-normal-y-tipificacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 34
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "probabilidad",
+    "blockTitle": "Probabilidad",
+    "topicSlug": "aproximacion-de-la-binomial-a-la-normal",
+    "title": "Aproximación de la Binomial a la Normal",
+    "orderIndex": 35,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "probabilidad",
+      "topic": "aproximacion-de-la-binomial-a-la-normal"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 35
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "inferencia",
+    "blockTitle": "Inferencia",
+    "topicSlug": "poblacion-muestra-y-tecnicas-de-muestreo",
+    "title": "Población, Muestra y Técnicas de Muestreo",
+    "orderIndex": 36,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "inferencia",
+      "topic": "poblacion-muestra-y-tecnicas-de-muestreo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 36
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "inferencia",
+    "blockTitle": "Inferencia",
+    "topicSlug": "distribucion-de-las-medias-muestrales",
+    "title": "Distribución de las Medias Muestrales",
+    "orderIndex": 37,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "inferencia",
+      "topic": "distribucion-de-las-medias-muestrales"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 37
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "inferencia",
+    "blockTitle": "Inferencia",
+    "topicSlug": "distribucion-de-las-proporciones-muestrales",
+    "title": "Distribución de las Proporciones Muestrales",
+    "orderIndex": 38,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "inferencia",
+      "topic": "distribucion-de-las-proporciones-muestrales"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 38
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "inferencia",
+    "blockTitle": "Inferencia",
+    "topicSlug": "intervalo-de-confianza-para-la-media",
+    "title": "Intervalo de Confianza para la Media",
+    "orderIndex": 39,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "inferencia",
+      "topic": "intervalo-de-confianza-para-la-media"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 39
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "inferencia",
+    "blockTitle": "Inferencia",
+    "topicSlug": "intervalo-de-confianza-para-la-proporcion",
+    "title": "Intervalo de Confianza para la Proporción",
+    "orderIndex": 40,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "inferencia",
+      "topic": "intervalo-de-confianza-para-la-proporcion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 40
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "inferencia",
+    "blockTitle": "Inferencia",
+    "topicSlug": "determinacion-del-tamano-muestral",
+    "title": "Determinación del Tamaño Muestral",
+    "orderIndex": 41,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "inferencia",
+      "topic": "determinacion-del-tamano-muestral"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 41
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "inferencia",
+    "blockTitle": "Inferencia",
+    "topicSlug": "contraste-de-hipotesis-para-la-media",
+    "title": "Contraste de Hipótesis para la Media",
+    "orderIndex": 42,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "inferencia",
+      "topic": "contraste-de-hipotesis-para-la-media"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 42
+  },
+  {
+    "subject": "matematicas_ccss",
+    "blockSlug": "inferencia",
+    "blockTitle": "Inferencia",
+    "topicSlug": "contraste-de-hipotesis-para-la-proporcion",
+    "title": "Contraste de Hipótesis para la Proporción",
+    "orderIndex": 43,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "matematicas_ccss",
+      "block": "inferencia",
+      "topic": "contraste-de-hipotesis-para-la-proporcion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "matematicas_ccss"
+    ],
+    "v2SortOrder": 43
   }
 ]

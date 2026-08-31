@@ -176,10 +176,7 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
 // ─── Subject config ───────────────────────────────────────────────────────────
 const SUBJECTS: { key: SubjectKey; label: string; blockOrder?: string[] }[] = [
   { key: 'matematicas_ii', label: 'Matemáticas II', blockOrder: ['Álgebra', 'Geometría', 'Análisis', 'Probabilidad'] },
-  // Borrador sin publicar (review_status='draft') — visible solo aquí, en
-  // el admin, nunca en el flujo real de alumnos (ver filtro en
-  // generateCaminoPlan.ts / add-subject/route.ts).
-  { key: 'matematicas_ccss', label: 'Matemáticas CCSS (borrador)', blockOrder: ['Álgebra', 'Análisis', 'Probabilidad', 'Inferencia'] },
+  { key: 'matematicas_ccss', label: 'Matemáticas CCSS', blockOrder: ['Álgebra', 'Análisis', 'Probabilidad', 'Inferencia'] },
   // El orden replica el del examen oficial de Madrid: Comunicación (4 pts),
   // Reflexión sobre la lengua (3 pts) y Educación literaria (3 pts).
   { key: 'lengua', label: 'Lengua Castellana', blockOrder: ['Comunicación', 'Reflexión sobre la lengua', 'Educación literaria'] },

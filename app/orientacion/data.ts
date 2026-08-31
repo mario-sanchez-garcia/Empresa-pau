@@ -1,63 +1,37 @@
-export type AdmissionSubject = {
-  id: string
-  name: string
-  weighting: 0.1 | 0.2
-  defaultGrade: number
-  enabled: boolean
-}
-
+export type OrientationSourceType = 'fixture' | 'official'
+export type OrientationSource = { type: OrientationSourceType; label: string; url: string | null; academicYear: string | null; verifiedAt: string | null }
+export type AdmissionSubject = { id: string; name: string; weighting: 0.1 | 0.2; defaultGrade: number; enabled: boolean; source: OrientationSource }
 export type OrientationTarget = {
-  id: string
-  degree: string
-  university: string
-  referenceScore: number
-  referenceLabel: string
-  source: null
-  subjects: AdmissionSubject[]
+  id: string; degree: string; university: string; universityAcronym: string | null
+  referenceScore: number; referenceLabel: string; source: OrientationSource; subjects: AdmissionSubject[]
+}
+export type SavedOrientationTarget = { degree: string; university: string; admissionScore: number; sourceType: OrientationSourceType; updatedAt: string | null }
+export type OfficialCriterion = {
+  id: string; community: string; academicYear: string; subject: string; criterionType: string
+  officialText: string; kairoExplanation: string | null; sourceUrl: string; sourceDocument: string | null
+  publishedAt: string | null; verifiedAt: string; version: string
 }
 
-// Fixtures de demostración para la experiencia V1. No son notas de corte ni
-// ponderaciones oficiales y la interfaz nunca las presenta como tales.
+export const FIXTURE_SOURCE: OrientationSource = { type: 'fixture', label: 'Datos de demostración', url: null, academicYear: null, verifiedAt: null }
+
+// Datos exclusivamente visuales. Nunca se mezclan ni se etiquetan como oficiales.
 export const ORIENTATION_FIXTURES: OrientationTarget[] = [
   {
-    id: 'psicologia-demo',
-    degree: 'Psicología',
-    university: 'Universidad de ejemplo · Madrid',
-    referenceScore: 12.12,
-    referenceLabel: 'Referencia de demostración',
-    source: null,
+    id: 'fixture:psicologia-demo', degree: 'Psicología', university: 'Universidad de ejemplo · Madrid', universityAcronym: null,
+    referenceScore: 12.12, referenceLabel: 'Referencia de demostración', source: FIXTURE_SOURCE,
     subjects: [
-      { id: 'matematicas', name: 'Matemáticas II', weighting: 0.2, defaultGrade: 7.5, enabled: true },
-      { id: 'biologia', name: 'Biología', weighting: 0.2, defaultGrade: 6.5, enabled: true },
-      { id: 'quimica', name: 'Química', weighting: 0.2, defaultGrade: 7, enabled: false },
+      { id: 'matematicas', name: 'Matemáticas II', weighting: 0.2, defaultGrade: 7.5, enabled: true, source: FIXTURE_SOURCE },
+      { id: 'biologia', name: 'Biología', weighting: 0.2, defaultGrade: 6.5, enabled: true, source: FIXTURE_SOURCE },
+      { id: 'quimica', name: 'Química', weighting: 0.2, defaultGrade: 7, enabled: false, source: FIXTURE_SOURCE },
     ],
   },
   {
-    id: 'ingenieria-demo',
-    degree: 'Ingeniería Informática',
-    university: 'Universidad de ejemplo · Barcelona',
-    referenceScore: 11.46,
-    referenceLabel: 'Referencia de demostración',
-    source: null,
+    id: 'fixture:ingenieria-demo', degree: 'Ingeniería Informática', university: 'Universidad de ejemplo · Barcelona', universityAcronym: null,
+    referenceScore: 11.46, referenceLabel: 'Referencia de demostración', source: FIXTURE_SOURCE,
     subjects: [
-      { id: 'matematicas', name: 'Matemáticas II', weighting: 0.2, defaultGrade: 8, enabled: true },
-      { id: 'fisica', name: 'Física', weighting: 0.2, defaultGrade: 7, enabled: true },
-      { id: 'dibujo', name: 'Dibujo Técnico II', weighting: 0.1, defaultGrade: 6.5, enabled: false },
+      { id: 'matematicas', name: 'Matemáticas II', weighting: 0.2, defaultGrade: 8, enabled: true, source: FIXTURE_SOURCE },
+      { id: 'fisica', name: 'Física', weighting: 0.2, defaultGrade: 7, enabled: true, source: FIXTURE_SOURCE },
+      { id: 'dibujo', name: 'Dibujo Técnico II', weighting: 0.1, defaultGrade: 6.5, enabled: false, source: FIXTURE_SOURCE },
     ],
   },
 ]
-
-export function calculateAdmissionScore(
-  bachillerato: number,
-  accessPhase: number,
-  subjects: AdmissionSubject[],
-) {
-  const weighted = subjects
-    .filter(subject => subject.enabled)
-    .map(subject => subject.defaultGrade * subject.weighting)
-    .sort((a, b) => b - a)
-    .slice(0, 2)
-    .reduce((total, contribution) => total + contribution, 0)
-
-  return Math.min(14, bachillerato * 0.6 + accessPhase * 0.4 + weighted)
-}

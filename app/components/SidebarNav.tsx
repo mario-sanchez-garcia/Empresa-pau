@@ -10,12 +10,12 @@ import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 
 const NAV = [
   { label: 'Camino PAU', href: '/camino',                  icon: LayoutGrid },
-  { label: 'Orientación', href: '/orientacion',             icon: Compass },
   { label: 'Exámenes',   href: '/examenes',                icon: ClipboardList },
   { label: 'Simulacros', href: '/simulacros',              icon: GraduationCap },
   { label: 'Tutor IA',   href: '/examenes?view=chat',      icon: MessageCircle },
   { label: 'Historial',  href: '/examenes?view=historial', icon: Clock },
   { label: 'La Zona',    href: '/zona',                    icon: Zap },
+  { label: 'Orientación', href: '/orientacion',             icon: Compass },
 ]
 
 // Same labels the Settings page uses for preferences.educationLevel
@@ -41,6 +41,7 @@ const MOBILE_NAV = [
   { label: 'Simulacros', href: '/simulacros',              icon: GraduationCap },
   { label: 'Historial',  href: '/examenes?view=historial', icon: Clock },
   { label: 'Zona',       href: '/zona',                    icon: Zap },
+  { label: 'Objetivo',   href: '/orientacion',             icon: Compass },
   { label: 'Perfil',     href: '/settings',                icon: UserRound },
 ]
 
@@ -401,9 +402,9 @@ export default function SidebarNav() {
                 minWidth: 0,
               }}
             >
-              <Icon size={20} strokeWidth={active ? 2.2 : 1.8} />
+              <Icon size={MOBILE_NAV.length > 6 ? 18 : 20} strokeWidth={active ? 2.2 : 1.8} />
               <span style={{
-                fontSize: 9, fontWeight: active ? 700 : 500,
+                fontSize: MOBILE_NAV.length > 6 ? 8 : 9, fontWeight: active ? 700 : 500,
                 letterSpacing: '.04em', textTransform: 'uppercase',
                 color: active ? '#2563eb' : '#64748b',
                 lineHeight: 1,

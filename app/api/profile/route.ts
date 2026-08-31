@@ -69,11 +69,24 @@ export async function GET(request: NextRequest) {
   if (error || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const db = createServiceClient()
-  const { data, error: fetchError } = await db
+  let { data, error: fetchError } = await db
     .from('perfiles')
-    .select('email_notifications, student_exams, username, custom_instructions, subject_levels, last_weekly_checkin_at, grade_threshold_mode, grade_threshold, subject_grade_thresholds')
+    .select('email_notifications, student_exams, username, custom_instructions, subject_levels, last_weekly_checkin_at, grade_threshold_mode, grade_threshold, subject_grade_thresholds, target_degree, target_university, target_admission_score, target_orientation_source_type, target_orientation_updated_at')
     .eq('id', user.id)
     .maybeSingle()
+
+  // Despliegue tolerante: si código y migración no llegan a producción en el
+  // mismo instante, el perfil existente sigue funcionando y Orientación usa
+  // su fallback local hasta que schema-drift confirme las nuevas columnas.
+  if (fetchError && /target_(degree|university|admission_score|orientation)/.test(fetchError.message)) {
+    const legacy = await db
+      .from('perfiles')
+      .select('email_notifications, student_exams, username, custom_instructions, subject_levels, last_weekly_checkin_at, grade_threshold_mode, grade_threshold, subject_grade_thresholds')
+      .eq('id', user.id)
+      .maybeSingle()
+    data = legacy.data as typeof data
+    fetchError = legacy.error
+  }
 
   if (fetchError) return NextResponse.json({ error: fetchError.message }, { status: 500 })
 
@@ -87,6 +100,11 @@ export async function GET(request: NextRequest) {
     grade_threshold_mode: data?.grade_threshold_mode ?? 'general',
     grade_threshold: data?.grade_threshold ?? null,
     subject_grade_thresholds: data?.subject_grade_thresholds ?? {},
+    target_degree: data?.target_degree ?? null,
+    target_university: data?.target_university ?? null,
+    target_admission_score: data?.target_admission_score ?? null,
+    target_orientation_source_type: data?.target_orientation_source_type ?? null,
+    target_orientation_updated_at: data?.target_orientation_updated_at ?? null,
   })
 }
 

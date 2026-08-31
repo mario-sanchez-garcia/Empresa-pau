@@ -37,6 +37,11 @@ export const EXPECTED_TABLES: Array<{ name: string; rls: boolean; porque: string
   { name: 'flashcard_deck_attempts',  rls: true, porque: 'Historial de intentos por mazo — estadísticas y ranking' },
   { name: 'chat_threads',             rls: true, porque: 'Hilo fijo por asignatura del Chat con Kairo' },
   { name: 'chat_messages',            rls: true, porque: 'Historial persistente de mensajes del Chat con Kairo' },
+  { name: 'orientation_universities', rls: true, porque: 'Catálogo de universidades con fuente oficial' },
+  { name: 'orientation_degrees',      rls: true, porque: 'Grados vinculados a universidades verificadas' },
+  { name: 'orientation_admission_cutoffs', rls: true, porque: 'Notas de corte históricas trazables' },
+  { name: 'orientation_subject_weightings', rls: true, porque: 'Ponderaciones por grado y curso académico' },
+  { name: 'orientation_official_criteria', rls: true, porque: 'Criterios oficiales separados de la explicación Kairo' },
 ]
 
 /** Columnas concretas que el código nombra de forma explícita. */
@@ -57,6 +62,16 @@ export const EXPECTED_COLUMNS: ExpectedColumn[] = [
     porque: 'Sin ella, Ajustes no puede guardar instrucciones personalizadas ni el generador de parciales leerlas' },
   { table: 'perfiles', column: 'student_exams',
     porque: 'GET /api/profile la selecciona junto a username; si falta, TODO el endpoint devuelve 500 y el username desaparece del perfil aunque esté guardado' },
+  { table: 'perfiles', column: 'target_degree',
+    porque: 'Objetivo de grado que Orientación guarda y Camino podrá consultar' },
+  { table: 'perfiles', column: 'target_university',
+    porque: 'Universidad del objetivo guardado' },
+  { table: 'perfiles', column: 'target_admission_score',
+    porque: 'Nota de referencia del objetivo, sin implicar garantía de admisión' },
+  { table: 'perfiles', column: 'target_orientation_source_type',
+    porque: 'Distingue objetivos basados en fixtures demo de objetivos con fuente oficial verificada' },
+  { table: 'perfiles', column: 'target_orientation_updated_at',
+    porque: 'Permite saber cuándo se eligió o actualizó el objetivo que Camino consumirá' },
   { table: 'user_learning_queue', column: 'retry_not_before',
     porque: '"No lo he dado" a mitad de bloque reintenta la misma tarjeta tras unos días en vez de saltarla; sin esta columna, postpone-mission falla al escribirla y ensureCaminoCalendar no puede respetar la espera' },
 ]

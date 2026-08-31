@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { CheckCircle2, ClipboardList, Clock, CreditCard, GraduationCap, HelpCircle, LayoutDashboard, LayoutGrid, LogOut, MessageCircle, MoreVertical, Settings, ShieldCheck, Sparkles, UserRound, Zap } from 'lucide-react'
+import { CheckCircle2, ClipboardList, Clock, Compass, CreditCard, GraduationCap, HelpCircle, LayoutDashboard, LayoutGrid, LogOut, MessageCircle, MoreVertical, Settings, ShieldCheck, Sparkles, UserRound, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { loadProfilePreferences } from '@/app/lib/profilePreferences'
 import { useBillingStatus } from '@/app/hooks/useBillingStatus'
@@ -10,6 +10,7 @@ import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 
 const NAV = [
   { label: 'Camino PAU', href: '/camino',                  icon: LayoutGrid },
+  { label: 'Orientación', href: '/orientacion',             icon: Compass },
   { label: 'Exámenes',   href: '/examenes',                icon: ClipboardList },
   { label: 'Simulacros', href: '/simulacros',              icon: GraduationCap },
   { label: 'Tutor IA',   href: '/examenes?view=chat',      icon: MessageCircle },
@@ -50,6 +51,7 @@ const MOBILE_NAV = [
 function isActive(href: string, pathname: string, currentView: string | null): boolean {
   const [hrefPath, hrefQuery] = href.split('?')
   if (hrefPath === '/camino')     return pathname.startsWith('/camino')
+  if (hrefPath === '/orientacion') return pathname.startsWith('/orientacion')
   if (hrefPath === '/zona')       return pathname.startsWith('/zona')
   if (hrefPath === '/simulacros') return pathname.startsWith('/simulacros')
   if (hrefPath === '/settings')   return pathname === '/settings'

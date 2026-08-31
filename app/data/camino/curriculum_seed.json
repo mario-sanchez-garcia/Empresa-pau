@@ -1582,10 +1582,10 @@
   },
   {
     "subject": "historia_filosofia",
-    "blockSlug": "filosofia-moderna",
-    "blockTitle": "Filosofía moderna",
-    "topicSlug": "descartes-hume-kant",
-    "title": "Descartes, Hume y Kant",
+    "blockSlug": "autores",
+    "blockTitle": "Autores",
+    "topicSlug": "descartes",
+    "title": "Descartes",
     "orderIndex": 1,
     "contentStatus": "itinerary_only",
     "explanation": "",
@@ -1594,8 +1594,382 @@
     "rawLatex": "",
     "evauPracticeQuery": {
       "subject": "historia_filosofia",
-      "block": "moderna",
-      "topic": "descartes-hume-kant"
+      "block": "autores",
+      "topic": "descartes"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "autores",
+    "blockTitle": "Autores",
+    "topicSlug": "tomas-de-aquino",
+    "title": "Tomás de Aquino",
+    "orderIndex": 2,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "autores",
+      "topic": "tomas-de-aquino"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "autores",
+    "blockTitle": "Autores",
+    "topicSlug": "platon",
+    "title": "Platón",
+    "orderIndex": 3,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "autores",
+      "topic": "platon"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "autores",
+    "blockTitle": "Autores",
+    "topicSlug": "kant",
+    "title": "Kant",
+    "orderIndex": 4,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "autores",
+      "topic": "kant"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "autores",
+    "blockTitle": "Autores",
+    "topicSlug": "rousseau",
+    "title": "Rousseau",
+    "orderIndex": 5,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "autores",
+      "topic": "rousseau"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "autores",
+    "blockTitle": "Autores",
+    "topicSlug": "hume",
+    "title": "Hume",
+    "orderIndex": 6,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "autores",
+      "topic": "hume"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "autores",
+    "blockTitle": "Autores",
+    "topicSlug": "habermas",
+    "title": "Habermas",
+    "orderIndex": 7,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "autores",
+      "topic": "habermas"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "autores",
+    "blockTitle": "Autores",
+    "topicSlug": "ortega-y-gasset",
+    "title": "Ortega y Gasset",
+    "orderIndex": 8,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "autores",
+      "topic": "ortega-y-gasset"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "autores",
+    "blockTitle": "Autores",
+    "topicSlug": "marx",
+    "title": "Marx",
+    "orderIndex": 9,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "autores",
+      "topic": "marx"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "autores",
+    "blockTitle": "Autores",
+    "topicSlug": "nietzsche",
+    "title": "Nietzsche",
+    "orderIndex": 10,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "autores",
+      "topic": "nietzsche"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "autores",
+    "blockTitle": "Autores",
+    "topicSlug": "aristoteles",
+    "title": "Aristóteles",
+    "orderIndex": 11,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "autores",
+      "topic": "aristoteles"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "autores",
+    "blockTitle": "Autores",
+    "topicSlug": "agustin-de-hipona",
+    "title": "Agustín de Hipona",
+    "orderIndex": 12,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "autores",
+      "topic": "agustin-de-hipona"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "autores",
+    "blockTitle": "Autores",
+    "topicSlug": "hannah-arendt",
+    "title": "Hannah Arendt",
+    "orderIndex": 13,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "autores",
+      "topic": "hannah-arendt"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "problemas-transversales",
+    "blockTitle": "Problemas Transversales",
+    "topicSlug": "etica-y-moral",
+    "title": "Ética y/o Moral",
+    "orderIndex": 14,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "problemas-transversales",
+      "topic": "etica-y-moral"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "problemas-transversales",
+    "blockTitle": "Problemas Transversales",
+    "topicSlug": "sociedad-y-politica",
+    "title": "Sociedad y/o Política",
+    "orderIndex": 15,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "problemas-transversales",
+      "topic": "sociedad-y-politica"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "problemas-transversales",
+    "blockTitle": "Problemas Transversales",
+    "topicSlug": "ser-humano",
+    "title": "Ser Humano",
+    "orderIndex": 16,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "problemas-transversales",
+      "topic": "ser-humano"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "problemas-transversales",
+    "blockTitle": "Problemas Transversales",
+    "topicSlug": "dios",
+    "title": "Dios",
+    "orderIndex": 17,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "problemas-transversales",
+      "topic": "dios"
+    },
+    "source": "contenidos_2_bach",
+    "compatibleSubjects": [
+      "historia_filosofia"
+    ]
+  },
+  {
+    "subject": "historia_filosofia",
+    "blockSlug": "problemas-transversales",
+    "blockTitle": "Problemas Transversales",
+    "topicSlug": "conocimiento-y-realidad",
+    "title": "Conocimiento y/o Realidad",
+    "orderIndex": 18,
+    "contentStatus": "itinerary_only",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "historia_filosofia",
+      "block": "problemas-transversales",
+      "topic": "conocimiento-y-realidad"
     },
     "source": "contenidos_2_bach",
     "compatibleSubjects": [

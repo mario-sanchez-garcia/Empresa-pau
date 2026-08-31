@@ -9833,5 +9833,120 @@
       "matematicas_ccss"
     ],
     "v2SortOrder": 43
+  },
+  {
+    "subject": "ingles",
+    "blockSlug": "destrezas-pau",
+    "blockTitle": "Destrezas PAU",
+    "topicSlug": "comprension-verdadero-falso-con-evidencia-textual",
+    "title": "Comprensión Lectora: Verdadero/Falso con Evidencia Textual",
+    "orderIndex": 2,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "destrezas-pau",
+      "topic": "comprension-verdadero-falso-con-evidencia-textual"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "ingles"
+    ],
+    "v2SortOrder": 2
+  },
+  {
+    "subject": "ingles",
+    "blockSlug": "destrezas-pau",
+    "blockTitle": "Destrezas PAU",
+    "topicSlug": "comprension-abierta-con-propias-palabras",
+    "title": "Comprensión Lectora: Preguntas Abiertas con Propias Palabras",
+    "orderIndex": 3,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "destrezas-pau",
+      "topic": "comprension-abierta-con-propias-palabras"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "ingles"
+    ],
+    "v2SortOrder": 3
+  },
+  {
+    "subject": "ingles",
+    "blockSlug": "destrezas-pau",
+    "blockTitle": "Destrezas PAU",
+    "topicSlug": "vocabulario-en-contexto",
+    "title": "Vocabulario en Contexto",
+    "orderIndex": 4,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "destrezas-pau",
+      "topic": "vocabulario-en-contexto"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "ingles"
+    ],
+    "v2SortOrder": 4
+  },
+  {
+    "subject": "ingles",
+    "blockSlug": "destrezas-pau",
+    "blockTitle": "Destrezas PAU",
+    "topicSlug": "gramatica-transformacion-y-uso-de-estructuras",
+    "title": "Gramática: Transformación y Uso de Estructuras",
+    "orderIndex": 5,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "destrezas-pau",
+      "topic": "gramatica-transformacion-y-uso-de-estructuras"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "ingles"
+    ],
+    "v2SortOrder": 5
+  },
+  {
+    "subject": "ingles",
+    "blockSlug": "destrezas-pau",
+    "blockTitle": "Destrezas PAU",
+    "topicSlug": "redaccion-ensayo-de-opinion",
+    "title": "Redacción: Ensayo de Opinión (150-200 palabras)",
+    "orderIndex": 6,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "destrezas-pau",
+      "topic": "redaccion-ensayo-de-opinion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "ingles"
+    ],
+    "v2SortOrder": 6
   }
 ]

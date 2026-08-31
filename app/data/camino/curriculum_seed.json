@@ -9948,5 +9948,143 @@
       "ingles"
     ],
     "v2SortOrder": 6
+  },
+  {
+    "subject": "ingles",
+    "blockSlug": "destrezas-pau",
+    "blockTitle": "Destrezas PAU",
+    "topicSlug": "estilo-indirecto-reported-speech",
+    "title": "Estilo Indirecto (Reported Speech)",
+    "orderIndex": 7,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "destrezas-pau",
+      "topic": "estilo-indirecto-reported-speech"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "ingles"
+    ],
+    "v2SortOrder": 7
+  },
+  {
+    "subject": "ingles",
+    "blockSlug": "destrezas-pau",
+    "blockTitle": "Destrezas PAU",
+    "topicSlug": "oraciones-condicionales",
+    "title": "Oraciones Condicionales",
+    "orderIndex": 8,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "destrezas-pau",
+      "topic": "oraciones-condicionales"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "ingles"
+    ],
+    "v2SortOrder": 8
+  },
+  {
+    "subject": "ingles",
+    "blockSlug": "destrezas-pau",
+    "blockTitle": "Destrezas PAU",
+    "topicSlug": "voz-pasiva",
+    "title": "Voz Pasiva",
+    "orderIndex": 9,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "destrezas-pau",
+      "topic": "voz-pasiva"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "ingles"
+    ],
+    "v2SortOrder": 9
+  },
+  {
+    "subject": "ingles",
+    "blockSlug": "destrezas-pau",
+    "blockTitle": "Destrezas PAU",
+    "topicSlug": "comparativos-y-superlativos",
+    "title": "Comparativos y Superlativos",
+    "orderIndex": 10,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "destrezas-pau",
+      "topic": "comparativos-y-superlativos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "ingles"
+    ],
+    "v2SortOrder": 10
+  },
+  {
+    "subject": "ingles",
+    "blockSlug": "destrezas-pau",
+    "blockTitle": "Destrezas PAU",
+    "topicSlug": "redaccion-narrativa-descriptiva-personal",
+    "title": "Redacción: Narrativa y Descripción de una Experiencia Personal",
+    "orderIndex": 11,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "destrezas-pau",
+      "topic": "redaccion-narrativa-descriptiva-personal"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "ingles"
+    ],
+    "v2SortOrder": 11
+  },
+  {
+    "subject": "ingles",
+    "blockSlug": "destrezas-pau",
+    "blockTitle": "Destrezas PAU",
+    "topicSlug": "redaccion-carta-o-email-informal",
+    "title": "Redacción: Carta o Email Informal",
+    "orderIndex": 12,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "destrezas-pau",
+      "topic": "redaccion-carta-o-email-informal"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "ingles"
+    ],
+    "v2SortOrder": 12
   }
 ]

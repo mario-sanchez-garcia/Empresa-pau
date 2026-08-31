@@ -14,6 +14,7 @@ export interface PreguntaIngles {
   criterios: string
   texto_fuente?: string
   requiereRevision?: boolean
+  topicSlugs?: string[]
 }
 
 export interface ExamenIngles {
@@ -734,7 +735,9 @@ function makePreguntas(
   q3Items: string,
   q4Items: string,
   q5Prompt: string,
-  tema: string
+  tema: string,
+  q4Topics: string[],
+  q5Topics: string[]
 ): PreguntaIngles[] {
   return [
     {
@@ -747,6 +750,7 @@ function makePreguntas(
       enunciado: `Are the following statements TRUE or FALSE? Copy the evidence from the text. No marks are given for only TRUE or FALSE.\n${q1Items}`,
       criterios: crit1,
       texto_fuente: texto,
+      topicSlugs: ["comprension-verdadero-falso-con-evidencia-textual"],
     },
     {
       id: `${prefix}-2`,
@@ -758,6 +762,7 @@ function makePreguntas(
       enunciado: `In your own words and based on the ideas in the text, answer the following questions. Do not copy from the text.\n${q2Items}`,
       criterios: crit2,
       texto_fuente: texto,
+      topicSlugs: ["comprension-abierta-con-propias-palabras"],
     },
     {
       id: `${prefix}-3`,
@@ -769,6 +774,7 @@ function makePreguntas(
       enunciado: `Find the words in the text that mean:\n${q3Items}`,
       criterios: crit3,
       texto_fuente: texto,
+      topicSlugs: ["vocabulario-en-contexto"],
     },
     {
       id: `${prefix}-4`,
@@ -780,6 +786,7 @@ function makePreguntas(
       enunciado: `Complete the following sentences. Use the appropriate form of the word in brackets when given.\n${q4Items}`,
       criterios: crit4_old,
       texto_fuente: texto,
+      topicSlugs: q4Topics,
     },
     {
       id: `${prefix}-5`,
@@ -790,6 +797,7 @@ function makePreguntas(
       puntuacion: 3,
       enunciado: `Write about 150 to 200 words on the following topic.\n${q5Prompt}`,
       criterios: crit5_old,
+      topicSlugs: q5Topics,
     },
   ]
 }
@@ -823,7 +831,9 @@ b) I'd prefer to spend six weeks in prison instead of _______ (get) a divorce, w
 c) I don't remember the name of that Biertan bishop _______ story is written on that church wall in order _______ justify his actions.
 d) Complete the following sentence to report what was said. "What shall I do next?" — He asked _____________________________ .`,
       "Single life vs. married life. What would be best for you? Explain your choice.",
-      "Matrimonio / Sociedad"
+      "Matrimonio / Sociedad",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -851,7 +861,9 @@ b) From a shy little girl _______ talked in a low voice, Clara Barton _______ (b
 c) After _______ (resign) from the American Red Cross, she founded the National First Aid Society, _______ mission was to promote local first aid programmes.
 d) Complete the following sentence to report what was said. "When was the Red Cross founded in your country?" he asked Mary. — He asked Mary _____________________________ .`,
       "Are humanitarian organisations important today? Give reasons to explain your answer.",
-      "Historia / Humanitarismo"
+      "Historia / Humanitarismo",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -881,7 +893,9 @@ b) Feeling homesick is compared _______ the emotion that we experience _______ l
 c) _______ (long) you live in a new place, _______ (good) you get to know it, and the less homesick you feel.
 d) Complete the following sentence to report what was said. "When did you last visit your hometown?", David asked me. — David asked me _____________________________ .`,
       "Have you ever felt homesick? Describe your experience.",
-      "Psicología / Experiencias personales"
+      "Psicología / Experiencias personales",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","comparativos-y-superlativos"],
+      ["redaccion-narrativa-descriptiva-personal"]
     ),
   },
   {
@@ -909,7 +923,9 @@ b) They didn't apologise _______ the trouble they caused. What's worse, they eve
 c) _______ (you ever participate) in a social media campaign? If so, who was it organised _______?
 d) The young activists, _______ had met at a university event, enjoyed _______ (discuss) new ideas after meetings.`,
       '"Today\'s Spanish youngsters are conformists and feel less committed to social issues than previous generations." Do you agree or disagree, and why?',
-      "Activismo / Redes sociales"
+      "Activismo / Redes sociales",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -940,7 +956,9 @@ b) The person _______ wallet I found, had left it _______ the bus.
 c) Stop _______ (complain)! We _______ (find) your wallet sooner or later!
 d) Complete the following sentence to report what was said. "You won't believe what happened to me!" she said. — She told me _____________________________ .`,
       "Have you ever lost something that was important to you? Describe your experience or imagine one.",
-      "Anécdotas / Solidaridad"
+      "Anécdotas / Solidaridad",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","comparativos-y-superlativos"],
+      ["redaccion-narrativa-descriptiva-personal"]
     ),
   },
   {
@@ -969,7 +987,9 @@ b) My younger sister is not allowed _______ (watch) Game of Thrones because she 
 c) _______ the fact that Game of Thrones is bloody and sexist, most people _______ have watched it say they like it.
 d) Remember _______ (return) Martin's book to the library before the deadline _______ (expire).`,
       "What is your favourite TV series? Describe the plot and say why you like it.",
-      "Historia / Entretenimiento"
+      "Historia / Entretenimiento",
+      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva"],
+      ["redaccion-narrativa-descriptiva-personal"]
     ),
   },
 
@@ -1000,7 +1020,9 @@ b) I'd _______ watch a period drama than _______ (read) a book.
 c) If I had _______ opportunity to travel to India, I _______ (visit) Vikram Seth's relatives.
 d) After _______ (watch) the last thriller on Netflix, I couldn't sleep _______ a couple of nights.`,
       "What do you prefer, films or TV series? Justify your answer.",
-      "Cultura / Entretenimiento"
+      "Cultura / Entretenimiento",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales","voz-pasiva"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1029,7 +1051,9 @@ b) _______ (avoid) natural disasters or extreme temperatures, _______ can damage
 c) Some people think that the greenhouse effect _______ (not/become) such a big problem if we _______ (not/cut) so many trees in the past.
 d) Rewrite the following sentence so that it means the same: "We are consuming natural resources so fast that the Earth does not have time to renew them." — Natural resources _____________________________ .`,
       "Would you agree to have limited Internet access to help reduce carbon emissions? Justify your answer.",
-      "Medio ambiente / Tecnología"
+      "Medio ambiente / Tecnología",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -1060,7 +1084,9 @@ b) The full stop derives _______ Greek punctuation which _______ (introduce) by 
 c) _______ (slight) mistake in punctuating a clause in a contract can have massive unintended consequences. Punctuation _______ (matter).
 d) If I were you, I _______ (show) how brilliant I am by manipulating the language _______ the internet.`,
       "Our words have impact. Why is it determining or relevant to think before speaking our minds? Explain.",
-      "Comunicación / Tecnología"
+      "Comunicación / Tecnología",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1089,7 +1115,9 @@ b) _______ women spies worked very hard during World War II, they were paid less
 c) According _______ official files, there were more than 200 women _______ served as double spies during the war.
 d) Complete the following sentence to report what was said. "Who is your preferred woman spy?" — My friend asked me _____________________________ .`,
       "Who is your favourite male or female historical character? Explain the reasons for your choice.",
-      "Historia / Segunda Guerra Mundial"
+      "Historia / Segunda Guerra Mundial",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","voz-pasiva"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -1120,7 +1148,9 @@ b) If I _______ (have) enough time to train properly last season, I _______ (win
 c) Celebrating the Olympic Games has a huge impact _______ social unity, besides _______ (imply) economic profit for the hosting country.
 d) Complete the following sentence to report what was said. "We don't expect many people in the country will volunteer." — Organisers said _____________________________ .`,
       "If you could volunteer at an important event, what type of event would you prefer and why?",
-      "Deporte / Diversidad"
+      "Deporte / Diversidad",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1149,7 +1179,9 @@ b) _______ can reporters prepare the public _______ the possibility that results
 c) Studies indicate that people _______ don't vote when they're eligible are more likely to _______ (rare) vote in the future.
 d) Millennials and Generation Z represent a _______ (large) voting bloc _______ Baby Boomers.`,
       "Should voting be compulsory? Justify your answer.",
-      "Política / Participación ciudadana"
+      "Política / Participación ciudadana",
+      ["gramatica-transformacion-y-uso-de-estructuras","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -1180,7 +1212,9 @@ b) When writing an _______ (apply) for a job, recruiters suggest _______ (includ
 c) Some jobs require being good _______ digital marketing, such _______ social media.
 d) Candidates who are culturally fit _______ (think) to be _______ (bad) for a firm than others.`,
       "Is cultural diversity good for society? (Think about school, social relationships, work, etc.). Discuss.",
-      "Trabajo / Diversidad"
+      "Trabajo / Diversidad",
+      ["gramatica-transformacion-y-uso-de-estructuras","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1209,7 +1243,9 @@ b) Since 2018, people _______ (become) more and more aware _______ the clothing 
 c) In order to change consumer habits _______ are contributing to pollution, new regulations _______ (draw up) two years ago.
 d) Complete the following sentence to report what was said. "Were only 2% of used clothes recycled in the country last year?" — The French minister asked _____________________________ .`,
       '"Clothes say a lot about you." Do you agree with this statement? Justify your opinion.',
-      "Medio ambiente / Moda"
+      "Medio ambiente / Moda",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -1240,7 +1276,9 @@ b) William Randolph Hearst was one of _______ (colorful), influential, and outsp
 c) Those _______ consume news need to find ways of _______ (determine) if what they're reading is true.
 d) Complete the following sentence to report what was said. "Can you check it out in ten minutes?" — She wondered _____________________________ .`,
       "Can social networking sites like Twitter or Instagram be considered news sources? Justify your answer.",
-      "Medios / Historia"
+      "Medios / Historia",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1269,7 +1307,9 @@ b) Guglielmo Marconi, who was born _______ 20th April 1874, invented what he cal
 c) Marconi used radio waves _______ (transmit) Morse code and the instrument he used became _______ (know) as the radio.
 d) Before the 1920s, the radio _______ (use) to contact ships that were out _______ sea.`,
       "Discuss the pros and cons of starting the school day later in the morning.",
-      "Tecnología / Comunicación"
+      "Tecnología / Comunicación",
+      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -1300,7 +1340,9 @@ b) If I _______ (know) so many people were going to the concert, I _______ (not/
 c) He was being so _______ (noise) that he was asked to stop _______ (play) the drums.
 d) Complete the following sentence to report what was said. "What songs did you use to listen to when you were a child?" — He asked me _____________________________ .`,
       "What are the benefits of music in today's world? Discuss.",
-      "Historia / Música"
+      "Historia / Música",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1329,7 +1371,9 @@ b) The company _______ sold the product explained how to use it _______ (correct
 c) If people _______ (care) about climate change in the past, we _______ (not/need) to take such drastic measures now.
 d) Complete the following sentence to report what was said. "Are you going to the museum next Friday?" — He asked Mary _____________________________ .`,
       "Describe the worst or the best dream you have ever had.",
-      "Medio ambiente / Salud"
+      "Medio ambiente / Salud",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
+      ["redaccion-narrativa-descriptiva-personal"]
     ),
   },
 
@@ -1360,7 +1404,9 @@ b) If I _______ (take) drama classes as a child, I _______ (be) a reasonable act
 c) Little babies are fond _______ classical music, _______ has a relaxing effect on them.
 d) Complete the following sentence to report what was said. "What is your favourite show?" — He asked him _____________________________ .`,
       "Would you like to participate in a TV show? Justify your answer.",
-      "Cultura / Comportamiento social"
+      "Cultura / Comportamiento social",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1389,7 +1435,9 @@ b) Food companies _______ (rare) think about how they could make their products 
 c) If I _______ (know) that this pizza had so much salt, I _______ (not/buy) it when I went to the supermarket yesterday.
 d) People _______ diet includes oily fish and vegetables _______ least once a week have lower rates of diabetes.`,
       "Discuss how people's eating habits could be improved in our society.",
-      "Salud / Nutrición"
+      "Salud / Nutrición",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -1420,7 +1468,9 @@ b) If we _______ (not feed) the ducks every day, they will fly away _______ anot
 c) I _______ (live) here in the woods for five years now. _______, I don't like wild animals.
 d) Complete the following sentence to report what was said. Maggie: "I've never wanted to live in this big city." — Maggie said _____________________________ .`,
       "Discuss the advantages and disadvantages of living in the countryside.",
-      "Familia / Naturaleza"
+      "Familia / Naturaleza",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1449,7 +1499,9 @@ b) In the future, I'd rather _______ (use) my creativity _______ Artificial Inte
 c) If I _______ (have) time to develop new algorithms in the 1990s, I _______ (become) a millionaire many years ago.
 d) Rachel is the one _______ took the decision to create a new AI enterprise _______ her own.`,
       "Explain the pros and cons of using Artificial Intelligence as a student.",
-      "Tecnología / Educación"
+      "Tecnología / Educación",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales","voz-pasiva"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -1480,7 +1532,9 @@ b) Some older people are not aware _______ how technologies _______ (change) the
 c) After _______ (work) for a decade in New York, Mary _______ (offer) a chance to work for NASA last year.
 d) We _______ (be) more in touch with nature if we weren't surrounded by _______ (technology) devices.`,
       "Do you think that we depend too much on technology? Justify your answer.",
-      "Ciencia / Mujeres"
+      "Ciencia / Mujeres",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1509,7 +1563,9 @@ b) Mary _______ (go) shopping and found _______ (good) offers than me.
 c) _______ John nor Paul can cook a tasty meal _______ pressure.
 d) Complete the following sentence to report what was said. "Did you like chicken soup when you were a child?," she asked me. — She asked me _____________________________ .`,
       "Describe and justify what a healthy diet is for you.",
-      "Salud / Tradiciones"
+      "Salud / Tradiciones",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","comparativos-y-superlativos"],
+      ["redaccion-narrativa-descriptiva-personal"]
     ),
   },
 
@@ -1527,6 +1583,7 @@ d) Complete the following sentence to report what was said. "Did you like chicke
     preguntas: [
       {
         id: "ing-2425-A-1",
+        topicSlugs: ["comprension-verdadero-falso-con-evidencia-textual"],
         numero: 1,
         bloque: "Q1",
         label: "True / False / Not Given",
@@ -1541,6 +1598,7 @@ c) People like to wonder about other passengers' lives on the train.`,
       },
       {
         id: "ing-2425-A-2",
+        topicSlugs: ["comprension-abierta-con-propias-palabras"],
         numero: 2,
         bloque: "Q2",
         label: "Comprensión abierta",
@@ -1554,6 +1612,7 @@ b) Give two reasons why fast trains have taken away some of the charm of railway
       },
       {
         id: "ing-2425-A-3",
+        topicSlugs: ["vocabulario-en-contexto"],
         numero: 3,
         bloque: "Q3",
         label: "Vocabulario",
@@ -1569,6 +1628,7 @@ d) unexpected (paragraph 5)`,
       },
       {
         id: "ing-2425-A-4",
+        topicSlugs: ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
         numero: 4,
         bloque: "Q4",
         label: "Gramática (elige 4 de 6)",
@@ -1587,6 +1647,7 @@ f) "Yes, I broke this vase yesterday." — Sue admitted … .`,
       },
       {
         id: "ing-2425-A-5",
+        topicSlugs: ["redaccion-ensayo-de-opinion","redaccion-carta-o-email-informal"],
         numero: 5,
         bloque: "Q5",
         label: "Redacción (elige 1 de 2)",
@@ -1615,6 +1676,7 @@ Remember: DO NOT SIGN OR IDENTIFY YOUR EMAIL.`,
     preguntas: [
       {
         id: "ing-2425-B-1",
+        topicSlugs: ["comprension-verdadero-falso-con-evidencia-textual"],
         numero: 1,
         bloque: "Q1",
         label: "True / False / Not Given",
@@ -1629,6 +1691,7 @@ c) One of the reasons why parents choose home schooling is that they can select 
       },
       {
         id: "ing-2425-B-2",
+        topicSlugs: ["comprension-abierta-con-propias-palabras"],
         numero: 2,
         bloque: "Q2",
         label: "Comprensión abierta",
@@ -1642,6 +1705,7 @@ b) How are more people getting to know better about home schooling?`,
       },
       {
         id: "ing-2425-B-3",
+        topicSlugs: ["vocabulario-en-contexto"],
         numero: 3,
         bloque: "Q3",
         label: "Vocabulario",
@@ -1657,6 +1721,7 @@ d) convenient (paragraph 3)`,
       },
       {
         id: "ing-2425-B-4",
+        topicSlugs: ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
         numero: 4,
         bloque: "Q4",
         label: "Gramática (elige 4 de 6)",
@@ -1676,6 +1741,7 @@ f) "The students in this group are making a huge effort to get the highest marks
       },
       {
         id: "ing-2425-B-5",
+        topicSlugs: ["redaccion-ensayo-de-opinion","redaccion-carta-o-email-informal"],
         numero: 5,
         bloque: "Q5",
         label: "Redacción (elige 1 de 2)",
@@ -1717,7 +1783,9 @@ d) Complete the following sentence to report what was said.
 "When did you discover social media for the first time?"
 He asked me ___________________________________________________________.`,
       "Discuss the advantages and disadvantages of using social media.",
-      "Redes sociales / Entretenimiento"
+      "Redes sociales / Entretenimiento",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","voz-pasiva","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1745,7 +1813,9 @@ b) Before _______ (start) college, I would like to check if I would be able to l
 c) If she had known what she _______ (want) to study, she _______ (complete) a university degree.
 d) Only after she _______ (spend) one year working, did she manage _______ (decide) which field she wanted to specialise in.`,
       "What would you like to do if you had the opportunity to take a gap year? Explain.",
-      "Educación / Decisiones vitales"
+      "Educación / Decisiones vitales",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -1775,7 +1845,9 @@ b) Even though the astronauts' footprints _______ (leave) on the moon a long tim
 c) China _______ (start) a comprehensive lunar program and _______ the beginning of January 2019 launched a probe on the far side of the moon.
 d) The Moon, _______ goes around the Earth, _______ (cover) in rocks.`,
       "You have the chance to be the first student astronaut to explore another planet. Would you accept the job? Give reasons why or why not.",
-      "Ciencia / Espacio"
+      "Ciencia / Espacio",
+      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1805,7 +1877,9 @@ d) Complete the following sentence to report what was said.
 "What is your favourite book?"
 My friend asked me______________________________________________________.`,
       "What is your favourite book? Describe it and say why you like it so much.",
-      "Educación / Género"
+      "Educación / Género",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech"],
+      ["redaccion-narrativa-descriptiva-personal"]
     ),
   },
 
@@ -1837,7 +1911,9 @@ d) Complete the following sentence to report what was said.
 "Which steps do we have to take to stop global warming?"
 In 2015 the WHO asked them _____________________________________________________.`,
       "Some people prefer to live in hot climates whereas others prefer the cold ones. Discuss both views and give your opinion.",
-      "Clima / Salud"
+      "Clima / Salud",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales","voz-pasiva"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1865,7 +1941,9 @@ b) People who _______ (be) interested in beauty and fashion use social media to 
 c) I wish the Internet _______ (have) more educational content, but this is something hard _______ (find) these days.
 d) If I _______ (become) a social media influencer years ago, I _______ (be) a wealthy person now.`,
       "Does technology make older people's lives better? Justify your answer.",
-      "Redes sociales / Tercera edad"
+      "Redes sociales / Tercera edad",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales","voz-pasiva"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -1897,7 +1975,9 @@ d) Complete the following sentence to report what was said.
 "Did the number of jobs in the green sector increase last year?"
 Advisors asked _________________________________________________________.`,
       "Do you think there are jobs more suitable for robots than for humans? Discuss.",
-      "Trabajo / Tecnología"
+      "Trabajo / Tecnología",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1927,7 +2007,9 @@ d) Complete the following sentence to report what is said:
 "Enjoy every aspect of your life in real time", said Dr Bono.
 Dr Bono tells us __________________________________________________________.`,
       "How have social media changed the way we live? Discuss.",
-      "Redes sociales / Salud mental"
+      "Redes sociales / Salud mental",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -1959,7 +2041,9 @@ d) Complete the following sentence to report what was said.
 "Minecraft is the most boring videogame I've ever played."
 Robert told me _______________________________________________________________.`,
       "What kind of board games do you like the most? Justify your answer.",
-      "Juegos / Ocio"
+      "Juegos / Ocio",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -1989,7 +2073,9 @@ d) Complete the following sentence to report what was said.
 "Do you enjoy drinking coffee after your dinner?"
 He asked me ________________________________________________________________.`,
       "Do you think that your present eating habits will affect your future health? Justify your answer.",
-      "Salud / Alimentación"
+      "Salud / Alimentación",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -2019,7 +2105,9 @@ b) Your Thailand costs will vary ________ (great) depending ________ the kind of
 c) If you ________(choose) a different airline last year, your trip ________(not / be) so expensive.
 d) You probably already know how ______ (say) "hello" in Japanese, but in case you don't, this is one of _______ (easy) words you can learn.`,
       "Discuss the advantages and disadvantages of travelling to exotic destinations.",
-      "Viajes / Turismo"
+      "Viajes / Turismo",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -2049,7 +2137,9 @@ d) Complete the following sentence to report what was said.
 "Who won the Australia Open tournament three years ago?"
 My son asked me _____________________________________________________________.`,
       "Do you consider that practicing sports is absolutely necessary for a healthy life? Explain.",
-      "Deporte / Educación"
+      "Deporte / Educación",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -2081,7 +2171,9 @@ d) Complete the following sentence to report what was said.
 "I can't go to the expedition with my friends."
 Joanna apologized because______________________________________________________.`,
       "Explain the pros and cons of adventure holidays.",
-      "Viajes / Aventura"
+      "Viajes / Aventura",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -2109,7 +2201,9 @@ b) The _______ (health) my diet is, the stronger I feel whenever I need _______ 
 c) Normally it _______ (think) that using the train is less polluting than driving because _______ the reduction in gas emissions.
 d) Sam, would you mind _______ (finish) the report now? It's terribly late, and this is a very _______ (stress) situation.`,
       "Do you think that only governments can do something to limit pollution or that individuals can contribute too? Justify your opinion.",
-      "Medio ambiente / Salud"
+      "Medio ambiente / Salud",
+      ["gramatica-transformacion-y-uso-de-estructuras","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -2141,7 +2235,9 @@ d) Complete the following sentence to report what was said.
 "Did any researcher from your country win a Nobel Prize?"
 He asked me _________________________________________________________________.`,
       "Which inventions do you think have significantly changed the world? Discuss.",
-      "Ciencia / Historia"
+      "Ciencia / Historia",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -2169,7 +2265,9 @@ b) By 2025, ads on TikTok _______ (reach) 30% of internet users _______ are aged
 c) TikTok is an international version of Douyin, which _______ (release) in the Chinese market seven years _______.
 d) Facebook has stopped _______ (be) the most downloaded app since TikTok appeared _______ 6th September 2016.`,
       "What is your opinion about the impact of social media on society? Justify your answer.",
-      "Redes sociales / Sociedad"
+      "Redes sociales / Sociedad",
+      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -2186,6 +2284,7 @@ d) Facebook has stopped _______ (be) the most downloaded app since TikTok appear
     preguntas: [
       {
         id: "ing-2425Ext-1",
+        topicSlugs: ["comprension-verdadero-falso-con-evidencia-textual"],
         numero: 1,
         bloque: "Q1",
         label: "True / False / Not Given",
@@ -2200,6 +2299,7 @@ c) Bugs have only recently been included as part of human diets.`,
       },
       {
         id: "ing-2425Ext-2",
+        topicSlugs: ["comprension-abierta-con-propias-palabras"],
         numero: 2,
         bloque: "Q2",
         label: "Comprensión abierta",
@@ -2213,6 +2313,7 @@ b) What type of activities does Yoon do to promote insect eating? Mention two.`,
       },
       {
         id: "ing-2425Ext-3",
+        topicSlugs: ["vocabulario-en-contexto"],
         numero: 3,
         bloque: "Q3",
         label: "Vocabulario",
@@ -2228,6 +2329,7 @@ d) strategy (paragraph 4)`,
       },
       {
         id: "ing-2425Ext-4",
+        topicSlugs: ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales","comparativos-y-superlativos"],
         numero: 4,
         bloque: "Q4",
         label: "Gramática (elige 4 de 6)",
@@ -2249,6 +2351,7 @@ More money … .`,
       },
       {
         id: "ing-2425Ext-5",
+        topicSlugs: ["redaccion-ensayo-de-opinion"],
         numero: 5,
         bloque: "Q5",
         label: "Redacción (elige 1 de 2)",
@@ -2275,6 +2378,7 @@ b) Describe a negative experience you have had when eating out.`,
     preguntas: [
       {
         id: "ing-2425Mod-1",
+        topicSlugs: ["comprension-verdadero-falso-con-evidencia-textual"],
         numero: 1,
         bloque: "Q1",
         label: "True / False / Not Given",
@@ -2289,6 +2393,7 @@ c) The practice of mindfulness requires deliberate observation of the here and n
       },
       {
         id: "ing-2425Mod-2",
+        topicSlugs: ["comprension-abierta-con-propias-palabras"],
         numero: 2,
         bloque: "Q2",
         label: "Comprensión abierta",
@@ -2302,6 +2407,7 @@ b) Why do people start practicing mindfulness and what is the result of that pra
       },
       {
         id: "ing-2425Mod-3",
+        topicSlugs: ["vocabulario-en-contexto"],
         numero: 3,
         bloque: "Q3",
         label: "Vocabulario",
@@ -2317,6 +2423,7 @@ d) emerge (paragraph 4)`,
       },
       {
         id: "ing-2425Mod-4",
+        topicSlugs: ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
         numero: 4,
         bloque: "Q4",
         label: "Gramática (elige 4 de 6)",
@@ -2338,6 +2445,7 @@ A new high-technology … .`,
       },
       {
         id: "ing-2425Mod-5",
+        topicSlugs: ["redaccion-ensayo-de-opinion","redaccion-carta-o-email-informal"],
         numero: 5,
         bloque: "Q5",
         label: "Redacción (elige 1 de 2)",
@@ -2364,6 +2472,7 @@ b) Write an informal e-mail to an English friend about something positive and in
     preguntas: [
       {
         id: "ing-2526Mod-1",
+        topicSlugs: ["comprension-verdadero-falso-con-evidencia-textual"],
         numero: 1,
         bloque: "Q1",
         label: "True / False / Not Given",
@@ -2378,6 +2487,7 @@ c) American tourists enjoy visiting the beautiful lakes of Killarney.`,
       },
       {
         id: "ing-2526Mod-2",
+        topicSlugs: ["comprension-abierta-con-propias-palabras"],
         numero: 2,
         bloque: "Q2",
         label: "Comprensión abierta",
@@ -2391,6 +2501,7 @@ b) Describe the green initiative that people in Killarney have introduced for ta
       },
       {
         id: "ing-2526Mod-3",
+        topicSlugs: ["vocabulario-en-contexto"],
         numero: 3,
         bloque: "Q3",
         label: "Vocabulario",
@@ -2407,6 +2518,7 @@ e) neat (paragraph 3)`,
       },
       {
         id: "ing-2526Mod-4",
+        topicSlugs: ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech"],
         numero: 4,
         bloque: "Q4",
         label: "Gramática (elige 4 de 6)",
@@ -2428,6 +2540,7 @@ There is no point … .`,
       },
       {
         id: "ing-2526Mod-5",
+        topicSlugs: ["redaccion-ensayo-de-opinion","redaccion-carta-o-email-informal"],
         numero: 5,
         bloque: "Q5",
         label: "Redacción (elige 1 de 2)",
@@ -2469,7 +2582,9 @@ d) Complete the following sentence to report what was said.
 Mike told Mary: "I spoke to my publisher about your new photography book."
 Mike said ___________________________________________________ .`,
       "Do you think selfie sticks should be banned in some places? Give your opinion.",
-      "Redes sociales / Tecnología"
+      "Redes sociales / Tecnología",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -2499,7 +2614,9 @@ d) Complete the following sentence to report what was said.
 John: Did you know that many ships and planes disappeared in the Bermuda Triangle?
 He asked us______________________________________________________.`,
       "Describe an experience that made you feel afraid.",
-      "Misterios / Naturaleza"
+      "Misterios / Naturaleza",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
+      ["redaccion-narrativa-descriptiva-personal"]
     ),
   },
 
@@ -2529,7 +2646,9 @@ b) _______ smoking is no longer permitted, some people still _______ (enjoy) soc
 c) You always come _______ friendly people in local pubs. That's _______ we should try to frequent them.
 d) I remember _______ (go) to the pub with my father when I was a child. However, now you are not allowed _______ you are over 18.`,
       "Is it important to save traditions? Give your opinion.",
-      "Tradiciones / Sociedad"
+      "Tradiciones / Sociedad",
+      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -2557,7 +2676,9 @@ b) The first cultured meatball _______ (make) in 2016 by an unknown company ____
 c) Some believe that cultured meat is one of _______ (important) discoveries in recent times for _______ (defeat) some world problems.
 d) Nowadays, _______ (be) a vegetarian is becoming a far more popular option _______ it used to be a few decades ago.`,
       "Would you like to live in a world with only artificial food? Justify your answer.",
-      "Ciencia / Alimentación"
+      "Ciencia / Alimentación",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales","voz-pasiva","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -2589,7 +2710,9 @@ d) Complete the following sentence to report what was said.
 "What else did you see in my Facebook account?"
 Mary asked her mother _____________________________________________.`,
       `"Parents have the right to spy or check up on their children". How far do you agree with this statement? Justify your answer.`,
-      "Redes sociales / Familia"
+      "Redes sociales / Familia",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -2617,7 +2740,9 @@ b) My sister can't help _______ (cough) every _______ she smells my favourite pe
 c) This particular perfume _______ (forbid) in Britain last month, but at home we had been using it _______ fifteen years.
 d) I must remember _______ (buy) shampoo at this shop, _______ owner is always kind to me.`,
       "What is the impact of advertising campaigns on people's choice of perfumes?",
-      "Salud / Consumo"
+      "Salud / Consumo",
+      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -2649,7 +2774,9 @@ d) Complete the following sentence to report what was said.
 "Stop telling me scary stories or I'll have to sleep with the lights on," my mother told me.
 My mother told me _______________________________________________.`,
       "You and your friends decide to spend a night in the forest. Write a horror story.",
-      "Historia / Misterio"
+      "Historia / Misterio",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech"],
+      ["redaccion-narrativa-descriptiva-personal"]
     ),
   },
   {
@@ -2677,7 +2804,9 @@ b) Chinese authorities _______ (regulate) aspects of family life _______ many ye
 c) _______ what her father thought, she considered that getting a divorce was the _______ (good) option for her.
 d) If she _______ (meet) him before, she _______ (marry) him.`,
       "Divorce rates in Spain have increased in the last few years. Why do you think this is so? Justify your answer.",
-      "Sociedad / Familia"
+      "Sociedad / Familia",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales","voz-pasiva","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -2710,7 +2839,9 @@ d) Complete the following sentence to report what was said.
 "What did you feel when you were flying over the Atlantic Ocean?"
 Ann asked her husband_____________________________________________.`,
       "How would you like a job which required travelling very often? Justify your answer.",
-      "Biografías / Aviación"
+      "Biografías / Aviación",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -2740,7 +2871,9 @@ d) Complete the following sentence to report what was said.
 "Do you think zoo animals are really happy?"
 Nick asked his wife _____________________________________________.`,
       `"Animal cruelty is an important issue in Spain nowadays." Do you agree? Justify your answer.`,
-      "Animales / Justicia"
+      "Animales / Justicia",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","voz-pasiva","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -2770,7 +2903,9 @@ b) The London School of Economics, ________ usually scores highly in university 
 c) She hasn't succeeded in ________ (get) the results she wanted. Therefore, she intends ________ (sit) the exam next year again.
 d) I'm so tired of school life: I've been looking _______ to starting university _______ I was in 3rd year of secondary education.`,
       `"Passion vs. Money". Which reasons will determine your university degree choice?`,
-      "Educación / Trabajo"
+      "Educación / Trabajo",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales","voz-pasiva"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -2798,7 +2933,9 @@ b) More women were employed in industrial sectors _______ the early forties as t
 c) The government has decided to go _______ with the plans for building a new airport 50 kilometres away _______ the city.
 d) They had worked hard all morning, so _______ midday they stopped _______ (have) a coffee and a sandwich.`,
       "Do you think the roles of men and women in society have changed over the last fifty years? Justify your answer.",
-      "Historia / Igualdad"
+      "Historia / Igualdad",
+      ["gramatica-transformacion-y-uso-de-estructuras"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -2831,7 +2968,9 @@ d) Complete the following sentence to report what was said.
 "How long do your children play computer games on weekdays?"
 The school counsellor asked us _______________________________________.`,
       "Do you think technology can be addictive? Justify your answer.",
-      "Tecnología / Adolescencia"
+      "Tecnología / Adolescencia",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -2860,7 +2999,9 @@ b) When I turned _______ the television, my favourite show had_______ finished.
 c) According to the United Nations, _______ least 800 species worldwide are affected by marine debris, and as much as 80 percent of that litter comes _______ plastic.
 d) A recent study _______ (find) that sea turtles _______ ingest just 14 pieces of plastic with their food have an increased risk of death.`,
       "Why do you think there are still more men than women in science? Justify your answer.",
-      "Medioambiente / Ciencia"
+      "Medioambiente / Ciencia",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 
@@ -2891,7 +3032,9 @@ b) The use of food pictograms to communicate has been effective _______ early hu
 c) Emojis are becoming more popular _______ internet abbreviations _______ 'lol' or 'muah'.
 d) Last year, a proposal _______ (send) to the Unicode Consortium, _______ is responsible for developing Unicode.`,
       "Are emojis helpful, are they simply a passing fashion, or are they actually destroying our languages? Write your opinion about it.",
-      "Tecnología / Comunicación"
+      "Tecnología / Comunicación",
+      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -2922,7 +3065,9 @@ d) Complete the following sentence to report what was said.
 "We want to thank you and your family for being such loyal guests."
 The manager told me _______________________________________________.`,
       "Have you ever stayed at a really bad hotel or accommodation? Describe the experience or imagine what it would have been like.",
-      "Turismo / Humor"
+      "Turismo / Humor",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","voz-pasiva"],
+      ["redaccion-narrativa-descriptiva-personal"]
     ),
   },
 
@@ -2964,7 +3109,9 @@ and change-makers. The program of speakers, workshops and events _______
 (spark) some of TED’s most iconic moments so far.
 d) Women are more _______ (like) to speak up if questions_______ (ask).`,
       `Good communication skills can help you in your life. Discuss.`,
-      "Comunicación / Género"
+      "Comunicación / Género",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -3005,7 +3152,9 @@ history goes.
 d) Researchers found dog owners were likely to live _______ (long) than those _______
 didn’t have dogs.`,
       `What are the pros and cons of keeping a pet?`,
-      "Animales / Ciencia"
+      "Animales / Ciencia",
+      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -3042,7 +3191,9 @@ b) The less you sleep, the _______ (big) the impact _______ your health.
 c) If you _______ (set) the alarm clock as I told you last night, you _______ (not / oversleep).
 d) Last week, she _______ (ask) how many hours she needs to be ready ________ an exam.`,
       `“A good laugh and a long sleep are the best cures for anything.” Do you agree? Justify your answer.`,
-      "Historia social / Trabajo"
+      "Historia social / Trabajo",
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
   {
@@ -3083,7 +3234,9 @@ d) Complete the following sentence to report what was said.
 “Who was the best Trivial Pursuit player in 2021?”
 I asked my sister ______________________________________________________________.`,
       `What is your favorite board game? Why? Explain.`,
-      "Juegos / Historia"
+      "Juegos / Historia",
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","voz-pasiva","comparativos-y-superlativos"],
+      ["redaccion-ensayo-de-opinion"]
     ),
   },
 

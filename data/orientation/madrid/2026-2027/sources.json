@@ -1,0 +1,25 @@
+{
+  "academic_year": "2026-2027",
+  "documents": [
+    {
+      "id": "madrid-dum-cutoffs-2026-2027",
+      "local_filename": "notas-de-corte-dum-2026-27.pdf",
+      "pages": 18,
+      "sha256": "4EBA9E5375C3EBE1BDABDB35EE459D0FCE166F4F295162BB5886197A9E889836",
+      "source_updated_at": "2026-07-10",
+      "type": "official_cutoffs",
+      "url": "https://www.comunidad.madrid/docs/2026-07/notas-de-corte-dum-2026-27.pdf?VersionId=49d24KZFf.vcTtvs6AWBu9v8erTCgMnB"
+    },
+    {
+      "id": "madrid-weightings-2026-2027",
+      "local_filename": "ponderaciones-26-27.pdf",
+      "pages": 20,
+      "sha256": "FE3FCE9E44DC5C857ED469BD943F201028517AEEB74FAA6283B0A23E422C6DE2",
+      "source_updated_at": "2026-02-27",
+      "type": "official_weightings",
+      "url": "https://www.comunidad.madrid/docs/assets/2026/03/02/ponderaciones_26-27_pdf_27_02_26.pdf?VersionId=axC4uzT2OgwXcJn6SNy_cC49YFVok9hd"
+    }
+  ],
+  "extracted_at": "2026-08-31T00:00:00Z",
+  "landing_page": "https://www.comunidad.madrid/educacion/herramientas-orientacion-universitaria"
+}

@@ -1,15 +1,19 @@
-export const CLOSE_REFERENCE_MARGIN = 0.5
+export const NEAR_THRESHOLD = 0.50
 
 export type OpportunityCategory = 'above' | 'close' | 'improve' | 'unavailable'
 
 export type OpportunityCandidate = {
   id: string
+  degreeId?: string | null
+  universityId?: string | null
   degree: string
   university: string
   referenceScore: number | null
 }
 
 export type SavedOpportunityTarget = {
+  degreeId?: string | null
+  universityId?: string | null
   degree: string
   university: string
 } | null
@@ -18,7 +22,7 @@ export function classifyOpportunity(estimatedScore: number, referenceScore: numb
   if (referenceScore == null || !Number.isFinite(referenceScore)) return 'unavailable'
   const missing = referenceScore - estimatedScore
   if (missing <= 0) return 'above'
-  if (missing <= CLOSE_REFERENCE_MARGIN + Number.EPSILON * 10) return 'close'
+  if (missing <= NEAR_THRESHOLD + Number.EPSILON * 10) return 'close'
   return 'improve'
 }
 
@@ -28,6 +32,9 @@ export function opportunityDifference(estimatedScore: number, referenceScore: nu
 
 export function isSavedOpportunity(candidate: OpportunityCandidate, savedTarget: SavedOpportunityTarget) {
   if (!savedTarget) return false
+  if (candidate.degreeId && candidate.universityId && savedTarget.degreeId && savedTarget.universityId) {
+    return candidate.degreeId === savedTarget.degreeId && candidate.universityId === savedTarget.universityId
+  }
   return candidate.degree === savedTarget.degree && candidate.university === savedTarget.university
 }
 

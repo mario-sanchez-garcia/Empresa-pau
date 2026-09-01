@@ -29,4 +29,9 @@ test('el objetivo guardado queda primero aunque esté más lejos', () => {
   assert.equal(isSavedOpportunity(ranked[0], { degree: saved.degree, university: saved.university }), true)
 })
 
+test('identifica el objetivo por ids estables aunque cambie el texto', () => {
+  const candidate = { ...target('objetivo-id', 12), degreeId: 'degree-1', universityId: 'university-1' }
+  assert.equal(isSavedOpportunity(candidate, { degreeId: 'degree-1', universityId: 'university-1', degree: 'Nombre anterior', university: 'Nombre anterior' }), true)
+})
+
 test('un catálogo vacío permanece vacío', () => assert.deepEqual(rankOpportunities([], 11, null), []))

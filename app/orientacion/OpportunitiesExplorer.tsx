@@ -8,11 +8,12 @@ import styles from './orientation.module.css'
 
 const INITIAL_VISIBLE = 6
 const formatGrade = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+const formatReference = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 })
 
 const CATEGORY_META: Record<Exclude<OpportunityCategory, 'unavailable'>, { label: string; shortLabel: string; icon: typeof Check }> = {
-  above: { label: 'Por encima de la referencia', shortLabel: 'Supera la referencia', icon: Check },
-  close: { label: 'Muy cerca de la referencia', shortLabel: 'Muy cerca', icon: Target },
-  improve: { label: 'Opción para subir nota', shortLabel: 'Para subir nota', icon: TrendingUp },
+  above: { label: 'Por encima de referencia', shortLabel: 'Por encima', icon: Check },
+  close: { label: 'Muy cerca', shortLabel: 'Muy cerca', icon: Target },
+  improve: { label: 'Necesitas subir', shortLabel: 'Necesitas subir', icon: TrendingUp },
 }
 
 type Props = {
@@ -127,13 +128,13 @@ export default function OpportunitiesExplorer({ estimatedScore, officialTargets,
                       <div><div className={styles.opportunityBadges}>{isTarget && <span className={styles.targetBadge}><Target size={11} /> Tu objetivo</span>}<span className={styles.categoryLabel}><Icon size={11} /> {meta.label}</span></div><h3>{item.degree}</h3><p>{item.university}</p>{item.community && <small><MapPin size={11} /> {item.community}</small>}</div>
                     </div>
                     <div className={styles.referenceNumbers}>
-                      <div><span>Referencia {item.source.academicYear}</span><b>{formatGrade(item.referenceScore)}</b></div>
+                      <div><span>Referencia {item.source.academicYear}</span><b>{formatReference(item.referenceScore)}</b></div>
                       <div><span>Tu escenario</span><b>{formatGrade(estimatedScore)}</b></div>
                     </div>
                     <div className={styles.opportunityOutcome}>
-                      <strong>{difference >= 0 ? '+' + formatGrade(difference) + ' sobre referencia' : 'Te faltan ' + formatGrade(Math.abs(difference))}</strong>
-                      <span>{difference >= 0 ? 'Ahora superas la referencia histórica' : meta.label}</span>
-                      <a href={item.source.url!} target="_blank" rel="noreferrer">Fuente oficial · {item.source.label} <ExternalLink size={12} /></a>
+                      <strong>{itemCategory === 'above' ? 'Superas la referencia 2026-27' : `Te faltan ${formatGrade(Math.abs(difference))} respecto a la referencia`}</strong>
+                      <span>{meta.label}</span>
+                      <a href={item.source.url!} target="_blank" rel="noreferrer">Fuente oficial · Comunidad de Madrid · 2026-27 <ExternalLink size={12} /></a>
                     </div>
                   </article>
                 )

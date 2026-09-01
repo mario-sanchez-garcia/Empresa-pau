@@ -1,0 +1,1701 @@
+{
+  "academic_year": "2026-2027",
+  "counts": {
+    "cutoffs": 554,
+    "degrees": 554,
+    "degrees_by_university": {
+      "UAH": 55,
+      "UAM": 73,
+      "UC3M": 65,
+      "UCM": 103,
+      "UPM": 71,
+      "URJC": 187
+    },
+    "degrees_with_weightings_by_university": {
+      "UAH": 35,
+      "UAM": 49,
+      "UC3M": 30,
+      "UCM": 84,
+      "UPM": 41,
+      "URJC": 125
+    },
+    "double_or_joint_degrees": 144,
+    "universities": 6,
+    "weightings": 4473
+  },
+  "errors": {
+    "duplicate_degree_ids": [],
+    "duplicate_degree_stable_codes": [],
+    "duplicate_weightings": [],
+    "invalid_cutoffs": [],
+    "invalid_weightings": []
+  },
+  "matching": {
+    "ambiguous_weighting_rows": [],
+    "conflicting_weighting_rows_excluded": [
+      {
+        "pages": [
+          3,
+          19
+        ],
+        "reason": "different duplicated matrices",
+        "title": "Filosofía - Ciencia Política y Gestión Pública (URJC)"
+      }
+    ],
+    "deduplicated_weighting_rows": 426,
+    "degrees_with_weightings": 364,
+    "degrees_without_weightings": [
+      {
+        "official_code": "0080",
+        "official_name": "Ingeniería de Computadores",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0086",
+        "official_name": "Ingeniería de Materiales",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0081",
+        "official_name": "Ingeniería del Software",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0082",
+        "official_name": "Ingeniería Informática",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0113",
+        "official_name": "Ciencias de la Actividad Física y el Deporte",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0108",
+        "official_name": "Economía",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0129",
+        "official_name": "Economía (en inglés)",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0115",
+        "official_name": "Maestro de Educación Infantil",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0116",
+        "official_name": "Maestro de Educación Primaria",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0130",
+        "official_name": "ADE - Ingeniería Informática",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0140",
+        "official_name": "Derecho - ADE",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0141",
+        "official_name": "Derecho - Relaciones Laborales y RR.HH.",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0131",
+        "official_name": "Maestro de Ed. Infantil - Maestro de Ed. Primaria",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0132",
+        "official_name": "Maestro de Educación Infantil - Pedagogía",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0133",
+        "official_name": "Maestro de Educación Primaria - Pedagogía",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0196",
+        "official_name": "Bachelor of Arts in European Studies",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0138",
+        "official_name": "Tit. Internacional en ADE (UCM-HWR Berlín)",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0107",
+        "official_name": "Tit. Internacional en Derecho (UCM-Sorbona)",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0139",
+        "official_name": "Tit. Internacional en Economía (UCM-Sorbona)",
+        "university": "UCM"
+      },
+      {
+        "official_code": "0219",
+        "official_name": "Geografía, Historia e Historia del Arte",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0210",
+        "official_name": "Lenguas Modernas, Cultura y Comunicación-Español",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0211",
+        "official_name": "Lenguas Modernas, Cultura y Comunicación-Francés",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0212",
+        "official_name": "Lenguas Modernas, Cultura y Comunicación-Inglés",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0213",
+        "official_name": "Traducción e Interpretación (Francés)",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0214",
+        "official_name": "Traducción e Interpretación (Inglés)",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0229",
+        "official_name": "Química (grupo bilingüe: español/inglés)",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0260",
+        "official_name": "Administración y Dirección de Empresas",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0277",
+        "official_name": "Ciencia Política y Administración Pública - Mención en Gobierno y dirección pública",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0278",
+        "official_name": "Ciencia Política y Administración Pública - Mención en Relaciones internacionales y Unión Europea",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0259",
+        "official_name": "Comunicación e Industrias Culturales",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0273",
+        "official_name": "Derecho - Mención en Derecho de la energía y del medio ambiente",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0274",
+        "official_name": "Derecho - Mención en Derecho de los negocios internacionales",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0275",
+        "official_name": "Derecho - Mención en Derecho digital y de las tecnologías",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0276",
+        "official_name": "Derecho - Mención en Derechos humanos y justicia social",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0279",
+        "official_name": "Economía (Grupo bilingüe: español/inglés)",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0270",
+        "official_name": "Turismo",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0253",
+        "official_name": "PARS-IA en Máster en Ingeniería de Telecomunicación vía grado en Ingeniería de Tecnologías de Telecomunicación",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0281",
+        "official_name": "Derecho - Ciencia Política y Administración Pública",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0286",
+        "official_name": "Filosofía - Historia y CC. de la Música y Tecnología Musical",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0299",
+        "official_name": "Traducción e Interpretación (Francés) - Lenguas Modernas, Cultura y Comunicación (Francés)",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0217",
+        "official_name": "Ciencia, Tecnología y Humanidades (UAB, UAM y UC3M)",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0227",
+        "official_name": "Ciencias (UAB, UAM y UC3M)",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0285",
+        "official_name": "Filosofia, Política y Economía (UAB, UAM, UC3M y UPF)",
+        "university": "UAM"
+      },
+      {
+        "official_code": "0407",
+        "official_name": "Industrias del Español y sus Culturas",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0405",
+        "official_name": "Lenguas Modernas y Traducción (Guadalajara)",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0410",
+        "official_name": "Biología",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0423",
+        "official_name": "Enfermería (Guadalajara)",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0427",
+        "official_name": "Enfermería (Torrejón de Ardoz)",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0428",
+        "official_name": "Fisioterapia (Torrejón de Ardoz)",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0461",
+        "official_name": "Administración y Dirección de Empresas (Guadalajara)",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0464",
+        "official_name": "Derecho",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0471",
+        "official_name": "Economía y Negocios Internaciones (docencia en inglés)",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0468",
+        "official_name": "Magisterio de Educación Infantil (Guadalajara)",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0467",
+        "official_name": "Magisterio de Educación Primaria (bilingüe) (docencia en inglés) (Guadalajara)",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0469",
+        "official_name": "Magisterio de Educación Primaria (Guadalajara)",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0430",
+        "official_name": "Fundamentos de Arquitectura y Urbanismo + Máster Univ. en Arquitectura",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0451",
+        "official_name": "Ingeniería en Tecnologías de Telecomunicación",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0446",
+        "official_name": "Ingeniería en Tecnologías de Telecomunicación + Master Universitario en Ingeniería de Telecomunicaciones",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0452",
+        "official_name": "Ingeniería en Tecnologías Industriales + Master Universitario en Ing. Industrial",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0480",
+        "official_name": "Derecho - Administración y Dirección de Empresas",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0485",
+        "official_name": "Ingeniería Electrónica de Comunicaciones - Ing. Electrónica y Automática Industrial",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0483",
+        "official_name": "Magisterio de Educación Infantil - Magisterio de Educación Primaria (Guadalajara)",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0481",
+        "official_name": "Turismo - Admón. y Dirección de Empresas (Guadalajara)",
+        "university": "UAH"
+      },
+      {
+        "official_code": "0544",
+        "official_name": "Derecho",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0545",
+        "official_name": "Derecho (Colmenarejo)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0505",
+        "official_name": "Educación Primaria",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0553",
+        "official_name": "Sociología (español o bilingüe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0560",
+        "official_name": "Sostenibilidad Urbana (Grado de la Alianza Europea YUFE)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0513",
+        "official_name": "Ingeniería Electrónica Industrial y Automática (español o bilingüe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0531",
+        "official_name": "Ingeniería en Tecnologías Cuánticas",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0520",
+        "official_name": "Ingeniería en Tecnologías de Telecomunicación (español o bilingüe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0519",
+        "official_name": "Ingeniería en Tecnologías Industriales (español o bilingüe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0514",
+        "official_name": "Ingeniería Informática (español, bilingüe o inglés)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0515",
+        "official_name": "Ingeniería Informática (Colmenarejo)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0516",
+        "official_name": "Ingeniería Mecánica (español o bilingüe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0530",
+        "official_name": "Inteligencia Artificial (Colmenarejo)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0597",
+        "official_name": "Programa Académico de Ingeniería Informática vía Grado en Ing. Informática (bilingüe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0598",
+        "official_name": "Programa Académico de Ingeniería de Telecomunicación vía Grado en Ing. en Tecnologías de Telecomunicación (bilingüe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0599",
+        "official_name": "Programa Académico de Ingeniería Industrial vía Grado en Ing. en Tecnologías Industriales (bilingüe-español)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0570",
+        "official_name": "Ciencias Políticas y Sociología",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0583",
+        "official_name": "Ciencia e Ingeniería de Datos e Ingeniería en Tecnologías de Telecomunicación (bilingüe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0571",
+        "official_name": "Derecho y Administración de Empresas (español o bilingüe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0572",
+        "official_name": "Derecho y Administración de Empresas (Colmenarejo)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0573",
+        "official_name": "Derecho y Ciencias Políticas",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0574",
+        "official_name": "Derecho y Economía (español o bilingüe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0578",
+        "official_name": "Estudios Internacionales y Administración de Empresas (en inglés)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0579",
+        "official_name": "Estudios Internacionales y Ciencias Políticas (bilingüe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0581",
+        "official_name": "Estudios Internacionales y Derecho (bilingue)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0582",
+        "official_name": "Estudios Internacionales y Economía (en inglés)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0584",
+        "official_name": "Ingeniería Física e Ingeniería en Tecnologías Industriales (bilingüe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0576",
+        "official_name": "Ingeniería Informática y Administración de Empresas (Colmenarejo)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0585",
+        "official_name": "Ingeniería Informática y Administración de Empresas (Leganes-Getafe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0575",
+        "official_name": "Periodismo y Comunicación Audiovisual (español o bilingüe)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0577",
+        "official_name": "Periodismo y Humanidades",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0591",
+        "official_name": "Ciencia, Tecnología y Humanidades (UAB, UAM y UC3M)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0590",
+        "official_name": "Ciencias (UAB, UAM y UC3M)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0561",
+        "official_name": "Doble Titulación Internacional en Administración de Empresas (UC3M y ESCP)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0580",
+        "official_name": "Filosofía, Política y Economía (bilingüe) (UAB, UAM, UC3M y UPF)",
+        "university": "UC3M"
+      },
+      {
+        "official_code": "0381",
+        "official_name": "Arquitecto/a (PARS)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0343",
+        "official_name": "Ciencia de Datos e Inteligencia Artificial (Campus de Montegancedo)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0308",
+        "official_name": "Edificación",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0389",
+        "official_name": "Ingeniero/a Aeronáutico/a (PARS)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0302",
+        "official_name": "Ingeniería Agrícola",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0378",
+        "official_name": "Ingeniero/a Agrónomo/a (PARS)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0334",
+        "official_name": "Ingeniería Biomédica",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0388",
+        "official_name": "Ingeniero/a Biomédico/a (PARS)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0306",
+        "official_name": "Ingeniería Civil y Territorial (Moncloa)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0346",
+        "official_name": "Ingeniería Civil y Territorial (Retiro)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0375",
+        "official_name": "Ingeniero/a de Caminos, Canales y Puertos (PARS)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0310",
+        "official_name": "Ingeniería de Materiales",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0371",
+        "official_name": "Ingeniero/a de Montes (PARS)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0319",
+        "official_name": "Ingeniería en Diseño Industrial y Desarrollo de Producto",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0390",
+        "official_name": "Ingeniería en Diseño Industrial (PARS)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0373",
+        "official_name": "Ingeniero/a en Sistemas Informáticos Distribuidos y Embebidos (PARS)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0320",
+        "official_name": "Ingeniería en Tecnología Minera / Ing. Geológica / Ing. Mineralúrgica y Metalúrgica de las Materias Primas / Ing. en Recursos Energéticos, Combustibles y Explosivos",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0323",
+        "official_name": "Ingeniería Geomática",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0391",
+        "official_name": "Ingeniería Geomática (PARS)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0386",
+        "official_name": "Ingeniero/a Industrial (PARS)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0324",
+        "official_name": "Ingeniería Informática",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0376",
+        "official_name": "Ingeniero/a Informática (PARS)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0327",
+        "official_name": "Ingeniería Química (Castellana)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0328",
+        "official_name": "Ingeniería Química (Embajadores)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0341",
+        "official_name": "Ingeniería y Sistemas de datos (Campus Moncloa)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0332",
+        "official_name": "Tecnologías para la Sociedad de la Información",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0360",
+        "official_name": "Ingeniería en Diseño Industrial y Desarrollo de Producto - Ingeniería Mecánica",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0369",
+        "official_name": "Ingeniería Geomática e Ingeniería de las Tecnologías de la Información Geoespacial (Campus Sur)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0359",
+        "official_name": "Ingeniería y Sistemas de Datos e Ingeniería Telemática (Campus Sur)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0368",
+        "official_name": "Diseño de Moda (UPM) y Comercio (UCM)",
+        "university": "UPM"
+      },
+      {
+        "official_code": "0802",
+        "official_name": "Bellas Artes (Aranjuez)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0806",
+        "official_name": "Diseño Integral y Gestión de la Imagen (Aranjuez)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0884",
+        "official_name": "Diseño Integral y Gestión de la Imagen (Madrid)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0622",
+        "official_name": "Medicina (Alcorcón)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0637",
+        "official_name": "Ingeniería en Tecnologías de la Telecomunicación (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0660",
+        "official_name": "Administración y Dirección de Empresas (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0661",
+        "official_name": "Administración y Dirección de Empresas (Inglés) (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0662",
+        "official_name": "Administración y Direccion de Empresas (Móstoles)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0663",
+        "official_name": "Administración y Dirección de Empresas (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0664",
+        "official_name": "Administración y Dirección de Empresas (A Distancia) (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0813",
+        "official_name": "Ciencia, Gestión e Ingeniería de Servicios (Madrid)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0845",
+        "official_name": "Ciencia, Gestión e Ingeniería de Servicios (Semipresencial) (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0667",
+        "official_name": "Comunicación Audiovisual (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0668",
+        "official_name": "Comunicación Audiovisual (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0761",
+        "official_name": "Contabilidad y Finanzas (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0707",
+        "official_name": "Contabilidad y Finanzas (Móstoles)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0895",
+        "official_name": "Contabilidad y Finanzas (A Distancia) (Vicálvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0702",
+        "official_name": "Contabilidad y Finanzas (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0670",
+        "official_name": "Derecho (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0671",
+        "official_name": "Derecho (Móstoles)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0672",
+        "official_name": "Derecho (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0673",
+        "official_name": "Derecho (Semipresencial) (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0674",
+        "official_name": "Economía (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0849",
+        "official_name": "Economía (Inglés) (Madrid)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0899",
+        "official_name": "Economía (Móstoles)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0675",
+        "official_name": "Economía (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0678",
+        "official_name": "Educación Infantil (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0829",
+        "official_name": "Educación Infantil (Inglés) (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0679",
+        "official_name": "Educación Infantil (Móstoles)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0680",
+        "official_name": "Educación Infantil (Semipresencial) (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0681",
+        "official_name": "Educación Primaria y Educación Primaria mención Educación Física (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0682",
+        "official_name": "Educación Primaria y Educación Primaria mención Educación Musical, Educación Física, Ciencias y Matemáticas (Móstoles)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0683",
+        "official_name": "Educación Primaria y Educación Primaria mención Lengua Extranjera Inglés (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0705",
+        "official_name": "Educación Primaria (Semipresencial) (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0689",
+        "official_name": "Periodismo (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0691",
+        "official_name": "Periodismo (Semipresencial) (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0690",
+        "official_name": "Periodismo (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0853",
+        "official_name": "Protocolo, Organización de Eventos y Com. Corporativa (Inglés) (Madrid)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0831",
+        "official_name": "Protocolo, Organización de Eventos y Com. Corporativa (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0692",
+        "official_name": "Publicidad y Relaciones Públicas (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0694",
+        "official_name": "Publicidad y Relaciones Públicas (Semipresencial) (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0693",
+        "official_name": "Publicidad y Relaciones Públicas (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0698",
+        "official_name": "Turismo (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0699",
+        "official_name": "Turismo (Inglés) (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0700",
+        "official_name": "Turismo (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0854",
+        "official_name": "Turismo (Semipresencial) (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0872",
+        "official_name": "ADE (A distancia) (Vicálvaro) - Ciencia, Gestión e Ingeniería de Servicios (Presencial) (Madrid)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0871",
+        "official_name": "ADE (Presencial) - Ciencia, Gestión e Ingeniería de Servicios (Semipresencial) (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0713",
+        "official_name": "Comunicación Audiovisual - ADE (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0742",
+        "official_name": "Contabilidad y Finanzas - Relaciones Laborales y RR.HH. (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0877",
+        "official_name": "Derecho (Semipresencial) - Relac. Internac. (Inglés) (Presencial) (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0826",
+        "official_name": "Diseño y Desarrollo de Videojuegos - Ing. de Computadores (Móstoles)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0858",
+        "official_name": "Diseño y Gestión de Moda - Diseño Integral y Gest de la Imagen (Aranjuez)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0901",
+        "official_name": "Economía Financiera y Actuarial - ADE (Móstoles)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0745",
+        "official_name": "Economía Financiera y Actuarial - ADE (Vicalvaro)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0905",
+        "official_name": "Filosofía - Ciencia Política y Gestión Pública (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0779",
+        "official_name": "Ingeniería en Tecnología de Telecomunicación (Mención Sistema de Telecomunicación) - Ingeniería Aeroespacial (Mención",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0730",
+        "official_name": "Ingeniería Informática - ADE (Móstoles)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0727",
+        "official_name": "Ingeniería Informática - Ingeniería de Computadores (Móstoles)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0728",
+        "official_name": "Ingeniería Informática - Ingeniería del Software (Móstoles)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0736",
+        "official_name": "Publicidad y Relaciones Públicas - ADE (Fuenlabrada)",
+        "university": "URJC"
+      },
+      {
+        "official_code": "0881",
+        "official_name": "Relaciones Laborales y RR.HH - Trabajo Social (Alcorcón)",
+        "university": "URJC"
+      }
+    ],
+    "match_methods": {
+      "campus_or_mode_relaxed": 158,
+      "exact": 206
+    },
+    "unmatched_weighting_rows": [
+      {
+        "page": 1,
+        "title": "Artes Escénicas - Interpretación Audiovisual (TAI - URJC) (Opción inglés)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 1,
+        "title": "Bellas Artes (TAI / URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 1,
+        "title": "Ciencia, Tecnología y Humanidades (Conjunto U. Autónoma de Barcelona, UAM, UC3M)",
+        "universities": [
+          "UAM",
+          "UC3M"
+        ]
+      },
+      {
+        "page": 1,
+        "title": "Cinematografía (TAI - URJC) (Opción inglés)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 1,
+        "title": "Composición Musical (TAI - URJC) (Opción inglés)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 1,
+        "title": "Diseño de Moda (Centro Superior de Diseño de Moda - UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 2,
+        "title": "Fotografía y Creación Audiovisual (TAI - URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 2,
+        "title": "Lenguas Modernas, Cultura y Comunicación (UAM)",
+        "universities": [
+          "UAM"
+        ]
+      },
+      {
+        "page": 3,
+        "title": "Diseño de Moda - Comercio (Interuniversitario UPM - UCM)",
+        "universities": [
+          "UCM",
+          "UPM"
+        ]
+      },
+      {
+        "page": 3,
+        "title": "Diseño y Gestión de Moda - Diseño Integral y Gestión de la Imagen (URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 3,
+        "title": "Filosofía - Historia y Ciencias de la Música y Tecnología Musical (UAM)",
+        "universities": [
+          "UAM"
+        ]
+      },
+      {
+        "page": 3,
+        "title": "Periodismo - Humanidades Digitales(UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 3,
+        "title": "Traducción e Interpretación - LL Modernas, Cult. y Comunicación (Francés) (UAM)",
+        "universities": [
+          "UAM"
+        ]
+      },
+      {
+        "page": 4,
+        "title": "Ciencias (Conjunto U. Autónoma de Barcelona, UAM, UC3M)",
+        "universities": [
+          "UAM",
+          "UC3M"
+        ]
+      },
+      {
+        "page": 5,
+        "title": "Fisioterapia (UAM)",
+        "universities": [
+          "UAM"
+        ]
+      },
+      {
+        "page": 6,
+        "title": "Podología (UAM)",
+        "universities": [
+          "UAM"
+        ]
+      },
+      {
+        "page": 6,
+        "title": "Psicología (UAH-Cardenal Cisneros)",
+        "universities": [
+          "UAH"
+        ]
+      },
+      {
+        "page": 6,
+        "title": "Terapia Ocupacional (UAM)",
+        "universities": [
+          "UAM"
+        ]
+      },
+      {
+        "page": 7,
+        "title": "Arquitecto PARS (*) (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 7,
+        "title": "Ingeniero Aeronáutico PARS (*) (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 7,
+        "title": "Ingeniero/a Agrónomo PARS (*) (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 8,
+        "title": "Ingeniero/a Biomédico PARS (*) (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 8,
+        "title": "Ingeniero de Caminos, Canales y Puertos PARS (*) (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 8,
+        "title": "Ingeniero/a en Diseño Industrial PARS (*) (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 9,
+        "title": "Ingeniero/a en Geomática PARS (*) (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 9,
+        "title": "Ingeniero Industrial PARS (*) (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 9,
+        "title": "Ingeniería Informática PARS (*) (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 9,
+        "title": "Ingeniero/a en Informática PARS (*) (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 9,
+        "title": "Ingeniería en Materiales (UCM)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 10,
+        "title": "Ingeniería Química (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 10,
+        "title": "Ingeniería y Sistemas de Datos (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 10,
+        "title": "Ingeniero/a de Sistemas Informáticos Distribuidos y Embebidos PARS (*) (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 10,
+        "title": "Ingeniería de Tecnologías Cuánticas (UC3M) (pendiente autorización)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 10,
+        "title": "Ingeniería en Tecnologías Industriales PARS (*) (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 11,
+        "title": "Ingeniería en Tecnología Minera/ Ingeniería Geológica/ Ingeniería Mineralúrgica y Metalúrgica de las Materias Primas/Ingeniería en Recursos Energéticos, Combustibles y Explosivos (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 11,
+        "title": "Ingeniería en Tecnologías de la Telecomunicación (UAH)",
+        "universities": [
+          "UAH"
+        ]
+      },
+      {
+        "page": 11,
+        "title": "Ingeniería en Tecnologías de Telecomunicación PARS (*) (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 11,
+        "title": "Ingeniería en Tecnologías de Telecomunicación (URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 11,
+        "title": "Ingeniería en Tecnologías para la Sociedad de la Información (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 11,
+        "title": "DOBLES GRADOS DE INGENIERÍA Y ARQUITECTURA Administración y Dirección de Empresas - Ingeniería Informática (UCM)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 11,
+        "title": "Administración y Dirección de Empresas - Ingeniería Informática (UCM)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 11,
+        "title": "Ciencia e Ingeniería de Datos - Ing. En Tecnologías de Telecomunicación (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 11,
+        "title": "Diseño y Desarrollo de Videojuegos - Ingeniería de Computadores (URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 12,
+        "title": "Ingeniería Electrónica de Comunicaciones - Ingeniería Electrónica y Automática Industrial (UAH)",
+        "universities": [
+          "UAH"
+        ]
+      },
+      {
+        "page": 12,
+        "title": "Ingeniería Física - Ing. En Tecnologías Industriales (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 12,
+        "title": "Ingeniería Geomática - Tecnologías de la Información Geoespacial (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 12,
+        "title": "Ingeniería Informática - Administración de Empresas (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 12,
+        "title": "Ingeniería Informática - Ingeniería de Software (URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 13,
+        "title": "Ingeniería y Sistemas de Datos - Ingeniería Telemática (UPM)",
+        "universities": [
+          "UPM"
+        ]
+      },
+      {
+        "page": 13,
+        "title": "Ingeniería en Tecnologías de Telecomunicación - Ingeniería Aeroespacial (URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 13,
+        "title": "Administración y Dirección de Empresas (UCM-HWR Berlín- Título Internacional)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 13,
+        "title": "Administración y Dirección de Empresas (URJC) (presencial / a distancia) (Opción Inglés)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 13,
+        "title": "Ciencia, Gestión e Ingeniería de Servicios (URJC) (presencial/ semipresencial)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 13,
+        "title": "Ciencias de la Actividad Física y del Deporte (UCM) (pendiente autorización)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 14,
+        "title": "Contabilidad y Finanzas (URJC) (presencial / a distancia)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 14,
+        "title": "Derecho (UCM - Sorbona- Título Internacional)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 14,
+        "title": "Derecho (URJC) (presencial / semipresencial)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 14,
+        "title": "Diseño y Gestión de Proyectos Transmedia (UAM)",
+        "universities": [
+          "UAM"
+        ]
+      },
+      {
+        "page": 14,
+        "title": "Economía (UCM-Sorbona- Título Internacional)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 14,
+        "title": "Educación Infantil (URJC) (presencial/ Semipresencial/ Inglés)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 15,
+        "title": "Educación Primaria (URJC) (con menciones/ inglés/ semipresencial)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 15,
+        "title": "Educación Social (Cardenal Cisneros- UAH)",
+        "universities": [
+          "UAH"
+        ]
+      },
+      {
+        "page": 15,
+        "title": "Educación Social (UAM)",
+        "universities": [
+          "UAM"
+        ]
+      },
+      {
+        "page": 15,
+        "title": "European Studies (UCM)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 15,
+        "title": "Filosofía, Política y Economía (Conjunto U. Pompeu Fabra de Barcelona, UAM, UC3M) - UAM",
+        "universities": [
+          "UAM",
+          "UC3M"
+        ]
+      },
+      {
+        "page": 15,
+        "title": "Maestro en Educación Infantil (UCM)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 16,
+        "title": "Maestro en Educación Primaria (UCM)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 16,
+        "title": "Periodismo (URJC) (Presencial / Semipresencial)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 16,
+        "title": "Protocolo, Organización de Eventos y Comunicación Corporativa (URJC) (Opción inglés)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 16,
+        "title": "Publicidad y Relaciones Públicas (URJC) (Presencial / Semipresencial)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 16,
+        "title": "Trabajo Social (UAM)",
+        "universities": [
+          "UAM"
+        ]
+      },
+      {
+        "page": 16,
+        "title": "Turismo (URJC) (presencial / semipresencial/ inglés)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 17,
+        "title": "Sostenibilidad Urbana (Urban Sustainability Studies) (Alianza YUFE) (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 17,
+        "title": "Administración y Dirección de Empresas - Ciencia, Gestión e Ingeniería de Servicios (URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 17,
+        "title": "Administración y Dirección de Empresas - Derecho (UAH)",
+        "universities": [
+          "UAH"
+        ]
+      },
+      {
+        "page": 17,
+        "title": "Ciencias Políticas - Sociología (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 17,
+        "title": "Comunicación Audiovisual - Administración y Dirección de Empresas (URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 17,
+        "title": "Contabilidad y Finanzas- Relaciones Laborales y Recursos Humanos (URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 17,
+        "title": "Derecho - Administración y Dirección de Empresas (UCM)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 18,
+        "title": "Derecho - Administración de Empresas (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 18,
+        "title": "Derecho - Ciencia Política y de la Administración Pública (UAM)",
+        "universities": [
+          "UAM"
+        ]
+      },
+      {
+        "page": 18,
+        "title": "Derecho - Economía (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 18,
+        "title": "Derecho - Relaciones Laborales y Recursos Humanos (UCM)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 18,
+        "title": "Economía Financiera y Actuarial - Administración y Dirección de Empresas (URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 18,
+        "title": "Estudios Internacionales - Administración de Empresas (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 18,
+        "title": "Estudios Internacionales - Derecho (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 18,
+        "title": "Estudios Internacionales - Economía (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 19,
+        "title": "Maestro en Educación Infantil - Maestro en Educación Primaria (UCM)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 19,
+        "title": "Maestro en Educación Infantil - Pedagogía (UCM)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 19,
+        "title": "Maestro en Educación Primaria - Pedagogía (UCM)",
+        "universities": [
+          "UCM"
+        ]
+      },
+      {
+        "page": 19,
+        "title": "Periodismo - Comunicación Audiovisual (UC3M)",
+        "universities": [
+          "UC3M"
+        ]
+      },
+      {
+        "page": 19,
+        "title": "Publicidad y Relaciones Públicas - Administración y Dirección de Empresas (URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 19,
+        "title": "Relaciones Internacionales - Ciencia Política y Gestión Pública (URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 20,
+        "title": "Relaciones Internacionales (Inglés) - Protocolo, Organización de eventos y Comunicación Corporativa (URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 20,
+        "title": "Relaciones Laborales y Recursos Humanos - Trabajo Social (URJC)",
+        "universities": [
+          "URJC"
+        ]
+      },
+      {
+        "page": 20,
+        "title": "Turismo - Administración y Dirección de Empresas (UAH)",
+        "universities": [
+          "UAH"
+        ]
+      }
+    ],
+    "weighting_row_assignments": 364,
+    "weighting_source_rows": 456
+  },
+  "scope": {
+    "adscribed_centres_excluded": true,
+    "cutoff_semantics": "Grupo 1 · convocatoria ordinaria",
+    "public_universities_only": true,
+    "universities": [
+      "UAH",
+      "UAM",
+      "UC3M",
+      "UCM",
+      "UPM",
+      "URJC"
+    ]
+  },
+  "status": "passed",
+  "warnings": {
+    "repeated_official_codes": []
+  }
+}

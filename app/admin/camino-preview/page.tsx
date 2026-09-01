@@ -184,14 +184,11 @@ const SUBJECTS: { key: SubjectKey; label: string; blockOrder?: string[] }[] = [
   { key: 'fisica', label: 'Física', blockOrder: ['Campo Gravitatorio', 'Campo Electromagnético', 'Vibraciones y Ondas', 'Óptica Geométrica', 'Física del Siglo XX'] },
   { key: 'quimica', label: 'Química', blockOrder: ['Estequiometría', 'Estructura Atómica y Clasificación Periódica', 'Enlace Químico y Propiedades de las Sustancias', 'Termoquímica', 'Equilibrio Químico y Cinética', 'Ácido-Base', 'Electroquímica', 'Química Orgánica'] },
   { key: 'economia', label: 'Economía de la Empresa', blockOrder: ['La Empresa y su Entorno', 'Desarrollo y Crecimiento de la Empresa', 'Organización y Dirección de la Empresa', 'La Función Productiva', 'La Función Comercial: El Marketing', 'La Información en la Empresa: Contabilidad y Fiscalidad', 'La Función Financiera'] },
-  // Sin blockOrder: las 5 destrezas (comprensión, vocabulario, gramática, redacción)
+  // Sin blockOrder: las destrezas (comprensión, vocabulario, gramática, redacción)
   // viven en un único block_key ('Destrezas PAU') en curriculum_content_v2 — no hay
   // progresión cronológica entre ellas que ordenar.
-  { key: 'ingles', label: 'Inglés (borrador)' },
-  // 0 filas en curriculum_content_v2 todavía (solo existe el catálogo en
-  // curriculum_topics) — la tabla mostrará "No hay misiones..." hasta que se redacten
-  // las lecciones. blockOrder queda preparado para cuando eso ocurra.
-  { key: 'historia_filosofia', label: 'Historia de la Filosofía (borrador)', blockOrder: ['Autores', 'Problemas Transversales'] },
+  { key: 'ingles', label: 'Inglés' },
+  { key: 'historia_filosofia', label: 'Historia de la Filosofía', blockOrder: ['Autores', 'Problemas Transversales'] },
 ]
 
 // ─── Page ────────────────────────────────────────────────────────────────────

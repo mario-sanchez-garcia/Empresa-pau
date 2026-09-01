@@ -2362,6 +2362,23 @@ pregunta('4B', 'Pregunta 4B — Dios contemporáneo', 'Exponga el problema de Di
 // en vez de hardcodear topicSlugs en cada uno de los ~350 literales de examen,
 // así nunca queda desincronizado si autor cambia.
 
+// Cobertura problema×época de las 5 fichas transversales (curriculum_content_v2,
+// sort_order 14-18) — investigada y decidida el 2026-09: de los 6 huecos reales
+// detectados, solo se resolvió Ser Humano×Moderna (Descartes, ejercicio real
+// 2025-Extraordinaria "Cogito y sustancia pensante"). Los otros 5 quedan sin resolver
+// A PROPÓSITO: ningún autor de los 13 tiene un ejercicio real en este banco para esa
+// combinación, y se decidió no escribir contenido de examen sin respaldo real. Si en
+// el futuro se añade un ejercicio real que cubra alguno de estos huecos, estos son los
+// candidatos ya evaluados (autor ya en el catálogo, con conexión filosófica genuina,
+// pendiente solo de un texto real que lo respalde):
+//   - Ética y/o Moral × Moderna       → candidato: Kant (imperativo categórico)
+//   - Sociedad y/o Política × Antigua → candidato: Aristóteles (zoon politikon) o Platón (La República)
+//   - Sociedad y/o Política × Medieval→ candidato: Tomás de Aquino (ley natural) o Agustín (La Ciudad de Dios)
+//   - Dios × Antigua                  → candidato: Aristóteles (motor inmóvil, Metafísica)
+//   - Conocimiento y/o Realidad × Medieval → candidato: Tomás de Aquino (abstracción escolástica) o Agustín (iluminación)
+// Ninguno de estos 5 candidatos tiene hoy un texto cargado en examenesHistoriaFilosofiaMadrid
+// para ese problema — no añadir sin uno.
+
 const AUTOR_TOPIC_SLUGS: Record<string, string> = {
 'Descartes': 'descartes',
 'Tomás de Aquino': 'tomas-de-aquino',

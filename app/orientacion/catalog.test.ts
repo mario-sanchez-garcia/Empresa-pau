@@ -38,6 +38,14 @@ test('el objetivo guardado usa ids estables antes que los textos antiguos', () =
   assert.equal(findSavedTarget(catalog, saved)?.id, 'uam-psi')
 })
 
+test('el objetivo oficial persiste tras serializar y recargar la respuesta', () => {
+  const saved = JSON.parse(JSON.stringify({ degreeId: 'degree:uam-psi', universityId: 'UAM', degree: 'Psicología', university: 'Universidad Autónoma de Madrid', admissionScore: 11.07, sourceType: 'official', updatedAt: '2026-09-01T00:00:00Z' }))
+  const restored = findSavedTarget(catalog, saved)
+  assert.equal(restored?.id, 'uam-psi')
+  assert.equal(restored?.degreeId, 'degree:uam-psi')
+  assert.equal(restored?.universityId, 'UAM')
+})
+
 test('los fixtures desaparecen cuando existe catálogo oficial', () => {
   assert.deepEqual(availableCatalogTargets(catalog, [target('demo', 'Demo', 'Demo', 'DEMO')]), catalog)
 })
@@ -45,4 +53,9 @@ test('los fixtures desaparecen cuando existe catálogo oficial', () => {
 test('el catálogo demo solo actúa como fallback vacío', () => {
   const fixtures = [target('demo', 'Demo', 'Demo', 'DEMO')]
   assert.deepEqual(availableCatalogTargets([], fixtures), fixtures)
+})
+
+test('un error del catálogo no expone fixtures como si no hubiera datos oficiales', () => {
+  const fixtures = [target('demo', 'Demo', 'Demo', 'DEMO')]
+  assert.deepEqual(availableCatalogTargets([], fixtures, false), [])
 })

@@ -153,12 +153,19 @@
 .dataSectionHeader > .universityToolbar { display: flex; flex-direction: row; align-items: end; gap: 9px; }
 .universitySelect { display: flex; flex-direction: column; gap: 3px; color: #64748b; font-size: 8px; font-weight: 850; }
 .universitySelect select { max-width: 250px; border: 1px solid #c7d9f5; border-radius: 10px; background: #f8fbff; padding: 8px 10px; color: #334155; font: inherit; font-size: 10px; }
-.universityRow { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 18px; padding: 14px; border-top: 1px solid #e5edf8; }
+.universityRow { display: grid; grid-template-columns: minmax(240px,1.1fr) minmax(210px,.8fr) minmax(190px,.7fr); align-items: center; gap: 18px; padding: 14px; border-top: 1px solid #e5edf8; }
 .universityRow > div { display: flex; flex-direction: column; gap: 3px; }
 .universityRow b { font-size: 13px; }.universityRow span { color: var(--pau-muted); font-size: 10px; }.universityRow strong { color: var(--pau-blue); }
-.universityComparison { align-items: flex-end; text-align: right; }
-.universityComparison span { max-width: 180px; color: #64748b; font-size: 8px; }
+.universityIdentity small { margin-top: 4px; color: #64748b; font-size: 8px; font-weight: 750; }
+.universityReference,.universityPractice { padding: 11px; border-radius: 11px; }
+.universityReference { border: 1px solid #dbe7f7; background: #f8fafc; }
+.universityPractice { border: 1px solid #bfdbfe; background: linear-gradient(145deg,#eff6ff,#fff); }
+.universityReference > small,.universityPractice > small { color: #475569; font-size: 8px; font-weight: 950; letter-spacing: .09em; }
+.universityPractice > small { color: var(--pau-blue); }
+.universityReference span { color: #64748b; font-size: 8px; }
+.universityPractice span { color: #334155; font-size: 9px; font-weight: 800; }
 .universityRow a, .sourceLink { display: inline-flex; align-items: center; gap: 5px; color: var(--pau-blue); font-size: 10px; font-weight: 800; text-decoration: none; }
+.universityReference a { margin-top: 5px; font-size: 8px; }
 .sourceLink { margin-top: 10px; }
 .verifiedEmpty { min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #64748b; }
 .verifiedEmpty svg { color: var(--pau-blue); }.verifiedEmpty h3 { max-width: 430px; margin: 13px 0 5px; color: #1e293b; font-size: 16px; }.verifiedEmpty p { margin: 0 0 14px; font-size: 11px; }
@@ -266,7 +273,7 @@
   .dataSectionHeader > .universityToolbar { align-items: stretch; flex-direction: column; }
   .universitySelect select { max-width: none; width: 100%; }
   .searchBox { min-width: 0; }
-  .universityRow { grid-template-columns: 1fr auto; }.universityRow a { grid-column: 1 / -1; }
+  .universityRow { grid-template-columns: 1fr; gap: 10px; }
   .catalogChooser { grid-template-columns: 1fr; }
   .controlsPanel, .resultPanel { padding: 19px 16px; }
   .scoreComparison { grid-template-columns: 1fr 1.25fr; }

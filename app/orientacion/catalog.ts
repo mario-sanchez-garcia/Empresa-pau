@@ -32,6 +32,7 @@ export function findSavedTarget(targets: OrientationTarget[], saved: SavedOrient
   ) ?? null
 }
 
-export function availableCatalogTargets(official: OrientationTarget[], fixtures: OrientationTarget[]) {
-  return official.length > 0 ? official : fixtures
+export function availableCatalogTargets(official: OrientationTarget[], fixtures: OrientationTarget[], allowFixtures = true) {
+  if (official.length > 0) return official
+  return allowFixtures ? fixtures : []
 }

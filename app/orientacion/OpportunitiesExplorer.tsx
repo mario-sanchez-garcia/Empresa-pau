@@ -11,9 +11,9 @@ const formatGrade = (value: number) => value.toLocaleString('es-ES', { minimumFr
 const formatReference = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 })
 
 const CATEGORY_META: Record<Exclude<OpportunityCategory, 'unavailable'>, { label: string; shortLabel: string; icon: typeof Check }> = {
-  above: { label: 'Por encima de referencia', shortLabel: 'Por encima', icon: Check },
-  close: { label: 'Muy cerca', shortLabel: 'Muy cerca', icon: Target },
-  improve: { label: 'Necesitas subir', shortLabel: 'Necesitas subir', icon: TrendingUp },
+  above: { label: 'Por encima de la referencia', shortLabel: 'Por encima', icon: Check },
+  close: { label: 'Cerca de la referencia', shortLabel: 'Cerca', icon: Target },
+  improve: { label: 'Por debajo de la referencia', shortLabel: 'Por debajo', icon: TrendingUp },
 }
 
 type Props = {
@@ -132,9 +132,9 @@ export default function OpportunitiesExplorer({ estimatedScore, officialTargets,
                       <div><span>Tu escenario</span><b>{formatGrade(estimatedScore)}</b></div>
                     </div>
                     <div className={styles.opportunityOutcome}>
-                      <strong>{itemCategory === 'above' ? 'Superas la referencia 2026-27' : `Te faltan ${formatGrade(Math.abs(difference))} respecto a la referencia`}</strong>
+                      <strong>{itemCategory === 'above' ? `Por encima de la referencia · +${formatGrade(Math.abs(difference))}` : `Por debajo de la referencia · ${formatGrade(Math.abs(difference))} puntos`}</strong>
                       <span>{meta.label}</span>
-                      <a href={item.source.url!} target="_blank" rel="noreferrer">Fuente oficial · Comunidad de Madrid · 2026-27 <ExternalLink size={12} /></a>
+                      <a href={item.source.url!} target="_blank" rel="noreferrer">OFICIAL · {item.source.label} <ExternalLink size={12} /></a>
                     </div>
                   </article>
                 )
@@ -146,7 +146,7 @@ export default function OpportunitiesExplorer({ estimatedScore, officialTargets,
         </>
       )}
 
-      <p className={styles.opportunityDisclaimer}>Las notas de corte son referencias históricas y pueden variar cada curso. Superar una referencia anterior no garantiza la admisión.</p>
+      <p className={styles.opportunityDisclaimer}>Las notas de corte son referencias históricas y pueden variar cada curso. Estar por encima de una referencia anterior no garantiza la admisión.</p>
     </section>
   )
 }

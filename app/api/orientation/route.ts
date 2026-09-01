@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient, getAuthUser } from '@/app/lib/billing/supabase'
+import { buildOfficialTargets, collectPaginatedRows, type OfficialCutoffRow, type OfficialDegreeRow, type OfficialUniversityRow, type OfficialWeightingRow } from '@/app/orientacion/official-data'
 
 export const dynamic = 'force-dynamic'
 const CATALOG_YEAR = '2026-2027'
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
 
   const weightingRequests = Array.from({ length: WEIGHTING_MAX_PAGES }, (_, page) =>
     db.from('orientation_subject_weightings')
-      .select('id,degree_id,academic_year,subject,subject_code,official_subject_name,weighting,rule_note,source_url,source_label,source_document,verified_at')
+      .select('id,degree_id,academic_year,subject,subject_code,official_subject_name,weighting,rule_note,source_url,source_label,source_document,source_type,verified_at')
       .eq('academic_year', CATALOG_YEAR).eq('status', 'verified').eq('source_type', 'official')
       .not('verified_at', 'is', null).neq('source_url', '').neq('source_label', '')
       .order('id').range(page * WEIGHTING_PAGE_SIZE, (page + 1) * WEIGHTING_PAGE_SIZE - 1)
@@ -60,44 +61,26 @@ export async function GET(request: NextRequest) {
   const [universitiesResult, degreesResult, cutoffsResult, weightingPages, criteriaResult] = await Promise.all([
     db.from('orientation_universities').select('id,name,acronym,stable_code,community,official_url').eq('active', true),
     db.from('orientation_degrees').select('id,university_id,name,official_code,stable_code,campus,official_url').eq('active', true),
-    db.from('orientation_admission_cutoffs').select('id,degree_id,academic_year,access_group,admission_round,cutoff_score,source_url,source_label,source_document,verified_at').eq('academic_year', CATALOG_YEAR).eq('admission_round', 'grupo_1_ordinaria').eq('status', 'verified').eq('source_type', 'official').not('verified_at', 'is', null).neq('source_url', '').neq('source_label', '').order('academic_year', { ascending: false }),
+    db.from('orientation_admission_cutoffs').select('id,degree_id,academic_year,access_group,admission_round,cutoff_score,source_url,source_label,source_document,source_type,verified_at').eq('academic_year', CATALOG_YEAR).eq('admission_round', 'grupo_1_ordinaria').eq('status', 'verified').eq('source_type', 'official').not('verified_at', 'is', null).neq('source_url', '').neq('source_label', '').order('academic_year', { ascending: false }),
     Promise.all(weightingRequests),
     db.from('orientation_official_criteria').select('id,community,academic_year,subject,criterion_type,official_text,kairo_explanation,source_url,source_document,published_at,verified_at,version').eq('status', 'verified').not('verified_at', 'is', null).neq('source_url', '').limit(50),
   ])
 
-  const weightingError = weightingPages.find(result => result.error)?.error ?? null
-  const weightings = weightingPages.flatMap(result => result.data ?? [])
+  const weightingPagination = collectPaginatedRows(weightingPages.map(result => result.data ?? []), WEIGHTING_PAGE_SIZE)
+  const weightingError = weightingPages.find(result => result.error)?.error ?? (!weightingPagination.complete ? new Error('Orientation weighting pagination limit reached') : null)
+  const weightings = weightingPagination.rows
   const catalogError = universitiesResult.error || degreesResult.error || cutoffsResult.error || weightingError
   if (catalogError) {
     return NextResponse.json({ targets: [], criteria: [], savedTarget, catalogAvailable: false })
   }
 
-  const universities = new Map((universitiesResult.data ?? []).map(row => [row.id, row]))
-  const degrees = new Map((degreesResult.data ?? []).map(row => [row.id, row]))
-  const seenDegrees = new Set<string>()
-  const targets = (cutoffsResult.data ?? []).flatMap(cutoff => {
-    if (seenDegrees.has(cutoff.degree_id)) return []
-    const degree = degrees.get(cutoff.degree_id)
-    const university = degree ? universities.get(degree.university_id) : null
-    if (!degree || !university || !cutoff.verified_at || !degree.official_url.trim() || !university.official_url.trim()) return []
-    seenDegrees.add(cutoff.degree_id)
-    const subjects = weightings
-      .filter(row => row.degree_id === degree.id && row.academic_year === cutoff.academic_year && row.verified_at)
-      .map(row => ({
-        id: row.id, subjectCode: row.subject_code, name: row.official_subject_name || row.subject,
-        weighting: Number(row.weighting), defaultGrade: 0, enabled: false, ruleNote: row.rule_note,
-        source: { type: 'official', label: 'Comunidad de Madrid', documentLabel: row.source_document, url: row.source_url, academicYear: row.academic_year, verifiedAt: row.verified_at },
-      }))
-      .sort((a, b) => b.weighting - a.weighting || a.name.localeCompare(b.name, 'es'))
-    return [{
-      id: `official:${degree.id}`, degreeId: degree.id, universityId: university.id, degreeCode: degree.stable_code, universityCode: university.stable_code,
-      degree: degree.name, university: university.name,
-      universityAcronym: university.acronym, community: university.community, referenceScore: Number(cutoff.cutoff_score),
-      referenceLabel: `Referencia · Grupo 1 ordinaria · ${cutoff.academic_year}`,
-      source: { type: 'official', label: 'Comunidad de Madrid', documentLabel: cutoff.source_document, url: cutoff.source_url, academicYear: cutoff.academic_year, verifiedAt: cutoff.verified_at },
-      subjects,
-    }]
-  }).sort((a, b) => a.university.localeCompare(b.university, 'es') || a.degree.localeCompare(b.degree, 'es'))
+  const targets = buildOfficialTargets({
+    universities: (universitiesResult.data ?? []) as OfficialUniversityRow[],
+    degrees: (degreesResult.data ?? []) as OfficialDegreeRow[],
+    cutoffs: (cutoffsResult.data ?? []) as OfficialCutoffRow[],
+    weightings: weightings as OfficialWeightingRow[],
+    academicYear: CATALOG_YEAR,
+  })
 
   const criteria = criteriaResult.error ? [] : (criteriaResult.data ?? []).filter(row => row.verified_at).map(row => ({
     id: row.id, community: row.community, academicYear: row.academic_year, subject: row.subject,
@@ -145,7 +128,7 @@ export async function POST(request: NextRequest) {
     }
     const [universityResult, cutoffResult] = await Promise.all([
       db.from('orientation_universities').select('id,name').eq('id', body.target_university_id).eq('active', true).maybeSingle(),
-      db.from('orientation_admission_cutoffs').select('cutoff_score').eq('degree_id', body.target_degree_id).eq('academic_year', CATALOG_YEAR).eq('admission_round', 'grupo_1_ordinaria').eq('status', 'verified').maybeSingle(),
+      db.from('orientation_admission_cutoffs').select('cutoff_score').eq('degree_id', body.target_degree_id).eq('academic_year', CATALOG_YEAR).eq('admission_round', 'grupo_1_ordinaria').eq('status', 'verified').eq('source_type', 'official').not('verified_at', 'is', null).maybeSingle(),
     ])
     if (universityResult.error || cutoffResult.error || !universityResult.data || !cutoffResult.data) {
       return NextResponse.json({ error: 'No se pudo verificar la referencia oficial.' }, { status: 400 })

@@ -9,6 +9,8 @@ const subject = (id: string, grade: number, weighting: 0.1 | 0.2, enabled = true
 
 test('calcula sin optativas', () => assert.equal(calculateAdmissionScore(8, 7, []), 7.6))
 test('calcula una ponderada', () => assert.equal(calculateAdmissionScore(8, 7, [subject('a', 9, 0.2)]), 9.4))
+test('calcula correctamente un grado con ponderación 0.1', () => assert.equal(calculateAdmissionScore(8, 7, [subject('a', 10, 0.1)]), 8.6))
+test('calcula correctamente un grado con ponderación 0.2', () => assert.equal(calculateAdmissionScore(8, 7, [subject('a', 10, 0.2)]), 9.6))
 test('calcula dos ponderadas', () => assert.equal(calculateAdmissionScore(8, 7, [subject('a', 9, 0.2), subject('b', 8, 0.2)]), 11))
 test('con tres ponderadas escoge las dos aportaciones más altas', () => assert.equal(calculateAdmissionScore(8, 7, [subject('a', 10, 0.1), subject('b', 8, 0.2), subject('c', 9, 0.2)]), 11))
 test('distingue ponderaciones 0.1 y 0.2', () => assert.equal(calculateAdmissionScore(5, 5, [subject('a', 10, 0.1), subject('b', 10, 0.2)]), 8))
@@ -16,5 +18,6 @@ test('limita la nota máxima a 14', () => assert.equal(calculateAdmissionScore(1
 test('un cambio de slider recalcula la nota', () => assert.equal(calculateAdmissionScore(9, 7, []), 8.2))
 test('una asignatura desactivada no aporta', () => assert.equal(calculateAdmissionScore(8, 7, [subject('a', 10, 0.2, false)]), 7.6))
 test('una asignatura suspensa no aporta aunque esté activada', () => assert.equal(calculateAdmissionScore(8, 7, [subject('a', 4.99, 0.2)]), 7.6))
+test('la ausencia de ponderaciones seguras conserva solo la fase de acceso', () => assert.equal(calculateAdmissionScore(8, 7, []), 7.6))
 test('detecta objetivo superado', () => assert.ok(getTargetDifference(12.3, 12.1) > 0))
 test('detecta objetivo pendiente', () => assert.ok(getTargetDifference(11.8, 12.1) < 0))

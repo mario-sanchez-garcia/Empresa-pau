@@ -2079,8 +2079,11 @@ export default function CaminoCalendarClient() {
       'Matemáticas CCSS': 'matematicas_ccss',
       'Lengua Castellana': 'lengua',
       'Historia de España': 'historia_espana',
+      'Historia de la Filosofía': 'historia_filosofia',
+      'Inglés': 'ingles',
       'Física': 'fisica',
       'Química': 'quimica',
+      'Economía de la Empresa': 'economia',
     }
     const slug = SUBJECT_TO_SLUG[subjectLabel]
     if (!slug) return
@@ -5265,8 +5268,11 @@ const ADDABLE_SUBJECT_OPTS = [
   { id: 'Matemáticas CCSS', color: '#7c3aed', bg: '#f5f3ff' },
   { id: 'Lengua Castellana', color: '#0891b2', bg: '#ecfeff' },
   { id: 'Historia de España', color: '#b45309', bg: '#fff7ed' },
+  { id: 'Historia de la Filosofía', color: '#c026d3', bg: '#fdf4ff' },
+  { id: 'Inglés', color: '#dc2626', bg: '#fef2f2' },
   { id: 'Física', color: '#0f766e', bg: '#f0fdfa' },
   { id: 'Química', color: '#65a30d', bg: '#f7fee7' },
+  { id: 'Economía de la Empresa', color: '#ea580c', bg: '#fff7ed' },
 ]
 
 function AddSubjectModal({ currentSubjects, onClose, onAdd, loading }: {

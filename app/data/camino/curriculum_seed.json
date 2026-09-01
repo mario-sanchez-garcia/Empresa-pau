@@ -10501,5 +10501,1132 @@
       "ingles"
     ],
     "v2SortOrder": 13
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-empresa-y-su-entorno",
+    "blockTitle": "La Empresa y su Entorno",
+    "topicSlug": "concepto-de-empresa-elementos-y-funciones",
+    "title": "Concepto de Empresa: Elementos y Funciones",
+    "orderIndex": 1,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-empresa-y-su-entorno",
+      "topic": "concepto-de-empresa-elementos-y-funciones"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 1
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-empresa-y-su-entorno",
+    "blockTitle": "La Empresa y su Entorno",
+    "topicSlug": "clasificacion-de-las-empresas",
+    "title": "Clasificación de las Empresas",
+    "orderIndex": 2,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-empresa-y-su-entorno",
+      "topic": "clasificacion-de-las-empresas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 2
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-empresa-y-su-entorno",
+    "blockTitle": "La Empresa y su Entorno",
+    "topicSlug": "el-empresario-individual-autonomo",
+    "title": "El Empresario Individual (Autónomo)",
+    "orderIndex": 3,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-empresa-y-su-entorno",
+      "topic": "el-empresario-individual-autonomo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 3
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-empresa-y-su-entorno",
+    "blockTitle": "La Empresa y su Entorno",
+    "topicSlug": "formas-juridicas-societarias-s-l-y-s-a",
+    "title": "Formas Jurídicas Societarias: S.L. y S.A.",
+    "orderIndex": 4,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-empresa-y-su-entorno",
+      "topic": "formas-juridicas-societarias-s-l-y-s-a"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 4
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-empresa-y-su-entorno",
+    "blockTitle": "La Empresa y su Entorno",
+    "topicSlug": "la-sociedad-cooperativa-y-la-economia-social",
+    "title": "La Sociedad Cooperativa y la Economía Social",
+    "orderIndex": 5,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-empresa-y-su-entorno",
+      "topic": "la-sociedad-cooperativa-y-la-economia-social"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 5
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-empresa-y-su-entorno",
+    "blockTitle": "La Empresa y su Entorno",
+    "topicSlug": "los-objetivos-de-la-empresa",
+    "title": "Los Objetivos de la Empresa",
+    "orderIndex": 6,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-empresa-y-su-entorno",
+      "topic": "los-objetivos-de-la-empresa"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 6
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-empresa-y-su-entorno",
+    "blockTitle": "La Empresa y su Entorno",
+    "topicSlug": "la-responsabilidad-social-corporativa-rsc",
+    "title": "La Responsabilidad Social Corporativa (RSC)",
+    "orderIndex": 7,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-empresa-y-su-entorno",
+      "topic": "la-responsabilidad-social-corporativa-rsc"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 7
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-empresa-y-su-entorno",
+    "blockTitle": "La Empresa y su Entorno",
+    "topicSlug": "el-entorno-general-de-la-empresa-analisis-pest",
+    "title": "El Entorno General de la Empresa: Análisis PEST",
+    "orderIndex": 8,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-empresa-y-su-entorno",
+      "topic": "el-entorno-general-de-la-empresa-analisis-pest"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 8
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-empresa-y-su-entorno",
+    "blockTitle": "La Empresa y su Entorno",
+    "topicSlug": "el-entorno-especifico-las-cinco-fuerzas-de-porter",
+    "title": "El Entorno Específico: Las Cinco Fuerzas de Porter",
+    "orderIndex": 9,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-empresa-y-su-entorno",
+      "topic": "el-entorno-especifico-las-cinco-fuerzas-de-porter"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 9
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-empresa-y-su-entorno",
+    "blockTitle": "La Empresa y su Entorno",
+    "topicSlug": "el-analisis-dafo",
+    "title": "El Análisis DAFO",
+    "orderIndex": 10,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-empresa-y-su-entorno",
+      "topic": "el-analisis-dafo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 10
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "desarrollo-y-crecimiento-de-la-empresa",
+    "blockTitle": "Desarrollo y Crecimiento de la Empresa",
+    "topicSlug": "la-localizacion-de-la-empresa",
+    "title": "La Localización de la Empresa",
+    "orderIndex": 11,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "desarrollo-y-crecimiento-de-la-empresa",
+      "topic": "la-localizacion-de-la-empresa"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 11
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "desarrollo-y-crecimiento-de-la-empresa",
+    "blockTitle": "Desarrollo y Crecimiento de la Empresa",
+    "topicSlug": "la-dimension-de-la-empresa",
+    "title": "La Dimensión de la Empresa",
+    "orderIndex": 12,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "desarrollo-y-crecimiento-de-la-empresa",
+      "topic": "la-dimension-de-la-empresa"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 12
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "desarrollo-y-crecimiento-de-la-empresa",
+    "blockTitle": "Desarrollo y Crecimiento de la Empresa",
+    "topicSlug": "estrategias-de-crecimiento-especializacion-y-diversificacion",
+    "title": "Estrategias de Crecimiento: Especialización y Diversificación",
+    "orderIndex": 13,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "desarrollo-y-crecimiento-de-la-empresa",
+      "topic": "estrategias-de-crecimiento-especializacion-y-diversificacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 13
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "desarrollo-y-crecimiento-de-la-empresa",
+    "blockTitle": "Desarrollo y Crecimiento de la Empresa",
+    "topicSlug": "crecimiento-interno-vs-crecimiento-externo",
+    "title": "Crecimiento Interno vs. Crecimiento Externo",
+    "orderIndex": 14,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "desarrollo-y-crecimiento-de-la-empresa",
+      "topic": "crecimiento-interno-vs-crecimiento-externo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 14
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "desarrollo-y-crecimiento-de-la-empresa",
+    "blockTitle": "Desarrollo y Crecimiento de la Empresa",
+    "topicSlug": "la-cooperacion-entre-empresas",
+    "title": "La Cooperación entre Empresas",
+    "orderIndex": 15,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "desarrollo-y-crecimiento-de-la-empresa",
+      "topic": "la-cooperacion-entre-empresas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 15
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "desarrollo-y-crecimiento-de-la-empresa",
+    "blockTitle": "Desarrollo y Crecimiento de la Empresa",
+    "topicSlug": "la-importancia-de-las-pymes",
+    "title": "La Importancia de las PYMES",
+    "orderIndex": 16,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "desarrollo-y-crecimiento-de-la-empresa",
+      "topic": "la-importancia-de-las-pymes"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 16
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "desarrollo-y-crecimiento-de-la-empresa",
+    "blockTitle": "Desarrollo y Crecimiento de la Empresa",
+    "topicSlug": "la-empresa-multinacional-y-la-globalizacion",
+    "title": "La Empresa Multinacional y la Globalización",
+    "orderIndex": 17,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "desarrollo-y-crecimiento-de-la-empresa",
+      "topic": "la-empresa-multinacional-y-la-globalizacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 17
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "organizacion-y-direccion-de-la-empresa",
+    "blockTitle": "Organización y Dirección de la Empresa",
+    "topicSlug": "las-funciones-del-proceso-de-administracion",
+    "title": "Las Funciones del Proceso de Administración",
+    "orderIndex": 18,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "organizacion-y-direccion-de-la-empresa",
+      "topic": "las-funciones-del-proceso-de-administracion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 18
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "organizacion-y-direccion-de-la-empresa",
+    "blockTitle": "Organización y Dirección de la Empresa",
+    "topicSlug": "la-planificacion-estrategica",
+    "title": "La Planificación Estratégica",
+    "orderIndex": 19,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "organizacion-y-direccion-de-la-empresa",
+      "topic": "la-planificacion-estrategica"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 19
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "organizacion-y-direccion-de-la-empresa",
+    "blockTitle": "Organización y Dirección de la Empresa",
+    "topicSlug": "estructuras-organizativas-organigramas",
+    "title": "Estructuras Organizativas: Organigramas",
+    "orderIndex": 20,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "organizacion-y-direccion-de-la-empresa",
+      "topic": "estructuras-organizativas-organigramas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 20
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "organizacion-y-direccion-de-la-empresa",
+    "blockTitle": "Organización y Dirección de la Empresa",
+    "topicSlug": "estilos-de-direccion-y-liderazgo",
+    "title": "Estilos de Dirección y Liderazgo",
+    "orderIndex": 21,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "organizacion-y-direccion-de-la-empresa",
+      "topic": "estilos-de-direccion-y-liderazgo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 21
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "organizacion-y-direccion-de-la-empresa",
+    "blockTitle": "Organización y Dirección de la Empresa",
+    "topicSlug": "la-gestion-de-los-recursos-humanos",
+    "title": "La Gestión de los Recursos Humanos",
+    "orderIndex": 22,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "organizacion-y-direccion-de-la-empresa",
+      "topic": "la-gestion-de-los-recursos-humanos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 22
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "organizacion-y-direccion-de-la-empresa",
+    "blockTitle": "Organización y Dirección de la Empresa",
+    "topicSlug": "teorias-de-la-motivacion-laboral-maslow-y-herzberg",
+    "title": "Teorías de la Motivación Laboral: Maslow y Herzberg",
+    "orderIndex": 23,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "organizacion-y-direccion-de-la-empresa",
+      "topic": "teorias-de-la-motivacion-laboral-maslow-y-herzberg"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 23
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "organizacion-y-direccion-de-la-empresa",
+    "blockTitle": "Organización y Dirección de la Empresa",
+    "topicSlug": "el-conflicto-y-la-negociacion-laboral",
+    "title": "El Conflicto y la Negociación Laboral",
+    "orderIndex": 24,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "organizacion-y-direccion-de-la-empresa",
+      "topic": "el-conflicto-y-la-negociacion-laboral"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 24
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-productiva",
+    "blockTitle": "La Función Productiva",
+    "topicSlug": "el-proceso-de-produccion",
+    "title": "El Proceso de Producción",
+    "orderIndex": 25,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-productiva",
+      "topic": "el-proceso-de-produccion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 25
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-productiva",
+    "blockTitle": "La Función Productiva",
+    "topicSlug": "la-productividad-y-su-calculo",
+    "title": "La Productividad y su Cálculo",
+    "orderIndex": 26,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-productiva",
+      "topic": "la-productividad-y-su-calculo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 26
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-productiva",
+    "blockTitle": "La Función Productiva",
+    "topicSlug": "costes-de-la-empresa-fijos-y-variables",
+    "title": "Costes de la Empresa: Fijos y Variables",
+    "orderIndex": 27,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-productiva",
+      "topic": "costes-de-la-empresa-fijos-y-variables"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 27
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-productiva",
+    "blockTitle": "La Función Productiva",
+    "topicSlug": "el-umbral-de-rentabilidad-o-punto-muerto",
+    "title": "El Umbral de Rentabilidad o Punto Muerto",
+    "orderIndex": 28,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-productiva",
+      "topic": "el-umbral-de-rentabilidad-o-punto-muerto"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 28
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-productiva",
+    "blockTitle": "La Función Productiva",
+    "topicSlug": "la-i-d-i-y-el-cambio-tecnologico",
+    "title": "La I+D+i y el Cambio Tecnológico",
+    "orderIndex": 29,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-productiva",
+      "topic": "la-i-d-i-y-el-cambio-tecnologico"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 29
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-productiva",
+    "blockTitle": "La Función Productiva",
+    "topicSlug": "la-gestion-de-existencias-el-stock",
+    "title": "La Gestión de Existencias: El Stock",
+    "orderIndex": 30,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-productiva",
+      "topic": "la-gestion-de-existencias-el-stock"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 30
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-comercial-el-marketing",
+    "blockTitle": "La Función Comercial: El Marketing",
+    "topicSlug": "el-mercado-concepto-y-clases",
+    "title": "El Mercado: Concepto y Clases",
+    "orderIndex": 31,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-comercial-el-marketing",
+      "topic": "el-mercado-concepto-y-clases"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 31
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-comercial-el-marketing",
+    "blockTitle": "La Función Comercial: El Marketing",
+    "topicSlug": "la-investigacion-de-mercados",
+    "title": "La Investigación de Mercados",
+    "orderIndex": 32,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-comercial-el-marketing",
+      "topic": "la-investigacion-de-mercados"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 32
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-comercial-el-marketing",
+    "blockTitle": "La Función Comercial: El Marketing",
+    "topicSlug": "la-segmentacion-de-mercados",
+    "title": "La Segmentación de Mercados",
+    "orderIndex": 33,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-comercial-el-marketing",
+      "topic": "la-segmentacion-de-mercados"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 33
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-comercial-el-marketing",
+    "blockTitle": "La Función Comercial: El Marketing",
+    "topicSlug": "el-marketing-mix-producto-y-precio",
+    "title": "El Marketing Mix: Producto y Precio",
+    "orderIndex": 34,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-comercial-el-marketing",
+      "topic": "el-marketing-mix-producto-y-precio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 34
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-comercial-el-marketing",
+    "blockTitle": "La Función Comercial: El Marketing",
+    "topicSlug": "el-marketing-mix-distribucion-y-comunicacion",
+    "title": "El Marketing Mix: Distribución y Comunicación",
+    "orderIndex": 35,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-comercial-el-marketing",
+      "topic": "el-marketing-mix-distribucion-y-comunicacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 35
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-comercial-el-marketing",
+    "blockTitle": "La Función Comercial: El Marketing",
+    "topicSlug": "el-ciclo-de-vida-del-producto",
+    "title": "El Ciclo de Vida del Producto",
+    "orderIndex": 36,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-comercial-el-marketing",
+      "topic": "el-ciclo-de-vida-del-producto"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 36
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+    "blockTitle": "La Información en la Empresa: Contabilidad y Fiscalidad",
+    "topicSlug": "el-patrimonio-empresarial-masas-patrimoniales",
+    "title": "El Patrimonio Empresarial: Masas Patrimoniales",
+    "orderIndex": 37,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+      "topic": "el-patrimonio-empresarial-masas-patrimoniales"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 37
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+    "blockTitle": "La Información en la Empresa: Contabilidad y Fiscalidad",
+    "topicSlug": "el-balance-de-situacion",
+    "title": "El Balance de Situación",
+    "orderIndex": 38,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+      "topic": "el-balance-de-situacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 38
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+    "blockTitle": "La Información en la Empresa: Contabilidad y Fiscalidad",
+    "topicSlug": "la-cuenta-de-perdidas-y-ganancias",
+    "title": "La Cuenta de Pérdidas y Ganancias",
+    "orderIndex": 39,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+      "topic": "la-cuenta-de-perdidas-y-ganancias"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 39
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+    "blockTitle": "La Información en la Empresa: Contabilidad y Fiscalidad",
+    "topicSlug": "el-fondo-de-maniobra",
+    "title": "El Fondo de Maniobra",
+    "orderIndex": 40,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+      "topic": "el-fondo-de-maniobra"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 40
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+    "blockTitle": "La Información en la Empresa: Contabilidad y Fiscalidad",
+    "topicSlug": "ratios-de-liquidez-tesoreria-y-garantia",
+    "title": "Ratios de Liquidez, Tesorería y Garantía",
+    "orderIndex": 41,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+      "topic": "ratios-de-liquidez-tesoreria-y-garantia"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 41
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+    "blockTitle": "La Información en la Empresa: Contabilidad y Fiscalidad",
+    "topicSlug": "ratios-de-endeudamiento-y-rentabilidad-roa-y-roe",
+    "title": "Ratios de Endeudamiento y Rentabilidad (ROA y ROE)",
+    "orderIndex": 42,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+      "topic": "ratios-de-endeudamiento-y-rentabilidad-roa-y-roe"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 42
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+    "blockTitle": "La Información en la Empresa: Contabilidad y Fiscalidad",
+    "topicSlug": "la-fiscalidad-de-la-empresa",
+    "title": "La Fiscalidad de la Empresa",
+    "orderIndex": 43,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-informacion-en-la-empresa-contabilidad-y-fiscalidad",
+      "topic": "la-fiscalidad-de-la-empresa"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 43
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-financiera",
+    "blockTitle": "La Función Financiera",
+    "topicSlug": "la-estructura-economica-y-financiera-de-la-empresa",
+    "title": "La Estructura Económica y Financiera de la Empresa",
+    "orderIndex": 44,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-financiera",
+      "topic": "la-estructura-economica-y-financiera-de-la-empresa"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 44
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-financiera",
+    "blockTitle": "La Función Financiera",
+    "topicSlug": "las-inversiones-y-su-clasificacion",
+    "title": "Las Inversiones y su Clasificación",
+    "orderIndex": 45,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-financiera",
+      "topic": "las-inversiones-y-su-clasificacion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 45
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-financiera",
+    "blockTitle": "La Función Financiera",
+    "topicSlug": "las-fuentes-de-financiacion-propias-y-ajenas",
+    "title": "Las Fuentes de Financiación: Propias y Ajenas",
+    "orderIndex": 46,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-financiera",
+      "topic": "las-fuentes-de-financiacion-propias-y-ajenas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 46
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-financiera",
+    "blockTitle": "La Función Financiera",
+    "topicSlug": "el-leasing-y-el-factoring",
+    "title": "El Leasing y el Factoring",
+    "orderIndex": 47,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-financiera",
+      "topic": "el-leasing-y-el-factoring"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 47
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-financiera",
+    "blockTitle": "La Función Financiera",
+    "topicSlug": "la-valoracion-de-inversiones-el-metodo-del-van",
+    "title": "La Valoración de Inversiones: El Método del VAN",
+    "orderIndex": 48,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-financiera",
+      "topic": "la-valoracion-de-inversiones-el-metodo-del-van"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 48
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-financiera",
+    "blockTitle": "La Función Financiera",
+    "topicSlug": "la-valoracion-de-inversiones-tir-y-payback",
+    "title": "La Valoración de Inversiones: TIR y Payback",
+    "orderIndex": 49,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-financiera",
+      "topic": "la-valoracion-de-inversiones-tir-y-payback"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 49
   }
 ]

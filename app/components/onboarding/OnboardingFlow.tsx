@@ -139,6 +139,7 @@ const SUBJECT_OPTS: Array<{ id: string; label: string; color: string; betaStatus
   { id: 'Inglés', label: 'Inglés', color: '#dc2626', betaStatus: 'enabled' },
   { id: 'Física', label: 'Física', color: '#0f766e', betaStatus: 'enabled' },
   { id: 'Química', label: 'Química', color: '#65a30d', betaStatus: 'enabled' },
+  { id: 'Economía de la Empresa', label: 'Economía de la Empresa', color: '#ea580c', betaStatus: 'enabled' },
   { id: 'Biología', label: 'Biología', color: '#64748b', betaStatus: 'locked', badge: 'Próximamente' },
 ]
 const PRIVATE_BETA_ENABLED_SUBJECTS = SUBJECT_OPTS.filter(s => s.betaStatus === 'enabled')

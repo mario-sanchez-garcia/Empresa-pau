@@ -33,6 +33,15 @@ const TOPIC_VIDEO_MAP: Record<string, string> = {
   'matematicas_ii:probabilidad:normal-tipificacion':         'Mi9JBF_a0H8',
 }
 
+// "No lo he dado en clase" nació como señal genérica de ritmo de Camino, pero solo se
+// pidió para los 2 temas de integrales de Matemáticas CCSS (llegan tarde en muchos
+// institutos) — subject Y topicSlug juntos, porque Matemáticas II reutiliza los mismos
+// topicSlug para sus propios temas de integrales y no debe activar el botón.
+const NOT_SEEN_BUTTON_TOPICS = new Set<string>([
+  'matematicas_ccss:primitiva-de-una-funcion-y-la-integral-indefinida',
+  'matematicas_ccss:la-integral-definida-regla-de-barrow-y-areas',
+])
+
 // Maps each seed topic to its sort_order range in curriculum_content_v2
 const TOPIC_TO_V2_RANGE: Record<string, { min: number; max: number }> = {
   // Matemáticas II
@@ -1054,9 +1063,11 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           {streak > 0 && <span style={{ fontSize: 10, fontWeight: 900, color: '#f59e0b', background: 'rgba(245,158,11,.1)', border: '1px solid rgba(245,158,11,.2)', borderRadius: 999, padding: '3px 10px' }}>🔥 {streak}</span>}
-          <button onClick={markNotSeen} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 800, color: '#92400e', background: 'rgba(251,191,36,.08)', border: '1px solid rgba(245,158,11,.2)', borderRadius: 5, padding: '5px 10px', cursor: 'pointer' }}>
-            <School size={13} /> No lo he dado en clase
-          </button>
+          {NOT_SEEN_BUTTON_TOPICS.has(`${currentTopic.subject}:${currentTopic.topicSlug}`) && (
+            <button onClick={markNotSeen} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 800, color: '#92400e', background: 'rgba(251,191,36,.08)', border: '1px solid rgba(245,158,11,.2)', borderRadius: 5, padding: '5px 10px', cursor: 'pointer' }}>
+              <School size={13} /> No lo he dado en clase
+            </button>
+          )}
         </div>
       </div>
 
@@ -1141,7 +1152,9 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   </LearningCard>
                 )}
               </>
-            ) : null
+            ) : (
+              <LearningCard title="Idea clave"><EmptyContent /></LearningCard>
+            )
           ) : (
             <>
               <LearningCard title={lessonTitleFor(currentTopic)}>

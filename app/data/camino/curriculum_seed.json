@@ -10478,5 +10478,28 @@
       "ingles"
     ],
     "v2SortOrder": 12
+  },
+  {
+    "subject": "ingles",
+    "blockSlug": "destrezas-pau",
+    "blockTitle": "Destrezas PAU",
+    "topicSlug": "gerundio-e-infinitivo",
+    "title": "Gerundio vs. Infinitivo",
+    "orderIndex": 13,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "ingles",
+      "block": "destrezas-pau",
+      "topic": "gerundio-e-infinitivo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "ingles"
+    ],
+    "v2SortOrder": 13
   }
 ]

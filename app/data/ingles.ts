@@ -924,7 +924,7 @@ c) _______ (you ever participate) in a social media campaign? If so, who was it 
 d) The young activists, _______ had met at a university event, enjoyed _______ (discuss) new ideas after meetings.`,
       '"Today\'s Spanish youngsters are conformists and feel less committed to social issues than previous generations." Do you agree or disagree, and why?',
       "Activismo / Redes sociales",
-      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales"],
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },
@@ -957,7 +957,7 @@ c) Stop _______ (complain)! We _______ (find) your wallet sooner or later!
 d) Complete the following sentence to report what was said. "You won't believe what happened to me!" she said. — She told me _____________________________ .`,
       "Have you ever lost something that was important to you? Describe your experience or imagine one.",
       "Anécdotas / Solidaridad",
-      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","comparativos-y-superlativos"],
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","comparativos-y-superlativos","gerundio-e-infinitivo"],
       ["redaccion-narrativa-descriptiva-personal"]
     ),
   },
@@ -988,7 +988,7 @@ c) _______ the fact that Game of Thrones is bloody and sexist, most people _____
 d) Remember _______ (return) Martin's book to the library before the deadline _______ (expire).`,
       "What is your favourite TV series? Describe the plot and say why you like it.",
       "Historia / Entretenimiento",
-      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva"],
+      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva","gerundio-e-infinitivo"],
       ["redaccion-narrativa-descriptiva-personal"]
     ),
   },
@@ -1213,7 +1213,7 @@ c) Some jobs require being good _______ digital marketing, such _______ social m
 d) Candidates who are culturally fit _______ (think) to be _______ (bad) for a firm than others.`,
       "Is cultural diversity good for society? (Think about school, social relationships, work, etc.). Discuss.",
       "Trabajo / Diversidad",
-      ["gramatica-transformacion-y-uso-de-estructuras","comparativos-y-superlativos"],
+      ["gramatica-transformacion-y-uso-de-estructuras","comparativos-y-superlativos","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },
@@ -1341,7 +1341,7 @@ c) He was being so _______ (noise) that he was asked to stop _______ (play) the 
 d) Complete the following sentence to report what was said. "What songs did you use to listen to when you were a child?" — He asked me _____________________________ .`,
       "What are the benefits of music in today's world? Discuss.",
       "Historia / Música",
-      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales","comparativos-y-superlativos"],
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales","comparativos-y-superlativos","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },
@@ -1469,7 +1469,7 @@ c) I _______ (live) here in the woods for five years now. _______, I don't like 
 d) Complete the following sentence to report what was said. Maggie: "I've never wanted to live in this big city." — Maggie said _____________________________ .`,
       "Discuss the advantages and disadvantages of living in the countryside.",
       "Familia / Naturaleza",
-      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },
@@ -1533,7 +1533,7 @@ c) After _______ (work) for a decade in New York, Mary _______ (offer) a chance 
 d) We _______ (be) more in touch with nature if we weren't surrounded by _______ (technology) devices.`,
       "Do you think that we depend too much on technology? Justify your answer.",
       "Ciencia / Mujeres",
-      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales"],
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },
@@ -1814,7 +1814,7 @@ c) If she had known what she _______ (want) to study, she _______ (complete) a u
 d) Only after she _______ (spend) one year working, did she manage _______ (decide) which field she wanted to specialise in.`,
       "What would you like to do if you had the opportunity to take a gap year? Explain.",
       "Educación / Decisiones vitales",
-      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales"],
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },
@@ -2106,7 +2106,7 @@ c) If you ________(choose) a different airline last year, your trip ________(not
 d) You probably already know how ______ (say) "hello" in Japanese, but in case you don't, this is one of _______ (easy) words you can learn.`,
       "Discuss the advantages and disadvantages of travelling to exotic destinations.",
       "Viajes / Turismo",
-      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales"],
+      ["gramatica-transformacion-y-uso-de-estructuras","oraciones-condicionales","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },
@@ -2138,7 +2138,7 @@ d) Complete the following sentence to report what was said.
 My son asked me _____________________________________________________________.`,
       "Do you consider that practicing sports is absolutely necessary for a healthy life? Explain.",
       "Deporte / Educación",
-      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech"],
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },
@@ -2172,7 +2172,7 @@ d) Complete the following sentence to report what was said.
 Joanna apologized because______________________________________________________.`,
       "Explain the pros and cons of adventure holidays.",
       "Viajes / Aventura",
-      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },
@@ -2202,7 +2202,7 @@ c) Normally it _______ (think) that using the train is less polluting than drivi
 d) Sam, would you mind _______ (finish) the report now? It's terribly late, and this is a very _______ (stress) situation.`,
       "Do you think that only governments can do something to limit pollution or that individuals can contribute too? Justify your opinion.",
       "Medio ambiente / Salud",
-      ["gramatica-transformacion-y-uso-de-estructuras","comparativos-y-superlativos"],
+      ["gramatica-transformacion-y-uso-de-estructuras","comparativos-y-superlativos","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },
@@ -2236,7 +2236,7 @@ d) Complete the following sentence to report what was said.
 He asked me _________________________________________________________________.`,
       "Which inventions do you think have significantly changed the world? Discuss.",
       "Ciencia / Historia",
-      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales"],
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","oraciones-condicionales","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },
@@ -2583,7 +2583,7 @@ Mike told Mary: "I spoke to my publisher about your new photography book."
 Mike said ___________________________________________________ .`,
       "Do you think selfie sticks should be banned in some places? Give your opinion.",
       "Redes sociales / Tecnología",
-      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech"],
+      ["gramatica-transformacion-y-uso-de-estructuras","estilo-indirecto-reported-speech","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },
@@ -2647,7 +2647,7 @@ c) You always come _______ friendly people in local pubs. That's _______ we shou
 d) I remember _______ (go) to the pub with my father when I was a child. However, now you are not allowed _______ you are over 18.`,
       "Is it important to save traditions? Give your opinion.",
       "Tradiciones / Sociedad",
-      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva"],
+      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },
@@ -2741,7 +2741,7 @@ c) This particular perfume _______ (forbid) in Britain last month, but at home w
 d) I must remember _______ (buy) shampoo at this shop, _______ owner is always kind to me.`,
       "What is the impact of advertising campaigns on people's choice of perfumes?",
       "Salud / Consumo",
-      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva"],
+      ["gramatica-transformacion-y-uso-de-estructuras","voz-pasiva","gerundio-e-infinitivo"],
       ["redaccion-ensayo-de-opinion"]
     ),
   },

@@ -1587,7 +1587,7 @@
     "topicSlug": "descartes",
     "title": "Descartes",
     "orderIndex": 1,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1600,7 +1600,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 1
   },
   {
     "subject": "historia_filosofia",
@@ -1609,7 +1610,7 @@
     "topicSlug": "tomas-de-aquino",
     "title": "Tomás de Aquino",
     "orderIndex": 2,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1622,7 +1623,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 2
   },
   {
     "subject": "historia_filosofia",
@@ -1631,7 +1633,7 @@
     "topicSlug": "platon",
     "title": "Platón",
     "orderIndex": 3,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1644,7 +1646,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 3
   },
   {
     "subject": "historia_filosofia",
@@ -1653,7 +1656,7 @@
     "topicSlug": "kant",
     "title": "Kant",
     "orderIndex": 4,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1666,7 +1669,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 4
   },
   {
     "subject": "historia_filosofia",
@@ -1675,7 +1679,7 @@
     "topicSlug": "rousseau",
     "title": "Rousseau",
     "orderIndex": 5,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1688,7 +1692,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 5
   },
   {
     "subject": "historia_filosofia",
@@ -1697,7 +1702,7 @@
     "topicSlug": "hume",
     "title": "Hume",
     "orderIndex": 6,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1710,7 +1715,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 6
   },
   {
     "subject": "historia_filosofia",
@@ -1719,7 +1725,7 @@
     "topicSlug": "habermas",
     "title": "Habermas",
     "orderIndex": 7,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1732,7 +1738,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 7
   },
   {
     "subject": "historia_filosofia",
@@ -1741,7 +1748,7 @@
     "topicSlug": "ortega-y-gasset",
     "title": "Ortega y Gasset",
     "orderIndex": 8,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1754,7 +1761,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 8
   },
   {
     "subject": "historia_filosofia",
@@ -1763,7 +1771,7 @@
     "topicSlug": "marx",
     "title": "Marx",
     "orderIndex": 9,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1776,7 +1784,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 9
   },
   {
     "subject": "historia_filosofia",
@@ -1785,7 +1794,7 @@
     "topicSlug": "nietzsche",
     "title": "Nietzsche",
     "orderIndex": 10,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1798,7 +1807,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 10
   },
   {
     "subject": "historia_filosofia",
@@ -1807,7 +1817,7 @@
     "topicSlug": "aristoteles",
     "title": "Aristóteles",
     "orderIndex": 11,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1820,7 +1830,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 11
   },
   {
     "subject": "historia_filosofia",
@@ -1829,7 +1840,7 @@
     "topicSlug": "agustin-de-hipona",
     "title": "Agustín de Hipona",
     "orderIndex": 12,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1842,7 +1853,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 12
   },
   {
     "subject": "historia_filosofia",
@@ -1851,7 +1863,7 @@
     "topicSlug": "hannah-arendt",
     "title": "Hannah Arendt",
     "orderIndex": 13,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1864,7 +1876,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 13
   },
   {
     "subject": "historia_filosofia",
@@ -1873,7 +1886,7 @@
     "topicSlug": "etica-y-moral",
     "title": "Ética y/o Moral",
     "orderIndex": 14,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1886,7 +1899,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 14
   },
   {
     "subject": "historia_filosofia",
@@ -1895,7 +1909,7 @@
     "topicSlug": "sociedad-y-politica",
     "title": "Sociedad y/o Política",
     "orderIndex": 15,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1908,7 +1922,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 15
   },
   {
     "subject": "historia_filosofia",
@@ -1917,7 +1932,7 @@
     "topicSlug": "ser-humano",
     "title": "Ser Humano",
     "orderIndex": 16,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1930,7 +1945,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 16
   },
   {
     "subject": "historia_filosofia",
@@ -1939,7 +1955,7 @@
     "topicSlug": "dios",
     "title": "Dios",
     "orderIndex": 17,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1952,7 +1968,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 17
   },
   {
     "subject": "historia_filosofia",
@@ -1961,7 +1978,7 @@
     "topicSlug": "conocimiento-y-realidad",
     "title": "Conocimiento y/o Realidad",
     "orderIndex": 18,
-    "contentStatus": "itinerary_only",
+    "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
     "practicePrompt": "",
@@ -1974,7 +1991,8 @@
     "source": "contenidos_2_bach",
     "compatibleSubjects": [
       "historia_filosofia"
-    ]
+    ],
+    "v2SortOrder": 18
   },
   {
     "subject": "ingles",

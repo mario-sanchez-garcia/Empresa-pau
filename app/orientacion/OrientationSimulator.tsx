@@ -7,6 +7,7 @@ import { supabase } from '@/app/lib/supabase'
 import { calculateAdmissionScore, getTargetDifference } from './calculation'
 import { availableCatalogTargets, filterOrientationTargets, findSavedTarget, mergeSubjectInputs } from './catalog'
 import { ORIENTATION_FIXTURES, type AdmissionSubject, type OfficialCriterion, type OrientationTarget, type SavedOrientationTarget } from './data'
+import { persistOrientationTarget } from './persistence'
 import OfficialCriterionCard from './OfficialCriterionCard'
 import OpportunitiesExplorer from './OpportunitiesExplorer'
 import styles from './orientation.module.css'
@@ -133,16 +134,16 @@ export default function OrientationSimulator() {
   async function saveAndOpenCamino() {
     if (!target) return
     setSaveState('saving')
-    const { data } = await supabase.auth.getSession()
-    if (!data.session) { setSaveState('error'); return }
-    const response = await fetch('/api/orientation', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + data.session.access_token },
-      body: JSON.stringify({ target_degree_id: target.degreeId, target_university_id: target.universityId, target_degree: target.degree, target_university: target.university, target_admission_score: target.referenceScore, source_type: target.source.type }),
-    })
-    if (!response.ok) { setSaveState('error'); return }
-    setSavedTarget({ degreeId: target.degreeId, universityId: target.universityId, degree: target.degree, university: target.university, admissionScore: target.referenceScore, sourceType: target.source.type, updatedAt: new Date().toISOString() })
-    window.location.assign('/camino')
+    try {
+      const { data } = await supabase.auth.getSession()
+      if (!data.session) { setSaveState('error'); return }
+      const saved = await persistOrientationTarget(data.session.access_token, target)
+      if (!saved) { setSaveState('error'); return }
+      setSavedTarget({ degreeId: target.degreeId, universityId: target.universityId, degree: target.degree, university: target.university, admissionScore: target.referenceScore, sourceType: target.source.type, updatedAt: new Date().toISOString() })
+      window.location.assign('/camino')
+    } catch {
+      setSaveState('error')
+    }
   }
 
   const recommendations = subjects.filter(subject => subject.enabled && subject.defaultGrade >= 5 && subject.defaultGrade < 10)

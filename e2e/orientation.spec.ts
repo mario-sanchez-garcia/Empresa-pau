@@ -1,0 +1,231 @@
+import { expect, test, type Page, type Request } from '@playwright/test'
+import { hasAuthenticatedSession } from './auth-session'
+
+type SavedTarget = {
+  degreeId: string | null
+  universityId: string | null
+  degree: string
+  university: string
+  admissionScore: number
+}
+
+type Target = {
+  id: string
+  degreeId: string | null
+  universityId: string | null
+  degree: string
+  university: string
+  referenceScore: number
+  source: { type: 'official' | 'fixture' }
+  subjects: unknown[]
+}
+
+type OrientationPayload = {
+  targets: Target[]
+  universities: unknown[]
+  savedTarget: SavedTarget | null
+  catalogAvailable: boolean
+}
+
+const saveButtonName = /Guardar y usar en Camino|Usar este objetivo en Camino/
+const sessionExpired = 'Sesión E2E caducada. Ejecuta npm run e2e:auth'
+
+function isOrientationRequest(request: Request, method?: string) {
+  const url = new URL(request.url())
+  return url.pathname === '/api/orientation' && (!method || request.method() === method)
+}
+
+async function assertAuthenticated(page: Page) {
+  await expect.poll(() => hasAuthenticatedSession(page), { timeout: 8_000, message: sessionExpired }).toBe(true)
+}
+
+async function openOrientation(page: Page) {
+  const responsePromise = page.waitForResponse(response => isOrientationRequest(response.request(), 'GET'))
+  await page.goto('/orientacion')
+  await assertAuthenticated(page)
+  const response = await responsePromise
+  expect(response.ok()).toBe(true)
+  const payload = await response.json() as OrientationPayload
+  await expect(page.getByRole('heading', { name: 'Mi objetivo' })).toBeVisible()
+  await expect(page.getByRole('combobox', { name: 'Carrera y universidad' })).toBeVisible()
+  return payload
+}
+
+async function selectTarget(page: Page, target: Target) {
+  expect(target.degreeId, 'El grado oficial debe tener degree_id').toBeTruthy()
+  expect(target.universityId, 'El grado oficial debe tener university_id').toBeTruthy()
+  await page.getByRole('combobox', { name: 'Carrera y universidad' }).selectOption({ value: target.id })
+  await expect(page.getByText('OFICIAL · Fuente verificada')).toBeVisible()
+}
+
+async function saveTarget(page: Page, target: Target, assertPending = false) {
+  if (assertPending) {
+    await page.route('**/api/orientation', async route => {
+      if (route.request().method() !== 'POST') return route.continue()
+      const response = await route.fetch()
+      await new Promise(resolve => setTimeout(resolve, 250))
+      await route.fulfill({ response })
+    })
+  }
+
+  const responsePromise = page.waitForResponse(response => isOrientationRequest(response.request(), 'POST'))
+  const button = page.getByRole('button', { name: saveButtonName })
+  const clickPromise = button.click()
+  if (assertPending) await expect(button).toBeDisabled()
+  const response = await responsePromise
+  expect(response.ok()).toBe(true)
+  const body = response.request().postDataJSON() as Record<string, unknown>
+  expect(body.target_degree_id).toBe(target.degreeId)
+  expect(body.target_university_id).toBe(target.universityId)
+  expect('user_id' in body).toBe(false)
+  await clickPromise
+  await expect(page).toHaveURL(/\/camino(?:\?|$)/)
+  if (assertPending) await page.unroute('**/api/orientation')
+}
+
+async function expectRestoredTarget(page: Page, target: Target) {
+  const payload = await openOrientation(page)
+  expect(payload.savedTarget?.degreeId).toBe(target.degreeId)
+  expect(payload.savedTarget?.universityId).toBe(target.universityId)
+  await expect(page.getByRole('combobox', { name: 'Carrera y universidad' })).toHaveValue(target.id)
+  const saved = page.getByText('Objetivo guardado', { exact: true }).locator('..')
+  await expect(saved).toContainText(target.degree)
+  await expect(saved).toContainText(target.university)
+  return payload
+}
+
+test('Orientación conserva el objetivo autenticado y mantiene el simulador local', async ({ page }) => {
+  const consoleErrors: string[] = []
+  const runtimeErrors: string[] = []
+  const failedRequests: string[] = []
+  let expectedSaveFailure = false
+  let expectedFailedResourceMessages = 0
+
+  page.on('console', message => {
+    if (message.type() !== 'error') return
+    const text = message.text()
+    if (/posthog|analytics|favicon/i.test(text)) return
+    if (/upgrade-insecure-requests.*report-only policy/i.test(text)) return
+    if (/Failed to load resource: net::ERR_FAILED/i.test(text) && expectedFailedResourceMessages > 0) {
+      expectedFailedResourceMessages -= 1
+      return
+    }
+    consoleErrors.push(text)
+  })
+  page.on('pageerror', error => {
+    if (error.message === 'Transition was skipped') return
+    runtimeErrors.push(error.message)
+  })
+  page.on('requestfailed', request => {
+    if (expectedSaveFailure && isOrientationRequest(request, 'POST')) return
+    if (!/posthog|analytics|googletagmanager/i.test(request.url())) failedRequests.push(`${request.method()} ${request.url()}`)
+  })
+
+  let originalTarget: Target | undefined
+
+  try {
+    const initial = await test.step('carga autenticada y catálogo oficial', async () => {
+      const payload = await openOrientation(page)
+      expect(payload.catalogAvailable).toBe(true)
+      expect(payload.targets).toHaveLength(554)
+      expect(payload.universities).toHaveLength(6)
+      expect(payload.targets.reduce((total, target) => total + target.subjects.length, 0)).toBe(4473)
+      expect(payload.targets.every(target => target.source.type === 'official')).toBe(true)
+      await expect(page.getByText(/Datos demo · no oficiales/)).toHaveCount(0)
+      return payload
+    })
+
+    const initialSavedTarget = initial.savedTarget
+    originalTarget = initialSavedTarget?.degreeId && initialSavedTarget.universityId
+      ? initial.targets.find(target => target.degreeId === initialSavedTarget.degreeId && target.universityId === initialSavedTarget.universityId)
+      : undefined
+    const firstTarget = initial.targets.find(target => target.degreeId !== initialSavedTarget?.degreeId && target.subjects.length >= 2) ?? initial.targets[0]
+    const secondTarget = initial.targets.find(target => target.degreeId !== firstTarget.degreeId && target.subjects.length >= 2) ?? initial.targets[1]
+    expect(firstTarget).toBeTruthy()
+    expect(secondTarget).toBeTruthy()
+
+    await test.step('selección y guardado por identificadores estables', async () => {
+      await selectTarget(page, firstTarget)
+      await saveTarget(page, firstTarget, true)
+    })
+
+    await test.step('F5 restaura universidad y grado mediante IDs', async () => {
+      await expectRestoredTarget(page, firstTarget)
+      const responsePromise = page.waitForResponse(response => isOrientationRequest(response.request(), 'GET'))
+      await page.reload()
+      const response = await responsePromise
+      const payload = await response.json() as OrientationPayload
+      expect(payload.savedTarget?.degreeId).toBe(firstTarget.degreeId)
+      expect(payload.savedTarget?.universityId).toBe(firstTarget.universityId)
+      await expect(page.getByRole('combobox', { name: 'Carrera y universidad' })).toHaveValue(firstTarget.id)
+    })
+
+    await test.step('salir y volver no depende del estado React anterior', async () => {
+      await page.getByRole('link', { name: 'Camino PAU' }).click()
+      await expect(page).toHaveURL(/\/camino(?:\?|$)/)
+      await expectRestoredTarget(page, firstTarget)
+    })
+
+    await test.step('sliders y oportunidades reaccionan sin persistencia accidental', async () => {
+      let orientationRequests = 0
+      const countRequests = (request: Request) => { if (isOrientationRequest(request)) orientationRequests += 1 }
+      page.on('request', countRequests)
+      const score = page.locator('[aria-label^="Tu nota estimada es"]')
+      const scoreBefore = await score.getAttribute('aria-label')
+      const opportunities = page.getByRole('region', { name: 'Explora oportunidades cerca de tu escenario' })
+      const opportunitiesBefore = await opportunities.innerText()
+      await page.getByRole('spinbutton', { name: 'Nota media Bachillerato, nota numérica' }).fill('10')
+      await page.getByRole('spinbutton', { name: 'Fase de acceso PAU, nota numérica' }).fill('10')
+      await expect(score).not.toHaveAttribute('aria-label', scoreBefore ?? '')
+      await expect.poll(() => opportunities.innerText()).not.toBe(opportunitiesBefore)
+      expect(orientationRequests).toBe(0)
+      await expect(opportunities).toContainText(/Por encima de la referencia|Cerca de la referencia|Por debajo de la referencia/)
+      await expect(page.getByText(/no garantiza la admisión/i)).toBeVisible()
+      page.off('request', countRequests)
+    })
+
+    await test.step('un cambio real de objetivo persiste el nuevo degree_id', async () => {
+      await selectTarget(page, secondTarget)
+      await saveTarget(page, secondTarget)
+      await expectRestoredTarget(page, secondTarget)
+      const responsePromise = page.waitForResponse(response => isOrientationRequest(response.request(), 'GET'))
+      await page.reload()
+      const response = await responsePromise
+      const payload = await response.json() as OrientationPayload
+      expect(payload.savedTarget?.degreeId).toBe(secondTarget.degreeId)
+      expect(payload.savedTarget?.universityId).toBe(secondTarget.universityId)
+    })
+
+    await test.step('un fallo de red muestra error y libera el estado guardando', async () => {
+      expectedSaveFailure = true
+      await page.route('**/api/orientation', async route => {
+        if (route.request().method() === 'POST') {
+          expectedFailedResourceMessages += 1
+          return route.abort('failed')
+        }
+        return route.continue()
+      })
+      const button = page.getByRole('button', { name: saveButtonName })
+      await button.click()
+      await expect(page.getByText('Inicia sesión o reintenta para guardar el objetivo.')).toBeVisible()
+      await expect(button).toBeEnabled()
+      await expect(page).toHaveURL(/\/orientacion(?:\?|$)/)
+      await page.unroute('**/api/orientation')
+      expectedSaveFailure = false
+    })
+  } finally {
+    if (originalTarget && page.url() !== 'about:blank') {
+      try {
+        if (!/\/orientacion(?:\?|$)/.test(page.url())) await openOrientation(page)
+        await selectTarget(page, originalTarget)
+        await saveTarget(page, originalTarget)
+      } catch {
+        // The main assertions report the failure; cleanup remains best-effort.
+      }
+    }
+  }
+
+  expect(consoleErrors, `console.error inesperados:\n${consoleErrors.join('\n')}`).toEqual([])
+  expect(runtimeErrors, `errores runtime:\n${runtimeErrors.join('\n')}`).toEqual([])
+  expect(failedRequests, `requests fallidas inesperadas:\n${failedRequests.join('\n')}`).toEqual([])
+})

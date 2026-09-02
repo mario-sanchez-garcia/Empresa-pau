@@ -52,6 +52,12 @@ export function collectPaginatedRows<T>(pages: T[][], pageSize: number) {
   return { rows, complete: !lastPage || lastPage.length < pageSize }
 }
 
+function isFirstAccessGroup(value: string | null) {
+  if (value === null) return true
+  const normalized = value.trim().toLocaleLowerCase('es').replace(/[\s_-]+/g, '')
+  return normalized === 'grupo1' || normalized === 'grupo1ordinaria'
+}
+
 function normalizedWeighting(row: OfficialWeightingRow): AdmissionSubject | null {
   const weighting = Number(row.weighting)
   const name = (row.official_subject_name || row.subject).trim()
@@ -119,7 +125,7 @@ export function buildOfficialTargets({
       seenDegrees.has(cutoff.degree_id)
       || cutoff.academic_year !== academicYear
       || cutoff.admission_round !== 'grupo_1_ordinaria'
-      || (cutoff.access_group !== null && cutoff.access_group !== 'grupo_1_ordinaria')
+      || !isFirstAccessGroup(cutoff.access_group)
       || cutoff.source_type !== 'official'
       || !cutoff.verified_at
     ) continue

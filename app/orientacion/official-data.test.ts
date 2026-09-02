@@ -11,7 +11,7 @@ const degree: OfficialDegreeRow = {
   official_url: 'https://official.example/notas.pdf',
 }
 const cutoff: OfficialCutoffRow = {
-  degree_id: degree.id, academic_year: '2026-2027', access_group: 'grupo_1_ordinaria',
+  degree_id: degree.id, academic_year: '2026-2027', access_group: 'Grupo 1',
   admission_round: 'grupo_1_ordinaria', cutoff_score: '11.070', source_url: 'https://official.example/notas.pdf',
   source_label: 'Comunidad de Madrid · Notas de corte 2026-2027', source_document: 'Notas de corte 2026-2027',
   source_type: 'official', verified_at: '2026-08-31T00:00:00Z',

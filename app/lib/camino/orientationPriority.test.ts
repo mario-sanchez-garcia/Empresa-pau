@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
 import type { CaminoOrientationContext } from '../../orientacion/access-paths/types.ts'
-import { formatPriorityReasons, matchingOrientationContext, missionPriorityScore, orientationImpactForSubject, orientationRotationBonusSlots, priorityReasonsForMission, rankMissionCandidates, withPriorityReasons } from './orientationPriority.ts'
+import { formatPriorityReasons, matchingOrientationContext, missionPriorityScore, orientationImpactForSubject, orientationRotationBonusSlots, priorityPresentationForMission, priorityReasonsForMission, rankMissionCandidates, withPriorityReasons } from './orientationPriority.ts'
 
 function context(overrides: Partial<CaminoOrientationContext> = {}): CaminoOrientationContext {
   return {
@@ -90,4 +90,81 @@ test('la capa de Camino consume la ponderación ya resuelta sin duplicar fórmul
   const impact = orientationImpactForSubject('Matemáticas II', context({ estimatedScore: null, gap: null }))
   assert.equal(impact.weighting, 0.2)
   assert.ok(impact.score > 0)
+})
+
+test('la presentación prioriza examen y muestra debilidad como razón secundaria', () => {
+  const mission = withPriorityReasons({
+    subject: 'Matemáticas II',
+    metadata: { partial_exam_date: '2026-09-05', weak_review: true },
+  }, context(), '2026-09-02')
+  const presentation = priorityPresentationForMission(mission, { orientationInfluenced: true })
+
+  assert.deepEqual(presentation.visibleReasons.map(reason => [reason.label, reason.emphasis]), [
+    ['Examen en 3 días', 'primary'],
+    ['Este tema te cuesta', 'secondary'],
+  ])
+  assert.equal(presentation.visibleReasons.length, 2)
+})
+
+test('examen y ponderación conviven sin superar dos razones visibles', () => {
+  const mission = withPriorityReasons({
+    subject: 'Matemáticas II',
+    metadata: { days_until_exam: 4 },
+  }, context())
+  const presentation = priorityPresentationForMission(mission, { orientationInfluenced: true })
+
+  assert.deepEqual(presentation.visibleReasons.map(reason => reason.label), [
+    'Examen en 4 días',
+    'Pondera 0,2 para tu objetivo',
+  ])
+  assert.match(presentation.explanation ?? '', /^Te recomiendo empezar por esto porque /)
+  assert.match(presentation.explanation ?? '', /Economía en UC3M/)
+  assert.match(presentation.explanation ?? '', /Matemáticas II pondera/)
+})
+
+test('debilidad y ponderación conservan una jerarquía humana', () => {
+  const mission = withPriorityReasons({ subject: 'Matemáticas II', metadata: { weak_review: true } }, context())
+  const presentation = priorityPresentationForMission(mission, { orientationInfluenced: true })
+
+  assert.deepEqual(presentation.visibleReasons.map(reason => reason.label), [
+    'Este tema te cuesta',
+    'Pondera 0,2 para tu objetivo',
+  ])
+})
+
+test('una recomendación solo universitaria puede explicarse sin lenguaje técnico', () => {
+  const mission = withPriorityReasons({ subject: 'Matemáticas II' }, context())
+  const presentation = priorityPresentationForMission(mission, { orientationInfluenced: true })
+
+  assert.equal(presentation.visibleReasons[0]?.label, 'Pondera 0,2 para tu objetivo')
+  assert.equal(presentation.visibleReasons[1]?.label, 'Puede acercarte a tu objetivo')
+  assert.doesNotMatch(presentation.explanation ?? '', /orientationImpact|priority boost|weighted subject/i)
+})
+
+test('sin objetivo no aparecen razones ni explicación universitaria', () => {
+  const mission = withPriorityReasons({ subject: 'Matemáticas II' }, null)
+  assert.deepEqual(priorityPresentationForMission(mission, { orientationInfluenced: false }), {
+    visibleReasons: [],
+    explanation: null,
+  })
+})
+
+test('una ponderación tenue que no influyó no se convierte en chip ni explicación', () => {
+  const mission = withPriorityReasons({ subject: 'Matemáticas II' }, context({
+    impactSubjects: [{ subjectCode: 'matematicas-ii', name: 'Matemáticas II', weighting: 0.2, defaultGrade: 9.5 }],
+    gap: 0.5,
+  }))
+  const presentation = priorityPresentationForMission(mission, { orientationInfluenced: false })
+
+  assert.deepEqual(presentation.visibleReasons, [])
+  assert.equal(presentation.explanation, null)
+})
+
+test('si orientación no influyó, una razón real de examen permanece limpia', () => {
+  const mission = withPriorityReasons({ subject: 'Matemáticas II', metadata: { days_until_exam: 1 } }, context())
+  const presentation = priorityPresentationForMission(mission, { orientationInfluenced: false })
+
+  assert.deepEqual(presentation.visibleReasons.map(reason => reason.label), ['Examen en 1 día'])
+  assert.match(presentation.explanation ?? '', /examen es en 1 día/)
+  assert.doesNotMatch(presentation.explanation ?? '', /pondera|objetivo/)
 })

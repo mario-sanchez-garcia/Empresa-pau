@@ -34,7 +34,7 @@ import { RankingRow } from '@/components/shared/RankingRow'
 import UsernameGate from '@/app/components/camino/UsernameGate'
 import { CAMINO_ORIENTATION_CONTEXT_KEY, parseCaminoOrientationContext } from '@/app/orientacion/access-paths/storage'
 import type { CaminoOrientationContext } from '@/app/orientacion/access-paths/types'
-import { formatPriorityReasons, matchingOrientationContext, orientationRotationBonusSlots, rankMissionCandidates, withPriorityReasons, type PersistedOrientationGoal } from '@/app/lib/camino/orientationPriority'
+import { matchingOrientationContext, orientationImpactForSubject, orientationRotationBonusSlots, priorityPresentationForMission, rankMissionCandidates, withPriorityReasons, type PersistedOrientationGoal } from '@/app/lib/camino/orientationPriority'
 
 type MissionKind = 'concept_explanation' | 'guided_example' | 'guided_practice' | 'evau_practice' | 'exam_focus' | 'mock_exam' | 'manual'
 type MissionRole = 'main' | 'bonus'
@@ -202,18 +202,6 @@ function normalizeOnboardingSubjects(subjects: string[]) {
   }).map(({ label }) => label)
 }
 function textSlug(value: string) { return normalizeCaminoSlug(value) }
-function orientationRouteLabel(context: CaminoOrientationContext | null) {
-  switch (context?.route) {
-    case 'spanish_pau': return 'Bachillerato · PAU'
-    case 'bachibac_spanish_pau': return 'Bachibac · PAU española'
-    case 'bachibac_diploma': return 'Bachibac · diplôme'
-    case 'ib_unedasiss': return 'IB · UNEDasiss'
-    case 'international_direct_unedasiss': return 'Internacional · UNEDasiss'
-    case 'international_homologation_pce': return 'Internacional · PCE'
-    case 'international_homologation_pending': return 'Internacional · pendiente'
-    default: return null
-  }
-}
 function calendarDayLabel(dateISO: string) { return new Date(`${dateISO}T12:00:00`).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) }
 function weekRangeLabel(weekStartISO: string) {
   const start = dateFromISO(weekStartISO)
@@ -2252,10 +2240,16 @@ export default function CaminoCalendarClient() {
 
   const mainMission = todayMain[0] ?? null
   const mainTarget = mainMission ? hrefForMission(mainMission) : null
-  const mainReason = mainMission ? formatPriorityReasons(mainMission) || heroReason(mainMission, blockCompletedCount, nextMissionInCalendar?.title ?? null) : null
+  const mainPriorityPresentation = mainMission
+    ? priorityPresentationForMission(mainMission, {
+        orientationInfluenced: orientationImpactForSubject(mainMission.subject, orientationContext).level === 'medium',
+      })
+    : null
+  const mainReason = mainMission && mainPriorityPresentation?.visibleReasons.length === 0
+    ? heroReason(mainMission, blockCompletedCount, nextMissionInCalendar?.title ?? null)
+    : null
   const orientationUniversity = orientationContext?.target.universityAcronym || orientationTarget?.university || ''
-  const orientationRoute = orientationRouteLabel(orientationContext)
-  const formatOrientationScore = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 3 })
+  const formatOrientationScore = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 3 })
 
   return (
     <Shell>
@@ -2319,18 +2313,15 @@ export default function CaminoCalendarClient() {
 
           {orientationTarget && (
             <div style={{ padding: '10px 20px', borderBottom: '1px solid #e2e8f0', background: 'linear-gradient(135deg,rgba(239,246,255,.72),rgba(255,255,255,.68))' }}>
-              <div className="kairo-soft-panel" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 14, padding: '10px 14px', border: '1px solid rgba(191,219,254,.72)', background: 'rgba(255,255,255,.68)', backdropFilter: 'blur(14px)', boxShadow: '0 8px 28px rgba(37,99,235,.07), inset 0 1px 0 rgba(255,255,255,.9)' }}>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 7 }}>
-                    <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase', color: '#2563eb' }}>Tu objetivo</span>
-                    {orientationRoute && <span style={{ borderRadius: 999, padding: '2px 8px', fontSize: 9, fontWeight: 800, color: '#64748b', background: '#f8fafc', boxShadow: 'inset 1px 1px 3px rgba(15,23,42,.08), inset -1px -1px 3px white' }}>{orientationRoute}</span>}
-                  </div>
+              <div className="camino-target-card kairo-soft-panel" data-testid="camino-orientation-target" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 14, padding: '10px 14px', border: '1px solid rgba(191,219,254,.72)', background: 'rgba(255,255,255,.68)', backdropFilter: 'blur(14px)', boxShadow: '0 8px 28px rgba(37,99,235,.07), inset 0 1px 0 rgba(255,255,255,.9)' }}>
+                <div className="camino-target-objective" style={{ minWidth: 0 }}>
+                  <span className="camino-target-label">Objetivo</span>
                   <p style={{ margin: '3px 0 0', fontSize: 13, fontWeight: 900, color: '#0f172a', lineHeight: 1.25 }}>{orientationTarget.degree} · {orientationUniversity}</p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px 12px', marginTop: 4, fontSize: 10.5, fontWeight: 650, color: '#64748b' }}>
-                    <span>Referencia: {formatOrientationScore(orientationTarget.admissionScore)}</span>
-                    {orientationContext?.calculationComplete && orientationContext.estimatedScore != null && <span>Tu escenario: {formatOrientationScore(orientationContext.estimatedScore)}</span>}
-                    {orientationContext?.calculationComplete && orientationContext.gap != null && <span style={{ color: orientationContext.gap < 0 ? '#b45309' : '#047857', fontWeight: 800 }}>{orientationContext.gap < 0 ? `Te separan: ${formatOrientationScore(Math.abs(orientationContext.gap))}` : `Sobre referencia: +${formatOrientationScore(orientationContext.gap)}`}</span>}
-                  </div>
+                </div>
+                <div className="camino-target-metrics">
+                  <div><span className="camino-target-label">Referencia</span><strong>{formatOrientationScore(orientationTarget.admissionScore)}</strong></div>
+                  {orientationContext?.calculationComplete && orientationContext.estimatedScore != null && <div><span className="camino-target-label">Tu escenario</span><strong>{formatOrientationScore(orientationContext.estimatedScore)}</strong></div>}
+                  {orientationContext?.calculationComplete && orientationContext.gap != null && <div><span className="camino-target-label">Gap</span><strong className={orientationContext.gap < 0 ? 'is-below' : 'is-above'}>{orientationContext.gap > 0 ? '+' : ''}{formatOrientationScore(Math.abs(orientationContext.gap))}</strong></div>}
                 </div>
                 <a href="/orientacion" style={{ flexShrink: 0, fontSize: 10.5, fontWeight: 900, color: '#2563eb', textDecoration: 'none', whiteSpace: 'nowrap' }}>Ver orientación →</a>
               </div>
@@ -2443,9 +2434,9 @@ export default function CaminoCalendarClient() {
 
           {/* ── MISSION 01 — PRINCIPAL ── */}
           {mainMission ? (
-            <div className="camino-mission-card kairo-raised" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, margin: '16px 20px', padding: '20px', borderRadius: 16, borderLeft: '3px solid #2563eb', cursor: 'default' }}>
+            <div className="camino-mission-card kairo-raised" data-testid="camino-main-mission" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, margin: '16px 20px', padding: '20px', borderRadius: 16, borderLeft: '3px solid #2563eb', cursor: 'default' }}>
               <div className="camino-mission-number" style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#93c5fd', flexShrink: 0, width: 48, paddingTop: 2, fontVariantNumeric: 'tabular-nums' }}>01</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="camino-main-body" data-testid="camino-main-body" style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6, alignItems: 'center' }}>
                   <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mainMission.subject}</span>
                   {(formatBlockLabel(mainMission.blockKey) || mainMission.block) && <><span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{formatBlockLabel(mainMission.blockKey) || mainMission.block}</span></>}
@@ -2459,6 +2450,24 @@ export default function CaminoCalendarClient() {
                   </div>
                   <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{mainMission.estimatedMinutes} min · {mainMission.status === 'done' ? 'Completada' : 'Sin comenzar'}</span>
                 </div>
+                {!!mainPriorityPresentation?.visibleReasons.length && (
+                  <div className="camino-reason-list" data-testid="camino-priority-reasons" aria-label="Razones de esta recomendación">
+                    {mainPriorityPresentation.visibleReasons.map(reason => (
+                      <span
+                        key={reason.code}
+                        className={`camino-reason-chip camino-reason-chip--${reason.emphasis}${reason.code === 'exam_soon' || reason.code === 'academic_risk' ? ' camino-reason-chip--urgent' : ''}${reason.source === 'orientation' ? ' camino-reason-chip--orientation' : ''}`}
+                      >
+                        {reason.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {mainPriorityPresentation?.explanation && (
+                  <details className="camino-why-now" data-testid="camino-why-now">
+                    <summary>¿Por qué ahora?</summary>
+                    <p>{mainPriorityPresentation.explanation}</p>
+                  </details>
+                )}
                 {mainReason && <div style={{ marginTop: 6, fontSize: 12, fontWeight: 600, color: '#64748b' }}>{mainReason}</div>}
                 {mainMission.status !== 'done' && (
                   <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
@@ -2469,7 +2478,7 @@ export default function CaminoCalendarClient() {
                   </div>
                 )}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+              <div className="camino-main-action" data-testid="camino-main-action" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
                   <span style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8' }}>+{mainMission.baseXP} XP</span>
                 {mainMission.status === 'done' ? (
                   mainMission.missionType === 'partial_practice' && mainTarget?.href ? (
@@ -2917,6 +2926,97 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
       <style>{`
+        .camino-target-label {
+          display: block;
+          color: #64748b;
+          font-size: 8.5px;
+          font-weight: 900;
+          letter-spacing: .1em;
+          line-height: 1.2;
+          text-transform: uppercase;
+        }
+        .camino-target-objective .camino-target-label { color: #2563eb; }
+        .camino-target-metrics {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          margin-left: auto;
+        }
+        .camino-target-metrics > div { min-width: 58px; }
+        .camino-target-metrics strong {
+          display: block;
+          margin-top: 2px;
+          color: #0f172a;
+          font-size: 12px;
+          font-variant-numeric: tabular-nums;
+          line-height: 1.2;
+        }
+        .camino-target-metrics strong.is-below { color: #b45309; }
+        .camino-target-metrics strong.is-above { color: #047857; }
+        .camino-reason-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+          margin-top: 10px;
+        }
+        .camino-reason-chip {
+          display: inline-flex;
+          align-items: center;
+          min-height: 25px;
+          max-width: 100%;
+          border: 1px solid rgba(203,213,225,.9);
+          border-radius: 999px;
+          background: #f8fafc;
+          box-shadow: inset 1px 1px 3px rgba(15,23,42,.06), inset -1px -1px 3px rgba(255,255,255,.95);
+          color: #475569;
+          font-size: 10.5px;
+          font-weight: 800;
+          line-height: 1.25;
+          padding: 5px 10px;
+        }
+        .camino-reason-chip--primary {
+          border-color: #bfdbfe;
+          background: #eff6ff;
+          color: #1d4ed8;
+          font-weight: 900;
+        }
+        .camino-reason-chip--primary.camino-reason-chip--urgent {
+          border-color: #fed7aa;
+          background: linear-gradient(145deg,#fff7ed,#ffedd5);
+          box-shadow: 0 4px 10px rgba(234,88,12,.12), inset 0 1px 0 rgba(255,255,255,.92);
+          color: #c2410c;
+        }
+        .camino-reason-chip--orientation {
+          border-color: #bfdbfe;
+          background: #eff6ff;
+          color: #1d4ed8;
+        }
+        .camino-why-now {
+          width: fit-content;
+          max-width: 100%;
+          margin-top: 8px;
+          border: 1px solid rgba(219,234,254,.8);
+          border-radius: 10px;
+          background: rgba(255,255,255,.58);
+          backdrop-filter: blur(10px);
+          color: #64748b;
+          font-size: 11px;
+        }
+        .camino-why-now summary {
+          cursor: pointer;
+          list-style-position: inside;
+          padding: 6px 9px;
+          color: #475569;
+          font-weight: 850;
+        }
+        .camino-why-now[open] { width: 100%; }
+        .camino-why-now p {
+          margin: 0;
+          border-top: 1px solid rgba(219,234,254,.72);
+          padding: 8px 10px 9px;
+          line-height: 1.45;
+        }
+
         /* iPad/tablet: el hero (340px, pensado para escritorio) solo tenía
            un recorte para móvil (max-width:767px) — en tablet se quedaba a
            altura completa, dejando muy poco sitio para el contenido real
@@ -2935,8 +3035,30 @@ function Shell({ children }: { children: React.ReactNode }) {
           .camino-header-title { font-size: 16px !important; }
           .camino-header-actions { width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
           .camino-header-actions::-webkit-scrollbar { display: none; }
-          .camino-mission-card { padding: 14px 16px !important; }
+          .camino-mission-card { flex-wrap: wrap !important; padding: 14px 16px !important; }
           .camino-mission-number { font-size: 22px !important; width: 36px !important; }
+          .camino-main-body { flex-basis: calc(100% - 52px) !important; }
+          .camino-main-action {
+            width: calc(100% - 52px) !important;
+            margin-left: 52px !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+          }
+          .camino-main-action > a,
+          .camino-main-action > span:not(:first-child) { justify-content: center; min-width: 0; }
+          .camino-target-card { align-items: flex-end !important; }
+          .camino-target-objective { flex-basis: 100%; }
+          .camino-target-metrics { order: 2; margin-left: 0; gap: 15px; }
+          .camino-target-card > a { order: 3; }
+        }
+
+        @media (max-width: 420px) {
+          .camino-mission-card { margin-left: 12px !important; margin-right: 12px !important; gap: 12px !important; }
+          .camino-main-body { flex-basis: calc(100% - 48px) !important; }
+          .camino-main-action { width: calc(100% - 48px) !important; margin-left: 48px !important; }
+          .camino-target-metrics { width: 100%; justify-content: space-between; }
+          .camino-target-card > a { margin-top: 1px; }
         }
       `}</style>
       <SidebarNav />

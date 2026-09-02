@@ -10,6 +10,18 @@ export type MissionPriorityReason = {
   weighting?: 0.1 | 0.2
 }
 
+export type MissionPriorityReasonPresentation = {
+  code: MissionPriorityReasonCode
+  label: string
+  source: MissionPriorityReason['source']
+  emphasis: 'primary' | 'secondary'
+}
+
+export type MissionPriorityPresentation = {
+  visibleReasons: MissionPriorityReasonPresentation[]
+  explanation: string | null
+}
+
 export type MissionPriorityInput = {
   subject: string
   reason?: string
@@ -168,6 +180,64 @@ export function withPriorityReasons<T extends MissionPriorityInput>(mission: T, 
 export function formatPriorityReasons(mission: MissionPriorityInput) {
   const reasons = Array.isArray(mission.metadata?.priorityReasons) ? mission.metadata.priorityReasons as MissionPriorityReason[] : []
   return reasons.slice(0, 2).map(reason => reason.label).join(' ')
+}
+
+function compactReasonLabel(reason: MissionPriorityReason) {
+  switch (reason.code) {
+    case 'exam_soon':
+      return reason.daysUntilExam === 0
+        ? 'Examen hoy'
+        : `Examen en ${reason.daysUntilExam} día${reason.daysUntilExam === 1 ? '' : 's'}`
+    case 'academic_risk':
+      return 'Ritmo en riesgo'
+    case 'weak_topic':
+      return 'Este tema te cuesta'
+    case 'orientation_high_weight':
+    case 'orientation_weight':
+      return reason.weighting
+        ? `Pondera ${reason.weighting.toLocaleString('es-ES')} para tu objetivo`
+        : 'Importa para tu objetivo'
+    case 'orientation_gap':
+      return 'Puede acercarte a tu objetivo'
+  }
+}
+
+function explanationClause(reason: MissionPriorityReason) {
+  const label = reason.label.replace(/[.!?]+$/, '')
+  if (label.startsWith('Tu ')) return `tu ${label.slice(3)}`
+  if (label.startsWith('Es ')) return `es ${label.slice(3)}`
+  if (label.startsWith('Mejorarla ')) return `mejorarla ${label.slice(10)}`
+  return label
+}
+
+/**
+ * Adapta las razones estructuradas a microcopy de interfaz. No decide ni
+ * puntúa misiones: solo presenta señales ya emitidas por el motor.
+ *
+ * La señal universitaria se omite cuando su impacto fue demasiado tenue para
+ * intervenir materialmente en la recomendación, aunque el dato de ponderación
+ * exista en el objetivo.
+ */
+export function priorityPresentationForMission(
+  mission: MissionPriorityInput,
+  { orientationInfluenced = false }: { orientationInfluenced?: boolean } = {},
+): MissionPriorityPresentation {
+  const priorityReasons = Array.isArray(mission.metadata?.priorityReasons)
+    ? mission.metadata.priorityReasons as MissionPriorityReason[]
+    : []
+  const applicableReasons = priorityReasons.filter(reason => reason.source !== 'orientation' || orientationInfluenced)
+  const visibleReasons = applicableReasons.slice(0, 2).map((reason, index) => ({
+    code: reason.code,
+    label: compactReasonLabel(reason),
+    source: reason.source,
+    emphasis: index === 0 ? 'primary' as const : 'secondary' as const,
+  }))
+  const clauses = applicableReasons.map(explanationClause).filter(Boolean)
+  const explanation = clauses.length === 0
+    ? null
+    : `Te recomiendo empezar por esto porque ${clauses.length === 1 ? clauses[0] : `${clauses.slice(0, -1).join(', ')} y ${clauses.at(-1)}`}.`
+
+  return { visibleReasons, explanation }
 }
 
 export function orientationRotationBonusSlots(subject: string, context?: CaminoOrientationContext | null) {

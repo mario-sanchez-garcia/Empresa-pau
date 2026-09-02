@@ -22,19 +22,20 @@ export function matchesReferenceBand(score: number, band: ReferenceBand) {
   return score >= 13
 }
 
-export function filterUniversityExplorerIndex(index: CatalogSearchIndex, filters: UniversityExplorerFilters, estimatedScore: number) {
+export function filterUniversityExplorerIndex(index: CatalogSearchIndex, filters: UniversityExplorerFilters, estimatedScore: number | null) {
   const searched = searchOrientationTargets(index, filters.search, filters.universityId)
   const filtered = searched.filter(target =>
     matchesReferenceBand(target.referenceScore, filters.referenceBand)
-    && (filters.situation === 'all' || classifyOpportunity(estimatedScore, target.referenceScore) === filters.situation)
+    && (estimatedScore === null || filters.situation === 'all' || classifyOpportunity(estimatedScore, target.referenceScore) === filters.situation)
     && (!filters.subjectCode || target.subjects.some(subject => subject.subjectCode === filters.subjectCode && subject.weighting === 0.2))
   )
   if (normalizeCatalogSearch(filters.search)) return filtered
+  if (estimatedScore === null) return filtered.sort((a, b) => a.degree.localeCompare(b.degree, 'es') || a.university.localeCompare(b.university, 'es'))
   return filtered.sort((a, b) => Math.abs(a.referenceScore - estimatedScore) - Math.abs(b.referenceScore - estimatedScore)
     || a.degree.localeCompare(b.degree, 'es')
     || a.university.localeCompare(b.university, 'es'))
 }
 
-export function filterUniversityExplorer(targets: OrientationTarget[], filters: UniversityExplorerFilters, estimatedScore: number) {
+export function filterUniversityExplorer(targets: OrientationTarget[], filters: UniversityExplorerFilters, estimatedScore: number | null) {
   return filterUniversityExplorerIndex(buildCatalogSearchIndex(targets), filters, estimatedScore)
 }

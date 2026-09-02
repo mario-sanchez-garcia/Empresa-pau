@@ -1,13 +1,19 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowRight, Check, Compass, ExternalLink, GraduationCap, Info, RefreshCw, RotateCcw, Sparkles, Target, X } from 'lucide-react'
 import SidebarNav from '@/app/components/SidebarNav'
 import { supabase } from '@/app/lib/supabase'
-import { calculateAdmissionScore, getTargetDifference } from './calculation'
+import { calculateAccessPathScore } from './access-paths/calculation'
+import AccessPathInputs from './access-paths/AccessPathInputs'
+import AccessPathSelector from './access-paths/AccessPathSelector'
+import { ACCESS_PATH_IDS, createDefaultAccessScenarios, createEmptyStoredSubjectInputs, getAccessPath } from './access-paths/model'
+import { ACCESS_PATH_STORAGE_KEY, CAMINO_ORIENTATION_CONTEXT_KEY, applyStoredSubjectInputs, createCaminoOrientationContext, parseAccessPathStorage, subjectInputsFromScenarios } from './access-paths/storage'
+import type { AccessPathId, AccessPathStorageState, StoredSubjectInputs } from './access-paths/types'
 import { availableCatalogTargets, findSavedTarget, mergeSubjectInputs } from './catalog'
 import CorrectionGuide from './CorrectionGuide'
 import { ORIENTATION_FIXTURES, type AdmissionSubject, type OfficialCriterion, type OrientationTarget, type SavedOrientationTarget } from './data'
+import GradeControl from './GradeControl'
 import { classifyOpportunity, rankOpportunities } from './opportunities'
 import { persistOrientationTarget } from './persistence'
 import TargetCombobox from './TargetCombobox'
@@ -16,23 +22,10 @@ import styles from './orientation.module.css'
 
 const formatGrade = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const formatReference = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 })
-const clamp = (value: number) => Math.min(10, Math.max(0, value))
+type SubjectsByPath = Record<AccessPathId, AdmissionSubject[]>
 
-function GradeControl({ id, label, value, onChange, hint, disabled = false }: {
-  id: string; label: string; value: number; onChange: (value: number) => void; hint?: string; disabled?: boolean
-}) {
-  return (
-    <div className={styles.gradeControl}>
-      <div className={styles.controlHeading}>
-        <div><label htmlFor={`${id}-range`}>{label}</label>{hint && <span>{hint}</span>}</div>
-        <div className={styles.numberWrap}>
-          <input id={`${id}-number`} aria-label={`${label}, nota numérica`} type="number" min="0" max="10" step="0.05" value={value} disabled={disabled} onChange={event => onChange(clamp(Number(event.target.value)))} />
-          <span>/ 10</span>
-        </div>
-      </div>
-      <input id={`${id}-range`} aria-label={label} className={styles.range} type="range" min="0" max="10" step="0.05" value={value} disabled={disabled} style={{ '--range-progress': `${value * 10}%` } as React.CSSProperties} onChange={event => onChange(Number(event.target.value))} />
-    </div>
-  )
+function createEmptySubjectsByPath(): SubjectsByPath {
+  return { spanish_bachillerato: [], bachibac: [], ib: [], international: [] }
 }
 
 export default function OrientationSimulator() {
@@ -40,9 +33,11 @@ export default function OrientationSimulator() {
   const [criteria, setCriteria] = useState<OfficialCriterion[]>([])
   const [savedTarget, setSavedTarget] = useState<SavedOrientationTarget | null>(null)
   const [targetId, setTargetId] = useState('')
-  const [bachillerato, setBachillerato] = useState(8.2)
-  const [accessPhase, setAccessPhase] = useState(7.8)
-  const [subjects, setSubjects] = useState<AdmissionSubject[]>([])
+  const [accessPath, setAccessPath] = useState<AccessPathId>('spanish_bachillerato')
+  const [scenarios, setScenarios] = useState(createDefaultAccessScenarios)
+  const [subjectsByPath, setSubjectsByPath] = useState<SubjectsByPath>(createEmptySubjectsByPath)
+  const [storageReady, setStorageReady] = useState(false)
+  const storedSubjectInputs = useRef<StoredSubjectInputs>(createEmptyStoredSubjectInputs())
   const [showMethod, setShowMethod] = useState(false)
   const [activeTab, setActiveTab] = useState<'objetivo' | 'universidades' | 'correccion'>('objetivo')
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -51,15 +46,23 @@ export default function OrientationSimulator() {
 
   const targets = useMemo(() => availableCatalogTargets(officialTargets, ORIENTATION_FIXTURES, catalogAvailable === true), [officialTargets, catalogAvailable])
   const target = targets.find(item => item.id === targetId) ?? null
-  const score = useMemo(() => calculateAdmissionScore(bachillerato, accessPhase, subjects), [bachillerato, accessPhase, subjects])
-  const difference = target ? getTargetDifference(score, target.referenceScore) : 0
+  const subjects = subjectsByPath[accessPath]
+  const scenario = scenarios[accessPath]
+  const pathDefinition = getAccessPath(accessPath)
+  const calculation = useMemo(() => calculateAccessPathScore(scenario, subjects), [scenario, subjects])
+  const score = calculation.finalScore
+  const difference = target && calculation.complete ? score - target.referenceScore : 0
   const universityOptions = useMemo(() => [...new Map(targets.map(item => [item.universityId, { id: item.universityId!, acronym: item.universityAcronym, name: item.university }])).values()].sort((a, b) => (a.acronym ?? a.name).localeCompare(b.acronym ?? b.name, 'es')), [targets])
   const alternatives = useMemo(() => rankOpportunities(officialTargets.filter(item => item.id !== targetId), score, savedTarget).slice(0, 4), [officialTargets, score, savedTarget, targetId])
 
   function selectTarget(id: string, availableTargets = targets) {
     const nextTarget = availableTargets.find(item => item.id === id)
     setTargetId(id)
-    setSubjects(current => nextTarget ? mergeSubjectInputs(nextTarget.subjects, current) : [])
+    setSubjectsByPath(current => Object.fromEntries(ACCESS_PATH_IDS.map(pathId => {
+      if (!nextTarget) return [pathId, []]
+      const merged = mergeSubjectInputs(nextTarget.subjects, current[pathId])
+      return [pathId, current[pathId].length ? merged : applyStoredSubjectInputs(merged, storedSubjectInputs.current[pathId])]
+    })) as SubjectsByPath)
     setSaveState('idle')
   }
 
@@ -80,7 +83,7 @@ export default function OrientationSimulator() {
         const match = findSavedTarget(allTargets, payload.savedTarget)
         if (match) {
           setTargetId(match.id)
-          setSubjects(match.subjects.map(subject => ({ ...subject })))
+          setSubjectsByPath(Object.fromEntries(ACCESS_PATH_IDS.map(pathId => [pathId, applyStoredSubjectInputs(match.subjects, storedSubjectInputs.current[pathId])])) as SubjectsByPath)
         }
       }
       setLoadState('ready')
@@ -98,6 +101,28 @@ export default function OrientationSimulator() {
   }, [loadOrientation])
 
   useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const stored = parseAccessPathStorage(window.localStorage.getItem(ACCESS_PATH_STORAGE_KEY))
+      if (stored) {
+        storedSubjectInputs.current = stored.subjectInputs
+        setAccessPath(stored.selectedPath)
+        setScenarios(stored.scenarios)
+        setSubjectsByPath(current => Object.fromEntries(ACCESS_PATH_IDS.map(pathId => [pathId, applyStoredSubjectInputs(current[pathId], stored.subjectInputs[pathId])])) as SubjectsByPath)
+      }
+      setStorageReady(true)
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    if (!storageReady) return
+    const subjectInputs = subjectInputsFromScenarios(subjectsByPath)
+    storedSubjectInputs.current = subjectInputs
+    const state: AccessPathStorageState = { version: 1, selectedPath: accessPath, scenarios, subjectInputs }
+    window.localStorage.setItem(ACCESS_PATH_STORAGE_KEY, JSON.stringify(state))
+  }, [accessPath, scenarios, storageReady, subjectsByPath])
+
+  useEffect(() => {
     if (!showMethod) return
     const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setShowMethod(false) }
     document.addEventListener('keydown', closeOnEscape)
@@ -105,7 +130,7 @@ export default function OrientationSimulator() {
   }, [showMethod])
 
   function updateSubject(id: string, patch: Partial<AdmissionSubject>) {
-    setSubjects(current => current.map(subject => subject.id === id ? { ...subject, ...patch } : subject))
+    setSubjectsByPath(current => ({ ...current, [accessPath]: current[accessPath].map(subject => subject.id === id ? { ...subject, ...patch } : subject) }))
   }
 
   function retryLoad() {
@@ -115,9 +140,9 @@ export default function OrientationSimulator() {
   }
 
   function resetScenario() {
-    setBachillerato(8.2)
-    setAccessPhase(7.8)
-    setSubjects(target?.subjects.map(subject => ({ ...subject })) ?? [])
+    const defaults = createDefaultAccessScenarios()
+    setScenarios(current => ({ ...current, [accessPath]: defaults[accessPath] }))
+    setSubjectsByPath(current => ({ ...current, [accessPath]: target?.subjects.map(subject => ({ ...subject })) ?? [] }))
   }
 
   async function saveAndOpenCamino() {
@@ -129,6 +154,8 @@ export default function OrientationSimulator() {
       const saved = await persistOrientationTarget(data.session.access_token, target)
       if (!saved) { setSaveState('error'); return }
       setSavedTarget({ degreeId: target.degreeId, universityId: target.universityId, degree: target.degree, university: target.university, admissionScore: target.referenceScore, sourceType: target.source.type, updatedAt: new Date().toISOString() })
+      const caminoContext = createCaminoOrientationContext(accessPath, target, calculation.complete ? score : null, calculation.complete ? difference : null, subjects)
+      window.localStorage.setItem(CAMINO_ORIENTATION_CONTEXT_KEY, JSON.stringify(caminoContext))
       window.location.assign('/camino')
     } catch {
       setSaveState('error')
@@ -141,6 +168,11 @@ export default function OrientationSimulator() {
   const prioritySubjects = subjects.filter(subject => subject.weighting === 0.2 || subject.enabled).slice(0, 8)
   const visibleSubjects = prioritySubjects.length ? prioritySubjects : subjects.slice(0, 4)
   const secondarySubjects = subjects.filter(subject => !visibleSubjects.some(visible => visible.id === subject.id))
+
+  function updateScenario(nextScenario: typeof scenario) {
+    setScenarios(current => ({ ...current, [accessPath]: nextScenario }))
+    setSaveState('idle')
+  }
 
   function renderSubject(subject: AdmissionSubject) {
     return (
@@ -174,16 +206,17 @@ export default function OrientationSimulator() {
           <section className={styles.savedTarget}>
             <div><Check size={16} /><span><small>Objetivo guardado</small><b>{savedTarget.degree} · {savedTarget.university}</b></span></div>
             <strong>{formatReference(savedTarget.admissionScore)}</strong>
-            <button onClick={() => { setTargetId(''); setSubjects([]) }}>Cambiar</button>
+            <button onClick={() => { setTargetId(''); setSubjectsByPath(createEmptySubjectsByPath()) }}>Cambiar</button>
           </section>
         )}
 
-        {activeTab === 'universidades' ? <UniversityExplorer targets={officialTargets} estimatedScore={score} loadState={loadState} onRetry={retryLoad} /> : activeTab === 'correccion' ? <CorrectionGuide databaseCriteria={criteria} /> : (
+        {activeTab === 'universidades' ? <UniversityExplorer targets={officialTargets} estimatedScore={calculation.complete ? score : null} loadState={loadState} onRetry={retryLoad} /> : activeTab === 'correccion' ? <CorrectionGuide databaseCriteria={criteria} /> : (
           <>
             <ol className={styles.flowRail} aria-label="Pasos para definir tu objetivo"><li className={styles.flowActive}><b>1</b><span>Elige objetivo</span></li><li className={target ? styles.flowActive : ''}><b>2</b><span>Ajusta notas</span></li><li className={target ? styles.flowActive : ''}><b>3</b><span>Decide qué mejorar</span></li><li><b>4</b><span>Llévalo a Camino</span></li></ol>
             <section className={styles.targetPicker}>
               <div className={styles.pickerTitle}><Target size={20} /><div><small>PASO 1</small><b>¿Dónde quieres entrar?</b><span>Busca primero el grado; afina por universidad si lo necesitas.</span></div></div>
               {loadState === 'loading' ? <div className={styles.selectSkeleton} /> : <TargetCombobox targets={targets} selectedId={targetId} universities={universityOptions} onSelect={selectTarget} />}
+              <AccessPathSelector value={accessPath} onChange={pathId => { setAccessPath(pathId); setSaveState('idle') }} />
             </section>
             {catalogAvailable === false && <div className={styles.fallbackNotice}><Info size={15} /><span>No se pudo leer el catálogo verificado. No mostraremos datos demo hasta poder confirmar la fuente oficial.</span><button onClick={retryLoad}><RefreshCw size={13} /> Reintentar</button></div>}
 
@@ -192,17 +225,16 @@ export default function OrientationSimulator() {
                 <div className={styles.simulatorGrid}>
                   <section className={styles.controlsPanel}>
                     <div className={styles.sectionHeading}><div><span>PASO 2 · SIMULACIÓN</span><h2>Ajusta tu escenario</h2></div><button onClick={resetScenario}><RotateCcw size={15} /> Restablecer</button></div>
-                    <GradeControl id="bachillerato" label="Nota media Bachillerato" hint="60% de la fase de acceso" value={bachillerato} onChange={setBachillerato} />
-                    <GradeControl id="fase-acceso" label="Fase de acceso PAU" hint="40% de la fase de acceso" value={accessPhase} onChange={setAccessPhase} />
-                    <div className={styles.subjectsHeading}><div><b>Materias de admisión</b><span>Solo cuentan las dos mejores aportaciones aprobadas y activas.</span></div></div>
+                    <AccessPathInputs scenario={scenario} onChange={updateScenario} />
+                    <div className={styles.subjectsHeading}><div><b>Materias que pueden subir tu nota</b><span>Solo cuentan las dos mejores aportaciones aprobadas, activas y válidas para tu vía.</span></div></div>
                     {subjects.length ? <>{visibleSubjects.map(renderSubject)}{secondarySubjects.length > 0 && <details className={styles.secondarySubjects}><summary>Ver {secondarySubjects.length} materias con menor ponderación</summary>{secondarySubjects.map(renderSubject)}</details>}</> : <p className={styles.noWeightings}>No hay ponderaciones verificadas para este objetivo.</p>}
                   </section>
 
                   <aside className={styles.resultPanel} aria-live="polite">
                     <div className={styles.resultTitle}><span>TU DISTANCIA AL OBJETIVO</span><div className={styles.liveDot} /> En vivo</div>
-                    <div className={styles.scoreComparison}><div><span>Necesitas como referencia</span><b>{formatReference(target.referenceScore)}</b><small>{target.referenceLabel}</small></div><div className={styles.primaryScore}><span>Con tu nota actual</span><b key={score}>{formatGrade(score)} <small>/ 14</small></b><small>Estimación del escenario</small></div></div>
-                    <div className={styles.goalChart} aria-label={`Tu nota estimada es ${formatGrade(score)} sobre 14; referencia ${formatReference(target.referenceScore)}`}><div className={styles.chartLabels}><span>5</span><span>14</span></div><div className={styles.track}><div className={styles.trackFill} style={{ width: `${Math.max(0, Math.min(100, ((score - 5) / 9) * 100))}%` }} /><div className={`${styles.marker} ${styles.yourMarker}`} style={{ left: `${Math.max(0, Math.min(100, ((score - 5) / 9) * 100))}%` }}><span>Tú</span></div><div className={`${styles.marker} ${styles.targetMarker}`} style={{ left: `${Math.max(0, Math.min(100, ((target.referenceScore - 5) / 9) * 100))}%` }}><span>Meta</span></div></div></div>
-                    <div className={`${styles.status} ${difference >= 0 ? styles.positive : ''}`}>{difference >= 0 ? <Check size={19} /> : <Target size={19} />}<div><b>{difference >= 0 ? `Por encima de la referencia · +${formatGrade(difference)}` : `Te faltan ${formatGrade(Math.abs(difference))} puntos`}</b><span>Es una simulación, no una garantía de admisión.</span></div></div>
+                    <div className={styles.scoreComparison}><div><span>Necesitas como referencia</span><b>{formatReference(target.referenceScore)}</b><small>{target.referenceLabel}</small></div><div className={styles.primaryScore}><span>Con tu nota actual</span><b key={`${accessPath}-${score}`}>{calculation.complete ? <>{formatGrade(score)} <small>/ 14</small></> : 'Pendiente'}</b><small>{calculation.complete ? `${formatGrade(calculation.baseScore)} base + ${formatGrade(calculation.weightedPoints)} admisión` : 'Falta completar tu vía'}</small></div></div>
+                    {calculation.complete && <div className={styles.goalChart} aria-label={`Tu nota estimada es ${formatGrade(score)} sobre 14; referencia ${formatReference(target.referenceScore)}`}><div className={styles.chartLabels}><span>5</span><span>14</span></div><div className={styles.track}><div className={styles.trackFill} style={{ width: `${Math.max(0, Math.min(100, ((score - 5) / 9) * 100))}%` }} /><div className={`${styles.marker} ${styles.yourMarker}`} style={{ left: `${Math.max(0, Math.min(100, ((score - 5) / 9) * 100))}%` }}><span>Tú</span></div><div className={`${styles.marker} ${styles.targetMarker}`} style={{ left: `${Math.max(0, Math.min(100, ((target.referenceScore - 5) / 9) * 100))}%` }}><span>Meta</span></div></div></div>}
+                    <div className={`${styles.status} ${calculation.complete && difference >= 0 ? styles.positive : ''}`}>{calculation.complete && difference >= 0 ? <Check size={19} /> : <Target size={19} />}<div><b>{calculation.complete ? difference >= 0 ? `Por encima de la referencia · +${formatGrade(difference)}` : `Te faltan ${formatGrade(Math.abs(difference))} puntos` : 'Completa los requisitos de tu vía'}</b><span>{calculation.incompleteReason ?? 'Es una simulación, no una garantía de admisión.'}</span></div></div>
                     {target.source.type === 'official' && target.source.url && <a className={styles.sourceLink} href={target.source.url} target="_blank" rel="noreferrer">OFICIAL · {target.source.label} <ExternalLink size={13} /></a>}
                     <div className={styles.recommendations}><div><span>PASO 3 · QUÉ MEJORAR</span><Sparkles size={17} /></div>{recommendations.length ? recommendations.map(item => <div className={styles.recommendation} key={item.id}><div><b>{item.name}</b><span>Si subes {formatGrade(item.defaultGrade)} → {formatGrade(item.nextGrade)}</span></div><strong>+{formatGrade(item.gain)}</strong></div>) : <p>Activa o ajusta una materia para comparar el impacto.</p>}</div>
                     <button className={`${styles.caminoCta} kairo-clay-action`} onClick={saveAndOpenCamino} disabled={saveState === 'saving'}><span><small>PASO 4</small>{saveState === 'saving' ? 'Guardando…' : savedTarget ? 'Actualizar objetivo en Camino' : 'Guardar y usar en Camino'}</span><ArrowRight size={20} /></button>
@@ -210,18 +242,18 @@ export default function OrientationSimulator() {
                   </aside>
                 </div>
 
-                <section className={styles.alternatives} aria-label="Alternativas con tu nota actual">
+                {calculation.complete && <section className={styles.alternatives} aria-label="Alternativas con tu nota actual">
                   <div className={styles.alternativesHeading}><div><span>PASO 5 · ALTERNATIVAS</span><h2>Opciones cerca de tu escenario</h2><p>Referencias ordenadas por distancia a tu nota actual.</p></div><button onClick={() => setActiveTab('universidades')}>Explorar las 554 <ArrowRight size={14} /></button></div>
                   <div className={styles.alternativeGrid}>{alternatives.map(item => { const category = classifyOpportunity(score, item.referenceScore); return <article key={item.id}><div><GraduationCap size={16} /><span>{category === 'above' ? 'Por encima' : category === 'close' ? 'Cerca' : 'Por debajo'}</span></div><h3>{item.degree}</h3><p>{item.universityAcronym ?? item.university}</p><strong>{formatReference(item.referenceScore)}</strong></article> })}</div>
                   <p className={styles.opportunityDisclaimer}>Las notas de corte son históricas y pueden variar. Estar por encima no garantiza la admisión.</p>
-                </section>
+                </section>}
               </>
             )}
           </>
         )}
       </main>
 
-      {showMethod && <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => event.target === event.currentTarget && setShowMethod(false)}><section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="method-title"><button className={styles.closeButton} aria-label="Cerrar" onClick={() => setShowMethod(false)}><X size={19} /></button><div className={styles.modalIcon}><Info size={22} /></div><h2 id="method-title">¿Cómo se calcula?</h2><p>La estimación suma la fase de acceso y las dos mejores aportaciones activas con nota mínima de 5. Las reglas particulares solo se incorporan con fuente verificada.</p><div className={styles.formula}><div><b>60%</b><span>Bachillerato</span></div><i>+</i><div><b>40%</b><span>Fase de acceso</span></div><i>+</i><div><b>Hasta 4</b><span>Dos mejores ponderadas</span></div></div><div className={styles.modalNotice}><Info size={17} /><span>Las referencias históricas orientan, pero no garantizan admisión.</span></div></section></div>}
+      {showMethod && <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => event.target === event.currentTarget && setShowMethod(false)}><section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="method-title"><button className={styles.closeButton} aria-label="Cerrar" onClick={() => setShowMethod(false)}><X size={19} /></button><div className={styles.modalIcon}><Info size={22} /></div><h2 id="method-title">¿Cómo se calcula {pathDefinition.shortLabel}?</h2><p>{pathDefinition.officialSummary}</p><div className={styles.formula}>{calculation.formulaParts.map((part, index) => <div key={`${part.value}-${index}`}><b>{part.value}</b><span>{part.label}</span></div>)}</div><div className={styles.modalNotice}><Info size={17} /><span>Las referencias históricas orientan, pero no garantizan admisión. La acreditación oficial siempre prevalece sobre la simulación.</span></div></section></div>}
     </div>
   )
 }

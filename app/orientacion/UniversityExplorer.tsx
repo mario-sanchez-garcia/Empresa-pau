@@ -18,7 +18,7 @@ const situationMeta = {
   improve: { label: 'Por debajo de la referencia', icon: TrendingUp },
 }
 
-export default function UniversityExplorer({ targets, estimatedScore, loadState, onRetry }: { targets: OrientationTarget[]; estimatedScore: number; loadState: 'loading' | 'ready' | 'error'; onRetry: () => void }) {
+export default function UniversityExplorer({ targets, estimatedScore, loadState, onRetry }: { targets: OrientationTarget[]; estimatedScore: number | null; loadState: 'loading' | 'ready' | 'error'; onRetry: () => void }) {
   const [search, setSearch] = useState('')
   const [universityId, setUniversityId] = useState('')
   const [referenceBand, setReferenceBand] = useState<ReferenceBand>('all')
@@ -41,7 +41,7 @@ export default function UniversityExplorer({ targets, estimatedScore, loadState,
     <section className={styles.explorer} aria-labelledby="explorer-title">
       <div className={styles.explorerHero}>
         <div><span className={styles.eyebrow}><GraduationCap size={14} /> Catálogo oficial</span><h2 id="explorer-title">Encuentra grados que encajan contigo</h2><p>Filtra 554 referencias por universidad, nota y materias que ponderan 0,2.</p></div>
-        <div className={styles.currentEstimate}><span>Con tu nota actual</span><strong>{formatGrade(estimatedScore)} <small>/ 14</small></strong><small>El orden y la situación cambian en vivo</small></div>
+        <div className={styles.currentEstimate}><span>Con tu nota actual</span><strong>{estimatedScore === null ? 'Pendiente' : <>{formatGrade(estimatedScore)} <small>/ 14</small></>}</strong><small>{estimatedScore === null ? 'Completa tu vía en Mi objetivo' : 'El orden y la situación cambian en vivo'}</small></div>
       </div>
 
       <div className={styles.filterPanel}>
@@ -49,7 +49,7 @@ export default function UniversityExplorer({ targets, estimatedScore, loadState,
         <label className={styles.wideFilter}><span>Grado</span><div className={styles.filterInput}><Search size={15} /><input aria-label="Buscar grado en universidades" value={search} onChange={event => changed(() => setSearch(event.target.value))} placeholder="Psicología, datos, ingeniería…" /></div></label>
         <FilterSelect label="Universidad" value={universityId} onChange={value => changed(() => setUniversityId(value))}><option value="">Todas</option>{universities.map(item => <option key={item.id} value={item.id}>{item.acronym ? `${item.acronym} · ` : ''}{item.name}</option>)}</FilterSelect>
         <FilterSelect label="Nota de referencia" value={referenceBand} onChange={value => changed(() => setReferenceBand(value as ReferenceBand))}><option value="all">Cualquier nota</option><option value="up-to-8">Hasta 8</option><option value="8-10">8–10</option><option value="10-12">10–12</option><option value="12-13">12–13</option><option value="13-plus">13+</option></FilterSelect>
-        <FilterSelect label="Con mi nota" value={situation} onChange={value => changed(() => setSituation(value as SituationFilter))}><option value="all">Todas las situaciones</option><option value="above">Por encima</option><option value="close">Cerca (≤ 0,50)</option><option value="improve">Por debajo</option></FilterSelect>
+        <FilterSelect label="Con mi nota" value={situation} disabled={estimatedScore === null} onChange={value => changed(() => setSituation(value as SituationFilter))}><option value="all">{estimatedScore === null ? 'Completa primero tu vía' : 'Todas las situaciones'}</option><option value="above">Por encima</option><option value="close">Cerca (≤ 0,50)</option><option value="improve">Por debajo</option></FilterSelect>
         <FilterSelect label="Pondera 0,2" value={subjectCode} onChange={value => changed(() => setSubjectCode(value))}><option value="">Cualquier asignatura</option>{subjects.map(([code, name]) => <option key={code} value={code}>{name}</option>)}</FilterSelect>
       </div>
 
@@ -58,18 +58,18 @@ export default function UniversityExplorer({ targets, estimatedScore, loadState,
       {loadState === 'loading' ? <div className={styles.skeletonList}><i /><i /><i /></div> : loadState === 'error' ? <div className={styles.filteredEmpty}><ShieldCheck size={23} /><span>No se pudo cargar el catálogo verificado.</span><button onClick={onRetry}>Reintentar</button></div> : visible.length ? (
         <div className={styles.degreeGrid}>
           {visible.map(item => {
-            const category = classifyOpportunity(estimatedScore, item.referenceScore) as keyof typeof situationMeta
-            const meta = situationMeta[category]
-            const Icon = meta.icon
-            const difference = opportunityDifference(estimatedScore, item.referenceScore) ?? 0
+            const category = estimatedScore === null ? null : classifyOpportunity(estimatedScore, item.referenceScore) as keyof typeof situationMeta
+            const meta = category ? situationMeta[category] : null
+            const Icon = meta?.icon
+            const difference = estimatedScore === null ? null : opportunityDifference(estimatedScore, item.referenceScore)
             const importantSubjects = item.subjects.filter(subject => subject.weighting === 0.2).slice(0, 4)
             const expanded = expandedId === item.id
             return (
-              <article className={`${styles.degreeCard} ${styles[`degree_${category}`]}`} key={item.id}>
-                <div className={styles.degreeTop}><div className={styles.degreeIcon}><GraduationCap size={17} /></div><span className={styles.situationBadge}><Icon size={11} /> {meta.label}</span></div>
+              <article className={`${styles.degreeCard} ${category ? styles[`degree_${category}`] : ''}`} key={item.id}>
+                <div className={styles.degreeTop}><div className={styles.degreeIcon}><GraduationCap size={17} /></div>{meta && Icon && <span className={styles.situationBadge}><Icon size={11} /> {meta.label}</span>}</div>
                 <h3>{item.degree}</h3><p>{item.universityAcronym ? `${item.universityAcronym} · ` : ''}{item.university}</p>
-                <div className={styles.degreeScores}><div><span>Nota referencia</span><b>{formatReference(item.referenceScore)}</b></div><div><span>Tu escenario</span><b>{formatGrade(estimatedScore)}</b></div></div>
-                <strong className={styles.degreeDifference}>{difference >= 0 ? `+${formatGrade(difference)} sobre la referencia` : `${formatGrade(Math.abs(difference))} puntos por debajo`}</strong>
+                <div className={styles.degreeScores}><div><span>Nota referencia</span><b>{formatReference(item.referenceScore)}</b></div><div><span>Tu escenario</span><b>{estimatedScore === null ? '—' : formatGrade(estimatedScore)}</b></div></div>
+                {difference !== null && <strong className={styles.degreeDifference}>{difference >= 0 ? `+${formatGrade(difference)} sobre la referencia` : `${formatGrade(Math.abs(difference))} puntos por debajo`}</strong>}
                 {importantSubjects.length > 0 && <div className={styles.weightingPreview}>{importantSubjects.slice(0, 2).map(subject => <span key={subject.id}>{subject.name} · 0,2</span>)}</div>}
                 <button type="button" className={styles.detailsButton} aria-expanded={expanded} onClick={() => setExpandedId(expanded ? '' : item.id)}>Ver detalles <ChevronDown size={14} /></button>
                 {expanded && <div className={styles.degreeDetails}><span>Ponderaciones 0,2</span>{importantSubjects.length ? <ul>{importantSubjects.map(subject => <li key={subject.id}>{subject.name}</li>)}</ul> : <p>Sin materias a 0,2 verificadas.</p>}<a href={item.source.url!} target="_blank" rel="noreferrer">Ver fuente oficial <ExternalLink size={12} /></a></div>}
@@ -84,6 +84,6 @@ export default function UniversityExplorer({ targets, estimatedScore, loadState,
   )
 }
 
-function FilterSelect({ label, value, onChange, children }: { label: string; value: string; onChange: (value: string) => void; children: React.ReactNode }) {
-  return <label className={styles.filterSelect}><span>{label}</span><span className={styles.nativeSelectWrap}><select value={value} onChange={event => onChange(event.target.value)}>{children}</select><ChevronDown size={14} /></span></label>
+function FilterSelect({ label, value, onChange, children, disabled = false }: { label: string; value: string; onChange: (value: string) => void; children: React.ReactNode; disabled?: boolean }) {
+  return <label className={styles.filterSelect}><span>{label}</span><span className={styles.nativeSelectWrap}><select value={value} disabled={disabled} onChange={event => onChange(event.target.value)}>{children}</select><ChevronDown size={14} /></span></label>
 }

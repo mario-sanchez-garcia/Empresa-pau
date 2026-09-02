@@ -27,7 +27,7 @@ type OrientationPayload = {
   catalogAvailable: boolean
 }
 
-const saveButtonName = /Guardar y usar en Camino|Usar este objetivo en Camino/
+const saveButtonName = /Guardar y usar en Camino|Usar este objetivo en Camino|Actualizar objetivo en Camino|Guardando…/
 const sessionExpired = 'Sesión E2E caducada. Ejecuta npm run e2e:auth'
 
 function isOrientationRequest(request: Request, method?: string) {
@@ -56,33 +56,43 @@ async function selectTarget(page: Page, target: Target) {
   expect(target.universityId, 'El grado oficial debe tener university_id').toBeTruthy()
   const combobox = page.getByRole('combobox', { name: 'Carrera y universidad' })
   await combobox.fill(target.degree)
-  const option = page.getByRole('option').filter({ hasText: target.degree }).filter({ hasText: target.university }).first()
+  const option = page.getByRole('listbox', { name: 'Resultados de grados' }).getByRole('option').filter({ hasText: target.degree }).filter({ hasText: target.university }).first()
   await expect(option).toBeVisible()
   await option.click()
   await expect(page.locator(`[data-selected-id="${target.id}"]`)).toBeVisible()
 }
 
 async function saveTarget(page: Page, target: Target, assertPending = false) {
+  let releaseResponse: (() => void) | undefined
+  const responseGate = assertPending ? new Promise<void>(resolve => { releaseResponse = resolve }) : Promise.resolve()
+
   if (assertPending) {
     await page.route('**/api/orientation', async route => {
       if (route.request().method() !== 'POST') return route.continue()
       const response = await route.fetch()
-      await new Promise(resolve => setTimeout(resolve, 250))
+      await responseGate
       await route.fulfill({ response })
     })
   }
 
+  const requestPromise = page.waitForRequest(request => isOrientationRequest(request, 'POST'))
   const responsePromise = page.waitForResponse(response => isOrientationRequest(response.request(), 'POST'))
   const button = page.getByRole('button', { name: saveButtonName })
-  const clickPromise = button.click()
-  if (assertPending) await expect(button).toBeDisabled()
+  if (assertPending) {
+    await button.dispatchEvent('click')
+    try {
+      await requestPromise
+      await expect(button).toBeDisabled()
+    } finally {
+      releaseResponse?.()
+    }
+  } else await button.click()
   const response = await responsePromise
   expect(response.ok()).toBe(true)
   const body = response.request().postDataJSON() as Record<string, unknown>
   expect(body.target_degree_id).toBe(target.degreeId)
   expect(body.target_university_id).toBe(target.universityId)
   expect('user_id' in body).toBe(false)
-  await clickPromise
   await expect(page).toHaveURL(/\/camino(?:\?|$)/)
   if (assertPending) await page.unroute('**/api/orientation')
 }
@@ -99,6 +109,7 @@ async function expectRestoredTarget(page: Page, target: Target) {
 }
 
 test('Orientación conserva el objetivo autenticado y mantiene el simulador local', async ({ page }) => {
+  test.setTimeout(150_000)
   const consoleErrors: string[] = []
   const runtimeErrors: string[] = []
   const failedRequests: string[] = []
@@ -130,6 +141,9 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
   try {
     const initial = await test.step('carga autenticada y catálogo oficial', async () => {
       const payload = await openOrientation(page)
+      const accessPaths = page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })
+      await accessPaths.getByRole('radio', { name: /^Bachillerato/ }).click()
+      await expect(accessPaths.getByRole('radio', { name: /^Bachillerato/ })).toHaveAttribute('aria-checked', 'true')
       expect(payload.catalogAvailable).toBe(true)
       expect(payload.targets).toHaveLength(554)
       expect(payload.universities).toHaveLength(6)
@@ -183,23 +197,57 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       await expect(score).not.toHaveAttribute('aria-label', scoreBefore ?? '')
       await expect.poll(() => opportunities.innerText()).not.toBe(opportunitiesBefore)
       expect(orientationRequests).toBe(0)
-      await expect(opportunities).toContainText(/Por encima de la referencia|Cerca de la referencia|Por debajo de la referencia/)
+      await expect(opportunities).toContainText(/Por encima|Cerca|Por debajo/)
       await expect(page.getByText(/no garantiza la admisión/i)).toBeVisible()
       page.off('request', countRequests)
+    })
+
+    await test.step('cada vía muestra sus campos, calcula en vivo y mantiene escenarios aislados', async () => {
+      const accessPaths = page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })
+      const ordinaryBach = page.getByRole('spinbutton', { name: 'Nota media Bachillerato, nota numérica' })
+      const ordinaryPau = page.getByRole('spinbutton', { name: 'Fase de acceso PAU, nota numérica' })
+      await ordinaryBach.fill('9.25')
+      await ordinaryPau.fill('8.75')
+
+      await accessPaths.getByRole('radio', { name: /^Bachibac/ }).click()
+      await expect(page.getByRole('radiogroup', { name: '¿Qué título usarás para acceder?' })).toBeVisible()
+      await expect(page.getByRole('spinbutton', { name: 'Prueba externa Bachibac, nota numérica' })).toBeVisible()
+      const bachibacScore = page.locator('[aria-label^="Tu nota estimada es"]')
+      const beforeBachibac = await bachibacScore.getAttribute('aria-label')
+      await page.getByRole('spinbutton', { name: 'Prueba externa Bachibac, nota numérica' }).fill('9.5')
+      await expect(bachibacScore).not.toHaveAttribute('aria-label', beforeBachibac ?? '')
+
+      await accessPaths.getByRole('radio', { name: /^IB/ }).click()
+      await expect(page.getByRole('spinbutton', { name: 'CAU acreditada por UNEDasiss, nota numérica' })).toBeVisible()
+      await page.getByRole('spinbutton', { name: 'CAU acreditada por UNEDasiss, nota numérica' }).fill('8.65')
+      await page.getByRole('radiogroup', { name: '¿Qué dato tienes ahora?' }).getByRole('radio', { name: /^Media de materias IB/ }).click()
+      await expect(page.getByRole('spinbutton', { name: 'Media de las materias del Diploma IB, nota numérica' })).toBeVisible()
+      await expect(page.getByText(/no los puntos \/45/i)).toBeVisible()
+
+      await accessPaths.getByRole('radio', { name: /^Bachillerato/ }).click()
+      await expect(page.getByRole('spinbutton', { name: 'Nota media Bachillerato, nota numérica' })).toHaveValue('9.25')
+      await expect(page.getByRole('spinbutton', { name: 'Fase de acceso PAU, nota numérica' })).toHaveValue('8.75')
+
+      await accessPaths.getByRole('radio', { name: /^IB/ }).click()
+      await page.reload()
+      const restoredPaths = page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })
+      await expect(restoredPaths.getByRole('radio', { name: /^IB/ })).toHaveAttribute('aria-checked', 'true')
+      await expect(page.getByRole('spinbutton', { name: 'Media de las materias del Diploma IB, nota numérica' })).toBeVisible()
+      await restoredPaths.getByRole('radio', { name: /^Bachillerato/ }).click()
     })
 
     await test.step('buscador accesible y filtros útiles del catálogo', async () => {
       const search = page.getByRole('combobox', { name: 'Carrera y universidad' })
       await search.fill('economi uc3m')
       await expect(search).toHaveAttribute('aria-expanded', 'true')
-      await expect(page.getByRole('option').first()).toContainText(/Econom/i)
+      await expect(page.getByRole('listbox', { name: 'Resultados de grados' }).getByRole('option').first()).toContainText(/Econom/i)
       await search.press('Escape')
       await expect(search).toHaveAttribute('aria-expanded', 'false')
 
       await page.getByRole('button', { name: 'Explorar grados' }).click()
       await expect(page.getByRole('heading', { name: 'Encuentra grados que encajan contigo' })).toBeVisible()
       const degreeSearch = page.getByRole('textbox', { name: 'Buscar grado en universidades' })
-      await degreeSearch.fill('zzzz-grado-inexistente')
+      await degreeSearch.fill('qxzvnpj')
       await expect(page.getByText('No hay grados con esta combinación.')).toBeVisible()
       await page.getByRole('button', { name: 'Limpiar filtros' }).click()
       await expect(degreeSearch).toHaveValue('')
@@ -240,6 +288,12 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       await expect(page).toHaveURL(/\/orientacion(?:\?|$)/)
       await page.unroute('**/api/orientation')
       expectedSaveFailure = false
+    })
+
+    await test.step('el selector y el simulador no desbordan en móvil', async () => {
+      await page.setViewportSize({ width: 390, height: 844 })
+      await expect(page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })).toBeVisible()
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)).toBe(true)
     })
   } finally {
     if (originalTarget && page.url() !== 'about:blank') {

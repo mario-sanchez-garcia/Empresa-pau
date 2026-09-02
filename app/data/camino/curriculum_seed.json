@@ -11518,9 +11518,32 @@
     "subject": "economia",
     "blockSlug": "la-funcion-financiera",
     "blockTitle": "La Función Financiera",
+    "topicSlug": "periodo-medio-de-maduracion",
+    "title": "El Periodo Medio de Maduración",
+    "orderIndex": 45,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "economia",
+      "block": "la-funcion-financiera",
+      "topic": "periodo-medio-de-maduracion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "economia"
+    ],
+    "v2SortOrder": 45
+  },
+  {
+    "subject": "economia",
+    "blockSlug": "la-funcion-financiera",
+    "blockTitle": "La Función Financiera",
     "topicSlug": "las-inversiones-y-su-clasificacion",
     "title": "Las Inversiones y su Clasificación",
-    "orderIndex": 45,
+    "orderIndex": 46,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -11535,7 +11558,7 @@
     "compatibleSubjects": [
       "economia"
     ],
-    "v2SortOrder": 45
+    "v2SortOrder": 46
   },
   {
     "subject": "economia",
@@ -11543,7 +11566,7 @@
     "blockTitle": "La Función Financiera",
     "topicSlug": "las-fuentes-de-financiacion-propias-y-ajenas",
     "title": "Las Fuentes de Financiación: Propias y Ajenas",
-    "orderIndex": 46,
+    "orderIndex": 47,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -11558,7 +11581,7 @@
     "compatibleSubjects": [
       "economia"
     ],
-    "v2SortOrder": 46
+    "v2SortOrder": 47
   },
   {
     "subject": "economia",
@@ -11566,7 +11589,7 @@
     "blockTitle": "La Función Financiera",
     "topicSlug": "el-leasing-y-el-factoring",
     "title": "El Leasing y el Factoring",
-    "orderIndex": 47,
+    "orderIndex": 48,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -11581,7 +11604,7 @@
     "compatibleSubjects": [
       "economia"
     ],
-    "v2SortOrder": 47
+    "v2SortOrder": 48
   },
   {
     "subject": "economia",
@@ -11589,7 +11612,7 @@
     "blockTitle": "La Función Financiera",
     "topicSlug": "la-valoracion-de-inversiones-el-metodo-del-van",
     "title": "La Valoración de Inversiones: El Método del VAN",
-    "orderIndex": 48,
+    "orderIndex": 49,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -11604,7 +11627,7 @@
     "compatibleSubjects": [
       "economia"
     ],
-    "v2SortOrder": 48
+    "v2SortOrder": 49
   },
   {
     "subject": "economia",
@@ -11612,7 +11635,7 @@
     "blockTitle": "La Función Financiera",
     "topicSlug": "la-valoracion-de-inversiones-tir-y-payback",
     "title": "La Valoración de Inversiones: TIR y Payback",
-    "orderIndex": 49,
+    "orderIndex": 50,
     "contentStatus": "flashcard_v2",
     "explanation": "",
     "guidedExample": "",
@@ -11627,6 +11650,6 @@
     "compatibleSubjects": [
       "economia"
     ],
-    "v2SortOrder": 49
+    "v2SortOrder": 50
   }
 ]

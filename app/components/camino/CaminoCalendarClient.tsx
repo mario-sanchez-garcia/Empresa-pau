@@ -32,6 +32,9 @@ import DivisionIcon from '@/components/shared/DivisionIcon'
 import FullRankingModal from '@/components/shared/FullRankingModal'
 import { RankingRow } from '@/components/shared/RankingRow'
 import UsernameGate from '@/app/components/camino/UsernameGate'
+import { CAMINO_ORIENTATION_CONTEXT_KEY, parseCaminoOrientationContext } from '@/app/orientacion/access-paths/storage'
+import type { CaminoOrientationContext } from '@/app/orientacion/access-paths/types'
+import { formatPriorityReasons, matchingOrientationContext, orientationRotationBonusSlots, rankMissionCandidates, withPriorityReasons, type PersistedOrientationGoal } from '@/app/lib/camino/orientationPriority'
 
 type MissionKind = 'concept_explanation' | 'guided_example' | 'guided_practice' | 'evau_practice' | 'exam_focus' | 'mock_exam' | 'manual'
 type MissionRole = 'main' | 'bonus'
@@ -199,6 +202,18 @@ function normalizeOnboardingSubjects(subjects: string[]) {
   }).map(({ label }) => label)
 }
 function textSlug(value: string) { return normalizeCaminoSlug(value) }
+function orientationRouteLabel(context: CaminoOrientationContext | null) {
+  switch (context?.route) {
+    case 'spanish_pau': return 'Bachillerato · PAU'
+    case 'bachibac_spanish_pau': return 'Bachibac · PAU española'
+    case 'bachibac_diploma': return 'Bachibac · diplôme'
+    case 'ib_unedasiss': return 'IB · UNEDasiss'
+    case 'international_direct_unedasiss': return 'Internacional · UNEDasiss'
+    case 'international_homologation_pce': return 'Internacional · PCE'
+    case 'international_homologation_pending': return 'Internacional · pendiente'
+    default: return null
+  }
+}
 function calendarDayLabel(dateISO: string) { return new Date(`${dateISO}T12:00:00`).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) }
 function weekRangeLabel(weekStartISO: string) {
   const start = dateFromISO(weekStartISO)
@@ -742,6 +757,7 @@ function buildMission(input: {
   reason: string
   minutes: number
   xp: number
+  metadata?: Record<string, unknown>
 }): Mission {
   const subjectSlugValue = input.item?.subjectSlug ?? subjectSlug(input.subject)
   const blockSlugValue = input.item?.blockSlug ?? (input.item?.block ? textSlug(input.item.block) : undefined)
@@ -759,13 +775,13 @@ function buildMission(input: {
     estimatedMinutes: input.minutes,
     baseXP: input.xp,
     status: 'pending',
-    metadata: topicSlugValue ? { topic_slug: topicSlugValue } : undefined,
+    metadata: topicSlugValue || input.metadata ? { ...(topicSlugValue ? { topic_slug: topicSlugValue } : {}), ...input.metadata } : undefined,
     subjectSlug: subjectSlugValue,
     blockKey: input.item?.block,
   }
 }
 
-function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curriculum: CurriculumItem[] = [], planId: CaminoPlanId = 'free', weekStartISO = currentWeekStartISO(), weekCache: CalendarWeekCache = {}) {
+function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curriculum: CurriculumItem[] = [], planId: CaminoPlanId = 'free', weekStartISO = currentWeekStartISO(), weekCache: CalendarWeekCache = {}, orientationContext: CaminoOrientationContext | null = null) {
   const planLimits = getCaminoPlanLimits(planId)
   const start = dateFromISO(weekStartISO)
   const subjects = normalizeOnboardingSubjects(onboarding.subjects)
@@ -846,7 +862,7 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
       // subjects from the pool, so a high-priority exam gets more days, not all of them.
       const rawPrioritySubject = sameDay?.subject ?? (index <= 2 ? weakArea?.subject : null)
       const prioritySubject = rawPrioritySubject ? subjectLabelFromSlug(normalizeSubjectSlug(rawPrioritySubject)) : null
-      const rotationPool = subjects.flatMap(subj => Array(subjectRotationWeight(subj, dateISO, relevantExams)).fill(subj) as string[])
+      const rotationPool = subjects.flatMap(subj => Array(subjectRotationWeight(subj, dateISO, relevantExams) + orientationRotationBonusSlots(subj, orientationContext)).fill(subj) as string[])
       const subject = prioritySubject ?? rotationPool[subjectRotation % rotationPool.length]
       const examContext = sameDay ?? ((strongExamNearby || blockCorrelationNearby) ? upcoming : undefined)
       const weakItem = weakArea && normalizeSubjectSlug(weakArea.subject) === subjectSlug(subject) ? findExamCurriculumItem({ id: 'weak-area', subject, date: todayISO(), block: weakArea.block ?? '', topic: weakArea.topic ?? '', name: 'Refuerzo', priority: 'normal' }, subject, curriculum) : null
@@ -891,6 +907,10 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
           reason,
           minutes: estimatedMinutesForSlot(minutes, 0),
           xp: kind === 'mock_exam' ? 35 : kind === 'evau_practice' ? 25 : 15,
+          metadata: {
+            ...(upcoming && normalizeSubjectSlug(upcoming.subject) === subjectSlug(subject) ? { partial_exam_date: upcoming.date, exam_priority: upcoming.priority } : {}),
+            ...(weakItem ? { weak_review: true, weak_area_label: weakArea?.topic ?? weakArea?.block ?? subject, weak_area_avg_score: weakArea?.score } : {}),
+          },
         }))
         if (kind === 'mock_exam') plannedSimulationsThisRun += 1
       }
@@ -983,6 +1003,8 @@ export default function CaminoCalendarClient() {
   const [onboardingChecked, setOnboardingChecked] = useState(false)
   const [calendar, setCalendar] = useState<DayPlan[]>([])
   const [exams, setExams] = useState<StudentExam[]>([])
+  const [localOrientationContext, setLocalOrientationContext] = useState<CaminoOrientationContext | null>(null)
+  const [persistedOrientationTarget, setPersistedOrientationTarget] = useState<PersistedOrientationGoal | null | undefined>(undefined)
   // ?editExam=<id> (used by the "elige tus temas" message on a Historia
   // Parcial with no exam_topics, see app/simulacros/page.tsx) deep-links
   // straight into that exam's edit modal instead of leaving the student to
@@ -1110,8 +1132,10 @@ export default function CaminoCalendarClient() {
       // reconcilia con el servidor justo debajo, sea cual sea su estado.
       const loadedExams = loadJson<StudentExam[]>(EXAMS_KEY, [])
       const loadedCalendarExpanded = loadJson<boolean>(CALENDAR_VISIBILITY_KEY, false)
+      const loadedOrientationContext = parseCaminoOrientationContext(window.localStorage.getItem(CAMINO_ORIENTATION_CONTEXT_KEY))
       setOnboarding(loadedOnboarding)
       setExams(loadedExams)
+      setLocalOrientationContext(loadedOrientationContext)
       setCalendarExpanded(loadedCalendarExpanded)
       setSelectedWeekStart(currentWeekStartISO())
       setExamDraft(current => ({ ...current, subject: loadedOnboarding.subjects[0] ?? 'Matemáticas II' }))
@@ -1170,10 +1194,18 @@ export default function CaminoCalendarClient() {
       if (token) {
         fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
           .then(r => r.json())
-          .then((profile: { student_exams?: StudentExam[] }) => {
+          .then((profile: { student_exams?: StudentExam[]; target_degree?: unknown; target_university?: unknown; target_admission_score?: unknown; target_orientation_source_type?: unknown }) => {
             if (Array.isArray(profile.student_exams) && !cancelled) {
               setExams(profile.student_exams)
               saveJson(EXAMS_KEY, profile.student_exams)
+            }
+            if (!cancelled) {
+              const admissionScore = Number(profile.target_admission_score)
+              setPersistedOrientationTarget(
+                typeof profile.target_degree === 'string' && typeof profile.target_university === 'string' && Number.isFinite(admissionScore)
+                  ? { degree: profile.target_degree, university: profile.target_university, admissionScore, sourceType: profile.target_orientation_source_type === 'official' || profile.target_orientation_source_type === 'fixture' ? profile.target_orientation_source_type : null }
+                  : null,
+              )
             }
           })
           .catch(() => undefined)
@@ -1505,8 +1537,13 @@ export default function CaminoCalendarClient() {
     }
   }, [hasProfile])
 
-  const visibleCalendar = visibleCalendarForOnboarding(calendar, onboarding)
   const realToday = todayMadrid()
+  const orientationContext = matchingOrientationContext(localOrientationContext, persistedOrientationTarget)
+  const orientationTarget: PersistedOrientationGoal | null = persistedOrientationTarget ?? null
+  const visibleCalendar = visibleCalendarForOnboarding(calendar, onboarding).map(day => ({
+    ...day,
+    missions: day.missions.map(mission => withPriorityReasons(mission, orientationContext, realToday)),
+  }))
   const today = visibleCalendar.find(day => day.date === realToday) ?? { date: realToday, label: calendarDayLabel(realToday), isToday: true, missions: [] }
   const allMissions = visibleCalendar.flatMap(day => day.missions)
   const totalMain = allMissions.filter(mission => mission.role === 'main').length
@@ -1521,7 +1558,7 @@ export default function CaminoCalendarClient() {
   // si fueran una misión normal más, sin superar el objetivo semanal ya
   // mostrado (Math.min(totalMain, 5)) para no desbordar la UI.
   const completedMainWithSims = Math.min(completedMain + weeklySimsCompleted + weeklyExamsCompleted, Math.min(totalMain, 5))
-  const todayMain = today?.missions.filter(mission => mission.role === 'main') ?? []
+  const todayMain = rankMissionCandidates(today?.missions.filter(mission => mission.role === 'main') ?? [], orientationContext, realToday)
   const todayBonus = today?.missions.filter(mission => mission.role === 'bonus') ?? []
   const todayDone = todayMain.length > 0 && todayMain.every(mission => mission.status === 'done')
   const displayedXP = leaderboard?.currentXp ?? xpTotal
@@ -1595,8 +1632,8 @@ export default function CaminoCalendarClient() {
     return dow === 'Fri' || dow === 'Sat' || dow === 'Sun'
   })()
   const heroAsignatura = (() => {
-    const todayMain = today.missions.find(m => m.role === 'main')?.subjectSlug ?? null
-    if (todayMain) return todayMain
+    const todayMainSubject = todayMain[0]?.subjectSlug ?? null
+    if (todayMainSubject) return todayMainSubject
     if (!filteredProjection?.length) return null
     const nextPartialSlug = upcomingPartial ? subjectSlug(upcomingPartial.subject) : null
     if (nextPartialSlug && filteredProjection.some(p => p.asignatura === nextPartialSlug)) return nextPartialSlug
@@ -1806,7 +1843,7 @@ export default function CaminoCalendarClient() {
     }
     const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
     const weekCache = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})
-    const nextCalendar = generateCalendar(onboarding, nextExams, source, planId, weekStartISO, weekCache)
+    const nextCalendar = generateCalendar(onboarding, nextExams, source, planId, weekStartISO, weekCache, orientationContext)
     return { days: nextCalendar, source: 'client', reason: 'no_server_or_cache_week', shouldCache: true, shouldMerge: true }
   }
   function generateWeek(weekStartISO: string, nextExams = exams, planId = caminoPlanId) {
@@ -1870,7 +1907,7 @@ export default function CaminoCalendarClient() {
   function regenerate(nextExams = exams) {
     if (!onboarding) return
     const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
-    const regenerated = generateCalendar(onboarding, nextExams, source, caminoPlanId, selectedWeekStart, {})
+    const regenerated = generateCalendar(onboarding, nextExams, source, caminoPlanId, selectedWeekStart, {}, orientationContext)
     recordCalendarSource('client', 'exam_change', { weekStart: selectedWeekStart, missionCount: missionCount(regenerated) })
     const saved = persist(regenerated, nextExams)
     setToast('Camino PAU actualizado')
@@ -2215,7 +2252,10 @@ export default function CaminoCalendarClient() {
 
   const mainMission = todayMain[0] ?? null
   const mainTarget = mainMission ? hrefForMission(mainMission) : null
-  const mainReason = mainMission ? heroReason(mainMission, blockCompletedCount, nextMissionInCalendar?.title ?? null) : null
+  const mainReason = mainMission ? formatPriorityReasons(mainMission) || heroReason(mainMission, blockCompletedCount, nextMissionInCalendar?.title ?? null) : null
+  const orientationUniversity = orientationContext?.target.universityAcronym || orientationTarget?.university || ''
+  const orientationRoute = orientationRouteLabel(orientationContext)
+  const formatOrientationScore = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 3 })
 
   return (
     <Shell>
@@ -2276,6 +2316,26 @@ export default function CaminoCalendarClient() {
           {isRescueMode && <div style={{ padding: '8px 20px', background: '#fef3c7', borderBottom: '1px solid #fde68a' }}><p style={{ fontSize: 11, fontWeight: 900, color: '#92400e', margin: 0 }}>⚠️ Modo Rescate PAU — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
           <WeeklyCheckinBanner />
           <ExamCoverageBanner />
+
+          {orientationTarget && (
+            <div style={{ padding: '10px 20px', borderBottom: '1px solid #e2e8f0', background: 'linear-gradient(135deg,rgba(239,246,255,.72),rgba(255,255,255,.68))' }}>
+              <div className="kairo-soft-panel" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 14, padding: '10px 14px', border: '1px solid rgba(191,219,254,.72)', background: 'rgba(255,255,255,.68)', backdropFilter: 'blur(14px)', boxShadow: '0 8px 28px rgba(37,99,235,.07), inset 0 1px 0 rgba(255,255,255,.9)' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 7 }}>
+                    <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.13em', textTransform: 'uppercase', color: '#2563eb' }}>Tu objetivo</span>
+                    {orientationRoute && <span style={{ borderRadius: 999, padding: '2px 8px', fontSize: 9, fontWeight: 800, color: '#64748b', background: '#f8fafc', boxShadow: 'inset 1px 1px 3px rgba(15,23,42,.08), inset -1px -1px 3px white' }}>{orientationRoute}</span>}
+                  </div>
+                  <p style={{ margin: '3px 0 0', fontSize: 13, fontWeight: 900, color: '#0f172a', lineHeight: 1.25 }}>{orientationTarget.degree} · {orientationUniversity}</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px 12px', marginTop: 4, fontSize: 10.5, fontWeight: 650, color: '#64748b' }}>
+                    <span>Referencia: {formatOrientationScore(orientationTarget.admissionScore)}</span>
+                    {orientationContext?.calculationComplete && orientationContext.estimatedScore != null && <span>Tu escenario: {formatOrientationScore(orientationContext.estimatedScore)}</span>}
+                    {orientationContext?.calculationComplete && orientationContext.gap != null && <span style={{ color: orientationContext.gap < 0 ? '#b45309' : '#047857', fontWeight: 800 }}>{orientationContext.gap < 0 ? `Te separan: ${formatOrientationScore(Math.abs(orientationContext.gap))}` : `Sobre referencia: +${formatOrientationScore(orientationContext.gap)}`}</span>}
+                  </div>
+                </div>
+                <a href="/orientacion" style={{ flexShrink: 0, fontSize: 10.5, fontWeight: 900, color: '#2563eb', textDecoration: 'none', whiteSpace: 'nowrap' }}>Ver orientación →</a>
+              </div>
+            </div>
+          )}
 
           {/* ── HERO ── */}
           <div className="camino-hero" style={{ position: 'relative', height: 214, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>

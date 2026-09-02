@@ -154,7 +154,7 @@ export default function OrientationSimulator() {
       const saved = await persistOrientationTarget(data.session.access_token, target)
       if (!saved) { setSaveState('error'); return }
       setSavedTarget({ degreeId: target.degreeId, universityId: target.universityId, degree: target.degree, university: target.university, admissionScore: target.referenceScore, sourceType: target.source.type, updatedAt: new Date().toISOString() })
-      const caminoContext = createCaminoOrientationContext(accessPath, target, calculation.complete ? score : null, calculation.complete ? difference : null, subjects)
+      const caminoContext = createCaminoOrientationContext(accessPath, target, calculation.complete ? score : null, calculation.complete ? difference : null, subjects, scenario, calculation.complete)
       window.localStorage.setItem(CAMINO_ORIENTATION_CONTEXT_KEY, JSON.stringify(caminoContext))
       window.location.assign('/camino')
     } catch {

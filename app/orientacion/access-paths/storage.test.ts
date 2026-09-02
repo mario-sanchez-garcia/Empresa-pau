@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { FIXTURE_SOURCE, type AdmissionSubject, type OrientationTarget } from '../data.ts'
 import { createDefaultAccessScenarios, createEmptyStoredSubjectInputs } from './model.ts'
-import { applyStoredSubjectInputs, createCaminoOrientationContext, parseAccessPathStorage, subjectInputsFromScenarios } from './storage.ts'
+import { applyStoredSubjectInputs, createCaminoOrientationContext, parseAccessPathStorage, parseCaminoOrientationContext, subjectInputsFromScenarios } from './storage.ts'
 
 const subjects: AdmissionSubject[] = [{ id: 'math', subjectCode: 'matematicas-ii', name: 'Matemáticas II', weighting: 0.2, defaultGrade: 7, enabled: true, source: FIXTURE_SOURCE }]
 
@@ -47,10 +47,29 @@ test('serializa inputs por vía de forma aislada', () => {
 
 test('prepara un contexto mínimo y estable para la futura integración con Camino', () => {
   const target: OrientationTarget = { id: 'target', degreeId: 'degree', universityId: 'university', degreeCode: null, universityCode: null, degree: 'Psicología', university: 'UCM', universityAcronym: 'UCM', community: 'Madrid', referenceScore: 12, referenceLabel: 'Referencia', source: FIXTURE_SOURCE, subjects }
-  const context = createCaminoOrientationContext('ib', target, 11.5, -0.5, subjects, new Date('2026-09-02T12:00:00.000Z'))
+  const context = createCaminoOrientationContext('ib', target, 11.5, -0.5, subjects, { pathId: 'ib', inputMode: 'accredited_cau', accreditedCau: 9, subjectAverage: null }, true, new Date('2026-09-02T12:00:00.000Z'))
   assert.equal(context.accessPath, 'ib')
+  assert.equal(context.route, 'ib_unedasiss')
+  assert.equal(context.calculationComplete, true)
   assert.equal(context.target.degreeId, 'degree')
   assert.equal(context.estimatedScore, 11.5)
   assert.equal(context.impactSubjects[0].subjectCode, 'matematicas-ii')
   assert.equal(context.updatedAt, '2026-09-02T12:00:00.000Z')
+})
+
+test('valida el contexto de Camino y no inventa la ruta de contextos antiguos ambiguos', () => {
+  assert.equal(parseCaminoOrientationContext('{'), null)
+  assert.equal(parseCaminoOrientationContext(JSON.stringify({ version: 1, accessPath: 'unknown', target: {} })), null)
+  const restored = parseCaminoOrientationContext(JSON.stringify({
+    version: 1,
+    accessPath: 'bachibac',
+    target: { degreeId: 'degree', universityId: 'university', degree: 'Psicología', university: 'UCM', referenceScore: 12 },
+    estimatedScore: 11.5,
+    gap: -0.5,
+    impactSubjects: [{ subjectCode: 'matematicas-ii', name: 'Matemáticas II', weighting: 0.2, defaultGrade: 99 }],
+    updatedAt: '2026-09-02T12:00:00.000Z',
+  }))
+  assert.equal(restored?.route, undefined)
+  assert.equal(restored?.calculationComplete, true)
+  assert.equal(restored?.impactSubjects[0].defaultGrade, 10)
 })

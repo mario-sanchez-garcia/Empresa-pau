@@ -33,7 +33,12 @@ export default defineConfig({
     },
     {
       name: 'orientation',
-      testMatch: /orientation\.spec\.ts/,
+      testMatch: /(^|[\\/])orientation\.spec\.ts$/,
+      use: { ...devices['Desktop Chrome'], channel: 'chrome', storageState: authState },
+    },
+    {
+      name: 'camino-orientation',
+      testMatch: /(^|[\\/])camino-orientation\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'], channel: 'chrome', storageState: authState },
     },
   ],

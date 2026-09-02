@@ -54,8 +54,12 @@ async function openOrientation(page: Page) {
 async function selectTarget(page: Page, target: Target) {
   expect(target.degreeId, 'El grado oficial debe tener degree_id').toBeTruthy()
   expect(target.universityId, 'El grado oficial debe tener university_id').toBeTruthy()
-  await page.getByRole('combobox', { name: 'Carrera y universidad' }).selectOption({ value: target.id })
-  await expect(page.getByText('OFICIAL · Fuente verificada')).toBeVisible()
+  const combobox = page.getByRole('combobox', { name: 'Carrera y universidad' })
+  await combobox.fill(target.degree)
+  const option = page.getByRole('option').filter({ hasText: target.degree }).filter({ hasText: target.university }).first()
+  await expect(option).toBeVisible()
+  await option.click()
+  await expect(page.locator(`[data-selected-id="${target.id}"]`)).toBeVisible()
 }
 
 async function saveTarget(page: Page, target: Target, assertPending = false) {
@@ -87,7 +91,7 @@ async function expectRestoredTarget(page: Page, target: Target) {
   const payload = await openOrientation(page)
   expect(payload.savedTarget?.degreeId).toBe(target.degreeId)
   expect(payload.savedTarget?.universityId).toBe(target.universityId)
-  await expect(page.getByRole('combobox', { name: 'Carrera y universidad' })).toHaveValue(target.id)
+  await expect(page.locator(`[data-selected-id="${target.id}"]`)).toBeVisible()
   const saved = page.getByText('Objetivo guardado', { exact: true }).locator('..')
   await expect(saved).toContainText(target.degree)
   await expect(saved).toContainText(target.university)
@@ -157,7 +161,7 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       const payload = await response.json() as OrientationPayload
       expect(payload.savedTarget?.degreeId).toBe(firstTarget.degreeId)
       expect(payload.savedTarget?.universityId).toBe(firstTarget.universityId)
-      await expect(page.getByRole('combobox', { name: 'Carrera y universidad' })).toHaveValue(firstTarget.id)
+      await expect(page.locator(`[data-selected-id="${firstTarget.id}"]`)).toBeVisible()
     })
 
     await test.step('salir y volver no depende del estado React anterior', async () => {
@@ -172,7 +176,7 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       page.on('request', countRequests)
       const score = page.locator('[aria-label^="Tu nota estimada es"]')
       const scoreBefore = await score.getAttribute('aria-label')
-      const opportunities = page.getByRole('region', { name: 'Explora oportunidades cerca de tu escenario' })
+      const opportunities = page.getByRole('region', { name: 'Alternativas con tu nota actual' })
       const opportunitiesBefore = await opportunities.innerText()
       await page.getByRole('spinbutton', { name: 'Nota media Bachillerato, nota numérica' }).fill('10')
       await page.getByRole('spinbutton', { name: 'Fase de acceso PAU, nota numérica' }).fill('10')
@@ -182,6 +186,30 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       await expect(opportunities).toContainText(/Por encima de la referencia|Cerca de la referencia|Por debajo de la referencia/)
       await expect(page.getByText(/no garantiza la admisión/i)).toBeVisible()
       page.off('request', countRequests)
+    })
+
+    await test.step('buscador accesible y filtros útiles del catálogo', async () => {
+      const search = page.getByRole('combobox', { name: 'Carrera y universidad' })
+      await search.fill('economi uc3m')
+      await expect(search).toHaveAttribute('aria-expanded', 'true')
+      await expect(page.getByRole('option').first()).toContainText(/Econom/i)
+      await search.press('Escape')
+      await expect(search).toHaveAttribute('aria-expanded', 'false')
+
+      await page.getByRole('button', { name: 'Explorar grados' }).click()
+      await expect(page.getByRole('heading', { name: 'Encuentra grados que encajan contigo' })).toBeVisible()
+      const degreeSearch = page.getByRole('textbox', { name: 'Buscar grado en universidades' })
+      await degreeSearch.fill('zzzz-grado-inexistente')
+      await expect(page.getByText('No hay grados con esta combinación.')).toBeVisible()
+      await page.getByRole('button', { name: 'Limpiar filtros' }).click()
+      await expect(degreeSearch).toHaveValue('')
+      await expect(page.getByText('554').first()).toBeVisible()
+
+      await page.getByRole('button', { name: 'Cómo se corrige' }).click()
+      await expect(page.getByRole('heading', { name: 'Cómo se corrige de verdad' })).toBeVisible()
+      await expect(page.getByText(/no los denomina rúbrica formal/i)).toBeVisible()
+      await expect(page.getByRole('link', { name: 'Ver fuente oficial' })).toBeVisible()
+      await page.getByRole('button', { name: 'Mi objetivo' }).click()
     })
 
     await test.step('un cambio real de objetivo persiste el nuevo degree_id', async () => {
@@ -207,7 +235,7 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       })
       const button = page.getByRole('button', { name: saveButtonName })
       await button.click()
-      await expect(page.getByText('Inicia sesión o reintenta para guardar el objetivo.')).toBeVisible()
+      await expect(page.getByText('No se pudo guardar. Revisa tu sesión y vuelve a intentarlo.')).toBeVisible()
       await expect(button).toBeEnabled()
       await expect(page).toHaveURL(/\/orientacion(?:\?|$)/)
       await page.unroute('**/api/orientation')

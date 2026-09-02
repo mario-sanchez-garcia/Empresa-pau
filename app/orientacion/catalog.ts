@@ -1,15 +1,92 @@
 import type { AdmissionSubject, OrientationTarget, SavedOrientationTarget } from './data'
 
+const UNIVERSITY_ALIASES: Record<string, string[]> = {
+  UAH: ['uah', 'alcala', 'universidad de alcala'],
+  UAM: ['uam', 'autonoma', 'universidad autonoma', 'universidad autonoma de madrid'],
+  UC3M: ['uc3m', 'carlos iii', 'universidad carlos iii', 'universidad carlos iii de madrid'],
+  UCM: ['ucm', 'complutense', 'universidad complutense', 'universidad complutense de madrid'],
+  UPM: ['upm', 'politecnica', 'universidad politecnica', 'universidad politecnica de madrid'],
+  URJC: ['urjc', 'rey juan carlos', 'universidad rey juan carlos'],
+}
+
 export function normalizeCatalogSearch(value: string) {
-  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').trim()
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase('es')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ')
+}
+
+type IndexedTarget = {
+  target: OrientationTarget
+  degree: string
+  degreeWords: string[]
+  university: string
+  acronym: string
+}
+
+export type CatalogSearchIndex = IndexedTarget[]
+
+export function buildCatalogSearchIndex(targets: OrientationTarget[]): CatalogSearchIndex {
+  return targets.map(target => {
+    const degree = normalizeCatalogSearch(target.degree)
+    return {
+      target,
+      degree,
+      degreeWords: degree.split(' ').filter(Boolean),
+      university: normalizeCatalogSearch(target.university),
+      acronym: normalizeCatalogSearch(target.universityAcronym ?? ''),
+    }
+  })
+}
+
+function detectUniversityAlias(query: string) {
+  const padded = ` ${query} `
+  const matches = Object.entries(UNIVERSITY_ALIASES)
+    .flatMap(([code, aliases]) => aliases.map(alias => ({ code, alias: normalizeCatalogSearch(alias) })))
+    .filter(({ alias }) => padded.includes(` ${alias} `))
+    .sort((a, b) => b.alias.length - a.alias.length)
+  const match = matches[0]
+  if (!match) return null
+  return {
+    code: match.code,
+    degreeQuery: normalizeCatalogSearch(padded.replace(` ${match.alias} `, ' ')),
+  }
+}
+
+function scoreDegree(entry: IndexedTarget, degreeQuery: string) {
+  if (!degreeQuery) return 1
+  if (entry.degree === degreeQuery) return 500
+  if (entry.degree.startsWith(degreeQuery)) return 400
+  const tokens = degreeQuery.split(' ').filter(Boolean)
+  if (tokens.every(token => entry.degreeWords.includes(token))) return 350
+  if (tokens.every(token => entry.degreeWords.some(word => word.startsWith(token)))) return 300
+  if (entry.degree.includes(degreeQuery)) return 250
+  if (tokens.every(token => entry.degreeWords.some(word => word.includes(token)))) return 200
+  if (tokens.some(token => token.length >= 3 && entry.degreeWords.some(word => word.startsWith(token) || word.includes(token)))) return 100
+  return 0
+}
+
+export function searchOrientationTargets(index: CatalogSearchIndex, search: string, universityId = '') {
+  const query = normalizeCatalogSearch(search)
+  const inferredUniversity = detectUniversityAlias(query)
+  const degreeQuery = inferredUniversity?.degreeQuery ?? query
+
+  return index
+    .filter(entry => !universityId || entry.target.universityId === universityId)
+    .filter(entry => !inferredUniversity || entry.acronym === normalizeCatalogSearch(inferredUniversity.code))
+    .map(entry => ({ entry, score: scoreDegree(entry, degreeQuery) + (inferredUniversity ? 25 : 0) }))
+    .filter(result => !query || result.score > (inferredUniversity ? 25 : 0))
+    .sort((a, b) => b.score - a.score
+      || a.entry.target.degree.localeCompare(b.entry.target.degree, 'es')
+      || a.entry.target.university.localeCompare(b.entry.target.university, 'es'))
+    .map(result => result.entry.target)
 }
 
 export function filterOrientationTargets(targets: OrientationTarget[], search: string, universityId = '') {
-  const query = normalizeCatalogSearch(search)
-  return targets.filter(target =>
-    (!universityId || target.universityId === universityId)
-    && (!query || normalizeCatalogSearch(`${target.degree} ${target.university} ${target.universityAcronym ?? ''}`).includes(query))
-  )
+  return searchOrientationTargets(buildCatalogSearchIndex(targets), search, universityId)
 }
 
 /** Preserve a student's inputs by official subject code when the selected degree changes. */

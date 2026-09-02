@@ -1,21 +1,22 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ArrowRight, Check, ChevronDown, Compass, ExternalLink, Info, RefreshCw, RotateCcw, Search, Sparkles, Target, X } from 'lucide-react'
+import { ArrowRight, Check, Compass, ExternalLink, GraduationCap, Info, RefreshCw, RotateCcw, Sparkles, Target, X } from 'lucide-react'
 import SidebarNav from '@/app/components/SidebarNav'
 import { supabase } from '@/app/lib/supabase'
 import { calculateAdmissionScore, getTargetDifference } from './calculation'
-import { availableCatalogTargets, filterOrientationTargets, findSavedTarget, mergeSubjectInputs } from './catalog'
+import { availableCatalogTargets, findSavedTarget, mergeSubjectInputs } from './catalog'
+import CorrectionGuide from './CorrectionGuide'
 import { ORIENTATION_FIXTURES, type AdmissionSubject, type OfficialCriterion, type OrientationTarget, type SavedOrientationTarget } from './data'
+import { classifyOpportunity, rankOpportunities } from './opportunities'
 import { persistOrientationTarget } from './persistence'
-import OfficialCriterionCard from './OfficialCriterionCard'
-import OpportunitiesExplorer from './OpportunitiesExplorer'
+import TargetCombobox from './TargetCombobox'
+import UniversityExplorer from './UniversityExplorer'
 import styles from './orientation.module.css'
 
 const formatGrade = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const formatReference = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 })
 const clamp = (value: number) => Math.min(10, Math.max(0, value))
-const CATALOG_PAGE_SIZE = 30
 
 function GradeControl({ id, label, value, onChange, hint, disabled = false }: {
   id: string; label: string; value: number; onChange: (value: number) => void; hint?: string; disabled?: boolean
@@ -23,24 +24,13 @@ function GradeControl({ id, label, value, onChange, hint, disabled = false }: {
   return (
     <div className={styles.gradeControl}>
       <div className={styles.controlHeading}>
-        <div><label htmlFor={id + '-range'}>{label}</label>{hint && <span>{hint}</span>}</div>
+        <div><label htmlFor={`${id}-range`}>{label}</label>{hint && <span>{hint}</span>}</div>
         <div className={styles.numberWrap}>
-          <input id={id + '-number'} aria-label={label + ', nota numérica'} type="number" min="0" max="10" step="0.05" value={value} disabled={disabled} onChange={event => onChange(clamp(Number(event.target.value)))} />
+          <input id={`${id}-number`} aria-label={`${label}, nota numérica`} type="number" min="0" max="10" step="0.05" value={value} disabled={disabled} onChange={event => onChange(clamp(Number(event.target.value)))} />
           <span>/ 10</span>
         </div>
       </div>
-      <input id={id + '-range'} aria-label={label} className={styles.range} type="range" min="0" max="10" step="0.05" value={value} disabled={disabled} style={{ '--range-progress': String(value * 10) + '%' } as React.CSSProperties} onChange={event => onChange(Number(event.target.value))} />
-    </div>
-  )
-}
-
-function EmptyVerifiedData({ onRetry }: { onRetry?: () => void }) {
-  return (
-    <div className={styles.verifiedEmpty}>
-      <Target size={25} />
-      <h3>Todavía no tenemos datos verificados para esta combinación.</h3>
-      <p>Solo publicaremos información con una fuente oficial trazable.</p>
-      {onRetry && <button onClick={onRetry}><RefreshCw size={14} /> Reintentar</button>}
+      <input id={`${id}-range`} aria-label={label} className={styles.range} type="range" min="0" max="10" step="0.05" value={value} disabled={disabled} style={{ '--range-progress': `${value * 10}%` } as React.CSSProperties} onChange={event => onChange(Number(event.target.value))} />
     </div>
   )
 }
@@ -54,19 +44,17 @@ export default function OrientationSimulator() {
   const [accessPhase, setAccessPhase] = useState(7.8)
   const [subjects, setSubjects] = useState<AdmissionSubject[]>([])
   const [showMethod, setShowMethod] = useState(false)
-  const [activeTab, setActiveTab] = useState('objetivo')
+  const [activeTab, setActiveTab] = useState<'objetivo' | 'universidades' | 'correccion'>('objetivo')
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading')
   const [catalogAvailable, setCatalogAvailable] = useState<boolean | null>(null)
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'error'>('idle')
-  const [search, setSearch] = useState('')
-  const [targetSearch, setTargetSearch] = useState('')
-  const [universityFilter, setUniversityFilter] = useState('')
-  const [catalogVisibleCount, setCatalogVisibleCount] = useState(CATALOG_PAGE_SIZE)
 
   const targets = useMemo(() => availableCatalogTargets(officialTargets, ORIENTATION_FIXTURES, catalogAvailable === true), [officialTargets, catalogAvailable])
   const target = targets.find(item => item.id === targetId) ?? null
   const score = useMemo(() => calculateAdmissionScore(bachillerato, accessPhase, subjects), [bachillerato, accessPhase, subjects])
   const difference = target ? getTargetDifference(score, target.referenceScore) : 0
+  const universityOptions = useMemo(() => [...new Map(targets.map(item => [item.universityId, { id: item.universityId!, acronym: item.universityAcronym, name: item.university }])).values()].sort((a, b) => (a.acronym ?? a.name).localeCompare(b.acronym ?? b.name, 'es')), [targets])
+  const alternatives = useMemo(() => rankOpportunities(officialTargets.filter(item => item.id !== targetId), score, savedTarget).slice(0, 4), [officialTargets, score, savedTarget, targetId])
 
   function selectTarget(id: string, availableTargets = targets) {
     const nextTarget = availableTargets.find(item => item.id === id)
@@ -78,7 +66,7 @@ export default function OrientationSimulator() {
   const loadOrientation = useCallback(async () => {
     try {
       const { data } = await supabase.auth.getSession()
-      const headers: HeadersInit = data.session ? { Authorization: 'Bearer ' + data.session.access_token } : {}
+      const headers: HeadersInit = data.session ? { Authorization: `Bearer ${data.session.access_token}` } : {}
       const response = await fetch('/api/orientation', { headers })
       if (!response.ok) throw new Error('orientation-api')
       const payload = await response.json() as { targets?: OrientationTarget[]; criteria?: OfficialCriterion[]; savedTarget?: SavedOrientationTarget | null; catalogAvailable?: boolean }
@@ -108,6 +96,7 @@ export default function OrientationSimulator() {
     const timer = window.setTimeout(() => { void loadOrientation() }, 0)
     return () => window.clearTimeout(timer)
   }, [loadOrientation])
+
   useEffect(() => {
     if (!showMethod) return
     const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setShowMethod(false) }
@@ -149,113 +138,90 @@ export default function OrientationSimulator() {
   const recommendations = subjects.filter(subject => subject.enabled && subject.defaultGrade >= 5 && subject.defaultGrade < 10)
     .sort((a, b) => b.weighting - a.weighting || a.defaultGrade - b.defaultGrade).slice(0, 2)
     .map(subject => ({ ...subject, nextGrade: Math.min(10, subject.defaultGrade + 1), gain: (Math.min(10, subject.defaultGrade + 1) - subject.defaultGrade) * subject.weighting }))
-  const universityOptions = useMemo(() => [...new Map(officialTargets.map(item => [item.universityId, { id: item.universityId!, acronym: item.universityAcronym, name: item.university }])).values()].sort((a, b) => (a.acronym ?? a.name).localeCompare(b.acronym ?? b.name, 'es')), [officialTargets])
-  const matchingUniversities = useMemo(() => filterOrientationTargets(officialTargets, search, universityFilter), [officialTargets, search, universityFilter])
-  const visibleUniversities = matchingUniversities.slice(0, catalogVisibleCount)
-  const selectorTargets = useMemo(() => {
-    const filtered = filterOrientationTargets(targets, targetSearch)
-    if (!targetId || filtered.some(item => item.id === targetId)) return filtered
-    const selected = targets.find(item => item.id === targetId)
-    return selected ? [selected, ...filtered] : filtered
-  }, [targets, targetSearch, targetId])
+  const prioritySubjects = subjects.filter(subject => subject.weighting === 0.2 || subject.enabled).slice(0, 8)
+  const visibleSubjects = prioritySubjects.length ? prioritySubjects : subjects.slice(0, 4)
+  const secondarySubjects = subjects.filter(subject => !visibleSubjects.some(visible => visible.id === subject.id))
+
+  function renderSubject(subject: AdmissionSubject) {
+    return (
+      <div className={`${styles.subjectRow} ${!subject.enabled ? styles.disabledSubject : ''}`} key={subject.id}>
+        <div className={styles.subjectMeta}><button role="switch" aria-checked={subject.enabled} aria-label={`${subject.enabled ? 'Desactivar' : 'Activar'} ${subject.name}`} className={styles.toggle} onClick={() => updateSubject(subject.id, { enabled: !subject.enabled })}><span><Check size={12} /></span></button><div><b>{subject.name}</b><span>Pondera ×{subject.weighting.toLocaleString('es-ES')}{subject.ruleNote ? ` · ${subject.ruleNote}` : ''}</span></div></div>
+        <GradeControl id={`subject-${subject.id}`} label={`Nota de ${subject.name}`} value={subject.defaultGrade} disabled={!subject.enabled} onChange={value => updateSubject(subject.id, { defaultGrade: value })} />
+      </div>
+    )
+  }
+
+  const headings = {
+    objetivo: ['Mi objetivo', 'Elige, simula y convierte tu meta en un siguiente paso claro.'],
+    universidades: ['Explorar grados', 'Filtra el catálogo oficial según lo que buscas y tu escenario.'],
+    correccion: ['Cómo se corrige', 'Baremos oficiales explicados sin mezclar fuente e interpretación.'],
+  } as const
 
   return (
     <div className={styles.appShell}>
       <SidebarNav />
       <main className={styles.page}>
         <header className={styles.header}>
-          <div><div className={styles.eyebrow}><Compass size={14} /> Orientación</div><h1>Mi objetivo</h1><p>Ajusta tus notas y descubre qué necesitas para entrar donde quieres.</p></div>
-          <button className={styles.methodButton} onClick={() => setShowMethod(true)}><Info size={17} /> ¿Cómo se calcula?</button>
+          <div><div className={styles.eyebrow}><Compass size={14} /> Orientación</div><h1>{headings[activeTab][0]}</h1><p>{headings[activeTab][1]}</p></div>
+          {activeTab === 'objetivo' && <button className={styles.methodButton} onClick={() => setShowMethod(true)}><Info size={17} /> ¿Cómo se calcula?</button>}
         </header>
 
         <nav className={styles.tabs} aria-label="Secciones de Orientación">
-          {[['objetivo', 'Mi objetivo'], ['calculadora', 'Calculadora'], ['universidades', 'Universidades'], ['correccion', 'Cómo se corrige']].map(([id, label]) =>
-            <button key={id} aria-current={activeTab === id ? 'page' : undefined} onClick={() => setActiveTab(id)}>{label}</button>
-          )}
-          <button disabled title="Próximamente">Mis puntos</button>
+          {([['objetivo', 'Mi objetivo'], ['universidades', 'Explorar grados'], ['correccion', 'Cómo se corrige']] as const).map(([id, label]) => <button key={id} aria-current={activeTab === id ? 'page' : undefined} onClick={() => setActiveTab(id)}>{label}</button>)}
         </nav>
 
-        {savedTarget && (
+        {activeTab === 'objetivo' && savedTarget && (
           <section className={styles.savedTarget}>
             <div><Check size={16} /><span><small>Objetivo guardado</small><b>{savedTarget.degree} · {savedTarget.university}</b></span></div>
             <strong>{formatReference(savedTarget.admissionScore)}</strong>
-            <button onClick={() => { setTargetId(''); setSubjects([]) }}>Cambiar objetivo</button>
+            <button onClick={() => { setTargetId(''); setSubjects([]) }}>Cambiar</button>
           </section>
         )}
 
-        {activeTab === 'universidades' ? (
-          <section className={styles.dataSection}>
-            <div className={styles.dataSectionHeader}><div><span>OFICIAL · Catálogo verificado</span><h2>Universidades y grados</h2><p>{matchingUniversities.length} referencias oficiales</p></div><div className={styles.universityToolbar}><label className={styles.searchBox}><Search size={16} /><input value={search} onChange={event => { setSearch(event.target.value); setCatalogVisibleCount(CATALOG_PAGE_SIZE) }} placeholder="Buscar universidad o grado" aria-label="Buscar universidad o grado" /></label><label className={styles.universitySelect}><span>Universidad</span><select value={universityFilter} onChange={event => { setUniversityFilter(event.target.value); setCatalogVisibleCount(CATALOG_PAGE_SIZE) }}><option value="">Todas</option>{universityOptions.map(item => <option key={item.id} value={item.id}>{item.acronym ? `${item.acronym} · ` : ''}{item.name}</option>)}</select></label></div></div>
-            {loadState === 'loading' ? <div className={styles.skeletonList}><i /><i /><i /></div> : visibleUniversities.length ? <>{visibleUniversities.map(item => {
-              const weightingValues = [...new Set(item.subjects.map(subject => subject.weighting))].sort()
-              const referenceDifference = score - item.referenceScore
-              return (
-                <article className={styles.universityRow} key={item.id}>
-                  <div className={styles.universityIdentity}><b>{item.degree}</b><span>{item.universityAcronym ? `${item.universityAcronym} · ` : ''}{item.university}</span><small>{weightingValues.length ? `Ponderaciones oficiales ${weightingValues.map(value => `×${value.toLocaleString('es-ES')}`).join(' · ')}` : 'Sin ponderaciones verificadas para este grado'}</small></div>
-                  <div className={styles.universityReference}><small>OFICIAL</small><strong>{formatReference(item.referenceScore)}</strong><span>{item.referenceLabel}</span><a href={item.source.url!} target="_blank" rel="noreferrer">{item.source.label} <ExternalLink size={13} /></a></div>
-                  <div className={styles.universityPractice}><small>EN LA PRÁCTICA</small><span>{referenceDifference >= 0 ? `Por encima de la referencia · +${formatGrade(referenceDifference)}` : `Por debajo de la referencia · ${formatGrade(Math.abs(referenceDifference))} puntos`}</span></div>
-                </article>
-              )
-            })}{catalogVisibleCount < matchingUniversities.length && <button className={styles.showMoreButton} onClick={() => setCatalogVisibleCount(current => current + CATALOG_PAGE_SIZE)}>Ver más grados</button>}</> : <EmptyVerifiedData onRetry={retryLoad} />}
-          </section>
-        ) : activeTab === 'correccion' ? (
-          <section className={styles.dataSection}>
-            <div className={styles.dataSectionHeader}><div><span>Trazabilidad</span><h2>Cómo se corrige</h2><p>El texto oficial y la explicación de Kairo siempre aparecen separados.</p></div></div>
-            {loadState === 'loading' ? <div className={styles.skeletonList}><i /><i /></div> : criteria.length ? criteria.map(item => <OfficialCriterionCard key={item.id} criterion={item} />) : <EmptyVerifiedData onRetry={retryLoad} />}
-          </section>
-        ) : (
+        {activeTab === 'universidades' ? <UniversityExplorer targets={officialTargets} estimatedScore={score} loadState={loadState} onRetry={retryLoad} /> : activeTab === 'correccion' ? <CorrectionGuide databaseCriteria={criteria} /> : (
           <>
+            <ol className={styles.flowRail} aria-label="Pasos para definir tu objetivo"><li className={styles.flowActive}><b>1</b><span>Elige objetivo</span></li><li className={target ? styles.flowActive : ''}><b>2</b><span>Ajusta notas</span></li><li className={target ? styles.flowActive : ''}><b>3</b><span>Decide qué mejorar</span></li><li><b>4</b><span>Llévalo a Camino</span></li></ol>
             <section className={styles.targetPicker}>
-              <div className={styles.pickerTitle}><Target size={19} /><div><b>Elige tu objetivo</b><span>El escenario no cambia tu objetivo guardado.</span></div></div>
-              {loadState === 'loading' ? <div className={styles.selectSkeleton} /> : <div className={styles.catalogChooser}><label htmlFor="target-search">Carrera + universidad</label><div className={styles.targetSearch}><Search size={15} /><input id="target-search" value={targetSearch} onChange={event => setTargetSearch(event.target.value)} placeholder="Busca Psicología, Medicina…" /></div><span className={styles.selectWrap}><select aria-label="Carrera y universidad" value={targetId} onChange={event => selectTarget(event.target.value)}><option value="">Selecciona una opción</option><optgroup label={officialTargets.length ? 'Datos oficiales verificados' : catalogAvailable === true ? 'Simulador de demostración' : 'Catálogo oficial no disponible'}>{selectorTargets.map(item => <option key={item.id} value={item.id}>{item.degree} · {item.university}</option>)}</optgroup></select><ChevronDown size={17} aria-hidden="true" /></span></div>}
-              <div className={styles.sourceBadge + ' ' + (target?.source.type === 'official' ? styles.officialBadge : '')}>{target?.source.type === 'official' ? 'OFICIAL · Fuente verificada' : target ? 'Datos demo · no oficiales' : 'Selecciona un objetivo'}</div>
+              <div className={styles.pickerTitle}><Target size={20} /><div><small>PASO 1</small><b>¿Dónde quieres entrar?</b><span>Busca primero el grado; afina por universidad si lo necesitas.</span></div></div>
+              {loadState === 'loading' ? <div className={styles.selectSkeleton} /> : <TargetCombobox targets={targets} selectedId={targetId} universities={universityOptions} onSelect={selectTarget} />}
             </section>
-            {catalogAvailable === false && <div className={styles.fallbackNotice}><Info size={15} /><span>No se pudo leer el catálogo verificado. No mostraremos datos demo mientras no podamos confirmar el catálogo oficial.</span><button onClick={retryLoad}>Reintentar</button></div>}
+            {catalogAvailable === false && <div className={styles.fallbackNotice}><Info size={15} /><span>No se pudo leer el catálogo verificado. No mostraremos datos demo hasta poder confirmar la fuente oficial.</span><button onClick={retryLoad}><RefreshCw size={13} /> Reintentar</button></div>}
 
-            {!target ? (
-              <section className={styles.emptyState}><div><Target size={29} /></div><h2>Elige una carrera para empezar a simular.</h2><p>Verás tu estimación, la distancia al objetivo y qué cambios tienen más impacto.</p></section>
-            ) : (
-              <div className={styles.simulatorGrid}>
-                <section className={styles.controlsPanel}>
-                  <div className={styles.sectionHeading}><div><span>Escenario sin guardar</span><h2>Ajusta tus notas</h2></div><button onClick={resetScenario}><RotateCcw size={15} /> Restablecer</button></div>
-                  <GradeControl id="bachillerato" label="Nota media Bachillerato" hint="60% de la fase de acceso" value={bachillerato} onChange={setBachillerato} />
-                  <GradeControl id="fase-acceso" label="Fase de acceso PAU" hint="40% de la fase de acceso" value={accessPhase} onChange={setAccessPhase} />
-                  <div className={styles.subjectsHeading}><div><b>Materias de admisión</b><span>Se toman las dos aportaciones aprobadas y activas más altas.</span></div></div>
-                  {subjects.length ? subjects.map(subject => (
-                    <div className={styles.subjectRow + ' ' + (!subject.enabled ? styles.disabledSubject : '')} key={subject.id}>
-                      <div className={styles.subjectMeta}><button role="switch" aria-checked={subject.enabled} aria-label={(subject.enabled ? 'Desactivar ' : 'Activar ') + subject.name} className={styles.toggle} onClick={() => updateSubject(subject.id, { enabled: !subject.enabled })}><span><Check size={12} /></span></button><div><b>{subject.name}</b><span>Ponderación ×{subject.weighting.toLocaleString('es-ES')}{subject.ruleNote ? ` · ${subject.ruleNote}` : ''}</span></div></div>
-                      <GradeControl id={'subject-' + subject.id} label={'Nota de ' + subject.name} value={subject.defaultGrade} disabled={!subject.enabled} onChange={value => updateSubject(subject.id, { defaultGrade: value })} />
-                    </div>
-                  )) : <p className={styles.noWeightings}>No hay ponderaciones verificadas para este objetivo.</p>}
+            {!target ? <section className={styles.emptyState}><div><Target size={29} /></div><h2>Empieza por un grado.</h2><p>En cuanto lo elijas verás la referencia, tu escenario y el cambio con más impacto.</p></section> : (
+              <>
+                <div className={styles.simulatorGrid}>
+                  <section className={styles.controlsPanel}>
+                    <div className={styles.sectionHeading}><div><span>PASO 2 · SIMULACIÓN</span><h2>Ajusta tu escenario</h2></div><button onClick={resetScenario}><RotateCcw size={15} /> Restablecer</button></div>
+                    <GradeControl id="bachillerato" label="Nota media Bachillerato" hint="60% de la fase de acceso" value={bachillerato} onChange={setBachillerato} />
+                    <GradeControl id="fase-acceso" label="Fase de acceso PAU" hint="40% de la fase de acceso" value={accessPhase} onChange={setAccessPhase} />
+                    <div className={styles.subjectsHeading}><div><b>Materias de admisión</b><span>Solo cuentan las dos mejores aportaciones aprobadas y activas.</span></div></div>
+                    {subjects.length ? <>{visibleSubjects.map(renderSubject)}{secondarySubjects.length > 0 && <details className={styles.secondarySubjects}><summary>Ver {secondarySubjects.length} materias con menor ponderación</summary>{secondarySubjects.map(renderSubject)}</details>}</> : <p className={styles.noWeightings}>No hay ponderaciones verificadas para este objetivo.</p>}
+                  </section>
+
+                  <aside className={styles.resultPanel} aria-live="polite">
+                    <div className={styles.resultTitle}><span>TU DISTANCIA AL OBJETIVO</span><div className={styles.liveDot} /> En vivo</div>
+                    <div className={styles.scoreComparison}><div><span>Necesitas como referencia</span><b>{formatReference(target.referenceScore)}</b><small>{target.referenceLabel}</small></div><div className={styles.primaryScore}><span>Con tu nota actual</span><b key={score}>{formatGrade(score)} <small>/ 14</small></b><small>Estimación del escenario</small></div></div>
+                    <div className={styles.goalChart} aria-label={`Tu nota estimada es ${formatGrade(score)} sobre 14; referencia ${formatReference(target.referenceScore)}`}><div className={styles.chartLabels}><span>5</span><span>14</span></div><div className={styles.track}><div className={styles.trackFill} style={{ width: `${Math.max(0, Math.min(100, ((score - 5) / 9) * 100))}%` }} /><div className={`${styles.marker} ${styles.yourMarker}`} style={{ left: `${Math.max(0, Math.min(100, ((score - 5) / 9) * 100))}%` }}><span>Tú</span></div><div className={`${styles.marker} ${styles.targetMarker}`} style={{ left: `${Math.max(0, Math.min(100, ((target.referenceScore - 5) / 9) * 100))}%` }}><span>Meta</span></div></div></div>
+                    <div className={`${styles.status} ${difference >= 0 ? styles.positive : ''}`}>{difference >= 0 ? <Check size={19} /> : <Target size={19} />}<div><b>{difference >= 0 ? `Por encima de la referencia · +${formatGrade(difference)}` : `Te faltan ${formatGrade(Math.abs(difference))} puntos`}</b><span>Es una simulación, no una garantía de admisión.</span></div></div>
+                    {target.source.type === 'official' && target.source.url && <a className={styles.sourceLink} href={target.source.url} target="_blank" rel="noreferrer">OFICIAL · {target.source.label} <ExternalLink size={13} /></a>}
+                    <div className={styles.recommendations}><div><span>PASO 3 · QUÉ MEJORAR</span><Sparkles size={17} /></div>{recommendations.length ? recommendations.map(item => <div className={styles.recommendation} key={item.id}><div><b>{item.name}</b><span>Si subes {formatGrade(item.defaultGrade)} → {formatGrade(item.nextGrade)}</span></div><strong>+{formatGrade(item.gain)}</strong></div>) : <p>Activa o ajusta una materia para comparar el impacto.</p>}</div>
+                    <button className={`${styles.caminoCta} kairo-clay-action`} onClick={saveAndOpenCamino} disabled={saveState === 'saving'}><span><small>PASO 4</small>{saveState === 'saving' ? 'Guardando…' : savedTarget ? 'Actualizar objetivo en Camino' : 'Guardar y usar en Camino'}</span><ArrowRight size={20} /></button>
+                    {saveState === 'error' && <p className={styles.saveError}>No se pudo guardar. Revisa tu sesión y vuelve a intentarlo.</p>}
+                  </aside>
+                </div>
+
+                <section className={styles.alternatives} aria-label="Alternativas con tu nota actual">
+                  <div className={styles.alternativesHeading}><div><span>PASO 5 · ALTERNATIVAS</span><h2>Opciones cerca de tu escenario</h2><p>Referencias ordenadas por distancia a tu nota actual.</p></div><button onClick={() => setActiveTab('universidades')}>Explorar las 554 <ArrowRight size={14} /></button></div>
+                  <div className={styles.alternativeGrid}>{alternatives.map(item => { const category = classifyOpportunity(score, item.referenceScore); return <article key={item.id}><div><GraduationCap size={16} /><span>{category === 'above' ? 'Por encima' : category === 'close' ? 'Cerca' : 'Por debajo'}</span></div><h3>{item.degree}</h3><p>{item.universityAcronym ?? item.university}</p><strong>{formatReference(item.referenceScore)}</strong></article> })}</div>
+                  <p className={styles.opportunityDisclaimer}>Las notas de corte son históricas y pueden variar. Estar por encima no garantiza la admisión.</p>
                 </section>
-
-                <aside className={styles.resultPanel} aria-live="polite">
-                  <div className={styles.resultTitle}><span>Tu resultado en tiempo real</span><div className={styles.liveDot} /> En vivo</div>
-                  <div className={styles.scoreComparison}><div><span>Nota de referencia</span><b>{formatReference(target.referenceScore)}</b><small>{target.referenceLabel}</small></div><div className={styles.primaryScore}><span>Tu nota estimada</span><b key={score}>{formatGrade(score)} <small>/ 14</small></b><small>Estimación del escenario</small></div></div>
-                  <p className={styles.cutoffNote}>Las notas de corte son orientativas y pueden variar cada curso.</p>
-                  <div className={styles.goalChart} aria-label={'Tu nota estimada es ' + formatGrade(score) + ' sobre 14; referencia ' + formatReference(target.referenceScore)}><div className={styles.chartLabels}><span>5</span><span>14</span></div><div className={styles.track}><div className={styles.trackFill} style={{ width: String(Math.max(0, Math.min(100, ((score - 5) / 9) * 100))) + '%' }} /><div className={styles.marker + ' ' + styles.yourMarker} style={{ left: String(Math.max(0, Math.min(100, ((score - 5) / 9) * 100))) + '%' }}><span>Tu nota</span></div><div className={styles.marker + ' ' + styles.targetMarker} style={{ left: String(Math.max(0, Math.min(100, ((target.referenceScore - 5) / 9) * 100))) + '%' }}><span>Referencia</span></div></div></div>
-                  <div className={styles.status + ' ' + (difference >= 0 ? styles.positive : '')}>{difference >= 0 ? <Check size={19} /> : <Target size={19} />}<div><b>{difference >= 0 ? 'Por encima de la referencia · +' + formatGrade(difference) : 'Por debajo de la referencia · ' + formatGrade(Math.abs(difference)) + ' puntos'}</b><span>Es una simulación, no una garantía de admisión.</span></div></div>
-                  {target.source.type === 'official' && target.source.url && <a className={styles.sourceLink} href={target.source.url} target="_blank" rel="noreferrer">OFICIAL · {target.source.label} <ExternalLink size={13} /></a>}
-                  <div className={styles.recommendations}><div><span>EN LA PRÁCTICA · Recomendación Kairo</span><Sparkles size={17} /></div>{recommendations.length ? recommendations.map(item => <div className={styles.recommendation} key={item.id}><div><b>{item.name}</b><span>{formatGrade(item.defaultGrade)} → {formatGrade(item.nextGrade)}</span></div><strong>+{formatGrade(item.gain)}</strong></div>) : <p>Activa o ajusta una materia para comparar escenarios.</p>}</div>
-                  <button className={styles.caminoCta + ' kairo-clay-action'} onClick={saveAndOpenCamino} disabled={saveState === 'saving'}><span><small>{savedTarget ? 'Actualizar objetivo' : 'Guardar objetivo'}</small>{savedTarget ? 'Usar este objetivo en Camino' : 'Guardar y usar en Camino'}</span><ArrowRight size={20} /></button>
-                  {saveState === 'error' && <p className={styles.saveError}>Inicia sesión o reintenta para guardar el objetivo.</p>}
-                  <p className={styles.integrationNote}>Camino podrá leer este objetivo sin modificar todavía su scheduler.</p>
-                </aside>
-              </div>
+              </>
             )}
-            <OpportunitiesExplorer
-              estimatedScore={score}
-              officialTargets={officialTargets}
-              savedTarget={savedTarget}
-              loadState={loadState}
-              catalogAvailable={catalogAvailable}
-              onRetry={retryLoad}
-            />
           </>
         )}
       </main>
 
-      {showMethod && <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => event.target === event.currentTarget && setShowMethod(false)}><section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="method-title"><button className={styles.closeButton} aria-label="Cerrar" onClick={() => setShowMethod(false)}><X size={19} /></button><div className={styles.modalIcon}><Info size={22} /></div><h2 id="method-title">¿Cómo se calcula?</h2><p>La simulación general suma la fase de acceso y las dos mejores aportaciones activas con nota mínima de 5. Las reglas particulares solo se incorporan con fuente verificada.</p><div className={styles.formula}><div><b>60%</b><span>Bachillerato</span></div><i>+</i><div><b>40%</b><span>Fase de acceso</span></div><i>+</i><div><b>Hasta 4</b><span>Dos mejores ponderadas</span></div></div><div className={styles.modalNotice}><Info size={17} /><span>Los datos demo nunca se presentan como oficiales. Las notas históricas no garantizan admisión.</span></div></section></div>}
+      {showMethod && <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => event.target === event.currentTarget && setShowMethod(false)}><section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="method-title"><button className={styles.closeButton} aria-label="Cerrar" onClick={() => setShowMethod(false)}><X size={19} /></button><div className={styles.modalIcon}><Info size={22} /></div><h2 id="method-title">¿Cómo se calcula?</h2><p>La estimación suma la fase de acceso y las dos mejores aportaciones activas con nota mínima de 5. Las reglas particulares solo se incorporan con fuente verificada.</p><div className={styles.formula}><div><b>60%</b><span>Bachillerato</span></div><i>+</i><div><b>40%</b><span>Fase de acceso</span></div><i>+</i><div><b>Hasta 4</b><span>Dos mejores ponderadas</span></div></div><div className={styles.modalNotice}><Info size={17} /><span>Las referencias históricas orientan, pero no garantizan admisión.</span></div></section></div>}
     </div>
   )
 }

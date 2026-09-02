@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { availableCatalogTargets, filterOrientationTargets, findSavedTarget, mergeSubjectInputs } from './catalog.ts'
+import { availableCatalogTargets, buildCatalogSearchIndex, filterOrientationTargets, findSavedTarget, mergeSubjectInputs, normalizeCatalogSearch, searchOrientationTargets } from './catalog.ts'
 import { FIXTURE_SOURCE, type AdmissionSubject, type OrientationTarget } from './data.ts'
 
 const subject = (subjectCode: string, grade: number): AdmissionSubject => ({
@@ -17,6 +17,8 @@ const catalog = [
   target('uam-psi', 'Psicología', 'Universidad Autónoma de Madrid', 'UAM'),
   target('ucm-psi', 'Psicología', 'Universidad Complutense de Madrid', 'UCM'),
   target('upm-mat', 'Matemáticas', 'Universidad Politécnica de Madrid', 'UPM'),
+  target('uc3m-business', 'Análisis de Datos en la Empresa / Business Analytics', 'Universidad Carlos III de Madrid', 'UC3M'),
+  target('uc3m-economia', 'Economía', 'Universidad Carlos III de Madrid', 'UC3M'),
 ]
 
 test('buscar Psicología devuelve solo titulaciones reales coincidentes', () => {
@@ -25,6 +27,32 @@ test('buscar Psicología devuelve solo titulaciones reales coincidentes', () => 
 
 test('el selector de universidad restringe el catálogo', () => {
   assert.deepEqual(filterOrientationTargets(catalog, '', 'UCM').map(item => item.id), ['ucm-psi'])
+})
+
+test('normaliza tildes, mayúsculas, puntuación y espacios múltiples', () => {
+  assert.equal(normalizeCatalogSearch('  PSICOLOGÍA,   UCM  '), 'psicologia ucm')
+})
+
+test('tolera consultas parciales y sin tildes', () => {
+  assert.deepEqual(filterOrientationTargets(catalog, 'psicolo').map(item => item.id), ['uam-psi', 'ucm-psi'])
+})
+
+test('encuentra palabras en distinto orden mediante tokens', () => {
+  assert.equal(filterOrientationTargets(catalog, 'datos analisis')[0]?.id, 'uc3m-business')
+})
+
+test('interpreta un alias universitario solo como token completo', () => {
+  assert.deepEqual(filterOrientationTargets(catalog, 'economi uc3m').map(item => item.id), ['uc3m-economia'])
+  assert.deepEqual(filterOrientationTargets(catalog, 'psicologia complutense').map(item => item.id), ['ucm-psi'])
+})
+
+test('prioriza coincidencia exacta, comienzo y después coincidencia parcial', () => {
+  const extended = [
+    target('exacta', 'Economía', 'Universidad Autónoma de Madrid', 'UAM'),
+    target('comienza', 'Economía y Finanzas', 'Universidad Complutense de Madrid', 'UCM'),
+    target('parcial', 'Doble Grado en Derecho y Economía', 'Universidad Carlos III de Madrid', 'UC3M'),
+  ]
+  assert.deepEqual(searchOrientationTargets(buildCatalogSearchIndex(extended), 'economia').map(item => item.id), ['exacta', 'comienza', 'parcial'])
 })
 
 test('cambiar de grado conserva notas de asignaturas que siguen existiendo', () => {

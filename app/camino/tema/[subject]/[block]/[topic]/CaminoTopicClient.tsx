@@ -16,6 +16,7 @@ import { calcularRacha } from '@/app/lib/calcularRacha'
 import { DIVISIONS } from '@/app/lib/camino/leagues'
 import { useBillingStatus } from '@/app/hooks/useBillingStatus'
 import MathMarkdown from '@/components/shared/MathMarkdown'
+import { annotateGlossarySymbols, decodeGlossaryPayload, type GlossaryEntry } from '@/app/lib/camino/glossaryAnnotate'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import KairoMapCard from '@/components/shared/KairoMapCard'
 import MathEditor from '@/components/shared/MathEditor'
@@ -102,6 +103,7 @@ type MissionXpStatus = 'checking' | 'pending' | 'already_completed' | 'free_prac
 type CurriculumV2Card = {
   sort_order: number
   title: string
+  topic_id: string | null
   concept_markdown: string | null
   worked_example_markdown: string | null
   alert_markdown: string | null
@@ -112,6 +114,7 @@ type LessonMarkdownProps = {
   text?: string | null
   className?: string
   format?: boolean | 'raw'
+  glossary?: Map<string, GlossaryEntry> | null
 }
 type CaminoCorrectionResponse = {
   error?: string
@@ -246,27 +249,29 @@ function parseLessonMarkdownSegments(text?: string | null): LessonSegment[] {
   return segments
 }
 
-function LessonMarkdown({ text, className = '', format = 'raw' }: LessonMarkdownProps) {
+function LessonMarkdown({ text, className = '', format = 'raw', glossary }: LessonMarkdownProps) {
   const normalized = normalizeLessonMarkdown(text)
   const segments = useMemo(() => parseLessonMarkdownSegments(normalized), [normalized])
 
   if (!segments.some(segment => segment.type === 'table')) {
-    return <MathMarkdown text={normalized} className={className} format={format} />
+    const finalText = glossary ? annotateGlossarySymbols(normalized, glossary) : normalized
+    return <MathMarkdown text={finalText} className={className} format={format} />
   }
 
   return (
     <div className={className}>
       {segments.map((segment, index) => {
         if (segment.type === 'markdown') {
-          return <MathMarkdown key={index} text={segment.text} format={format} />
+          const finalText = glossary ? annotateGlossarySymbols(segment.text, glossary) : segment.text
+          return <MathMarkdown key={index} text={finalText} format={format} />
         }
-        return <LessonMarkdownTable key={index} headers={segment.headers} rows={segment.rows} />
+        return <LessonMarkdownTable key={index} headers={segment.headers} rows={segment.rows} glossary={glossary} />
       })}
     </div>
   )
 }
 
-function LessonMarkdownTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
+function LessonMarkdownTable({ headers, rows, glossary }: { headers: string[]; rows: string[][]; glossary?: Map<string, GlossaryEntry> | null }) {
   return (
     <div style={{ margin: '16px 0', overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: 5 }}>
       <table style={{ width: '100%', minWidth: 520, borderCollapse: 'collapse', fontSize: 13, textAlign: 'left' }}>
@@ -274,7 +279,7 @@ function LessonMarkdownTable({ headers, rows }: { headers: string[]; rows: strin
           <tr style={{ background: '#f8fafc' }}>
             {headers.map((header, index) => (
               <th key={`${header}-${index}`} style={{ borderBottom: '2px solid #0f172a', padding: '10px 14px', fontWeight: 900, fontSize: 11, color: '#0f172a', verticalAlign: 'top' }}>
-                <LessonMarkdown text={header} format="raw" />
+                <LessonMarkdown text={header} format="raw" glossary={glossary} />
               </th>
             ))}
           </tr>
@@ -284,7 +289,7 @@ function LessonMarkdownTable({ headers, rows }: { headers: string[]; rows: strin
             <tr key={rowIndex} style={{ borderBottom: '1px solid #f1f5f9', verticalAlign: 'top' }}>
               {row.map((cell, cellIndex) => (
                 <td key={`${rowIndex}-${cellIndex}`} style={{ padding: '10px 14px', fontWeight: 500, color: '#334155', lineHeight: 1.7 }}>
-                  <LessonMarkdown text={cell} format="raw" />
+                  <LessonMarkdown text={cell} format="raw" glossary={glossary} />
                 </td>
               ))}
             </tr>
@@ -356,6 +361,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   // la intención explícita de repetir.
   const [repeatConfirmed, setRepeatConfirmed] = useState(false)
   const billing = useBillingStatus()
+  // Glosario interactivo de fórmulas (piloto Física): mapa topic_id -> símbolo -> significado,
+  // cargado una vez se conocen los topic_id de las fichas mostradas (v2Cards). Vacío para
+  // asignaturas sin entradas en formula_glossary — no rompe nada, simplemente no anota nada.
+  const [glossaryByTopic, setGlossaryByTopic] = useState<Map<string, Map<string, GlossaryEntry>>>(new Map())
+  const [activeGlossaryEntry, setActiveGlossaryEntry] = useState<GlossaryEntry | null>(null)
+  const [mobileAsideOpen, setMobileAsideOpen] = useState(false)
 
   useEffect(() => {
     if (shouldStartExercise) exerciseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -453,7 +464,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     if (topic.contentStatus === 'flashcard_v2' && topic.v2SortOrder != null) {
       supabase
         .from('curriculum_content_v2')
-        .select('sort_order, title, concept_markdown, worked_example_markdown, alert_markdown, practice_prompt, video_id')
+        .select('sort_order, title, topic_id, concept_markdown, worked_example_markdown, alert_markdown, practice_prompt, video_id')
         .eq('subject', topic.subject)
         .eq('sort_order', topic.v2SortOrder)
         .single()
@@ -481,7 +492,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
 
     supabase
       .from('curriculum_content_v2')
-      .select('sort_order, title, concept_markdown, worked_example_markdown, alert_markdown, practice_prompt, video_id')
+      .select('sort_order, title, topic_id, concept_markdown, worked_example_markdown, alert_markdown, practice_prompt, video_id')
       .eq('subject', topic.subject)
       .gte('sort_order', range.min)
       .lte('sort_order', range.max)
@@ -501,6 +512,51 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
 
     return () => { cancelled = true }
   }, [topic?.subject, topic?.blockSlug, topic?.topicSlug, topic?.v2SortOrder])
+
+  useEffect(() => {
+    const topicIds = [...new Set(v2Cards.map(card => card.topic_id).filter((id): id is string => Boolean(id)))]
+    if (topicIds.length === 0) {
+      queueMicrotask(() => setGlossaryByTopic(new Map()))
+      return
+    }
+    let cancelled = false
+    supabase
+      .from('formula_glossary')
+      .select('topic_id, symbol, label, definition')
+      .in('topic_id', topicIds)
+      .then(({ data }) => {
+        if (cancelled) return
+        const map = new Map<string, Map<string, GlossaryEntry>>()
+        for (const row of data ?? []) {
+          if (!map.has(row.topic_id)) map.set(row.topic_id, new Map())
+          map.get(row.topic_id)!.set(row.symbol, { label: row.label, definition: row.definition })
+        }
+        setGlossaryByTopic(map)
+      })
+    return () => { cancelled = true }
+  }, [v2Cards])
+
+  useEffect(() => {
+    if (!mobileAsideOpen) return
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setMobileAsideOpen(false)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [mobileAsideOpen])
+
+  function handleGlossaryInteraction(e: React.SyntheticEvent<HTMLElement>) {
+    const target = (e.target as HTMLElement).closest('[data-glossary-info]')
+    const raw = target?.getAttribute('data-glossary-info')
+    if (!raw) return
+    const decoded = decodeGlossaryPayload(raw)
+    if (decoded) setActiveGlossaryEntry(decoded)
+  }
 
   useEffect(() => {
     if (!v2Cards.length) {
@@ -1075,7 +1131,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
 
         {/* Article column */}
-        <main className="topic-main" style={{ flex: 1, overflowY: 'auto', padding: '40px 48px', background: '#fdfdfc', borderRight: '1px solid #e2e8f0', minWidth: 0 }}>
+        <main
+          className="topic-main"
+          onClick={handleGlossaryInteraction}
+          onMouseOver={handleGlossaryInteraction}
+          style={{ flex: 1, overflowY: 'auto', padding: '40px 48px', background: '#fdfdfc', borderRight: '1px solid #e2e8f0', minWidth: 0 }}
+        >
 
           {/* Document header */}
           <header style={{ marginBottom: 36, paddingBottom: 28, borderBottom: '2px solid #0f172a' }}>
@@ -1148,7 +1209,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 )}
                 {selectedV2Card.practice_prompt && (
                   <LearningCard title="Inténtalo tú">
-                    <LessonMarkdown text={selectedV2Card.practice_prompt} format="raw" />
+                    <LessonMarkdown text={selectedV2Card.practice_prompt} format="raw" glossary={selectedV2Card.topic_id ? glossaryByTopic.get(selectedV2Card.topic_id) : undefined} />
                   </LearningCard>
                 )}
               </>
@@ -1161,7 +1222,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 {v2Loading
                   ? <ContentSkeleton />
                   : v2Cards.length > 0
-                    ? <V2FlashcardAccordion cards={v2Cards} />
+                    ? <V2FlashcardAccordion cards={v2Cards} glossaryByTopic={glossaryByTopic} />
                     : diegoLoading
                       ? (currentTopic.explanation ? <StructuredLesson topic={currentTopic} /> : <ContentSkeleton />)
                       : diegoContent
@@ -1244,7 +1305,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     <div className="kairo-soft-panel" style={{ marginTop: 16, background: '#eff6ff', padding: '14px 16px' }}>
                       <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.14em', color: '#2563eb', marginBottom: 8 }}>Ahora inténtalo tú</p>
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                        <LessonMarkdown text={selectedV2Card.practice_prompt} format="raw" />
+                        <LessonMarkdown text={selectedV2Card.practice_prompt} format="raw" glossary={selectedV2Card.topic_id ? glossaryByTopic.get(selectedV2Card.topic_id) : undefined} />
                       </div>
                     </div>
                   )}
@@ -1401,75 +1462,82 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           </article>
         </main>
 
-        {/* ── Aside ── */}
+        {/* ── Aside (escritorio) ── */}
         <aside className="topic-aside" style={{ width: 264, flexShrink: 0, background: 'rgba(248,251,255,.82)', padding: '28px 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 0, borderLeft: '1px solid #dbe7fb' }}>
-
-          {/* Streak + Liga */}
-          <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 10 }}>Tu progreso</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ textAlign: 'center', flexShrink: 0 }}>
-                <p style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>{streak}</p>
-                <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.1em', color: '#94a3b8', marginTop: 2 }}>días racha</p>
-              </div>
-              <div style={{ width: 1, height: 28, background: '#e2e8f0', flexShrink: 0 }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                {ligaLoading ? (
-                  <div style={{ height: 10, width: 80, borderRadius: 999, background: '#f1f5f9' }} />
-                ) : liga && myLigaEntry ? (
-                  <>
-                    <p style={{ fontSize: 12, fontWeight: 900, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{liga.nombre}</p>
-                    <p style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', marginTop: 2 }}>#{myLigaEntry.rank} · {myLigaEntry.weekly_xp} XP ronda</p>
-                  </>
-                ) : (
-                  <Link href="/camino" style={{ fontSize: 12, fontWeight: 900, color: '#2563eb', textDecoration: 'none' }}>Crear liga →</Link>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Práctica PAU */}
-          <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #e2e8f0' }}>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 8 }}>Práctica PAU</p>
-            <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>Ejercicio real con este contexto.</p>
-            <Link href={buildEvauHref(currentTopic)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: 8, padding: '9px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none', marginBottom: 6 }}>
-              Practicar PAU <ArrowRight size={12} />
-            </Link>
-            <a href="#course-exercise" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: 'transparent', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 12px', fontSize: 11, fontWeight: 800, textDecoration: 'none' }}>
-              Ir a la respuesta <Check size={12} />
-            </a>
-          </div>
-
-          {/* Chat Kairo */}
-          <div className="kairo-glass" style={{ marginBottom: 18, padding: 14, borderRadius: 16 }}>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 10 }}>Pregunta a Kairo</p>
-            <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>Pregunta sobre este tema con el contexto ya preparado.</p>
-            <details style={{ marginBottom: 10 }}>
-              <summary style={{ cursor: 'pointer', fontSize: 10, fontWeight: 900, color: '#7c3aed' }}>Preguntas rápidas</summary>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
-                {['Explícamelo más fácil', 'Ponme otro ejemplo', 'No entiendo este paso', 'Hazme una pregunta parecida', '¿Por qué se hace así?'].map(item => (
-                  <Link key={item} href={chatHref(item)} style={{ borderRadius: 999, border: '1px solid #e2e8f0', background: 'white', padding: '4px 9px', fontSize: 10, fontWeight: 700, color: '#334155', textDecoration: 'none' }}>
-                    {item}
-                  </Link>
-                ))}
-              </div>
-            </details>
-            <Link href={chatHref()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#7c3aed', color: 'white', borderRadius: 8, padding: '9px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none' }}>
-              Abrir Chat con Kairo <MessageCircle size={12} />
-            </Link>
-          </div>
-
-          {/* XP */}
-          <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #e2e8f0' }}>
-            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 8 }}>XP en este tema</p>
-            <p style={{ fontSize: 20, fontWeight: 900, color: topicCompleted ? '#059669' : '#334155', lineHeight: 1, marginBottom: 4 }}>{current.xp ?? 0} XP</p>
-            <p style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>{topicCompleted ? 'Tema completado con corrección.' : 'Pendiente de corrección.'}</p>
-          </div>
-
-          <Link href="/pricing" style={{ display: 'block', textAlign: 'center', fontSize: 12, fontWeight: 900, color: '#2563eb', marginTop: 4, textDecoration: 'none' }}>Ver planes</Link>
+          <TopicAsideBody
+            streak={streak}
+            liga={liga}
+            ligaLoading={ligaLoading}
+            myLigaEntry={myLigaEntry}
+            currentTopic={currentTopic}
+            currentXp={current.xp ?? 0}
+            topicCompleted={topicCompleted}
+            chatHref={chatHref}
+            activeGlossaryEntry={activeGlossaryEntry}
+          />
         </aside>
 
       </div>{/* end document body */}
+
+      {/* ── Botón flotante "Progreso y ayuda" (solo móvil) ── */}
+      <button
+        type="button"
+        onClick={() => setMobileAsideOpen(true)}
+        className="topic-mobile-aside-trigger"
+        style={{ display: 'none', position: 'fixed', bottom: 20, right: 20, zIndex: 40, alignItems: 'center', gap: 7, background: '#0f172a', color: 'white', border: 'none', borderRadius: 999, padding: '11px 18px', fontSize: 12, fontWeight: 900, boxShadow: '0 12px 30px rgba(15,23,42,.28)', cursor: 'pointer' }}
+      >
+        <School size={14} /> Progreso y ayuda
+      </button>
+
+      {/* ── Drawer con el mismo contenido del aside (móvil) — no tapa la lección: se abre a demanda y se cierra tocando fuera/Escape/la X, igual que XpExplainerDrawer ── */}
+      {mobileAsideOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Progreso, práctica, chat y glosario de este tema"
+          onClick={() => setMobileAsideOpen(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(15,23,42,0.45)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'flex-end' }}
+        >
+          <style>{`
+            @keyframes topic-aside-drawer-in { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+            .topic-aside-drawer-panel { animation: topic-aside-drawer-in 260ms cubic-bezier(0.23,1,0.32,1) both; }
+            @media (max-width: 640px) { .topic-aside-drawer-panel { width: 100vw !important; } }
+          `}</style>
+          <div
+            className="topic-aside-drawer-panel"
+            onClick={e => e.stopPropagation()}
+            style={{ width: 'min(360px, 100vw)', height: '100%', background: 'rgba(248,251,255,.98)', boxShadow: '0 16px 48px rgba(37,99,235,0.12), 0 32px 80px rgba(37,99,235,0.12)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '18px 20px', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
+              <p style={{ fontSize: 14, fontWeight: 900, color: '#0f172a', margin: 0 }}>Progreso y ayuda</p>
+              <button
+                type="button"
+                onClick={() => setMobileAsideOpen(false)}
+                aria-label="Cerrar"
+                style={{ flexShrink: 0, width: 30, height: 30, borderRadius: '50%', background: '#f1f5f9', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#64748b' }}
+              >
+                <X size={15} />
+              </button>
+            </div>
+            <div
+              onClick={handleGlossaryInteraction}
+              style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 32px' }}
+            >
+              <TopicAsideBody
+                streak={streak}
+                liga={liga}
+                ligaLoading={ligaLoading}
+                myLigaEntry={myLigaEntry}
+                currentTopic={currentTopic}
+                currentXp={current.xp ?? 0}
+                topicCompleted={topicCompleted}
+                chatHref={chatHref}
+                activeGlossaryEntry={activeGlossaryEntry}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast */}
       {toast && (
@@ -1541,14 +1609,124 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   )
 }
 
+// ── Contenido del aside (progreso/práctica/chat/glosario/XP) — compartido entre
+// el <aside> fijo de escritorio y el drawer de móvil, mismo contenido en ambos
+// sitios para que un alumno de móvil tenga acceso exactamente a lo mismo que uno
+// de escritorio (antes el aside entero se ocultaba por completo en móvil).
+function TopicAsideBody({
+  streak,
+  liga,
+  ligaLoading,
+  myLigaEntry,
+  currentTopic,
+  currentXp,
+  topicCompleted,
+  chatHref,
+  activeGlossaryEntry,
+}: {
+  streak: number
+  liga: LigaInfo | null
+  ligaLoading: boolean
+  myLigaEntry: LigaMiembro | null
+  currentTopic: CaminoCurriculumTopic
+  currentXp: number
+  topicCompleted: boolean
+  chatHref: (prompt?: string) => string
+  activeGlossaryEntry: GlossaryEntry | null
+}) {
+  return (
+    <>
+      {/* Streak + Liga */}
+      <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
+        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 10 }}>Tu progreso</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ textAlign: 'center', flexShrink: 0 }}>
+            <p style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>{streak}</p>
+            <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.1em', color: '#94a3b8', marginTop: 2 }}>días racha</p>
+          </div>
+          <div style={{ width: 1, height: 28, background: '#e2e8f0', flexShrink: 0 }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {ligaLoading ? (
+              <div style={{ height: 10, width: 80, borderRadius: 999, background: '#f1f5f9' }} />
+            ) : liga && myLigaEntry ? (
+              <>
+                <p style={{ fontSize: 12, fontWeight: 900, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{liga.nombre}</p>
+                <p style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', marginTop: 2 }}>#{myLigaEntry.rank} · {myLigaEntry.weekly_xp} XP ronda</p>
+              </>
+            ) : (
+              <Link href="/camino" style={{ fontSize: 12, fontWeight: 900, color: '#2563eb', textDecoration: 'none' }}>Crear liga →</Link>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Práctica PAU */}
+      <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #e2e8f0' }}>
+        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 8 }}>Práctica PAU</p>
+        <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>Ejercicio real con este contexto.</p>
+        <Link href={buildEvauHref(currentTopic)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: 8, padding: '9px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none', marginBottom: 6 }}>
+          Practicar PAU <ArrowRight size={12} />
+        </Link>
+        <a href="#course-exercise" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: 'transparent', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 12px', fontSize: 11, fontWeight: 800, textDecoration: 'none' }}>
+          Ir a la respuesta <Check size={12} />
+        </a>
+      </div>
+
+      {/* Chat Kairo */}
+      <div className="kairo-glass" style={{ marginBottom: 18, padding: 14, borderRadius: 16 }}>
+        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 10 }}>Pregunta a Kairo</p>
+        <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>Pregunta sobre este tema con el contexto ya preparado.</p>
+        <details style={{ marginBottom: 10 }}>
+          <summary style={{ cursor: 'pointer', fontSize: 10, fontWeight: 900, color: '#7c3aed' }}>Preguntas rápidas</summary>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
+            {['Explícamelo más fácil', 'Ponme otro ejemplo', 'No entiendo este paso', 'Hazme una pregunta parecida', '¿Por qué se hace así?'].map(item => (
+              <Link key={item} href={chatHref(item)} style={{ borderRadius: 999, border: '1px solid #e2e8f0', background: 'white', padding: '4px 9px', fontSize: 10, fontWeight: 700, color: '#334155', textDecoration: 'none' }}>
+                {item}
+              </Link>
+            ))}
+          </div>
+        </details>
+        <Link href={chatHref()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#7c3aed', color: 'white', borderRadius: 8, padding: '9px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none' }}>
+          Abrir Chat con Kairo <MessageCircle size={12} />
+        </Link>
+      </div>
+
+      {/* Glosario interactivo (piloto Física): se actualiza al tocar/pasar el ratón
+          sobre un símbolo marcado dentro de una fórmula — nunca en una burbuja
+          flotante sobre la propia fórmula, siempre aquí. */}
+      <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #e2e8f0' }}>
+        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 8 }}>¿Qué significa esto?</p>
+        {activeGlossaryEntry ? (
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 4 }}>{activeGlossaryEntry.label}</p>
+            <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5 }}>{activeGlossaryEntry.definition}</p>
+          </div>
+        ) : (
+          <p style={{ fontSize: 12, fontWeight: 500, color: '#94a3b8', lineHeight: 1.5 }}>Toca (o pasa el ratón sobre) un símbolo resaltado de una fórmula para ver su significado aquí.</p>
+        )}
+      </div>
+
+      {/* XP */}
+      <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #e2e8f0' }}>
+        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 8 }}>XP en este tema</p>
+        <p style={{ fontSize: 20, fontWeight: 900, color: topicCompleted ? '#059669' : '#334155', lineHeight: 1, marginBottom: 4 }}>{currentXp} XP</p>
+        <p style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>{topicCompleted ? 'Tema completado con corrección.' : 'Pendiente de corrección.'}</p>
+      </div>
+
+      <Link href="/pricing" style={{ display: 'block', textAlign: 'center', fontSize: 12, fontWeight: 900, color: '#2563eb', marginTop: 4, textDecoration: 'none' }}>Ver planes</Link>
+    </>
+  )
+}
+
 // ── curriculum_content_v2 flashcard accordion (todos los apuntes) ────────────
 
-function V2FlashcardAccordion({ cards }: { cards: CurriculumV2Card[] }) {
+function V2FlashcardAccordion({ cards, glossaryByTopic }: { cards: CurriculumV2Card[]; glossaryByTopic: Map<string, Map<string, GlossaryEntry>> }) {
   const [openIdx, setOpenIdx] = useState<number>(0)
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
       {cards.map((card, i) => {
         const isOpen = openIdx === i
+        const glossary = card.topic_id ? glossaryByTopic.get(card.topic_id) : undefined
         return (
           <div key={card.sort_order} style={{ overflow: 'hidden', border: '1px solid #e2e8f0', borderRadius: 5 }}>
             <button
@@ -1567,18 +1745,18 @@ function V2FlashcardAccordion({ cards }: { cards: CurriculumV2Card[] }) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid #f1f5f9', padding: '12px 14px' }}>
                   {card.concept_markdown && (
                     <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                      <LessonMarkdown text={card.concept_markdown} format="raw" />
+                      <LessonMarkdown text={card.concept_markdown} format="raw" glossary={glossary} />
                     </div>
                   )}
                   {card.alert_markdown && (
                     <div style={{ border: '1px solid #fde68a', background: '#fffbeb', borderRadius: 4, padding: '10px 12px' }}>
-                      <LessonMarkdown text={card.alert_markdown} format="raw" />
+                      <LessonMarkdown text={card.alert_markdown} format="raw" glossary={glossary} />
                     </div>
                   )}
                   {card.worked_example_markdown && (
                     <div style={{ border: '1px solid #bbf7d0', background: '#f0fdf4', borderRadius: 4, padding: '12px 14px' }}>
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
-                        <LessonMarkdown text={card.worked_example_markdown} format="raw" />
+                        <LessonMarkdown text={card.worked_example_markdown} format="raw" glossary={glossary} />
                       </div>
                     </div>
                   )}
@@ -1820,9 +1998,13 @@ function Shell({ children }: { children: React.ReactNode }) {
         @media (max-width: 767px) {
           .topic-topbar { padding: 10px 16px !important; }
           .topic-topbar-breadcrumb { display: none !important; }
-          .topic-main { padding: 24px 18px !important; }
+          .topic-main { padding: 24px 18px !important; padding-bottom: 84px !important; }
           .topic-aside { display: none !important; }
           .topic-h1 { font-size: 26px !important; }
+          /* El aside fijo se oculta en móvil (arriba); en su lugar, el botón
+             flotante abre el mismo contenido en un drawer bajo demanda — nunca
+             tapa la lección salvo cuando el alumno lo pide explícitamente. */
+          .topic-mobile-aside-trigger { display: inline-flex !important; }
         }
       `}</style>
       <SidebarNav />

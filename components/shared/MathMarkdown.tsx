@@ -38,6 +38,18 @@ const defaultComponents: Partial<Components> = {
   },
 }
 
+// KaTeX gatea comandos potencialmente peligrosos (\href, \url,
+// \includegraphics, \htmlClass, \htmlId, \htmlStyle, \htmlData) detrás de
+// `trust`. Lo acotamos a EXACTAMENTE \htmlData — el único uso previsto es
+// marcar símbolos de fórmulas con `data-glossary-info` para el glosario
+// interactivo (ver app/lib/camino/glossaryAnnotate.ts) — así que ningún
+// otro comando (que sí podrían inyectar un href tipo javascript:, CSS
+// arbitrario vía \htmlStyle, o cargar una imagen externa) queda habilitado.
+// \htmlData en sí solo puede escribir atributos data-*, que el navegador
+// nunca interpreta como HTML/CSS/JS ejecutable — es inerte por diseño de la
+// propia especificación de atributos data-*.
+const katexTrust = (context: { command?: string }) => context.command === '\\htmlData'
+
 export default function MathMarkdown({
   text,
   className = '',
@@ -69,7 +81,7 @@ export default function MathMarkdown({
       <div className={`math-markdown max-w-none ${className}`}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath]}
-          rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false, errorColor: '#64748b' }]]}
+          rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false, errorColor: '#64748b', trust: katexTrust }]]}
           components={{ ...defaultComponents, ...(components ?? {}) }}
         >
           {text ?? ''}
@@ -87,7 +99,7 @@ export default function MathMarkdown({
     <div className={`math-markdown max-w-none ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false, errorColor: '#64748b' }]]}
+        rehypePlugins={[[rehypeKatex, { strict: false, throwOnError: false, errorColor: '#64748b', trust: katexTrust }]]}
         components={{ ...defaultComponents, ...(components ?? {}) }}
       >
         {normalized}

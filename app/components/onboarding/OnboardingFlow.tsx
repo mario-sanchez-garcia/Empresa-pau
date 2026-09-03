@@ -13,6 +13,7 @@ import { CENTROS_CATALUNA } from '@/app/data/centros_cataluna'
 import { normalizeInstituteName } from '@/app/lib/camino/instituteNormalize'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 import { DAILY_MINUTES_LABELS } from '@/app/lib/camino/dailyTimeCapacity'
+import { SUBJECT_OPTS } from '@/app/lib/subjectCatalog'
 import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 import { PRIVATE_BETA_SUBJECTS, PRIVATE_BETA_SUBJECT_LABELS } from '@/app/lib/camino/betaCurriculum'
 import { DEFAULT_GRADE_THRESHOLD } from '@/app/lib/camino/gradeThreshold'
@@ -130,18 +131,10 @@ const COMMUNITY_OPTS: Array<{ id: OnboardingCommunity; label: string; desc: stri
 ]
 const COMMUNITY_AVAILABLE_IDS = new Set(COMMUNITY_OPTS.filter(opt => opt.available).map(opt => opt.id))
 
-const SUBJECT_OPTS: Array<{ id: string; label: string; color: string; betaStatus: 'enabled' | 'locked'; badge?: string }> = [
-  { id: 'Matemáticas II', label: 'Matemáticas II', color: '#2563eb', betaStatus: 'enabled' },
-  { id: 'Matemáticas CCSS', label: 'Matemáticas CCSS', color: '#7c3aed', betaStatus: 'enabled' },
-  { id: 'Lengua Castellana', label: 'Lengua Castellana y Literatura', color: '#0891b2', betaStatus: 'enabled' },
-  { id: 'Historia de España', label: 'Historia de España', color: '#b45309', betaStatus: 'enabled' },
-  { id: 'Historia de la Filosofía', label: 'Historia de la Filosofía', color: '#c026d3', betaStatus: 'enabled' },
-  { id: 'Inglés', label: 'Inglés', color: '#dc2626', betaStatus: 'enabled' },
-  { id: 'Física', label: 'Física', color: '#0f766e', betaStatus: 'enabled' },
-  { id: 'Química', label: 'Química', color: '#65a30d', betaStatus: 'enabled' },
-  { id: 'Economía de la Empresa', label: 'Economía de la Empresa', color: '#ea580c', betaStatus: 'enabled' },
-  { id: 'Biología', label: 'Biología', color: '#64748b', betaStatus: 'locked', badge: 'Próximamente' },
-]
+// SUBJECT_OPTS vive en app/lib/subjectCatalog.ts (módulo neutro, sin 'use
+// client') para que /landing pueda importarlo sin arrastrar el bundle
+// cliente completo de este componente — importado aquí para no tener que
+// tocar los ~15 usos existentes de SUBJECT_OPTS en este archivo.
 const PRIVATE_BETA_ENABLED_SUBJECTS = SUBJECT_OPTS.filter(s => s.betaStatus === 'enabled')
 const PRIVATE_BETA_LOCKED_SUBJECTS = SUBJECT_OPTS.filter(s => s.betaStatus === 'locked')
 const PRIVATE_BETA_SUPPORTED_SUBJECTS = new Set(PRIVATE_BETA_ENABLED_SUBJECTS.map(s => s.id))

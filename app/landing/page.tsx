@@ -9,6 +9,7 @@ import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_P
 import LandingAuthProvider from './LandingAuthState'
 import { NavLoginLink, HeroCta, BottomCta, PricingPlanCta, StickyMobileCta } from './LandingCta'
 import RevealOnScroll from '@/app/components/ui/RevealOnScroll'
+import { SUBJECT_OPTS } from '@/app/lib/subjectCatalog'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -60,15 +61,12 @@ const COMPARE_ROWS: CompareRow[] = [
   { label: 'Precio mensual',                 kairo: `${getPlanPriceDisplay('free')} / ${getPlanPriceDisplay('premium')}`,  academia: '100–200€',  solo: 'Gratis' },
 ]
 
-const SUBJECTS = [
-  { label: 'Matemáticas II',    ready: true  },
-  { label: 'Matemáticas CCSS',  ready: false },
-  { label: 'Física',            ready: true  },
-  { label: 'Historia de España', ready: true  },
-  { label: 'Química',           ready: true  },
-  { label: 'Biología',          ready: false },
-  { label: 'Lengua',            ready: true  },
-]
+// Derivado de SUBJECT_OPTS (app/components/onboarding/OnboardingFlow.tsx) —
+// misma fuente que decide qué asignaturas puede elegir un alumno real en el
+// onboarding, para que esta lista de marketing nunca vuelva a quedarse
+// desincronizada (antes tenía Matemáticas CCSS como "Pronto" ya activa, y le
+// faltaban Historia de la Filosofía, Inglés y Economía de la Empresa).
+const SUBJECTS = SUBJECT_OPTS.map(s => ({ label: s.label, ready: s.betaStatus === 'enabled' }))
 
 const PLANS = [
   {

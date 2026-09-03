@@ -65,6 +65,21 @@ type Mission = {
   startTime?: string | null
   endTime?: string | null
 }
+// "Aún no lo he dado"/"No lo he dado en clase" nació como señal genérica de
+// ritmo de Camino, pero solo se pidió para los 2 temas de integrales de
+// Matemáticas CCSS (llegan tarde en muchos institutos) — mismo alcance que
+// NOT_SEEN_BUTTON_TOPICS en CaminoTopicClient.tsx, identificado aquí por
+// subject+v2SortOrder (23 y 24) porque Mission no lleva topicSlug fiable.
+// Antes el botón se ofrecía para cualquier misión de cualquier asignatura
+// con subjectSlug+v2SortOrder — mucho más amplio que lo pedido.
+const NOT_SEEN_BUTTON_MISSIONS = new Set<string>([
+  'matematicas_ccss:23', // primitiva-de-una-funcion-y-la-integral-indefinida
+  'matematicas_ccss:24', // la-integral-definida-regla-de-barrow-y-areas
+])
+function canMarkNotSeen(mission: { subjectSlug?: string; v2SortOrder?: number } | null | undefined): boolean {
+  if (!mission?.subjectSlug || mission.v2SortOrder == null) return false
+  return NOT_SEEN_BUTTON_MISSIONS.has(`${mission.subjectSlug}:${mission.v2SortOrder}`)
+}
 type DayPlan = { date: string; label: string; isToday: boolean; missions: Mission[] }
 type ExamPriority = 'baja' | 'normal' | 'alta' | 'muy_alta'
 type ExamConfidence = 'bajo' | 'medio' | 'alto'
@@ -2146,7 +2161,7 @@ export default function CaminoCalendarClient() {
 
   async function markNotSeenHero() {
     const mission = todayMain[0]
-    if (!mission?.subjectSlug || mission.v2SortOrder == null) return
+    if (!canMarkNotSeen(mission)) return
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
     setCalendar(current => current.map(day => ({
@@ -2472,7 +2487,7 @@ export default function CaminoCalendarClient() {
                 {mainMission.status !== 'done' && (
                   <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
                     <button onClick={() => postponeMission(mainMission.id)} style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>↺ Posponer</button>
-                    {mainMission.subjectSlug && mainMission.v2SortOrder != null && (
+                    {canMarkNotSeen(mainMission) && (
                       <button onClick={() => setShowNotSeenConfirm(true)} style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Aún no lo he dado</button>
                     )}
                   </div>
@@ -4221,7 +4236,7 @@ function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, t
             {mission.status !== 'done' && (
               <div className="mt-3 flex justify-center gap-3">
                 <button onClick={onPostpone} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50 active:scale-[0.97]"><RotateCcw size={12} /> Posponer</button>
-                {mission.subjectSlug && mission.v2SortOrder != null && (
+                {canMarkNotSeen(mission) && (
                   <button onClick={() => setShowNotSeenConfirm(true)} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 transition hover:bg-slate-50 active:scale-[0.97]">Aún no lo he dado</button>
                 )}
               </div>

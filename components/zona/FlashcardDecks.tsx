@@ -325,6 +325,10 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
   }
 
   async function deleteDeck(deck: DeckSummary) {
+    // Borrado irreversible — si el mazo es público, se pierde también para
+    // cualquiera que lo tuviera guardado. Mismo patrón de confirmación que
+    // deleteSimulacro en app/simulacros/page.tsx.
+    if (!window.confirm(`¿Borrar el mazo "${deck.title || 'sin nombre'}"? No se puede deshacer.`)) return
     await authedFetch(`/api/flashcards/decks/${deck.id}`, { method: 'DELETE' })
     if (selectedDeck?.id === deck.id) { setSelectedDeck(null); setView('list') }
     await loadDecks()

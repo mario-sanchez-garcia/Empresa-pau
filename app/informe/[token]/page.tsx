@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 import { verifyInformeToken, isTokenExpired } from '@/app/lib/informe/token'
 import { computeWeeklyReport, type WeeklyReport } from '@/app/lib/informe/computeWeeklyReport'
+import KairoBrand from '@/components/shared/KairoBrand'
 
 export const dynamic = 'force-dynamic'
 
@@ -94,11 +95,8 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
       <div style={{ maxWidth: 520, margin: '0 auto', padding: '24px 16px 48px' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <div style={{ width: 32, height: 32, background: '#2563eb', borderRadius: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: '#fff', fontSize: 16, fontWeight: 900 }}>P</span>
-            </div>
-            <span style={{ fontSize: 17, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>Kairo</span>
+          <div style={{ display: 'inline-flex', marginBottom: 16 }}>
+            <KairoBrand size="sm" />
           </div>
           <h1 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 900, letterSpacing: '-0.02em', color: '#0f172a' }}>
             Informe semanal de {report.firstName}

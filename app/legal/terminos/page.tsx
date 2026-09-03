@@ -70,7 +70,7 @@ export default function TerminosPage() {
         </S>
 
         <S n="07" title="Planes y precios" M={M}>
-          <P>Los pagos son procesados por Stripe. Kairo no almacena datos de tarjetas de crédito. Ofrecemos devolución íntegra dentro de los 7 días naturales siguientes a la compra, siempre que no se hayan realizado más de 10 correcciones IA. Para solicitar la devolución: <A href="mailto:legal@kairo.es">legal@kairo.es</A></P>
+          <P>Los pagos son procesados por Stripe. Kairo no almacena datos de tarjetas de crédito. Ofrecemos devolución íntegra dentro de los 7 días naturales siguientes a la compra, sin necesidad de justificar la solicitud (sujeta a la política de uso razonable frente a abuso — ver <A href="/legal/reembolsos">Política de reembolsos</A>). Para solicitar la devolución: <A href="mailto:legal@kairo.es">legal@kairo.es</A></P>
         </S>
 
         <S n="08" title="Derecho de desistimiento" M={M}>

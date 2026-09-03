@@ -115,6 +115,9 @@ export function useCanvas(userId: string, initialCanvases: ZonaCanvas[]) {
   }
 
   async function deleteCanvas(canvas: ZonaCanvas) {
+    // Borrado irreversible (notas, dibujos, imágenes del tablero) — mismo
+    // patrón de confirmación que ya usa deleteSimulacro en app/simulacros/page.tsx.
+    if (!window.confirm(`¿Borrar "${canvas.name || 'este canvas'}"? No se puede deshacer.`)) return
     await supabase.from('canvases').delete().eq('id', canvas.id).eq('user_id', userId)
     const next = canvases.filter(item => item.id !== canvas.id)
     setCanvases(next)

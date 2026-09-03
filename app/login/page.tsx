@@ -35,6 +35,37 @@ export default function Login() {
   const [mensaje, setMensaje]   = useState('')
   const [cargando, setCargando] = useState(false)
 
+  // "¿La olvidaste?" — recuperación de contraseña. Estado propio (no
+  // reutiliza `mensaje`, que ya tiene su propia semántica de éxito/error
+  // ligada al login) para no interferir con el resto del formulario.
+  const [enviandoRecuperacion, setEnviandoRecuperacion] = useState(false)
+  const [mensajeRecuperacion, setMensajeRecuperacion] = useState('')
+  const [recuperacionOk, setRecuperacionOk] = useState(false)
+
+  const handleForgotPassword = async () => {
+    if (enviandoRecuperacion) return
+    const correo = email.trim()
+    if (!correo) {
+      setRecuperacionOk(false)
+      setMensajeRecuperacion('Escribe tu email arriba y vuelve a pulsar "¿La olvidaste?".')
+      return
+    }
+    setEnviandoRecuperacion(true)
+    setMensajeRecuperacion('')
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin
+    const { error } = await supabase.auth.resetPasswordForEmail(correo, {
+      redirectTo: `${base}/login/reset-password`,
+    })
+    setEnviandoRecuperacion(false)
+    if (error) {
+      setRecuperacionOk(false)
+      setMensajeRecuperacion('No se pudo enviar el correo de recuperación. Inténtalo de nuevo en un momento.')
+      return
+    }
+    setRecuperacionOk(true)
+    setMensajeRecuperacion(`Te hemos enviado un enlace a ${correo} para restablecer tu contraseña.`)
+  }
+
   // ── UI state ─────────────────────────────────────────────────────────────────
   const [showPwd, setShowPwd]               = useState(false)
   const isError   = !!mensaje && !mensaje.includes('confirmar')
@@ -406,8 +437,14 @@ export default function Login() {
                 <label htmlFor="login-password" style={{ fontFamily: M, fontSize: 9, fontWeight: 500, color: 'rgba(255,255,255,.35)', letterSpacing: '.14em', textTransform: 'uppercase' }}>
                   Contraseña
                 </label>
-                <button type="button" className="lg-link" style={{ fontSize: 11 }}>
-                  ¿La olvidaste?
+                <button
+                  type="button"
+                  className="lg-link"
+                  style={{ fontSize: 11 }}
+                  onClick={handleForgotPassword}
+                  disabled={enviandoRecuperacion}
+                >
+                  {enviandoRecuperacion ? 'Enviando…' : '¿La olvidaste?'}
                 </button>
               </div>
               <div className="lg-field">
@@ -430,6 +467,11 @@ export default function Login() {
                   {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
+              {mensajeRecuperacion && (
+                <p role="status" aria-live="polite" style={{ marginTop: 7, fontSize: 11, lineHeight: 1.5, color: recuperacionOk ? '#86efac' : '#f87171' }}>
+                  {mensajeRecuperacion}
+                </p>
+              )}
             </div>
           </div>
 

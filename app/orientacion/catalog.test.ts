@@ -52,6 +52,7 @@ test('reconoce alias oficiales de universidades catalanas', () => {
     { ...target('uab-psi', 'Psicologia', 'Universitat Autònoma de Barcelona', 'UAB'), community: 'Cataluña' },
   ]
   assert.deepEqual(filterOrientationTargets(catalunya, 'psicologia uab').map(item => item.id), ['uab-psi'])
+  assert.deepEqual(filterOrientationTargets(catalunya, 'autonoma barcelona').map(item => item.id), ['uab-psi'])
   assert.deepEqual(filterOrientationTargets(catalunya, 'psicologia universitat de barcelona').map(item => item.id), ['ub-psi'])
 })
 

@@ -12,6 +12,7 @@ type SavedTarget = {
 
 type Target = {
   id: string
+  degreeCode: string
   degreeId: string | null
   universityId: string | null
   degree: string
@@ -152,6 +153,7 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
   })
   page.on('requestfailed', request => {
     if (expectedSaveFailure && isOrientationRequest(request, 'POST')) return
+    if (request.method() === 'HEAD' && request.failure()?.errorText === 'net::ERR_ABORTED') return
     if (!/posthog|analytics|googletagmanager/i.test(request.url())) failedRequests.push(`${request.method()} ${request.url()}`)
   })
 
@@ -159,7 +161,9 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
   let originalSavedTarget: SavedTarget | null = null
 
   try {
-    await page.addInitScript(() => localStorage.setItem('kairo_orientation_community_v1', 'Madrid'))
+    await page.addInitScript(() => {
+      if (!localStorage.getItem('kairo_orientation_community_v1')) localStorage.setItem('kairo_orientation_community_v1', 'Madrid')
+    })
     const initial = await test.step('carga autenticada y catálogo oficial', async () => {
       const payload = await openOrientation(page)
       const accessPaths = page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })
@@ -168,7 +172,10 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       expect(payload.catalogAvailable).toBe(true)
       expect(payload.targets).toHaveLength(554)
       expect(payload.universities).toHaveLength(6)
+      expect(new Set(payload.targets.map(target => target.degreeId)).size).toBe(554)
       expect(payload.targets.reduce((total, target) => total + target.subjects.length, 0)).toBe(4473)
+      expect(new Set(payload.targets.map(target => target.community))).toEqual(new Set(['Comunidad de Madrid']))
+      expect(payload.targets.every(target => Number.isFinite(target.referenceScore))).toBe(true)
       expect(payload.targets.every(target => target.source.type === 'official')).toBe(true)
       await expect(page.getByText(/Datos demo · no oficiales/)).toHaveCount(0)
       return payload
@@ -309,9 +316,32 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       expect(catalunya.catalogAvailable).toBe(true)
       expect(catalunya.universities).toHaveLength(8)
       expect(catalunya.targets).toHaveLength(560)
+      expect(new Set(catalunya.targets.map(item => item.degreeId)).size).toBe(560)
       expect(catalunya.targets.reduce((total, item) => total + item.subjects.length, 0)).toBe(4797)
       expect(catalunya.targets.every(item => item.community === 'Cataluña')).toBe(true)
+      expect(catalunya.targets.every(item => Number.isFinite(item.referenceScore))).toBe(true)
+      expect(catalunya.targets.every(item => item.source.type === 'official')).toBe(true)
+      for (const degreeCode of ['CAT:41066', 'CAT:61057']) {
+        const targetWithoutInferredWeights = catalunya.targets.find(item => item.degreeCode === degreeCode)
+        expect(targetWithoutInferredWeights, `Falta el grado oficial ${degreeCode}`).toBeDefined()
+        expect(targetWithoutInferredWeights?.subjects, `${degreeCode} no debe recibir ponderaciones inferidas`).toHaveLength(0)
+      }
       await expect(page.getByText(/Datos oficiales de preinscripción 2026/)).toBeVisible()
+      const targetSearch = page.getByRole('combobox', { name: 'Carrera y universidad' })
+      const searchCases: Array<[string, RegExp]> = [
+        ['barcelona', /Barcelona|UB|UAB|UPC|UPF/], ['uab', /UAB/], ['autonoma barcelona', /UAB/],
+        ['AUTÒNOMA BARCELONA', /UAB/], ['tecnologia ciencia', /Ciència i Tecnologia/],
+        ['upc', /UPC/], ['politecnica catalunya', /UPC/], ['catalunya politecnica', /UPC/],
+        ['pompeu', /UPF/], ['girona', /UdG/], ['lleida', /UdL/], ['rovira', /URV/], ['vic', /UVic-UCC/],
+      ]
+      for (const [query, expected] of searchCases) {
+        await targetSearch.fill(query)
+        const options = page.getByRole('listbox', { name: 'Resultados de grados' }).getByRole('option')
+        await expect(options.first(), `Sin resultados catalanes para ${query}`).toBeVisible()
+        expect((await options.allTextContents()).join('\n')).toMatch(expected)
+        expect((await options.allTextContents()).join('\n')).not.toMatch(/\b(?:UAH|UAM|UC3M|UCM|UPM|URJC)\b/)
+      }
+      await targetSearch.fill('')
       const catalanTarget = catalunya.targets.find(item => item.subjects.length >= 2) ?? catalunya.targets[0]
       await selectTarget(page, catalanTarget)
       await expect(page.getByText(/Nota de referencia · 1.ª asignación de junio/)).toBeVisible()
@@ -319,13 +349,70 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       await expect(page.getByTestId('camino-orientation-target')).toContainText(catalanTarget.degree)
       const restored = await expectRestoredTarget(page, catalanTarget)
       expect(restored.savedTarget?.community).toMatch(/Cataluña|Catalunya/)
+
+      const catalanAccessPaths = page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })
+      await catalanAccessPaths.getByRole('radio', { name: /^Bachibac/ }).click()
+      await expect(page.getByRole('radiogroup', { name: '¿Qué título usarás para acceder?' })).toBeVisible()
+      await catalanAccessPaths.getByRole('radio', { name: /^IB/ }).click()
+      await page.getByRole('radiogroup', { name: '¿Qué dato tienes ahora?' }).getByRole('radio', { name: /^CAU de UNEDasiss/ }).click()
+      await expect(page.getByRole('spinbutton', { name: 'CAU acreditada por UNEDasiss, nota numérica' })).toBeVisible()
+      await catalanAccessPaths.getByRole('radio', { name: /^Internacional/ }).click()
+      const internationalRoutes = page.getByRole('radiogroup', { name: '¿De qué sistema procedes?' })
+      await internationalRoutes.getByRole('radio', { name: /^UE \/ convenio/ }).click()
+      await expect(page.getByRole('spinbutton', { name: 'CAU acreditada por UNEDasiss, nota numérica' })).toBeVisible()
+      await internationalRoutes.getByRole('radio', { name: /^Sin convenio \+ PAU\/PCE/ }).click()
+      await expect(page.getByRole('spinbutton', { name: 'Obligatoria 1, nota numérica' })).toBeVisible()
+      await internationalRoutes.getByRole('radio', { name: /^Sin PCE\/modalidad/ }).click()
+      await expect(page.getByText(/Kairo no inventará una equivalencia/)).toBeVisible()
+      await catalanAccessPaths.getByRole('radio', { name: /^Bachillerato/ }).click()
+
+      await page.getByRole('button', { name: 'Explorar grados' }).click()
+      await expect(page.getByText('Filtra 560 referencias por universidad, nota y materias que ponderan 0,2.')).toBeVisible()
+      let orientationRequests = 0
+      const countOrientationRequests = (request: Request) => { if (isOrientationRequest(request)) orientationRequests += 1 }
+      page.on('request', countOrientationRequests)
+      await page.getByRole('combobox', { name: 'Universidad', exact: true }).selectOption(catalanTarget.universityId!)
+      await expect(page.locator('article').filter({ hasText: catalanTarget.university }).first()).toBeVisible()
+      await page.getByRole('combobox', { name: 'Nota de referencia', exact: true }).selectOption('10-12')
+      await page.getByRole('combobox', { name: 'Con mi nota', exact: true }).selectOption('improve')
+      await page.getByRole('combobox', { name: 'Pondera 0,2', exact: true }).selectOption({ index: 1 })
+      await page.getByRole('button', { name: 'Limpiar', exact: true }).click()
+      await expect(page.getByText('560').first()).toBeVisible()
+      await page.getByRole('textbox', { name: 'Buscar grado en universidades' }).fill('qxzvnpj')
+      await expect(page.getByText('No hay grados con esta combinación.')).toBeVisible()
+      await page.getByRole('button', { name: 'Limpiar filtros' }).click()
+      expect(orientationRequests).toBe(0)
+      page.off('request', countOrientationRequests)
+
+      await page.getByRole('button', { name: 'Mi objetivo' }).click()
       await page.getByRole('radio', { name: /^Internacional/ }).click()
+      await page.getByRole('radiogroup', { name: '¿De qué sistema procedes?' }).getByRole('radio', { name: /^UE \/ convenio/ }).click()
       await expect(page.getByText(/no basta con que aparezcan reconocidas en UNEDasiss/i)).toBeVisible()
       await page.getByRole('button', { name: 'Cómo se corrige' }).click()
       await page.getByLabel('Asignatura').selectOption({ label: 'Química' })
       await expect(page.getByText('PAU Cataluña · junio 2026')).toBeVisible()
+      await expect(page.getByText('OFICIAL', { exact: true }).first()).toBeVisible()
+      await expect(page.getByText('KAIRO TE LO EXPLICA', { exact: true })).toBeVisible()
+      await expect(page.getByText(/Comunidad de Madrid/)).toHaveCount(0)
       await expect(page.getByRole('link', { name: 'Ver fuente oficial' })).toHaveAttribute('href', /universitats\.gencat\.cat/)
       await page.getByRole('button', { name: 'Mi objetivo' }).click()
+
+      await page.setViewportSize({ width: 390, height: 844 })
+      await expect(page.getByRole('region', { name: 'Comunidad del catálogo' })).toBeVisible()
+      const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+      expect(mobileOverflow).toBeLessThanOrEqual(1)
+      await page.setViewportSize({ width: 1440, height: 900 })
+
+      await switchCommunity(page, 'Madrid')
+      await expect(page.getByText(/Tu objetivo guardado está en Cataluña\. Puedes explorar Madrid sin sustituirlo\./)).toBeVisible()
+      await page.getByRole('link', { name: 'Camino PAU' }).click()
+      await expect(page.getByTestId('camino-orientation-target')).toContainText(catalanTarget.degree)
+      await openOrientation(page)
+      await switchCommunity(page, 'Madrid')
+      await selectTarget(page, secondTarget)
+      await saveTarget(page, secondTarget)
+      const madridRestored = await expectRestoredTarget(page, secondTarget)
+      expect(madridRestored.savedTarget?.community).toBe('Madrid')
     })
 
     await test.step('un fallo de red muestra error y libera el estado guardando', async () => {

@@ -40,7 +40,7 @@ function ResetPasswordHandler() {
     const code = searchParams.get('code')
     const errorParam = searchParams.get('error')
     if (errorParam) {
-      setLinkStatus('expired')
+      queueMicrotask(() => setLinkStatus('expired'))
       return
     }
     if (code) {

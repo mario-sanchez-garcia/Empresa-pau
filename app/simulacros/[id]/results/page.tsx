@@ -511,7 +511,7 @@ export default function SimulacroResultsPage() {
               <Route size={15} />Crear misión de repaso
             </a>
             <Link
-              href="/"
+              href="/examenes?view=chat"
               className="pau-button-secondary no-underline"
             >
               <MessageCircle size={15} />Preguntar a Kairo

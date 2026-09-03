@@ -367,6 +367,11 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [glossaryByTopic, setGlossaryByTopic] = useState<Map<string, Map<string, GlossaryEntry>>>(new Map())
   const [activeGlossaryEntry, setActiveGlossaryEntry] = useState<GlossaryEntry | null>(null)
   const [mobileAsideOpen, setMobileAsideOpen] = useState(false)
+  // Cápsula de feedback inmediato pegada al símbolo tocado/con hover (solo el
+  // "label" corto) — el panel/drawer sigue mostrando la definición larga por
+  // separado, esto es un añadido, no un reemplazo.
+  const [glossaryTooltip, setGlossaryTooltip] = useState<{ label: string; left: number; top: number; placement: 'above' | 'below' } | null>(null)
+  const glossaryTooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (shouldStartExercise) exerciseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -556,6 +561,52 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     }
   }, [mobileAsideOpen])
 
+  // La cápsula se cierra sola a los 3s (temporizador en showGlossaryTooltip),
+  // pero también debe cerrarse al tocar fuera de cualquier símbolo marcado —
+  // tocar OTRO símbolo no pasa por aquí porque handleGlossaryInteraction ya
+  // reinicia el temporizador y reposiciona la cápsula para ese símbolo nuevo.
+  useEffect(() => {
+    if (!glossaryTooltip) return
+    function onDocumentClick(e: MouseEvent) {
+      if ((e.target as HTMLElement).closest('[data-glossary-info]')) return
+      setGlossaryTooltip(null)
+    }
+    document.addEventListener('click', onDocumentClick)
+    return () => document.removeEventListener('click', onDocumentClick)
+  }, [glossaryTooltip])
+
+  useEffect(() => () => {
+    if (glossaryTooltipTimer.current) clearTimeout(glossaryTooltipTimer.current)
+  }, [])
+
+  const GLOSSARY_TOOLTIP_WIDTH = 220
+  const GLOSSARY_TOOLTIP_MARGIN = 8
+
+  // Calcula dónde poner la cápsula a partir del rectángulo real del símbolo
+  // tocado: por defecto ENCIMA del símbolo (nunca a su derecha, para no tapar
+  // el resto de la línea si el símbolo está a mitad de una fórmula larga), y
+  // solo si no cabe arriba (símbolo muy pegado al borde superior del
+  // viewport) se coloca debajo. El eje horizontal se centra sobre el símbolo
+  // pero se recorta (clamp) para que la cápsula nunca se salga de la
+  // pantalla por los lados.
+  function computeGlossaryTooltipPosition(rect: DOMRect): { left: number; top: number; placement: 'above' | 'below' } {
+    const centerX = rect.left + rect.width / 2
+    const left = Math.min(
+      Math.max(centerX - GLOSSARY_TOOLTIP_WIDTH / 2, GLOSSARY_TOOLTIP_MARGIN),
+      window.innerWidth - GLOSSARY_TOOLTIP_WIDTH - GLOSSARY_TOOLTIP_MARGIN
+    )
+    const fitsAbove = rect.top > 56
+    return fitsAbove
+      ? { left, top: rect.top - 10, placement: 'above' }
+      : { left, top: rect.bottom + 10, placement: 'below' }
+  }
+
+  function showGlossaryTooltip(label: string, rect: DOMRect) {
+    setGlossaryTooltip({ label, ...computeGlossaryTooltipPosition(rect) })
+    if (glossaryTooltipTimer.current) clearTimeout(glossaryTooltipTimer.current)
+    glossaryTooltipTimer.current = setTimeout(() => setGlossaryTooltip(null), 3000)
+  }
+
   // Hover (escritorio, el aside siempre está a la vista) y click/tap (cualquier
   // dispositivo) comparten la misma lectura del símbolo tocado.
   function handleGlossaryInteraction(e: React.SyntheticEvent<HTMLElement>) {
@@ -563,7 +614,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     const raw = target?.getAttribute('data-glossary-info')
     if (!raw) return null
     const decoded = decodeGlossaryPayload(raw)
-    if (decoded) setActiveGlossaryEntry(decoded)
+    if (decoded) {
+      setActiveGlossaryEntry(decoded)
+      showGlossaryTooltip(decoded.label, target!.getBoundingClientRect())
+    }
     return decoded
   }
 
@@ -1563,6 +1617,36 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               />
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Cápsula de feedback inmediato del glosario de fórmulas — pegada al
+          símbolo tocado/con hover, mismo lenguaje visual que el Toast de
+          abajo (píldora oscura, texto blanco, sombra) para no inventar un
+          estilo nuevo. position:fixed con coordenadas de getBoundingClientRect
+          (viewport), por eso no se ve afectada por el scroll del contenedor. */}
+      {glossaryTooltip && (
+        <div
+          role="status"
+          style={{
+            position: 'fixed',
+            left: glossaryTooltip.left,
+            top: glossaryTooltip.top,
+            transform: glossaryTooltip.placement === 'above' ? 'translateY(-100%)' : undefined,
+            zIndex: 45,
+            width: GLOSSARY_TOOLTIP_WIDTH,
+            pointerEvents: 'none',
+            borderRadius: 10,
+            background: '#0f172a',
+            color: 'white',
+            fontSize: 12,
+            fontWeight: 800,
+            padding: '7px 12px',
+            textAlign: 'center',
+            boxShadow: '0 8px 20px rgba(15,23,42,.28)',
+          }}
+        >
+          {glossaryTooltip.label}
         </div>
       )}
 

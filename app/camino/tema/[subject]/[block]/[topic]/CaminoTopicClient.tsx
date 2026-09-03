@@ -524,8 +524,14 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       .from('formula_glossary')
       .select('topic_id, symbol, label, definition')
       .in('topic_id', topicIds)
-      .then(({ data }) => {
+      .then(({ data, error }) => {
         if (cancelled) return
+        if (error) {
+          // Fallo silencioso hasta ahora: sin esto, un error transitorio dejaba
+          // glossaryByTopic vacío sin ningún rastro — "no aparece nada marcado"
+          // sin ninguna pista de por qué.
+          console.warn('[camino/topic] formula_glossary fetch failed', error)
+        }
         const map = new Map<string, Map<string, GlossaryEntry>>()
         for (const row of data ?? []) {
           if (!map.has(row.topic_id)) map.set(row.topic_id, new Map())
@@ -550,12 +556,29 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     }
   }, [mobileAsideOpen])
 
+  // Hover (escritorio, el aside siempre está a la vista) y click/tap (cualquier
+  // dispositivo) comparten la misma lectura del símbolo tocado.
   function handleGlossaryInteraction(e: React.SyntheticEvent<HTMLElement>) {
     const target = (e.target as HTMLElement).closest('[data-glossary-info]')
     const raw = target?.getAttribute('data-glossary-info')
-    if (!raw) return
+    if (!raw) return null
     const decoded = decodeGlossaryPayload(raw)
     if (decoded) setActiveGlossaryEntry(decoded)
+    return decoded
+  }
+
+  // En móvil el aside vive oculto detrás del botón "Progreso y ayuda" (ver
+  // Shell más abajo): sin esto, tocar un símbolo actualizaba el estado sin que
+  // el alumno viera ningún cambio en pantalla — el "¿Qué significa esto?"
+  // quedaba escrito dentro de un drawer que nadie había abierto todavía. Al
+  // tocar (no al pasar el ratón) se abre el drawer automáticamente si el
+  // aside fijo no está visible, para que la definición aparezca al instante.
+  function handleGlossaryClick(e: React.SyntheticEvent<HTMLElement>) {
+    const decoded = handleGlossaryInteraction(e)
+    if (!decoded) return
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
+      setMobileAsideOpen(true)
+    }
   }
 
   useEffect(() => {
@@ -1133,7 +1156,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         {/* Article column */}
         <main
           className="topic-main"
-          onClick={handleGlossaryInteraction}
+          onClick={handleGlossaryClick}
           onMouseOver={handleGlossaryInteraction}
           style={{ flex: 1, overflowY: 'auto', padding: '40px 48px', background: '#fdfdfc', borderRight: '1px solid #e2e8f0', minWidth: 0 }}
         >
@@ -1479,12 +1502,16 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
 
       </div>{/* end document body */}
 
-      {/* ── Botón flotante "Progreso y ayuda" (solo móvil) ── */}
+      {/* ── Botón flotante "Progreso y ayuda" (solo móvil) ──
+          bottom:84 (no 20) para no quedar tapado por CookieBanner.tsx, que es
+          fixed/bottom:0/z-index:9999 a todo el ancho en la primera visita —
+          con bottom:20 el botón quedaba oculto detrás del banner hasta que el
+          alumno aceptaba/rechazaba cookies. */}
       <button
         type="button"
         onClick={() => setMobileAsideOpen(true)}
         className="topic-mobile-aside-trigger"
-        style={{ display: 'none', position: 'fixed', bottom: 20, right: 20, zIndex: 40, alignItems: 'center', gap: 7, background: '#0f172a', color: 'white', border: 'none', borderRadius: 999, padding: '11px 18px', fontSize: 12, fontWeight: 900, boxShadow: '0 12px 30px rgba(15,23,42,.28)', cursor: 'pointer' }}
+        style={{ display: 'none', position: 'fixed', bottom: 84, right: 20, zIndex: 40, alignItems: 'center', gap: 7, background: '#0f172a', color: 'white', border: 'none', borderRadius: 999, padding: '11px 18px', fontSize: 12, fontWeight: 900, boxShadow: '0 12px 30px rgba(15,23,42,.28)', cursor: 'pointer' }}
       >
         <School size={14} /> Progreso y ayuda
       </button>

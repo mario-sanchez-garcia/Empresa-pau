@@ -679,20 +679,25 @@ button:active:not(:disabled),
    annotateGlossarySymbols() via \htmlData (ver app/lib/camino/glossaryAnnotate.ts)
    llevan data-glossary-info en vez de una clase (trust de KaTeX está acotado a
    \htmlData exclusivamente, ver components/shared/MathMarkdown.tsx) — el
-   selector de atributo evita necesitar \htmlClass. Sin subrayado permanente
-   agresivo: un guion bajo punteado sutil + resalte solo al pasar el ratón,
-   para no ensuciar visualmente fórmulas con muchos símbolos anotados.
-   cursor:pointer indica que el símbolo responde a toque/click en cualquier
-   dispositivo, no solo con ratón. */
+   selector de atributo evita necesitar \htmlClass. Fondo azul claro SIEMPRE
+   visible (no solo al pasar el ratón): un subrayado punteado por sí solo
+   pasaba desapercibido entre el ruido visual de fracciones/subíndices de una
+   fórmula real — el alumno tiene que poder ver de un vistazo qué símbolos son
+   tocables sin tener que pasar el ratón por encima primero para descubrirlo
+   (en móvil no hay ratón, así que sin esta pista visual permanente el símbolo
+   parece texto normal). cursor:pointer indica que responde a toque/click en
+   cualquier dispositivo. */
 .math-markdown [data-glossary-info] {
   cursor: pointer;
-  border-bottom: 1.5px dotted #93c5fd;
-  border-radius: 2px;
+  background-color: rgba(37, 99, 235, 0.09);
+  border-bottom: 1.5px dotted #2563eb;
+  border-radius: 3px;
+  padding: 0 1px;
   transition: background-color 120ms ease;
 }
 
 .math-markdown [data-glossary-info]:hover {
-  background-color: rgba(37, 99, 235, 0.08);
+  background-color: rgba(37, 99, 235, 0.18);
 }
 
 .math-markdown p,

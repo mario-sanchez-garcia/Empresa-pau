@@ -30,6 +30,7 @@ test('el guardado envía ids estables sin aceptar un user_id del cliente', async
   assert.equal(saved, true)
   assert.equal(sentBody.target_degree_id, target.degreeId)
   assert.equal(sentBody.target_university_id, target.universityId)
+  assert.equal(sentBody.target_community, target.community)
   assert.equal('user_id' in sentBody, false)
 })
 

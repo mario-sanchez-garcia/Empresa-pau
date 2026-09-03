@@ -46,6 +46,15 @@ test('interpreta un alias universitario solo como token completo', () => {
   assert.deepEqual(filterOrientationTargets(catalog, 'psicologia complutense').map(item => item.id), ['ucm-psi'])
 })
 
+test('reconoce alias oficiales de universidades catalanas', () => {
+  const catalunya = [
+    { ...target('ub-psi', 'Psicologia', 'Universitat de Barcelona', 'UB'), community: 'Cataluña' },
+    { ...target('uab-psi', 'Psicologia', 'Universitat Autònoma de Barcelona', 'UAB'), community: 'Cataluña' },
+  ]
+  assert.deepEqual(filterOrientationTargets(catalunya, 'psicologia uab').map(item => item.id), ['uab-psi'])
+  assert.deepEqual(filterOrientationTargets(catalunya, 'psicologia universitat de barcelona').map(item => item.id), ['ub-psi'])
+})
+
 test('prioriza coincidencia exacta, comienzo y después coincidencia parcial', () => {
   const extended = [
     target('exacta', 'Economía', 'Universidad Autónoma de Madrid', 'UAM'),
@@ -62,7 +71,7 @@ test('cambiar de grado conserva notas de asignaturas que siguen existiendo', () 
 })
 
 test('el objetivo guardado usa ids estables antes que los textos antiguos', () => {
-  const saved = { degreeId: 'degree:uam-psi', universityId: 'UAM', degree: 'Nombre antiguo', university: 'Nombre antiguo', admissionScore: 10, sourceType: 'official' as const, updatedAt: null }
+  const saved = { degreeId: 'degree:uam-psi', universityId: 'UAM', degree: 'Nombre antiguo', university: 'Nombre antiguo', community: 'Comunidad de Madrid', admissionScore: 10, sourceType: 'official' as const, updatedAt: null }
   assert.equal(findSavedTarget(catalog, saved)?.id, 'uam-psi')
 })
 

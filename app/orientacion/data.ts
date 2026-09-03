@@ -6,7 +6,7 @@ export type OrientationTarget = {
   degree: string; university: string; universityAcronym: string | null
   community: string | null; referenceScore: number; referenceLabel: string; source: OrientationSource; subjects: AdmissionSubject[]
 }
-export type SavedOrientationTarget = { degreeId: string | null; universityId: string | null; degree: string; university: string; admissionScore: number; sourceType: OrientationSourceType; updatedAt: string | null }
+export type SavedOrientationTarget = { degreeId: string | null; universityId: string | null; degree: string; university: string; community: string | null; admissionScore: number; sourceType: OrientationSourceType; updatedAt: string | null }
 export type OfficialCriterion = {
   id: string; community: string; academicYear: string; subject: string; criterionType: string
   officialText: string; kairoExplanation: string | null; sourceUrl: string; sourceDocument: string | null

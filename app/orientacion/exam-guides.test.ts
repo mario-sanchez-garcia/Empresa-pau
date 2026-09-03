@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { GENERAL_CORRECTION_GUIDE, OFFICIAL_EXAM_GUIDES } from './exam-guides.ts'
+import { CATALUNYA_GENERAL_CORRECTION_GUIDE, CATALUNYA_OFFICIAL_EXAM_GUIDES, GENERAL_CORRECTION_GUIDE, OFFICIAL_EXAM_GUIDES } from './exam-guides.ts'
 
 test('cada guía oficial conserva trazabilidad y estructura mínima', () => {
   assert.ok(OFFICIAL_EXAM_GUIDES.length >= 7)
@@ -22,4 +22,13 @@ test('no etiqueta como rúbrica formal los criterios que el documento no llama r
 test('el acuerdo general se identifica como acuerdo y no como modelo', () => {
   assert.equal(GENERAL_CORRECTION_GUIDE.sourceType, 'official_agreement')
   assert.match(GENERAL_CORRECTION_GUIDE.sourceDocument, /Comisión Organizadora/)
+})
+
+test('Cataluña tiene guía territorial 2026 con enlaces exclusivos de la Generalitat', () => {
+  const guides = [CATALUNYA_GENERAL_CORRECTION_GUIDE, ...CATALUNYA_OFFICIAL_EXAM_GUIDES]
+  assert.ok(guides.length >= 4)
+  assert.ok(guides.every(guide => guide.sourceUrl.startsWith('https://universitats.gencat.cat/')))
+  assert.ok(guides.every(guide => guide.durationMinutes === 90 && guide.totalPoints === 10))
+  assert.ok(guides.some(guide => guide.subject === 'Química'))
+  assert.ok(guides.some(guide => guide.subject === 'Historia de la Filosofía'))
 })

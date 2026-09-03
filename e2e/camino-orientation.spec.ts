@@ -5,6 +5,7 @@ const target = {
   target_university: 'Universidad Carlos III de Madrid',
   target_admission_score: 11.7,
   target_orientation_source_type: 'official',
+  target_orientation_community: 'Comunidad de Madrid',
 }
 
 const localContext = {
@@ -12,7 +13,7 @@ const localContext = {
   accessPath: 'spanish_bachillerato',
   route: 'spanish_pau',
   calculationComplete: true,
-  target: { degreeId: 'degree-e2e', universityId: 'university-e2e', degree: target.target_degree, university: target.target_university, universityAcronym: 'UC3M', referenceScore: target.target_admission_score },
+  target: { degreeId: 'degree-e2e', universityId: 'university-e2e', degree: target.target_degree, university: target.target_university, community: target.target_orientation_community, universityAcronym: 'UC3M', referenceScore: target.target_admission_score },
   estimatedScore: 11.2,
   gap: -0.5,
   impactSubjects: [
@@ -22,6 +23,22 @@ const localContext = {
   updatedAt: '2026-09-02T12:00:00.000Z',
 }
 
+const catalunyaTarget = {
+  target_degree: 'Dret (Barcelona)',
+  target_university: 'Universitat de Barcelona',
+  target_admission_score: 10.8,
+  target_orientation_source_type: 'official',
+  target_orientation_community: 'Cataluña',
+}
+
+const catalunyaContext = {
+  ...localContext,
+  target: { degreeId: 'CAT:11101', universityId: 'CAT:UB', degree: catalunyaTarget.target_degree, university: catalunyaTarget.target_university, community: 'Cataluña', universityAcronym: 'UB', referenceScore: catalunyaTarget.target_admission_score },
+  estimatedScore: 10.2,
+  gap: -0.6,
+  impactSubjects: [{ subjectCode: 'historia-filosofia-o-espana-admision', name: 'Historia de España', weighting: 0.2, defaultGrade: 6.5 }],
+}
+
 const todayISO = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Madrid' }).format(new Date())
 const examDateISO = (() => {
   const date = new Date(`${todayISO}T12:00:00Z`)
@@ -29,7 +46,7 @@ const examDateISO = (() => {
   return date.toISOString().slice(0, 10)
 })()
 
-async function interceptProfile(page: Page, orientationTarget: typeof target | null) {
+async function interceptProfile(page: Page, orientationTarget: typeof target | typeof catalunyaTarget | null) {
   await page.route('**/api/profile', async (route: Route) => {
     await route.fulfill({
       status: 200,
@@ -40,6 +57,7 @@ async function interceptProfile(page: Page, orientationTarget: typeof target | n
         target_university: orientationTarget?.target_university ?? null,
         target_admission_score: orientationTarget?.target_admission_score ?? null,
         target_orientation_source_type: orientationTarget?.target_orientation_source_type ?? null,
+        target_orientation_community: orientationTarget?.target_orientation_community ?? null,
       },
     })
   })
@@ -112,6 +130,20 @@ test('sin objetivo no añade el bloque y Camino sigue siendo responsive', async 
   await expect(page.getByTestId('camino-orientation-target')).toHaveCount(0)
   const dimensions = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }))
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1)
+})
+
+test('un objetivo catalán llega a Camino con sus razones territoriales', async ({ page }) => {
+  await page.addInitScript(context => localStorage.setItem('kairo.orientation.camino-context.v1', JSON.stringify(context)), catalunyaContext)
+  await interceptProfile(page, catalunyaTarget)
+  await interceptPriorityMission(page)
+  await page.goto('/camino')
+
+  await expect(page.getByTestId('camino-orientation-target')).toContainText('Dret (Barcelona) · UB')
+  const reasons = page.getByTestId('camino-priority-reasons').locator('.camino-reason-chip')
+  await expect(reasons.nth(0)).toHaveText('Examen en 4 días')
+  await expect(reasons.nth(1)).toHaveText('Pondera 0,2 para tu objetivo')
+  await page.getByTestId('camino-why-now').getByText('¿Por qué ahora?').click()
+  await expect(page.getByTestId('camino-why-now')).toContainText('Dret (Barcelona) en UB')
 })
 
 test('a 390 px el objetivo y la misión principal conservan ancho útil sin overflow', async ({ page }) => {

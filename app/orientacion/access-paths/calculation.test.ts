@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { calculateAccessPathScore, calculateIbCauFromSubjectAverage, convertForeignGradeToSpanish } from './calculation.ts'
 import { FIXTURE_SOURCE, type AdmissionSubject } from '../data.ts'
+import { getAccessPath } from './model.ts'
 import type { AccessScenario } from './types.ts'
 
 const subject = (id: string, grade: number, weighting: 0.1 | 0.2, enabled = true): AdmissionSubject => ({ id, subjectCode: id, name: id, defaultGrade: grade, weighting, enabled, source: FIXTURE_SOURCE })
@@ -84,4 +85,17 @@ test('internacional no inventa una nota cuando falta la acreditación o la homol
   const homologation = calculateAccessPathScore({ pathId: 'international', route: 'homologation_pce', accreditedCau: null, homologatedAverage: null, pceGrades: [7, 7, 7, null] }, [])
   assert.equal(direct.complete, false)
   assert.equal(homologation.complete, false)
+})
+
+test('Cataluña calcula la vía homologada con 60/40 y no con la fórmula de Madrid', () => {
+  const result = calculateAccessPathScore({ pathId: 'international', route: 'homologation_pce', accreditedCau: null, homologatedAverage: 8, pceGrades: [7, 8, 6, 9] }, [], 'Cataluña')
+  assert.equal(result.complete, true)
+  assert.equal(result.baseScore, 7.8)
+  assert.deepEqual(result.formulaParts.slice(0, 2).map(item => item.value), ['60%', '40%'])
+})
+
+test('Cataluña no pondera reconocimientos UNEDasiss no examinados', () => {
+  const definition = getAccessPath('international', 'Cataluña')
+  assert.match(definition.subjectOrigin, /PAU\/EBAU o PCE/)
+  assert.match(definition.subjectOrigin, /no basta/i)
 })

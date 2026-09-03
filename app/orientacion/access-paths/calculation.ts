@@ -1,5 +1,6 @@
 import type { AdmissionSubject } from '../data'
 import type { AccessCalculationResult, AccessPathId, AccessScenario } from './types'
+import type { OrientationCommunity } from '../community'
 
 export const ACCESS_CALCULATION_RULES = {
   maxWeightedSubjects: 2,
@@ -53,7 +54,7 @@ function baseResult(pathId: AccessPathId, baseScore: number, subjects: Admission
   }
 }
 
-export function calculateAccessPathScore(scenario: AccessScenario, subjects: AdmissionSubject[]): AccessCalculationResult {
+export function calculateAccessPathScore(scenario: AccessScenario, subjects: AdmissionSubject[], community: OrientationCommunity = 'Madrid'): AccessCalculationResult {
   switch (scenario.pathId) {
     case 'spanish_bachillerato': {
       const base = clamp(scenario.bachillerato, 0, 10) * ACCESS_CALCULATION_RULES.spanish.bachilleratoWeight
@@ -97,7 +98,7 @@ export function calculateAccessPathScore(scenario: AccessScenario, subjects: Adm
     }
     case 'international': {
       if (scenario.route === 'homologation_pending') {
-        return baseResult(scenario.pathId, 0, [], false, 'Sin PCE y modalidad acreditada no hay una nota comparable para el reparto ordinario de Madrid.', [
+        return baseResult(scenario.pathId, 0, [], false, community === 'Cataluña' ? 'Sin homologación y prueba de acceso superada no hay una nota comparable para la preinscripción de junio.' : 'Sin PCE y modalidad acreditada no hay una nota comparable para el reparto ordinario de Madrid.', [
           { value: 'Pendiente', label: 'Homologación' }, { value: 'PCE', label: 'Acreditar modalidad' }, { value: 'Extraordinaria', label: 'Si falta modalidad' },
         ])
       }
@@ -109,6 +110,20 @@ export function calculateAccessPathScore(scenario: AccessScenario, subjects: Adm
         }
         return baseResult(scenario.pathId, clamp(scenario.accreditedCau, 5, 10), subjects, true, null, [
           { value: 'CAU', label: 'Acreditación UNEDasiss' }, { value: '+', label: 'Admisión' }, { value: 'Hasta 4', label: 'Dos mejores ponderadas' },
+        ])
+      }
+      if (community === 'Cataluña') {
+        const accessGrades = scenario.pceGrades.filter((grade): grade is number => grade !== null)
+        if (scenario.homologatedAverage === null || accessGrades.length !== 4) {
+          return baseResult(scenario.pathId, 0, [], false, 'Completa la nota homologada y las cuatro materias obligatorias de la prueba de acceso.', [
+            { value: '60%', label: 'Bachillerato homologado' }, { value: '40%', label: 'Media de 4 obligatorias' }, { value: 'Hasta 4', label: 'Dos mejores ponderadas' },
+          ])
+        }
+        const accessAverage = accessGrades.reduce((total, grade) => total + clamp(grade, 0, 10), 0) / 4
+        const base = clamp(scenario.homologatedAverage, 5, 10) * 0.6 + accessAverage * 0.4
+        const complete = accessAverage >= 4 && base >= 5
+        return baseResult(scenario.pathId, base, subjects, complete, complete ? null : 'La media de la fase de acceso debe ser al menos 4 y la nota de acceso final al menos 5.', [
+          { value: '60%', label: 'Bachillerato homologado' }, { value: '40%', label: 'Media de 4 obligatorias' }, { value: 'Hasta 4', label: 'Dos mejores ponderadas' },
         ])
       }
       const qualifyingPce = scenario.pceGrades.filter((grade): grade is number => grade !== null && grade >= 5).slice(0, ACCESS_CALCULATION_RULES.internationalHomologation.maxPce)

@@ -56,3 +56,16 @@ test('no convierte una nota no oficial en objetivo oficial', () => {
   })
   assert.deepEqual(targets, [])
 })
+
+test('Cataluña usa su ronda y etiqueta sin aceptar la ronda de Madrid', () => {
+  const catalanUniversity = { ...university, community: 'Cataluña', acronym: 'UB', stable_code: 'CAT:UB' }
+  const targets = buildOfficialTargets({
+    universities: [catalanUniversity], degrees: [degree],
+    cutoffs: [{ ...cutoff, admission_round: 'primera_assignacio_juny', access_group: 'PAU / CFGS' }, cutoff],
+    weightings: [weighting('biologia', 0.2)], academicYear: '2026-2027',
+    admissionRound: 'primera_assignacio_juny', accessGroup: 'PAU / CFGS', referenceLabel: 'Nota de referencia · 1.ª asignación de junio (10/07/2026)',
+  })
+  assert.equal(targets.length, 1)
+  assert.equal(targets[0].community, 'Cataluña')
+  assert.match(targets[0].referenceLabel, /10\/07\/2026/)
+})

@@ -41,6 +41,7 @@ export type PersistedOrientationGoal = {
   university: string
   admissionScore: number
   sourceType: 'official' | 'fixture' | null
+  community?: string | null
 }
 
 function normalized(value: string) {
@@ -86,6 +87,7 @@ export function matchingOrientationContext(localContext: CaminoOrientationContex
   if (!localContext || !persistedTarget || persistedTarget.sourceType !== 'official') return null
   if (normalized(localContext.target.degree) !== normalized(persistedTarget.degree)) return null
   if (normalized(localContext.target.university) !== normalized(persistedTarget.university)) return null
+  if (localContext.target.community && persistedTarget.community && normalized(localContext.target.community) !== normalized(persistedTarget.community)) return null
   return localContext
 }
 

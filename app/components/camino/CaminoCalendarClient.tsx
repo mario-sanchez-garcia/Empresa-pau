@@ -1182,7 +1182,7 @@ export default function CaminoCalendarClient() {
       if (token) {
         fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
           .then(r => r.json())
-          .then((profile: { student_exams?: StudentExam[]; target_degree?: unknown; target_university?: unknown; target_admission_score?: unknown; target_orientation_source_type?: unknown }) => {
+          .then((profile: { student_exams?: StudentExam[]; target_degree?: unknown; target_university?: unknown; target_admission_score?: unknown; target_orientation_source_type?: unknown; target_orientation_community?: unknown }) => {
             if (Array.isArray(profile.student_exams) && !cancelled) {
               setExams(profile.student_exams)
               saveJson(EXAMS_KEY, profile.student_exams)
@@ -1191,7 +1191,7 @@ export default function CaminoCalendarClient() {
               const admissionScore = Number(profile.target_admission_score)
               setPersistedOrientationTarget(
                 typeof profile.target_degree === 'string' && typeof profile.target_university === 'string' && Number.isFinite(admissionScore)
-                  ? { degree: profile.target_degree, university: profile.target_university, admissionScore, sourceType: profile.target_orientation_source_type === 'official' || profile.target_orientation_source_type === 'fixture' ? profile.target_orientation_source_type : null }
+                  ? { degree: profile.target_degree, university: profile.target_university, community: typeof profile.target_orientation_community === 'string' ? profile.target_orientation_community : null, admissionScore, sourceType: profile.target_orientation_source_type === 'official' || profile.target_orientation_source_type === 'fixture' ? profile.target_orientation_source_type : null }
                   : null,
               )
             }

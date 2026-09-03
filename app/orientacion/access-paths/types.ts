@@ -89,7 +89,7 @@ export type CaminoOrientationContext = {
   /** Ruta concreta usada por el motor de Orientación. Ausente en contextos locales antiguos. */
   route?: 'spanish_pau' | 'bachibac_spanish_pau' | 'bachibac_diploma' | 'ib_unedasiss' | 'international_direct_unedasiss' | 'international_homologation_pce' | 'international_homologation_pending'
   calculationComplete?: boolean
-  target: Pick<OrientationTarget, 'degreeId' | 'universityId' | 'degree' | 'university' | 'referenceScore'> & { universityAcronym?: string | null }
+  target: Pick<OrientationTarget, 'degreeId' | 'universityId' | 'degree' | 'university' | 'community' | 'referenceScore'> & { universityAcronym?: string | null }
   estimatedScore: number | null
   gap: number | null
   impactSubjects: Array<Pick<AdmissionSubject, 'subjectCode' | 'name' | 'weighting' | 'defaultGrade'>>

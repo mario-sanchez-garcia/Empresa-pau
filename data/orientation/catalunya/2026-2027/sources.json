@@ -1,0 +1,29 @@
+{
+  "academic_year": "2026-2027",
+  "documents": [
+    {
+      "id": "catalunya-cutoffs-first-june-2026",
+      "local_filename": "notes-tall-1a-assignacio-juny-2026.pdf",
+      "pages": 8,
+      "sha256": "56F8A797F34E7774018B64CF4CBBDE621E382810A9AEF62C031793A99667AA2A",
+      "source_updated_at": "2026-07-10",
+      "type": "official_cutoffs",
+      "url": "https://universitats.gencat.cat/web/.content/02_preinscripcio/enllac-documents/notes-de-tall/Notes-tall-1a-assignacio_juny_2026.pdf"
+    },
+    {
+      "id": "catalunya-weightings-2026-v7",
+      "local_filename": "ponderacions-2026-v7.pdf",
+      "pages": 28,
+      "sha256": "FA7E47A88A448254C13C490E94A70E1302E33304866CB1A7B0A21215AC23C83A",
+      "source_updated_at": "2026-05-28",
+      "type": "official_weightings",
+      "url": "https://universitats.gencat.cat/web/.content/02_preinscripcio/enllac-documents/Ponderacions-2026_v7.pdf"
+    }
+  ],
+  "extracted_at": "2026-09-03T00:00:00Z",
+  "landing_pages": [
+    "https://universitats.gencat.cat/es/preinscripcions/",
+    "https://universitats.gencat.cat/es/preinscripcions/notes-tall/",
+    "https://universitats.gencat.cat/es/preinscripcions/ponderacions/"
+  ]
+}

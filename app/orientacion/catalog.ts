@@ -7,6 +7,14 @@ const UNIVERSITY_ALIASES: Record<string, string[]> = {
   UCM: ['ucm', 'complutense', 'universidad complutense', 'universidad complutense de madrid'],
   UPM: ['upm', 'politecnica', 'universidad politecnica', 'universidad politecnica de madrid'],
   URJC: ['urjc', 'rey juan carlos', 'universidad rey juan carlos'],
+  UB: ['ub', 'universitat de barcelona', 'universidad de barcelona'],
+  UAB: ['uab', 'autonoma de barcelona', 'universitat autonoma de barcelona', 'universidad autonoma de barcelona'],
+  UPC: ['upc', 'politecnica de catalunya', 'politecnica de cataluna', 'universitat politecnica de catalunya'],
+  UPF: ['upf', 'pompeu fabra', 'universitat pompeu fabra'],
+  UdL: ['udl', 'universitat de lleida', 'universidad de lleida'],
+  UdG: ['udg', 'universitat de girona', 'universidad de girona'],
+  URV: ['urv', 'rovira i virgili', 'universitat rovira i virgili'],
+  'UVic-UCC': ['uvic', 'uvic ucc', 'universitat de vic', 'universidad de vic'],
 }
 
 export function normalizeCatalogSearch(value: string) {

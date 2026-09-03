@@ -11,6 +11,7 @@ import { ACCESS_PATH_IDS, createDefaultAccessScenarios, createEmptyStoredSubject
 import { ACCESS_PATH_STORAGE_KEY, CAMINO_ORIENTATION_CONTEXT_KEY, applyStoredSubjectInputs, createCaminoOrientationContext, parseAccessPathStorage, subjectInputsFromScenarios } from './access-paths/storage'
 import type { AccessPathId, AccessPathStorageState, StoredSubjectInputs } from './access-paths/types'
 import { availableCatalogTargets, findSavedTarget, mergeSubjectInputs } from './catalog'
+import { ORIENTATION_COMMUNITIES, ORIENTATION_COMMUNITY_STORAGE_KEY, communitySlug, normalizeOrientationCommunity, type OrientationCommunity } from './community'
 import CorrectionGuide from './CorrectionGuide'
 import { ORIENTATION_FIXTURES, type AdmissionSubject, type OfficialCriterion, type OrientationTarget, type SavedOrientationTarget } from './data'
 import GradeControl from './GradeControl'
@@ -32,6 +33,7 @@ export default function OrientationSimulator() {
   const [officialTargets, setOfficialTargets] = useState<OrientationTarget[]>([])
   const [criteria, setCriteria] = useState<OfficialCriterion[]>([])
   const [savedTarget, setSavedTarget] = useState<SavedOrientationTarget | null>(null)
+  const [community, setCommunity] = useState<OrientationCommunity>('Madrid')
   const [targetId, setTargetId] = useState('')
   const [accessPath, setAccessPath] = useState<AccessPathId>('spanish_bachillerato')
   const [scenarios, setScenarios] = useState(createDefaultAccessScenarios)
@@ -48,8 +50,8 @@ export default function OrientationSimulator() {
   const target = targets.find(item => item.id === targetId) ?? null
   const subjects = subjectsByPath[accessPath]
   const scenario = scenarios[accessPath]
-  const pathDefinition = getAccessPath(accessPath)
-  const calculation = useMemo(() => calculateAccessPathScore(scenario, subjects), [scenario, subjects])
+  const pathDefinition = getAccessPath(accessPath, community)
+  const calculation = useMemo(() => calculateAccessPathScore(scenario, subjects, community), [community, scenario, subjects])
   const score = calculation.finalScore
   const difference = target && calculation.complete ? score - target.referenceScore : 0
   const universityOptions = useMemo(() => [...new Map(targets.map(item => [item.universityId, { id: item.universityId!, acronym: item.universityAcronym, name: item.university }])).values()].sort((a, b) => (a.acronym ?? a.name).localeCompare(b.acronym ?? b.name, 'es')), [targets])
@@ -66,20 +68,25 @@ export default function OrientationSimulator() {
     setSaveState('idle')
   }
 
-  const loadOrientation = useCallback(async () => {
+  const loadOrientation = useCallback(async (requestedCommunity?: OrientationCommunity | null) => {
     try {
       const { data } = await supabase.auth.getSession()
       const headers: HeadersInit = data.session ? { Authorization: `Bearer ${data.session.access_token}` } : {}
-      const response = await fetch('/api/orientation', { headers })
+      const endpoint = requestedCommunity ? `/api/orientation?community=${communitySlug(requestedCommunity)}` : '/api/orientation'
+      const response = await fetch(endpoint, { headers })
       if (!response.ok) throw new Error('orientation-api')
-      const payload = await response.json() as { targets?: OrientationTarget[]; criteria?: OfficialCriterion[]; savedTarget?: SavedOrientationTarget | null; catalogAvailable?: boolean }
+      const payload = await response.json() as { community?: OrientationCommunity; targets?: OrientationTarget[]; criteria?: OfficialCriterion[]; savedTarget?: SavedOrientationTarget | null; catalogAvailable?: boolean }
       const realTargets = payload.targets ?? []
       const allTargets = availableCatalogTargets(realTargets, ORIENTATION_FIXTURES, payload.catalogAvailable !== false)
       setOfficialTargets(realTargets)
       setCriteria(payload.criteria ?? [])
       setSavedTarget(payload.savedTarget ?? null)
       setCatalogAvailable(payload.catalogAvailable ?? true)
-      if (payload.savedTarget) {
+      if (payload.community) setCommunity(payload.community)
+      const activeCommunity = payload.community ?? requestedCommunity ?? 'Madrid'
+      const savedCommunity = normalizeOrientationCommunity(payload.savedTarget?.community)
+      const canRestoreLegacyTarget = Boolean(payload.savedTarget?.degreeId && payload.savedTarget?.universityId && !savedCommunity)
+      if (payload.savedTarget && (savedCommunity === activeCommunity || canRestoreLegacyTarget)) {
         const match = findSavedTarget(allTargets, payload.savedTarget)
         if (match) {
           setTargetId(match.id)
@@ -96,7 +103,10 @@ export default function OrientationSimulator() {
   }, [])
 
   useEffect(() => {
-    const timer = window.setTimeout(() => { void loadOrientation() }, 0)
+    const timer = window.setTimeout(() => {
+      const preferred = normalizeOrientationCommunity(window.localStorage.getItem(ORIENTATION_COMMUNITY_STORAGE_KEY) ?? window.localStorage.getItem('kairo_ccaa'))
+      void loadOrientation(preferred)
+    }, 0)
     return () => window.clearTimeout(timer)
   }, [loadOrientation])
 
@@ -136,7 +146,21 @@ export default function OrientationSimulator() {
   function retryLoad() {
     setLoadState('loading')
     setCatalogAvailable(null)
-    void loadOrientation()
+    void loadOrientation(community)
+  }
+
+  function changeCommunity(nextCommunity: OrientationCommunity) {
+    if (nextCommunity === community) return
+    setCommunity(nextCommunity)
+    window.localStorage.setItem(ORIENTATION_COMMUNITY_STORAGE_KEY, nextCommunity)
+    setTargetId('')
+    setSubjectsByPath(createEmptySubjectsByPath())
+    setOfficialTargets([])
+    setCriteria([])
+    setLoadState('loading')
+    setCatalogAvailable(null)
+    setSaveState('idle')
+    void loadOrientation(nextCommunity)
   }
 
   function resetScenario() {
@@ -153,7 +177,7 @@ export default function OrientationSimulator() {
       if (!data.session) { setSaveState('error'); return }
       const saved = await persistOrientationTarget(data.session.access_token, target)
       if (!saved) { setSaveState('error'); return }
-      setSavedTarget({ degreeId: target.degreeId, universityId: target.universityId, degree: target.degree, university: target.university, admissionScore: target.referenceScore, sourceType: target.source.type, updatedAt: new Date().toISOString() })
+      setSavedTarget({ degreeId: target.degreeId, universityId: target.universityId, degree: target.degree, university: target.university, community: target.community, admissionScore: target.referenceScore, sourceType: target.source.type, updatedAt: new Date().toISOString() })
       const caminoContext = createCaminoOrientationContext(accessPath, target, calculation.complete ? score : null, calculation.complete ? difference : null, subjects, scenario, calculation.complete)
       window.localStorage.setItem(CAMINO_ORIENTATION_CONTEXT_KEY, JSON.stringify(caminoContext))
       window.location.assign('/camino')
@@ -202,6 +226,19 @@ export default function OrientationSimulator() {
           {([['objetivo', 'Mi objetivo'], ['universidades', 'Explorar grados'], ['correccion', 'Cómo se corrige']] as const).map(([id, label]) => <button key={id} aria-current={activeTab === id ? 'page' : undefined} onClick={() => setActiveTab(id)}>{label}</button>)}
         </nav>
 
+        <section className={styles.communityBar} aria-label="Comunidad del catálogo">
+          <div><small>COMUNIDAD</small><b>Consulta el sistema que te corresponde</b></div>
+          <div className={styles.communitySwitch} role="group" aria-label="Selecciona comunidad">
+            {ORIENTATION_COMMUNITIES.map(item => <button key={item} type="button" aria-pressed={community === item} onClick={() => changeCommunity(item)}>{item}</button>)}
+          </div>
+          <span>{community === 'Cataluña' ? 'Datos oficiales de preinscripción 2026' : 'Distrito único · curso 2026-2027'}</span>
+        </section>
+        {community === 'Cataluña' && <p className={styles.communityNote}><Info size={14} /> La nota de referencia es la del último estudiante que obtuvo plaza en la 1.ª asignación de junio de 2026; orienta, pero no garantiza admisión.</p>}
+
+        {savedTarget?.community && normalizeOrientationCommunity(savedTarget.community) !== community && (
+          <div className={styles.savedElsewhere}><Info size={15} /> Tu objetivo guardado está en {normalizeOrientationCommunity(savedTarget.community)}. Puedes explorar {community} sin sustituirlo.</div>
+        )}
+
         {activeTab === 'objetivo' && savedTarget && (
           <section className={styles.savedTarget}>
             <div><Check size={16} /><span><small>Objetivo guardado</small><b>{savedTarget.degree} · {savedTarget.university}</b></span></div>
@@ -210,7 +247,7 @@ export default function OrientationSimulator() {
           </section>
         )}
 
-        {activeTab === 'universidades' ? <UniversityExplorer targets={officialTargets} estimatedScore={calculation.complete ? score : null} loadState={loadState} onRetry={retryLoad} /> : activeTab === 'correccion' ? <CorrectionGuide databaseCriteria={criteria} /> : (
+        {activeTab === 'universidades' ? <UniversityExplorer targets={officialTargets} estimatedScore={calculation.complete ? score : null} loadState={loadState} onRetry={retryLoad} /> : activeTab === 'correccion' ? <CorrectionGuide community={community} databaseCriteria={criteria} /> : (
           <>
             <ol className={styles.flowRail} aria-label="Pasos para definir tu objetivo"><li className={styles.flowActive}><b>1</b><span>Elige objetivo</span></li><li className={target ? styles.flowActive : ''}><b>2</b><span>Ajusta notas</span></li><li className={target ? styles.flowActive : ''}><b>3</b><span>Decide qué mejorar</span></li><li><b>4</b><span>Llévalo a Camino</span></li></ol>
             <section className={styles.targetPicker}>
@@ -225,7 +262,7 @@ export default function OrientationSimulator() {
                 <div className={styles.simulatorGrid}>
                   <section className={styles.controlsPanel}>
                     <div className={styles.sectionHeading}><div><span>PASO 2 · SIMULACIÓN</span><h2>Ajusta tu escenario</h2></div><button onClick={resetScenario}><RotateCcw size={15} /> Restablecer</button></div>
-                    <AccessPathInputs scenario={scenario} onChange={updateScenario} />
+                    <AccessPathInputs community={community} scenario={scenario} onChange={updateScenario} />
                     <div className={styles.subjectsHeading}><div><b>Materias que pueden subir tu nota</b><span>Solo cuentan las dos mejores aportaciones aprobadas, activas y válidas para tu vía.</span></div></div>
                     {subjects.length ? <>{visibleSubjects.map(renderSubject)}{secondarySubjects.length > 0 && <details className={styles.secondarySubjects}><summary>Ver {secondarySubjects.length} materias con menor ponderación</summary>{secondarySubjects.map(renderSubject)}</details>}</> : <p className={styles.noWeightings}>No hay ponderaciones verificadas para este objetivo.</p>}
                   </section>
@@ -243,7 +280,7 @@ export default function OrientationSimulator() {
                 </div>
 
                 {calculation.complete && <section className={styles.alternatives} aria-label="Alternativas con tu nota actual">
-                  <div className={styles.alternativesHeading}><div><span>PASO 5 · ALTERNATIVAS</span><h2>Opciones cerca de tu escenario</h2><p>Referencias ordenadas por distancia a tu nota actual.</p></div><button onClick={() => setActiveTab('universidades')}>Explorar las 554 <ArrowRight size={14} /></button></div>
+                  <div className={styles.alternativesHeading}><div><span>PASO 5 · ALTERNATIVAS</span><h2>Opciones cerca de tu escenario</h2><p>Referencias ordenadas por distancia a tu nota actual.</p></div><button onClick={() => setActiveTab('universidades')}>Explorar {officialTargets.length} <ArrowRight size={14} /></button></div>
                   <div className={styles.alternativeGrid}>{alternatives.map(item => { const category = classifyOpportunity(score, item.referenceScore); return <article key={item.id}><div><GraduationCap size={16} /><span>{category === 'above' ? 'Por encima' : category === 'close' ? 'Cerca' : 'Por debajo'}</span></div><h3>{item.degree}</h3><p>{item.universityAcronym ?? item.university}</p><strong>{formatReference(item.referenceScore)}</strong></article> })}</div>
                   <p className={styles.opportunityDisclaimer}>Las notas de corte son históricas y pueden variar. Estar por encima no garantiza la admisión.</p>
                 </section>}

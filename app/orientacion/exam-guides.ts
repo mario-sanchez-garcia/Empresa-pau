@@ -111,4 +111,36 @@ export const OFFICIAL_EXAM_GUIDES: OfficialExamGuide[] = [
   },
 ]
 
+export const CATALUNYA_GENERAL_CORRECTION_GUIDE: OfficialExamGuide = {
+  id: 'catalunya-general-2026', subject: 'Criterios generales (todas las materias)', academicYear: '2025-2026', examLabel: 'PAU Cataluña · junio 2026', durationMinutes: 90, totalPoints: 10,
+  structure: [{ label: 'Criterio específico por materia', points: '10 puntos', detail: 'Canal Universitats publica el examen y su pauta de corrección por asignatura y tribunal.' }],
+  officialCriteria: ['Cada ejercicio dura una hora y media.', 'La estructura, el reparto de puntos y las penalizaciones se consultan en la ficha oficial de cada materia.', 'Los exámenes y correcciones de junio de 2026 están publicados por día y tribunal.'],
+  kairoExplanation: ['Elige tu asignatura para ver su reparto real: no trasladamos el baremo de Madrid a Cataluña.', 'Practica en bloques de 90 minutos y contrasta siempre tu respuesta con la corrección oficial del tribunal.'],
+  sourceUrl: 'https://universitats.gencat.cat/es/pau/examens-criteris-correccions/', sourceDocument: 'Exámenes y criterios de corrección 2026', organism: 'Generalitat de Catalunya · Canal Universitats', sourceType: 'official_agreement', formalRubric: false,
+}
+
+export const CATALUNYA_OFFICIAL_EXAM_GUIDES: OfficialExamGuide[] = [
+  {
+    id: 'catalunya-historia-filosofia-2026', subject: 'Historia de la Filosofía', academicYear: '2025-2026', examLabel: 'PAU Cataluña · junio 2026', durationMinutes: 90, totalPoints: 10,
+    structure: [{ label: 'Ejercicio 1 · Texto y tres preguntas', points: '6 puntos' }, { label: 'Ejercicio 2 · Desarrollo', points: '2 puntos' }, { label: 'Ejercicio 3 · Evaluación razonada', points: '2 puntos' }],
+    officialCriteria: ['El resumen debe identificar las ideas principales y la estructura argumentativa sin añadir teoría ajena al texto.', 'La claridad, coherencia, cohesión y precisión forman parte de la evaluación de la comprensión.', 'Seis o más faltas de ortografía, incluyendo problemas graves de presentación, pueden restar hasta 0,25 puntos.'],
+    kairoExplanation: ['En el ejercicio 1 separa lo que afirma el texto de lo que sabes del autor.', 'En el ejercicio 3 toma posición y razona: una opinión sin argumento no demuestra la competencia evaluada.'],
+    sourceUrl: 'https://universitats.gencat.cat/es/pau/materies-pau/historia-filosofia/index.html', sourceDocument: 'Estructura y criterios generales de evaluación · Historia de la Filosofía 2026', organism: 'Generalitat de Catalunya · Canal Universitats', sourceType: 'official_model', formalRubric: false,
+  },
+  {
+    id: 'catalunya-historia-2026', subject: 'Historia', academicYear: '2025-2026', examLabel: 'PAU Cataluña · 2026', durationMinutes: 90, totalPoints: 10,
+    structure: [{ label: 'Ejercicio 1 · Análisis crítico de fuentes', points: '2,5 puntos' }, { label: 'Ejercicio 2 · Tiempo y términos históricos', points: '2,5 puntos' }, { label: 'Ejercicio 3 · Tema mediante descriptores', points: '2,5 puntos' }, { label: 'Ejercicio 4 · Saberes', points: '2,5 puntos' }],
+    officialCriteria: ['En el análisis de fuentes, 1 punto identifica la información de ambas fuentes y 1,5 puntos las compara y contextualiza.', 'Se valora el vocabulario histórico, el orden lógico, la concreción y la argumentación.', 'La falta de coherencia, corrección o presentación puede descontar hasta el 10 % del ejercicio cuando se indique.'],
+    kairoExplanation: ['No describas las fuentes por separado: reserva la mayor parte de la respuesta para contrastarlas y situarlas.', 'Usa conectores de contraste y ubica cada afirmación en su marco temporal.'],
+    sourceUrl: 'https://universitats.gencat.cat/es/pau/materies-pau/historia/', sourceDocument: 'Estructura y criterios generales de evaluación · Historia 2026', organism: 'Generalitat de Catalunya · Canal Universitats', sourceType: 'official_model', formalRubric: false,
+  },
+  {
+    id: 'catalunya-quimica-2026', subject: 'Química', academicYear: '2025-2026', examLabel: 'PAU Cataluña · junio 2026', durationMinutes: 90, totalPoints: 10,
+    structure: [{ label: 'Ejercicios 1, 2 y 3', points: '2,5 puntos cada uno', detail: 'Dos apartados de 1,25 puntos.' }, { label: 'Ejercicio 4', points: '2,5 puntos', detail: 'Se eligen dos de cuatro tareas; 1,25 puntos cada una.' }],
+    officialCriteria: ['Las respuestas deben estar organizadas lógicamente y justificadas de forma que el corrector pueda seguir el razonamiento.', 'Una fórmula química equivocada se penaliza con 0,5 puntos en la subpregunta donde aparezca.', 'Se evalúan conceptos, ecuaciones, cálculos, unidades, terminología científica y legibilidad.'],
+    kairoExplanation: ['Escribe el razonamiento completo: el resultado numérico no permite recuperar puntos si no se ve cómo llegaste.', 'Revisa fórmulas y ajuste de ecuaciones antes de entregar; una fórmula errónea tiene una penalización explícita importante.'],
+    sourceUrl: 'https://universitats.gencat.cat/es/pau/materies-pau/quimica/index.html', sourceDocument: 'Estructura y criterios generales de evaluación · Química 2026', organism: 'Generalitat de Catalunya · Canal Universitats', sourceType: 'official_model', formalRubric: false,
+  },
+]
+
 export const ALL_OFFICIAL_EXAM_GUIDES = [GENERAL_CORRECTION_GUIDE, ...OFFICIAL_EXAM_GUIDES]

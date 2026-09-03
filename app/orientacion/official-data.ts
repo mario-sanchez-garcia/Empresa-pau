@@ -52,9 +52,10 @@ export function collectPaginatedRows<T>(pages: T[][], pageSize: number) {
   return { rows, complete: !lastPage || lastPage.length < pageSize }
 }
 
-function isFirstAccessGroup(value: string | null) {
+function isFirstAccessGroup(value: string | null, expected?: string) {
   if (value === null) return true
-  const normalized = value.trim().toLocaleLowerCase('es').replace(/[\s_-]+/g, '')
+  const normalized = value.trim().toLocaleLowerCase('es').replace(/[\s_/-]+/g, '')
+  if (expected) return normalized === expected.trim().toLocaleLowerCase('es').replace(/[\s_/-]+/g, '')
   return normalized === 'grupo1' || normalized === 'grupo1ordinaria'
 }
 
@@ -95,12 +96,18 @@ export function buildOfficialTargets({
   cutoffs,
   weightings,
   academicYear,
+  admissionRound = 'grupo_1_ordinaria',
+  referenceLabel,
+  accessGroup,
 }: {
   universities: OfficialUniversityRow[]
   degrees: OfficialDegreeRow[]
   cutoffs: OfficialCutoffRow[]
   weightings: OfficialWeightingRow[]
   academicYear: string
+  admissionRound?: string
+  referenceLabel?: string
+  accessGroup?: string
 }): OrientationTarget[] {
   const universities = new Map(universityRows.map(row => [row.id, row]))
   const degrees = new Map(degreeRows.map(row => [row.id, row]))
@@ -124,8 +131,8 @@ export function buildOfficialTargets({
     if (
       seenDegrees.has(cutoff.degree_id)
       || cutoff.academic_year !== academicYear
-      || cutoff.admission_round !== 'grupo_1_ordinaria'
-      || !isFirstAccessGroup(cutoff.access_group)
+      || cutoff.admission_round !== admissionRound
+      || !isFirstAccessGroup(cutoff.access_group, accessGroup)
       || cutoff.source_type !== 'official'
       || !cutoff.verified_at
     ) continue
@@ -153,7 +160,7 @@ export function buildOfficialTargets({
       universityAcronym: university.acronym,
       community: university.community,
       referenceScore,
-      referenceLabel: `Referencia · Grupo 1 ordinaria · ${cutoff.academic_year}`,
+      referenceLabel: referenceLabel ?? `Referencia · Grupo 1 ordinaria · ${cutoff.academic_year}`,
       source: {
         type: 'official',
         label: sourceLabel,

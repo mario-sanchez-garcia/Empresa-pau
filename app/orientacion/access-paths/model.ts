@@ -1,10 +1,13 @@
 import type { AccessPathDefinition, AccessPathId, AccessScenarioMap, StoredSubjectInputs } from './types'
+import type { OrientationCommunity } from '../community'
 
 export const MADRID_ADMISSION_AGREEMENT_URL = 'https://www.comunidad.madrid/docs/2026-06/acuerdo-universidades-2026-2027.pdf'
 export const BACHIBAC_MINISTRY_URL = 'https://www.educacionfpydeportes.gob.es/mc/bachibac/presentacion/acceso-universidad/acceso-universidad-espanola.html'
 export const FOREIGN_EQUIVALENCE_ORDER_URL = 'https://www.boe.es/buscar/act.php?id=BOE-A-2025-10777'
 export const UNIVERSITY_ACCESS_DECREE_URL = 'https://www.boe.es/buscar/doc.php?id=BOE-A-2024-11858'
 export const UNEDASISS_STUDENT_TYPES_URL = 'https://unedasiss.uned.es/publico_destino'
+export const CATALUNYA_FOREIGN_ACCESS_URL = 'https://universitats.gencat.cat/es/preinscripcions/acces-universitat-estudis-estrangers/'
+export const CATALUNYA_WEIGHTINGS_URL = 'https://universitats.gencat.cat/es/preinscripcions/ponderacions/'
 
 export const ACCESS_PATH_IDS: AccessPathId[] = ['spanish_bachillerato', 'bachibac', 'ib', 'international']
 
@@ -72,8 +75,31 @@ export const ACCESS_PATHS: AccessPathDefinition[] = [
   },
 ]
 
-export function getAccessPath(pathId: AccessPathId) {
-  return ACCESS_PATHS.find(path => path.id === pathId) ?? ACCESS_PATHS[0]
+export function getAccessPath(pathId: AccessPathId, community: OrientationCommunity = 'Madrid') {
+  const base = ACCESS_PATHS.find(path => path.id === pathId) ?? ACCESS_PATHS[0]
+  if (community === 'Madrid') return base
+  const catalunyaSource = { organization: 'Generalitat de Catalunya · Canal Universitats', document: 'Acceso con estudios extranjeros y ponderaciones', period: 'Preinscripción 2026-2027', url: CATALUNYA_FOREIGN_ACCESS_URL }
+  if (pathId === 'international') return {
+    ...base,
+    description: 'UE/con convenio o Bachillerato homologado.',
+    officialSummary: 'Cataluña distingue la acreditación UNEDasiss de UE, convenios e IB y la vía con Bachillerato homologado. La nota de acceso va de 5 a 10; la admisión puede llegar a 14 con las dos mejores materias aprobadas y ponderables.',
+    kairoSummary: 'Solo usamos la vía que indiques. En acceso directo copiamos la nota UNEDasiss; con homologación calculamos el 60/40 de la prueba de acceso sin trasladar reglas de Madrid.',
+    changes: ['Las materias de la acreditación no suman si no se han examinado por PAU o PCE.', 'Solo se eligen las dos mejores aportaciones ponderadas en Cataluña.'],
+    needs: ['Acreditación UNEDasiss, o nota homologada y cuatro pruebas obligatorias'],
+    subjectOrigin: 'Únicamente materias examinadas mediante PAU/EBAU o PCE, aprobadas y ponderables en Cataluña; no basta con que aparezcan reconocidas en UNEDasiss.',
+    sources: [catalunyaSource, { organization: 'Generalitat de Catalunya · Canal Universitats', document: 'Ponderaciones 2026', period: '2026', url: CATALUNYA_WEIGHTINGS_URL }],
+  }
+  if (pathId === 'ib') return {
+    ...base,
+    officialSummary: 'En Cataluña, el Diploma IB accede mediante acreditación UNEDasiss con una nota entre 5 y 10. Para subir hasta 14 solo cuentan las dos mejores materias aprobadas, ponderables y examinadas por PAU o PCE.',
+    subjectOrigin: 'Solo materias examinadas mediante PAU/EBAU o PCE; una materia reconocida en la acreditación UNEDasiss sin examen no suma ponderación.',
+    sources: [catalunyaSource, ...base.sources.filter(source => source.organization === 'BOE')],
+  }
+  return {
+    ...base,
+    subjectOrigin: 'Materias aprobadas de admisión PAU/EBAU o PCE que ponderen para el grado en Cataluña; se aplican las dos mejores aportaciones.',
+    sources: pathId === 'bachibac' ? [...base.sources.filter(source => source.organization !== 'Universidades públicas de Madrid'), catalunyaSource] : [catalunyaSource],
+  }
 }
 
 export function createDefaultAccessScenarios(): AccessScenarioMap {

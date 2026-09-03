@@ -6,6 +6,7 @@ export function buildOrientationSavePayload(target: OrientationTarget) {
     target_university_id: target.universityId,
     target_degree: target.degree,
     target_university: target.university,
+    target_community: target.community,
     target_admission_score: target.referenceScore,
     source_type: target.source.type,
   }

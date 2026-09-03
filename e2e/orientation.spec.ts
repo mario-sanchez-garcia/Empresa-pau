@@ -6,6 +6,7 @@ type SavedTarget = {
   universityId: string | null
   degree: string
   university: string
+  community: string | null
   admissionScore: number
 }
 
@@ -15,12 +16,14 @@ type Target = {
   universityId: string | null
   degree: string
   university: string
+  community: string | null
   referenceScore: number
   source: { type: 'official' | 'fixture' }
   subjects: unknown[]
 }
 
 type OrientationPayload = {
+  community: 'Madrid' | 'Cataluña'
   targets: Target[]
   universities: unknown[]
   savedTarget: SavedTarget | null
@@ -62,6 +65,21 @@ async function selectTarget(page: Page, target: Target) {
   await expect(page.locator(`[data-selected-id="${target.id}"]`)).toBeVisible()
 }
 
+async function switchCommunity(page: Page, community: 'Madrid' | 'Cataluña') {
+  const button = page.getByRole('group', { name: 'Selecciona comunidad' }).getByRole('button', { name: community, exact: true })
+  if (await button.getAttribute('aria-pressed') === 'true') return openOrientation(page)
+  const slug = community === 'Madrid' ? 'madrid' : 'cataluna'
+  const responsePromise = page.waitForResponse(response => {
+    const url = new URL(response.url())
+    return url.pathname === '/api/orientation' && url.searchParams.get('community') === slug && response.request().method() === 'GET'
+  })
+  await button.click()
+  const response = await responsePromise
+  expect(response.ok()).toBe(true)
+  await expect(page.getByRole('button', { name: community, pressed: true })).toBeVisible()
+  return response.json() as Promise<OrientationPayload>
+}
+
 async function saveTarget(page: Page, target: Target, assertPending = false) {
   let releaseResponse: (() => void) | undefined
   const responseGate = assertPending ? new Promise<void>(resolve => { releaseResponse = resolve }) : Promise.resolve()
@@ -92,6 +110,7 @@ async function saveTarget(page: Page, target: Target, assertPending = false) {
   const body = response.request().postDataJSON() as Record<string, unknown>
   expect(body.target_degree_id).toBe(target.degreeId)
   expect(body.target_university_id).toBe(target.universityId)
+  expect(body.target_community).toBe(target.community)
   expect('user_id' in body).toBe(false)
   await expect(page).toHaveURL(/\/camino(?:\?|$)/)
   if (assertPending) await page.unroute('**/api/orientation')
@@ -137,8 +156,10 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
   })
 
   let originalTarget: Target | undefined
+  let originalSavedTarget: SavedTarget | null = null
 
   try {
+    await page.addInitScript(() => localStorage.setItem('kairo_orientation_community_v1', 'Madrid'))
     const initial = await test.step('carga autenticada y catálogo oficial', async () => {
       const payload = await openOrientation(page)
       const accessPaths = page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })
@@ -154,6 +175,7 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
     })
 
     const initialSavedTarget = initial.savedTarget
+    originalSavedTarget = initialSavedTarget
     originalTarget = initialSavedTarget?.degreeId && initialSavedTarget.universityId
       ? initial.targets.find(target => target.degreeId === initialSavedTarget.degreeId && target.universityId === initialSavedTarget.universityId)
       : undefined
@@ -272,6 +294,40 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       expect(payload.savedTarget?.universityId).toBe(secondTarget.universityId)
     })
 
+    await test.step('Cataluña carga su catálogo, reglas y objetivo sin mezclar Madrid', async () => {
+      const catalunya = await switchCommunity(page, 'Cataluña')
+      expect(catalunya.community).toBe('Cataluña')
+      if (!catalunya.catalogAvailable) {
+        test.info().annotations.push({
+          type: 'deployment',
+          description: 'El catálogo catalán aún no está cargado en la base remota; las aserciones se activan automáticamente al aplicar las migraciones.',
+        })
+        await switchCommunity(page, 'Madrid')
+        await expectRestoredTarget(page, secondTarget)
+        return
+      }
+      expect(catalunya.catalogAvailable).toBe(true)
+      expect(catalunya.universities).toHaveLength(8)
+      expect(catalunya.targets).toHaveLength(560)
+      expect(catalunya.targets.reduce((total, item) => total + item.subjects.length, 0)).toBe(4797)
+      expect(catalunya.targets.every(item => item.community === 'Cataluña')).toBe(true)
+      await expect(page.getByText(/Datos oficiales de preinscripción 2026/)).toBeVisible()
+      const catalanTarget = catalunya.targets.find(item => item.subjects.length >= 2) ?? catalunya.targets[0]
+      await selectTarget(page, catalanTarget)
+      await expect(page.getByText(/Nota de referencia · 1.ª asignación de junio/)).toBeVisible()
+      await saveTarget(page, catalanTarget)
+      await expect(page.getByTestId('camino-orientation-target')).toContainText(catalanTarget.degree)
+      const restored = await expectRestoredTarget(page, catalanTarget)
+      expect(restored.savedTarget?.community).toMatch(/Cataluña|Catalunya/)
+      await page.getByRole('radio', { name: /^Internacional/ }).click()
+      await expect(page.getByText(/no basta con que aparezcan reconocidas en UNEDasiss/i)).toBeVisible()
+      await page.getByRole('button', { name: 'Cómo se corrige' }).click()
+      await page.getByLabel('Asignatura').selectOption({ label: 'Química' })
+      await expect(page.getByText('PAU Cataluña · junio 2026')).toBeVisible()
+      await expect(page.getByRole('link', { name: 'Ver fuente oficial' })).toHaveAttribute('href', /universitats\.gencat\.cat/)
+      await page.getByRole('button', { name: 'Mi objetivo' }).click()
+    })
+
     await test.step('un fallo de red muestra error y libera el estado guardando', async () => {
       expectedSaveFailure = true
       await page.route('**/api/orientation', async route => {
@@ -296,11 +352,16 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)).toBe(true)
     })
   } finally {
-    if (originalTarget && page.url() !== 'about:blank') {
+    if (originalSavedTarget?.degreeId && originalSavedTarget.universityId && page.url() !== 'about:blank') {
       try {
         if (!/\/orientacion(?:\?|$)/.test(page.url())) await openOrientation(page)
-        await selectTarget(page, originalTarget)
-        await saveTarget(page, originalTarget)
+        const originalCommunity = /catalu/i.test(originalSavedTarget.community ?? '') ? 'Cataluña' : 'Madrid'
+        const payload = await switchCommunity(page, originalCommunity)
+        originalTarget = payload.targets.find(item => item.degreeId === originalSavedTarget?.degreeId && item.universityId === originalSavedTarget?.universityId)
+        if (originalTarget) {
+          await selectTarget(page, originalTarget)
+          await saveTarget(page, originalTarget)
+        }
       } catch {
         // The main assertions report the failure; cleanup remains best-effort.
       }

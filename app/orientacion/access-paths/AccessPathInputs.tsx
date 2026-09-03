@@ -5,6 +5,7 @@ import GradeControl from '../GradeControl'
 import styles from '../orientation.module.css'
 import { getAccessPath } from './model'
 import type { AccessScenario } from './types'
+import type { OrientationCommunity } from '../community'
 
 function ChoiceGroup({ label, value, options, onChange }: { label: string; value: string; options: Array<{ id: string; label: string; description: string }>; onChange: (value: string) => void }) {
   return (
@@ -15,8 +16,8 @@ function ChoiceGroup({ label, value, options, onChange }: { label: string; value
   )
 }
 
-export default function AccessPathInputs({ scenario, onChange }: { scenario: AccessScenario; onChange: (scenario: AccessScenario) => void }) {
-  const path = getAccessPath(scenario.pathId)
+export default function AccessPathInputs({ community, scenario, onChange }: { community: OrientationCommunity; scenario: AccessScenario; onChange: (scenario: AccessScenario) => void }) {
+  const path = getAccessPath(scenario.pathId, community)
   const subjectNote = <div className={styles.subjectOrigin}><BadgeCheck size={14} /><span><b>Qué materias sirven en esta vía</b>{path.subjectOrigin}</span></div>
 
   if (scenario.pathId === 'spanish_bachillerato') return (
@@ -64,15 +65,15 @@ export default function AccessPathInputs({ scenario, onChange }: { scenario: Acc
     <>
       <ChoiceGroup label="¿De qué sistema procedes?" value={scenario.route} onChange={route => onChange({ ...scenario, route: route === 'homologation_pce' || route === 'homologation_pending' ? route : 'direct_unedasiss' })} options={[
         { id: 'direct_unedasiss', label: 'UE / convenio', description: 'Acceso directo con UNEDasiss' },
-        { id: 'homologation_pce', label: 'Sin convenio + PCE', description: 'Homologación y modalidad' },
+        { id: 'homologation_pce', label: 'Sin convenio + PAU/PCE', description: community === 'Cataluña' ? 'Homologación y fase de acceso' : 'Homologación y modalidad' },
         { id: 'homologation_pending', label: 'Sin PCE/modalidad', description: 'Caso todavía incompleto' },
       ]} />
       {scenario.route === 'direct_unedasiss' && <GradeControl allowEmpty id="international-cau" label="CAU acreditada por UNEDasiss" hint="Calificación oficial entre 5 y 10" value={scenario.accreditedCau} minimum={5} onChange={accreditedCau => onChange({ ...scenario, accreditedCau })} />}
       {scenario.route === 'homologation_pce' && <>
-        <GradeControl allowEmpty id="international-media" label="Nota media del Bachillerato homologado" hint="Aporta 0,2 × la media a la CAU" value={scenario.homologatedAverage} minimum={5} onChange={homologatedAverage => onChange({ ...scenario, homologatedAverage })} />
-        <div className={styles.pceGroup}><div><b>PCE para acreditar modalidad</b><span>Se suman hasta cuatro aprobadas con ×0,1 en la nota de acceso.</span></div><div className={styles.pceGrid}>{scenario.pceGrades.map((value, index) => <GradeControl allowEmpty key={index} id={`pce-${index + 1}`} label={`PCE ${index + 1}`} value={value} onChange={grade => { const pceGrades = [...scenario.pceGrades] as [number | null, number | null, number | null, number | null]; pceGrades[index] = grade; onChange({ ...scenario, pceGrades }) }} />)}</div></div>
+        <GradeControl allowEmpty id="international-media" label="Nota media del Bachillerato homologado" hint={community === 'Cataluña' ? '60% de la nota de acceso' : 'Aporta 0,2 × la media a la CAU'} value={scenario.homologatedAverage} minimum={5} onChange={homologatedAverage => onChange({ ...scenario, homologatedAverage })} />
+        <div className={styles.pceGroup}><div><b>{community === 'Cataluña' ? 'Cuatro materias obligatorias PAU/PCE' : 'PCE para acreditar modalidad'}</b><span>{community === 'Cataluña' ? 'Su media aporta el 40% de la nota de acceso.' : 'Se suman hasta cuatro aprobadas con ×0,1 en la nota de acceso.'}</span></div><div className={styles.pceGrid}>{scenario.pceGrades.map((value, index) => <GradeControl allowEmpty key={index} id={`pce-${index + 1}`} label={`${community === 'Cataluña' ? 'Obligatoria' : 'PCE'} ${index + 1}`} value={value} onChange={grade => { const pceGrades = [...scenario.pceGrades] as [number | null, number | null, number | null, number | null]; pceGrades[index] = grade; onChange({ ...scenario, pceGrades }) }} />)}</div></div>
       </>}
-      {scenario.route === 'homologation_pending' && <div className={styles.incompletePath}><AlertTriangle size={18} /><div><b>Todavía no podemos calcular una nota comparable.</b><p>Sin PCE superadas ni modalidad acreditada, Madrid sitúa esta solicitud en la convocatoria extraordinaria y detrás de quienes sí cumplen esos requisitos. Kairo no inventará una equivalencia.</p></div></div>}
+      {scenario.route === 'homologation_pending' && <div className={styles.incompletePath}><AlertTriangle size={18} /><div><b>Todavía no podemos calcular una nota comparable.</b><p>{community === 'Cataluña' ? 'Sin homologación y prueba de acceso superada no existe una referencia comparable para la asignación ordinaria de junio. Kairo no inventará una equivalencia.' : 'Sin PCE superadas ni modalidad acreditada, Madrid sitúa esta solicitud en la convocatoria extraordinaria y detrás de quienes sí cumplen esos requisitos. Kairo no inventará una equivalencia.'}</p></div></div>}
       {scenario.route !== 'homologation_pending' && subjectNote}
     </>
   )

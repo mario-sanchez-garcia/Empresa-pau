@@ -10,7 +10,7 @@ function context(overrides: Partial<CaminoOrientationContext> = {}): CaminoOrien
     accessPath: 'spanish_bachillerato',
     route: 'spanish_pau',
     calculationComplete: true,
-    target: { degreeId: 'degree', universityId: 'university', degree: 'Economía', university: 'Universidad Carlos III de Madrid', universityAcronym: 'UC3M', referenceScore: 11.7 },
+    target: { degreeId: 'degree', universityId: 'university', degree: 'Economía', university: 'Universidad Carlos III de Madrid', community: 'Comunidad de Madrid', universityAcronym: 'UC3M', referenceScore: 11.7 },
     estimatedScore: 11.2,
     gap: -0.5,
     impactSubjects: [
@@ -50,6 +50,29 @@ test('sin objetivo o sin ponderaciones oficiales se conserva el orden anterior',
   assert.equal(matchingOrientationContext(local, { degree: 'Economía', university: 'Universidad Carlos III de Madrid', admissionScore: 11.7, sourceType: 'fixture' }), null)
   assert.equal(matchingOrientationContext(local, { degree: 'Otra carrera', university: 'Universidad Carlos III de Madrid', admissionScore: 11.7, sourceType: 'official' }), null)
   assert.equal(matchingOrientationContext(local, { degree: 'Economía', university: 'Universidad Carlos III de Madrid', admissionScore: 11.7, sourceType: 'official' }), local)
+})
+
+test('un objetivo catalán usa únicamente sus ponderaciones territoriales ya resueltas', () => {
+  const catalunya = context({
+    target: { degreeId: 'CAT:11101', universityId: 'CAT:UB', degree: 'Dret (Barcelona)', university: 'Universitat de Barcelona', community: 'Cataluña', universityAcronym: 'UB', referenceScore: 10.8 },
+    impactSubjects: [{ subjectCode: 'historia-filosofia-o-espana-admision', name: 'Història de la Filosofia', weighting: 0.2, defaultGrade: 6 }],
+  })
+  const matched = matchingOrientationContext(catalunya, { degree: 'Dret (Barcelona)', university: 'Universitat de Barcelona', community: 'Cataluña', admissionScore: 10.8, sourceType: 'official' })
+  assert.equal(matched, catalunya)
+  assert.equal(orientationImpactForSubject('Historia de España', matched).weighting, 0.2)
+})
+
+test('explorar otra comunidad no aplica el contexto local al objetivo persistido', () => {
+  const local = context({ target: { ...context().target, community: 'Cataluña' } })
+  assert.equal(matchingOrientationContext(local, { degree: 'Economía', university: 'Universidad Carlos III de Madrid', community: 'Comunidad de Madrid', admissionScore: 11.7, sourceType: 'official' }), null)
+})
+
+test('un grado catalán sin ponderación segura no inventa impacto', () => {
+  const catalunya = context({
+    target: { ...context().target, community: 'Cataluña' },
+    impactSubjects: [],
+  })
+  assert.deepEqual(orientationImpactForSubject('Química', catalunya), { level: 'none', score: 0, weighting: null, defaultGrade: null })
 })
 
 test('un gap por debajo de referencia refuerza la señal y estar por encima la atenúa', () => {

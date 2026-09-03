@@ -1,0 +1,1200 @@
+{
+  "academic_year": "2026-2027",
+  "counts": {
+    "cutoffs": 560,
+    "degrees": 560,
+    "degrees_by_university": {
+      "UAB": 113,
+      "UB": 89,
+      "UPC": 72,
+      "UPF": 49,
+      "URV": 67,
+      "UVic-UCC": 41,
+      "UdG": 72,
+      "UdL": 57
+    },
+    "degrees_with_weightings": 558,
+    "universities": 8,
+    "weightings": 4797
+  },
+  "errors": {
+    "duplicate_codes": [],
+    "duplicate_ids": [],
+    "invalid_cutoffs": [],
+    "invalid_weightings": []
+  },
+  "excluded_cutoff_rows": [],
+  "matching": {
+    "conflicting_codes_excluded": [
+      {
+        "code": "61057",
+        "names": [
+          "Fisioteràpia / Nutrició Humana i Dietètica (Simultaneïtat)",
+          "Nutrició Humana i Dietètica / Fisioteràpia (Simultaneïtat)"
+        ],
+        "pages": [
+          19,
+          24
+        ],
+        "reason": "conflicting matrices for one official code"
+      }
+    ],
+    "cutoff_codes_without_weightings": [
+      "41066",
+      "61057"
+    ],
+    "identical_duplicate_codes": [
+      {
+        "code": "41041",
+        "names": [
+          "Administració d'Empreses i Gestió de la Innovació / Màrqueting i Comunitats Digitals \"Tecnocampus\" (Simultaneïtat)",
+          "Màrqueting i Comunitats Digitals / Administració d'Empreses i Gestió de la Innovació \"Tecnocampus\" (Simultaneïtat)"
+        ],
+        "pages": [
+          1,
+          23
+        ]
+      },
+      {
+        "code": "41035",
+        "names": [
+          "Administració d'Empreses i Gestió de la Innovació / Turisme i Gestió del Lleure \"Tecnocampus\" (Simultaneïtat)",
+          "Turisme i Gestió del Lleure / Administració d'Empreses i Gestió de la Innovació \"Tecnocampus\" (Simultaneïtat)"
+        ],
+        "pages": [
+          1,
+          28
+        ]
+      },
+      {
+        "code": "11064",
+        "names": [
+          "Administració i Direcció d'Empreses / Dret (Simultaneïtat)",
+          "Dret / Administració i Direcció d'Empreses (Simultaneïtat)"
+        ],
+        "pages": [
+          1,
+          7
+        ]
+      },
+      {
+        "code": "21098",
+        "names": [
+          "Administració i Direcció d'Empreses / Dret (Simultaneïtat)",
+          "Dret / Administració i Direcció d'Empreses (Simultaneïtat)"
+        ],
+        "pages": [
+          1,
+          7
+        ]
+      },
+      {
+        "code": "61035",
+        "names": [
+          "Administració i Direcció d'Empreses / Dret (Simultaneïtat)",
+          "Dret / Administració i Direcció d'Empreses (Simultaneïtat)"
+        ],
+        "pages": [
+          1,
+          7
+        ]
+      },
+      {
+        "code": "81090",
+        "names": [
+          "Administració i Direcció d'Empreses / Dret (Simultaneïtat)",
+          "Dret / Administració i Direcció d'Empreses (Simultaneïtat)"
+        ],
+        "pages": [
+          1,
+          7
+        ]
+      },
+      {
+        "code": "71055",
+        "names": [
+          "Administració i Direcció d'Empreses / Dret (Simultaneïtat)",
+          "Dret / Administració i Direcció d'Empreses (Simultaneïtat)"
+        ],
+        "pages": [
+          1,
+          8
+        ]
+      },
+      {
+        "code": "81096",
+        "names": [
+          "Administració i Direcció d'Empreses / Economia (Simultaneïtat)",
+          "Economia / Administració i Direcció d'Empreses (Simultaneïtat)"
+        ],
+        "pages": [
+          1,
+          8
+        ]
+      },
+      {
+        "code": "41034",
+        "names": [
+          "Administració i Direcció d'Empreses - Economia / Dret (Agrupació de Simultaneïtat)",
+          "Dret / Administració i Direcció d'Empreses - Economia (Agrupació de Simultaneïtat)",
+          "Economia - Administració i Direcció d'Empreses / Dret (Agrupació de Simultaneïtat)"
+        ],
+        "pages": [
+          1,
+          8,
+          8
+        ]
+      },
+      {
+        "code": "61070",
+        "names": [
+          "Administració i Direcció d'Empreses / Enginyeria en Organització Industrial i Logística (simultaneïtat)",
+          "Enginyeria en Organització Industrial i Logística / Administració i Direcció d'Empreses (simultaneïtat)"
+        ],
+        "pages": [
+          2,
+          14
+        ]
+      },
+      {
+        "code": "81091",
+        "names": [
+          "Administració i Direcció d'Empreses / Enginyeria en Tecnologies Industrials (Simultaneïtat)",
+          "Enginyeria en Tecnologies Industrials / Administració i Direcció d'Empreses (Simultaneïtat)"
+        ],
+        "pages": [
+          2,
+          14
+        ]
+      },
+      {
+        "code": "61036",
+        "names": [
+          "Administració i Direcció d'Empreses / Enginyeria Informàtica (Simultaneïtat)",
+          "Enginyeria Informàtica / Administració i Direcció d'Empreses (Simultaneïtat)"
+        ],
+        "pages": [
+          2,
+          15
+        ]
+      },
+      {
+        "code": "71053",
+        "names": [
+          "Administració i Direcció d'Empreses / Finances i Comptabilitat (Simultaneïtat)",
+          "Finances i Comptabilitat / Administració i Direcció d'Empreses (Simultaneïtat)"
+        ],
+        "pages": [
+          2,
+          18
+        ]
+      },
+      {
+        "code": "71079",
+        "names": [
+          "Administració i Direcció d'Empreses / Màrqueting \"ESIC\" (simultaneïtat) Reus / Barcelona",
+          "Màrqueting / Administració i Direcció d'Empreses \"ESIC\" (simultaneïtat) Reus / Barcelona"
+        ],
+        "pages": [
+          2,
+          22
+        ]
+      },
+      {
+        "code": "71080",
+        "names": [
+          "Administració i Direcció d'Empreses / Màrqueting \"ESIC\" (simultaneïtat) Tortosa / Barcelona",
+          "Màrqueting / Administració i Direcció d'Empreses \"ESIC\" (simultaneïtat) Tortosa / Barcelona"
+        ],
+        "pages": [
+          2,
+          22
+        ]
+      },
+      {
+        "code": "11095",
+        "names": [
+          "Administració i Direcció d'Empreses / Química (Simultaneïtat)",
+          "Química / Administració i Direcció d'Empreses (Simultaneïtat)"
+        ],
+        "pages": [
+          2,
+          26
+        ]
+      },
+      {
+        "code": "11090",
+        "names": [
+          "Administració i Direcció d'Empreses / Sociologia (Simultaneïtat)",
+          "Sociologia / Administració i Direcció d'Empreses (Simultaneïtat)"
+        ],
+        "pages": [
+          2,
+          26
+        ]
+      },
+      {
+        "code": "61053",
+        "names": [
+          "Administració i Direcció d'Empreses / Turisme (Simultaneïtat)",
+          "Turisme / Administració i Direcció d'Empreses (Simultaneïtat)"
+        ],
+        "pages": [
+          2,
+          27
+        ]
+      },
+      {
+        "code": "11096",
+        "names": [
+          "Arqueologia / Història (Simultaneïtat)",
+          "Història / Arqueologia (Simultaneïtat)"
+        ],
+        "pages": [
+          2,
+          20
+        ]
+      },
+      {
+        "code": "81047",
+        "names": [
+          "Biologia / Biotecnologia (Simultaneïtat)",
+          "Biotecnologia / Biologia (Simultaneïtat)"
+        ],
+        "pages": [
+          3,
+          3
+        ]
+      },
+      {
+        "code": "81048",
+        "names": [
+          "Biologia / Ciències Ambientals (Simultaneïtat)",
+          "Ciències Ambientals / Biologia (Simultaneïtat)"
+        ],
+        "pages": [
+          3,
+          4
+        ]
+      },
+      {
+        "code": "71054",
+        "names": [
+          "Bioquímica i Biologia Molecular / Biotecnologia (Simultaneïtat)",
+          "Biotecnologia / Bioquímica i Biologia Molecular (Simultaneïtat)"
+        ],
+        "pages": [
+          3,
+          3
+        ]
+      },
+      {
+        "code": "71056",
+        "names": [
+          "Biotecnologia / Enginyeria Informàtica (Simultaneïtat)",
+          "Enginyeria Informàtica / Biotecnologia (Simultaneïtat)"
+        ],
+        "pages": [
+          3,
+          15
+        ]
+      },
+      {
+        "code": "61040",
+        "names": [
+          "Ciència i Producció Animal / Veterinària (Simultaneïtat)",
+          "Veterinària / Ciència i Producció Animal (Simultaneïtat)"
+        ],
+        "pages": [
+          4,
+          28
+        ]
+      },
+      {
+        "code": "11120",
+        "names": [
+          "Ciència Política i de l'Administració / Dret (Simultaneïtat)",
+          "Dret / Ciència Política i de l'Administració (Simultaneïtat)"
+        ],
+        "pages": [
+          4,
+          8
+        ]
+      },
+      {
+        "code": "21104",
+        "names": [
+          "Ciència Política i Gestió Pública / Dret (Simultaneïtat)",
+          "Dret / Ciència Política i Gestió Pública (Simultaneïtat)"
+        ],
+        "pages": [
+          4,
+          8
+        ]
+      },
+      {
+        "code": "21125",
+        "names": [
+          "Ciència Política i Gestió Pública / Sociologia (Simultaneïtat)",
+          "Sociologia / Ciència Política i Gestió Pública (Simultaneïtat)"
+        ],
+        "pages": [
+          4,
+          26
+        ]
+      },
+      {
+        "code": "21151",
+        "names": [
+          "Ciències Ambientals / Geologia (Simultaneïtat)",
+          "Geologia / Ciències Ambientals (Simultaneïtat)"
+        ],
+        "pages": [
+          4,
+          19
+        ]
+      },
+      {
+        "code": "61038",
+        "names": [
+          "Ciències de l'Activitat Física i de l'Esport / Educació Primària (Simultaneïtat)",
+          "Educació Primària / Ciències de l'Activitat Física i de l'Esport (Simultaneïtat)"
+        ],
+        "pages": [
+          5,
+          9
+        ]
+      },
+      {
+        "code": "91055",
+        "names": [
+          "Ciències de l'Activitat Física i de l'Esport / Educació Primària (Menció en Educació Física) (Simultaneïtat)",
+          "Educació Primària (Menció en Educació Física) / Ciències de l'Activitat Física i de l'Esport (Simultaneïtat)"
+        ],
+        "pages": [
+          5,
+          9
+        ]
+      },
+      {
+        "code": "41037",
+        "names": [
+          "Ciències de l'Activitat Física i de l'Esport / Fisioteràpia \"Tecnocampus\" (Simultaneïtat)",
+          "Fisioteràpia / Ciències de l'Activitat Física i de l'Esport \"Tecnocampus\" (simultaneïtat)"
+        ],
+        "pages": [
+          5,
+          19
+        ]
+      },
+      {
+        "code": "61039",
+        "names": [
+          "Ciències de l'Activitat Física i de l'Esport / Fisioteràpia (Simultaneïtat)",
+          "Fisioteràpia / Ciències de l'Activitat Física i de l'Esport (Simultaneïtat)"
+        ],
+        "pages": [
+          5,
+          19
+        ]
+      },
+      {
+        "code": "81086",
+        "names": [
+          "Ciències de l'Activitat Física i de l'Esport / Fisioteràpia \"EUSES\" (simultaneïtat)",
+          "Fisioteràpia / Ciències de l'Activitat Física i de l'Esport \"EUSES\" (simultaneïtat)"
+        ],
+        "pages": [
+          5,
+          19
+        ]
+      },
+      {
+        "code": "71088",
+        "names": [
+          "Ciències de l'Activitat Física i de l'Esport / Fisioteràpia \"EUSES\" (simultaneïtat)",
+          "Fisioteràpia / Ciències de l'Activitat Física i de l'Esport \"EUSES\" (simultaneïtat)"
+        ],
+        "pages": [
+          5,
+          19
+        ]
+      },
+      {
+        "code": "31138",
+        "names": [
+          "Ciències i Tecnologies del Mar / Enginyeria Ambiental (simultaneïtat)",
+          "Enginyeria Ambiental / Ciències i Tecnologies del Mar (simultaneïtat)"
+        ],
+        "pages": [
+          5,
+          10
+        ]
+      },
+      {
+        "code": "81092",
+        "names": [
+          "Ciències polítiques i de l'Administració / Comunicació Cultural (simultaneïtat)",
+          "Comunicació Cultural / Ciències polítiques i de l'Administració (simultaneïtat)"
+        ],
+        "pages": [
+          5,
+          6
+        ]
+      },
+      {
+        "code": "81054",
+        "names": [
+          "Ciències Polítiques i de l'Administració / Dret (Simultaneïtat)",
+          "Dret / Ciències Polítiques i de l'Administració (Simultaneïtat)"
+        ],
+        "pages": [
+          5,
+          8
+        ]
+      },
+      {
+        "code": "11098",
+        "names": [
+          "Comunicació Audiovisual / Gestió d'Informació i Documentació Digital (Simultaneïtat)",
+          "Gestió d'Informació i Documentació Digital / Comunicació Audiovisual (Simultaneïtat)"
+        ],
+        "pages": [
+          6,
+          20
+        ]
+      },
+      {
+        "code": "61042",
+        "names": [
+          "Conservació de la Natura / Enginyeria Forestal (Simultaneïtat)",
+          "Enginyeria Forestal / Conservació de la Natura (Simultaneïtat)"
+        ],
+        "pages": [
+          6,
+          15
+        ]
+      },
+      {
+        "code": "21108",
+        "names": [
+          "Criminologia / Dret (Simultaneïtat)",
+          "Dret / Criminologia (Simultaneïtat)"
+        ],
+        "pages": [
+          6,
+          8
+        ]
+      },
+      {
+        "code": "81056",
+        "names": [
+          "Criminologia / Dret (Simultaneïtat)",
+          "Dret / Criminologia (Simultaneïtat)"
+        ],
+        "pages": [
+          6,
+          8
+        ]
+      },
+      {
+        "code": "21171",
+        "names": [
+          "Criminologia / Psicologia (simultaneïtat)",
+          "Psicologia / Criminologia (simultaneïtat)"
+        ],
+        "pages": [
+          6,
+          25
+        ]
+      },
+      {
+        "code": "41043",
+        "names": [
+          "Criminologia i Polítiques Públiques de Prevenció / Dret (Simultaneïtat)",
+          "Dret / Criminologia i Polítiques Públiques de Prevenció (Simultaneïtat)"
+        ],
+        "pages": [
+          6,
+          8
+        ]
+      },
+      {
+        "code": "41073",
+        "names": [
+          "Disseny i Producció de Videojocs / Enginyeria Informàtica de Gestió i Sistemes d'Informació \"Tecnocampus\" (Simultaneïtat)",
+          "Enginyeria Informàtica de Gestió i Sistemes d'Informació / Disseny i Producció de Videojocs \"Tecnocampus\" (Simultaneïtat)"
+        ],
+        "pages": [
+          7,
+          15
+        ]
+      },
+      {
+        "code": "21145",
+        "names": [
+          "Dret / Relacions Internacionals (Simultaneïtat)",
+          "Relacions Internacionals / Dret (Simultaneïtat)"
+        ],
+        "pages": [
+          8,
+          26
+        ]
+      },
+      {
+        "code": "21109",
+        "names": [
+          "Dret / Relacions Laborals (Simultaneïtat)",
+          "Relacions Laborals / Dret (Simultaneïtat)"
+        ],
+        "pages": [
+          8,
+          26
+        ]
+      },
+      {
+        "code": "71083",
+        "names": [
+          "Dret / Relacions Laborals i Recursos Humans (Simultaneïtat)",
+          "Relacions Laborals i Recursos Humans / Dret (Simultaneïtat)"
+        ],
+        "pages": [
+          8,
+          26
+        ]
+      },
+      {
+        "code": "91922",
+        "names": [
+          "Economia / Estadística (Simultaneïtat)",
+          "Estadística / Economia (Simultaneïtat)"
+        ],
+        "pages": [
+          8,
+          17
+        ]
+      },
+      {
+        "code": "81089",
+        "names": [
+          "Economia / Filosofia (Simultaneïtat)",
+          "Filosofia / Economia (Simultaneïtat)"
+        ],
+        "pages": [
+          8,
+          18
+        ]
+      },
+      {
+        "code": "21167",
+        "names": [
+          "Economia / Matemàtica Computacional i Analítica de Dades (simultaneïtat)",
+          "Matemàtica Computacional i Analítica de Dades / Economia (simultaneïtat)"
+        ],
+        "pages": [
+          8,
+          23
+        ]
+      },
+      {
+        "code": "11072",
+        "names": [
+          "Educació Infantil / Educació Primària (5 anys) (Simultaneïtat)",
+          "Educació Primària / Educació Infantil (5 anys) (Simultaneïtat)"
+        ],
+        "pages": [
+          9,
+          9
+        ]
+      },
+      {
+        "code": "21111",
+        "names": [
+          "Educació Infantil / Educació Primària (5 anys) (Simultaneïtat)",
+          "Educació Primària / Educació Infantil (5 anys) (Simultaneïtat)"
+        ],
+        "pages": [
+          9,
+          9
+        ]
+      },
+      {
+        "code": "61037",
+        "names": [
+          "Educació Infantil / Educació Primària (5 anys) (Simultaneïtat)",
+          "Educació Primària / Educació Infantil (5 anys) (Simultaneïtat)"
+        ],
+        "pages": [
+          9,
+          9
+        ]
+      },
+      {
+        "code": "81049",
+        "names": [
+          "Educació Infantil / Educació Primària (5 anys) (Simultaneïtat)",
+          "Educació Primària / Educació Infantil (5 anys) (Simultaneïtat)"
+        ],
+        "pages": [
+          9,
+          10
+        ]
+      },
+      {
+        "code": "71050",
+        "names": [
+          "Educació Infantil / Educació Primària (5 anys) (Simultaneïtat)",
+          "Educació Primària / Educació Infantil (5 anys) (Simultaneïtat)"
+        ],
+        "pages": [
+          9,
+          10
+        ]
+      },
+      {
+        "code": "71076",
+        "names": [
+          "Educació Infantil / Educació Primària (5 anys) (Simultaneïtat)",
+          "Educació Primària / Educació Infantil (5 anys) (Simultaneïtat)"
+        ],
+        "pages": [
+          9,
+          10
+        ]
+      },
+      {
+        "code": "91030",
+        "names": [
+          "Educació Infantil / Educació Primària (Menció en Llengua Anglesa) (5 anys) (Simultaneïtat)",
+          "Educació Primària / Educació Infantil (Menció en Llengua Anglesa) (5 anys) (Simultaneïtat)"
+        ],
+        "pages": [
+          9,
+          9
+        ]
+      },
+      {
+        "code": "31136",
+        "names": [
+          "Empresa, Innovació i Tecnologia / Gestió i Digitalització en l'Esport \"EUNCET\" (Campus Can Dragó + Campus 22@) (presencial) (simultaneïtat)",
+          "Gestió i Digitalització en l'Esport / Empresa, Innovació i Tecnologia \"EUNCET\" (Campus Can Dragó + Campus 22@) (presencial) (simultaneïtat)"
+        ],
+        "pages": [
+          10,
+          20
+        ]
+      },
+      {
+        "code": "31129",
+        "names": [
+          "Empresa, Innovació i Tecnologia \"EUNCET\" / Màrqueting, Innovació i Tecnologia \"EUNCET\" (Campus 22@) (presencial) (simultaneïtat)",
+          "Màrqueting, Innovació i Tecnologia / Empresa, Innovació i Tecnologia \"EUNCET\" (Campus 22@) (presencial) (simultaneïtat)"
+        ],
+        "pages": [
+          10,
+          23
+        ]
+      },
+      {
+        "code": "31130",
+        "names": [
+          "Empresa, Innovació i Tecnologia \"EUNCET\" / Màrqueting, Innovació i Tecnologia \"EUNCET\" (Campus Terrassa) (presencial) (simultaneïtat)",
+          "Màrqueting, Innovació i Tecnologia / Empresa, Innovació i Tecnologia \"EUNCET\" (Campus Terrassa) (presencial) (simultaneïtat)"
+        ],
+        "pages": [
+          10,
+          23
+        ]
+      },
+      {
+        "code": "71070",
+        "names": [
+          "Enginyeria Biomèdica / Enginyeria de Sistemes i Serveis de Telecomunicacions (Simultaneïtat)",
+          "Enginyeria de Sistemes i Serveis de Telecomunicacions / Enginyeria Biomèdica (Simultaneïtat)"
+        ],
+        "pages": [
+          11,
+          12
+        ]
+      },
+      {
+        "code": "61061",
+        "names": [
+          "Enginyeria de l'Energia i Sostenibilitat / Enginyeria en Electrònica Industrial i Automàtica / Enginyeria Mecànica (Agrupació)",
+          "Enginyeria en Electrònica Industrial i Automàtica / Enginyeria Mecànica / Enginyeria de l'Energia i Sostenibilitat (agrupació)",
+          "Enginyeria Mecànica / Enginyeria de l'Energia i Sostenibilitat / Enginyeria en Electrònica Industrial i Automàtica (Agrupació)"
+        ],
+        "pages": [
+          11,
+          14,
+          16
+        ]
+      },
+      {
+        "code": "61075",
+        "names": [
+          "Enginyeria de l'Energia i Sostenibilitat / Enginyeria en Electrònica Industrial i Automàtica / Enginyeria Mecànica (agrupació) Grau en + Màster Universitari en Enginyeria Industrial (PARS: Enginyer/a Industrial)",
+          "Enginyeria en Electrònica Industrial i Automàtica / Enginyeria de l'Energia i Sostenibilitat / Enginyeria Mecànica (agrupació) Grau en + Màster Universitari en Enginyeria Industrial (PARS: Enginyer/a Industrial)",
+          "Enginyeria Mecànica / Enginyeria de l'Energia i Sostenibilitat / Enginyeria en Electrònica Industrial i Automàtica / (agrupació) Grau en + Màster Universitari en Enginyeria Industrial (PARS: Enginyer/a Industrial)"
+        ],
+        "pages": [
+          11,
+          13,
+          16
+        ]
+      },
+      {
+        "code": "61065",
+        "names": [
+          "Enginyeria de l'Energia i Sostenibilitat / Enginyeria Mecànica (Simultaneïtat)",
+          "Enginyeria Mecànica / Enginyeria de l'Energia i Sostenibilitat (Simultaneïtat)"
+        ],
+        "pages": [
+          11,
+          16
+        ]
+      },
+      {
+        "code": "31104",
+        "names": [
+          "Eng. de Recursos Minerals i el seu Reciclatge / Eng. Electrònica, Industrial i Automàtica / Eng. Mecànica / Eng. Química (Agrupació)",
+          "Eng. Electrònica, Industrial i Automàtica / Eng. Mecànica / Eng. Química / Eng. de Recursos Minerals i el seu Reciclatge (Agrupació)",
+          "Eng. Mecànica / Eng. Electrònica, Industrial i Automàtica / Eng. Química / Eng. de Recursos Minerals i el seu Reciclatge (Agrupació)",
+          "Eng. Química / Eng. Electrònica, Industrial i Automàtica / Eng. Mecànica / Eng. de Recursos Minerals i el seu Reciclatge (Agrupació)"
+        ],
+        "pages": [
+          11,
+          14,
+          16,
+          16
+        ]
+      },
+      {
+        "code": "31085",
+        "names": [
+          "Eng. de Sistemes Aeroespacials / Eng. de Sistemes de Telecomunicació - Eng. Telemàtica (Agrupació de Simultaneïtat)",
+          "Eng. de Sistemes de Telecomunicació - Eng. Telemàtica / Eng. de Sistemes Aeroespacials (Agrupació de Simultaneïtat)",
+          "Eng. Telemàtica - Eng. de Sistemes de Telecomunicació / Eng. de Sistemes Aeroespacials (Agrupació de Simultaneïtat)"
+        ],
+        "pages": [
+          12,
+          12,
+          17
+        ]
+      },
+      {
+        "code": "21115",
+        "names": [
+          "Enginyeria de Sistemes de Telecomunicació / Enginyeria Electrònica de Telecomunicació (Agrupació)",
+          "Enginyeria Electrònica de Telecomunicació / Enginyeria de Sistemes de Telecomunicació (Agrupació)"
+        ],
+        "pages": [
+          12,
+          13
+        ]
+      },
+      {
+        "code": "21172",
+        "names": [
+          "Enginyeria de Sistemes de Telecomunicació / Enginyeria Electrònica de Telecomunicació (Agrupació) + Màster Universitari en Enginyeria de Telecomunicació (PARS: Enginyeria de Telecomunicació )",
+          "Enginyeria Electrònica de Telecomunicació / Enginyeria de Sistemes de Telecomunicació (Agrupació) + Màster Universitari en Enginyeria de Telecomunicació (PARS: Enginyeria de Telecomunicació )"
+        ],
+        "pages": [
+          12,
+          13
+        ]
+      },
+      {
+        "code": "31076",
+        "names": [
+          "Enginyeria Telemàtica / Enginyeria de Sistemes de Telecomunicació (inclou xarxes i Internet) (agrupació)",
+          "Eng. Telemàtica (Inclou Xarxes i Internet) / Eng. de Sistemes de Telecomunicació (Agrupació)"
+        ],
+        "pages": [
+          12,
+          16
+        ]
+      },
+      {
+        "code": "31077",
+        "names": [
+          "Enginyeria de Sistemes de Telecomunicació / Enginyeria Telemàtica (Inclou Xarxes i Internet) (Febrer) (Agrupació)",
+          "Enginyeria Telemàtica / Enginyeria de Sistemes de Telecomunicació (inclou xarxes i Internet) (febrer) (agrupació)"
+        ],
+        "pages": [
+          12,
+          17
+        ]
+      },
+      {
+        "code": "21105",
+        "names": [
+          "Enginyeria de Sistemes de Telecomunicació / Enginyeria Informàtica (Simultaneïtat)",
+          "Enginyeria Informàtica / Enginyeria de Sistemes de Telecomunicació (Simultaneïtat)"
+        ],
+        "pages": [
+          12,
+          15
+        ]
+      },
+      {
+        "code": "31015",
+        "names": [
+          "Eng. de Tecnologia i Disseny Tèxtil / Eng. Elèctrica / Eng. Electrònica Industrial i Automàtica / Eng. Mecànica / Eng. Química (Agrupació)",
+          "Eng. Elèctrica / Eng. de Tecnologia i Disseny Tèxtil / Eng. Electrònica Industrial i Automàtica / Eng. Mecànica / Eng. Química (Agrupació)",
+          "Eng. Electrònica Industrial i Automàtica / Eng. de Tecnologia i Disseny Tèxtil / Eng. Elèctrica / Eng. Mecànica / Eng. Química (Agrupació)",
+          "Eng. Mecànica / Eng. Electrònica Industrial i Automàtica / Eng. de Tecnologia i Disseny Tèxtil / Eng. Elèctrica / Eng. Química (Agrupació)",
+          "Eng. Química / Eng. Elèctrica / Eng. Electrònica Industrial i Automàtica / Eng. de Tecnologia i Disseny Tèxtil / Eng. Mecànica (Agrupació)"
+        ],
+        "pages": [
+          12,
+          13,
+          14,
+          16,
+          16
+        ]
+      },
+      {
+        "code": "41057",
+        "names": [
+          "Eng. d'Organització Industrial / Eng. Electrònica Industrial i Automàtica / Eng. Mecànica \"Tecnocampus\" (Agrupació)",
+          "Eng. Electrònica Industrial i Automàtica / Eng. d'Organització Industrial / Eng. Mecànica \"Tecnocampus\" (Agrupació)",
+          "Eng. Mecànica / Eng. d'Organització Industrial / Eng. Electrònica Industrial i Automàtica \"Tecnocampus\" (Agrupació)"
+        ],
+        "pages": [
+          13,
+          13,
+          16
+        ]
+      },
+      {
+        "code": "81050",
+        "names": [
+          "Eng. Elèctrica / Eng. Electrònica, Industrial i Automàtica (Simultaneïtat)",
+          "Eng. Electrònica, Industrial i Automàtica / Eng. Elèctrica (Simultaneïtat)"
+        ],
+        "pages": [
+          13,
+          13
+        ]
+      },
+      {
+        "code": "71058",
+        "names": [
+          "Eng. Elèctrica / Eng. Electrònica, Industrial i Automàtica (Simultaneïtat)",
+          "Eng. Electrònica, Industrial i Automàtica / Eng. Elèctrica (Simultaneïtat)"
+        ],
+        "pages": [
+          13,
+          14
+        ]
+      },
+      {
+        "code": "31124",
+        "names": [
+          "Eng. Elèctrica i Sistemes Ferroviaris / Eng. Electrònica, Industrial i Automàtica / Eng. Mecànica (Agrupació)",
+          "Eng. Electrònica, Industrial i Automàtica / Eng. Elèctrica i Sistemes Ferroviaris / Eng. Mecànica (Agrupació)",
+          "Eng. Mecànica / Eng. Electrònica, Industrial i Automàtica / Eng. Elèctrica i Sistemes Ferroviaris (Agrupació)"
+        ],
+        "pages": [
+          13,
+          14,
+          16
+        ]
+      },
+      {
+        "code": "21106",
+        "names": [
+          "Enginyeria Electrònica de Telecomunicació / Enginyeria Informàtica (Simultaneïtat)",
+          "Enginyeria Informàtica / Enginyeria Electrònica de Telecomunicació (Simultaneïtat)"
+        ],
+        "pages": [
+          13,
+          15
+        ]
+      },
+      {
+        "code": "21112",
+        "names": [
+          "Enginyeria Electrònica Industrial i Automàtica / Enginyeria Mecànica \"EU Salesiana de Sarrià\" (simultaneïtat)",
+          "Enginyeria Mecànica / Enginyeria Electrònica Industrial i Automàtica \"EU Salesiana de Sarrià\" (simultaneïtat)"
+        ],
+        "pages": [
+          14,
+          16
+        ]
+      },
+      {
+        "code": "61060",
+        "names": [
+          "Enginyeria en Organització Industrial i Logística / Enginyeria Química (Agrupació)",
+          "Enginyeria Química / Enginyeria en Organització Industrial i Logística (Agrupació)"
+        ],
+        "pages": [
+          14,
+          16
+        ]
+      },
+      {
+        "code": "11124",
+        "names": [
+          "Enginyeria Informàtica / Matemàtiques (Simultaneïtat)",
+          "Matemàtiques / Enginyeria Informàtica (Simultaneïtat)"
+        ],
+        "pages": [
+          15,
+          23
+        ]
+      },
+      {
+        "code": "21129",
+        "names": [
+          "Estadística Aplicada / Sociologia (Simultaneïtat)",
+          "Sociologia / Estadística Aplicada (Simultaneïtat)"
+        ],
+        "pages": [
+          17,
+          26
+        ]
+      },
+      {
+        "code": "61051",
+        "names": [
+          "Estudis Anglesos / Llengües Aplicades i Traducció (Simultaneïtat)",
+          "Llengües Aplicades i Traducció / Estudis Anglesos (Simultaneïtat)"
+        ],
+        "pages": [
+          17,
+          22
+        ]
+      },
+      {
+        "code": "81085",
+        "names": [
+          "Estudis Globals / Global Studies (docència en Anglès) / Turisme (simultaneïtat)",
+          "Turisme / Estudis Globals / Global Studies (docència en Anglès) (simultaneïtat)"
+        ],
+        "pages": [
+          17,
+          27
+        ]
+      },
+      {
+        "code": "11075",
+        "names": [
+          "Farmàcia / Nutrició Humana i Dietètica (Simultaneïtat)",
+          "Nutrició Humana i Dietètica / Farmàcia (Simultaneïtat)"
+        ],
+        "pages": [
+          18,
+          24
+        ]
+      },
+      {
+        "code": "81080",
+        "names": [
+          "Filologia Catalana / Filologia Hispànica (simultaneïtat)",
+          "Filologia Hispànica / Filologia Catalana (simultaneïtat)"
+        ],
+        "pages": [
+          18,
+          18
+        ]
+      },
+      {
+        "code": "61058",
+        "names": [
+          "Filologia Catalana i Estudis Occitans / Llengües Aplicades i Traducció (Simultaneïtat)",
+          "Llengües Aplicades i Traducció / Filologia Catalana i Estudis Occitans (Simultaneïtat)"
+        ],
+        "pages": [
+          18,
+          22
+        ]
+      },
+      {
+        "code": "61080",
+        "names": [
+          "Filologia Hispànica / Llengües Aplicades i Traducció (Simultaneïtat)",
+          "Llengües Aplicades i Traducció / Filologia Hispànica (Simultaneïtat)"
+        ],
+        "pages": [
+          18,
+          22
+        ]
+      },
+      {
+        "code": "11119",
+        "names": [
+          "Física / Matemàtiques (Simultaneïtat)",
+          "Matemàtiques / Física (Simultaneïtat)"
+        ],
+        "pages": [
+          18,
+          23
+        ]
+      },
+      {
+        "code": "21169",
+        "names": [
+          "Física / Matemàtiques (Simultaneïtat)",
+          "Matemàtiques / Física (Simultaneïtat)"
+        ],
+        "pages": [
+          18,
+          23
+        ]
+      },
+      {
+        "code": "21170",
+        "names": [
+          "Física / Química (Simultaneïtat)",
+          "Química / Física (Simultaneïtat)"
+        ],
+        "pages": [
+          19,
+          26
+        ]
+      },
+      {
+        "code": "61044",
+        "names": [
+          "Fisioteràpia / Infermeria (Simultaneïtat)",
+          "Infermeria / Fisioteràpia (Simultaneïtat)"
+        ],
+        "pages": [
+          19,
+          21
+        ]
+      },
+      {
+        "code": "81076",
+        "names": [
+          "Geografia, Territori i Medi Ambient / Turisme (simultaneïtat)",
+          "Turisme / Geografia, Territori i Medi Ambient (simultaneïtat)"
+        ],
+        "pages": [
+          19,
+          27
+        ]
+      },
+      {
+        "code": "31137",
+        "names": [
+          "Gestió i Digitalització en l'Esport / Màrqueting, Innovació i Tecnologia \"EUNCET\" (Campus Can Dragó + Campus 22@) (simultaneïtat)",
+          "Màrqueting, Innovació i Tecnologia / Gestió i Digitalització en l'Esport \"EUNCET\" (Campus Can Dragó + Campus 22@) (simultaneïtat)"
+        ],
+        "pages": [
+          20,
+          23
+        ]
+      },
+      {
+        "code": "11104",
+        "names": [
+          "Història / Història de l'Art (Simultaneïtat)",
+          "Història de l'Art / Història (Simultaneïtat)"
+        ],
+        "pages": [
+          20,
+          20
+        ]
+      },
+      {
+        "code": "81078",
+        "names": [
+          "Història / Història de l'Art (simultaneïtat)",
+          "Història de l'Art / Història (Simultaneïtat)"
+        ],
+        "pages": [
+          20,
+          20
+        ]
+      },
+      {
+        "code": "41054",
+        "names": [
+          "Llengües Aplicades / Traducció i Interpretació - Anglès - (Simultaneïtat)",
+          "Traducció i Interpretació - Anglès - / Llengües Aplicades (Simultaneïtat)"
+        ],
+        "pages": [
+          22,
+          27
+        ]
+      },
+      {
+        "code": "81062",
+        "names": [
+          "Màrqueting / Turisme \"Mediterrani\" (Simultaneïtat)",
+          "Turisme / Màrqueting \"Mediterrani\" (Simultaneïtat)"
+        ],
+        "pages": [
+          22,
+          27
+        ]
+      },
+      {
+        "code": "41062",
+        "names": [
+          "Màrqueting i Comunitats Digitals / Turisme i Gestió del Lleure \"Tecnocampus\" (simultaneïtat)",
+          "Turisme i Gestió del Lleure / Màrqueting i Comunitats Digitals \"Tecnocampus\" (simultaneïtat)"
+        ],
+        "pages": [
+          23,
+          28
+        ]
+      },
+      {
+        "code": "11112",
+        "names": [
+          "Negoci Digital i Innovació en Turisme / Turisme \"CETT\" (simultaneïtat)",
+          "Turisme / Negoci Digital i Innovació en Turisme \"CETT\" (simultaneïtat)"
+        ],
+        "pages": [
+          24,
+          27
+        ]
+      },
+      {
+        "code": "81077",
+        "names": [
+          "Publicitat i Relacions Públiques / Turisme (simultaneïtat)",
+          "Turisme / Publicitat i Relacions Públiques (simultaneïtat)"
+        ],
+        "pages": [
+          26,
+          27
+        ]
+      }
+    ],
+    "join_method": "exact official five-digit code only",
+    "matched_codes": 558,
+    "source_rows": 671,
+    "unique_codes": 559,
+    "weighting_codes_without_cutoff": []
+  },
+  "scope": {
+    "cutoff_semantics": "PAU/CFGS · primera asignación de junio de 2026 (10/07/2026)",
+    "join": "exact official code; no fuzzy fallback",
+    "universities": [
+      "UAB",
+      "UB",
+      "UPC",
+      "UPF",
+      "URV",
+      "UVic-UCC",
+      "UdG",
+      "UdL"
+    ]
+  },
+  "status": "passed",
+  "university_resolution_fallbacks": [
+    {
+      "code": "31131",
+      "method": "official code prefix fallback",
+      "page": 7,
+      "raw_university": "arceUloPnCa)",
+      "resolved_university": "UPC"
+    }
+  ]
+}

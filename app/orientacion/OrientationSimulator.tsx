@@ -9,14 +9,16 @@ import AccessPathInputs from './access-paths/AccessPathInputs'
 import AccessPathSelector from './access-paths/AccessPathSelector'
 import { ACCESS_PATH_IDS, createDefaultAccessScenarios, createEmptyStoredSubjectInputs, getAccessPath } from './access-paths/model'
 import { ACCESS_PATH_STORAGE_KEY, CAMINO_ORIENTATION_CONTEXT_KEY, applyStoredSubjectInputs, createCaminoOrientationContext, parseAccessPathStorage, subjectInputsFromScenarios } from './access-paths/storage'
-import type { AccessPathId, AccessPathStorageState, StoredSubjectInputs } from './access-paths/types'
-import { availableCatalogTargets, findSavedTarget, mergeSubjectInputs } from './catalog'
+import type { AccessPathId, StoredSubjectInputs } from './access-paths/types'
+import { LatestStateAutosave, type AutosaveStatus } from './autosave'
+import { availableCatalogTargets, findSavedTarget, groupOrientationTargets, mergeSubjectInputs } from './catalog'
 import { ORIENTATION_COMMUNITIES, ORIENTATION_COMMUNITY_STORAGE_KEY, communitySlug, normalizeOrientationCommunity, type OrientationCommunity } from './community'
 import CorrectionGuide from './CorrectionGuide'
 import { ORIENTATION_FIXTURES, type AdmissionSubject, type OfficialCriterion, type OrientationTarget, type SavedOrientationTarget } from './data'
 import GradeControl from './GradeControl'
 import { classifyOpportunity, rankOpportunities } from './opportunities'
-import { persistOrientationTarget } from './persistence'
+import { loadOrientationState, persistOrientationState, persistOrientationTarget } from './persistence'
+import { createOrientationState, mergeStoredSubjectInputs, orientationStateContentKey, ORIENTATION_STATE_STORAGE_KEY, parseOrientationState, reconcileOrientationStates, toAccessPathStorage, type OrientationExploration, type OrientationStateV1 } from './state'
 import TargetCombobox from './TargetCombobox'
 import UniversityExplorer from './UniversityExplorer'
 import styles from './orientation.module.css'
@@ -34,12 +36,21 @@ export default function OrientationSimulator() {
   const [criteria, setCriteria] = useState<OfficialCriterion[]>([])
   const [savedTarget, setSavedTarget] = useState<SavedOrientationTarget | null>(null)
   const [community, setCommunity] = useState<OrientationCommunity>('Madrid')
+  const [selectedDegreeKey, setSelectedDegreeKey] = useState('')
   const [targetId, setTargetId] = useState('')
   const [accessPath, setAccessPath] = useState<AccessPathId>('spanish_bachillerato')
   const [scenarios, setScenarios] = useState(createDefaultAccessScenarios)
   const [subjectsByPath, setSubjectsByPath] = useState<SubjectsByPath>(createEmptySubjectsByPath)
-  const [storageReady, setStorageReady] = useState(false)
+  const [stateReady, setStateReady] = useState(false)
+  const [stateUpdatedAt, setStateUpdatedAt] = useState('1970-01-01T00:00:00.000Z')
+  const [authenticated, setAuthenticated] = useState(false)
+  const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle')
   const storedSubjectInputs = useRef<StoredSubjectInputs>(createEmptyStoredSubjectInputs())
+  const accessTokenRef = useRef<string | null>(null)
+  const autosaveRef = useRef<LatestStateAutosave<OrientationStateV1> | null>(null)
+  const queuedContentRef = useRef('')
+  const currentContentRef = useRef('')
+  const loadSequenceRef = useRef(0)
   const [showMethod, setShowMethod] = useState(false)
   const [activeTab, setActiveTab] = useState<'objetivo' | 'universidades' | 'correccion'>('objetivo')
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -54,10 +65,15 @@ export default function OrientationSimulator() {
   const calculation = useMemo(() => calculateAccessPathScore(scenario, subjects, community), [community, scenario, subjects])
   const score = calculation.finalScore
   const difference = target && calculation.complete ? score - target.referenceScore : 0
-  const universityOptions = useMemo(() => [...new Map(targets.map(item => [item.universityId, { id: item.universityId!, acronym: item.universityAcronym, name: item.university }])).values()].sort((a, b) => (a.acronym ?? a.name).localeCompare(b.acronym ?? b.name, 'es')), [targets])
+  const degreeGroups = useMemo(() => groupOrientationTargets(targets), [targets])
+  const selectedDegree = degreeGroups.find(group => group.key === selectedDegreeKey) ?? null
   const alternatives = useMemo(() => rankOpportunities(officialTargets.filter(item => item.id !== targetId), score, savedTarget).slice(0, 4), [officialTargets, score, savedTarget, targetId])
 
-  function selectTarget(id: string, availableTargets = targets) {
+  function markStateChanged() {
+    setStateUpdatedAt(new Date().toISOString())
+  }
+
+  function selectTarget(id: string, availableTargets = targets, changedByUser = true) {
     const nextTarget = availableTargets.find(item => item.id === id)
     setTargetId(id)
     setSubjectsByPath(current => Object.fromEntries(ACCESS_PATH_IDS.map(pathId => {
@@ -66,16 +82,18 @@ export default function OrientationSimulator() {
       return [pathId, current[pathId].length ? merged : applyStoredSubjectInputs(merged, storedSubjectInputs.current[pathId])]
     })) as SubjectsByPath)
     setSaveState('idle')
+    if (changedByUser) markStateChanged()
   }
 
-  const loadOrientation = useCallback(async (requestedCommunity?: OrientationCommunity | null) => {
+  const loadOrientation = useCallback(async (requestedCommunity: OrientationCommunity, exploration: OrientationExploration | null, accessToken: string | null) => {
+    const requestSequence = ++loadSequenceRef.current
     try {
-      const { data } = await supabase.auth.getSession()
-      const headers: HeadersInit = data.session ? { Authorization: `Bearer ${data.session.access_token}` } : {}
-      const endpoint = requestedCommunity ? `/api/orientation?community=${communitySlug(requestedCommunity)}` : '/api/orientation'
+      const headers: HeadersInit = accessToken ? { Authorization: `Bearer ${accessToken}` } : {}
+      const endpoint = `/api/orientation?community=${communitySlug(requestedCommunity)}`
       const response = await fetch(endpoint, { headers })
       if (!response.ok) throw new Error('orientation-api')
       const payload = await response.json() as { community?: OrientationCommunity; targets?: OrientationTarget[]; criteria?: OfficialCriterion[]; savedTarget?: SavedOrientationTarget | null; catalogAvailable?: boolean }
+      if (requestSequence !== loadSequenceRef.current) return
       const realTargets = payload.targets ?? []
       const allTargets = availableCatalogTargets(realTargets, ORIENTATION_FIXTURES, payload.catalogAvailable !== false)
       setOfficialTargets(realTargets)
@@ -83,18 +101,44 @@ export default function OrientationSimulator() {
       setSavedTarget(payload.savedTarget ?? null)
       setCatalogAvailable(payload.catalogAvailable ?? true)
       if (payload.community) setCommunity(payload.community)
-      const activeCommunity = payload.community ?? requestedCommunity ?? 'Madrid'
+      const activeCommunity = payload.community ?? requestedCommunity
+      const groups = groupOrientationTargets(allTargets)
+      const exploredHere = exploration?.community === activeCommunity
+      const exploredTarget = exploredHere && exploration.degreeId && exploration.universityId
+        ? allTargets.find(item => item.degreeId === exploration.degreeId && item.universityId === exploration.universityId) ?? null
+        : null
+      const exploredGroup = exploredHere
+        ? groups.find(group => group.key === exploration.degreeGroupKey)
+          ?? groups.find(group => group.offerings.some(item => item.id === exploredTarget?.id))
+          ?? null
+        : null
+      function restoreTarget(nextTarget: OrientationTarget) {
+        setTargetId(nextTarget.id)
+        setSubjectsByPath(Object.fromEntries(ACCESS_PATH_IDS.map(pathId => [pathId, applyStoredSubjectInputs(nextTarget.subjects, storedSubjectInputs.current[pathId])])) as SubjectsByPath)
+        setSaveState('idle')
+      }
+      if (exploredGroup) setSelectedDegreeKey(exploredGroup.key)
+      else setSelectedDegreeKey('')
+      if (exploredTarget) {
+        restoreTarget(exploredTarget)
+      } else {
+        setTargetId('')
+        setSubjectsByPath(createEmptySubjectsByPath())
+      }
+
       const savedCommunity = normalizeOrientationCommunity(payload.savedTarget?.community)
       const canRestoreLegacyTarget = Boolean(payload.savedTarget?.degreeId && payload.savedTarget?.universityId && !savedCommunity)
-      if (payload.savedTarget && (savedCommunity === activeCommunity || canRestoreLegacyTarget)) {
+      if (!exploredHere && payload.savedTarget && (savedCommunity === activeCommunity || canRestoreLegacyTarget)) {
         const match = findSavedTarget(allTargets, payload.savedTarget)
         if (match) {
-          setTargetId(match.id)
-          setSubjectsByPath(Object.fromEntries(ACCESS_PATH_IDS.map(pathId => [pathId, applyStoredSubjectInputs(match.subjects, storedSubjectInputs.current[pathId])])) as SubjectsByPath)
+          const group = groups.find(item => item.offerings.some(offering => offering.id === match.id))
+          setSelectedDegreeKey(group?.key ?? '')
+          restoreTarget(match)
         }
       }
       setLoadState('ready')
     } catch {
+      if (requestSequence !== loadSequenceRef.current) return
       setOfficialTargets([])
       setCriteria([])
       setCatalogAvailable(false)
@@ -103,34 +147,92 @@ export default function OrientationSimulator() {
   }, [])
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      const preferred = normalizeOrientationCommunity(window.localStorage.getItem(ORIENTATION_COMMUNITY_STORAGE_KEY) ?? window.localStorage.getItem('kairo_ccaa'))
-      void loadOrientation(preferred)
-    }, 0)
-    return () => window.clearTimeout(timer)
+    let cancelled = false
+    function applyState(state: OrientationStateV1) {
+      storedSubjectInputs.current = state.subjectInputs
+      setCommunity(state.activeCommunity)
+      setAccessPath(state.activeAccessPath)
+      setScenarios(state.scenarios)
+      setSelectedDegreeKey(state.exploration.community === state.activeCommunity ? state.exploration.degreeGroupKey ?? '' : '')
+      setTargetId('')
+      setSubjectsByPath(createEmptySubjectsByPath())
+      setStateUpdatedAt(state.updatedAt)
+    }
+    async function bootstrap() {
+      const preferred = normalizeOrientationCommunity(window.localStorage.getItem(ORIENTATION_COMMUNITY_STORAGE_KEY) ?? window.localStorage.getItem('kairo_ccaa')) ?? 'Madrid'
+      const unifiedLocal = parseOrientationState(window.localStorage.getItem(ORIENTATION_STATE_STORAGE_KEY))
+      const legacyAccess = parseAccessPathStorage(window.localStorage.getItem(ACCESS_PATH_STORAGE_KEY))
+      const localState = unifiedLocal ?? createOrientationState(preferred, legacyAccess, '1970-01-01T00:00:00.000Z')
+      applyState(localState)
+
+      const { data } = await supabase.auth.getSession()
+      if (cancelled) return
+      const accessToken = data.session?.access_token ?? null
+      accessTokenRef.current = accessToken
+      setAuthenticated(Boolean(accessToken))
+      let serverState: OrientationStateV1 | null = null
+      if (accessToken) {
+        try {
+          serverState = await loadOrientationState(accessToken)
+        } catch {
+          setAutosaveStatus('error')
+        }
+      }
+      if (cancelled) return
+      const chosen = reconcileOrientationStates(localState, serverState) ?? localState
+      applyState(chosen)
+      if (serverState && orientationStateContentKey(chosen) === orientationStateContentKey(serverState)) {
+        queuedContentRef.current = orientationStateContentKey(serverState)
+      }
+      await loadOrientation(chosen.activeCommunity, unifiedLocal || serverState ? chosen.exploration : null, accessToken)
+      if (!cancelled) setStateReady(true)
+    }
+    void bootstrap()
+    return () => { cancelled = true; loadSequenceRef.current += 1 }
   }, [loadOrientation])
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      const stored = parseAccessPathStorage(window.localStorage.getItem(ACCESS_PATH_STORAGE_KEY))
-      if (stored) {
-        storedSubjectInputs.current = stored.subjectInputs
-        setAccessPath(stored.selectedPath)
-        setScenarios(stored.scenarios)
-        setSubjectsByPath(current => Object.fromEntries(ACCESS_PATH_IDS.map(pathId => [pathId, applyStoredSubjectInputs(current[pathId], stored.subjectInputs[pathId])])) as SubjectsByPath)
+    const autosave = new LatestStateAutosave<OrientationStateV1>(async state => {
+      const saved = await persistOrientationState(accessTokenRef.current, state)
+      if (!saved) return
+      if (currentContentRef.current === orientationStateContentKey(saved)) {
+        window.localStorage.setItem(ORIENTATION_STATE_STORAGE_KEY, JSON.stringify(saved))
       }
-      setStorageReady(true)
-    }, 0)
-    return () => window.clearTimeout(timer)
+    }, setAutosaveStatus, 750)
+    autosaveRef.current = autosave
+    return () => { autosave.dispose(); autosaveRef.current = null }
   }, [])
 
   useEffect(() => {
-    if (!storageReady) return
-    const subjectInputs = subjectInputsFromScenarios(subjectsByPath)
+    if (!stateReady) return
+    const visibleInputs = subjectInputsFromScenarios(subjectsByPath)
+    const subjectInputs = mergeStoredSubjectInputs(storedSubjectInputs.current, visibleInputs)
     storedSubjectInputs.current = subjectInputs
-    const state: AccessPathStorageState = { version: 1, selectedPath: accessPath, scenarios, subjectInputs }
-    window.localStorage.setItem(ACCESS_PATH_STORAGE_KEY, JSON.stringify(state))
-  }, [accessPath, scenarios, storageReady, subjectsByPath])
+    const state: OrientationStateV1 = {
+      version: 1,
+      updatedAt: stateUpdatedAt,
+      activeCommunity: community,
+      activeAccessPath: accessPath,
+      exploration: {
+        community,
+        degreeGroupKey: selectedDegree?.key ?? null,
+        degreeName: selectedDegree?.name ?? null,
+        degreeId: target?.degreeId ?? null,
+        universityId: target?.universityId ?? null,
+      },
+      scenarios,
+      subjectInputs,
+    }
+    const contentKey = orientationStateContentKey(state)
+    currentContentRef.current = contentKey
+    window.localStorage.setItem(ORIENTATION_STATE_STORAGE_KEY, JSON.stringify(state))
+    window.localStorage.setItem(ACCESS_PATH_STORAGE_KEY, JSON.stringify(toAccessPathStorage(state)))
+    window.localStorage.setItem(ORIENTATION_COMMUNITY_STORAGE_KEY, community)
+    if (authenticated && contentKey !== queuedContentRef.current) {
+      queuedContentRef.current = contentKey
+      autosaveRef.current?.update(state)
+    }
+  }, [accessPath, authenticated, community, scenarios, selectedDegree, stateReady, stateUpdatedAt, subjectsByPath, target])
 
   useEffect(() => {
     if (!showMethod) return
@@ -141,18 +243,26 @@ export default function OrientationSimulator() {
 
   function updateSubject(id: string, patch: Partial<AdmissionSubject>) {
     setSubjectsByPath(current => ({ ...current, [accessPath]: current[accessPath].map(subject => subject.id === id ? { ...subject, ...patch } : subject) }))
+    markStateChanged()
   }
 
   function retryLoad() {
     setLoadState('loading')
     setCatalogAvailable(null)
-    void loadOrientation(community)
+    void loadOrientation(community, {
+      community,
+      degreeGroupKey: selectedDegree?.key ?? null,
+      degreeName: selectedDegree?.name ?? null,
+      degreeId: target?.degreeId ?? null,
+      universityId: target?.universityId ?? null,
+    }, accessTokenRef.current)
   }
 
   function changeCommunity(nextCommunity: OrientationCommunity) {
     if (nextCommunity === community) return
     setCommunity(nextCommunity)
     window.localStorage.setItem(ORIENTATION_COMMUNITY_STORAGE_KEY, nextCommunity)
+    setSelectedDegreeKey('')
     setTargetId('')
     setSubjectsByPath(createEmptySubjectsByPath())
     setOfficialTargets([])
@@ -160,19 +270,30 @@ export default function OrientationSimulator() {
     setLoadState('loading')
     setCatalogAvailable(null)
     setSaveState('idle')
-    void loadOrientation(nextCommunity)
+    markStateChanged()
+    void loadOrientation(nextCommunity, null, accessTokenRef.current)
   }
 
   function resetScenario() {
     const defaults = createDefaultAccessScenarios()
     setScenarios(current => ({ ...current, [accessPath]: defaults[accessPath] }))
     setSubjectsByPath(current => ({ ...current, [accessPath]: target?.subjects.map(subject => ({ ...subject })) ?? [] }))
+    markStateChanged()
+  }
+
+  function chooseDegree(key: string) {
+    setSelectedDegreeKey(key)
+    setTargetId('')
+    setSubjectsByPath(createEmptySubjectsByPath())
+    setSaveState('idle')
+    markStateChanged()
   }
 
   async function saveAndOpenCamino() {
     if (!target) return
     setSaveState('saving')
     try {
+      await autosaveRef.current?.flush()
       const { data } = await supabase.auth.getSession()
       if (!data.session) { setSaveState('error'); return }
       const saved = await persistOrientationTarget(data.session.access_token, target)
@@ -196,6 +317,7 @@ export default function OrientationSimulator() {
   function updateScenario(nextScenario: typeof scenario) {
     setScenarios(current => ({ ...current, [accessPath]: nextScenario }))
     setSaveState('idle')
+    markStateChanged()
   }
 
   function renderSubject(subject: AdmissionSubject) {
@@ -243,7 +365,7 @@ export default function OrientationSimulator() {
           <section className={styles.savedTarget}>
             <div><Check size={16} /><span><small>Objetivo guardado</small><b>{savedTarget.degree} · {savedTarget.university}</b></span></div>
             <strong>{formatReference(savedTarget.admissionScore)}</strong>
-            <button onClick={() => { setTargetId(''); setSubjectsByPath(createEmptySubjectsByPath()) }}>Cambiar</button>
+            <button onClick={() => { setSelectedDegreeKey(''); setTargetId(''); setSubjectsByPath(createEmptySubjectsByPath()); markStateChanged() }}>Cambiar</button>
           </section>
         )}
 
@@ -251,9 +373,14 @@ export default function OrientationSimulator() {
           <>
             <ol className={styles.flowRail} aria-label="Pasos para definir tu objetivo"><li className={styles.flowActive}><b>1</b><span>Elige objetivo</span></li><li className={target ? styles.flowActive : ''}><b>2</b><span>Ajusta notas</span></li><li className={target ? styles.flowActive : ''}><b>3</b><span>Decide qué mejorar</span></li><li><b>4</b><span>Llévalo a Camino</span></li></ol>
             <section className={styles.targetPicker}>
-              <div className={styles.pickerTitle}><Target size={20} /><div><small>PASO 1</small><b>¿Dónde quieres entrar?</b><span>Busca primero el grado; afina por universidad si lo necesitas.</span></div></div>
-              {loadState === 'loading' ? <div className={styles.selectSkeleton} /> : <TargetCombobox targets={targets} selectedId={targetId} universities={universityOptions} onSelect={selectTarget} />}
-              <AccessPathSelector value={accessPath} onChange={pathId => { setAccessPath(pathId); setSaveState('idle') }} />
+              <div className={styles.pickerTitle}><Target size={20} /><div><small>PASO 1</small><b>Define tu objetivo</b><span>Elige el grado y después la oferta oficial donde quieres estudiarlo.</span></div></div>
+              {stateReady && (
+                <div className={styles.autosaveIndicator} data-state={authenticated ? autosaveStatus : 'local'} aria-live="polite">
+                  {!authenticated ? 'Guardado en este dispositivo' : autosaveStatus === 'saving' ? 'Guardando cambios…' : autosaveStatus === 'error' ? <><span>Cambios pendientes</span><button type="button" onClick={() => autosaveRef.current?.retry()}><RefreshCw size={11} /> Reintentar</button></> : autosaveStatus === 'saved' ? <><Check size={11} /> Guardado</> : 'Sin cambios pendientes'}
+                </div>
+              )}
+              {loadState === 'loading' ? <div className={styles.selectSkeleton} /> : <TargetCombobox targets={targets} selectedId={targetId} selectedDegreeKey={selectedDegreeKey} onDegreeSelect={chooseDegree} onSelect={selectTarget} />}
+              <AccessPathSelector value={accessPath} onChange={pathId => { setAccessPath(pathId); setSaveState('idle'); markStateChanged() }} />
             </section>
             {catalogAvailable === false && <div className={styles.fallbackNotice}><Info size={15} /><span>No se pudo leer el catálogo verificado. No mostraremos datos demo hasta poder confirmar la fuente oficial.</span><button onClick={retryLoad}><RefreshCw size={13} /> Reintentar</button></div>}
 

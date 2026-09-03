@@ -27,6 +27,94 @@ export function normalizeCatalogSearch(value: string) {
     .replace(/\s+/g, ' ')
 }
 
+const MADRID_CAMPUS_QUALIFIERS = new Set([
+  'alcala de henares', 'alcorcon', 'aranjuez', 'castellana', 'colmenarejo', 'embajadores',
+  'fuenlabrada', 'getafe', 'guadalajara', 'leganes getafe', 'madrid', 'madrid quintana',
+  'moncloa', 'mostoles', 'retiro', 'torrejon de ardoz', 'vicalvaro',
+])
+
+function stripOfferLocation(target: OrientationTarget) {
+  const originalTitle = target.degree.trim()
+  let title = originalTitle
+  let removed = false
+  const catalunya = /catalu/i.test(target.community ?? '')
+
+  while (true) {
+    const match = title.match(/\s+\(([^()]*)\)\s*$/)
+    if (!match) break
+    const qualifier = normalizeCatalogSearch(match[1])
+    const campus = qualifier.startsWith('campus ') || qualifier.startsWith('facultad ')
+    if ((!catalunya && !campus && !MADRID_CAMPUS_QUALIFIERS.has(qualifier)) || !qualifier) break
+    title = title.slice(0, match.index).trim()
+    removed = true
+    // En Cataluña el último paréntesis del catálogo 2026 es siempre la
+    // localidad; solo retiramos otro si está declarado expresamente como campus.
+    if (catalunya && !campus) {
+      const previous = title.match(/\s+\(([^()]*)\)\s*$/)
+      if (!previous || !normalizeCatalogSearch(previous[1]).startsWith('campus ')) break
+    }
+  }
+
+  return { title: title || originalTitle, offerDetail: removed ? originalTitle.slice(title.length).trim() : null }
+}
+
+export type DegreeGroup = {
+  key: string
+  name: string
+  offerings: OrientationTarget[]
+  universityCount: number
+}
+
+/** Groups only the same academic title; official offering IDs remain untouched. */
+export function groupOrientationTargets(targets: OrientationTarget[]): DegreeGroup[] {
+  const groups = new Map<string, { name: string; offerings: OrientationTarget[] }>()
+  for (const target of targets) {
+    const { title } = stripOfferLocation(target)
+    const key = normalizeCatalogSearch(title)
+    if (!key) continue
+    const current = groups.get(key)
+    if (current) current.offerings.push(target)
+    else groups.set(key, { name: title, offerings: [target] })
+  }
+  return [...groups.entries()].map(([key, group]) => ({
+    key,
+    name: group.name,
+    offerings: group.offerings.sort((a, b) => a.university.localeCompare(b.university, 'es') || a.degree.localeCompare(b.degree, 'es')),
+    universityCount: new Set(group.offerings.map(item => item.universityId ?? item.university)).size,
+  })).sort((a, b) => a.name.localeCompare(b.name, 'es'))
+}
+
+export function degreeOfferDetail(target: OrientationTarget) {
+  return stripOfferLocation(target).offerDetail
+}
+
+export function searchDegreeGroups(groups: DegreeGroup[], search: string) {
+  const query = normalizeCatalogSearch(search)
+  return groups
+    .map(group => {
+      const degree = normalizeCatalogSearch(group.name)
+      return { group, score: scoreDegree({ degree, degreeWords: degree.split(' ').filter(Boolean) }, query) }
+    })
+    .filter(result => !query || result.score > 0)
+    .sort((a, b) => b.score - a.score || a.group.name.localeCompare(b.group.name, 'es'))
+    .map(result => result.group)
+}
+
+export function searchDegreeOfferings(group: DegreeGroup, search: string) {
+  const query = normalizeCatalogSearch(search)
+  const alias = detectUniversityAlias(query)
+  const aliasCode = alias ? normalizeCatalogSearch(alias.code) : null
+  const remaining = alias?.degreeQuery ?? query
+  const tokens = remaining.split(' ').filter(Boolean)
+  return group.offerings.filter(target => {
+    const acronym = normalizeCatalogSearch(target.universityAcronym ?? '')
+    if (aliasCode && acronym !== aliasCode) return false
+    if (!tokens.length) return true
+    const haystack = normalizeCatalogSearch(`${target.universityAcronym ?? ''} ${target.university} ${target.degree}`)
+    return tokens.every(token => haystack.split(' ').some(word => word.startsWith(token) || word.includes(token)))
+  })
+}
+
 type IndexedTarget = {
   target: OrientationTarget
   degree: string
@@ -64,7 +152,7 @@ function detectUniversityAlias(query: string) {
   }
 }
 
-function scoreDegree(entry: IndexedTarget, degreeQuery: string) {
+function scoreDegree(entry: Pick<IndexedTarget, 'degree' | 'degreeWords'>, degreeQuery: string) {
   if (!degreeQuery) return 1
   if (entry.degree === degreeQuery) return 500
   if (entry.degree.startsWith(degreeQuery)) return 400

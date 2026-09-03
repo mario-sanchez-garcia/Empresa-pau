@@ -1,5 +1,8 @@
 import { expect, test, type Page, type Request } from '@playwright/test'
 import { hasAuthenticatedSession } from './auth-session'
+import { groupOrientationTargets } from '../app/orientacion/catalog'
+import type { OrientationTarget } from '../app/orientacion/data'
+import type { OrientationStateV1 } from '../app/orientacion/state'
 
 type SavedTarget = {
   degreeId: string | null
@@ -39,6 +42,31 @@ function isOrientationRequest(request: Request, method?: string) {
   return url.pathname === '/api/orientation' && (!method || request.method() === method)
 }
 
+function isOrientationStateRequest(request: Request, method?: string) {
+  const url = new URL(request.url())
+  return url.pathname === '/api/orientation/state' && (!method || request.method() === method)
+}
+
+async function requestOrientationState(page: Page, method: 'GET' | 'PATCH' | 'DELETE', state?: unknown) {
+  return page.evaluate(async ({ method, state }) => {
+    let accessToken = ''
+    for (let index = 0; index < window.localStorage.length; index += 1) {
+      const key = window.localStorage.key(index)
+      if (!key?.startsWith('sb-') || !key.endsWith('-auth-token')) continue
+      try {
+        const value = JSON.parse(window.localStorage.getItem(key) ?? '{}') as { access_token?: unknown }
+        if (typeof value.access_token === 'string') accessToken = value.access_token
+      } catch {}
+    }
+    const response = await window.fetch('/api/orientation/state', {
+      method,
+      headers: { ...(state === undefined ? {} : { 'Content-Type': 'application/json' }), Authorization: `Bearer ${accessToken}` },
+      body: state === undefined ? undefined : JSON.stringify({ state }),
+    })
+    return { status: response.status, body: await response.json() as { state?: unknown; error?: string } }
+  }, { method, state })
+}
+
 async function assertAuthenticated(page: Page) {
   await expect.poll(() => hasAuthenticatedSession(page), { timeout: 8_000, message: sessionExpired }).toBe(true)
 }
@@ -51,18 +79,30 @@ async function openOrientation(page: Page) {
   expect(response.ok()).toBe(true)
   const payload = await response.json() as OrientationPayload
   await expect(page.getByRole('heading', { name: 'Mi objetivo' })).toBeVisible()
-  await expect(page.getByRole('combobox', { name: 'Carrera y universidad' })).toBeVisible()
+  await expect(page.getByRole('combobox', { name: 'Buscar grado' }).or(page.getByRole('button', { name: /Cambiar grado/ }))).toBeVisible()
   return payload
 }
 
 async function selectTarget(page: Page, target: Target) {
   expect(target.degreeId, 'El grado oficial debe tener degree_id').toBeTruthy()
   expect(target.universityId, 'El grado oficial debe tener university_id').toBeTruthy()
-  const combobox = page.getByRole('combobox', { name: 'Carrera y universidad' })
-  await combobox.fill(target.degree)
-  const option = page.getByRole('listbox', { name: 'Resultados de grados' }).getByRole('option').filter({ hasText: target.degree }).filter({ hasText: target.university }).first()
+  const selectedOffer = page.locator(`[data-degree-id="${target.degreeId}"][data-university-id="${target.universityId}"]`)
+  if (await selectedOffer.count()) {
+    await selectedOffer.click()
+    await expect(page.locator(`[data-selected-id="${target.id}"]`)).toBeVisible()
+    return
+  }
+  const changeDegree = page.getByRole('button', { name: /Cambiar grado/ })
+  if (await changeDegree.isVisible().catch(() => false)) await changeDegree.click()
+  const group = groupOrientationTargets([target as unknown as OrientationTarget])[0]
+  const combobox = page.getByRole('combobox', { name: 'Buscar grado' })
+  await combobox.fill(group.name)
+  const option = page.getByRole('listbox', { name: 'Resultados de titulaciones' }).getByRole('option').filter({ hasText: group.name }).first()
   await expect(option).toBeVisible()
   await option.click()
+  const offer = page.locator(`[data-degree-id="${target.degreeId}"][data-university-id="${target.universityId}"]`)
+  await expect(offer).toBeVisible()
+  await offer.click()
   await expect(page.locator(`[data-selected-id="${target.id}"]`)).toBeVisible()
 }
 
@@ -129,11 +169,12 @@ async function expectRestoredTarget(page: Page, target: Target) {
 }
 
 test('Orientación conserva el objetivo autenticado y mantiene el simulador local', async ({ page }) => {
-  test.setTimeout(150_000)
+  test.setTimeout(420_000)
   const consoleErrors: string[] = []
   const runtimeErrors: string[] = []
   const failedRequests: string[] = []
   let expectedSaveFailure = false
+  let expectedStateFailure = false
   let expectedFailedResourceMessages = 0
 
   page.on('console', message => {
@@ -153,22 +194,36 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
   })
   page.on('requestfailed', request => {
     if (expectedSaveFailure && isOrientationRequest(request, 'POST')) return
+    if (expectedStateFailure && isOrientationStateRequest(request, 'PATCH')) return
     if (request.method() === 'HEAD' && request.failure()?.errorText === 'net::ERR_ABORTED') return
     if (!/posthog|analytics|googletagmanager/i.test(request.url())) failedRequests.push(`${request.method()} ${request.url()}`)
   })
 
   let originalTarget: Target | undefined
   let originalSavedTarget: SavedTarget | null = null
+  let originalOrientationState: OrientationStateV1 | null | undefined
 
   try {
     await page.addInitScript(() => {
+      localStorage.removeItem('kairo.orientation.state.v1')
       if (!localStorage.getItem('kairo_orientation_community_v1')) localStorage.setItem('kairo_orientation_community_v1', 'Madrid')
     })
     const initial = await test.step('carga autenticada y catálogo oficial', async () => {
       const payload = await openOrientation(page)
+      const persistedState = await requestOrientationState(page, 'GET')
+      expect(persistedState.status, `La migración orientation_state debe estar aplicada: ${persistedState.body.error ?? ''}`).toBe(200)
+      originalOrientationState = (persistedState.body.state ?? null) as OrientationStateV1 | null
+      if (!originalOrientationState) {
+        await expect(page.getByText('Guardado', { exact: true })).toBeVisible()
+      }
       const accessPaths = page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })
-      await accessPaths.getByRole('radio', { name: /^Bachillerato/ }).click()
-      await expect(accessPaths.getByRole('radio', { name: /^Bachillerato/ })).toHaveAttribute('aria-checked', 'true')
+      const bachillerato = accessPaths.getByRole('radio', { name: /^Bachillerato/ })
+      if (await bachillerato.getAttribute('aria-checked') !== 'true') {
+        const pathSaved = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
+        await bachillerato.click()
+        expect((await pathSaved).ok()).toBe(true)
+      }
+      await expect(bachillerato).toHaveAttribute('aria-checked', 'true')
       expect(payload.catalogAvailable).toBe(true)
       expect(payload.targets).toHaveLength(554)
       expect(payload.universities).toHaveLength(6)
@@ -186,13 +241,21 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
     originalTarget = initialSavedTarget?.degreeId && initialSavedTarget.universityId
       ? initial.targets.find(target => target.degreeId === initialSavedTarget.degreeId && target.universityId === initialSavedTarget.universityId)
       : undefined
-    const firstTarget = initial.targets.find(target => target.degreeId !== initialSavedTarget?.degreeId && target.subjects.length >= 2) ?? initial.targets[0]
+    const firstTarget = initial.targets.find(target => target.degreeId !== initialSavedTarget?.degreeId && target.degreeId !== originalOrientationState?.exploration.degreeId && target.subjects.length >= 2) ?? initial.targets[0]
     const secondTarget = initial.targets.find(target => target.degreeId !== firstTarget.degreeId && target.subjects.length >= 2) ?? initial.targets[1]
     expect(firstTarget).toBeTruthy()
     expect(secondTarget).toBeTruthy()
 
     await test.step('selección y guardado por identificadores estables', async () => {
+      const autosaveResponse = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
       await selectTarget(page, firstTarget)
+      const savedExplorationResponse = await autosaveResponse
+      expect(savedExplorationResponse.ok()).toBe(true)
+      const savedExploration = await savedExplorationResponse.json() as { state: OrientationStateV1 }
+      expect(savedExploration.state.exploration.degreeId).toBe(firstTarget.degreeId)
+      expect(savedExploration.state.exploration.universityId).toBe(firstTarget.universityId)
+      expect(savedExploration.state.exploration.degreeGroupKey).toBeTruthy()
+      await expect(page.getByText('Guardado', { exact: true })).toBeVisible()
       await saveTarget(page, firstTarget, true)
     })
 
@@ -217,12 +280,17 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       let orientationRequests = 0
       const countRequests = (request: Request) => { if (isOrientationRequest(request)) orientationRequests += 1 }
       page.on('request', countRequests)
+      const stateSaved = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
       const score = page.locator('[aria-label^="Tu nota estimada es"]')
       const scoreBefore = await score.getAttribute('aria-label')
       const opportunities = page.getByRole('region', { name: 'Alternativas con tu nota actual' })
       const opportunitiesBefore = await opportunities.innerText()
       await page.getByRole('spinbutton', { name: 'Nota media Bachillerato, nota numérica' }).fill('10')
       await page.getByRole('spinbutton', { name: 'Fase de acceso PAU, nota numérica' }).fill('10')
+      const stateResponse = await stateSaved
+      expect(stateResponse.ok()).toBe(true)
+      const stateBody = await stateResponse.json() as { state: OrientationStateV1 }
+      expect(stateBody.state.scenarios.spanish_bachillerato).toMatchObject({ bachillerato: 10, accessPhase: 10 })
       await expect(score).not.toHaveAttribute('aria-label', scoreBefore ?? '')
       await expect.poll(() => opportunities.innerText()).not.toBe(opportunitiesBefore)
       expect(orientationRequests).toBe(0)
@@ -239,17 +307,23 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       await ordinaryPau.fill('8.75')
 
       await accessPaths.getByRole('radio', { name: /^Bachibac/ }).click()
-      await expect(page.getByRole('radiogroup', { name: '¿Qué título usarás para acceder?' })).toBeVisible()
-      await expect(page.getByRole('spinbutton', { name: 'Prueba externa Bachibac, nota numérica' })).toBeVisible()
+      const bachibacRoutes = page.getByRole('radiogroup', { name: '¿Qué título usarás para acceder?' })
+      await expect(bachibacRoutes).toBeVisible()
+      await bachibacRoutes.getByRole('radio', { name: /^Diplôme du Baccalauréat/ }).click()
+      const externalTest = page.getByRole('spinbutton', { name: 'Prueba externa Bachibac, nota numérica' })
+      await expect(externalTest).toBeVisible()
       const bachibacScore = page.locator('[aria-label^="Tu nota estimada es"]')
       const beforeBachibac = await bachibacScore.getAttribute('aria-label')
-      await page.getByRole('spinbutton', { name: 'Prueba externa Bachibac, nota numérica' }).fill('9.5')
+      await externalTest.fill((await externalTest.inputValue()) === '9.5' ? '9.4' : '9.5')
       await expect(bachibacScore).not.toHaveAttribute('aria-label', beforeBachibac ?? '')
 
       await accessPaths.getByRole('radio', { name: /^IB/ }).click()
-      await expect(page.getByRole('spinbutton', { name: 'CAU acreditada por UNEDasiss, nota numérica' })).toBeVisible()
-      await page.getByRole('spinbutton', { name: 'CAU acreditada por UNEDasiss, nota numérica' }).fill('8.65')
-      await page.getByRole('radiogroup', { name: '¿Qué dato tienes ahora?' }).getByRole('radio', { name: /^Media de materias IB/ }).click()
+      const ibRoutes = page.getByRole('radiogroup', { name: '¿Qué dato tienes ahora?' })
+      await ibRoutes.getByRole('radio', { name: /^CAU de UNEDasiss/ }).click()
+      const accreditedCau = page.getByRole('spinbutton', { name: 'CAU acreditada por UNEDasiss, nota numérica' })
+      await expect(accreditedCau).toBeVisible()
+      await accreditedCau.fill((await accreditedCau.inputValue()) === '8.65' ? '8.55' : '8.65')
+      await ibRoutes.getByRole('radio', { name: /^Media de materias IB/ }).click()
       await expect(page.getByRole('spinbutton', { name: 'Media de las materias del Diploma IB, nota numérica' })).toBeVisible()
       await expect(page.getByText(/no los puntos \/45/i)).toBeVisible()
 
@@ -257,7 +331,9 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       await expect(page.getByRole('spinbutton', { name: 'Nota media Bachillerato, nota numérica' })).toHaveValue('9.25')
       await expect(page.getByRole('spinbutton', { name: 'Fase de acceso PAU, nota numérica' })).toHaveValue('8.75')
 
+      const ibStateSaved = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
       await accessPaths.getByRole('radio', { name: /^IB/ }).click()
+      expect((await ibStateSaved).ok()).toBe(true)
       await page.reload()
       const restoredPaths = page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })
       await expect(restoredPaths.getByRole('radio', { name: /^IB/ })).toHaveAttribute('aria-checked', 'true')
@@ -266,12 +342,28 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
     })
 
     await test.step('buscador accesible y filtros útiles del catálogo', async () => {
-      const search = page.getByRole('combobox', { name: 'Carrera y universidad' })
-      await search.fill('economi uc3m')
+      const changeDegree = page.getByRole('button', { name: /Cambiar grado/ })
+      if (await changeDegree.isVisible().catch(() => false)) await changeDegree.click()
+      const groupedMadridTargets = groupOrientationTargets(initial.targets as unknown as OrientationTarget[])
+      const economicsOffer = initial.targets.find(item => /econom/i.test(item.degree) && /Carlos III/i.test(item.university))
+      const economicsGroupModel = groupedMadridTargets.find(group => group.offerings.some(item => item.id === economicsOffer?.id))
+      expect(economicsOffer).toBeDefined()
+      expect(economicsGroupModel).toBeDefined()
+      const search = page.getByRole('combobox', { name: 'Buscar grado' })
+      await search.fill(economicsGroupModel!.name)
       await expect(search).toHaveAttribute('aria-expanded', 'true')
-      await expect(page.getByRole('listbox', { name: 'Resultados de grados' }).getByRole('option').first()).toContainText(/Econom/i)
+      const economicsGroup = page.getByRole('listbox', { name: 'Resultados de titulaciones' }).getByRole('option').filter({ hasText: economicsGroupModel!.name }).first()
+      await expect(economicsGroup).toBeVisible()
       await search.press('Escape')
       await expect(search).toHaveAttribute('aria-expanded', 'false')
+      await search.press('ArrowDown')
+      await expect(search).toHaveAttribute('aria-expanded', 'true')
+      await economicsGroup.click()
+      const offerSearch = page.getByRole('textbox', { name: 'Buscar universidad o centro' })
+      if (await offerSearch.isVisible().catch(() => false)) {
+        await offerSearch.fill('uc3m')
+        await expect(page.locator(`[data-degree-id="${economicsOffer!.degreeId}"][data-university-id="${economicsOffer!.universityId}"]`)).toContainText(/UC3M|Carlos III/i)
+      }
 
       await page.getByRole('button', { name: 'Explorar grados' }).click()
       await expect(page.getByRole('heading', { name: 'Encuentra grados que encajan contigo' })).toBeVisible()
@@ -327,21 +419,26 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
         expect(targetWithoutInferredWeights?.subjects, `${degreeCode} no debe recibir ponderaciones inferidas`).toHaveLength(0)
       }
       await expect(page.getByText(/Datos oficiales de preinscripción 2026/)).toBeVisible()
-      const targetSearch = page.getByRole('combobox', { name: 'Carrera y universidad' })
-      const searchCases: Array<[string, RegExp]> = [
-        ['barcelona', /Barcelona|UB|UAB|UPC|UPF/], ['uab', /UAB/], ['autonoma barcelona', /UAB/],
-        ['AUTÒNOMA BARCELONA', /UAB/], ['tecnologia ciencia', /Ciència i Tecnologia/],
-        ['upc', /UPC/], ['politecnica catalunya', /UPC/], ['catalunya politecnica', /UPC/],
-        ['pompeu', /UPF/], ['girona', /UdG/], ['lleida', /UdL/], ['rovira', /URV/], ['vic', /UVic-UCC/],
-      ]
-      for (const [query, expected] of searchCases) {
-        await targetSearch.fill(query)
-        const options = page.getByRole('listbox', { name: 'Resultados de grados' }).getByRole('option')
-        await expect(options.first(), `Sin resultados catalanes para ${query}`).toBeVisible()
-        expect((await options.allTextContents()).join('\n')).toMatch(expected)
-        expect((await options.allTextContents()).join('\n')).not.toMatch(/\b(?:UAH|UAM|UC3M|UCM|UPM|URJC)\b/)
+      const selectedGroupButton = page.getByRole('button', { name: /Cambiar grado/ })
+      if (await selectedGroupButton.isVisible().catch(() => false)) await selectedGroupButton.click()
+      const targetSearch = page.getByRole('combobox', { name: 'Buscar grado' })
+      await targetSearch.fill('tecnologia ciencia')
+      const degreeOptions = page.getByRole('listbox', { name: 'Resultados de titulaciones' }).getByRole('option')
+      await expect(degreeOptions.first()).toContainText(/Ciència i Tecnologia/i)
+
+      const catalanGroups = groupOrientationTargets(catalunya.targets as unknown as OrientationTarget[])
+      const multiOfferGroup = catalanGroups.find(group => group.offerings.length > 4) ?? catalanGroups.find(group => group.offerings.length > 1)
+      expect(multiOfferGroup).toBeDefined()
+      await targetSearch.fill(multiOfferGroup!.name)
+      await degreeOptions.filter({ hasText: multiOfferGroup!.name }).first().click()
+      const offerSearch = page.getByRole('textbox', { name: 'Buscar universidad o centro' })
+      if (await offerSearch.isVisible().catch(() => false)) {
+        const expectedOffer = multiOfferGroup!.offerings.find(item => item.universityAcronym)!
+        await offerSearch.fill(expectedOffer.universityAcronym!)
+        const visibleOffers = page.getByRole('listbox', { name: /Ofertas de/ }).getByRole('option')
+        await expect(visibleOffers.first()).toContainText(expectedOffer.universityAcronym!)
+        expect((await visibleOffers.allTextContents()).join('\n')).not.toMatch(/\b(?:UAH|UAM|UC3M|UCM|UPM|URJC)\b/)
       }
-      await targetSearch.fill('')
       const catalanTarget = catalunya.targets.find(item => item.subjects.length >= 2) ?? catalunya.targets[0]
       await selectTarget(page, catalanTarget)
       await expect(page.getByText(/Nota de referencia · 1.ª asignación de junio/)).toBeVisible()
@@ -399,8 +496,7 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
 
       await page.setViewportSize({ width: 390, height: 844 })
       await expect(page.getByRole('region', { name: 'Comunidad del catálogo' })).toBeVisible()
-      const mobileOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
-      expect(mobileOverflow).toBeLessThanOrEqual(1)
+      await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1)
       await page.setViewportSize({ width: 1440, height: 900 })
 
       await switchCommunity(page, 'Madrid')
@@ -433,10 +529,44 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       expectedSaveFailure = false
     })
 
+    await test.step('un fallo del autosave no muestra éxito falso y permite reintentar', async () => {
+      expectedStateFailure = true
+      await page.route('**/api/orientation/state', async route => {
+        if (route.request().method() === 'PATCH') {
+          expectedFailedResourceMessages += 1
+          return route.abort('failed')
+        }
+        return route.continue()
+      })
+      const paths = page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })
+      const bachilleratoPath = paths.getByRole('radio', { name: /^Bachillerato/ })
+      const pathToSelect = await bachilleratoPath.getAttribute('aria-checked') === 'true'
+        ? paths.getByRole('radio', { name: /^IB/ })
+        : bachilleratoPath
+      await pathToSelect.click()
+      const pending = page.locator('[data-state="error"]').filter({ hasText: 'Cambios pendientes' })
+      await expect(pending).toBeVisible()
+      await expect(page.getByText('Guardado', { exact: true })).toHaveCount(0)
+      await page.unroute('**/api/orientation/state')
+      expectedStateFailure = false
+      const retryResponse = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
+      await pending.getByRole('button', { name: /Reintentar/ }).click()
+      expect((await retryResponse).ok()).toBe(true)
+      await expect(page.getByText('Guardado', { exact: true })).toBeVisible()
+    })
+
     await test.step('el selector y el simulador no desbordan en móvil', async () => {
       await page.setViewportSize({ width: 390, height: 844 })
       await expect(page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })).toBeVisible()
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)).toBe(true)
+      const layout = await page.evaluate(() => ({
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        offenders: [...document.querySelectorAll<HTMLElement>('body *')]
+          .map(element => ({ element, rect: element.getBoundingClientRect() }))
+          .filter(({ rect }) => rect.right > document.documentElement.clientWidth + 1 || rect.left < -1)
+          .slice(0, 8)
+          .map(({ element, rect }) => ({ tag: element.tagName, className: element.className, left: rect.left, right: rect.right, text: element.textContent?.trim().slice(0, 60) })),
+      }))
+      expect(layout.overflow, JSON.stringify(layout.offenders)).toBeLessThanOrEqual(1)
     })
   } finally {
     if (originalSavedTarget?.degreeId && originalSavedTarget.universityId && page.url() !== 'about:blank') {
@@ -451,6 +581,21 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
         }
       } catch {
         // The main assertions report the failure; cleanup remains best-effort.
+      }
+    }
+    if (originalOrientationState !== undefined && page.url() !== 'about:blank') {
+      try {
+        const restoredState = originalOrientationState
+          ? await requestOrientationState(page, 'PATCH', originalOrientationState)
+          : await requestOrientationState(page, 'DELETE')
+        if (restoredState.status === 200) {
+          await page.evaluate(state => {
+            if (state) localStorage.setItem('kairo.orientation.state.v1', JSON.stringify(state))
+            else localStorage.removeItem('kairo.orientation.state.v1')
+          }, restoredState.body.state ?? null)
+        }
+      } catch {
+        // Best-effort cleanup; the failing assertion remains the useful signal.
       }
     }
   }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { availableCatalogTargets, buildCatalogSearchIndex, filterOrientationTargets, findSavedTarget, mergeSubjectInputs, normalizeCatalogSearch, searchOrientationTargets } from './catalog.ts'
+import { availableCatalogTargets, buildCatalogSearchIndex, filterOrientationTargets, findSavedTarget, groupOrientationTargets, mergeSubjectInputs, normalizeCatalogSearch, searchDegreeGroups, searchDegreeOfferings, searchOrientationTargets } from './catalog.ts'
 import { FIXTURE_SOURCE, type AdmissionSubject, type OrientationTarget } from './data.ts'
 
 const subject = (subjectCode: string, grade: number): AdmissionSubject => ({
@@ -63,6 +63,57 @@ test('prioriza coincidencia exacta, comienzo y después coincidencia parcial', (
     target('parcial', 'Doble Grado en Derecho y Economía', 'Universidad Carlos III de Madrid', 'UC3M'),
   ]
   assert.deepEqual(searchOrientationTargets(buildCatalogSearchIndex(extended), 'economia').map(item => item.id), ['exacta', 'comienza', 'parcial'])
+})
+
+test('agrupa una titulación repetida y conserva todas sus ofertas e IDs', () => {
+  const groups = groupOrientationTargets([
+    target('uam-eco', 'Economía', 'Universidad Autónoma de Madrid', 'UAM'),
+    target('ucm-eco', 'Economía', 'Universidad Complutense de Madrid', 'UCM'),
+    target('uc3m-eco', 'Economía', 'Universidad Carlos III de Madrid', 'UC3M'),
+  ])
+  assert.equal(groups.length, 1)
+  assert.equal(groups[0].name, 'Economía')
+  assert.equal(groups[0].universityCount, 3)
+  assert.deepEqual(new Set(groups[0].offerings.map(item => item.id)), new Set(['uam-eco', 'ucm-eco', 'uc3m-eco']))
+})
+
+test('una sola oferta sigue siendo un grupo seleccionable', () => {
+  const groups = groupOrientationTargets([target('upm-mat', 'Matemáticas', 'Universidad Politécnica de Madrid', 'UPM')])
+  assert.equal(groups.length, 1)
+  assert.equal(groups[0].offerings[0].id, 'upm-mat')
+})
+
+test('no fusiona titulaciones parecidas, dobles grados ni variantes bilingües', () => {
+  const groups = groupOrientationTargets([
+    target('eco', 'Economía', 'UAM', 'UAM'),
+    target('eco-fin', 'Economía y Finanzas', 'UAM', 'UAM'),
+    target('eco-der', 'Doble Grado en Economía y Derecho', 'UAM', 'UAM'),
+    target('eco-en', 'Economía (en inglés)', 'UAM', 'UAM'),
+    target('joint', 'Economía (UAB, UAM y UC3M)', 'UAM', 'UAM'),
+  ])
+  assert.equal(groups.length, 5)
+})
+
+test('agrupa campus seguros sin perder la oferta oficial concreta', () => {
+  const catalunya = [
+    { ...target('med-clinic', 'Medicina (Campus Clínic) (Barcelona)', 'Universitat de Barcelona', 'UB'), community: 'Cataluña' },
+    { ...target('med-bellvitge', "Medicina (Campus Bellvitge) (L'Hospitalet de Llobregat)", 'Universitat de Barcelona', 'UB'), community: 'Cataluña' },
+  ]
+  const groups = groupOrientationTargets(catalunya)
+  assert.equal(groups.length, 1)
+  assert.equal(groups[0].name, 'Medicina')
+  assert.deepEqual(groups[0].offerings.map(item => item.degree), ["Medicina (Campus Bellvitge) (L'Hospitalet de Llobregat)", 'Medicina (Campus Clínic) (Barcelona)'])
+})
+
+test('busca primero grupos y después filtra sus ofertas por universidad', () => {
+  const groups = groupOrientationTargets([
+    target('uam-eco', 'Economía', 'Universidad Autónoma de Madrid', 'UAM'),
+    target('ucm-eco', 'Economía', 'Universidad Complutense de Madrid', 'UCM'),
+    target('eco-fin', 'Economía y Finanzas', 'Universidad Autónoma de Madrid', 'UAM'),
+  ])
+  assert.deepEqual(searchDegreeGroups(groups, 'economi').map(group => group.name), ['Economía', 'Economía y Finanzas'])
+  const economy = searchDegreeGroups(groups, 'economia')[0]
+  assert.deepEqual(searchDegreeOfferings(economy, 'complutense').map(item => item.id), ['ucm-eco'])
 })
 
 test('cambiar de grado conserva notas de asignaturas que siguen existiendo', () => {

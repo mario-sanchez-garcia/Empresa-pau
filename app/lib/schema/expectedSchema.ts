@@ -74,6 +74,8 @@ export const EXPECTED_COLUMNS: ExpectedColumn[] = [
     porque: 'Permite saber cuándo se eligió o actualizó el objetivo que Camino consumirá' },
   { table: 'perfiles', column: 'target_orientation_community',
     porque: 'Conserva la comunidad del único objetivo global aunque el alumno explore otro territorio' },
+  { table: 'perfiles', column: 'orientation_state',
+    porque: 'Sincroniza de forma versionada la exploración, vía y simulaciones de Orientación entre dispositivos' },
   { table: 'orientation_degrees', column: 'community',
     porque: 'Filtra grados por territorio sin mezclar catálogos oficiales' },
   { table: 'orientation_admission_cutoffs', column: 'community',

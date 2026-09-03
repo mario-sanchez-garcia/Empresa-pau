@@ -101,8 +101,36 @@
 .incompletePath svg { flex: 0 0 auto; }
 .incompletePath b { font-size: 9px; }
 .incompletePath p { margin: 4px 0 0; font-size: 8px; line-height: 1.5; }
-.targetChooser { position: relative; min-width: 0; }
-.searchSteps { display: grid; grid-template-columns: 1.25fr .75fr; gap: 12px; }
+.targetChooser { position: relative; grid-column: 2; grid-row: 1 / span 2; min-width: 0; }
+.targetPicker > .selectSkeleton { grid-column: 2; grid-row: 1 / span 2; }
+.autosaveIndicator { grid-column: 1; align-self: end; display: flex; align-items: center; gap: 5px; min-height: 24px; padding-left: 32px; color: #64748b; font-size: 8px; font-weight: 850; }
+.autosaveIndicator[data-state='saved'] { color: #15803d; }
+.autosaveIndicator[data-state='error'] { color: #b45309; }
+.autosaveIndicator button { display: inline-flex; align-items: center; gap: 4px; border: 0; border-radius: 8px; background: #fff7ed; padding: 4px 7px; color: #b45309; font: inherit; font-size: 8px; font-weight: 900; cursor: pointer; }
+.degreeStage { position: relative; animation: stageIn 200ms ease-out; }
+.chosenDegree { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 13px; border: 1px solid rgba(147, 197, 253, .62); border-radius: 15px; background: linear-gradient(145deg, #eef6ff, rgba(255, 255, 255, .88)); box-shadow: var(--kairo-inset-soft); animation: stageIn 200ms ease-out; }
+.chosenDegree > div { min-width: 0; width: 100%; max-width: 100%; display: flex; flex-direction: column; gap: 2px; }
+.chosenDegree small { color: #2563eb; font-size: 8px; font-weight: 950; letter-spacing: .09em; }
+.chosenDegree strong { overflow: hidden; color: #172033; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.chosenDegree span { color: #64748b; font-size: 9px; }
+.chosenDegree button { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; border: 1px solid #c9dafa; border-radius: 10px; background: rgba(255, 255, 255, .8); padding: 8px 10px; color: #2563eb; font: inherit; font-size: 9px; font-weight: 900; cursor: pointer; box-shadow: var(--kairo-inset-soft); }
+.offerStage { margin-top: 11px; overflow: hidden; border: 1px solid rgba(191, 219, 254, .78); border-radius: 17px; background: rgba(249, 252, 255, .78); box-shadow: 0 15px 34px rgba(37, 99, 235, .09), inset 0 1px 0 white; backdrop-filter: blur(18px); animation: stageIn 200ms ease-out; }
+.offerStageHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 13px; border-bottom: 1px solid #e1eaf7; }
+.offerStageHeading > div { display: flex; align-items: center; gap: 8px; }
+.offerStageHeading > div > b { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: #dbeafe; color: #2563eb; font-size: 9px; }
+.offerStageHeading span { display: flex; flex-direction: column; gap: 1px; }
+.offerStageHeading strong { color: #243044; font-size: 10px; }
+.offerStageHeading small { color: #718096; font-size: 8px; }
+.offerSearch { width: min(230px, 45%); height: 34px; display: flex; align-items: center; gap: 7px; padding: 0 10px; border: 1px solid #d4e2f6; border-radius: 10px; background: rgba(255, 255, 255, .75); color: #718096; box-shadow: var(--kairo-inset-soft); }
+.offerSearch input { min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; color: #243044; font: inherit; font-size: 9px; }
+.offerList { max-height: 310px; overflow-y: auto; }
+.offerList > button { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 15px; border: 0; border-bottom: 1px solid #e9eff8; background: transparent; padding: 11px 13px; color: inherit; text-align: left; cursor: pointer; transition: background 160ms, transform 160ms; }
+.offerList > button:hover { background: rgba(238, 246, 255, .8); }
+.offerList > button[aria-selected='true'] { background: linear-gradient(90deg, #dbeafe, rgba(255, 255, 255, .88)); box-shadow: inset 3px 0 0 #3b82f6; }
+.offerList > button > span:first-child { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.offerList strong { color: #172033; font-size: 11px; }
+.offerList small { color: #718096; font-size: 8px; }
+.offerCampus { overflow: hidden; max-width: 520px; color: #475569 !important; text-overflow: ellipsis; white-space: nowrap; }
 .searchField, .universityField, .filterSelect, .wideFilter, .subjectSelector { display: flex; flex-direction: column; gap: 7px; color: #475569; font-size: 10px; font-weight: 850; }
 .searchField > span, .universityField > span:first-child { display: flex; align-items: center; gap: 6px; }
 .searchField > span b, .universityField > span:first-child b, .resultsMeta span b { width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; color: #2563eb; background: #dbeafe; font-size: 9px; }
@@ -351,6 +379,7 @@
 
 @keyframes shimmer { to { background-position: -200% 0; } }
 @keyframes scorePop { from { opacity: .55; transform: translateY(2px) scale(.97); } }
+@keyframes stageIn { from { opacity: 0; transform: translateY(5px); } }
 
 @media (max-width: 1050px) {
   .filterPanel { grid-template-columns: repeat(2, 1fr); }
@@ -364,6 +393,8 @@
   .communityBar > span { display: none; }
   .page { padding: 24px 16px 92px; }
   .targetPicker, .simulatorGrid, .correctionLayout { grid-template-columns: 1fr; }
+  .targetChooser, .targetPicker > .selectSkeleton { grid-column: 1; grid-row: auto; }
+  .autosaveIndicator { grid-column: 1; padding-left: 32px; }
   .resultPanel { position: static; }
   .pickerTitle span { max-width: none; }
   .flowRail li span { display: none; }
@@ -384,8 +415,12 @@
   .savedTarget strong { margin-left: 0; }
   .savedTarget button { margin-left: auto; }
   .targetPicker, .explorer, .correctionGuide, .alternatives { padding: 17px; border-radius: 19px; }
-  .searchSteps, .scoreComparison, .correctionMeta, .degreeGrid, .alternativeGrid, .filterPanel, .criterionCard, .accessPathDetails { grid-template-columns: 1fr; }
-  .comboboxPanel { inset: 140px 0 auto; }
+  .scoreComparison, .correctionMeta, .degreeGrid, .alternativeGrid, .filterPanel, .criterionCard, .accessPathDetails { grid-template-columns: 1fr; }
+  .comboboxPanel { inset: 72px 0 auto; }
+  .chosenDegree, .offerStageHeading { align-items: flex-start; flex-direction: column; }
+  .offerSearch { width: 100%; }
+  .offerList > button { align-items: flex-start; }
+  .offerCampus { max-width: 220px; white-space: normal; }
   .selectedTarget { grid-template-columns: auto minmax(0, 1fr); }
   .selectedScore { grid-column: 2; align-items: flex-start; }
   .controlHeading { align-items: flex-start; }
@@ -404,6 +439,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .selectSkeleton, .skeletonList i, .primaryScore b { animation: none; }
+  .selectSkeleton, .skeletonList i, .primaryScore b, .degreeStage, .chosenDegree, .offerStage { animation: none; }
   .appShell *, .appShell *::before, .appShell *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }

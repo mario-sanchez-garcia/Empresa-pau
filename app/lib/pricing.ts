@@ -39,9 +39,15 @@ export function getFoundingDeadline(): Date {
 }
 
 export function getCursoPauPriceCents(): number {
+  return isCursoPauEarlyPeriod() ? CURSO_PAU_EARLY_PRICE_CENTS : CURSO_PAU_STANDARD_PRICE_CENTS
+}
+
+// true antes de FOUNDING_DEADLINE_DATE (precio 59€ activo), false después (79€).
+// CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS (69€) solo tiene sentido como tachado
+// mientras esto es true — es la referencia "antes/después" del precio de
+// lanzamiento, no un tachado válido para el precio estándar de 79€.
+export function isCursoPauEarlyPeriod(): boolean {
   return Date.now() < getFoundingDeadline().getTime()
-    ? CURSO_PAU_EARLY_PRICE_CENTS
-    : CURSO_PAU_STANDARD_PRICE_CENTS
 }
 
 /**

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { Check, X } from 'lucide-react'
-import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS, formatEur } from '@/app/lib/pricing'
+import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS, formatEur, isCursoPauEarlyPeriod } from '@/app/lib/pricing'
 import ParentLinkSection from '@/app/pricing/ParentLinkSection'
 
 export const metadata: Metadata = {
@@ -42,7 +42,11 @@ const PLANS = [
   {
     name: PLAN_COPY.curso_pau.label,
     price: getPlanPriceDisplay('curso_pau'),
-    previousPrice: formatEur(CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS),
+    // 69€ solo es un tachado válido durante el precio de lanzamiento (59€
+    // real, "69€ → 59€" = descuento). Pasada la fecha límite el precio real
+    // pasa a ser 79€, y tachar 69€ junto a 79€ parecería una subida de
+    // precio en vez de un descuento — mejor no mostrar tachado ninguno.
+    previousPrice: isCursoPauEarlyPeriod() ? formatEur(CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS) : null,
     period: PLAN_COPY.curso_pau.periodDisplay,
     description: PLAN_COPY.curso_pau.description,
     features: PLAN_COPY.curso_pau.features.map((text) => ({ text, included: true })),
@@ -291,7 +295,9 @@ export default function PricingPage() {
       <section className="pr-note" style={{ background: '#111', padding: '40px 72px', borderTop: '1px solid rgba(255,255,255,.06)' }}>
         <div style={{ maxWidth: 1040, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <p style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.25)', letterSpacing: '.04em', lineHeight: 1.7 }}>
-            Los precios incluyen IVA. Curso PAU early bird {getPlanPriceDisplay('curso_pau')} hasta la fecha límite, después {formatEur(CURSO_PAU_STANDARD_PRICE_CENTS)}.
+            {isCursoPauEarlyPeriod()
+              ? <>Los precios incluyen IVA. Curso PAU early bird {getPlanPriceDisplay('curso_pau')} hasta la fecha límite, después {formatEur(CURSO_PAU_STANDARD_PRICE_CENTS)}.</>
+              : <>Los precios incluyen IVA.</>}
           </p>
           <div style={{ display: 'flex', gap: 12 }}>
             {[

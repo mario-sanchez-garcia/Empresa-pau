@@ -5,7 +5,7 @@ import {
   PLATFORM_STRUCTURED_EXERCISES_LABEL,
   PLATFORM_STRUCTURED_EXERCISES_LONG_TEXT,
 } from '@/app/lib/platformStats'
-import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS, formatEur } from '@/app/lib/pricing'
+import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS, formatEur, isCursoPauEarlyPeriod } from '@/app/lib/pricing'
 import LandingAuthProvider from './LandingAuthState'
 import { NavLoginLink, HeroCta, BottomCta, PricingPlanCta, StickyMobileCta } from './LandingCta'
 import RevealOnScroll from '@/app/components/ui/RevealOnScroll'
@@ -88,15 +88,20 @@ const PLANS = [
     period: PLAN_COPY.premium.periodDisplay,
     bullets: ['200 correcciones/mes', '80 fotos/mes', '5 simulacros/mes', 'Camino PAU completo', 'Ranking de clase'],
     cta: 'Elegir Premium →',
+    checkoutPlan: 'premium',
   },
   {
     name: PLAN_COPY.curso_pau.label,
     price: getPlanPriceDisplay('curso_pau'),
-    previousPrice: formatEur(CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS) as string | null,
+    // Igual que en /pricing: 69€ solo es un tachado válido junto al precio de
+    // lanzamiento (59€). Pasada la fecha límite el precio real es 79€, y
+    // tachar 69€ ahí parecería una subida de precio en vez de un descuento.
+    previousPrice: (isCursoPauEarlyPeriod() ? formatEur(CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS) : null) as string | null,
     badge: 'Plazas limitadas' as string | null,
     period: 'pago único · septiembre a junio',
     bullets: ['Todo Premium incluido', 'Acceso completo hasta junio', 'Sin renovación mensual'],
     cta: 'Reservar →',
+    checkoutPlan: 'pack_curso_pau',
   },
 ]
 
@@ -637,12 +642,14 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <PricingPlanCta isFree={plan.name === PLAN_COPY.free.label} cta={plan.cta} />
+                <PricingPlanCta isFree={plan.name === PLAN_COPY.free.label} cta={plan.cta} checkoutPlan={'checkoutPlan' in plan ? plan.checkoutPlan : undefined} />
               </div>
             ))}
           </div>
           <p style={{ marginTop: 32, fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.2)', letterSpacing: '.06em' }}>
-            IVA incluido. El Curso PAU pasará a {formatEur(CURSO_PAU_STANDARD_PRICE_CENTS)} tras la fecha límite del precio de lanzamiento.{' '}
+            {isCursoPauEarlyPeriod()
+              ? <>IVA incluido. El Curso PAU pasará a {formatEur(CURSO_PAU_STANDARD_PRICE_CENTS)} tras la fecha límite del precio de lanzamiento.{' '}</>
+              : <>IVA incluido.{' '}</>}
             <Link href="/pricing" style={{ color: 'rgba(255,255,255,.3)', textDecoration: 'underline', textUnderlineOffset: 3 }}>
               Ver todos los detalles →
             </Link>

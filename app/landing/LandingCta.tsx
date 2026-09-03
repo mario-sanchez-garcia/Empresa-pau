@@ -99,10 +99,21 @@ export function StickyMobileCta() {
   )
 }
 
-export function PricingPlanCta({ isFree, cta }: { isFree: boolean; cta: string }) {
+export function PricingPlanCta({ isFree, cta, checkoutPlan }: { isFree: boolean; cta: string; checkoutPlan?: string }) {
   const { status, href } = useLandingAuth()
   const isLoading = status === 'loading'
-  const target = isLoading ? '#' : status === 'authed' ? href : (isFree ? '/onboarding' : '/login')
+  // Para un plan de pago sin sesión, el destino es /checkout (no /login):
+  // /checkout ya sabe redirigir a /login?returnTo=/checkout?plan=... y traer
+  // de vuelta al alumno al checkout correcto tras loguearse (mismo patrón que
+  // usa /pricing). Enlazar directo a /login perdía el plan elegido — tras
+  // loguearse el alumno aterrizaba en /camino u /onboarding, no en el pago.
+  const target = isLoading
+    ? '#'
+    : status === 'authed'
+      ? href
+      : isFree
+        ? '/onboarding'
+        : `/checkout?plan=${encodeURIComponent(checkoutPlan ?? '')}`
   return (
     <Link
       href={target}

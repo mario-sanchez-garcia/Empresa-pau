@@ -4,6 +4,10 @@ import { useState } from 'react'
 import SidebarNav from '@/app/components/SidebarNav'
 import XpExplainerDrawer from '@/components/ayuda/XpExplainerDrawer'
 import { AYUDA_FAQS, type AyudaFaq } from '@/app/lib/ayudaFaqs'
+import ClayThemeScope from '@/components/clay/ClayThemeScope'
+import ClayCard from '@/components/clay/ClayCard'
+import ClayBadge from '@/components/clay/ClayBadge'
+import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 
 const SECTIONS = [
   {
@@ -45,9 +49,10 @@ function askKairoHref(faq?: AyudaFaq): string {
 
 export default function AyudaPage() {
   const [xpDrawerOpen, setXpDrawerOpen] = useState(false)
+  const { theme } = useClayThemePreference()
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
+    <ClayThemeScope theme={theme} style={{ display: 'flex', minHeight: '100vh' }}>
       <style>{`
         @media (max-width: 767px) {
           .ayuda-content { padding: 24px 20px 60px !important; }
@@ -60,13 +65,13 @@ export default function AyudaPage() {
       <div style={{ flex: 1, minWidth: 0 }}>
         {/* Header */}
         <div style={{ padding: '36px 36px 0', maxWidth: 780 }}>
-          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 8 }}>
+          <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--clay-text-muted)', marginBottom: 8 }}>
             Ayuda
           </p>
-          <h1 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 8 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--clay-text)', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 8 }}>
             Cómo funciona Kairo
           </h1>
-          <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.6 }}>
+          <p style={{ fontSize: 14, color: 'var(--clay-text-muted)', lineHeight: 1.6 }}>
             Todo lo que necesitas saber para sacarle partido a la app.
           </p>
         </div>
@@ -74,49 +79,33 @@ export default function AyudaPage() {
         <div className="ayuda-content" style={{ padding: '32px 36px 80px', maxWidth: 780 }}>
 
           {/* Sections */}
-          <h2 style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 16 }}>
+          <h2 style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--clay-text-muted)', marginBottom: 16 }}>
             Las secciones
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 1, marginBottom: 48 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 48 }}>
             {SECTIONS.map((s) => (
-              <div
-                key={s.title}
-                style={{
-                  padding: '18px 20px',
-                  background: 'white',
-                  borderRadius: 10,
-                  border: '1px solid #e2e8f0',
-                }}
-              >
-                <p style={{ fontSize: 14, fontWeight: 900, color: '#0f172a', marginBottom: 6 }}>
+              <ClayCard key={s.title} radius={14} padding={20}>
+                <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--clay-text)', marginBottom: 6 }}>
                   {s.title}
                 </p>
-                <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.65 }}>
+                <p style={{ fontSize: 13, color: 'var(--clay-text-muted)', lineHeight: 1.65 }}>
                   {s.body}
                 </p>
-              </div>
+              </ClayCard>
             ))}
           </div>
 
           {/* FAQs */}
-          <h2 style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 16 }}>
+          <h2 style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--clay-text-muted)', marginBottom: 16 }}>
             Preguntas frecuentes
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {FAQS.map((faq) => (
-              <div
-                key={faq.id}
-                style={{
-                  padding: '18px 20px',
-                  background: 'white',
-                  borderRadius: 10,
-                  border: '1px solid #e2e8f0',
-                }}
-              >
-                <p style={{ fontSize: 14, fontWeight: 900, color: '#0f172a', marginBottom: 6 }}>
+              <ClayCard key={faq.id} radius={14} padding={20}>
+                <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--clay-text)', marginBottom: 6 }}>
                   {faq.q}
                 </p>
-                <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.65, marginBottom: 10 }}>
+                <p style={{ fontSize: 13, color: 'var(--clay-text-muted)', lineHeight: 1.65, marginBottom: 10 }}>
                   {faq.a}
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -124,56 +113,35 @@ export default function AyudaPage() {
                     <button
                       type="button"
                       onClick={() => setXpDrawerOpen(true)}
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 6,
-                        fontSize: 12, fontWeight: 800, color: 'white',
-                        background: '#2563eb', border: '1px solid #2563eb',
-                        borderRadius: 999, padding: '6px 12px', cursor: 'pointer',
-                      }}
+                      style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer' }}
                     >
-                      📊 Ver cómo se calcula
+                      <ClayBadge>📊 Ver cómo se calcula</ClayBadge>
                     </button>
                   )}
-                  <a
-                    href={askKairoHref(faq)}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 6,
-                      fontSize: 12, fontWeight: 800, color: '#2563eb',
-                      background: '#eff6ff', border: '1px solid #bfdbfe',
-                      borderRadius: 999, padding: '6px 12px', textDecoration: 'none',
-                    }}
-                  >
-                    💬 Pregúntale esto a Kairo
+                  <a href={askKairoHref(faq)} style={{ textDecoration: 'none' }}>
+                    <ClayBadge tone="neutral">💬 Pregúntale esto a Kairo</ClayBadge>
                   </a>
                 </div>
-              </div>
+              </ClayCard>
             ))}
           </div>
 
-          <div style={{ marginTop: 24, textAlign: 'center', padding: '20px', background: 'white', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 12 }}>
+          <ClayCard radius={14} padding={20} style={{ marginTop: 24, textAlign: 'center' }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--clay-text)', marginBottom: 12 }}>
               ¿Sigues con dudas?
             </p>
-            <a
-              href={askKairoHref()}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 7,
-                fontSize: 13, fontWeight: 900, color: 'white',
-                background: '#2563eb', borderRadius: 999, padding: '10px 20px',
-                textDecoration: 'none',
-              }}
-            >
-              💬 Pregunta a Kairo
+            <a href={askKairoHref()} style={{ textDecoration: 'none' }}>
+              <ClayBadge>💬 Pregunta a Kairo</ClayBadge>
             </a>
-            <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 14 }}>
+            <p style={{ fontSize: 12, color: 'var(--clay-text-muted)', marginTop: 14 }}>
               ¿Nada de esto lo resuelve?{' '}
-              <a href="/contacto" style={{ color: '#2563eb', fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: 2 }}>
+              <a href="/contacto" style={{ color: 'var(--clay-accent-text)', fontWeight: 700, textDecoration: 'underline', textUnderlineOffset: 2 }}>
                 Escríbenos directamente
               </a>
             </p>
-          </div>
+          </ClayCard>
         </div>
       </div>
-    </div>
+    </ClayThemeScope>
   )
 }

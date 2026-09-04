@@ -22,6 +22,13 @@ import KairoMapCard from '@/components/shared/KairoMapCard'
 import MathEditor from '@/components/shared/MathEditor'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 import LenguaObrasLeidasSelector from '@/app/components/camino/LenguaObrasLeidasSelector'
+import ClayThemeScope from '@/components/clay/ClayThemeScope'
+import ClayBadge from '@/components/clay/ClayBadge'
+import ClayButton from '@/components/clay/ClayButton'
+import ClayLinkButton from '@/components/clay/ClayLinkButton'
+import ClayCard from '@/components/clay/ClayCard'
+import ClayEmptyState from '@/components/clay/ClayEmptyState'
+import { useClayThemePreference, type ClayTheme } from '@/components/clay/useClayThemePreference'
 
 const TOPIC_VIDEO_MAP: Record<string, string> = {
   'matematicas_ii:algebra-lineal:matrices-operaciones':      'wMEHXzOvln0',
@@ -42,6 +49,16 @@ const NOT_SEEN_BUTTON_TOPICS = new Set<string>([
   'matematicas_ccss:primitiva-de-una-funcion-y-la-integral-indefinida',
   'matematicas_ccss:la-integral-definida-regla-de-barrow-y-areas',
 ])
+
+// Piloto de claymorfismo (ver components/clay/): restilizado solo para esta
+// ficha de tema concreta (Física · Modelo Atómico de Bohr), elegida porque ya
+// tiene glosario de fórmulas real y permite comprobar que ambos conviven. El
+// resto de temas/asignaturas renderiza exactamente igual que antes.
+const CLAY_PILOT_SUBJECT = 'fisica'
+const CLAY_PILOT_TOPIC_SLUG = 'modelo-atomico-de-bohr'
+function isClayPilotTopic(topic: { subject?: string; topicSlug?: string } | null | undefined): boolean {
+  return topic?.subject === CLAY_PILOT_SUBJECT && topic?.topicSlug === CLAY_PILOT_TOPIC_SLUG
+}
 
 // Maps each seed topic to its sort_order range in curriculum_content_v2
 const TOPIC_TO_V2_RANGE: Record<string, { min: number; max: number }> = {
@@ -301,6 +318,10 @@ function LessonMarkdownTable({ headers, rows, glossary }: { headers: string[]; r
 }
 
 export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTopic | null }) {
+  // Hook del piloto de claymorfismo — se llama siempre (antes del posible
+  // return anticipado de más abajo si el tema no existe) para no romper las
+  // reglas de hooks; isClayPilotTopic() decide después si se usa su valor.
+  const { theme: clayTheme } = useClayThemePreference()
   const onboarding = useMemo(() => loadOnboarding(), [])
   const router = useRouter()
   const params = useSearchParams()
@@ -747,6 +768,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   }
 
   const currentTopic = topic
+  const isClayPilot = isClayPilotTopic(currentTopic)
   const key = progressKey(currentTopic)
   const current = progress[key] ?? { xp: 0 }
   const topicCompleted = Boolean(current.evau)
@@ -1183,8 +1205,16 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     }
   }
 
+  // Piloto claymorfismo, solo modo oscuro: el fondo real de página (Shell +
+  // main + aside) era blanco fijo pase lo que pase, así que las tarjetas
+  // oscuras (header, "Idea clave", glosario) flotaban sobre un lienzo que no
+  // había cambiado — igual que el bug de temas.css. --clay-bg ya existía y ya
+  // era más oscuro que --clay-surface, solo faltaba usarlo aquí. Claro/color
+  // no se tocan (sus fondos casi blancos ya encajaban con el `#fdfdfc` fijo).
+  const isClayPilotDark = isClayPilot && clayTheme === 'dark'
+
   return (
-    <Shell>
+    <Shell clayTheme={isClayPilot ? clayTheme : undefined} clayDarkBg={isClayPilotDark}>
       {/* ── Dark topbar ── */}
       <div className="topic-topbar" style={{ background: '#0f172a', padding: '11px 32px', display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
         <Link href="/camino" style={{ color: '#475569', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none' }}>
@@ -1212,34 +1242,57 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           className="topic-main"
           onClick={handleGlossaryClick}
           onMouseOver={handleGlossaryInteraction}
-          style={{ flex: 1, overflowY: 'auto', padding: '40px 48px', background: '#fdfdfc', borderRight: '1px solid #e2e8f0', minWidth: 0 }}
+          style={{ flex: 1, overflowY: 'auto', padding: '40px 48px', background: isClayPilotDark ? 'var(--clay-bg)' : '#fdfdfc', borderRight: isClayPilotDark ? '1px solid var(--clay-border)' : '1px solid #e2e8f0', minWidth: 0 }}
         >
 
-          {/* Document header */}
-          <header style={{ marginBottom: 36, paddingBottom: 28, borderBottom: '2px solid #0f172a' }}>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 10 }}>
-              {subjectLabelFromSlug(currentTopic.subject)} &middot; {currentTopic.blockTitle}
-            </p>
-            <h1 className="topic-h1 [&_p]:m-0 [&_p]:inline" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 38, fontWeight: 700, color: '#0f172a', lineHeight: 1.1, letterSpacing: '-.02em', marginBottom: 14 }}>
-              <LessonMarkdown text={currentTopic.title} format="raw" />
-            </h1>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12, alignItems: 'center' }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 4, padding: '3px 10px' }}>
-                {selectedV2Card ? 'Mini-misión · 25 min' : '25 min'}
-              </span>
-              <span style={{ fontSize: 11, fontWeight: 800, color: topicCompleted ? '#059669' : '#64748b', background: topicCompleted ? '#f0fdf4' : '#f8fafc', border: `1px solid ${topicCompleted ? '#bbf7d0' : '#e2e8f0'}`, borderRadius: 4, padding: '3px 10px' }}>
-                {statusLabel}
-              </span>
-              {selectedV2Number && (
-                <span style={{ fontSize: 11, fontWeight: 800, color: '#7c3aed', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 4, padding: '3px 10px' }}>
-                  Mini-misión {selectedV2Number} de {v2Cards.length}
+          {/* Document header — piloto de claymorfismo solo si isClayPilot (ver
+              CLAY_PILOT_SUBJECT/CLAY_PILOT_TOPIC_SLUG más arriba); cualquier
+              otro tema renderiza el header original sin cambios. */}
+          {isClayPilot ? (
+            <ClayThemeScope theme={clayTheme} style={{ marginBottom: 36, background: 'transparent' }}>
+              <ClayCard radius={24} padding={28}>
+                <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--clay-accent)', marginBottom: 10 }}>
+                  {subjectLabelFromSlug(currentTopic.subject)} &middot; {currentTopic.blockTitle}
+                </p>
+                <h1 className="topic-h1 [&_p]:m-0 [&_p]:inline" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 38, fontWeight: 700, color: 'var(--clay-text)', lineHeight: 1.1, letterSpacing: '-.02em', marginBottom: 14 }}>
+                  <LessonMarkdown text={currentTopic.title} format="raw" />
+                </h1>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12, alignItems: 'center' }}>
+                  <ClayBadge tone="neutral">{selectedV2Card ? 'Mini-misión · 25 min' : '25 min'}</ClayBadge>
+                  <ClayBadge tone={topicCompleted ? 'accent' : 'neutral'}>{statusLabel}</ClayBadge>
+                  {selectedV2Number && <ClayBadge tone="neutral">Mini-misión {selectedV2Number} de {v2Cards.length}</ClayBadge>}
+                </div>
+                <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--clay-text-muted)', lineHeight: 1.7, margin: 0 }}>
+                  Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU relacionado.
+                </p>
+              </ClayCard>
+            </ClayThemeScope>
+          ) : (
+            <header style={{ marginBottom: 36, paddingBottom: 28, borderBottom: '2px solid #0f172a' }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.18em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 10 }}>
+                {subjectLabelFromSlug(currentTopic.subject)} &middot; {currentTopic.blockTitle}
+              </p>
+              <h1 className="topic-h1 [&_p]:m-0 [&_p]:inline" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 38, fontWeight: 700, color: '#0f172a', lineHeight: 1.1, letterSpacing: '-.02em', marginBottom: 14 }}>
+                <LessonMarkdown text={currentTopic.title} format="raw" />
+              </h1>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 12, alignItems: 'center' }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 4, padding: '3px 10px' }}>
+                  {selectedV2Card ? 'Mini-misión · 25 min' : '25 min'}
                 </span>
-              )}
-            </div>
-            <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.7 }}>
-              Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU relacionado.
-            </p>
-          </header>
+                <span style={{ fontSize: 11, fontWeight: 800, color: topicCompleted ? '#059669' : '#64748b', background: topicCompleted ? '#f0fdf4' : '#f8fafc', border: `1px solid ${topicCompleted ? '#bbf7d0' : '#e2e8f0'}`, borderRadius: 4, padding: '3px 10px' }}>
+                  {statusLabel}
+                </span>
+                {selectedV2Number && (
+                  <span style={{ fontSize: 11, fontWeight: 800, color: '#7c3aed', background: '#f5f3ff', border: '1px solid #ddd6fe', borderRadius: 4, padding: '3px 10px' }}>
+                    Mini-misión {selectedV2Number} de {v2Cards.length}
+                  </span>
+                )}
+              </div>
+              <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.7 }}>
+                Primero entiende la idea, después practica guiado y por último salta a un ejercicio PAU relacionado.
+              </p>
+            </header>
+          )}
 
           {currentTopic.subject === 'lengua' && currentTopic.blockSlug === 'educacion-literaria' && (
             <LenguaObrasLeidasSelector />
@@ -1248,21 +1301,38 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           {/* ── Content sections ── */}
           {currentTopic.contentStatus === 'flashcard_v2' ? (
             v2Loading ? (
-              <LearningCard title="Explicación"><ContentSkeleton /></LearningCard>
+              <LearningCard title="Explicación" dark={isClayPilotDark}><ContentSkeleton /></LearningCard>
             ) : selectedV2Card ? (
               <>
-                <LearningCard title="Idea clave">
-                  {selectedV2Card.concept_markdown
-                    ? <LessonMarkdown text={selectedV2Card.concept_markdown} format="raw" />
-                    : <EmptyContent />}
-                  {selectedV2Card.alert_markdown && (
-                    <div style={{ marginTop: 14, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, padding: '12px 14px' }}>
-                      <LessonMarkdown text={selectedV2Card.alert_markdown} format="raw" />
-                    </div>
+                <LearningCard title="Idea clave" dark={isClayPilotDark}>
+                  {isClayPilot ? (
+                    <ClayThemeScope theme={clayTheme} style={{ background: 'transparent' }}>
+                      <ClayCard radius={18}>
+                        {selectedV2Card.concept_markdown
+                          ? <LessonMarkdown text={selectedV2Card.concept_markdown} format="raw" />
+                          : <EmptyContent dark={isClayPilotDark} />}
+                      </ClayCard>
+                      {selectedV2Card.alert_markdown && (
+                        <ClayCard radius={18} style={{ marginTop: 14 }}>
+                          <LessonMarkdown text={selectedV2Card.alert_markdown} format="raw" />
+                        </ClayCard>
+                      )}
+                    </ClayThemeScope>
+                  ) : (
+                    <>
+                      {selectedV2Card.concept_markdown
+                        ? <LessonMarkdown text={selectedV2Card.concept_markdown} format="raw" />
+                        : <EmptyContent />}
+                      {selectedV2Card.alert_markdown && (
+                        <div style={{ marginTop: 14, background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, padding: '12px 14px' }}>
+                          <LessonMarkdown text={selectedV2Card.alert_markdown} format="raw" />
+                        </div>
+                      )}
+                    </>
                   )}
                 </LearningCard>
                 {selectedV2Card.worked_example_markdown && (
-                  <LearningCard title="Caso práctico resuelto">
+                  <LearningCard title="Caso práctico resuelto" dark={isClayPilotDark}>
                     <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '14px 16px' }}>
                       <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
                         <LessonMarkdown text={selectedV2Card.worked_example_markdown} format="raw" />
@@ -1271,12 +1341,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   </LearningCard>
                 )}
                 {videoId && (
-                  <LearningCard title="Vídeo explicativo">
-                    <button onClick={() => setVideoOpen(v => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                  <LearningCard title="Vídeo explicativo" dark={isClayPilotDark}>
+                    <button onClick={() => setVideoOpen(v => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: isClayPilotDark ? 'var(--clay-text-muted)' : '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                       🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
                     </button>
                     {videoOpen && (
-                      <div style={{ marginTop: 12, overflow: 'hidden', borderRadius: 4, border: '1px solid #e2e8f0' }}>
+                      <div style={{ marginTop: 12, overflow: 'hidden', borderRadius: 4, border: isClayPilotDark ? '1px solid var(--clay-border)' : '1px solid #e2e8f0' }}>
                         <div style={{ position: 'relative', paddingTop: '56.25%' }}>
                           <iframe src={'https://www.youtube.com/embed/' + videoId} title={'Vídeo: ' + currentTopic.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }} />
                         </div>
@@ -1285,13 +1355,21 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   </LearningCard>
                 )}
                 {selectedV2Card.practice_prompt && (
-                  <LearningCard title="Inténtalo tú">
+                  <LearningCard title="Inténtalo tú" dark={isClayPilotDark}>
                     <LessonMarkdown text={selectedV2Card.practice_prompt} format="raw" glossary={selectedV2Card.topic_id ? glossaryByTopic.get(selectedV2Card.topic_id) : undefined} />
                   </LearningCard>
                 )}
               </>
             ) : (
-              <LearningCard title="Idea clave"><EmptyContent /></LearningCard>
+              <LearningCard title="Idea clave" dark={isClayPilotDark}>
+                {isClayPilot ? (
+                  <ClayThemeScope theme={clayTheme} style={{ background: 'transparent' }}>
+                    <ClayCard radius={18}><EmptyContent dark={isClayPilotDark} /></ClayCard>
+                  </ClayThemeScope>
+                ) : (
+                  <EmptyContent />
+                )}
+              </LearningCard>
             )
           ) : (
             <>
@@ -1400,11 +1478,11 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           )}
 
           {/* ── Exercise submission ── */}
-          <article ref={exerciseRef} id="course-exercise" style={{ paddingTop: 28, paddingBottom: 40, borderTop: '1px solid #dbe7fb', marginTop: 4 }}>
+          <article ref={exerciseRef} id="course-exercise" style={{ paddingTop: 28, paddingBottom: 40, borderTop: isClayPilotDark ? '1px solid var(--clay-border)' : '1px solid #dbe7fb', marginTop: 4 }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
               <div>
-                <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em' }}>Entrega tu ejercicio</h2>
-                <p style={{ marginTop: 4, fontSize: 13, fontWeight: 500, color: '#64748b' }}>Corrige el ejercicio para registrar XP. La nota ajusta el bonus.</p>
+                <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: isClayPilotDark ? 'var(--clay-text)' : '#0f172a', letterSpacing: '-.01em' }}>Entrega tu ejercicio</h2>
+                <p style={{ marginTop: 4, fontSize: 13, fontWeight: 500, color: isClayPilotDark ? 'var(--clay-text-muted)' : '#64748b' }}>Corrige el ejercicio para registrar XP. La nota ajusta el bonus.</p>
               </div>
               <span style={{ borderRadius: 999, background: missionXpStatus === 'pending' ? '#eff6ff' : missionXpStatus === 'already_completed' ? '#f0fdf4' : '#f8fafc', padding: '3px 10px', fontSize: 10, fontWeight: 900, color: missionXpStatus === 'pending' ? '#2563eb' : missionXpStatus === 'already_completed' ? '#059669' : '#64748b', border: `1px solid ${missionXpStatus === 'pending' ? '#bfdbfe' : missionXpStatus === 'already_completed' ? '#bbf7d0' : '#e2e8f0'}` }}>
                 {missionXpStatus === 'checking' ? 'Comprobando XP...' : missionXpStatus === 'pending' ? 'Misión con XP' : missionXpStatus === 'already_completed' ? 'Misión ya completada' : 'Práctica libre · no suma XP'}
@@ -1438,18 +1516,54 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               </div>
             ) : (
               <>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-                  <button type="button" onClick={() => setAnswerMode('texto')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 12, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: answerMode === 'texto' ? 'none' : '1px solid #dbe7fb', background: answerMode === 'texto' ? '#0f172a' : '#f8fbff', color: answerMode === 'texto' ? 'white' : '#64748b', boxShadow: answerMode === 'texto' ? '0 8px 18px rgba(15,23,42,.14)' : 'var(--kairo-inset-soft)' }}>
-                    <PenLine size={13} /> Escribir respuesta
-                  </button>
-                  <button type="button" onClick={() => setAnswerMode('imagen')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 12, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: answerMode === 'imagen' ? 'none' : '1px solid #dbe7fb', background: answerMode === 'imagen' ? '#0f172a' : '#f8fbff', color: answerMode === 'imagen' ? 'white' : '#64748b', boxShadow: answerMode === 'imagen' ? '0 8px 18px rgba(15,23,42,.14)' : 'var(--kairo-inset-soft)' }}>
-                    <Camera size={13} /> Subir foto
-                  </button>
-                </div>
-                {answerMode === 'texto' ? (
-                  <MathEditor subject={currentTopic.subject} value={studentAnswer} onChange={setStudentAnswer} placeholder="Escribe aquí tu desarrollo paso a paso..." minHeight={160} accentColor="#2563eb" />
+                {isClayPilot ? (
+                  <ClayThemeScope theme={clayTheme} style={{ background: 'transparent', display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 18 }}>
+                    <ClayButton type="button" onClick={() => setAnswerMode('texto')} variant={answerMode === 'texto' ? 'primary' : 'secondary'} style={{ padding: '10px 18px', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                      <PenLine size={13} /> Escribir respuesta
+                    </ClayButton>
+                    <ClayButton type="button" onClick={() => setAnswerMode('imagen')} variant={answerMode === 'imagen' ? 'primary' : 'secondary'} style={{ padding: '10px 18px', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                      <Camera size={13} /> Subir foto
+                    </ClayButton>
+                  </ClayThemeScope>
                 ) : (
-                  <div className="kairo-inset" style={{ borderRadius: 14, borderStyle: 'dashed', padding: 14 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+                    <button type="button" onClick={() => setAnswerMode('texto')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 12, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: answerMode === 'texto' ? 'none' : '1px solid #dbe7fb', background: answerMode === 'texto' ? '#0f172a' : '#f8fbff', color: answerMode === 'texto' ? 'white' : '#64748b', boxShadow: answerMode === 'texto' ? '0 8px 18px rgba(15,23,42,.14)' : 'var(--kairo-inset-soft)' }}>
+                      <PenLine size={13} /> Escribir respuesta
+                    </button>
+                    <button type="button" onClick={() => setAnswerMode('imagen')} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 12, padding: '8px 14px', fontSize: 12, fontWeight: 900, cursor: 'pointer', border: answerMode === 'imagen' ? 'none' : '1px solid #dbe7fb', background: answerMode === 'imagen' ? '#0f172a' : '#f8fbff', color: answerMode === 'imagen' ? 'white' : '#64748b', boxShadow: answerMode === 'imagen' ? '0 8px 18px rgba(15,23,42,.14)' : 'var(--kairo-inset-soft)' }}>
+                      <Camera size={13} /> Subir foto
+                    </button>
+                  </div>
+                )}
+                {answerMode === 'texto' ? (
+                  // El textarea de MathEditor se vuelve transparente por diseño
+                  // (para poder mostrar la capa de LaTeX renderizado encima) y
+                  // hereda el fondo de la página con texto oscuro fijo (#0f172a)
+                  // — con <main> ya oscuro por el piloto, ese texto se volvía
+                  // invisible. textareaStyle ya es un prop expuesto por
+                  // MathEditor para esto exacto, sin tocar su componente.
+                  // ANSWER_HAS_LATEX_OVERLAY replica la misma condición interna
+                  // de MathEditor (hasContent && hasLatex) para NO forzar color
+                  // cuando el textarea debe quedarse transparente (superpuesto
+                  // sobre el LaTeX renderizado) — si lo forzáramos siempre,
+                  // se rompería esa superposición en cuanto el alumno escriba
+                  // una fórmula.
+                  <MathEditor
+                    subject={currentTopic.subject}
+                    value={studentAnswer}
+                    onChange={setStudentAnswer}
+                    placeholder="Escribe aquí tu desarrollo paso a paso..."
+                    minHeight={160}
+                    accentColor={isClayPilotDark ? '#60a5fa' : '#2563eb'}
+                    softColor={isClayPilotDark ? 'var(--clay-accent-soft)' : undefined}
+                    borderColor={isClayPilotDark ? 'var(--clay-border)' : undefined}
+                    textareaStyle={isClayPilotDark ? {
+                      background: 'var(--clay-surface-raised)',
+                      color: (studentAnswer.trim().length > 0 && /\$|\\\[|\\\(|\\begin\{/.test(studentAnswer)) ? 'transparent' : 'var(--clay-text)',
+                    } : undefined}
+                  />
+                ) : (
+                  <div className="kairo-inset" style={{ borderRadius: 14, borderStyle: 'dashed', padding: 14, ...(isClayPilotDark ? { background: 'var(--clay-surface-raised)', borderColor: 'var(--clay-border)' } : {}) }}>
                     <input ref={fileRef} type="file" accept="image/*" multiple capture="environment" onChange={handleImage} style={{ display: 'none' }} />
                     {images.length > 0 && (
                       <div style={{ marginBottom: 10, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))', gap: 8 }}>
@@ -1465,20 +1579,29 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                       </div>
                     )}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                      <button type="button" onClick={() => fileRef.current?.click()} className="kairo-soft-control" style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 16px', fontSize: 13, fontWeight: 900, color: '#2563eb', cursor: 'pointer' }}>
+                      <button
+                        type="button"
+                        onClick={() => fileRef.current?.click()}
+                        className={isClayPilotDark ? undefined : 'kairo-soft-control'}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 16px', fontSize: 13, fontWeight: 900, cursor: 'pointer',
+                          color: isClayPilotDark ? 'var(--clay-accent)' : '#2563eb',
+                          ...(isClayPilotDark ? { background: 'var(--clay-surface)', border: '1px solid var(--clay-border)', borderRadius: 'var(--kairo-radius-control)' } : {}),
+                        }}
+                      >
                         <UploadCloud size={15} /> {images.length > 0 ? 'Añadir otra página' : 'Hacer foto o elegir imagen'}
                       </button>
                       {images.length > 0 && (
-                        <button type="button" onClick={clearImages} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 4, border: '1px solid #fecaca', background: 'white', padding: '10px 12px', fontSize: 11, fontWeight: 900, color: '#dc2626', cursor: 'pointer' }}>
+                        <button type="button" onClick={clearImages} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 4, border: isClayPilotDark ? '1px solid #7f1d1d' : '1px solid #fecaca', background: isClayPilotDark ? 'var(--clay-surface)' : 'white', padding: '10px 12px', fontSize: 11, fontWeight: 900, color: isClayPilotDark ? '#f87171' : '#dc2626', cursor: 'pointer' }}>
                           <X size={13} /> Quitar todas
                         </button>
                       )}
                     </div>
                     {images.length > 1 && (
-                      <p style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: '#64748b' }}>Se corrigen juntas como páginas consecutivas de una misma respuesta.</p>
+                      <p style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: isClayPilotDark ? 'var(--clay-text-muted)' : '#64748b' }}>Se corrigen juntas como páginas consecutivas de una misma respuesta.</p>
                     )}
                     {imageError && (
-                      <p style={{ marginTop: 8, fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{imageError}</p>
+                      <p style={{ marginTop: 8, fontSize: 12, fontWeight: 700, color: isClayPilotDark ? '#f87171' : '#dc2626' }}>{imageError}</p>
                     )}
                   </div>
                 )}
@@ -1540,7 +1663,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         </main>
 
         {/* ── Aside (escritorio) ── */}
-        <aside className="topic-aside" style={{ width: 264, flexShrink: 0, background: 'rgba(248,251,255,.82)', padding: '28px 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 0, borderLeft: '1px solid #dbe7fb' }}>
+        <aside className="topic-aside" style={{ width: 264, flexShrink: 0, background: isClayPilotDark ? 'var(--clay-surface)' : 'rgba(248,251,255,.82)', padding: '28px 20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 0, borderLeft: isClayPilotDark ? '1px solid var(--clay-border)' : '1px solid #dbe7fb' }}>
           <TopicAsideBody
             streak={streak}
             liga={liga}
@@ -1745,42 +1868,69 @@ function TopicAsideBody({
   chatHref: (prompt?: string) => string
   activeGlossaryEntry: GlossaryEntry | null
 }) {
+  const isClayPilot = isClayPilotTopic(currentTopic)
+  const { theme: clayTheme } = useClayThemePreference()
+  // El fondo del <aside> pasa a oscuro (var(--clay-surface)) solo en este
+  // tema para el piloto — el texto de las secciones que no tienen su propia
+  // caja clara (Tu progreso, Práctica PAU, XP, Ver planes) seguía en negro
+  // fijo y quedaba ilegible sobre ese fondo oscuro. Las secciones que ya
+  // tienen su propia caja (glosario en ClayCard, "Pregunta a Kairo" en
+  // kairo-glass) no necesitan esto, ya resuelven su propio contraste.
+  const isClayPilotDark = isClayPilot && clayTheme === 'dark'
+  const asideText = isClayPilotDark ? 'var(--clay-text)' : '#0f172a'
+  const asideMuted = isClayPilotDark ? 'var(--clay-text-muted)' : '#94a3b8'
+  const asideBody = isClayPilotDark ? 'var(--clay-text-muted)' : '#64748b'
+  const asideBorder = isClayPilotDark ? 'var(--clay-border)' : '#e2e8f0'
+  const asideAccent = isClayPilotDark ? 'var(--clay-accent)' : '#2563eb'
   return (
     <>
       {/* Streak + Liga */}
-      <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: '1px solid #e2e8f0' }}>
-        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 10 }}>Tu progreso</p>
+      <div style={{ marginBottom: 22, paddingBottom: 22, borderBottom: `1px solid ${asideBorder}` }}>
+        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: asideMuted, marginBottom: 10 }}>Tu progreso</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ textAlign: 'center', flexShrink: 0 }}>
-            <p style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>{streak}</p>
-            <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.1em', color: '#94a3b8', marginTop: 2 }}>días racha</p>
+            <p style={{ fontSize: 22, fontWeight: 900, color: asideText, lineHeight: 1 }}>{streak}</p>
+            <p style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase' as const, letterSpacing: '.1em', color: asideMuted, marginTop: 2 }}>días racha</p>
           </div>
-          <div style={{ width: 1, height: 28, background: '#e2e8f0', flexShrink: 0 }} />
+          <div style={{ width: 1, height: 28, background: asideBorder, flexShrink: 0 }} />
           <div style={{ flex: 1, minWidth: 0 }}>
             {ligaLoading ? (
               <div style={{ height: 10, width: 80, borderRadius: 999, background: '#f1f5f9' }} />
             ) : liga && myLigaEntry ? (
               <>
-                <p style={{ fontSize: 12, fontWeight: 900, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{liga.nombre}</p>
-                <p style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', marginTop: 2 }}>#{myLigaEntry.rank} · {myLigaEntry.weekly_xp} XP ronda</p>
+                <p style={{ fontSize: 12, fontWeight: 900, color: asideText, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{liga.nombre}</p>
+                <p style={{ fontSize: 10, fontWeight: 600, color: asideMuted, marginTop: 2 }}>#{myLigaEntry.rank} · {myLigaEntry.weekly_xp} XP ronda</p>
               </>
             ) : (
-              <Link href="/camino" style={{ fontSize: 12, fontWeight: 900, color: '#2563eb', textDecoration: 'none' }}>Crear liga →</Link>
+              <Link href="/camino" style={{ fontSize: 12, fontWeight: 900, color: asideAccent, textDecoration: 'none' }}>Crear liga →</Link>
             )}
           </div>
         </div>
       </div>
 
       {/* Práctica PAU */}
-      <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #e2e8f0' }}>
-        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 8 }}>Práctica PAU</p>
-        <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>Ejercicio real con este contexto.</p>
-        <Link href={buildEvauHref(currentTopic)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: 8, padding: '9px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none', marginBottom: 6 }}>
-          Practicar PAU <ArrowRight size={12} />
-        </Link>
-        <a href="#course-exercise" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: 'transparent', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 12px', fontSize: 11, fontWeight: 800, textDecoration: 'none' }}>
-          Ir a la respuesta <Check size={12} />
-        </a>
+      <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: `1px solid ${asideBorder}` }}>
+        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: asideMuted, marginBottom: 8 }}>Práctica PAU</p>
+        <p style={{ fontSize: 12, fontWeight: 500, color: asideBody, lineHeight: 1.5, marginBottom: 10 }}>Ejercicio real con este contexto.</p>
+        {isClayPilot ? (
+          <ClayThemeScope theme={clayTheme} style={{ background: 'transparent' }}>
+            <ClayLinkButton href={buildEvauHref(currentTopic)} style={{ marginBottom: 8 }}>
+              Practicar PAU <ArrowRight size={12} />
+            </ClayLinkButton>
+            <ClayLinkButton href="#course-exercise" variant="secondary">
+              Ir a la respuesta <Check size={12} />
+            </ClayLinkButton>
+          </ClayThemeScope>
+        ) : (
+          <>
+            <Link href={buildEvauHref(currentTopic)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: 8, padding: '9px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none', marginBottom: 6 }}>
+              Practicar PAU <ArrowRight size={12} />
+            </Link>
+            <a href="#course-exercise" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: 'transparent', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 12px', fontSize: 11, fontWeight: 800, textDecoration: 'none' }}>
+              Ir a la respuesta <Check size={12} />
+            </a>
+          </>
+        )}
       </div>
 
       {/* Chat Kairo */}
@@ -1797,34 +1947,59 @@ function TopicAsideBody({
             ))}
           </div>
         </details>
-        <Link href={chatHref()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#7c3aed', color: 'white', borderRadius: 8, padding: '9px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none' }}>
-          Abrir Chat con Kairo <MessageCircle size={12} />
-        </Link>
+        {isClayPilot ? (
+          <ClayThemeScope theme={clayTheme} style={{ background: 'transparent' }}>
+            <ClayLinkButton href={chatHref()}>
+              Abrir Chat con Kairo <MessageCircle size={12} />
+            </ClayLinkButton>
+          </ClayThemeScope>
+        ) : (
+          <Link href={chatHref()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', background: '#7c3aed', color: 'white', borderRadius: 8, padding: '9px 12px', fontSize: 11, fontWeight: 900, textDecoration: 'none' }}>
+            Abrir Chat con Kairo <MessageCircle size={12} />
+          </Link>
+        )}
       </div>
 
       {/* Glosario interactivo (piloto Física): se actualiza al tocar/pasar el ratón
           sobre un símbolo marcado dentro de una fórmula — nunca en una burbuja
-          flotante sobre la propia fórmula, siempre aquí. */}
-      <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #e2e8f0' }}>
-        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 8 }}>¿Qué significa esto?</p>
-        {activeGlossaryEntry ? (
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 4 }}>{activeGlossaryEntry.label}</p>
-            <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5 }}>{activeGlossaryEntry.definition}</p>
-          </div>
-        ) : (
-          <p style={{ fontSize: 12, fontWeight: 500, color: '#94a3b8', lineHeight: 1.5 }}>Toca (o pasa el ratón sobre) un símbolo resaltado de una fórmula para ver su significado aquí.</p>
-        )}
-      </div>
+          flotante sobre la propia fórmula, siempre aquí. Restilizado en clay
+          solo para isClayPilot (misma lógica/datos, sin cambios). */}
+      {isClayPilot ? (
+        <ClayThemeScope theme={clayTheme} style={{ marginBottom: 18, background: 'transparent' }}>
+          <ClayCard radius={20} padding={18}>
+            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: 'var(--clay-text-muted)', marginBottom: 8 }}>¿Qué significa esto?</p>
+            {activeGlossaryEntry ? (
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 900, color: 'var(--clay-text)', marginBottom: 4 }}>{activeGlossaryEntry.label}</p>
+                <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--clay-text-muted)', lineHeight: 1.5 }}>{activeGlossaryEntry.definition}</p>
+              </div>
+            ) : (
+              <ClayEmptyState title="Aún no hay símbolo seleccionado" subtitle="Toca (o pasa el ratón sobre) un símbolo resaltado de una fórmula para ver su significado aquí." />
+            )}
+          </ClayCard>
+        </ClayThemeScope>
+      ) : (
+        <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #e2e8f0' }}>
+          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 8 }}>¿Qué significa esto?</p>
+          {activeGlossaryEntry ? (
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 4 }}>{activeGlossaryEntry.label}</p>
+              <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5 }}>{activeGlossaryEntry.definition}</p>
+            </div>
+          ) : (
+            <p style={{ fontSize: 12, fontWeight: 500, color: '#94a3b8', lineHeight: 1.5 }}>Toca (o pasa el ratón sobre) un símbolo resaltado de una fórmula para ver su significado aquí.</p>
+          )}
+        </div>
+      )}
 
       {/* XP */}
-      <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: '1px solid #e2e8f0' }}>
-        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 8 }}>XP en este tema</p>
-        <p style={{ fontSize: 20, fontWeight: 900, color: topicCompleted ? '#059669' : '#334155', lineHeight: 1, marginBottom: 4 }}>{currentXp} XP</p>
-        <p style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>{topicCompleted ? 'Tema completado con corrección.' : 'Pendiente de corrección.'}</p>
+      <div style={{ marginBottom: 18, paddingBottom: 18, borderBottom: `1px solid ${asideBorder}` }}>
+        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: asideMuted, marginBottom: 8 }}>XP en este tema</p>
+        <p style={{ fontSize: 20, fontWeight: 900, color: topicCompleted ? '#059669' : asideText, lineHeight: 1, marginBottom: 4 }}>{currentXp} XP</p>
+        <p style={{ fontSize: 11, fontWeight: 600, color: asideBody }}>{topicCompleted ? 'Tema completado con corrección.' : 'Pendiente de corrección.'}</p>
       </div>
 
-      <Link href="/pricing" style={{ display: 'block', textAlign: 'center', fontSize: 12, fontWeight: 900, color: '#2563eb', marginTop: 4, textDecoration: 'none' }}>Ver planes</Link>
+      <Link href="/pricing" style={{ display: 'block', textAlign: 'center', fontSize: 12, fontWeight: 900, color: asideAccent, marginTop: 4, textDecoration: 'none' }}>Ver planes</Link>
     </>
   )
 }
@@ -2102,7 +2277,7 @@ function SuccessModal({ score, xp, streak, blockProgress, nextMissionTitle, onVi
   )
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, clayTheme, clayDarkBg }: { children: React.ReactNode; clayTheme?: ClayTheme; clayDarkBg?: boolean }) {
   return (
     <div className="kairo-premium-shell" style={{ display: 'flex', minHeight: '100dvh' }}>
       <style>{`
@@ -2119,7 +2294,13 @@ function Shell({ children }: { children: React.ReactNode }) {
         }
       `}</style>
       <SidebarNav />
-      <div style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100dvh' }}>
+      {/* data-kairo-clay-theme aquí (no en <html>/<body>) para que var(--clay-*)
+          resuelva dentro de main/aside sin afectar a SidebarNav ni a ninguna
+          otra pantalla — el atributo solo envuelve el contenido de esta ficha. */}
+      <div
+        data-kairo-clay-theme={clayTheme}
+        style={{ minWidth: 0, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', height: '100dvh', background: clayDarkBg ? 'var(--clay-bg)' : undefined }}
+      >
         {children}
       </div>
     </div>
@@ -2231,11 +2412,23 @@ function PracticePromptPanel({ text }: { text: string }) {
   )
 }
 
-function EmptyContent({ compact = false }: { compact?: boolean }) {
+function EmptyContent({ compact = false, dark = false }: { compact?: boolean; dark?: boolean }) {
   const copy = compact
     ? 'Este bloque aún necesita contenido completo.'
     : 'Este tema aún necesita contenido completo. Puedes practicar con ejercicios disponibles.'
-  return <p style={{ border: '1px dashed #bfdbfe', borderRadius: 5, padding: '10px 14px', fontSize: 13, fontWeight: 700, color: '#3b82f6', background: '#eff6ff' }}>{copy}</p>
+  return (
+    <p style={{
+      border: dark ? '1px dashed var(--clay-border)' : '1px dashed #bfdbfe',
+      borderRadius: 5,
+      padding: '10px 14px',
+      fontSize: 13,
+      fontWeight: 700,
+      color: dark ? 'var(--clay-accent)' : '#3b82f6',
+      background: dark ? 'var(--clay-accent-soft)' : '#eff6ff',
+    }}>
+      {copy}
+    </p>
+  )
 }
 
 function ContentSkeleton() {
@@ -2248,14 +2441,41 @@ function ContentSkeleton() {
   )
 }
 
-function LearningCard({ title, children }: { title: string; children: React.ReactNode }) {
+function LearningCard({ title, children, dark = false }: { title: string; children: React.ReactNode; dark?: boolean }) {
+  // dark solo lo pasa la ficha de Bohr en tema oscuro (ver isClayPilotDark) —
+  // LearningCard es local a este archivo pero se reutiliza en TODOS los
+  // temas, así que el valor por defecto (false) deja cualquier otro tema
+  // exactamente igual que siempre. .kairo-quiet-card/.kairo-soft-control son
+  // clases globales con fondo claro fijo, por eso se pisan aquí con estilo
+  // inline en vez de intentar un selector CSS más frágil.
   return (
-    <article className="kairo-quiet-card" style={{ padding: '22px 24px', marginBottom: 16 }}>
+    <article
+      className={dark ? undefined : 'kairo-quiet-card'}
+      style={{
+        padding: '22px 24px',
+        marginBottom: 16,
+        ...(dark ? {
+          background: 'var(--clay-surface)',
+          border: '1px solid var(--clay-border)',
+          borderRadius: 'var(--kairo-radius-card)',
+          boxShadow: `0 10px 0 var(--clay-shadow-shelf), 0 16px 28px var(--clay-shadow-elevate)`,
+        } : {}),
+      }}
+    >
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 16 }}>
-        <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em' }}>{title}</h2>
-        <span className="kairo-soft-control" style={{ padding: '5px 10px', fontSize: 9, fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase' as const, color: '#64748b' }}>Paso de lectura</span>
+        <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: dark ? 'var(--clay-text)' : '#0f172a', letterSpacing: '-.01em' }}>{title}</h2>
+        <span
+          className={dark ? undefined : 'kairo-soft-control'}
+          style={{
+            padding: '5px 10px', fontSize: 9, fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase' as const,
+            color: dark ? 'var(--clay-text-muted)' : '#64748b',
+            ...(dark ? { background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)', borderRadius: 'var(--kairo-radius-control)' } : {}),
+          }}
+        >
+          Paso de lectura
+        </span>
       </div>
-      <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">{children}</div>
+      <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700" style={dark ? { color: 'var(--clay-text)' } : undefined}>{children}</div>
     </article>
   )
 }

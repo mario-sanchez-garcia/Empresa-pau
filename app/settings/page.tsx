@@ -12,6 +12,7 @@ import { VALID_DAILY_MINUTES, dailyMinutesLabel, describeDailyPlan } from '@/app
 import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 import { DEFAULT_GRADE_THRESHOLD, type GradeThresholdMode } from '@/app/lib/camino/gradeThreshold'
 import SidebarNav from '@/app/components/SidebarNav'
+import ClayThemeSwitcher from '@/components/clay/ClayThemeSwitcher'
 
 const NOTEBOOK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_171854_b8f1489a-95e8-4506-a6c5-742030f50c09.png'
 
@@ -744,6 +745,11 @@ export default function SettingsPage() {
               {caminoPrefsStatus}
             </div>
           )}
+
+          <Section label="Apariencia (piloto)" />
+          <div style={{ marginBottom: 24 }}>
+            <ClayThemeSwitcher />
+          </div>
 
           {activeSubjectOptions.length > 0 && (
             <div style={{ marginBottom: 20 }}>

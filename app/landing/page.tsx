@@ -7,7 +7,8 @@ import {
 } from '@/app/lib/platformStats'
 import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS, formatEur, isCursoPauEarlyPeriod } from '@/app/lib/pricing'
 import LandingAuthProvider from './LandingAuthState'
-import { NavLoginLink, HeroCta, BottomCta, PricingPlanCta, StickyMobileCta } from './LandingCta'
+import { NavLoginLink, BottomCta, PricingPlanCta, StickyMobileCta } from './LandingCta'
+import { ClayHeroCta, ClayHeroMiniCards } from './LandingClayPilotHero'
 import RevealOnScroll from '@/app/components/ui/RevealOnScroll'
 import { SUBJECT_OPTS } from '@/app/lib/subjectCatalog'
 
@@ -366,29 +367,16 @@ export default function LandingPage() {
             Prepara<span style={{ display: 'block', letterSpacing: '-.01em' }}>la PAU.</span>
           </h1>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <HeroCta />
+            <ClayHeroCta />
           </div>
           <Link href="#como-funciona" style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.35)', letterSpacing: '.12em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,.15)', paddingBottom: 2, display: 'inline-block' }}>
             Ver cómo funciona
           </Link>
         </div>
 
-        {/* Mini cards */}
-        <div className="v4c-mini-cards" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '0 48px' }}>
-          <div style={{ background: 'rgba(249,249,249,.07)', border: '1px solid rgba(255,255,255,.12)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', borderRadius: '10px 10px 0 0', padding: '20px 22px', width: 220 }}>
-            <p style={{ fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.3)', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>Examen real</p>
-            <p style={{ fontSize: 12, fontWeight: 600, color: '#fff', marginBottom: 12, lineHeight: 1.35 }}>Matemáticas II · Madrid 2023<br />Bloque análisis · Ejercicio 2</p>
-            <p style={{ fontSize: 10, color: 'rgba(255,255,255,.4)', lineHeight: 1.4 }}>Calcula la derivada de f(x) = x³·ln(x) y estudia su monotonía…</p>
-          </div>
-          <div style={{ background: 'rgba(249,249,249,.07)', border: '1px solid rgba(255,255,255,.12)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', borderRadius: '10px 10px 0 0', padding: '20px 22px', width: 220 }}>
-            <p style={{ fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.3)', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>Corrección IA</p>
-            <p style={{ fontFamily: M, fontSize: 26, fontWeight: 500, color: '#fff', lineHeight: 1 }}>7,8<span style={{ fontSize: 14, opacity: .5 }}>/10</span></p>
-            <p style={{ fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.35)', marginTop: 2 }}>resultado sintético</p>
-            <div style={{ height: 3, background: 'rgba(255,255,255,.12)', borderRadius: 2, margin: '12px 0 6px' }}>
-              <div style={{ height: 3, background: '#fff', borderRadius: 2, width: '78%' }} />
-            </div>
-            <p style={{ fontSize: 10, color: 'rgba(255,255,255,.4)', lineHeight: 1.4 }}>Derivada correcta. Signo monotonía: falta el intervalo (0,1/e). −1,2 pts.</p>
-          </div>
+        {/* Mini cards — piloto claymorfismo (ver app/landing/LandingClayPilotHero.tsx) */}
+        <div className="v4c-mini-cards" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10, padding: '0 48px 24px' }}>
+          <ClayHeroMiniCards />
         </div>
       </section>
 

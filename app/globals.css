@@ -91,6 +91,118 @@
   --kairo-backdrop: rgba(15, 23, 42, 0.48);
 }
 
+/* ─── Claymorfismo (piloto) ─────────────────────────────────────────
+   Tokens de tema para el piloto de claymorfismo (landing hero + ficha
+   de tema de Bohr). Solo cambian valores de color/sombra por variante
+   — nunca la estructura de los componentes clay (ver components/clay/).
+   Se activan envolviendo una sección en [data-kairo-clay-theme="…"];
+   fuera de esas dos pantallas piloto esto no se usa ni se referencia. */
+[data-kairo-clay-theme="light"] {
+  --clay-bg: #e9eefb;
+  --clay-surface: #eef3fc;
+  --clay-surface-raised: #f6f9fe;
+  --clay-shadow-dark: rgba(37, 99, 235, 0.22);
+  --clay-shadow-light: rgba(255, 255, 255, 0.95);
+  --clay-accent: #2563eb;
+  --clay-accent-soft: rgba(37, 99, 235, 0.12);
+  /* Texto de color acento directamente sobre --clay-bg (p.ej. enlaces de las
+     páginas legales, sin tarjeta debajo) — en claro, --clay-accent normal da
+     4.45:1 sobre --clay-bg, justo por debajo del mínimo AA (4.5) para texto
+     normal. Un tono más oscuro lo sube a 5.77:1 sin cambiar el acento de
+     botones/insignias. En oscuro/color ya pasa (7.06/4.98), así que ahí es
+     igual que --clay-accent. */
+  --clay-accent-text: #1d4ed8;
+  --clay-text: #0d1424;
+  --clay-text-muted: #55627a;
+  --clay-border: rgba(37, 99, 235, 0.14);
+  /* Relieve real (no solo color): borde sólido de sombra bajo tarjetas/
+     botones/cápsulas, sin desenfoque, como el canto de una pieza de plastilina. */
+  --clay-accent-deep: #1d4ed8;
+  --clay-surface-deep: #c7d6f0;
+  --clay-shadow-shelf: rgba(37, 99, 235, 0.10);
+  --clay-shadow-elevate: rgba(37, 99, 235, 0.18);
+  --clay-on-accent: #ffffff;
+}
+
+[data-kairo-clay-theme="dark"] {
+  --clay-bg: #10162a;
+  --clay-surface: #171e38;
+  --clay-surface-raised: #1c2440;
+  --clay-shadow-dark: rgba(0, 0, 0, 0.55);
+  /* Invertir literalmente el clay (sombra blanca) sobre fondo oscuro se ve
+     sucio — en su lugar, un resplandor sutil del color de acento hace de
+     "luz" en vez de blanco. */
+  --clay-shadow-light: rgba(96, 165, 250, 0.28);
+  --clay-accent: #60a5fa;
+  --clay-accent-soft: rgba(96, 165, 250, 0.16);
+  --clay-accent-text: #60a5fa;
+  --clay-text: #eef2fb;
+  --clay-text-muted: #9aa7c4;
+  --clay-border: rgba(96, 165, 250, 0.20);
+  --clay-accent-deep: #1e3a8a;
+  --clay-surface-deep: #060912;
+  /* El "canto" de una tarjeta/botón necesita leerse como sombra incluso
+     sobre fondo oscuro — ahí el resplandor de acento (--clay-shadow-light)
+     hace de luz, pero el canto en sí sigue siendo negro, no acento. */
+  --clay-shadow-shelf: rgba(0, 0, 0, 0.35);
+  --clay-shadow-elevate: rgba(0, 0, 0, 0.55);
+  /* #60a5fa (acento claro) con texto blanco encima da un contraste de 2.5:1
+     — falla AA. Con relleno sólido de acento, el texto pasa a oscuro. */
+  --clay-on-accent: #0b1220;
+}
+
+[data-kairo-clay-theme="color"] {
+  --clay-bg: #f3edff;
+  --clay-surface: #f7f2ff;
+  --clay-surface-raised: #fbf8ff;
+  --clay-shadow-dark: rgba(124, 58, 237, 0.24);
+  --clay-shadow-light: rgba(255, 255, 255, 0.95);
+  --clay-accent: #7c3aed;
+  --clay-accent-soft: rgba(124, 58, 237, 0.12);
+  --clay-accent-text: #7c3aed;
+  --clay-text: #241b3d;
+  --clay-text-muted: #5f5279;
+  --clay-border: rgba(124, 58, 237, 0.16);
+  --clay-accent-deep: #5b21b6;
+  --clay-surface-deep: #ddc9f7;
+  --clay-shadow-shelf: rgba(124, 58, 237, 0.10);
+  --clay-shadow-elevate: rgba(124, 58, 237, 0.18);
+  --clay-on-accent: #ffffff;
+}
+
+@keyframes clay-progress-bounce {
+  0% { transform: scaleX(var(--clay-progress-from, 0)); }
+  70% { transform: scaleX(calc(var(--clay-progress-to, 1) + 0.02)); }
+  100% { transform: scaleX(var(--clay-progress-to, 1)); }
+}
+
+/* LessonMarkdown/MathMarkdown renderiza <p> con text-slate-700 fijo (ver
+   components/shared/MathMarkdown.tsx) — eso gana sobre el color heredado del
+   contenedor, así que dentro del piloto (p. ej. el <h1> de la ficha de Bohr,
+   que MathMarkdown envuelve en un <p>) el texto salía gris oscuro fijo en vez
+   de var(--clay-text), ilegible en el tema oscuro. Solo afecta a texto dentro
+   de [data-kairo-clay-theme]; el resto de fichas de tema no lo ven. */
+[data-kairo-clay-theme] .math-markdown p,
+[data-kairo-clay-theme] .math-markdown li,
+[data-kairo-clay-theme] .math-markdown strong {
+  color: inherit;
+}
+
+/* MathAnswerToolbar (barra "ƒx Símbolos"/"Plantillas" sobre el textarea de
+   respuesta) es un componente de corrección compartido — no se toca su
+   archivo (ver AGENTS.md, piloto estético no debe tocar corrección/LaTeX).
+   Su contenedor raíz tiene fondo/borde fijos por inline style
+   (background:"#f8fafc") sin prop para cambiarlo, así que en oscuro
+   necesita !important para ganar a ese inline style — solo dentro del
+   piloto (dark), nunca fuera de [data-kairo-clay-theme="dark"]. */
+[data-kairo-clay-theme="dark"] [data-kairo-math-toolbar="true"] {
+  background: var(--clay-surface-raised) !important;
+  border-color: var(--clay-border) !important;
+}
+[data-kairo-clay-theme="dark"] [data-kairo-math-toolbar="true"] p {
+  color: var(--clay-text-muted) !important;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

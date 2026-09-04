@@ -3,19 +3,29 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
 import type { AdminMetrics, RangeSummary } from '@/app/lib/adminMetrics'
+import ClayThemeScope from '@/components/clay/ClayThemeScope'
+import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 
 // ─── Design tokens ─────────────────────────────────────────────────────────────
+// Ya enrutaba todo el archivo a traves de este objeto -- retargetear sus
+// valores a tokens clay cubre casi toda la pantalla sin tocar cada
+// style={{}} suelto. C.bg conserva su rol de "texto de enlace legible sobre
+// el fondo claro del cuerpo" (--clay-accent-text); los 2 sitios que lo usaban
+// como FONDO con texto blanco encima (cabecera, pestaña activa) se han hecho
+// explicitos con --clay-accent-deep, que es oscuro en los 3 temas -- si
+// hubieran seguido leyendo C.bg (accent-text) ahi, en oscuro el fondo habria
+// quedado demasiado claro para texto blanco legible.
 const C = {
-  bg: '#2563eb',
-  bgDark: '#1d4ed8',
-  light: '#eff6ff',
-  accent: '#60a5fa',
-  ink: '#111827',
-  muted: '#64748b',
-  border: '#dbe7fb',
-  surface: '#ffffff',
-  shadow: '0 4px 24px rgba(37,99,235,0.07)',
-  shadowMd: '0 8px 32px rgba(37,99,235,0.10)'
+  bg: 'var(--clay-accent-text)',
+  bgDark: 'var(--clay-accent-deep)',
+  light: 'var(--clay-accent-soft)',
+  accent: 'var(--clay-accent)',
+  ink: 'var(--clay-text)',
+  muted: 'var(--clay-text-muted)',
+  border: 'var(--clay-border)',
+  surface: 'var(--clay-surface)',
+  shadow: '0 10px 0 var(--clay-shadow-shelf), 0 16px 28px var(--clay-shadow-elevate)',
+  shadowMd: '0 10px 0 var(--clay-shadow-shelf), 0 20px 36px var(--clay-shadow-elevate)'
 }
 
 // ─── Formatters ─────────────────────────────────────────────────────────────────
@@ -86,7 +96,7 @@ function StatCard({
   accent?: boolean; warn?: boolean; danger?: boolean
 }) {
   const bg = danger ? '#fef2f2' : warn ? '#fffbeb' : accent ? C.light : C.surface
-  const border = danger ? '#fecaca' : warn ? '#fde68a' : accent ? '#bfdbfe' : C.border
+  const border = danger ? '#fecaca' : warn ? '#fde68a' : accent ? 'var(--clay-border)' : C.border
   const valColor = danger ? '#dc2626' : warn ? '#b45309' : C.ink
   return (
     <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: 14, padding: '18px 20px', boxShadow: C.shadow }}>
@@ -127,7 +137,7 @@ function Table({ cols, rows, emptyMsg = 'Sin datos' }: {
           <tr>
             {cols.map(col => (
               <th key={col} style={{
-                textAlign: 'left', padding: '9px 14px', background: '#f8faff',
+                textAlign: 'left', padding: '9px 14px', background: 'var(--clay-surface-raised)',
                 color: C.muted, fontWeight: 700, fontSize: 10, textTransform: 'uppercase',
                 letterSpacing: '0.08em', borderBottom: `1px solid ${C.border}`, whiteSpace: 'nowrap'
               }}>{col}</th>
@@ -142,7 +152,7 @@ function Table({ cols, rows, emptyMsg = 'Sin datos' }: {
               </td>
             </tr>
           ) : rows.map((row, i) => (
-            <tr key={i} style={{ background: i % 2 === 0 ? C.surface : '#fafcff' }}>
+            <tr key={i} style={{ background: i % 2 === 0 ? C.surface : 'var(--clay-surface-raised)' }}>
               {row.map((cell, j) => (
                 <td key={j} style={{
                   padding: '8px 14px', color: C.ink, borderBottom: `1px solid ${C.border}`,
@@ -299,8 +309,8 @@ function InsightsPanel({ insights }: { insights: string[] }) {
     <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
       {insights.map((ins, i) => (
         <div key={i} style={{
-          background: C.light, border: `1px solid #bfdbfe`, borderRadius: 10,
-          padding: '10px 14px', fontSize: 13, color: '#1e40af', fontWeight: 500, lineHeight: 1.5
+          background: C.light, border: '1px solid var(--clay-border)', borderRadius: 10,
+          padding: '10px 14px', fontSize: 13, color: 'var(--clay-accent-text)', fontWeight: 500, lineHeight: 1.5
         }}>
           {ins}
         </div>
@@ -317,13 +327,13 @@ function RangeTabs({ value, onChange }: { value: Range; onChange: (r: Range) => 
     { id: '30d', label: '30 días' }
   ]
   return (
-    <div style={{ display: 'inline-flex', background: '#f1f5f9', borderRadius: 10, padding: 3, gap: 2 }}>
+    <div style={{ display: 'inline-flex', background: 'var(--clay-surface-raised)', borderRadius: 10, padding: 3, gap: 2 }}>
       {tabs.map(t => (
         <button
           key={t.id}
           onClick={() => onChange(t.id)}
           style={{
-            background: value === t.id ? C.bg : 'transparent',
+            background: value === t.id ? 'var(--clay-accent-deep)' : 'transparent',
             color: value === t.id ? '#fff' : C.muted,
             border: 'none', borderRadius: 8, padding: '6px 16px',
             fontSize: 12, fontWeight: 700, cursor: 'pointer',
@@ -673,11 +683,16 @@ export default function AdminPage() {
 
   const isLoaded = state.status === 'loaded'
   const updatedAt = isLoaded ? fmtDate(state.metrics.calculatedAt) : null
+  const { theme } = useClayThemePreference()
 
   return (
-    <div style={{ minHeight: '100vh', background: `linear-gradient(160deg, ${C.light} 0%, #f8faff 100%)` }}>
+    <ClayThemeScope theme={theme} style={{ minHeight: '100vh' }}>
       {/* ── Header ── */}
-      <div style={{ background: `linear-gradient(135deg, ${C.bgDark} 0%, ${C.bg} 100%)`, padding: '0 32px', boxShadow: '0 2px 20px rgba(37,99,235,0.2)' }}>
+      {/* Fondo solido en accent-deep (no un degradado hacia --clay-accent):
+          accent-deep es oscuro en los 3 temas, asi que el texto blanco de
+          aqui abajo siempre tiene contraste -- un degradado hacia el acento
+          normal fallaria en oscuro (acento claro + texto blanco). */}
+      <div style={{ background: 'var(--clay-accent-deep)', padding: '0 32px', boxShadow: '0 2px 20px rgba(0,0,0,0.2)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
@@ -765,6 +780,6 @@ export default function AdminPage() {
 
         {state.status === 'loaded' && <Dashboard m={state.metrics} />}
       </div>
-    </div>
+    </ClayThemeScope>
   )
 }

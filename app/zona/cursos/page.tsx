@@ -19,6 +19,8 @@ import {
   type CaminoCurriculumTopic,
 } from '@/app/lib/camino/caminoCurriculumPlan'
 import { DEFAULT_GRADE_THRESHOLD_CONFIG, resolveGradeThreshold, shouldSuggestRepeat, type GradeThresholdConfig } from '@/app/lib/camino/gradeThreshold'
+import ClayThemeScope from '@/components/clay/ClayThemeScope'
+import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 
 const LIBRARY_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_134153_21d8ecce-c198-4ae1-8fc9-22814072fdbc.png'
 
@@ -203,6 +205,7 @@ export default function ZonaCursosPage() {
   const router = useRouter()
   const billing = useBillingStatus()
   const internalUser = useIsInternalUser()
+  const { theme } = useClayThemePreference()
 
   useEffect(() => {
     async function load() {
@@ -278,7 +281,7 @@ export default function ZonaCursosPage() {
   const canAccess = billing.hasActivePack || internalUser.isInternalUser
 
   return (
-    <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#f8fafc' }}>
+    <ClayThemeScope theme={theme} style={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>
       <style>{`
         .cursos-hero { height: 200px !important; }
         .cursos-hero-overlay { background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%) !important; padding: 20px 28px !important; }
@@ -311,31 +314,31 @@ export default function ZonaCursosPage() {
         </div>
 
         {/* Tab nav */}
-        <div style={{ background: 'white', borderBottom: '1px solid #f1f5f9', display: 'flex', padding: '0 20px', flexShrink: 0, overflowX: 'auto' }}>
-          <a href="/zona" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: '#64748b', borderBottom: '3px solid transparent', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
+        <div style={{ background: 'var(--clay-surface)', borderBottom: '1px solid var(--clay-border)', display: 'flex', padding: '0 20px', flexShrink: 0, overflowX: 'auto' }}>
+          <a href="/zona" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: 'var(--clay-text-muted)', borderBottom: '3px solid transparent', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
             <Zap size={13} /> Zona de Estudio
           </a>
           {CANVAS_ENABLED && (
-            <a href="/zona/canvas" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: '#64748b', borderBottom: '3px solid transparent', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
+            <a href="/zona/canvas" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: 'var(--clay-text-muted)', borderBottom: '3px solid transparent', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
               <LayoutGrid size={13} /> Mi Espacio
             </a>
           )}
-          <a href="/zona/cursos" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: '#0f172a', borderBottom: '3px solid #2563eb', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
+          <a href="/zona/cursos" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: 'var(--clay-text)', borderBottom: '3px solid var(--clay-accent)', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
             <BookOpen size={13} /> Mis Cursos
           </a>
         </div>
 
         <main className="kairo-page-scroll cursos-main" style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 40px' }}>
           {!canAccess ? (
-            <div style={{ borderRadius: 20, border: '1px solid #e2e8f0', background: 'white', padding: '40px 28px', textAlign: 'center', maxWidth: 440, margin: '32px auto 0' }}>
-              <div style={{ width: 52, height: 52, borderRadius: 16, background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                <Lock size={22} color="#2563eb" />
+            <div style={{ borderRadius: 20, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', padding: '40px 28px', textAlign: 'center', maxWidth: 440, margin: '32px auto 0' }}>
+              <div style={{ width: 52, height: 52, borderRadius: 16, background: 'var(--clay-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                <Lock size={22} color="var(--clay-on-accent)" />
               </div>
-              <p style={{ fontSize: 15.5, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>Mis Cursos es para alumnos con plan activo</p>
-              <p style={{ fontSize: 13.5, color: '#64748b', marginBottom: 20, lineHeight: 1.6 }}>
+              <p style={{ fontSize: 15.5, fontWeight: 900, color: 'var(--clay-text)', marginBottom: 8 }}>Mis Cursos es para alumnos con plan activo</p>
+              <p style={{ fontSize: 13.5, color: 'var(--clay-text-muted)', marginBottom: 20, lineHeight: 1.6 }}>
                 Desbloquea todo el temario de Camino PAU organizado por asignatura y bloque con cualquier plan de pago de Kairo.
               </p>
-              <a href="/pricing" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, background: '#2563eb', padding: '11px 24px', fontSize: 13.5, fontWeight: 900, color: 'white', textDecoration: 'none' }}>Ver planes</a>
+              <a href="/pricing" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, background: 'var(--clay-accent-deep)', padding: '11px 24px', fontSize: 13.5, fontWeight: 900, color: 'var(--clay-on-accent)', textDecoration: 'none' }}>Ver planes</a>
             </div>
           ) : (
             <>
@@ -346,11 +349,11 @@ export default function ZonaCursosPage() {
               />
 
               {groups.length === 0 ? (
-                <div style={{ borderRadius: 20, border: '1px dashed #cbd5e1', background: 'white', padding: '32px 20px', textAlign: 'center' }}>
-                  <BookOpen size={28} color="#94a3b8" style={{ marginBottom: 10 }} />
-                  <p style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>Todavía no tienes cursos generados</p>
-                  <p style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>Completa tu Camino PAU para que aparezcan aquí, organizados por asignatura.</p>
-                  <a href="/camino" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, background: '#2563eb', padding: '10px 20px', fontSize: 13, fontWeight: 900, color: 'white', textDecoration: 'none' }}>Ir a Camino PAU</a>
+                <div style={{ borderRadius: 20, border: '1px dashed var(--clay-border)', background: 'var(--clay-surface)', padding: '32px 20px', textAlign: 'center' }}>
+                  <BookOpen size={28} color="var(--clay-text-muted)" style={{ marginBottom: 10 }} />
+                  <p style={{ fontSize: 14, fontWeight: 800, color: 'var(--clay-text)', marginBottom: 6 }}>Todavía no tienes cursos generados</p>
+                  <p style={{ fontSize: 13, color: 'var(--clay-text-muted)', marginBottom: 16 }}>Completa tu Camino PAU para que aparezcan aquí, organizados por asignatura.</p>
+                  <a href="/camino" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, background: 'var(--clay-accent-deep)', padding: '10px 20px', fontSize: 13, fontWeight: 900, color: 'var(--clay-on-accent)', textDecoration: 'none' }}>Ir a Camino PAU</a>
                 </div>
               ) : (
                 <>
@@ -381,7 +384,7 @@ export default function ZonaCursosPage() {
                           display: 'flex', alignItems: 'center', gap: 8,
                           padding: '8px 14px', borderRadius: 999, cursor: 'pointer',
                           border: `1px solid ${isActive ? accent.text : accent.border}`,
-                          background: isActive ? accent.bg : 'white',
+                          background: isActive ? accent.bg : 'var(--clay-surface)',
                           color: accent.text, fontSize: 12, fontWeight: 900,
                         }}
                       >
@@ -396,19 +399,19 @@ export default function ZonaCursosPage() {
                   <div>
                     {/* Progress bar for the selected subject */}
                     <div style={{ marginBottom: 18 }}>
-                      <div style={{ height: 8, borderRadius: 999, background: '#e2e8f0', overflow: 'hidden' }}>
+                      <div style={{ height: 8, borderRadius: 999, background: 'var(--clay-border)', overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${activeGroup.total ? Math.round((activeGroup.completed / activeGroup.total) * 100) : 0}%`, background: '#34d399', borderRadius: 999 }} />
                       </div>
-                      <p style={{ marginTop: 6, fontSize: 11.5, fontWeight: 700, color: '#64748b' }}>
+                      <p style={{ marginTop: 6, fontSize: 11.5, fontWeight: 700, color: 'var(--clay-text-muted)' }}>
                         {activeGroup.completed} de {activeGroup.total} temas completados en {activeGroup.label}
                       </p>
                     </div>
 
                     {activeGroup.blocks.map(block => (
-                      <section key={block.blockTitle} style={{ marginBottom: 16, borderRadius: 20, border: '1px solid #e2e8f0', background: 'white', padding: 16 }}>
+                      <section key={block.blockTitle} style={{ marginBottom: 16, borderRadius: 20, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', padding: 16 }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                          <h3 style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', margin: 0 }}>{block.blockTitle}</h3>
-                          <span style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8' }}>
+                          <h3 style={{ fontSize: 13, fontWeight: 900, color: 'var(--clay-text)', margin: 0 }}>{block.blockTitle}</h3>
+                          <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--clay-text-muted)' }}>
                             {block.items.filter(i => i.status === 'completed').length}/{block.items.length}
                           </span>
                         </div>
@@ -420,8 +423,8 @@ export default function ZonaCursosPage() {
                             const suggestRepeat = item.status === 'completed' && item.latestHistorialId != null && item.href != null && shouldSuggestRepeat(notaOnTen, threshold)
                             const rowStyle: CSSProperties = {
                               display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
-                              padding: '10px 12px', borderRadius: 12, border: '1px solid #eef2f7',
-                              background: item.status === 'completed' ? '#f8fafc' : 'white',
+                              padding: '10px 12px', borderRadius: 12, border: '1px solid var(--clay-border)',
+                              background: item.status === 'completed' ? 'var(--clay-bg)' : 'var(--clay-surface)',
                               textDecoration: 'none', cursor: item.href ? 'pointer' : 'default',
                               opacity: item.href ? 1 : .6,
                             }
@@ -429,7 +432,7 @@ export default function ZonaCursosPage() {
                               <span style={{ display: 'flex', flexDirection: 'column', gap: 3, overflow: 'hidden', minWidth: 0 }}>
                                 <span style={{
                                   fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                                  color: item.status === 'completed' ? '#94a3b8' : '#0f172a',
+                                  color: item.status === 'completed' ? 'var(--clay-text-muted)' : 'var(--clay-text)',
                                   textDecoration: item.status === 'completed' ? 'line-through' : 'none',
                                 }}>
                                   {item.title}
@@ -502,17 +505,17 @@ export default function ZonaCursosPage() {
         >
           <div
             onClick={e => e.stopPropagation()}
-            style={{ width: '100%', maxWidth: 400, background: 'white', borderRadius: 22, border: '1px solid #e2e8f0', boxShadow: '0 24px 60px rgba(15,23,42,0.22)', padding: 26 }}
+            style={{ width: '100%', maxWidth: 400, background: 'var(--clay-surface)', borderRadius: 22, border: '1px solid var(--clay-border)', boxShadow: '0 24px 60px rgba(15,23,42,0.22)', padding: 26 }}
           >
-            <p style={{ fontSize: 16, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>Ya completaste este tema</p>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#64748b', lineHeight: 1.6, marginBottom: 20 }}>
+            <p style={{ fontSize: 16, fontWeight: 900, color: 'var(--clay-text)', marginBottom: 8 }}>Ya completaste este tema</p>
+            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--clay-text-muted)', lineHeight: 1.6, marginBottom: 20 }}>
               &ldquo;{confirmItem.title}&rdquo; ya está marcado como completado{confirmItem.nota != null ? ` con nota ${formatGrade(confirmItem.nota)}/${formatGrade(confirmItem.notaMaxima ?? 10)}` : ''}. ¿Quieres repetirlo?
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button
                 type="button"
                 onClick={() => setConfirmItem(null)}
-                style={{ padding: '10px 18px', borderRadius: 12, background: 'white', border: '1px solid #e2e8f0', color: '#475569', fontSize: 13, fontWeight: 900, cursor: 'pointer' }}
+                style={{ padding: '10px 18px', borderRadius: 12, background: 'var(--clay-surface)', border: '1px solid var(--clay-border)', color: 'var(--clay-text-muted)', fontSize: 13, fontWeight: 900, cursor: 'pointer' }}
               >
                 Cancelar
               </button>
@@ -533,6 +536,6 @@ export default function ZonaCursosPage() {
           </div>
         </div>
       )}
-    </div>
+    </ClayThemeScope>
   )
 }

@@ -10,6 +10,8 @@ import KairoSpinner from '@/app/components/ui/KairoSpinner'
 import Flashcards from '@/components/zona/Flashcards'
 import SectionIntroCard from '@/components/shared/SectionIntroCard'
 import type { Flashcard, ZonaUser } from '@/components/zona/types'
+import ClayThemeScope from '@/components/clay/ClayThemeScope'
+import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 
 const STUDY_DESK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_130632_68dfbf7a-aa85-468a-87c7-855c54c5b88f.png'
 
@@ -51,10 +53,12 @@ export default function ZonaPage() {
     load()
   }, [router])
 
+  const { theme } = useClayThemePreference()
+
   if (loading || !user) return <KairoSpinner />
 
   return (
-    <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#f8fafc' }}>
+    <ClayThemeScope theme={theme} style={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>
       <style>{`
         .zona-hero {
           height: 200px !important;
@@ -103,14 +107,14 @@ export default function ZonaPage() {
         </div>
 
         {/* Subject chips band */}
-        <div style={{ background: 'white', borderBottom: '2px solid #0f172a', display: 'flex', overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'none', padding: '0 20px' }}>
+        <div style={{ background: 'var(--clay-surface)', borderBottom: '2px solid var(--clay-border)', display: 'flex', overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'none', padding: '0 20px' }}>
           {SUBJ_CHIPS.map((chip) => {
             const isActive = activeSubject === chip.id
             return (
               <button
                 key={chip.label}
                 onClick={() => setActiveSubject(chip.id)}
-                style={{ padding: '12px 14px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 7, borderBottom: isActive ? '3px solid #2563eb' : '3px solid transparent', marginBottom: -2, fontSize: 11, fontWeight: 700, color: isActive ? '#0f172a' : '#64748b', background: 'none', border: 'none', borderBottomStyle: 'solid', cursor: 'pointer' }}
+                style={{ padding: '12px 14px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 7, borderBottom: isActive ? '3px solid var(--clay-accent)' : '3px solid transparent', marginBottom: -2, fontSize: 11, fontWeight: 700, color: isActive ? 'var(--clay-text)' : 'var(--clay-text-muted)', background: 'none', border: 'none', borderBottomStyle: 'solid', cursor: 'pointer' }}
               >
                 <div style={{ width: 6, height: 6, borderRadius: '50%', background: chip.color, flexShrink: 0 }} />
                 {chip.label}
@@ -120,16 +124,16 @@ export default function ZonaPage() {
         </div>
 
         {/* Tab nav */}
-        <div style={{ background: 'white', borderBottom: '1px solid #f1f5f9', display: 'flex', padding: '0 20px', flexShrink: 0 }}>
-          <a href="/zona" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: '#0f172a', borderBottom: '3px solid #2563eb', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7 }}>
+        <div style={{ background: 'var(--clay-surface)', borderBottom: '1px solid var(--clay-border)', display: 'flex', padding: '0 20px', flexShrink: 0 }}>
+          <a href="/zona" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: 'var(--clay-text)', borderBottom: '3px solid var(--clay-accent)', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7 }}>
             <Zap size={13} /> Zona de Estudio
           </a>
           {CANVAS_ENABLED && (
-            <a href="/zona/canvas" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: '#64748b', borderBottom: '3px solid transparent', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7 }}>
+            <a href="/zona/canvas" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: 'var(--clay-text-muted)', borderBottom: '3px solid transparent', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7 }}>
               <LayoutGrid size={13} /> Mi Espacio
             </a>
           )}
-          <a href="/zona/cursos" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: '#64748b', borderBottom: '3px solid transparent', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7 }}>
+          <a href="/zona/cursos" style={{ padding: '13px 20px', fontSize: 12, fontWeight: 900, color: 'var(--clay-text-muted)', borderBottom: '3px solid transparent', marginBottom: -1, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 7 }}>
             <BookOpen size={13} /> Mis Cursos
           </a>
         </div>
@@ -144,6 +148,6 @@ export default function ZonaPage() {
           <Flashcards userId={user.id} initialCards={cards} externalSubject={activeSubject} />
         </main>
       </div>
-    </div>
+    </ClayThemeScope>
   )
 }

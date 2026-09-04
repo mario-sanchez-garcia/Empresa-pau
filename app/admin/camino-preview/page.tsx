@@ -5,17 +5,22 @@ import { supabase } from '@/app/lib/supabase'
 import { useIsInternalUser } from '@/app/hooks/useIsInternalUser'
 import { buildTopicHref, getTopicByV2SortOrder, normalizeCaminoSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 import type { CaminoContentV2Row } from '@/app/api/admin/camino-content-v2/route'
+import ClayThemeScope from '@/components/clay/ClayThemeScope'
+import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
+// Mismo patron que app/admin/page.tsx y camino-status: C.bg es texto legible
+// sobre el fondo claro del cuerpo; la cabecera (fondo con texto blanco) usa
+// --clay-accent-deep explicito porque es oscuro en los 3 temas.
 const C = {
-  bg: '#2563eb',
-  bgDark: '#1d4ed8',
-  light: '#eff6ff',
-  ink: '#111827',
-  muted: '#64748b',
-  border: '#dbe7fb',
-  surface: '#ffffff',
-  shadow: '0 4px 24px rgba(37,99,235,0.07)',
+  bg: 'var(--clay-accent-text)',
+  bgDark: 'var(--clay-accent-deep)',
+  light: 'var(--clay-accent-soft)',
+  ink: 'var(--clay-text)',
+  muted: 'var(--clay-text-muted)',
+  border: 'var(--clay-border)',
+  surface: 'var(--clay-surface)',
+  shadow: '0 10px 0 var(--clay-shadow-shelf), 0 16px 28px var(--clay-shadow-elevate)',
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -83,7 +88,7 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
 
         return (
           <div key={blockKey} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', boxShadow: C.shadow }}>
-            <div style={{ background: '#f8faff', padding: '12px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ background: 'var(--clay-surface-raised)', padding: '12px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
               <div>
                 <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.09em', margin: '0 0 2px' }}>
                   {subjectLabel}
@@ -130,7 +135,7 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
                       // sort_order es único por subject en los datos actuales, pero
                       // no hay una restricción UNIQUE que lo garantice en el esquema
                       // — se combina con subject por si acaso, en vez de asumirlo.
-                      <tr key={`${row.subject}-${row.sort_order}`} style={{ background: i % 2 === 0 ? C.surface : '#fafcff' }}>
+                      <tr key={`${row.subject}-${row.sort_order}`} style={{ background: i % 2 === 0 ? C.surface : 'var(--clay-surface-raised)' }}>
                         <td style={{ padding: '9px 14px', color: C.muted, fontWeight: 700, fontSize: 11, borderBottom: `1px solid ${C.border}`, whiteSpace: 'nowrap' }}>
                           {row.sort_order}
                         </td>
@@ -263,11 +268,12 @@ export default function CaminoPreviewPage() {
 
   const subjectCfg = SUBJECTS.find(s => s.key === activeSubject)!
   const loadState = cache[activeSubject] ?? { status: 'idle' }
+  const { theme } = useClayThemePreference()
 
   return (
-    <div style={{ minHeight: '100vh', background: `linear-gradient(160deg, ${C.light} 0%, #f8faff 100%)` }}>
+    <ClayThemeScope theme={theme} style={{ minHeight: '100vh' }}>
       {/* ── Header ── */}
-      <div style={{ background: `linear-gradient(135deg, ${C.bgDark} 0%, ${C.bg} 100%)`, padding: '0 32px', boxShadow: '0 2px 20px rgba(37,99,235,0.2)' }}>
+      <div style={{ background: 'var(--clay-accent-deep)', padding: '0 32px', boxShadow: '0 2px 20px rgba(0,0,0,0.2)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
@@ -382,6 +388,6 @@ export default function CaminoPreviewPage() {
           </>
         )}
       </div>
-    </div>
+    </ClayThemeScope>
   )
 }

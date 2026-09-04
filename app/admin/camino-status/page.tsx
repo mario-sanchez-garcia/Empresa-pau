@@ -2,16 +2,22 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
+import ClayThemeScope from '@/components/clay/ClayThemeScope'
+import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 
+// Mismo patron que app/admin/page.tsx: C.bg es texto legible sobre el fondo
+// claro del cuerpo (--clay-accent-text); el unico sitio que lo usaba como
+// FONDO con texto blanco (la cabecera) pasa a --clay-accent-deep explicito,
+// que es oscuro en los 3 temas.
 const C = {
-  bg: '#2563eb',
-  bgDark: '#1d4ed8',
-  light: '#eff6ff',
-  ink: '#111827',
-  muted: '#64748b',
-  border: '#dbe7fb',
-  surface: '#ffffff',
-  shadow: '0 4px 24px rgba(37,99,235,0.07)',
+  bg: 'var(--clay-accent-text)',
+  bgDark: 'var(--clay-accent-deep)',
+  light: 'var(--clay-accent-soft)',
+  ink: 'var(--clay-text)',
+  muted: 'var(--clay-text-muted)',
+  border: 'var(--clay-border)',
+  surface: 'var(--clay-surface)',
+  shadow: '0 10px 0 var(--clay-shadow-shelf), 0 16px 28px var(--clay-shadow-elevate)',
 }
 
 type UserStatus = {
@@ -86,10 +92,12 @@ export default function CaminoStatusPage() {
     load()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const { theme } = useClayThemePreference()
+
   return (
-    <div style={{ minHeight: '100vh', background: `linear-gradient(160deg, ${C.light} 0%, #f8faff 100%)` }}>
+    <ClayThemeScope theme={theme} style={{ minHeight: '100vh' }}>
       {/* ── Header ── */}
-      <div style={{ background: `linear-gradient(135deg, ${C.bgDark} 0%, ${C.bg} 100%)`, padding: '0 32px', boxShadow: '0 2px 20px rgba(37,99,235,0.2)' }}>
+      <div style={{ background: 'var(--clay-accent-deep)', padding: '0 32px', boxShadow: '0 2px 20px rgba(0,0,0,0.2)' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
@@ -179,7 +187,7 @@ export default function CaminoStatusPage() {
                     <tr>
                       {COLS.map(col => (
                         <th key={col} style={{
-                          textAlign: 'left', padding: '9px 14px', background: '#f8faff',
+                          textAlign: 'left', padding: '9px 14px', background: 'var(--clay-surface-raised)',
                           color: C.muted, fontWeight: 700, fontSize: 10, textTransform: 'uppercase',
                           letterSpacing: '0.08em', borderBottom: `1px solid ${C.border}`, whiteSpace: 'nowrap',
                         }}>{col}</th>
@@ -194,7 +202,7 @@ export default function CaminoStatusPage() {
                         </td>
                       </tr>
                     ) : state.users.map((u, i) => (
-                      <tr key={u.email} style={{ background: i % 2 === 0 ? C.surface : '#fafcff' }}>
+                      <tr key={u.email} style={{ background: i % 2 === 0 ? C.surface : 'var(--clay-surface-raised)' }}>
                         <td style={{ padding: '8px 14px', fontFamily: 'var(--font-geist-mono, monospace)', fontSize: 11, borderBottom: `1px solid ${C.border}`, whiteSpace: 'nowrap', color: C.ink }}>
                           {u.email}
                         </td>
@@ -237,6 +245,6 @@ export default function CaminoStatusPage() {
           </>
         )}
       </div>
-    </div>
+    </ClayThemeScope>
   )
 }

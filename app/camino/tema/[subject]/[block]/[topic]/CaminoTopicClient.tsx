@@ -1627,35 +1627,78 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     </div>
                   </div>
                 )}
-                {score != null && (
-                  <p style={{ marginTop: 12, borderRadius: 4, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 14px', fontSize: 13, fontWeight: 900, color: '#065f46' }}>
-                    Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}
-                  </p>
-                )}
-                {mockCorrection && process.env.NODE_ENV !== 'production' && (
-                  <p style={{ marginTop: 8, display: 'inline-flex', borderRadius: 999, background: '#f8fafc', border: '1px solid #e2e8f0', padding: '4px 10px', fontSize: 11, fontWeight: 900, color: '#64748b' }}>
-                    Modo prueba
-                  </p>
-                )}
-                {correction && <div style={{ marginTop: 14 }}><CorrectionResultCard correction={correction} officialMaxScore={10} className="p-5 text-sm leading-7" /></div>}
-                {isFirstSession && score !== null && correction && !mockCorrection && (
-                  <div style={{ marginTop: 20, borderRadius: 12, background: '#0f172a', padding: '20px 22px', color: 'white' }}>
-                    <p style={{ fontSize: 15, fontWeight: 900, lineHeight: 1.4, marginBottom: 10 }}>
-                      {score < 5
-                        ? 'Este es tu punto de partida. Kairo ya sabe en qué tienes que trabajar y va a empezar por ahí.'
-                        : 'Buen comienzo. A partir de aquí Kairo ajusta tu Camino a lo que necesitas.'}
-                    </p>
-                    <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, marginBottom: 18 }}>
-                      Kairo convierte tus correcciones en la siguiente misión: qué hacer ahora, cuánto suma y cómo seguir avanzando.
-                    </p>
-                    <KairoMapCard embedded />
-                    <a
-                      href="/camino"
-                      style={{ display: 'inline-block', marginTop: 18, padding: '11px 20px', borderRadius: 8, background: '#2563eb', color: 'white', fontSize: 13, fontWeight: 900, textDecoration: 'none', letterSpacing: '-0.01em' }}
-                    >
-                      Ver mi Camino →
-                    </a>
-                  </div>
+                {/* Zona que quedó fuera del piloto clay original: la caja de
+                    nota, el badge "Modo prueba", la corrección en sí y la
+                    tarjeta de primera sesión no participaban del tema pese a
+                    vivir dentro de la ficha piloto de Bohr. Mismo patrón
+                    isClayPilot ? ClayThemeScope : legacy que el resto del
+                    archivo, para no afectar a ningún tema fuera del piloto. */}
+                {isClayPilot ? (
+                  <ClayThemeScope theme={clayTheme} style={{ background: 'transparent' }}>
+                    {score != null && (
+                      <p style={{ marginTop: 12, borderRadius: 4, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 14px', fontSize: 13, fontWeight: 900, color: '#065f46' }}>
+                        Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}
+                      </p>
+                    )}
+                    {mockCorrection && process.env.NODE_ENV !== 'production' && (
+                      <p style={{ marginTop: 8, display: 'inline-flex', borderRadius: 999, background: 'var(--clay-bg)', border: '1px solid var(--clay-border)', padding: '4px 10px', fontSize: 11, fontWeight: 900, color: 'var(--clay-text-muted)' }}>
+                        Modo prueba
+                      </p>
+                    )}
+                    {correction && <div style={{ marginTop: 14 }}><CorrectionResultCard correction={correction} officialMaxScore={10} className="p-5 text-sm leading-7" /></div>}
+                    {isFirstSession && score !== null && correction && !mockCorrection && (
+                      <div style={{ marginTop: 20, borderRadius: 12, background: 'var(--clay-accent-deep)', padding: '20px 22px', color: 'var(--clay-on-accent)' }}>
+                        <p style={{ fontSize: 15, fontWeight: 900, lineHeight: 1.4, marginBottom: 10 }}>
+                          {score < 5
+                            ? 'Este es tu punto de partida. Kairo ya sabe en qué tienes que trabajar y va a empezar por ahí.'
+                            : 'Buen comienzo. A partir de aquí Kairo ajusta tu Camino a lo que necesitas.'}
+                        </p>
+                        <p style={{ fontSize: 13, color: 'var(--clay-on-accent)', opacity: .6, lineHeight: 1.7, marginBottom: 18 }}>
+                          Kairo convierte tus correcciones en la siguiente misión: qué hacer ahora, cuánto suma y cómo seguir avanzando.
+                        </p>
+                        <KairoMapCard embedded />
+                        <a
+                          href="/camino"
+                          style={{ display: 'inline-block', marginTop: 18, padding: '11px 20px', borderRadius: 8, background: 'var(--clay-accent)', color: 'var(--clay-on-accent)', fontSize: 13, fontWeight: 900, textDecoration: 'none', letterSpacing: '-0.01em' }}
+                        >
+                          Ver mi Camino →
+                        </a>
+                      </div>
+                    )}
+                  </ClayThemeScope>
+                ) : (
+                  <>
+                    {score != null && (
+                      <p style={{ marginTop: 12, borderRadius: 4, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 14px', fontSize: 13, fontWeight: 900, color: '#065f46' }}>
+                        Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}
+                      </p>
+                    )}
+                    {mockCorrection && process.env.NODE_ENV !== 'production' && (
+                      <p style={{ marginTop: 8, display: 'inline-flex', borderRadius: 999, background: '#f8fafc', border: '1px solid #e2e8f0', padding: '4px 10px', fontSize: 11, fontWeight: 900, color: '#64748b' }}>
+                        Modo prueba
+                      </p>
+                    )}
+                    {correction && <div style={{ marginTop: 14 }}><CorrectionResultCard correction={correction} officialMaxScore={10} className="p-5 text-sm leading-7" /></div>}
+                    {isFirstSession && score !== null && correction && !mockCorrection && (
+                      <div style={{ marginTop: 20, borderRadius: 12, background: '#0f172a', padding: '20px 22px', color: 'white' }}>
+                        <p style={{ fontSize: 15, fontWeight: 900, lineHeight: 1.4, marginBottom: 10 }}>
+                          {score < 5
+                            ? 'Este es tu punto de partida. Kairo ya sabe en qué tienes que trabajar y va a empezar por ahí.'
+                            : 'Buen comienzo. A partir de aquí Kairo ajusta tu Camino a lo que necesitas.'}
+                        </p>
+                        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, marginBottom: 18 }}>
+                          Kairo convierte tus correcciones en la siguiente misión: qué hacer ahora, cuánto suma y cómo seguir avanzando.
+                        </p>
+                        <KairoMapCard embedded />
+                        <a
+                          href="/camino"
+                          style={{ display: 'inline-block', marginTop: 18, padding: '11px 20px', borderRadius: 8, background: '#2563eb', color: 'white', fontSize: 13, fontWeight: 900, textDecoration: 'none', letterSpacing: '-0.01em' }}
+                        >
+                          Ver mi Camino →
+                        </a>
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             )}

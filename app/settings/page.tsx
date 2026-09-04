@@ -13,6 +13,8 @@ import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 import { DEFAULT_GRADE_THRESHOLD, type GradeThresholdMode } from '@/app/lib/camino/gradeThreshold'
 import SidebarNav from '@/app/components/SidebarNav'
 import ClayThemeSwitcher from '@/components/clay/ClayThemeSwitcher'
+import ClayThemeScope from '@/components/clay/ClayThemeScope'
+import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 
 const NOTEBOOK_IMG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260725_171854_b8f1489a-95e8-4506-a6c5-742030f50c09.png'
 
@@ -89,6 +91,7 @@ function weeklyDaysLabel(days: number | null) {
 
 export default function SettingsPage() {
   const router = useRouter()
+  const { theme } = useClayThemePreference()
   const { ccaa, setCCAA } = useCCAA()
   const [userId, setUserId] = useState('')
   const [email, setEmail] = useState('')
@@ -517,7 +520,7 @@ export default function SettingsPage() {
   const defaultSubjectOptions = activeSubjectOptions.length > 0 ? activeSubjectOptions : FULL_SUBJECT_OPTIONS
 
   return (
-    <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: '#f8fafc' }}>
+    <ClayThemeScope theme={theme} style={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>
       <style>{`
         @media (max-width: 767px) {
           .settings-header { height: 160px !important; }
@@ -584,17 +587,17 @@ export default function SettingsPage() {
         <div style={{ height: 2, background: '#0f172a', flexShrink: 0 }} />
 
         {/* Stats band */}
-        <div style={{ background: 'white', borderBottom: '1px solid #f1f5f9', display: 'flex', flexShrink: 0 }}>
+        <div style={{ background: 'var(--clay-surface)', borderBottom: '1px solid var(--clay-border)', display: 'flex', flexShrink: 0 }}>
           {[
             { label: 'Tiempo diario', value: `${caminoDailyMinutes}`, unit: 'min' },
             { label: 'Asignatura', value: SUBJECT_LABELS[preferences.defaultSubject] ?? 'Mates II', unit: '' },
             { label: 'Corrección', value: preferences.correctionStyle.charAt(0).toUpperCase() + preferences.correctionStyle.slice(1), unit: '' },
             { label: 'Recordatorios', value: emailNotifications ? 'Activos' : 'Inactivos', unit: '', green: emailNotifications },
           ].map(s => (
-            <div key={s.label} style={{ flex: 1, padding: '12px 20px', borderRight: '1px solid #f1f5f9', textAlign: 'center' }}>
-              <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 4 }}>{s.label}</div>
-              <div style={{ fontSize: 18, fontWeight: 900, color: s.green ? '#16a34a' : '#0f172a', letterSpacing: '-.02em', lineHeight: 1 }}>
-                {s.value}{s.unit && <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', marginLeft: 2 }}>{s.unit}</span>}
+            <div key={s.label} style={{ flex: 1, padding: '12px 20px', borderRight: '1px solid var(--clay-border)', textAlign: 'center' }}>
+              <div style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--clay-text-muted)', marginBottom: 4 }}>{s.label}</div>
+              <div style={{ fontSize: 18, fontWeight: 900, color: s.green ? '#16a34a' : 'var(--clay-text)', letterSpacing: '-.02em', lineHeight: 1 }}>
+                {s.value}{s.unit && <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)', marginLeft: 2 }}>{s.unit}</span>}
               </div>
             </div>
           ))}
@@ -608,22 +611,22 @@ export default function SettingsPage() {
 
           {/* Username — full-width block with display/edit toggle */}
           <div style={{ marginBottom: 12 }}>
-            <span style={{ display: 'block', marginBottom: 5, fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8' }}>Nombre de usuario</span>
-            <div style={{ border: `1px solid ${usernameEditMode && (usernameStatus === 'taken' || usernameStatus === 'invalid') ? '#dc2626' : usernameEditMode && usernameStatus === 'available' ? '#16a34a' : '#e2e8f0'}`, borderRadius: 10, background: 'white', overflow: 'hidden', transition: 'border-color .15s' }}>
+            <span style={{ display: 'block', marginBottom: 5, fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--clay-text-muted)' }}>Nombre de usuario</span>
+            <div style={{ border: `1px solid ${usernameEditMode && (usernameStatus === 'taken' || usernameStatus === 'invalid') ? '#dc2626' : usernameEditMode && usernameStatus === 'available' ? '#16a34a' : 'var(--clay-border)'}`, borderRadius: 10, background: 'var(--clay-surface)', overflow: 'hidden', transition: 'border-color .15s' }}>
               {!usernameEditMode ? (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px' }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: username ? '#0f172a' : '#94a3b8', fontFamily: username ? 'monospace' : 'inherit' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: username ? 'var(--clay-text)' : 'var(--clay-text-muted)', fontFamily: username ? 'monospace' : 'inherit' }}>
                     {username ? `@${username}` : 'Sin nombre de usuario aún'}
                   </span>
                   <button type="button" onClick={enterUsernameEditMode}
-                    style={{ padding: '5px 12px', borderRadius: 6, background: '#f8fafc', border: '1px solid #e2e8f0', fontSize: 11, fontWeight: 900, color: '#0f172a', cursor: 'pointer' }}>
+                    style={{ padding: '5px 12px', borderRadius: 6, background: 'var(--clay-bg)', border: '1px solid var(--clay-border)', fontSize: 11, fontWeight: 900, color: 'var(--clay-text)', cursor: 'pointer' }}>
                     {username ? 'Cambiar →' : 'Añadir →'}
                   </button>
                 </div>
               ) : (
                 <div style={{ padding: '12px 14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${usernameStatus === 'available' ? '#16a34a' : usernameStatus === 'taken' || usernameStatus === 'invalid' ? '#dc2626' : '#e2e8f0'}`, borderRadius: 8, background: 'white', paddingLeft: 10, transition: 'border-color .15s' }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', flexShrink: 0, fontFamily: 'monospace' }}>@</span>
+                  <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${usernameStatus === 'available' ? '#16a34a' : usernameStatus === 'taken' || usernameStatus === 'invalid' ? '#dc2626' : 'var(--clay-border)'}`, borderRadius: 8, background: 'var(--clay-surface)', paddingLeft: 10, transition: 'border-color .15s' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--clay-text-muted)', flexShrink: 0, fontFamily: 'monospace' }}>@</span>
                     <input
                       value={usernameInput}
                       onChange={e => onUsernameInputChange(e.target.value)}
@@ -649,7 +652,7 @@ export default function SettingsPage() {
                         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                           {usernameSuggestions.map(s => (
                             <button key={s} type="button" onClick={() => { setUsernameInput(s); void checkUsernameSettings(s) }}
-                              style={{ padding: '3px 10px', border: '1px solid #e2e8f0', borderRadius: 6, background: '#f8fafc', fontSize: 11, fontWeight: 700, color: '#0f172a', cursor: 'pointer', fontFamily: 'monospace' }}>
+                              style={{ padding: '3px 10px', border: '1px solid var(--clay-border)', borderRadius: 6, background: 'var(--clay-bg)', fontSize: 11, fontWeight: 700, color: 'var(--clay-text)', cursor: 'pointer', fontFamily: 'monospace' }}>
                               @{s}
                             </button>
                           ))}
@@ -662,24 +665,24 @@ export default function SettingsPage() {
                   )}
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 10 }}>
                     <button type="button" onClick={cancelUsernameEdit}
-                      style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', fontSize: 11, fontWeight: 900, color: '#64748b', cursor: 'pointer' }}>
+                      style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', fontSize: 11, fontWeight: 900, color: 'var(--clay-text-muted)', cursor: 'pointer' }}>
                       Cancelar
                     </button>
                     <button type="button" onClick={saveUsernameNow}
                       disabled={usernameStatus === 'saving' || usernameStatus !== 'available' || !usernameInput.trim()}
-                      style={{ padding: '7px 14px', borderRadius: 8, border: 'none', background: (usernameStatus === 'available' || usernameStatus === 'saving') && usernameInput.trim() ? '#0f172a' : '#e2e8f0', color: (usernameStatus === 'available' || usernameStatus === 'saving') && usernameInput.trim() ? 'white' : '#94a3b8', fontSize: 11, fontWeight: 900, cursor: usernameStatus === 'available' && usernameInput.trim() ? 'pointer' : 'not-allowed' }}>
+                      style={{ padding: '7px 14px', borderRadius: 8, border: 'none', background: (usernameStatus === 'available' || usernameStatus === 'saving') && usernameInput.trim() ? 'var(--clay-accent-deep)' : 'var(--clay-border)', color: (usernameStatus === 'available' || usernameStatus === 'saving') && usernameInput.trim() ? 'var(--clay-on-accent)' : 'var(--clay-text-muted)', fontSize: 11, fontWeight: 900, cursor: usernameStatus === 'available' && usernameInput.trim() ? 'pointer' : 'not-allowed' }}>
                       {usernameStatus === 'saving' ? 'Guardando…' : 'Guardar cambio'}
                     </button>
                   </div>
                 </div>
               )}
             </div>
-            <small style={{ display: 'block', marginTop: 6, fontSize: 10, lineHeight: 1.4, color: '#94a3b8', fontWeight: 650 }}>Único en Kairo · 3–20 caracteres · Aparece en clasificaciones</small>
+            <small style={{ display: 'block', marginTop: 6, fontSize: 10, lineHeight: 1.4, color: 'var(--clay-text-muted)', fontWeight: 650 }}>Único en Kairo · 3–20 caracteres · Aparece en clasificaciones</small>
           </div>
 
           <div className="settings-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 28 }}>
             <Field label="Email">
-              <input value={email} readOnly style={{ ...inputStyle, background: '#f8fafc', color: '#94a3b8', cursor: 'not-allowed' }} />
+              <input value={email} readOnly style={{ ...inputStyle, background: 'var(--clay-bg)', color: 'var(--clay-text-muted)', cursor: 'not-allowed' }} />
             </Field>
             <Field label="Comunidad por defecto">
               <select value={ccaa} onChange={e => setCCAA(e.target.value as CCAA)} style={inputStyle}>
@@ -701,14 +704,14 @@ export default function SettingsPage() {
           {hasActivePack && (
             <>
               <Section label="Facturación" />
-              <div style={{ marginBottom: 28, borderRadius: 14, border: '1px solid #e2e8f0', background: 'white', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+              <div style={{ marginBottom: 28, borderRadius: 14, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
                 <div>
-                  <strong style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#0f172a' }}>Gestionar mi suscripción</strong>
-                  <small style={{ display: 'block', marginTop: 4, fontSize: 11, color: '#94a3b8' }}>Cambia tu método de pago, descarga facturas o cancela tu plan cuando quieras.</small>
+                  <strong style={{ display: 'block', fontSize: 13, fontWeight: 700, color: 'var(--clay-text)' }}>Gestionar mi suscripción</strong>
+                  <small style={{ display: 'block', marginTop: 4, fontSize: 11, color: 'var(--clay-text-muted)' }}>Cambia tu método de pago, descarga facturas o cancela tu plan cuando quieras.</small>
                   {portalError && <small style={{ display: 'block', marginTop: 6, fontSize: 11, fontWeight: 700, color: '#dc2626' }}>{portalError}</small>}
                 </div>
                 <button type="button" onClick={openBillingPortal} disabled={portalLoading}
-                  style={{ padding: '9px 18px', borderRadius: 999, background: '#0f172a', color: 'white', fontSize: 12, fontWeight: 900, border: 'none', cursor: portalLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0, opacity: portalLoading ? .7 : 1 }}>
+                  style={{ padding: '9px 18px', borderRadius: 999, background: 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', fontSize: 12, fontWeight: 900, border: 'none', cursor: portalLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0, opacity: portalLoading ? .7 : 1 }}>
                   <CreditCard size={14} /> {portalLoading ? 'Abriendo…' : 'Gestionar facturación'}
                 </button>
               </div>
@@ -741,7 +744,7 @@ export default function SettingsPage() {
             </Field>
           </div>
           {caminoPrefsStatus && (
-            <div style={{ margin: '-4px 0 18px', borderRadius: 14, border: '1px solid #bfdbfe', background: '#eff6ff', padding: '10px 12px', fontSize: 11, fontWeight: 750, color: '#1d4ed8' }}>
+            <div style={{ margin: '-4px 0 18px', borderRadius: 14, border: '1px solid var(--clay-border)', background: 'var(--clay-accent-soft)', padding: '10px 12px', fontSize: 11, fontWeight: 750, color: 'var(--clay-accent-text)' }}>
               {caminoPrefsStatus}
             </div>
           )}
@@ -753,11 +756,11 @@ export default function SettingsPage() {
 
           {activeSubjectOptions.length > 0 && (
             <div style={{ marginBottom: 20 }}>
-              <span style={{ display: 'block', marginBottom: 8, fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8' }}>Cómo vas en cada asignatura</span>
+              <span style={{ display: 'block', marginBottom: 8, fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--clay-text-muted)' }}>Cómo vas en cada asignatura</span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {activeSubjectOptions.map(opt => (
-                  <div key={opt.value} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', borderRadius: 10, border: '1px solid #f1f5f9', background: '#fafbfc' }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{opt.label}</span>
+                  <div key={opt.value} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--clay-border)', background: 'var(--clay-bg)' }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--clay-text)' }}>{opt.label}</span>
                     <div style={{ display: 'flex', gap: 4 }}>
                       {SUBJECT_LEVELS.map(level => {
                         const active = subjectLevels[opt.value] === level
@@ -768,9 +771,9 @@ export default function SettingsPage() {
                             onClick={() => setSubjectLevels(cur => ({ ...cur, [opt.value]: level }))}
                             style={{
                               padding: '6px 10px', borderRadius: 8, fontSize: 10, fontWeight: 800,
-                              border: `1.5px solid ${active ? '#93c5fd' : '#e2e8f0'}`,
-                              background: active ? '#eff6ff' : 'white',
-                              color: active ? '#1d4ed8' : '#94a3b8',
+                              border: `1.5px solid ${active ? 'var(--clay-accent)' : 'var(--clay-border)'}`,
+                              background: active ? 'var(--clay-accent-soft)' : 'var(--clay-surface)',
+                              color: active ? 'var(--clay-accent-text)' : 'var(--clay-text-muted)',
                               cursor: 'pointer',
                             }}
                           >
@@ -787,7 +790,7 @@ export default function SettingsPage() {
           )}
 
           <div style={{ marginBottom: 20 }}>
-            <span style={{ display: 'block', marginBottom: 8, fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8' }}>
+            <span style={{ display: 'block', marginBottom: 8, fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--clay-text-muted)' }}>
               Repetir para mejorar
             </span>
             <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
@@ -803,9 +806,9 @@ export default function SettingsPage() {
                     onClick={() => setGradeThresholdMode(opt.value)}
                     style={{
                       padding: '7px 12px', borderRadius: 10, fontSize: 11, fontWeight: 800,
-                      border: `1.5px solid ${active ? '#93c5fd' : '#e2e8f0'}`,
-                      background: active ? '#eff6ff' : 'white',
-                      color: active ? '#1d4ed8' : '#94a3b8',
+                      border: `1.5px solid ${active ? 'var(--clay-accent)' : 'var(--clay-border)'}`,
+                      background: active ? 'var(--clay-accent-soft)' : 'var(--clay-surface)',
+                      color: active ? 'var(--clay-accent-text)' : 'var(--clay-text-muted)',
                       cursor: 'pointer',
                     }}
                   >
@@ -816,8 +819,8 @@ export default function SettingsPage() {
             </div>
 
             {gradeThresholdMode === 'general' ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, border: '1px solid #f1f5f9', background: '#fafbfc' }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>Sugerir repetir si saco menos de</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--clay-border)', background: 'var(--clay-bg)' }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--clay-text)' }}>Sugerir repetir si saco menos de</span>
                 <div style={{ display: 'flex', gap: 4 }}>
                   {GRADE_THRESHOLD_OPTS.map(value => {
                     const active = (gradeThreshold ?? DEFAULT_GRADE_THRESHOLD) === value
@@ -828,9 +831,9 @@ export default function SettingsPage() {
                         onClick={() => setGradeThreshold(value)}
                         style={{
                           width: 30, height: 30, borderRadius: 8, fontSize: 11, fontWeight: 800, cursor: 'pointer',
-                          border: `1.5px solid ${active ? '#93c5fd' : '#e2e8f0'}`,
-                          background: active ? '#eff6ff' : 'white',
-                          color: active ? '#1d4ed8' : '#94a3b8',
+                          border: `1.5px solid ${active ? 'var(--clay-accent)' : 'var(--clay-border)'}`,
+                          background: active ? 'var(--clay-accent-soft)' : 'var(--clay-surface)',
+                          color: active ? 'var(--clay-accent-text)' : 'var(--clay-text-muted)',
                         }}
                       >
                         {value}
@@ -842,14 +845,14 @@ export default function SettingsPage() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {(onboarding?.subjects ?? []).length === 0 && (
-                  <p style={{ fontSize: 11.5, fontWeight: 700, color: '#94a3b8' }}>Añade asignaturas activas para ajustarlas una a una.</p>
+                  <p style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--clay-text-muted)' }}>Añade asignaturas activas para ajustarlas una a una.</p>
                 )}
                 {(onboarding?.subjects ?? []).map(subjectLabel => {
                   const slug = normalizeSubjectSlug(subjectLabel)
                   const current = subjectGradeThresholds[slug] ?? DEFAULT_GRADE_THRESHOLD
                   return (
-                    <div key={slug} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', borderRadius: 10, border: '1px solid #f1f5f9', background: '#fafbfc' }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{subjectLabel}</span>
+                    <div key={slug} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--clay-border)', background: 'var(--clay-bg)' }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--clay-text)' }}>{subjectLabel}</span>
                       <div style={{ display: 'flex', gap: 4 }}>
                         {GRADE_THRESHOLD_OPTS.map(value => {
                           const active = current === value
@@ -860,9 +863,9 @@ export default function SettingsPage() {
                               onClick={() => setSubjectGradeThresholds(cur => ({ ...cur, [slug]: value }))}
                               style={{
                                 width: 30, height: 30, borderRadius: 8, fontSize: 11, fontWeight: 800, cursor: 'pointer',
-                                border: `1.5px solid ${active ? '#93c5fd' : '#e2e8f0'}`,
-                                background: active ? '#eff6ff' : 'white',
-                                color: active ? '#1d4ed8' : '#94a3b8',
+                                border: `1.5px solid ${active ? 'var(--clay-accent)' : 'var(--clay-border)'}`,
+                                background: active ? 'var(--clay-accent-soft)' : 'var(--clay-surface)',
+                                color: active ? 'var(--clay-accent-text)' : 'var(--clay-text-muted)',
                               }}
                             >
                               {value}
@@ -883,7 +886,7 @@ export default function SettingsPage() {
               type="button"
               onClick={recalculateNow}
               disabled={recalculating}
-              style={{ padding: '10px 16px', borderRadius: 10, border: '1px solid #e2e8f0', background: 'white', fontSize: 12, fontWeight: 800, color: '#0f172a', cursor: recalculating ? 'default' : 'pointer', opacity: recalculating ? 0.6 : 1 }}
+              style={{ padding: '10px 16px', borderRadius: 10, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', fontSize: 12, fontWeight: 800, color: 'var(--clay-text)', cursor: recalculating ? 'default' : 'pointer', opacity: recalculating ? 0.6 : 1 }}
             >
               {recalculating ? 'Recalculando…' : 'Recalcular mi plan ahora'}
             </button>
@@ -910,7 +913,7 @@ export default function SettingsPage() {
             </Field>
           </div>
           <Toggle label="Mostrar consejos largos" description="Conservar explicaciones amplias al final de las correcciones." checked={preferences.longAdvice} onChange={v => setPreferences(cur => ({ ...cur, longAdvice: v }))} />
-          <p style={{ marginTop: 10, fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>Estas preferencias se guardan localmente en este dispositivo.</p>
+          <p style={{ marginTop: 10, fontSize: 11, fontWeight: 600, color: 'var(--clay-text-muted)' }}>Estas preferencias se guardan localmente en este dispositivo.</p>
           <div style={{ marginTop: 20 }}>
             <Field label="Instrucciones personalizadas">
               <textarea
@@ -921,14 +924,14 @@ export default function SettingsPage() {
                 style={{ ...inputStyle, resize: 'vertical', fontFamily: 'inherit' }}
               />
             </Field>
-            <p style={{ marginTop: 6, fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>El plan de tus parciales las tiene en cuenta al generar misiones.</p>
+            <p style={{ marginTop: 6, fontSize: 11, fontWeight: 600, color: 'var(--clay-text-muted)' }}>El plan de tus parciales las tiene en cuenta al generar misiones.</p>
           </div>
         </div>
 
         {/* Save bar */}
-        <div className="settings-savebar" style={{ background: 'white', borderTop: '2px solid #0f172a', padding: '12px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, gap: 12 }}>
+        <div className="settings-savebar" style={{ background: 'var(--clay-surface)', borderTop: '2px solid var(--clay-text)', padding: '12px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button type="button" onClick={logout} style={{ padding: '9px 18px', borderRadius: 999, background: 'white', color: '#dc2626', fontSize: 12, fontWeight: 900, border: '1px solid #fee2e2', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
+            <button type="button" onClick={logout} style={{ padding: '9px 18px', borderRadius: 999, background: 'var(--clay-surface)', color: '#dc2626', fontSize: 12, fontWeight: 900, border: '1px solid #fee2e2', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
               <LogOut size={14} /> Cerrar sesión
             </button>
             <button type="button" onClick={openDeleteModal} style={{ padding: '9px 18px', borderRadius: 999, background: '#fff7ed', color: '#c2410c', fontSize: 12, fontWeight: 900, border: '1px solid #fed7aa', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
@@ -937,7 +940,7 @@ export default function SettingsPage() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
             {saveError && <div style={{ maxWidth: 360, borderRadius: 10, border: '1px solid #fee2e2', background: '#fff5f5', padding: '8px 14px', fontSize: 11, fontWeight: 600, color: '#dc2626' }}>{saveError}</div>}
-            <button type="button" onClick={save} style={{ padding: '10px 22px', borderRadius: 999, background: '#0f172a', color: 'white', fontSize: 12, fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
+            <button type="button" onClick={save} style={{ padding: '10px 22px', borderRadius: 999, background: 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', fontSize: 12, fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
               <Save size={14} /> {saved ? 'Cambios guardados' : 'Guardar cambios'}
             </button>
           </div>
@@ -946,16 +949,16 @@ export default function SettingsPage() {
 
       {showDeleteModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(15,23,42,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div role="dialog" aria-modal="true" aria-labelledby="delete-account-title" style={{ width: 'min(460px, 100%)', borderRadius: 24, background: 'white', boxShadow: '0 24px 70px rgba(15,23,42,.26)', border: '1px solid #fee2e2', overflow: 'hidden' }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-account-title" style={{ width: 'min(460px, 100%)', borderRadius: 24, background: 'var(--clay-surface)', boxShadow: '0 24px 70px rgba(15,23,42,.26)', border: '1px solid #fee2e2', overflow: 'hidden' }}>
             <div style={{ padding: '22px 24px 18px', borderBottom: '1px solid #fee2e2', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
               <div>
                 <div style={{ width: 42, height: 42, borderRadius: 16, background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c2410c', marginBottom: 12 }}>
                   <Trash2 size={20} />
                 </div>
-                <h2 id="delete-account-title" style={{ margin: 0, fontSize: 22, fontWeight: 900, letterSpacing: '-.04em', color: '#0f172a' }}>Borrar cuenta</h2>
-                <p style={{ margin: '8px 0 0', fontSize: 13, lineHeight: 1.55, fontWeight: 600, color: '#64748b' }}>Esta acción eliminará tu cuenta y los datos asociados de Kairo. No se puede deshacer.</p>
+                <h2 id="delete-account-title" style={{ margin: 0, fontSize: 22, fontWeight: 900, letterSpacing: '-.04em', color: 'var(--clay-text)' }}>Borrar cuenta</h2>
+                <p style={{ margin: '8px 0 0', fontSize: 13, lineHeight: 1.55, fontWeight: 600, color: 'var(--clay-text-muted)' }}>Esta acción eliminará tu cuenta y los datos asociados de Kairo. No se puede deshacer.</p>
               </div>
-              <button type="button" onClick={() => setShowDeleteModal(false)} disabled={deleting} aria-label="Cerrar" style={{ width: 34, height: 34, borderRadius: 999, border: '1px solid #e2e8f0', background: 'white', color: '#64748b', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <button type="button" onClick={() => setShowDeleteModal(false)} disabled={deleting} aria-label="Cerrar" style={{ width: 34, height: 34, borderRadius: 999, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', color: 'var(--clay-text-muted)', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <X size={16} />
               </button>
             </div>
@@ -972,7 +975,7 @@ export default function SettingsPage() {
               </label>
               {deleteError && <div style={{ marginTop: 12, borderRadius: 12, border: '1px solid #fecaca', background: '#fff5f5', padding: '10px 12px', fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{deleteError}</div>}
               <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-                <button type="button" onClick={() => setShowDeleteModal(false)} disabled={deleting} style={{ padding: '10px 16px', borderRadius: 999, border: '1px solid #e2e8f0', background: 'white', color: '#475569', fontSize: 12, fontWeight: 900, cursor: deleting ? 'not-allowed' : 'pointer' }}>Cancelar</button>
+                <button type="button" onClick={() => setShowDeleteModal(false)} disabled={deleting} style={{ padding: '10px 16px', borderRadius: 999, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', color: 'var(--clay-text-muted)', fontSize: 12, fontWeight: 900, cursor: deleting ? 'not-allowed' : 'pointer' }}>Cancelar</button>
                 <button type="button" onClick={deleteAccount} disabled={deleting || deleteConfirm !== 'BORRAR'} style={{ padding: '10px 16px', borderRadius: 999, border: 'none', background: deleteConfirm === 'BORRAR' ? '#dc2626' : '#fecaca', color: 'white', fontSize: 12, fontWeight: 900, cursor: deleting || deleteConfirm !== 'BORRAR' ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
                   <Trash2 size={14} /> {deleting ? 'Borrando…' : 'Borrar definitivamente'}
                 </button>
@@ -981,17 +984,17 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
-    </div>
+    </ClayThemeScope>
   )
 }
 
-const inputStyle: React.CSSProperties = { width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13, fontWeight: 600, color: '#0f172a', background: 'white', outline: 'none' }
+const inputStyle: React.CSSProperties = { width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--clay-border)', fontSize: 13, fontWeight: 600, color: 'var(--clay-text)', background: 'var(--clay-surface)', outline: 'none' }
 
 function Section({ label }: { label: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-      <span style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#94a3b8', flexShrink: 0 }}>{label}</span>
-      <div style={{ flex: 1, height: 1, background: '#f1f5f9' }} />
+      <span style={{ fontSize: 8, fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--clay-text-muted)', flexShrink: 0 }}>{label}</span>
+      <div style={{ flex: 1, height: 1, background: 'var(--clay-border)' }} />
     </div>
   )
 }
@@ -999,24 +1002,24 @@ function Section({ label }: { label: string }) {
 function Field({ label, children }: { label: string, children: React.ReactNode }) {
   return (
     <label>
-      <span style={{ display: 'block', marginBottom: 5, fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8' }}>{label}</span>
+      <span style={{ display: 'block', marginBottom: 5, fontSize: 8, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--clay-text-muted)' }}>{label}</span>
       {children}
     </label>
   )
 }
 
 function Hint({ children }: { children: React.ReactNode }) {
-  return <small style={{ display: 'block', marginTop: 6, fontSize: 10, lineHeight: 1.4, color: '#94a3b8', fontWeight: 650 }}>{children}</small>
+  return <small style={{ display: 'block', marginTop: 6, fontSize: 10, lineHeight: 1.4, color: 'var(--clay-text-muted)', fontWeight: 650 }}>{children}</small>
 }
 
 function Toggle({ label, description, checked, onChange }: { label: string, description: string, checked: boolean, onChange: (v: boolean) => void }) {
   return (
-    <label style={{ display: 'flex', cursor: 'pointer', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '14px 0', borderBottom: '1px solid #f8fafc' }}>
+    <label style={{ display: 'flex', cursor: 'pointer', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '14px 0', borderBottom: '1px solid var(--clay-border)' }}>
       <span>
-        <strong style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{label}</strong>
-        <small style={{ display: 'block', marginTop: 4, fontSize: 11, color: '#94a3b8' }}>{description}</small>
+        <strong style={{ display: 'block', fontSize: 13, fontWeight: 700, color: 'var(--clay-text)' }}>{label}</strong>
+        <small style={{ display: 'block', marginTop: 4, fontSize: 11, color: 'var(--clay-text-muted)' }}>{description}</small>
       </span>
-      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} style={{ width: 18, height: 18, accentColor: '#2563eb', flexShrink: 0 }} />
+      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} style={{ width: 18, height: 18, accentColor: 'var(--clay-accent)', flexShrink: 0 }} />
     </label>
   )
 }

@@ -10,7 +10,17 @@ test('guardar una sesión iniciada manualmente', async ({ page, context }) => {
   await page.goto('/login?returnTo=%2Forientacion')
   process.stdout.write('Se ha abierto el navegador. Inicia sesión normalmente y, cuando veas Kairo autenticado, vuelve aquí y escribe listo.\n')
 
-  while (!await hasAuthenticatedSession(page)) {
+  for (;;) {
+    let authenticated = false
+    try {
+      authenticated = await hasAuthenticatedSession(page)
+    } catch {
+      // page.evaluate puede lanzar "Execution context was destroyed" si el
+      // login del alumno dispara justo entonces una navegación (p.ej. el
+      // redirect a /camino) — no es un fallo real, solo hay que reintentar
+      // en el siguiente tick en vez de abortar el test.
+    }
+    if (authenticated) break
     await page.waitForTimeout(750)
   }
 

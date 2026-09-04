@@ -16,7 +16,11 @@ export async function hasAuthenticatedSession(page: Page) {
     }
     if (!accessToken) return false
     try {
-      const response = await window.fetch('/api/admin/me', {
+      // /api/admin/me exige rol interno -- una cuenta de alumno normal nunca
+      // lo pasa, así que este check se quedaba esperando para siempre.
+      // /api/onboarding/me solo exige sesión válida (getAuthContext), que es
+      // lo único que hace falta comprobar aquí: que hay una sesión real.
+      const response = await window.fetch('/api/onboarding/me', {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
       return response.ok

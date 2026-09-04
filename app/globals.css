@@ -188,6 +188,47 @@
   color: inherit;
 }
 
+/* Mismo problema que p/li/strong arriba, pero en el resto de elementos que
+   MathMarkdown puede renderizar (encabezados, correcciones con tablas, etc.)
+   — cualquier corrección o texto de Camino que use estos elementos quedaba
+   con el mismo texto oscuro fijo e ilegible en tema oscuro. h1–h3 y las
+   celdas <td> no tienen fondo propio (heredan el de la tarjeta), así que
+   les basta con color: inherit, igual que p/li/strong. */
+[data-kairo-clay-theme] .math-markdown h1,
+[data-kairo-clay-theme] .math-markdown h2,
+[data-kairo-clay-theme] .math-markdown h3,
+[data-kairo-clay-theme] .math-markdown td {
+  color: inherit;
+}
+
+/* blockquote, las celdas <th> y <code> sí traen su propio fondo claro fijo
+   (bg-white/bg-blue-50/bg-slate-100) — aplicarles solo color:inherit
+   volvería el bug al revés (texto claro de tema oscuro sobre esas cajas
+   claras, otra vez ilegible). Aquí se sustituyen fondo y texto juntos por
+   el par de tokens clay correspondiente para que sigan siendo legibles en
+   los 3 temas. */
+[data-kairo-clay-theme] .math-markdown blockquote {
+  background: var(--clay-surface);
+  border-color: var(--clay-border);
+  border-left-color: var(--clay-accent);
+  color: var(--clay-text-muted);
+}
+
+[data-kairo-clay-theme] .math-markdown th,
+[data-kairo-clay-theme] .math-markdown td {
+  border-color: var(--clay-border);
+}
+
+[data-kairo-clay-theme] .math-markdown th {
+  background: var(--clay-accent-soft);
+  color: var(--clay-accent-text);
+}
+
+[data-kairo-clay-theme] .math-markdown code {
+  background: var(--clay-bg);
+  color: var(--clay-text);
+}
+
 /* MathAnswerToolbar (barra "ƒx Símbolos"/"Plantillas" sobre el textarea de
    respuesta) es un componente de corrección compartido — no se toca su
    archivo (ver AGENTS.md, piloto estético no debe tocar corrección/LaTeX).

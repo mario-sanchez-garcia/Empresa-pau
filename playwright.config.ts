@@ -41,5 +41,10 @@ export default defineConfig({
       testMatch: /(^|[\\/])camino-orientation\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'], channel: 'chrome', storageState: authState },
     },
+    {
+      name: 'pricing-public',
+      testMatch: /(^|[\\/])pricing\.spec\.ts$/,
+      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+    },
   ],
 })

@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser, createServiceClient } from '@/app/lib/billing/supabase'
 import { getStripe, isStripeConfigured, getAppUrl } from '@/app/lib/billing/stripe'
-import { getPlan, getLivePriceCents, isRecurringPlan } from '@/app/lib/billing/plans'
+import { getPlan, getLivePriceCents, isPurchasableCheckoutPlanId, isRecurringPlan } from '@/app/lib/billing/plans'
 import { checkServerRateLimit, getClientIp } from '@/app/lib/serverRateLimit'
 import { resolverPrecioConReserva } from '@/app/lib/billing/waitlistPrice'
+import { PRICING_PATH } from '@/app/lib/pricing'
 
 export const dynamic = 'force-dynamic'
-
-const ALLOWED_PLAN_IDS = ['pack_curso_pau', 'premium'] as const
 
 function getBearerToken(req: NextRequest): string | null {
   const auth = req.headers.get('authorization') ?? ''
@@ -44,7 +43,7 @@ export async function POST(request: NextRequest) {
   }
 
   const planId = typeof body.plan_id === 'string' ? body.plan_id.trim() : null
-  if (!planId || !(ALLOWED_PLAN_IDS as readonly string[]).includes(planId)) {
+  if (!isPurchasableCheckoutPlanId(planId)) {
     return NextResponse.json({ error: 'Plan no válido' }, { status: 400 })
   }
 
@@ -105,7 +104,7 @@ export async function POST(request: NextRequest) {
       plan_id: planId,
     },
     success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${appUrl}/pricing`,
+    cancel_url: `${appUrl}${PRICING_PATH}`,
     expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
   })
 

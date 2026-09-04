@@ -1,4 +1,10 @@
-export type CaminoPlanId = 'free' | 'premium' | 'curso_pau' | 'intensivo' | 'superpremium'
+import {
+  PLAN_DEFINITIONS,
+  normalizeCommercialPlanId,
+  type CommercialPlanId,
+} from '../pricing.ts'
+
+export type CaminoPlanId = CommercialPlanId
 
 export type CaminoPlanLimits = {
   id: CaminoPlanId
@@ -17,89 +23,26 @@ export type CaminoPlanLimits = {
 
 export const CAMINO_VARIABLE_MARGIN_FLOOR = 0.2
 
-export const CAMINO_PLAN_LIMITS: Record<CaminoPlanId, CaminoPlanLimits> = {
-  free: {
-    id: 'free',
-    label: 'Free',
-    monthlyPriceEur: 0,
-    correctionsPerMonth: 25,
-    photosPerMonth: 3,
-    partialsPerMonth: 1,
-    fullMocksPerMonth: 0,
-    caminoMode: 'limited',
-    maxStudyDaysPerWeek: 2,
-    includeBonusMissions: false,
-    variableMarginFloor: CAMINO_VARIABLE_MARGIN_FLOOR,
-    maxFlashcardsPerDeck: 15,
-  },
-  premium: {
-    id: 'premium',
-    label: 'Premium',
-    monthlyPriceEur: 9.99,
-    correctionsPerMonth: 200,
-    photosPerMonth: 80,
-    partialsPerMonth: 12,
-    fullMocksPerMonth: 5,
-    caminoMode: 'complete',
-    maxStudyDaysPerWeek: 6,
-    includeBonusMissions: true,
-    variableMarginFloor: CAMINO_VARIABLE_MARGIN_FLOOR,
-    maxFlashcardsPerDeck: 40,
-  },
-  curso_pau: {
-    id: 'curso_pau',
-    label: 'Curso PAU',
-    monthlyPriceEur: 7.9,
-    correctionsPerMonth: 200,
-    photosPerMonth: 80,
-    partialsPerMonth: 12,
-    fullMocksPerMonth: 5,
-    caminoMode: 'complete',
-    maxStudyDaysPerWeek: 6,
-    includeBonusMissions: true,
-    variableMarginFloor: CAMINO_VARIABLE_MARGIN_FLOOR,
-    maxFlashcardsPerDeck: 40,
-  },
-  intensivo: {
-    id: 'intensivo',
-    label: 'Intensivo',
-    monthlyPriceEur: 6.67,
-    correctionsPerMonth: 150,
-    photosPerMonth: 60,
-    partialsPerMonth: 12,
-    fullMocksPerMonth: 6,
-    caminoMode: 'intensive',
-    maxStudyDaysPerWeek: 6,
-    includeBonusMissions: true,
-    variableMarginFloor: CAMINO_VARIABLE_MARGIN_FLOOR,
-    maxFlashcardsPerDeck: 40,
-  },
-  superpremium: {
-    id: 'superpremium',
-    label: 'Superpremium',
-    monthlyPriceEur: 17.99,
-    correctionsPerMonth: 600,
-    photosPerMonth: 200,
-    partialsPerMonth: 20,
-    fullMocksPerMonth: 20,
-    caminoMode: 'complete',
-    maxStudyDaysPerWeek: 7,
-    includeBonusMissions: true,
-    variableMarginFloor: CAMINO_VARIABLE_MARGIN_FLOOR,
-    maxFlashcardsPerDeck: 60,
-  },
-}
+// Enforcement consumes the same typed limits that power pricing copy. This
+// adapter keeps the historical Camino API stable for every existing caller.
+export const CAMINO_PLAN_LIMITS = Object.fromEntries(
+  (Object.keys(PLAN_DEFINITIONS) as CaminoPlanId[]).map((id) => {
+    const plan = PLAN_DEFINITIONS[id]
+    return [id, {
+      id,
+      label: plan.name,
+      monthlyPriceEur: plan.monthlyEquivalentCents / 100,
+      ...plan.limits,
+      variableMarginFloor: CAMINO_VARIABLE_MARGIN_FLOOR,
+    } satisfies CaminoPlanLimits]
+  })
+) as Record<CaminoPlanId, CaminoPlanLimits>
 
 export function normalizeCaminoPlanId(planId?: string | null): CaminoPlanId {
-  const normalized = (planId ?? '').toLowerCase()
-  if (normalized.includes('super')) return 'superpremium'
-  if (normalized.includes('intensivo')) return 'intensivo'
-  if (normalized.includes('curso') || normalized.includes('pack_curso')) return 'curso_pau'
-  if (normalized.includes('premium') || normalized.includes('mensual')) return 'premium'
-  return 'free'
+  return normalizeCommercialPlanId(planId)
 }
 
-export function getCaminoPlanLimits(planId?: string | null) {
+export function getCaminoPlanLimits(planId?: string | null): CaminoPlanLimits {
   return CAMINO_PLAN_LIMITS[normalizeCaminoPlanId(planId)]
 }
 

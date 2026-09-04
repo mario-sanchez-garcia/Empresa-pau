@@ -5,9 +5,9 @@ import {
   PLATFORM_STRUCTURED_EXERCISES_LABEL,
   PLATFORM_STRUCTURED_EXERCISES_LONG_TEXT,
 } from '@/app/lib/platformStats'
-import { PLAN_COPY, getPlanPriceDisplay, CURSO_PAU_STANDARD_PRICE_CENTS, CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS, formatEur, isCursoPauEarlyPeriod } from '@/app/lib/pricing'
+import { getPlanPriceDisplay, getPublicPlanDefinitions } from '@/app/lib/pricing'
 import LandingAuthProvider from './LandingAuthState'
-import { NavLoginLink, BottomCta, PricingPlanCta, StickyMobileCta } from './LandingCta'
+import { NavLoginLink, BottomCta, PricingPlanCta, PricingSectionTracker, StickyMobileCta } from './LandingCta'
 import { ClayHeroCta, ClayHeroMiniCards } from './LandingClayPilotHero'
 import RevealOnScroll from '@/app/components/ui/RevealOnScroll'
 import { SUBJECT_OPTS } from '@/app/lib/subjectCatalog'
@@ -52,7 +52,7 @@ type CompareRow =
   | { label: string; kairo: string;   academia: string;   solo: string  }
 
 const COMPARE_ROWS: CompareRow[] = [
-  { label: 'Exámenes reales EBAU Madrid',    kairo: true,            academia: true,        solo: true  },
+  { label: 'Exámenes PAU Madrid y Cataluña', kairo: true,            academia: true,        solo: true  },
   { label: 'Corrección instantánea por IA',  kairo: true,            academia: false,       solo: false },
   { label: 'Desglose por apartado/criterio', kairo: true,            academia: false,       solo: false },
   { label: 'Plan de estudio personalizado',  kairo: true,            academia: false,       solo: false },
@@ -69,40 +69,7 @@ const COMPARE_ROWS: CompareRow[] = [
 // faltaban Historia de la Filosofía, Inglés y Economía de la Empresa).
 const SUBJECTS = SUBJECT_OPTS.map(s => ({ label: s.label, ready: s.betaStatus === 'enabled' }))
 
-const PLANS = [
-  {
-    name: PLAN_COPY.free.label,
-    price: getPlanPriceDisplay('free'),
-    previousPrice: null as string | null,
-    badge: null as string | null,
-    period: PLAN_COPY.free.periodDisplay,
-    bullets: ['25 correcciones/mes', '3 fotos/mes', '1 parcial/mes', 'Camino PAU limitado'],
-    cta: 'Empezar →',
-  },
-  {
-    name: PLAN_COPY.premium.label,
-    price: getPlanPriceDisplay('premium'),
-    previousPrice: null as string | null,
-    badge: null as string | null,
-    period: PLAN_COPY.premium.periodDisplay,
-    bullets: ['200 correcciones/mes', '80 fotos/mes', '5 simulacros/mes', 'Camino PAU completo', 'Ranking de clase'],
-    cta: 'Elegir Premium →',
-    checkoutPlan: 'premium',
-  },
-  {
-    name: PLAN_COPY.curso_pau.label,
-    price: getPlanPriceDisplay('curso_pau'),
-    // Igual que en /pricing: 69€ solo es un tachado válido junto al precio de
-    // lanzamiento (59€). Pasada la fecha límite el precio real es 79€, y
-    // tachar 69€ ahí parecería una subida de precio en vez de un descuento.
-    previousPrice: (isCursoPauEarlyPeriod() ? formatEur(CURSO_PAU_FOMO_REFERENCE_PRICE_CENTS) : null) as string | null,
-    badge: 'Plazas limitadas' as string | null,
-    period: 'pago único · septiembre a junio',
-    bullets: ['Todo Premium incluido', 'Acceso completo hasta junio', 'Sin renovación mensual'],
-    cta: 'Reservar →',
-    checkoutPlan: 'pack_curso_pau',
-  },
-]
+const PLANS = getPublicPlanDefinitions()
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
@@ -194,12 +161,22 @@ export default function LandingPage() {
         .v4c-p-cols {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          border-top: 1px solid rgba(255,255,255,.1);
+          gap: 16px;
+          align-items: stretch;
         }
-        .v4c-p-col         { padding: 40px 40px 40px 0;  border-right: 1px solid rgba(255,255,255,.08); }
-        .v4c-p-col:first-child { padding-left: 0; }
-        .v4c-p-col:nth-child(2) { padding-left: 40px; }
-        .v4c-p-col:last-child { border-right: none; padding-right: 0; padding-left: 40px; }
+        .v4c-p-col {
+          display: flex; flex-direction: column; min-width: 0; padding: 28px;
+          border: 1px solid rgba(255,255,255,.12); border-radius: 26px;
+          background: linear-gradient(145deg,rgba(255,255,255,.09),rgba(255,255,255,.035));
+          box-shadow: 14px 18px 40px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.13);
+          backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        }
+        .v4c-p-col--featured {
+          border-color: rgba(147,197,253,.55);
+          background: linear-gradient(145deg,rgba(37,99,235,.94),rgba(47,124,246,.8));
+          box-shadow: 0 24px 54px rgba(37,99,235,.26), inset 0 1px 0 rgba(255,255,255,.25), inset 0 -1px 0 rgba(0,0,0,.14);
+        }
+        .v4c-p-value { min-height: 66px; }
 
         /* ── CTA split block ── */
         .v4c-cta-split  { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid #e0e0e0; }
@@ -261,8 +238,9 @@ export default function LandingPage() {
           .v4c-cmp-grid { grid-template-columns: 1.6fr 1fr 1fr 1fr; font-size: 12px; }
 
           .v4c-p-cols     { grid-template-columns: 1fr; }
-          .v4c-p-col      { padding: 32px 0 !important; border-right: none !important; border-bottom: 1px solid rgba(255,255,255,.08); }
-          .v4c-p-col:last-child { border-bottom: none; }
+          .v4c-p-col      { padding: 26px !important; }
+          .v4c-p-col--featured { order: -1; }
+          .v4c-p-value { min-height: 0; }
 
           .v4c-cta-split  { grid-template-columns: 1fr; }
           .v4c-cta-left, .v4c-cta-right { padding: 56px 28px; }
@@ -322,7 +300,7 @@ export default function LandingPage() {
           <img id="v4c-nav-logo" src="/brand/kairo-logo-white.png" alt="Kairo" loading="eager" style={{ height: 32, width: 'auto', display: 'block' }} />
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <Link href="/pricing" className="v4c-nav-link" style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,.5)', textDecoration: 'none', letterSpacing: '.08em', textTransform: 'uppercase' }}>
+          <Link href="/precios" className="v4c-nav-link" style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,.5)', textDecoration: 'none', letterSpacing: '.08em', textTransform: 'uppercase' }}>
             Precios
           </Link>
           <NavLoginLink />
@@ -599,50 +577,48 @@ export default function LandingPage() {
       </RevealOnScroll>
 
       {/* ── Pricing (dark full-width) ─────────────────────────────────────────── */}
+      <PricingSectionTracker>
       <RevealOnScroll as="div">
-      <div style={{ background: '#111', padding: '80px 72px' }}>
+      <div data-testid="landing-pricing" style={{ background: '#111', padding: '80px 72px' }}>
         <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-          <h2 style={{ fontFamily: B, fontSize: 'clamp(32px, 4vw, 52px)', letterSpacing: '.01em', color: '#fff', lineHeight: .95, marginBottom: 56 }}>Planes.</h2>
+          <span style={{ fontFamily: M, fontSize: 10, color: 'rgba(147,197,253,.75)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 14, display: 'block' }}>Planes claros</span>
+          <h2 style={{ fontFamily: B, fontSize: 'clamp(36px, 5vw, 60px)', letterSpacing: '.01em', color: '#fff', lineHeight: .95, marginBottom: 14 }}>Elige cuánto acompañamiento necesitas.</h2>
+          <p style={{ maxWidth: 610, color: 'rgba(255,255,255,.5)', fontSize: 14, lineHeight: 1.65, marginBottom: 42 }}>Primero el valor, después los límites. Premium es la opción completa para el curso; Free te deja probar Kairo y Curso PAU evita la renovación mensual.</p>
           <div className="v4c-p-cols">
             {PLANS.map((plan) => (
-              <div key={plan.name} className="v4c-p-col">
-                {plan.badge && (
-                  <p style={{ fontFamily: M, fontSize: 9, fontWeight: 500, color: 'rgba(255,255,255,.4)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 10 }}>
-                    ● {plan.badge}
+              <div data-testid={`landing-pricing-card-${plan.id}`} key={plan.id} className={`v4c-p-col${plan.highlighted ? ' v4c-p-col--featured' : ''}`}>
+                {plan.highlighted && (
+                  <p style={{ fontFamily: M, fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.8)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 10 }}>
+                    ● Recomendado
                   </p>
                 )}
                 <span style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 14, display: 'block' }}>{plan.name}</span>
-                {plan.previousPrice && (
-                  <p style={{ fontFamily: M, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,.35)', textDecoration: 'line-through', marginBottom: 2 }}>
-                    {plan.previousPrice}
-                  </p>
-                )}
-                <p style={{ fontFamily: B, fontSize: 52, color: '#fff', letterSpacing: '.01em', lineHeight: 1, marginBottom: 2 }}>{plan.price}</p>
-                <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.3)', marginBottom: 24, display: 'block' }}>{plan.period}</span>
+                <h3 className="v4c-p-value" style={{ fontSize: 20, color: '#fff', lineHeight: 1.2, letterSpacing: '-.02em', marginBottom: 18 }}>{plan.valueProposition}</h3>
+                <p style={{ fontFamily: B, fontSize: 52, color: '#fff', letterSpacing: '.01em', lineHeight: 1, marginBottom: 2 }}>{plan.priceDisplay}</p>
+                <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.48)', marginBottom: 24, display: 'block' }}>{plan.periodDisplay}</span>
                 <div style={{ height: 1, background: 'rgba(255,255,255,.08)', marginBottom: 18 }} />
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 24, padding: 0 }}>
-                  {plan.bullets.map((b) => (
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24, padding: 0, flex: 1 }}>
+                  {plan.highlights.slice(0, 5).map((b) => (
                     <li key={b} style={{ fontSize: 12, color: 'rgba(255,255,255,.55)', lineHeight: 1.4, paddingLeft: 10, position: 'relative' }}>
                       <span style={{ position: 'absolute', left: 0, color: 'rgba(255,255,255,.18)', fontSize: 10 }}>—</span>
                       {b}
                     </li>
                   ))}
                 </ul>
-                <PricingPlanCta isFree={plan.name === PLAN_COPY.free.label} cta={plan.cta} checkoutPlan={'checkoutPlan' in plan ? plan.checkoutPlan : undefined} />
+                <PricingPlanCta planId={plan.id} isFree={plan.id === 'free'} cta={plan.ctaLabel} checkoutPlan={plan.checkoutPlanId ?? undefined} />
               </div>
             ))}
           </div>
           <p style={{ marginTop: 32, fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.2)', letterSpacing: '.06em' }}>
-            {isCursoPauEarlyPeriod()
-              ? <>IVA incluido. El Curso PAU pasará a {formatEur(CURSO_PAU_STANDARD_PRICE_CENTS)} tras la fecha límite del precio de lanzamiento.{' '}</>
-              : <>IVA incluido.{' '}</>}
-            <Link href="/pricing" style={{ color: 'rgba(255,255,255,.3)', textDecoration: 'underline', textUnderlineOffset: 3 }}>
-              Ver todos los detalles →
+            IVA incluido. Los límites se reinician al comenzar cada mes.{' '}
+            <Link href="/precios" style={{ color: 'rgba(255,255,255,.45)', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+              Comparar planes y condiciones →
             </Link>
           </p>
         </div>
       </div>
       </RevealOnScroll>
+      </PricingSectionTracker>
 
       {/* ── CTA split block ───────────────────────────────────────────────────── */}
       <RevealOnScroll as="div">
@@ -672,7 +648,7 @@ export default function LandingPage() {
             { label: 'Exámenes',   href: '/examenes'          },
             { label: 'Camino PAU', href: '/camino'            },
             { label: 'Simulacros', href: '/simulacros'        },
-            { label: 'Precios',    href: '/pricing'           },
+            { label: 'Precios',    href: '/precios'           },
             { label: 'Ayuda',      href: '/ayuda'             },
             { label: 'Contacto',   href: '/contacto'          },
             { label: 'Privacidad',  href: '/legal/privacidad'   },

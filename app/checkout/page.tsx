@@ -8,14 +8,12 @@ import KairoLoader from '@/app/components/ui/KairoLoader'
 import CheckoutShell from '@/components/shared/CheckoutShell'
 import { CheckCircle2, Lock } from 'lucide-react'
 import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
+import { DEFAULT_CHECKOUT_PLAN_ID, getPlanDefinitionByCheckoutId, getPublicPlanDefinitions, PRICING_PATH } from '@/app/lib/pricing'
+import { useCookieConsent } from '@/app/lib/analytics/CookieConsentContext'
+import { posthog } from '@/app/lib/analytics/posthog'
 
 const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
-
-const PLAN_LABELS: Record<string, string> = {
-  pack_curso_pau: 'Curso PAU',
-  premium: 'Premium',
-}
 
 const WITHDRAWAL_VERSION = LEGAL_VERSIONS.desistimiento.version
 
@@ -23,8 +21,11 @@ type State = 'loading' | 'ready' | 'paying' | 'error' | 'already_active'
 
 function CheckoutFlow() {
   const searchParams = useSearchParams()
-  const planId = searchParams.get('plan') ?? 'pack_curso_pau'
-  const planLabel = PLAN_LABELS[planId] ?? planId
+  const planId = searchParams.get('plan') ?? DEFAULT_CHECKOUT_PLAN_ID
+  const plan = getPlanDefinitionByCheckoutId(planId)
+  const planView = getPublicPlanDefinitions().find((item) => item.id === plan?.id)
+  const planLabel = plan?.name ?? 'no disponible'
+  const { status: consent } = useCookieConsent()
   const [state, setState] = useState<State>('loading')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [token, setToken] = useState<string | null>(null)
@@ -39,6 +40,11 @@ function CheckoutFlow() {
     initiated.current = true
 
     async function start() {
+      if (!plan) {
+        setErrorMsg('Este plan no está disponible para compra.')
+        setState('error')
+        return
+      }
       const { data: { session } } = await supabase.auth.getSession()
 
       if (!session?.access_token) {
@@ -52,12 +58,15 @@ function CheckoutFlow() {
     }
 
     void start()
-  }, [planId])
+  }, [plan, planId])
 
   async function handlePay() {
     if (!withdrawalAccepted || !token) return
     setState('paying')
     try {
+      if (consent === 'accepted') {
+        posthog.capture('checkout_start', { plan_id: plan?.id ?? 'unknown', checkout_plan_id: planId, surface: 'student_checkout' })
+      }
       const res = await fetch('/api/checkout/student-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -115,7 +124,7 @@ function CheckoutFlow() {
         </div>
         <h1 style={{ ...styles.title, fontFamily: B }}>Algo ha salido mal.</h1>
         <p style={{ ...styles.body, textAlign: 'center' }}>{errorMsg}</p>
-        <a href="/pricing" style={{ ...styles.btnPrimary, fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)' }}>Ver planes →</a>
+        <a href={PRICING_PATH} style={{ ...styles.btnPrimary, fontFamily: 'var(--font-geist-sans, system-ui, sans-serif)' }}>Ver planes →</a>
         <a href="mailto:hola@kairo.es" style={{ ...styles.link, textAlign: 'center', display: 'block', marginTop: 14 }}>hola@kairo.es</a>
       </CheckoutShell>
     )
@@ -135,6 +144,11 @@ function CheckoutFlow() {
         <Logo />
         <p style={{ ...styles.eyebrow, fontFamily: M, textAlign: 'center' }}>Camino PAU · Checkout</p>
         <h1 style={{ ...styles.title, fontFamily: B, textAlign: 'center' }}>Plan {planLabel}.</h1>
+        {planView && (
+          <p style={{ ...styles.body, textAlign: 'center', marginBottom: 12 }}>
+            <strong style={{ color: '#fff' }}>{planView.priceDisplay}</strong> · {planView.periodDisplay}
+          </p>
+        )}
         <p style={{ ...styles.body, textAlign: 'center', marginBottom: 4 }}>Antes de ir al pago, confirma lo siguiente:</p>
 
         <label className={`co-field${withdrawalAccepted ? ' checked' : ''}`}>

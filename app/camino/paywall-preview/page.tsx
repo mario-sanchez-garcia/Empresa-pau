@@ -60,7 +60,7 @@ export default function PaywallPreviewPage() {
           </ClayCard>
 
           <Link
-            href="/pricing"
+            href="/precios"
             className="mt-3 block text-center text-sm font-black hover:underline"
             style={{ color: 'var(--clay-accent-text)' }}
           >

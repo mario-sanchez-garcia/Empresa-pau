@@ -218,7 +218,7 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
                 ¿Quieres apoyar su preparación con correcciones IA con uso responsable y simulacros completos?
               </p>
               <a
-                href={`${appUrl}/pricing`}
+                href={`${appUrl}/precios`}
                 style={{
                   display: 'inline-block', background: '#2563eb', color: '#fff',
                   fontSize: 14, fontWeight: 800, textDecoration: 'none',

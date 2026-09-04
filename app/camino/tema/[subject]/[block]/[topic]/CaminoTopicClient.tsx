@@ -1793,10 +1793,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               <button type="button" onClick={() => setShowPaywall(false)} className="shrink-0 rounded-full p-1 text-slate-400 hover:bg-slate-100"><X size={18} /></button>
             </div>
             <div className="grid gap-2">
-              <Link href="/pricing" className="kairo-clay-action flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-black text-white">Desbloquear acceso completo <ArrowRight size={14} /></Link>
+              <Link href="/precios" className="kairo-clay-action flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-black text-white">Desbloquear acceso completo <ArrowRight size={14} /></Link>
               <button type="button" onClick={() => setShowPaywall(false)} className="kairo-soft-control flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-black text-slate-600">Seguir con el plan gratuito</button>
             </div>
-            <Link href="/pricing" className="mt-3 block text-center text-sm font-black text-blue-700 hover:underline">Ver planes</Link>
+            <Link href="/precios" className="mt-3 block text-center text-sm font-black text-blue-700 hover:underline">Ver planes</Link>
           </div>
         </div>
       )}
@@ -1999,7 +1999,7 @@ function TopicAsideBody({
         <p style={{ fontSize: 11, fontWeight: 600, color: asideBody }}>{topicCompleted ? 'Tema completado con corrección.' : 'Pendiente de corrección.'}</p>
       </div>
 
-      <Link href="/pricing" style={{ display: 'block', textAlign: 'center', fontSize: 12, fontWeight: 900, color: asideAccent, marginTop: 4, textDecoration: 'none' }}>Ver planes</Link>
+      <Link href="/precios" style={{ display: 'block', textAlign: 'center', fontSize: 12, fontWeight: 900, color: asideAccent, marginTop: 4, textDecoration: 'none' }}>Ver planes</Link>
     </>
   )
 }

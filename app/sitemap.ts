@@ -7,7 +7,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
 // sesión y no aportan nada en resultados de búsqueda.
 const ROUTES: Array<{ path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency'] }> = [
   { path: '',                   priority: 1.0, changeFrequency: 'weekly'  },
-  { path: '/pricing',           priority: 0.9, changeFrequency: 'monthly' },
+  { path: '/precios',           priority: 0.9, changeFrequency: 'monthly' },
   { path: '/ayuda',             priority: 0.7, changeFrequency: 'monthly' },
   { path: '/contacto',          priority: 0.6, changeFrequency: 'yearly'  },
   { path: '/waitlist',          priority: 0.5, changeFrequency: 'monthly' },

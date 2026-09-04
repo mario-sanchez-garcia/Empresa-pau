@@ -1,8 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { useLandingAuth } from './LandingAuthState'
+import { useCookieConsent } from '@/app/lib/analytics/CookieConsentContext'
+import { posthog } from '@/app/lib/analytics/posthog'
+import type { CommercialPlanId } from '@/app/lib/pricing'
 
 const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -99,8 +103,9 @@ export function StickyMobileCta() {
   )
 }
 
-export function PricingPlanCta({ isFree, cta, checkoutPlan }: { isFree: boolean; cta: string; checkoutPlan?: string }) {
+export function PricingPlanCta({ planId, isFree, cta, checkoutPlan }: { planId: CommercialPlanId; isFree: boolean; cta: string; checkoutPlan?: string }) {
   const { status, href } = useLandingAuth()
+  const { status: consent } = useCookieConsent()
   const isLoading = status === 'loading'
   // Para un plan de pago sin sesión, el destino es /checkout (no /login):
   // /checkout ya sabe redirigir a /login?returnTo=/checkout?plan=... y traer
@@ -118,10 +123,40 @@ export function PricingPlanCta({ isFree, cta, checkoutPlan }: { isFree: boolean;
     <Link
       href={target}
       aria-disabled={isLoading}
-      onClick={e => { if (isLoading) e.preventDefault() }}
+      onClick={e => {
+        if (isLoading) { e.preventDefault(); return }
+        if (consent === 'accepted') {
+          posthog.capture('plan_cta_click', {
+            plan_id: planId,
+            checkout_plan_id: checkoutPlan ?? 'free',
+            surface: 'landing',
+          })
+        }
+      }}
       style={{ fontFamily: M, fontSize: 10, color: '#fff', letterSpacing: '.1em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,.3)', paddingBottom: 1, display: 'inline-block', opacity: isLoading ? 0.6 : 1, cursor: isLoading ? 'default' : 'pointer' }}
     >
       {status === 'authed' && isFree ? (href === '/camino' ? 'Ir a mi Camino →' : 'Continuar →') : cta}
     </Link>
   )
+}
+
+export function PricingSectionTracker({ children }: { children: ReactNode }) {
+  const { status } = useCookieConsent()
+  const ref = useRef<HTMLDivElement>(null)
+  const tracked = useRef(false)
+
+  useEffect(() => {
+    if (status !== 'accepted' || tracked.current || !ref.current) return
+    const node = ref.current
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting) || tracked.current) return
+      tracked.current = true
+      posthog.capture('pricing_view', { surface: 'landing' })
+      observer.disconnect()
+    }, { threshold: 0.25 })
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [status])
+
+  return <div ref={ref}>{children}</div>
 }

@@ -129,7 +129,7 @@ async function handleCheckoutCompleted(
   const { error: entitlementError } = await db.from('user_entitlements').insert({
     user_id: studentUserId,
     plan_id: planId,
-    source: 'stripe_parent_checkout',
+    source: parentCheckoutLinkId ? 'stripe_parent_checkout' : 'stripe_self_checkout',
     status: 'active',
     started_at: now,
     expires_at: expiresAt,

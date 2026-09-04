@@ -27,7 +27,7 @@ const EDUC_LABELS: Record<string, string> = {
 const ACCOUNT_MENU = [
   { label: 'Mi perfil', href: '/settings', icon: UserRound },
   { label: 'Ajustes', href: '/settings', icon: Settings },
-  { label: 'Plan y facturación', href: '/pricing', icon: CreditCard },
+  { label: 'Plan y facturación', href: '/precios', icon: CreditCard },
   { label: 'Ayuda', href: '/ayuda', icon: HelpCircle },
 ]
 
@@ -266,7 +266,7 @@ export default function SidebarNav() {
               </div>
             ) : (
               <a
-                href="/pricing"
+                href="/precios"
                 style={{
                   margin: '0 10px 12px', padding: open ? '12px' : '10px 0',
                   borderRadius: 12, textDecoration: 'none',

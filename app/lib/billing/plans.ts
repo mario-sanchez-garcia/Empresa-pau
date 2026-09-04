@@ -1,84 +1,67 @@
-// Server-only: never import in client components.
-// Single source of truth for all billing plan definitions.
-// Los precios en sí viven en app/lib/pricing.ts (compartido con /pricing,
-// /landing y /waitlist) — este archivo solo los reexporta para el checkout.
+// Server-only adapter from the canonical commercial catalogue to Stripe.
+// Persistent checkout IDs stay unchanged for existing sessions and users.
+
+import 'server-only'
 
 import {
   CURSO_PAU_EARLY_PRICE_CENTS,
   CURSO_PAU_STANDARD_PRICE_CENTS,
+  DEFAULT_CHECKOUT_PLAN_ID,
+  PURCHASABLE_CHECKOUT_PLAN_IDS,
   getCursoPauPriceCents,
+  getPlanDefinitionByCheckoutId,
+  getPlanFeatureLabels,
+  getPlanPriceCents,
+  isPurchasableCheckoutPlanId,
+  type CheckoutPlanId,
 } from '@/app/lib/pricing'
 
 export interface BillingPlan {
-  id: string
+  id: CheckoutPlanId
   label: string
   description: string
   priceCents: number
-  currency: string
-  // How long the entitlement lasts. null = permanent (until explicitly revoked).
+  currency: 'eur'
   accessDays: number | null
-  // What's included — used on parent checkout page.
   features: string[]
 }
 
-// Founding price active until FOUNDING_DEADLINE (ver app/lib/pricing.ts).
-// After that, use standardPriceCents.
 export const PACK_CURSO_PAU_FOUNDING_PRICE_CENTS = CURSO_PAU_EARLY_PRICE_CENTS
 export const PACK_CURSO_PAU_STANDARD_PRICE_CENTS = CURSO_PAU_STANDARD_PRICE_CENTS
-
 export const getPackCursoPauPriceCents = getCursoPauPriceCents
 
-export const PLANS: Record<string, BillingPlan> = {
-  pack_curso_pau: {
-    id: 'pack_curso_pau',
-    label: 'Pack Curso PAU',
-    description: 'Ruta de estudio PAU completa de septiembre a junio con misiones diarias, correcciones IA y simulacros.',
-    priceCents: PACK_CURSO_PAU_FOUNDING_PRICE_CENTS,
+function toBillingPlan(checkoutPlanId: CheckoutPlanId): BillingPlan {
+  const definition = getPlanDefinitionByCheckoutId(checkoutPlanId)
+  if (!definition) throw new Error(`Missing canonical plan for checkout ID: ${checkoutPlanId}`)
+  return {
+    id: checkoutPlanId,
+    label: definition.commercialName,
+    description: definition.description,
+    priceCents: getPlanPriceCents(definition.id),
     currency: 'eur',
-    accessDays: null,
-    features: [
-      'Camino PAU: misiones diarias personalizadas',
-      'Correcciones IA con uso razonable',
-      'Simulacros completos con corrección automática',
-      'Historial de progreso y análisis de errores',
-      'Seguimiento semana a semana hasta la PAU',
-      'Soporte prioritario',
-    ],
-  },
-  premium: {
-    id: 'premium',
-    label: 'Premium',
-    description: 'Plan mensual con acceso completo a correcciones, simulacros y Camino PAU.',
-    priceCents: 999,
-    currency: 'eur',
-    accessDays: 30,
-    features: [
-      '200 correcciones/mes',
-      '80 fotos/mes',
-      '12 parciales/mes · 5 simulacros/mes',
-      'Camino PAU completo',
-    ],
-  },
+    accessDays: definition.billingPeriod === 'monthly' ? 30 : null,
+    features: getPlanFeatureLabels(definition.id),
+  }
+}
+
+export const PLANS: Record<CheckoutPlanId, BillingPlan> = {
+  premium: toBillingPlan('premium'),
+  pack_curso_pau: toBillingPlan('pack_curso_pau'),
 }
 
 export function getPlan(planId: string): BillingPlan | null {
-  return PLANS[planId] ?? null
+  return isPurchasableCheckoutPlanId(planId) ? PLANS[planId] : null
 }
-
-// Plans billed as a real recurring Stripe subscription (auto-renews monthly)
-// rather than a one-off payment. Drives mode:'subscription' at checkout and
-// which webhook events keep the entitlement's expires_at in sync.
-const RECURRING_PLAN_IDS: readonly string[] = ['premium']
 
 export function isRecurringPlan(planId: string): boolean {
-  return RECURRING_PLAN_IDS.includes(planId)
+  const definition = getPlanDefinitionByCheckoutId(planId)
+  return definition?.billingPeriod === 'monthly'
 }
 
-// Returns the live price for a plan (may differ from PLANS[id].priceCents after founding period).
 export function getLivePriceCents(planId: string): number | null {
-  if (planId === 'pack_curso_pau') return getPackCursoPauPriceCents()
-  const plan = PLANS[planId]
-  return plan?.priceCents ?? null
+  const definition = getPlanDefinitionByCheckoutId(planId)
+  return definition ? getPlanPriceCents(definition.id) : null
 }
 
-export const DEFAULT_PLAN_ID = 'pack_curso_pau'
+export { PURCHASABLE_CHECKOUT_PLAN_IDS, isPurchasableCheckoutPlanId }
+export const DEFAULT_PLAN_ID = DEFAULT_CHECKOUT_PLAN_ID

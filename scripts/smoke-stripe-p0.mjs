@@ -34,7 +34,7 @@ const migration = existsSync(join(root, migrationPath)) ? read(migrationPath) : 
 assert('Stripe webhook endpoint exists', existsSync(join(root, webhookPath)))
 assert('Stripe webhook verifies raw-body signature', webhook.includes('request.text()') && webhook.includes('stripe-signature') && webhook.includes('constructEvent(rawBody, sig, getWebhookSecret())'))
 assert('Stripe webhook handles checkout.session.completed', webhook.includes("event.type === 'checkout.session.completed'") && webhook.includes('handleCheckoutCompleted'))
-assert('Stripe webhook creates entitlement only after verified event', webhook.includes(".from('user_entitlements').insert") && webhook.includes("source: 'stripe_parent_checkout'") && webhook.includes("status: 'active'"))
+assert('Stripe webhook creates entitlement only after verified event', webhook.includes(".from('user_entitlements').insert") && webhook.includes("'stripe_parent_checkout' : 'stripe_self_checkout'") && webhook.includes("status: 'active'"))
 assert('Stripe webhook is idempotent by checkout session id', webhook.includes(".eq('stripe_checkout_session_id', sessionId)") && webhook.includes('existingEntitlement') && webhook.includes('idempotent'))
 assert('Stripe webhook writes billing audit events', webhook.includes(".from('billing_events').insert") && webhook.includes("event_type: 'checkout_completed'"))
 assert('Success page is passive and does not activate entitlement', success.includes('does NOT activate any entitlement') && !success.includes(".from('user_entitlements').insert") && !success.includes("status: 'active'"))

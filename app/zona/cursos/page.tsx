@@ -338,7 +338,7 @@ export default function ZonaCursosPage() {
               <p style={{ fontSize: 13.5, color: 'var(--clay-text-muted)', marginBottom: 20, lineHeight: 1.6 }}>
                 Desbloquea todo el temario de Camino PAU organizado por asignatura y bloque con cualquier plan de pago de Kairo.
               </p>
-              <a href="/pricing" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, background: 'var(--clay-accent-deep)', padding: '11px 24px', fontSize: 13.5, fontWeight: 900, color: 'var(--clay-on-accent)', textDecoration: 'none' }}>Ver planes</a>
+              <a href="/precios" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, background: 'var(--clay-accent-deep)', padding: '11px 24px', fontSize: 13.5, fontWeight: 900, color: 'var(--clay-on-accent)', textDecoration: 'none' }}>Ver planes</a>
             </div>
           ) : (
             <>

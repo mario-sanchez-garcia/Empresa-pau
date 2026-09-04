@@ -21,7 +21,8 @@ const mathAnswerToolbar = read('components/shared/MathAnswerToolbar.tsx')
 const richTextArea = read('components/shared/RichTextArea.tsx')
 const signupRoute = read('app/api/auth/signup/route.ts')
 const signupMigration = read('supabase/migrations/20260621130000_create_signup_attempts.sql')
-const pricing = read('app/pricing/page.tsx')
+const pricing = read('app/lib/pricing.ts')
+const pricingPage = read('app/precios/PricingClient.tsx')
 const landing = read('app/landing/page.tsx')
 const loginPage = read('app/login/page.tsx')
 const sidebar = read('app/components/SidebarNav.tsx')
@@ -215,26 +216,17 @@ assert(
 )
 
 assert(
-  'pricing and landing use definitive honest plan copy',
+  'pricing and landing use the canonical honest public catalogue',
     !/ilimitad/i.test(pricing) &&
     !/ilimitad/i.test(landing) &&
-    !pricing.includes("price: '7,99 €'") &&
-    !pricing.includes("price: '49 €'") &&
-    !landing.includes('7,99€') &&
-    pricing.includes('0 €') &&
-    pricing.includes('9,99 €') &&
-    pricing.includes('19,99 €') &&
-    pricing.includes('17,99 €') &&
-    pricing.includes('Desde 59 €') &&
-    pricing.includes('79 €') &&
-    pricing.includes('Recomendado') &&
-    pricing.includes('Uso intensivo con política de uso razonable') &&
-    landing.includes('9,99 €/mes') &&
-    landing.includes('19,99 € / 3 meses') &&
-    landing.includes('17,99 €/mes') &&
-    landing.includes('Desde 59 €') &&
-    landing.includes('Normal: 79 €') &&
-    landing.includes('Beta privada: de momento probamos Matemáticas II y Matemáticas CCSS')
+    pricing.includes("PUBLIC_PLAN_IDS = ['free', 'premium', 'curso_pau']") &&
+    pricing.includes("ENTITLEMENT_ONLY_PLAN_IDS = ['intensivo', 'superpremium']") &&
+    pricing.includes('basePriceCents: 999') &&
+    pricing.includes('CURSO_PAU_STANDARD_PRICE_CENTS = 7900') &&
+    pricing.includes('getPublicPlanDefinitions') &&
+    pricingPage.includes('Recomendado') &&
+    pricingPage.includes('Comparar límites y funciones') &&
+    landing.includes('getPublicPlanDefinitions()')
 )
 
 assert(
@@ -491,20 +483,17 @@ assert(
 assert(
   'Camino PAU applies plan limits with a minimum 20 percent variable margin',
   caminoPlanLimits.includes('CAMINO_VARIABLE_MARGIN_FLOOR = 0.2') &&
-    caminoPlanLimits.includes("free: {") &&
-    caminoPlanLimits.includes("premium: {") &&
-    caminoPlanLimits.includes("curso_pau: {") &&
-    caminoPlanLimits.includes("intensivo: {") &&
-    caminoPlanLimits.includes("superpremium: {") &&
-    caminoPlanLimits.includes('maxStudyDaysPerWeek: 2') &&
-    caminoPlanLimits.includes('maxStudyDaysPerWeek: 6') &&
-    caminoPlanLimits.includes('correctionsPerMonth: 25') &&
-    caminoPlanLimits.includes('correctionsPerMonth: 600') &&
-    caminoPlanLimits.includes('photosPerMonth: 3') &&
-    caminoPlanLimits.includes('photosPerMonth: 200') &&
-    caminoPlanLimits.includes("caminoMode: 'limited'") &&
-    caminoPlanLimits.includes("caminoMode: 'complete'") &&
-    caminoPlanLimits.includes("caminoMode: 'intensive'") &&
+    caminoPlanLimits.includes('Object.keys(PLAN_DEFINITIONS)') &&
+    caminoPlanLimits.includes('...plan.limits') &&
+    pricing.includes('maxStudyDaysPerWeek: 2') &&
+    pricing.includes('maxStudyDaysPerWeek: 6') &&
+    pricing.includes('correctionsPerMonth: 25') &&
+    pricing.includes('correctionsPerMonth: 600') &&
+    pricing.includes('photosPerMonth: 3') &&
+    pricing.includes('photosPerMonth: 200') &&
+    pricing.includes("caminoMode: 'limited'") &&
+    pricing.includes("caminoMode: 'complete'") &&
+    pricing.includes("caminoMode: 'intensive'") &&
     caminoPlanLimits.includes('normalizeCaminoPlanId') &&
     caminoPlanLimits.includes('monthlyToWeeklyLimit')
 )

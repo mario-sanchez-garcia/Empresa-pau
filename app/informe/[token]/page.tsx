@@ -65,7 +65,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         <meta name="robots" content="noindex, nofollow" />
         <title>Informe semanal · Kairo</title>
       </head>
-      <body style={{ margin: 0, padding: 0, background: '#f4f7fb', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#0f172a' }}>
+      <body style={{ margin: 0, padding: 0, background: '#e9eefb', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#0d1424' }}>
         {children}
       </body>
     </html>
@@ -76,11 +76,11 @@ function ErrorPage({ title, body }: { title: string; body: string }) {
   return (
     <Layout>
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
-        <div style={{ width: '100%', maxWidth: 440, background: '#fff', borderRadius: 24, padding: 32, boxShadow: '0 4px 24px rgba(37,99,235,0.08)', textAlign: 'center' }}>
+        <div style={{ width: '100%', maxWidth: 440, background: '#eef3fc', borderRadius: 24, padding: 32, boxShadow: '0 10px 0 rgba(37,99,235,0.10), 0 16px 28px rgba(37,99,235,0.18), inset 0 2px 3px rgba(255,255,255,0.95)', textAlign: 'center' }}>
           <div style={{ width: 56, height: 56, background: '#fff1f2', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, fontSize: 24 }}>⏰</div>
-          <h1 style={{ margin: '0 0 12px', fontSize: 20, fontWeight: 900, color: '#0f172a' }}>{title}</h1>
-          <p style={{ margin: '0 0 24px', fontSize: 14, color: '#64748b', lineHeight: 1.6 }}>{body}</p>
-          <p style={{ margin: 0, fontSize: 12, color: '#94a3b8' }}>Puedes pedir al alumno que comparta un enlace nuevo desde su cuenta de Kairo.</p>
+          <h1 style={{ margin: '0 0 12px', fontSize: 20, fontWeight: 900, color: '#0d1424' }}>{title}</h1>
+          <p style={{ margin: '0 0 24px', fontSize: 14, color: '#55627a', lineHeight: 1.6 }}>{body}</p>
+          <p style={{ margin: 0, fontSize: 12, color: '#8fa3bc' }}>Puedes pedir al alumno que comparta un enlace nuevo desde su cuenta de Kairo.</p>
         </div>
       </div>
     </Layout>
@@ -98,10 +98,10 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
           <div style={{ display: 'inline-flex', marginBottom: 16 }}>
             <KairoBrand size="sm" />
           </div>
-          <h1 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 900, letterSpacing: '-0.02em', color: '#0f172a' }}>
+          <h1 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 900, letterSpacing: '-0.02em', color: '#0d1424' }}>
             Informe semanal de {report.firstName}
           </h1>
-          <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>{weekLabel}</p>
+          <p style={{ margin: 0, fontSize: 13, color: '#55627a' }}>{weekLabel}</p>
         </div>
 
         {/* Key stats — hidden for empty weeks */}
@@ -112,16 +112,16 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
               { label: 'Racha', value: `${report.streakDays}d`, icon: '🔥' },
               { label: 'Simulacros', value: String(report.simulacrosCount), icon: '📝' },
             ].map(stat => (
-              <div key={stat.label} style={{ background: '#fff', borderRadius: 16, padding: '14px 10px', textAlign: 'center', boxShadow: '0 2px 8px rgba(37,99,235,0.06)' }}>
+              <div key={stat.label} style={{ background: '#eef3fc', borderRadius: 16, padding: '14px 10px', textAlign: 'center', boxShadow: '0 6px 0 rgba(37,99,235,0.10), 0 10px 18px rgba(37,99,235,0.18), inset 0 2px 3px rgba(255,255,255,0.95)' }}>
                 <div style={{ fontSize: 20, marginBottom: 4 }}>{stat.icon}</div>
-                <div style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>{stat.value}</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{stat.label}</div>
+                <div style={{ fontSize: 22, fontWeight: 900, color: '#0d1424', letterSpacing: '-0.02em' }}>{stat.value}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#8fa3bc', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{stat.label}</div>
               </div>
             ))}
           </div>
         ) : (
-          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 16, padding: '14px 16px', marginBottom: 20 }}>
-            <p style={{ margin: 0, fontSize: 13, color: '#64748b', fontWeight: 600 }}>
+          <div style={{ background: '#f6f9fe', border: '1px solid rgba(37,99,235,0.14)', borderRadius: 16, padding: '14px 16px', marginBottom: 20 }}>
+            <p style={{ margin: 0, fontSize: 13, color: '#55627a', fontWeight: 600 }}>
               Semana de arranque — el progreso aparecerá aquí a partir de la próxima.
             </p>
           </div>
@@ -129,8 +129,8 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
 
         {/* Subject projections */}
         {report.subjects.length > 0 && (
-          <div style={{ background: '#fff', borderRadius: 20, padding: 20, marginBottom: 16, boxShadow: '0 2px 8px rgba(37,99,235,0.06)' }}>
-            <h2 style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Nota proyectada PAU</h2>
+          <div style={{ background: '#eef3fc', borderRadius: 20, padding: 20, marginBottom: 16, boxShadow: '0 10px 0 rgba(37,99,235,0.10), 0 16px 28px rgba(37,99,235,0.18), inset 0 2px 3px rgba(255,255,255,0.95)' }}>
+            <h2 style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 900, color: '#55627a', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Nota proyectada PAU</h2>
             <div style={{ display: 'grid', gap: 16 }}>
               {report.subjects.map(s => {
                 const nota = s.projection
@@ -197,24 +197,24 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
 
         {/* Best block */}
         {report.bestBlock && (
-          <div style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)', border: '1px solid #bfdbfe', borderRadius: 20, padding: 20, marginBottom: 16 }}>
-            <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 900, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Punto fuerte esta semana</p>
-            <p style={{ margin: '0 0 2px', fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{report.bestBlock.block}</p>
-            <p style={{ margin: 0, fontSize: 13, color: '#475569' }}>
+          <div style={{ background: '#f6f9fe', border: '1px solid rgba(37,99,235,0.14)', borderRadius: 20, padding: 20, marginBottom: 16, boxShadow: 'inset 0 2px 3px rgba(255,255,255,0.95)' }}>
+            <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 900, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Punto fuerte esta semana</p>
+            <p style={{ margin: '0 0 2px', fontSize: 18, fontWeight: 900, color: '#0d1424' }}>{report.bestBlock.block}</p>
+            <p style={{ margin: 0, fontSize: 13, color: '#55627a' }}>
               {report.bestBlock.subject} · {report.bestBlock.nota.toFixed(1)}/10
             </p>
           </div>
         )}
 
         {/* Footer */}
-        <div style={{ textAlign: 'center', paddingTop: 16, borderTop: '1px solid #e2e8f0' }}>
+        <div style={{ textAlign: 'center', paddingTop: 16, borderTop: '1px solid rgba(37,99,235,0.14)' }}>
           {isPremium ? (
-            <p style={{ margin: 0, fontSize: 12, color: '#94a3b8' }}>
-              Informe generado por <strong style={{ color: '#2563eb' }}>Kairo</strong> · Preparación PAU
+            <p style={{ margin: 0, fontSize: 12, color: '#8fa3bc' }}>
+              Informe generado por <strong style={{ color: '#1d4ed8' }}>Kairo</strong> · Preparación PAU
             </p>
           ) : (
             <div>
-              <p style={{ margin: '0 0 12px', fontSize: 13, color: '#475569', lineHeight: 1.5 }}>
+              <p style={{ margin: '0 0 12px', fontSize: 13, color: '#55627a', lineHeight: 1.5 }}>
                 ¿Quieres apoyar su preparación con correcciones IA con uso responsable y simulacros completos?
               </p>
               <a
@@ -223,11 +223,12 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
                   display: 'inline-block', background: '#2563eb', color: '#fff',
                   fontSize: 14, fontWeight: 800, textDecoration: 'none',
                   padding: '12px 24px', borderRadius: 14, letterSpacing: '-0.01em',
+                  boxShadow: '0 5px 0 0 #1d4ed8',
                 }}
               >
                 Conoce el Pack Curso PAU →
               </a>
-              <p style={{ margin: '12px 0 0', fontSize: 11, color: '#94a3b8' }}>
+              <p style={{ margin: '12px 0 0', fontSize: 11, color: '#8fa3bc' }}>
                 Generado por <strong>Kairo</strong>
               </p>
             </div>

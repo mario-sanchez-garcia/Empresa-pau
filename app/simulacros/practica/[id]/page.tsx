@@ -520,16 +520,16 @@ function PracticaPageInner() {
             >
               <Pause size={12} /> En pausa
             </span>
-            <h2 className="mt-4 text-2xl font-black" style={{ color: '#0f172a' }}>
+            <h2 className="mt-4 text-2xl font-black" style={{ color: 'var(--clay-text)' }}>
               Tu práctica está en pausa
             </h2>
-            <p className="mt-2 text-sm font-semibold" style={{ color: '#64748b' }}>
+            <p className="mt-2 text-sm font-semibold" style={{ color: 'var(--clay-text-muted)' }}>
               Ya llevas {usedMinutes} min trabajados y tus respuestas están guardadas. Continúa justo donde lo dejaste.
             </p>
-            <div className="mt-5 text-4xl font-black" style={{ color: '#2563eb' }}>
+            <div className="mt-5 text-4xl font-black" style={{ color: 'var(--clay-accent)' }}>
               {formatTime(secondsLeft)}
             </div>
-            <div className="mt-1 text-xs font-black uppercase tracking-widest" style={{ color: '#94a3b8' }}>
+            <div className="mt-1 text-xs font-black uppercase tracking-widest" style={{ color: 'var(--clay-text-muted)' }}>
               tiempo restante
             </div>
             {resumeError && <div className="pau-info mt-4" role="alert">{resumeError}</div>}
@@ -887,23 +887,23 @@ function PracticaPageInner() {
         >
           <div
             className="pau-reveal-scale w-full max-w-md"
-            style={{ background: '#fff', borderRadius: 22, border: '1px solid var(--pau-border)', boxShadow: 'var(--shadow-xl)', padding: 28 }}
+            style={{ background: 'var(--clay-surface)', borderRadius: 22, border: '1px solid var(--pau-border)', boxShadow: 'var(--shadow-xl)', padding: 28 }}
           >
             <div className="mb-3 flex items-center gap-3">
               {timeUp
                 ? <AlertTriangle size={22} style={{ color: '#f59e0b' }} />
                 : <CheckCircle2 size={22} style={{ color: cfg.color }} />}
-              <h2 className="text-xl font-black" style={{ color: '#0f172a' }}>
+              <h2 className="text-xl font-black" style={{ color: 'var(--clay-text)' }}>
                 {timeUp ? 'Tiempo agotado' : '¿Entregar la práctica?'}
               </h2>
             </div>
-            <p className="text-sm font-semibold" style={{ color: '#475569' }}>
+            <p className="text-sm font-semibold" style={{ color: 'var(--clay-text-muted)' }}>
               La corrección se mostrará al entregar. Después podrás revisar tu nota y el desglose por pregunta.
             </p>
-            <p className="mt-3 text-sm font-semibold" style={{ color: '#475569' }}>
-              Has respondido <strong style={{ color: '#0f172a' }}>{answeredCount}</strong> de <strong style={{ color: '#0f172a' }}>{record.bloques.length}</strong> preguntas.
+            <p className="mt-3 text-sm font-semibold" style={{ color: 'var(--clay-text-muted)' }}>
+              Has respondido <strong style={{ color: 'var(--clay-text)' }}>{answeredCount}</strong> de <strong style={{ color: 'var(--clay-text)' }}>{record.bloques.length}</strong> preguntas.
               {record.bloques.length - answeredCount > 0 && (
-                <> Quedan <strong style={{ color: '#0f172a' }}>{record.bloques.length - answeredCount}</strong> sin responder.</>
+                <> Quedan <strong style={{ color: 'var(--clay-text)' }}>{record.bloques.length - answeredCount}</strong> sin responder.</>
               )}
             </p>
             <div className="mt-3 pau-progress-bar">

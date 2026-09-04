@@ -901,7 +901,7 @@ export default function SimulacroActivoPage() {
           <div
             className="pau-reveal-scale w-full max-w-md"
             style={{
-              background: '#fff',
+              background: 'var(--clay-surface)',
               borderRadius: 22,
               border: '1px solid var(--pau-border)',
               boxShadow: 'var(--shadow-xl)',
@@ -913,20 +913,20 @@ export default function SimulacroActivoPage() {
               {timeUp
                 ? <AlertTriangle size={22} style={{ color: '#f59e0b' }} />
                 : <CheckCircle2 size={22} style={{ color: cfg.color }} />}
-              <h2 className="text-xl font-black" style={{ color: '#0f172a' }}>
+              <h2 className="text-xl font-black" style={{ color: 'var(--clay-text)' }}>
                 {timeUp ? 'Tiempo agotado' : '¿Quieres entregar el simulacro?'}
               </h2>
             </div>
 
-            <p className="text-sm font-semibold" style={{ color: '#475569' }}>
+            <p className="text-sm font-semibold" style={{ color: 'var(--clay-text-muted)' }}>
               La corrección se mostrará al entregar. Después podrás revisar la nota estimada y el desglose por ejercicios.
             </p>
-            <p className="mt-3 text-sm font-semibold" style={{ color: '#475569' }}>
+            <p className="mt-3 text-sm font-semibold" style={{ color: 'var(--clay-text-muted)' }}>
               Has respondido{' '}
-              <strong style={{ color: '#0f172a' }}>{answeredCount}</strong> de{' '}
-              <strong style={{ color: '#0f172a' }}>{record.bloques.length}</strong> bloques.
+              <strong style={{ color: 'var(--clay-text)' }}>{answeredCount}</strong> de{' '}
+              <strong style={{ color: 'var(--clay-text)' }}>{record.bloques.length}</strong> bloques.
               {record.bloques.length - answeredCount > 0 && (
-                <> Quedan <strong style={{ color: '#0f172a' }}>{record.bloques.length - answeredCount}</strong> sin responder.</>
+                <> Quedan <strong style={{ color: 'var(--clay-text)' }}>{record.bloques.length - answeredCount}</strong> sin responder.</>
               )}
             </p>
 

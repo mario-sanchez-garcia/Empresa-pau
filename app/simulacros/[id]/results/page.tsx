@@ -200,7 +200,7 @@ export default function SimulacroResultsPage() {
           <section
             className="pau-reveal overflow-hidden rounded-2xl"
             style={{
-              background: `linear-gradient(160deg, #ffffff 0%, ${cfg.light} 100%)`,
+              background: `linear-gradient(160deg, var(--clay-surface) 0%, ${cfg.light} 100%)`,
               border: `1px solid ${cfg.color}22`,
               boxShadow: `0 20px 60px ${cfg.color}14, 0 4px 16px rgba(15,23,42,0.06)`,
             }}
@@ -230,7 +230,7 @@ export default function SimulacroResultsPage() {
                 >
                   {scoreDisplay ?? '—'}
                 </div>
-                <div className="mt-2 text-lg font-black" style={{ color: '#94a3b8' }}>
+                <div className="mt-2 text-lg font-black" style={{ color: 'var(--clay-text-muted)' }}>
                   {hasGrade ? '/ 10 puntos' : 'Corrección pendiente'}
                 </div>
                 {hasGrade && typeof result.xpAwarded === 'number' && result.xpAwarded > 0 && (
@@ -317,7 +317,7 @@ export default function SimulacroResultsPage() {
             style={{
               borderRadius: 16,
               border: '1px solid var(--pau-border)',
-              background: 'rgba(255,255,255,0.82)',
+              background: 'var(--clay-surface)',
               boxShadow: 'var(--shadow-sm)',
             }}
           >
@@ -328,7 +328,7 @@ export default function SimulacroResultsPage() {
                 className="rounded-xl px-4 py-2 text-sm font-black transition"
                 style={{
                   background: tab === id ? cfg.color : 'transparent',
-                  color: tab === id ? '#fff' : '#64748b',
+                  color: tab === id ? '#fff' : 'var(--clay-text-muted)',
                   boxShadow: tab === id ? `0 6px 16px ${cfg.color}28` : 'none',
                   border: 'none',
                   transition: 'all 180ms var(--ease-out)',
@@ -360,10 +360,10 @@ export default function SimulacroResultsPage() {
                 >
                   <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <h2 className="text-xl font-black" style={{ color: '#0f172a' }}>
+                      <h2 className="text-xl font-black" style={{ color: 'var(--clay-text)' }}>
                         {block.numero_bloque} · {block.tema}
                       </h2>
-                      <p className="text-sm font-semibold" style={{ color: '#94a3b8' }}>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--clay-text-muted)' }}>
                         Año {block.año_origen ?? 'sin datos'} · {block.convocatoria_origen || 'convocatoria sin datos'}
                       </p>
                     </div>
@@ -446,9 +446,9 @@ export default function SimulacroResultsPage() {
                   >
                     {item.prioridad}
                   </div>
-                  <h3 className="mb-2 text-base font-black" style={{ color: '#0f172a' }}>{item.tema}</h3>
+                  <h3 className="mb-2 text-base font-black" style={{ color: 'var(--clay-text)' }}>{item.tema}</h3>
                   <Markdown text={item.accion} />
-                  <p className="mt-3 flex items-center gap-1 text-sm font-black" style={{ color: '#94a3b8' }}>
+                  <p className="mt-3 flex items-center gap-1 text-sm font-black" style={{ color: 'var(--clay-text-muted)' }}>
                     <Clock size={14} />{item.tiempo_recomendado}
                   </p>
                   <div
@@ -467,8 +467,8 @@ export default function SimulacroResultsPage() {
             <section className="pau-stagger grid gap-4 md:grid-cols-4 max-sm:grid-cols-2">
               {resumen.map((item: { bloque: string; puntos_conseguidos: number; puntos_maximos: number; porcentaje: number; nivel: string }, index: number) => (
                 <article key={`${item.bloque}-${index}`} className="pau-card-section">
-                  <h3 className="mb-1 text-sm font-black" style={{ color: '#0f172a' }}>{item.bloque}</h3>
-                  <p className="text-xs font-bold" style={{ color: '#94a3b8' }}>
+                  <h3 className="mb-1 text-sm font-black" style={{ color: 'var(--clay-text)' }}>{item.bloque}</h3>
+                  <p className="text-xs font-bold" style={{ color: 'var(--clay-text-muted)' }}>
                     {format(item.puntos_conseguidos)}/{format(item.puntos_maximos)} pts
                   </p>
                   <div className="my-3 pau-progress-bar">

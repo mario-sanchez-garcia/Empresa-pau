@@ -474,7 +474,7 @@ function SimulacrosPage() {
   if (isCaminoPartial) {
     return (
       <SimulacroShell>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '80px 24px', color: '#64748b', fontSize: 13, fontWeight: 700 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '80px 24px', color: 'var(--clay-text-muted)', fontSize: 13, fontWeight: 700 }}>
           <KairoLoadingDot /> Abriendo tu práctica…
         </div>
       </SimulacroShell>
@@ -486,8 +486,8 @@ function SimulacrosPage() {
       return (
         <SimulacroShell>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, padding: '80px 24px', textAlign: 'center' }}>
-            <p style={{ color: '#334155', fontSize: 13, fontWeight: 700, margin: 0 }}>Este examen necesita que elijas los temas — edítalo para seleccionarlos.</p>
-            <a href={`/camino?editExam=${encodeURIComponent(needsTopicsExamId)}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 10, background: '#0f172a', padding: '8px 16px', fontSize: 12, fontWeight: 800, color: 'white', textDecoration: 'none' }}>
+            <p style={{ color: 'var(--clay-text)', fontSize: 13, fontWeight: 700, margin: 0 }}>Este examen necesita que elijas los temas — edítalo para seleccionarlos.</p>
+            <a href={`/camino?editExam=${encodeURIComponent(needsTopicsExamId)}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 10, background: 'var(--clay-accent-deep)', padding: '8px 16px', fontSize: 12, fontWeight: 800, color: 'var(--clay-on-accent)', textDecoration: 'none' }}>
               Editar Parcial
             </a>
           </div>
@@ -496,7 +496,7 @@ function SimulacrosPage() {
     }
     return (
       <SimulacroShell>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '80px 24px', color: '#64748b', fontSize: 13, fontWeight: 700 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '80px 24px', color: 'var(--clay-text-muted)', fontSize: 13, fontWeight: 700 }}>
           <KairoLoadingDot /> {errorMessage || 'Preparando tu simulacro…'}
         </div>
       </SimulacroShell>
@@ -543,7 +543,7 @@ function SimulacrosPage() {
     </div>
 
     {/* ── CONTENT ── */}
-    <div style={{ background: 'white', borderTop: '2px solid #0f172a', flex: 1 }}>
+    <div style={{ background: 'var(--clay-surface)', borderTop: '2px solid var(--clay-text)', flex: 1 }}>
 
       <div style={{ padding: '16px 24px 0' }}>
         <SectionIntroCard
@@ -555,13 +555,13 @@ function SimulacrosPage() {
 
       {/* History panel */}
       {historyOpen && (
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
+        <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--clay-border)', background: 'var(--clay-bg)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Mis simulacros anteriores</span>
-            <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 10px', borderRadius: 999, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }}>{history.length} total</span>
+            <span style={{ fontSize: 13, fontWeight: 900, color: 'var(--clay-text)' }}>Mis simulacros anteriores</span>
+            <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 10px', borderRadius: 999, background: 'var(--clay-accent-soft)', color: 'var(--clay-accent-text)', border: '1px solid var(--clay-border)' }}>{history.length} total</span>
           </div>
           {history.length === 0 ? (
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>Todavía no tienes simulacros guardados.</p>
+            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--clay-text-muted)' }}>Todavía no tienes simulacros guardados.</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 280, overflowY: 'auto' }}>
               {history.map(item => {
@@ -591,18 +591,18 @@ function SimulacrosPage() {
                 // interactivo real, sin anidar.
                 <div
                   key={item.id}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '9px 12px', borderRadius: 10, border: '1px solid #f1f5f9', background: 'white', transition: 'border-color .12s' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#93c5fd'; (e.currentTarget as HTMLElement).style.background = '#eff6ff' }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#f1f5f9'; (e.currentTarget as HTMLElement).style.background = 'white' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '9px 12px', borderRadius: 10, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', transition: 'border-color .12s' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--clay-accent)'; (e.currentTarget as HTMLElement).style.background = 'var(--clay-accent-soft)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--clay-border)'; (e.currentTarget as HTMLElement).style.background = 'var(--clay-surface)' }}
                 >
                   <a href={rowHref} style={{ display: 'contents', textDecoration: 'none', color: 'inherit' }}>
                     <div style={{ minWidth: 0 }}>
                       <div style={{
                         fontSize: 12, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        color: item.estado === 'completado' ? '#94a3b8' : '#0f172a',
+                        color: item.estado === 'completado' ? 'var(--clay-text-muted)' : 'var(--clay-text)',
                         textDecoration: item.estado === 'completado' ? 'line-through' : 'none',
                       }}>{SUBJECTS[item.asignatura]?.label ?? item.asignatura} · {item.dificultad_real ?? item.dificultad}</div>
-                      <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 1 }}>Última entrada: {formatDate(item.updated_at ?? item.created_at)} · {item.estado === 'completado' ? `${item.nota_final ?? '-'}/10` : 'En progreso'}</div>
+                      <div style={{ fontSize: 10, color: 'var(--clay-text-muted)', marginTop: 1 }}>Última entrada: {formatDate(item.updated_at ?? item.created_at)} · {item.estado === 'completado' ? `${item.nota_final ?? '-'}/10` : 'En progreso'}</div>
                     </div>
                   </a>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
@@ -610,7 +610,7 @@ function SimulacrosPage() {
                       {item.estado === 'completado'
                         ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#f0fdf4', color: '#15803d' }}><CheckCircle2 size={11} />Completado</span>
                         : <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#b45309' }}>En progreso</span>}
-                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: '#f1f5f9', color: '#475569' }}>{optionSummaryForRecord(item)}</span>
+                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'var(--clay-bg)', color: 'var(--clay-text-muted)' }}>{optionSummaryForRecord(item)}</span>
                     </a>
                     {suggestRepeat && (
                       <button
@@ -630,7 +630,7 @@ function SimulacrosPage() {
                         disabled={deletingId === item.id}
                         title="Borrar intento sin terminar"
                         aria-label="Borrar intento sin terminar"
-                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 999, background: 'transparent', color: '#94a3b8', border: '1px solid #f1f5f9', cursor: deletingId === item.id ? 'default' : 'pointer', opacity: deletingId === item.id ? .5 : 1 }}
+                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 999, background: 'transparent', color: 'var(--clay-text-muted)', border: '1px solid var(--clay-border)', cursor: deletingId === item.id ? 'default' : 'pointer', opacity: deletingId === item.id ? .5 : 1 }}
                       >
                         <Trash2 size={12} />
                       </button>
@@ -654,7 +654,7 @@ function SimulacrosPage() {
         {/* ── STEP 1: ASIGNATURA ── */}
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8' }}>Asignatura</div>
+            <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--clay-text-muted)' }}>Asignatura</div>
             <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 999, background: cfg.light, color: cfg.color, border: `1px solid ${cfg.color}30` }}>{cfg.label}</span>
           </div>
           <div className="sim-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
@@ -666,10 +666,10 @@ function SimulacrosPage() {
                   key={key}
                   disabled={!s.available}
                   onClick={() => s.available && setSubject(key)}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `2px solid ${isActive ? s.color : '#e2e8f0'}`, background: isActive ? s.light : 'white', cursor: s.available ? 'pointer' : 'not-allowed', opacity: s.available ? 1 : 0.45, transition: 'all .12s', position: 'relative', textAlign: 'center' }}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `2px solid ${isActive ? s.color : 'var(--clay-border)'}`, background: isActive ? s.light : 'var(--clay-surface)', cursor: s.available ? 'pointer' : 'not-allowed', opacity: s.available ? 1 : 0.45, transition: 'all .12s', position: 'relative', textAlign: 'center' }}
                 >
                   <div style={{ width: 12, height: 12, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
-                  <div style={{ fontSize: 11, fontWeight: 800, color: isActive ? s.color : '#334155', lineHeight: 1.3 }}>{s.label}</div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: isActive ? s.color : 'var(--clay-text)', lineHeight: 1.3 }}>{s.label}</div>
                   {!s.available && <span style={{ position: 'absolute', top: 4, right: 4, fontSize: 8, fontWeight: 900, padding: '1px 4px', borderRadius: 999, background: '#f0fdf4', color: '#15803d' }}>Pronto</span>}
                 </button>
               )
@@ -679,7 +679,7 @@ function SimulacrosPage() {
 
         {/* ── STEP 2: TIPO ── */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 10 }}>Tipo de simulacro</div>
+          <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--clay-text-muted)', marginBottom: 10 }}>Tipo de simulacro</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {(['normal', 'errores', 'personalizado'] as SimulacroMode[]).map(m => {
               const isActive = mode === m
@@ -695,14 +695,14 @@ function SimulacrosPage() {
                     gap: 6,
                     padding: '12px 14px',
                     borderRadius: 12,
-                    border: `1.5px solid ${isActive ? cfg.color : '#e2e8f0'}`,
-                    background: isActive ? cfg.light : 'white',
+                    border: `1.5px solid ${isActive ? cfg.color : 'var(--clay-border)'}`,
+                    background: isActive ? cfg.light : 'var(--clay-surface)',
                     cursor: 'pointer',
                     transition: 'border-color .12s, background .12s',
                     textAlign: 'left',
                   }}
                 >
-                  <span style={{ fontSize: 12, fontWeight: 800, color: isActive ? cfg.color : '#334155', lineHeight: 1.2 }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: isActive ? cfg.color : 'var(--clay-text)', lineHeight: 1.2 }}>
                     {labels[m]}
                   </span>
                   <span style={{
@@ -721,18 +721,18 @@ function SimulacrosPage() {
           </div>
           {/* Auto info */}
           {mode !== 'personalizado' && (
-            <div style={{ marginTop: 10, padding: '12px 16px', background: '#f8fafc', borderRadius: 10, border: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a' }}>{autoInfo.title}</div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginTop: 4, lineHeight: 1.5 }}>{autoInfo.description}</div>
+            <div style={{ marginTop: 10, padding: '12px 16px', background: 'var(--clay-bg)', borderRadius: 10, border: '1px solid var(--clay-border)' }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--clay-text)' }}>{autoInfo.title}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--clay-text-muted)', marginTop: 4, lineHeight: 1.5 }}>{autoInfo.description}</div>
             </div>
           )}
         </div>
 
         {/* ── STEP 3: CONFIG (personalizado) ── */}
         {mode === 'personalizado' && (
-          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16, marginBottom: 24 }}>
-            <div style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 14 }}>Ajustes personalizados</div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 8 }}>Años de convocatoria</div>
+          <div style={{ background: 'var(--clay-bg)', border: '1px solid var(--clay-border)', borderRadius: 12, padding: 16, marginBottom: 24 }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: 'var(--clay-text)', marginBottom: 14 }}>Ajustes personalizados</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--clay-text)', marginBottom: 8 }}>Años de convocatoria</div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
               {YEAR_CHOICES.map(item => {
                 const isActive = yearChoice === item.id
@@ -740,7 +740,7 @@ function SimulacrosPage() {
                   <button
                     key={item.id}
                     onClick={() => setYearChoice(item.id)}
-                    style={{ fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 10, border: `1px solid ${isActive ? cfg.color : '#e2e8f0'}`, background: isActive ? cfg.light : 'white', color: isActive ? cfg.color : '#334155', cursor: 'pointer', transition: 'all .12s' }}
+                    style={{ fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 10, border: `1px solid ${isActive ? cfg.color : 'var(--clay-border)'}`, background: isActive ? cfg.light : 'var(--clay-surface)', color: isActive ? cfg.color : 'var(--clay-text)', cursor: 'pointer', transition: 'all .12s' }}
                   >
                     {item.label}
                   </button>
@@ -748,13 +748,13 @@ function SimulacrosPage() {
               })}
             </div>
             {yearChoice !== 'all' && (
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginBottom: 12, padding: '6px 10px', background: 'white', borderRadius: 8, border: '1px solid #f1f5f9' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--clay-text-muted)', marginBottom: 12, padding: '6px 10px', background: 'var(--clay-surface)', borderRadius: 8, border: '1px solid var(--clay-border)' }}>
                 {YEAR_CHOICES.find(y => y.id === yearChoice)?.description}
               </div>
             )}
             {subject !== 'lengua' ? (
               <>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 8 }}>Opción del examen</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--clay-text)', marginBottom: 8 }}>Opción del examen</div>
                 <div style={{ display: 'flex', gap: 6 }}>
                   {OPTION_CHOICES.map(item => {
                     const isActive = optionChoice === item.id
@@ -762,7 +762,7 @@ function SimulacrosPage() {
                       <button
                         key={item.id}
                         onClick={() => setOptionChoice(item.id)}
-                        style={{ fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 10, border: `1px solid ${isActive ? cfg.color : '#e2e8f0'}`, background: isActive ? cfg.light : 'white', color: isActive ? cfg.color : '#334155', cursor: 'pointer', transition: 'all .12s' }}
+                        style={{ fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 10, border: `1px solid ${isActive ? cfg.color : 'var(--clay-border)'}`, background: isActive ? cfg.light : 'var(--clay-surface)', color: isActive ? cfg.color : 'var(--clay-text)', cursor: 'pointer', transition: 'all .12s' }}
                       >
                         {item.label}
                       </button>
@@ -771,7 +771,7 @@ function SimulacrosPage() {
                 </div>
               </>
             ) : (
-              <div style={{ padding: '10px 14px', borderRadius: 10, background: `${cfg.color}0f`, border: `1px solid ${cfg.color}24`, fontSize: 12, fontWeight: 600, color: '#475569', lineHeight: 1.5 }}>
+              <div style={{ padding: '10px 14px', borderRadius: 10, background: `${cfg.color}0f`, border: `1px solid ${cfg.color}24`, fontSize: 12, fontWeight: 600, color: 'var(--clay-text-muted)', lineHeight: 1.5 }}>
                 Lengua se genera como examen oficial coherente. Kairo elige automáticamente la versión compatible con el banco de ejercicios.
               </div>
             )}
@@ -779,11 +779,11 @@ function SimulacrosPage() {
         )}
 
         {/* ── SUMMARY + CTA ── */}
-        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, padding: 20 }}>
+        <div style={{ background: 'var(--clay-surface)', border: '1px solid var(--clay-border)', borderRadius: 14, padding: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <div>
-              <div style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94a3b8' }}>Listo para crear</div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', marginTop: 3 }}>
+              <div style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--clay-text-muted)' }}>Listo para crear</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--clay-text)', marginTop: 3 }}>
                 {cfg.label} · {buildConfigLabel(mode, effectiveYearChoiceRender, optionSelectionRender)}
               </div>
             </div>
@@ -792,7 +792,7 @@ function SimulacrosPage() {
           <button
             onClick={createSimulacro}
             disabled={loading || !userId || !SUBJECTS[subject].available}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 15, fontWeight: 900, padding: '16px', borderRadius: 12, background: loading || !userId || !SUBJECTS[subject].available ? '#94a3b8' : '#2563eb', color: 'white', border: 'none', boxShadow: loading || !userId || !SUBJECTS[subject].available ? 'none' : '0 4px 20px rgba(37,99,235,.32)', cursor: loading || !userId || !SUBJECTS[subject].available ? 'not-allowed' : 'pointer', transition: 'background .15s' }}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 15, fontWeight: 900, padding: '16px', borderRadius: 12, background: loading || !userId || !SUBJECTS[subject].available ? 'var(--clay-text-muted)' : 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', border: 'none', boxShadow: loading || !userId || !SUBJECTS[subject].available ? 'none' : '0 4px 20px rgba(37,99,235,.32)', cursor: loading || !userId || !SUBJECTS[subject].available ? 'not-allowed' : 'pointer', transition: 'background .15s' }}
           >
             {loading ? <KairoLoadingDot /> : <PlayCircle size={18} />}
             {loading

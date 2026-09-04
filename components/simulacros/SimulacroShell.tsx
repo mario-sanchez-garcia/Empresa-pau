@@ -2,6 +2,8 @@
 
 import type { ReactNode } from 'react'
 import SidebarNav from '@/app/components/SidebarNav'
+import ClayThemeScope from '@/components/clay/ClayThemeScope'
+import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 
 interface SimulacroShellProps {
   children: ReactNode
@@ -11,8 +13,9 @@ interface SimulacroShellProps {
 }
 
 export default function SimulacroShell({ children, title, subtitle, actions }: SimulacroShellProps) {
+  const { theme } = useClayThemePreference()
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
+    <ClayThemeScope theme={theme} style={{ display: 'flex', minHeight: '100vh' }}>
       <style>{`
         /* iPad/tablet: el hero (340px, pensado para escritorio) solo tenía
            un recorte para móvil (max-width:767px) — en tablet se quedaba a
@@ -37,12 +40,12 @@ export default function SimulacroShell({ children, title, subtitle, actions }: S
       {/* Content area */}
       <div className="kairo-page-scroll" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         {title && (
-          <header style={{ position: 'sticky', top: 0, zIndex: 30, background: 'white', borderBottom: '1px solid #e2e8f0' }}>
+          <header style={{ position: 'sticky', top: 0, zIndex: 30, background: 'var(--clay-surface)', borderBottom: '1px solid var(--clay-border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#2563eb' }}>Simulacros</span>
-                <span style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>{title}</span>
-                {subtitle && <span style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', marginTop: 2 }}>{subtitle}</span>}
+                <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--clay-accent)' }}>Simulacros</span>
+                <span style={{ fontSize: 20, fontWeight: 900, color: 'var(--clay-text)', lineHeight: 1 }}>{title}</span>
+                {subtitle && <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--clay-text-muted)', marginTop: 2 }}>{subtitle}</span>}
               </div>
               {actions && <div style={{ display: 'flex', gap: 8 }}>{actions}</div>}
             </div>
@@ -53,6 +56,6 @@ export default function SimulacroShell({ children, title, subtitle, actions }: S
           : <>{children}</>
         }
       </div>
-    </div>
+    </ClayThemeScope>
   )
 }

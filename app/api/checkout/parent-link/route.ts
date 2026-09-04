@@ -28,6 +28,12 @@ export async function POST(request: NextRequest) {
   try { body = await request.json() } catch { /* empty body ok */ }
 
   const planId = typeof body.planId === 'string' ? body.planId : DEFAULT_PLAN_ID
+  // The family invitation UI and its consent copy are specifically for the
+  // fixed-term Curso PAU purchase. Do not let a crafted client turn it into a
+  // recurring Premium subscription with misleading one-time-payment copy.
+  if (planId !== DEFAULT_PLAN_ID) {
+    return NextResponse.json({ error: 'El pago familiar solo está disponible para Curso PAU' }, { status: 400 })
+  }
   const plan = getPlan(planId)
   if (!plan) return NextResponse.json({ error: 'Plan no reconocido' }, { status: 400 })
 

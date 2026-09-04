@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 import { getStripe, getWebhookSecret, isStripeConfigured } from '@/app/lib/billing/stripe'
+import {
+  entitlementMatchesSubscription,
+  invoiceSubscriptionId,
+  stripeId,
+  stripeTimestampToIso,
+  subscriptionPeriodEndIso,
+} from '@/app/lib/billing/stripeEvents'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 
 export const dynamic = 'force-dynamic'
@@ -68,8 +75,8 @@ async function handleCheckoutCompleted(
   }
 
   const now = new Date().toISOString()
-  const stripeCustomerId = typeof session.customer === 'string' ? session.customer : null
-  const subscriptionId = typeof session.subscription === 'string' ? session.subscription : null
+  const stripeCustomerId = stripeId(session.customer)
+  const subscriptionId = stripeId(session.subscription)
 
   // For real Stripe subscriptions (mode:'subscription'), expires_at should mirror
   // the actual billing period end rather than a flat "+30 days" guess — this is
@@ -78,7 +85,7 @@ async function handleCheckoutCompleted(
   if (subscriptionId) {
     try {
       const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
-      expiresAt = stripeTimestampToIso((subscription as unknown as { current_period_end?: unknown }).current_period_end)
+      expiresAt = subscriptionPeriodEndIso(subscription)
     } catch (err) {
       console.error('[stripe/webhook] could not retrieve subscription at checkout completion', {
         sessionId,
@@ -114,11 +121,14 @@ async function handleCheckoutCompleted(
     // Ensure parent link is paid — handles partial-failure recovery where
     // entitlement was created but link update failed on a prior attempt.
     if (parentCheckoutLinkId) {
-      await db
+      const { error: linkRepairError } = await db
         .from('parent_checkout_links')
         .update({ status: 'paid', paid_at: now, stripe_customer_id: stripeCustomerId, updated_at: now })
         .eq('id', parentCheckoutLinkId)
         .neq('status', 'paid')
+      if (linkRepairError) {
+        throw new Error(`parent link idempotent repair failed: ${linkRepairError.message}`)
+      }
     }
     return
   }
@@ -187,8 +197,9 @@ async function handleCheckoutCompleted(
         parentCheckoutLinkId,
         error: linkError.message,
       })
-      // Do not throw — entitlement is the authoritative record. Stripe retry
-      // will reach Step 1 and repair the link.
+      // The unique checkout-session key makes a Stripe retry safe. It will
+      // enter Step 1 and repair this link without duplicating the entitlement.
+      throw new Error(`parent link update failed: ${linkError.message}`)
     }
   }
 
@@ -247,21 +258,6 @@ async function handleCheckoutExpired(
   })
 }
 
-function stripeId(value: unknown): string | null {
-  if (typeof value === 'string' && value) return value
-  if (value && typeof value === 'object' && 'id' in value) {
-    const id = (value as { id?: unknown }).id
-    return typeof id === 'string' && id ? id : null
-  }
-  return null
-}
-
-function stripeTimestampToIso(value: unknown): string | null {
-  return typeof value === 'number' && Number.isFinite(value)
-    ? new Date(value * 1000).toISOString()
-    : null
-}
-
 function latestIsoDate(a: string | null | undefined, b: string | null | undefined): string | null {
   if (!a) return b ?? null
   if (!b) return a
@@ -280,20 +276,21 @@ async function handleSubscriptionDeleted(
   }
 
   const now = new Date().toISOString()
-  const paidThrough = stripeTimestampToIso((subscription as unknown as { current_period_end?: unknown }).current_period_end)
+  const paidThrough = subscriptionPeriodEndIso(subscription)
     ?? stripeTimestampToIso(subscription.ended_at)
     ?? stripeTimestampToIso(subscription.canceled_at)
     ?? now
 
   const { data: entitlements, error } = await db
     .from('user_entitlements')
-    .select('id, user_id, expires_at, metadata')
+    .select('id, user_id, plan_id, expires_at, metadata')
     .eq('stripe_customer_id', stripeCustomerId)
     .eq('status', 'active')
 
   if (error) throw new Error(`subscription deleted entitlement lookup failed: ${error.message}`)
 
   for (const entitlement of entitlements ?? []) {
+    if (!entitlementMatchesSubscription(entitlement, subscriptionId)) continue
     const metadata = (entitlement.metadata && typeof entitlement.metadata === 'object')
       ? entitlement.metadata as Record<string, unknown>
       : {}
@@ -341,17 +338,19 @@ async function handleInvoicePaymentFailed(
     return
   }
 
-  const subscriptionId = stripeId((invoice as unknown as { subscription?: unknown }).subscription)
+  const subscriptionId = invoiceSubscriptionId(invoice)
+  if (!subscriptionId) return // one-off invoice — it must not mutate subscription access
   const now = new Date().toISOString()
   const { data: entitlements, error } = await db
     .from('user_entitlements')
-    .select('id, user_id, metadata')
+    .select('id, user_id, plan_id, metadata')
     .eq('stripe_customer_id', stripeCustomerId)
     .eq('status', 'active')
 
   if (error) throw new Error(`payment failed entitlement lookup failed: ${error.message}`)
 
   for (const entitlement of entitlements ?? []) {
+    if (!entitlementMatchesSubscription(entitlement, subscriptionId)) continue
     const metadata = (entitlement.metadata && typeof entitlement.metadata === 'object')
       ? entitlement.metadata as Record<string, unknown>
       : {}
@@ -400,13 +399,13 @@ async function handleInvoicePaid(
     return
   }
 
-  const subscriptionId = stripeId((invoice as unknown as { subscription?: unknown }).subscription)
+  const subscriptionId = invoiceSubscriptionId(invoice)
   if (!subscriptionId) return // one-off (non-subscription) invoice — nothing to renew
 
   let periodEndIso: string | null = null
   try {
     const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
-    periodEndIso = stripeTimestampToIso((subscription as unknown as { current_period_end?: unknown }).current_period_end)
+    periodEndIso = subscriptionPeriodEndIso(subscription)
   } catch (err) {
     console.error('[stripe/webhook] could not retrieve subscription for renewal', {
       subscriptionId,
@@ -419,7 +418,7 @@ async function handleInvoicePaid(
   const now = new Date().toISOString()
   const { data: entitlements, error } = await db
     .from('user_entitlements')
-    .select('id, user_id, expires_at, metadata')
+    .select('id, user_id, plan_id, expires_at, metadata')
     .eq('stripe_customer_id', stripeCustomerId)
     .eq('status', 'active')
 
@@ -429,6 +428,7 @@ async function handleInvoicePaid(
   // ordering isn't guaranteed), there's nothing to extend yet — it will be
   // created with the correct period end there. Not an error, just a no-op.
   for (const entitlement of entitlements ?? []) {
+    if (!entitlementMatchesSubscription(entitlement, subscriptionId)) continue
     const metadata = (entitlement.metadata && typeof entitlement.metadata === 'object')
       ? entitlement.metadata as Record<string, unknown>
       : {}

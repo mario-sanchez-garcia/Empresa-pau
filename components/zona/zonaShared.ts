@@ -28,13 +28,13 @@ export const eyebrowStyle: CSSProperties = {
   fontWeight: 900,
   letterSpacing: '.18em',
   textTransform: 'uppercase',
-  color: '#94a3b8',
+  color: 'var(--clay-text-muted)',
   margin: 0,
 }
 
 export const labelStyle: CSSProperties = {
   display: 'block',
-  color: '#64748b',
+  color: 'var(--clay-text-muted)',
   fontSize: 11,
   fontWeight: 800,
   letterSpacing: '.1em',
@@ -45,9 +45,9 @@ export const labelStyle: CSSProperties = {
 export const inputStyle: CSSProperties = {
   width: '100%',
   boxSizing: 'border-box',
-  border: '1px solid #e2e8f0',
-  background: 'white',
-  color: '#0f172a',
+  border: '1px solid var(--clay-border)',
+  background: 'var(--clay-surface)',
+  color: 'var(--clay-text)',
   borderRadius: 4,
   padding: '10px 12px',
   font: 'inherit',

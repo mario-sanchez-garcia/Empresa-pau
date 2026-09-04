@@ -196,12 +196,12 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
       {/* ── Mode selector ── */}
       <section style={{ paddingBottom: 24 }}>
         <div style={{ marginBottom: 18 }}>
-          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 6 }}>Empieza aquí</p>
-          <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 26, fontWeight: 700, color: '#0f172a', letterSpacing: '-.02em', marginBottom: 5 }}>Elige qué quieres hacer</h2>
-          <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.7 }}>Repasa conceptos, guarda errores y crea tus propias tarjetas.</p>
+          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--clay-text-muted)', marginBottom: 6 }}>Empieza aquí</p>
+          <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 26, fontWeight: 700, color: 'var(--clay-text)', letterSpacing: '-.02em', marginBottom: 5 }}>Elige qué quieres hacer</h2>
+          <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--clay-text-muted)', lineHeight: 1.7 }}>Repasa conceptos, guarda errores y crea tus propias tarjetas.</p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4" style={{ border: '1px solid #e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
+        <div className="grid grid-cols-2 lg:grid-cols-4" style={{ border: '1px solid var(--clay-border)', borderRadius: 4, overflow: 'hidden' }}>
           {MODES.map((m, i) => {
             const isActive = mode === m.key
             return (
@@ -211,18 +211,18 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 7,
                   padding: '16px 18px',
-                  background: isActive ? '#0f172a' : 'white',
+                  background: isActive ? 'var(--clay-accent-deep)' : 'var(--clay-surface)',
                   borderWidth: 0,
                   borderRightWidth: i < MODES.length - 1 ? 1 : 0,
                   borderRightStyle: 'solid',
-                  borderRightColor: '#e2e8f0',
+                  borderRightColor: 'var(--clay-border)',
                   cursor: 'pointer', textAlign: 'left',
                   transition: 'background .12s',
                 }}
               >
-                <div style={{ color: isActive ? '#93c5fd' : '#2563eb' }}>{m.icon}</div>
-                <div style={{ fontSize: 13, fontWeight: 800, color: isActive ? 'white' : '#0f172a', lineHeight: 1.2 }}>{m.title}</div>
-                <div style={{ fontSize: 11, fontWeight: 500, color: isActive ? '#94a3b8' : '#64748b', lineHeight: 1.55 }}>{m.text}</div>
+                <div style={{ color: isActive ? 'var(--clay-on-accent)' : 'var(--clay-accent)' }}>{m.icon}</div>
+                <div style={{ fontSize: 13, fontWeight: 800, color: isActive ? 'var(--clay-on-accent)' : 'var(--clay-text)', lineHeight: 1.2 }}>{m.title}</div>
+                <div style={{ fontSize: 11, fontWeight: 500, color: isActive ? 'var(--clay-on-accent)' : 'var(--clay-text-muted)', lineHeight: 1.55, opacity: isActive ? .8 : 1 }}>{m.text}</div>
               </button>
             )
           })}
@@ -231,19 +231,19 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
 
       {/* ── Study mode ── */}
       {mode === 'study' && (
-        <section style={{ borderTop: '2px solid #0f172a', paddingTop: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingBottom: 16, borderBottom: '1px solid #e2e8f0' }}>
+        <section style={{ borderTop: '2px solid var(--clay-text)', paddingTop: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingBottom: 16, borderBottom: '1px solid var(--clay-border)' }}>
             <div>
-              <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 5 }}>Repaso activo</p>
-              <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em' }}>Repasa antes de hacer ejercicios</h3>
+              <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--clay-text-muted)', marginBottom: 5 }}>Repaso activo</p>
+              <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: 'var(--clay-text)', letterSpacing: '-.01em' }}>Repasa antes de hacer ejercicios</h3>
             </div>
-            <button onClick={resetDeck} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: '1px solid #e2e8f0', background: 'white', borderRadius: 4, padding: '7px 13px', fontSize: 11, fontWeight: 900, color: '#64748b', cursor: 'pointer' }}>
+            <button onClick={resetDeck} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', borderRadius: 4, padding: '7px 13px', fontSize: 11, fontWeight: 900, color: 'var(--clay-text-muted)', cursor: 'pointer' }}>
               <RotateCcw size={13} /> Reiniciar
             </button>
           </div>
 
           <div className="grid gap-5 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
-            <aside style={{ display: 'grid', alignContent: 'start', gap: 16, border: '1px solid #e2e8f0', borderRadius: 4, padding: 16, background: '#fafaf9' }}>
+            <aside style={{ display: 'grid', alignContent: 'start', gap: 16, border: '1px solid var(--clay-border)', borderRadius: 4, padding: 16, background: 'var(--clay-bg)' }}>
               <div>
                 <div style={eyebrowStyle}>Asignatura</div>
                 <select value={subject} onChange={event => selectSubject(event.target.value as ZonaSubject | 'all')} style={inputStyle}>
@@ -258,16 +258,16 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
                   <option value="all">Todo</option>
                   {topics.map(item => <option key={item} value={item}>{item}</option>)}
                 </select>
-                <p style={{ marginTop: 6, fontSize: 11, fontWeight: 500, color: '#94a3b8', lineHeight: 1.5 }}>Empieza por Todo si no sabes por dónde empezar.</p>
+                <p style={{ marginTop: 6, fontSize: 11, fontWeight: 500, color: 'var(--clay-text-muted)', lineHeight: 1.5 }}>Empieza por Todo si no sabes por dónde empezar.</p>
               </div>
 
-              <div style={{ border: '1px solid #e2e8f0', borderRadius: 4, padding: '12px 14px', background: 'white' }}>
+              <div style={{ border: '1px solid var(--clay-border)', borderRadius: 4, padding: '12px 14px', background: 'var(--clay-surface)' }}>
                 <div style={eyebrowStyle}>Progreso</div>
-                <div style={{ height: 3, borderRadius: 999, background: '#f1f5f9', overflow: 'hidden', margin: '10px 0 8px' }}>
-                  <div style={{ height: '100%', background: '#2563eb', transition: 'width .3s', width: progress + '%' }} />
+                <div style={{ height: 3, borderRadius: 999, background: 'var(--clay-border)', overflow: 'hidden', margin: '10px 0 8px' }}>
+                  <div style={{ height: '100%', background: 'var(--clay-accent)', transition: 'width .3s', width: progress + '%' }} />
                 </div>
-                <div style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>{reviewed}/{studyCards.length} tarjetas repasadas</div>
-                <div style={{ fontSize: 11, fontWeight: 500, color: '#94a3b8', marginTop: 2 }}>{filtered.length ? 'Tus tarjetas' : 'Tarjetas recomendadas para empezar'}</div>
+                <div style={{ fontSize: 13, fontWeight: 900, color: 'var(--clay-text)' }}>{reviewed}/{studyCards.length} tarjetas repasadas</div>
+                <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--clay-text-muted)', marginTop: 2 }}>{filtered.length ? 'Tus tarjetas' : 'Tarjetas recomendadas para empezar'}</div>
               </div>
             </aside>
 
@@ -304,7 +304,7 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
               )}
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <button onClick={() => answerCard('dont')} disabled={!current} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, border: '1px solid #fecaca', background: 'white', borderRadius: 4, padding: 12, fontWeight: 900, fontSize: 13, color: '#dc2626', cursor: 'pointer', opacity: !current ? .45 : 1 }}>
+                <button onClick={() => answerCard('dont')} disabled={!current} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, border: '1px solid #fecaca', background: 'var(--clay-surface)', borderRadius: 4, padding: 12, fontWeight: 900, fontSize: 13, color: '#dc2626', cursor: 'pointer', opacity: !current ? .45 : 1 }}>
                   <XCircle size={15} /> No me la sé
                 </button>
                 <button onClick={() => answerCard('know')} disabled={!current} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, border: '1px solid #bbf7d0', background: '#f0fdf4', borderRadius: 4, padding: 12, fontWeight: 900, fontSize: 13, color: '#059669', cursor: 'pointer', opacity: !current ? .45 : 1 }}>
@@ -318,19 +318,19 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
 
       {/* ── Create mode ── */}
       {mode === 'create' && (
-        <section style={{ borderTop: '2px solid #0f172a', paddingTop: 24 }} className="grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
-          <div style={{ border: '1px solid #e2e8f0', borderRadius: 4, background: '#fafaf9', padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <section style={{ borderTop: '2px solid var(--clay-text)', paddingTop: 24 }} className="grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
+          <div style={{ border: '1px solid var(--clay-border)', borderRadius: 4, background: 'var(--clay-bg)', padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div>
               <p style={eyebrowStyle}>Crear tarjeta</p>
-              <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em', marginBottom: 6, marginTop: 6 }}>Hazlo rápido y vuelve luego</h3>
-              <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.7 }}>Guarda aquí fórmulas, errores o ideas que quieras recordar.</p>
+              <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: 'var(--clay-text)', letterSpacing: '-.01em', marginBottom: 6, marginTop: 6 }}>Hazlo rápido y vuelve luego</h3>
+              <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--clay-text-muted)', lineHeight: 1.7 }}>Guarda aquí fórmulas, errores o ideas que quieras recordar.</p>
             </div>
-            <div style={{ border: '1px solid #e2e8f0', background: 'white', borderRadius: 4, padding: '12px 14px', fontSize: 12, fontWeight: 600, color: '#64748b', lineHeight: 1.7 }}>
-              Ejemplo: escribe <code style={{ background: '#f1f5f9', borderRadius: 3, padding: '1px 4px', fontSize: 11 }}>{`$P(A\\mid B)$`}</code> o una fórmula en bloque y se verá con el mismo renderizador.
+            <div style={{ border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', borderRadius: 4, padding: '12px 14px', fontSize: 12, fontWeight: 600, color: 'var(--clay-text-muted)', lineHeight: 1.7 }}>
+              Ejemplo: escribe <code style={{ background: 'var(--clay-bg)', borderRadius: 3, padding: '1px 4px', fontSize: 11 }}>{`$P(A\\mid B)$`}</code> o una fórmula en bloque y se verá con el mismo renderizador.
             </div>
           </div>
 
-          <form onSubmit={createCard} style={{ border: '1px solid #e2e8f0', borderRadius: 4, background: 'white', padding: 20, display: 'grid', gap: 14 }}>
+          <form onSubmit={createCard} style={{ border: '1px solid var(--clay-border)', borderRadius: 4, background: 'var(--clay-surface)', padding: 20, display: 'grid', gap: 14 }}>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label style={labelStyle}>Asignatura</label>
@@ -354,9 +354,9 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
               <textarea value={form.back} onChange={e => setForm(prev => ({ ...prev, back: e.target.value }))} placeholder="Definición, explicación o regla" style={{ ...inputStyle, minHeight: 132, resize: 'vertical' }} />
             </div>
 
-            {formError && <div style={{ border: '1px solid #bfdbfe', background: '#eff6ff', borderRadius: 4, padding: '10px 14px', fontSize: 13, fontWeight: 800, color: '#1e40af' }}>{formError}</div>}
+            {formError && <div style={{ border: '1px solid var(--clay-border)', background: 'var(--clay-accent-soft)', borderRadius: 4, padding: '10px 14px', fontSize: 13, fontWeight: 800, color: 'var(--clay-accent-text)' }}>{formError}</div>}
 
-            <button disabled={saving} style={{ display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, background: '#0f172a', border: 'none', borderRadius: 4, padding: 12, fontWeight: 900, fontSize: 13, color: 'white', cursor: saving ? 'wait' : 'pointer', opacity: saving ? .7 : 1 }}>
+            <button disabled={saving} style={{ display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, background: 'var(--clay-accent-deep)', border: 'none', borderRadius: 4, padding: 12, fontWeight: 900, fontSize: 13, color: 'var(--clay-on-accent)', cursor: saving ? 'wait' : 'pointer', opacity: saving ? .7 : 1 }}>
               <Plus size={16} />{saving ? 'Guardando...' : 'Crear tarjeta'}
             </button>
           </form>
@@ -365,13 +365,13 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
 
       {/* ── Space mode ── */}
       {mode === 'space' && (
-        <section style={{ borderTop: '2px solid #0f172a', paddingTop: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingBottom: 16, borderBottom: '1px solid #e2e8f0' }}>
+        <section style={{ borderTop: '2px solid var(--clay-text)', paddingTop: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingBottom: 16, borderBottom: '1px solid var(--clay-border)' }}>
             <div>
               <p style={eyebrowStyle}>Tarjetas guardadas</p>
-              <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em', marginTop: 5 }}>Guarda aquí lo que quieras volver a repasar</h3>
+              <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: 'var(--clay-text)', letterSpacing: '-.01em', marginTop: 5 }}>Guarda aquí lo que quieras volver a repasar</h3>
             </div>
-            <Link href="/zona/canvas" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#0f172a', color: 'white', borderRadius: 4, padding: '9px 14px', fontSize: 11, fontWeight: 900, textDecoration: 'none' }}>
+            <Link href="/zona/canvas" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', borderRadius: 4, padding: '9px 14px', fontSize: 11, fontWeight: 900, textDecoration: 'none' }}>
               Abrir canvas <ArrowRight size={12} />
             </Link>
           </div>
@@ -381,27 +381,27 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
               {cards.length > 0 ? cards.map(card => (
                 <SavedCard key={card.id} card={card} onDelete={() => void deleteCard(card)} />
               )) : (
-                <div style={{ border: '1px dashed #bfdbfe', borderRadius: 4, background: '#f8fafc', padding: 28, textAlign: 'center' }}>
-                  <Sparkles style={{ margin: '0 auto 10px', color: '#2563eb', display: 'block' }} size={26} />
-                  <h4 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>Todavía no tienes tarjetas propias</h4>
-                  <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.7, marginBottom: 14 }}>Crea una con un error o fórmula que quieras repasar.</p>
-                  <button onClick={() => setMode('create')} style={{ background: '#0f172a', color: 'white', border: 'none', borderRadius: 4, padding: '9px 16px', fontSize: 12, fontWeight: 900, cursor: 'pointer' }}>Crear primera tarjeta</button>
+                <div style={{ border: '1px dashed var(--clay-border)', borderRadius: 4, background: 'var(--clay-bg)', padding: 28, textAlign: 'center' }}>
+                  <Sparkles style={{ margin: '0 auto 10px', color: 'var(--clay-accent)', display: 'block' }} size={26} />
+                  <h4 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: 'var(--clay-text)', marginBottom: 6 }}>Todavía no tienes tarjetas propias</h4>
+                  <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--clay-text-muted)', lineHeight: 1.7, marginBottom: 14 }}>Crea una con un error o fórmula que quieras repasar.</p>
+                  <button onClick={() => setMode('create')} style={{ background: 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', border: 'none', borderRadius: 4, padding: '9px 16px', fontSize: 12, fontWeight: 900, cursor: 'pointer' }}>Crear primera tarjeta</button>
                 </div>
               )}
             </div>
 
-            <aside style={{ display: 'grid', alignContent: 'start', gap: 10, border: '1px solid #e2e8f0', borderRadius: 4, padding: 16, background: '#fafaf9' }}>
-              <div style={{ paddingBottom: 10, borderBottom: '1px solid #e2e8f0' }}>
+            <aside style={{ display: 'grid', alignContent: 'start', gap: 10, border: '1px solid var(--clay-border)', borderRadius: 4, padding: 16, background: 'var(--clay-bg)' }}>
+              <div style={{ paddingBottom: 10, borderBottom: '1px solid var(--clay-border)' }}>
                 <div style={eyebrowStyle}>Tarjetas recomendadas</div>
-                <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.6, marginTop: 5 }}>Copia solo las que quieras tener en tu cuenta.</p>
+                <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--clay-text-muted)', lineHeight: 1.6, marginTop: 5 }}>Copia solo las que quieras tener en tu cuenta.</p>
               </div>
               {SUBJECTS.filter(item => !selectedSubject || item.id === selectedSubject.id).map(item => {
                 const deckSize = RECOMMENDED_FLASHCARDS.filter(card => card.subject === item.id).length
                 return (
-                  <article key={item.id} style={{ border: '1px solid #e2e8f0', borderRadius: 4, padding: '12px 14px', background: 'white' }}>
+                  <article key={item.id} style={{ border: '1px solid var(--clay-border)', borderRadius: 4, padding: '12px 14px', background: 'var(--clay-surface)' }}>
                     <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.14em', color: item.color, marginBottom: 3 }}>Recomendado</div>
-                    <h4 style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 2 }}>{item.label}</h4>
-                    <p style={{ fontSize: 11, fontWeight: 500, color: '#64748b', marginBottom: 10 }}>{deckSize} tarjetas esenciales</p>
+                    <h4 style={{ fontSize: 13, fontWeight: 900, color: 'var(--clay-text)', marginBottom: 2 }}>{item.label}</h4>
+                    <p style={{ fontSize: 11, fontWeight: 500, color: 'var(--clay-text-muted)', marginBottom: 10 }}>{deckSize} tarjetas esenciales</p>
                     <button onClick={() => void copyRecommendedDeck(item.id)} disabled={copyingSubject !== null} style={{ display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: 4, padding: '7px 10px', fontSize: 11, fontWeight: 900, cursor: 'pointer', border: `1px solid ${item.color}33`, background: item.soft, color: item.color, opacity: copyingSubject !== null ? .6 : 1 }}>
                       <CopyPlus size={13} />{copyingSubject === item.id ? 'Copiando...' : 'Copiar tarjetas'}
                     </button>
@@ -415,7 +415,7 @@ export default function Flashcards({ userId, initialCards, externalSubject }: Fl
 
       {/* ── Decks mode ── */}
       {mode === 'decks' && (
-        <section style={{ borderTop: '2px solid #0f172a', paddingTop: 24 }}>
+        <section style={{ borderTop: '2px solid var(--clay-text)', paddingTop: 24 }}>
           <FlashcardDecks onExit={() => setMode(null)} />
         </section>
       )}
@@ -433,8 +433,8 @@ function CardFace({ subject, topic, label, text, back = false }: { subject: Zona
       minHeight: 320,
       borderRadius: 6,
       padding: 26,
-      background: back ? '#f8fafc' : 'white',
-      border: '1px solid #e2e8f0',
+      background: back ? 'var(--clay-bg)' : 'var(--clay-surface)',
+      border: '1px solid var(--clay-border)',
       boxShadow: '0 8px 32px rgba(0,0,0,.06)',
       backfaceVisibility: 'hidden',
       transform: back ? 'rotateY(180deg)' : 'rotateY(0deg)',
@@ -445,24 +445,24 @@ function CardFace({ subject, topic, label, text, back = false }: { subject: Zona
     }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
         <span style={{ color, fontWeight: 900, fontSize: 10, letterSpacing: '.16em', textTransform: 'uppercase' }}>{label}</span>
-        <span style={{ color: '#64748b', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '3px 9px', borderRadius: 999, fontSize: 11, fontWeight: 700 }}>{subjectLabel(subject)} · {topic}</span>
+        <span style={{ color: 'var(--clay-text-muted)', background: 'var(--clay-bg)', border: '1px solid var(--clay-border)', padding: '3px 9px', borderRadius: 999, fontSize: 11, fontWeight: 700 }}>{subjectLabel(subject)} · {topic}</span>
       </div>
       <MathMarkdown text={text} className={back ? 'text-lg font-semibold overflow-x-auto' : 'text-xl font-black overflow-x-auto'} />
-      <div style={{ color: '#94a3b8', fontSize: 11, fontWeight: 600 }}>Toca para girar · Arrastra derecha/izquierda</div>
+      <div style={{ color: 'var(--clay-text-muted)', fontSize: 11, fontWeight: 600 }}>Toca para girar · Arrastra derecha/izquierda</div>
     </div>
   )
 }
 
 function SavedCard({ card, onDelete }: { card: Flashcard; onDelete: () => void }) {
   return (
-    <article style={{ border: '1px solid #e2e8f0', borderRadius: 4, padding: '14px 16px', background: 'white' }}>
+    <article style={{ border: '1px solid var(--clay-border)', borderRadius: 4, padding: '14px 16px', background: 'var(--clay-surface)' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.14em', color: '#94a3b8', marginBottom: 6 }}>{subjectLabel(card.subject)} · {card.topic}</div>
-          <div style={{ fontWeight: 900, color: '#0f172a', marginBottom: 8 }}><MathMarkdown text={card.front} /></div>
-          <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: 4, padding: '10px 12px', fontSize: 13, fontWeight: 500, color: '#475569' }}><MathMarkdown text={card.back} /></div>
+          <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.14em', color: 'var(--clay-text-muted)', marginBottom: 6 }}>{subjectLabel(card.subject)} · {card.topic}</div>
+          <div style={{ fontWeight: 900, color: 'var(--clay-text)', marginBottom: 8 }}><MathMarkdown text={card.front} /></div>
+          <div style={{ background: 'var(--clay-bg)', border: '1px solid var(--clay-border)', borderRadius: 4, padding: '10px 12px', fontSize: 13, fontWeight: 500, color: 'var(--clay-text-muted)' }}><MathMarkdown text={card.back} /></div>
         </div>
-        <button onClick={onDelete} aria-label="Eliminar flashcard" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, border: '1px solid #fecaca', background: 'white', borderRadius: 4, color: '#dc2626', cursor: 'pointer' }}>
+        <button onClick={onDelete} aria-label="Eliminar flashcard" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, border: '1px solid #fecaca', background: 'var(--clay-surface)', borderRadius: 4, color: '#dc2626', cursor: 'pointer' }}>
           <Trash2 size={14} />
         </button>
       </div>
@@ -475,8 +475,8 @@ function DeckCompleteState({ onReset, count }: { onReset: () => void; count: num
     <div style={{ display: 'grid', minHeight: 320, placeItems: 'center', border: '1px solid #bbf7d0', borderRadius: 4, background: '#f0fdf4', padding: 24, textAlign: 'center' }}>
       <div>
         <CheckCircle2 style={{ margin: '0 auto 10px', color: '#059669', display: 'block' }} size={32} />
-        <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>¡Mazo completado!</h3>
-        <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.6, marginBottom: 16 }}>{count} tarjeta{count !== 1 ? 's' : ''} repasada{count !== 1 ? 's' : ''}.</p>
+        <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: 'var(--clay-text)', marginBottom: 6 }}>¡Mazo completado!</h3>
+        <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--clay-text-muted)', lineHeight: 1.6, marginBottom: 16 }}>{count} tarjeta{count !== 1 ? 's' : ''} repasada{count !== 1 ? 's' : ''}.</p>
         <button onClick={onReset} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#059669', color: 'white', border: 'none', borderRadius: 4, padding: '9px 16px', fontSize: 12, fontWeight: 900, cursor: 'pointer' }}>
           <RotateCcw size={13} /> Repetir mazo
         </button>
@@ -487,11 +487,11 @@ function DeckCompleteState({ onReset, count }: { onReset: () => void; count: num
 
 function EmptyStudyState() {
   return (
-    <div style={{ display: 'grid', minHeight: 320, placeItems: 'center', border: '1px dashed #bfdbfe', borderRadius: 4, background: '#f8fafc', padding: 24, textAlign: 'center' }}>
+    <div style={{ display: 'grid', minHeight: 320, placeItems: 'center', border: '1px dashed var(--clay-border)', borderRadius: 4, background: 'var(--clay-bg)', padding: 24, textAlign: 'center' }}>
       <div>
-        <Sparkles style={{ margin: '0 auto 10px', color: '#2563eb', display: 'block' }} size={26} />
-        <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>No hay tarjetas con este filtro</h3>
-        <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.6 }}>Prueba otra asignatura o crea una flashcard propia.</p>
+        <Sparkles style={{ margin: '0 auto 10px', color: 'var(--clay-accent)', display: 'block' }} size={26} />
+        <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 18, fontWeight: 700, color: 'var(--clay-text)', marginBottom: 6 }}>No hay tarjetas con este filtro</h3>
+        <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--clay-text-muted)', lineHeight: 1.6 }}>Prueba otra asignatura o crea una flashcard propia.</p>
       </div>
     </div>
   )

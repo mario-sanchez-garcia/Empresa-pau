@@ -357,7 +357,7 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
 
         <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: 4, background: 'white', padding: 16, display: 'grid', gap: 12 }}>
+            <div style={{ border: '1px solid var(--clay-border)', borderRadius: 4, background: 'var(--clay-surface)', padding: 16, display: 'grid', gap: 12 }}>
               <div>
                 <label style={labelStyle}>Asignatura</label>
                 <select value={form.subject} onChange={e => setForm(prev => ({ ...prev, subject: e.target.value as ZonaSubject }))} style={inputStyle}>
@@ -372,18 +372,18 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
                 <label style={labelStyle}>Título del mazo (opcional)</label>
                 <input value={form.title} onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))} placeholder="Se usa el tema si lo dejas vacío" style={inputStyle} />
               </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 700, color: '#334155', cursor: 'pointer' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 700, color: 'var(--clay-text)', cursor: 'pointer' }}>
                 <input type="checkbox" checked={form.isPublic} onChange={e => setForm(prev => ({ ...prev, isPublic: e.target.checked }))} />
                 Publicar como mazo público (otros alumnos podrán resolverlo y ganar XP; si va bien, tú también ganas XP)
               </label>
             </div>
 
-            <div style={{ border: '1px solid #e2e8f0', borderRadius: 4, background: '#fafaf9', padding: 16, display: 'grid', gap: 10 }}>
+            <div style={{ border: '1px solid var(--clay-border)', borderRadius: 4, background: 'var(--clay-bg)', padding: 16, display: 'grid', gap: 10 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <ClipboardPaste size={14} color="#2563eb" />
-                <span style={{ fontSize: 12, fontWeight: 900, color: '#0f172a' }}>Importar desde texto/CSV</span>
+                <ClipboardPaste size={14} color="var(--clay-accent)" />
+                <span style={{ fontSize: 12, fontWeight: 900, color: 'var(--clay-text)' }}>Importar desde texto/CSV</span>
               </div>
-              <p style={{ fontSize: 11, fontWeight: 500, color: '#64748b', lineHeight: 1.6 }}>
+              <p style={{ fontSize: 11, fontWeight: 500, color: 'var(--clay-text-muted)', lineHeight: 1.6 }}>
                 Pega una tarjeta por línea: &ldquo;concepto;respuesta&rdquo;, separado por tabulador (al pegar de Excel/Sheets) o &ldquo;concepto - respuesta&rdquo;.
               </p>
               <textarea
@@ -396,24 +396,24 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
                 type="button"
                 onClick={applyImport}
                 disabled={!importText.trim()}
-                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, border: '1px solid #bfdbfe', background: '#eff6ff', borderRadius: 4, padding: '8px 12px', fontSize: 11, fontWeight: 900, color: '#1e40af', cursor: importText.trim() ? 'pointer' : 'not-allowed', opacity: importText.trim() ? 1 : .5 }}
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, border: '1px solid var(--clay-border)', background: 'var(--clay-accent-soft)', borderRadius: 4, padding: '8px 12px', fontSize: 11, fontWeight: 900, color: 'var(--clay-accent-text)', cursor: importText.trim() ? 'pointer' : 'not-allowed', opacity: importText.trim() ? 1 : .5 }}
               >
                 Reconocer tarjetas
               </button>
               {importFeedback && (
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#334155', lineHeight: 1.6 }}>{importFeedback}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--clay-text)', lineHeight: 1.6 }}>{importFeedback}</div>
               )}
             </div>
           </div>
 
-          <div style={{ border: '1px solid #e2e8f0', borderRadius: 4, background: 'white', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ border: '1px solid var(--clay-border)', borderRadius: 4, background: 'var(--clay-surface)', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={eyebrowStyle}>Tarjetas ({draftCards.length}/{maxCardsForPlan})</span>
               <button
                 type="button"
                 onClick={addDraftRow}
                 disabled={draftCards.length >= maxCardsForPlan}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 5, border: '1px solid #e2e8f0', background: 'white', borderRadius: 4, padding: '6px 10px', fontSize: 11, fontWeight: 900, color: '#0f172a', cursor: draftCards.length >= maxCardsForPlan ? 'not-allowed' : 'pointer', opacity: draftCards.length >= maxCardsForPlan ? .5 : 1 }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 5, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', borderRadius: 4, padding: '6px 10px', fontSize: 11, fontWeight: 900, color: 'var(--clay-text)', cursor: draftCards.length >= maxCardsForPlan ? 'not-allowed' : 'pointer', opacity: draftCards.length >= maxCardsForPlan ? .5 : 1 }}
               >
                 <Plus size={12} /> Añadir tarjeta
               </button>
@@ -424,7 +424,7 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
                 <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 6, alignItems: 'start' }}>
                   <input value={card.front} onChange={e => updateDraftCard(i, 'front', e.target.value)} placeholder="Concepto" style={inputStyle} />
                   <input value={card.back} onChange={e => updateDraftCard(i, 'back', e.target.value)} placeholder="Respuesta" style={inputStyle} />
-                  <button type="button" onClick={() => removeDraftRow(i)} aria-label="Eliminar tarjeta" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, border: '1px solid #fecaca', background: 'white', borderRadius: 4, color: '#dc2626', cursor: 'pointer' }}>
+                  <button type="button" onClick={() => removeDraftRow(i)} aria-label="Eliminar tarjeta" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, border: '1px solid #fecaca', background: 'var(--clay-surface)', borderRadius: 4, color: '#dc2626', cursor: 'pointer' }}>
                     <Trash2 size={13} />
                   </button>
                 </div>
@@ -436,7 +436,7 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
             <button
               onClick={createDeck}
               disabled={creating}
-              style={{ display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, background: '#0f172a', border: 'none', borderRadius: 4, padding: 12, fontWeight: 900, fontSize: 13, color: 'white', cursor: creating ? 'wait' : 'pointer', opacity: creating ? .7 : 1 }}
+              style={{ display: 'inline-flex', width: '100%', alignItems: 'center', justifyContent: 'center', gap: 7, background: 'var(--clay-accent-deep)', border: 'none', borderRadius: 4, padding: 12, fontWeight: 900, fontSize: 13, color: 'var(--clay-on-accent)', cursor: creating ? 'wait' : 'pointer', opacity: creating ? .7 : 1 }}
             >
               {creating ? 'Guardando...' : 'Crear mazo'}
             </button>
@@ -457,34 +457,34 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
         />
 
         {loadingDetail ? (
-          <div style={{ padding: 24, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>Cargando mazo...</div>
+          <div style={{ padding: 24, textAlign: 'center', color: 'var(--clay-text-muted)', fontSize: 13 }}>Cargando mazo...</div>
         ) : (
           <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <button
                 onClick={() => startSession(deckCards)}
                 disabled={deckCards.length === 0}
-                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#0f172a', color: 'white', border: 'none', borderRadius: 4, padding: 14, fontSize: 14, fontWeight: 900, cursor: 'pointer' }}
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', border: 'none', borderRadius: 4, padding: 14, fontSize: 14, fontWeight: 900, cursor: 'pointer' }}
               >
                 Empezar mazo
               </button>
 
               {selectedDeck.isMine && (
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => void togglePublic(selectedDeck)} style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, border: '1px solid #e2e8f0', background: 'white', borderRadius: 4, padding: 10, fontSize: 11, fontWeight: 900, color: '#334155', cursor: 'pointer' }}>
+                  <button onClick={() => void togglePublic(selectedDeck)} style={{ flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', borderRadius: 4, padding: 10, fontSize: 11, fontWeight: 900, color: 'var(--clay-text)', cursor: 'pointer' }}>
                     {selectedDeck.isPublic ? <><Lock size={13} /> Hacer privado</> : <><Globe2 size={13} /> Publicar mazo</>}
                   </button>
-                  <button onClick={() => void deleteDeck(selectedDeck)} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, border: '1px solid #fecaca', background: 'white', borderRadius: 4, padding: '10px 14px', fontSize: 11, fontWeight: 900, color: '#dc2626', cursor: 'pointer' }}>
+                  <button onClick={() => void deleteDeck(selectedDeck)} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, border: '1px solid #fecaca', background: 'var(--clay-surface)', borderRadius: 4, padding: '10px 14px', fontSize: 11, fontWeight: 900, color: '#dc2626', cursor: 'pointer' }}>
                     <Trash2 size={13} /> Borrar
                   </button>
                 </div>
               )}
 
-              <div style={{ border: '1px solid #e2e8f0', borderRadius: 4, background: 'white', padding: 16 }}>
+              <div style={{ border: '1px solid var(--clay-border)', borderRadius: 4, background: 'var(--clay-surface)', padding: 16 }}>
                 <div style={eyebrowStyle}>Tarjetas del mazo</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 }}>
                   {deckCards.map(card => (
-                    <div key={card.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 600, color: '#334155', padding: '6px 8px', borderRadius: 4, background: '#fafaf9' }}>
+                    <div key={card.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 600, color: 'var(--clay-text)', padding: '6px 8px', borderRadius: 4, background: 'var(--clay-bg)' }}>
                       <span style={{ width: 8, height: 8, borderRadius: '50%', background: statusColor(cardStatus[card.id]), flexShrink: 0 }} />
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{card.front}</span>
                     </div>
@@ -511,8 +511,8 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
         <section style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ display: 'grid', placeItems: 'center', border: '1px solid #bbf7d0', borderRadius: 4, background: '#f0fdf4', padding: 32, textAlign: 'center' }}>
             <CheckCircle2 style={{ margin: '0 auto 10px', color: '#059669' }} size={34} />
-            <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>¡Mazo completado!</h3>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 4 }}>
+            <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: 'var(--clay-text)', marginBottom: 6 }}>¡Mazo completado!</h3>
+            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--clay-text-muted)', marginBottom: 4 }}>
               {correctCount} a la primera · {failedCount} con algún fallo
             </p>
             <p style={{ fontSize: 13, fontWeight: 900, color: '#059669', marginBottom: 18 }}>
@@ -520,7 +520,7 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
               {attemptResult.authorBonusAwarded ? ' · el autor del mazo también ha ganado XP' : ''}
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10 }}>
-              <button onClick={() => startSession(deckCards)} style={actionBtnStyle('#0f172a', 'white')}>
+              <button onClick={() => startSession(deckCards)} style={actionBtnStyle('var(--clay-accent-deep)', 'var(--clay-on-accent)')}>
                 <RotateCcw size={13} /> Repetir mazo completo
               </button>
               {failedCount > 0 && (
@@ -528,10 +528,10 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
                   <XCircle size={13} /> Repasar solo las falladas
                 </button>
               )}
-              <button onClick={() => { resetCreateForm(); setView('create') }} style={actionBtnStyle('#eff6ff', '#1e40af', '#bfdbfe')}>
+              <button onClick={() => { resetCreateForm(); setView('create') }} style={actionBtnStyle('var(--clay-accent-soft)', 'var(--clay-accent-text)', 'var(--clay-border)')}>
                 <Plus size={13} /> Crear nuevo mazo
               </button>
-              <button onClick={() => setView('list')} style={actionBtnStyle('white', '#334155', '#e2e8f0')}>
+              <button onClick={() => setView('list')} style={actionBtnStyle('var(--clay-surface)', 'var(--clay-text)', 'var(--clay-border)')}>
                 Volver a mazos
               </button>
             </div>
@@ -543,8 +543,8 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
     return (
       <section style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 12, fontWeight: 900, color: '#64748b' }}>{doneCount}/{Math.max(totalInSession, deckCards.length)} repasadas</span>
-          <button onClick={() => setView('detail')} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, border: 'none', background: 'transparent', color: '#64748b', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>
+          <span style={{ fontSize: 12, fontWeight: 900, color: 'var(--clay-text-muted)' }}>{doneCount}/{Math.max(totalInSession, deckCards.length)} repasadas</span>
+          <button onClick={() => setView('detail')} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, border: 'none', background: 'transparent', color: 'var(--clay-text-muted)', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>
             <X size={13} /> Salir
           </button>
         </div>
@@ -569,11 +569,11 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
             </div>
           </div>
         ) : (
-          <div style={{ display: 'grid', minHeight: 300, placeItems: 'center', color: '#94a3b8', fontSize: 13 }}>Calculando resultado...</div>
+          <div style={{ display: 'grid', minHeight: 300, placeItems: 'center', color: 'var(--clay-text-muted)', fontSize: 13 }}>Calculando resultado...</div>
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <button onClick={() => answerCurrent(false)} disabled={!currentCard} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, border: '1px solid #fecaca', background: 'white', borderRadius: 4, padding: 12, fontWeight: 900, fontSize: 13, color: '#dc2626', cursor: 'pointer', opacity: !currentCard ? .45 : 1 }}>
+          <button onClick={() => answerCurrent(false)} disabled={!currentCard} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, border: '1px solid #fecaca', background: 'var(--clay-surface)', borderRadius: 4, padding: 12, fontWeight: 900, fontSize: 13, color: '#dc2626', cursor: 'pointer', opacity: !currentCard ? .45 : 1 }}>
             <XCircle size={15} /> No me la sé
           </button>
           <button onClick={() => answerCurrent(true)} disabled={!currentCard} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7, border: '1px solid #bbf7d0', background: '#f0fdf4', borderRadius: 4, padding: 12, fontWeight: 900, fontSize: 13, color: '#059669', cursor: 'pointer', opacity: !currentCard ? .45 : 1 }}>
@@ -590,15 +590,15 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <div>
           <p style={eyebrowStyle}>Mazos</p>
-          <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em', marginTop: 5 }}>Tus mazos de tarjetas</h3>
+          <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: 'var(--clay-text)', letterSpacing: '-.01em', marginTop: 5 }}>Tus mazos de tarjetas</h3>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {onExit && (
-            <button onClick={onExit} style={{ border: '1px solid #e2e8f0', background: 'white', borderRadius: 4, padding: '9px 14px', fontSize: 11, fontWeight: 900, color: '#64748b', cursor: 'pointer' }}>
+            <button onClick={onExit} style={{ border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', borderRadius: 4, padding: '9px 14px', fontSize: 11, fontWeight: 900, color: 'var(--clay-text-muted)', cursor: 'pointer' }}>
               Volver a La Zona
             </button>
           )}
-          <button onClick={() => { resetCreateForm(); setView('create') }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#0f172a', color: 'white', border: 'none', borderRadius: 4, padding: '9px 16px', fontSize: 11, fontWeight: 900, cursor: 'pointer' }}>
+          <button onClick={() => { resetCreateForm(); setView('create') }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', border: 'none', borderRadius: 4, padding: '9px 16px', fontSize: 11, fontWeight: 900, cursor: 'pointer' }}>
             <Plus size={13} /> Nuevo mazo
           </button>
         </div>
@@ -607,7 +607,7 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
       {decksError && <div style={{ border: '1px solid #fecaca', background: '#fef2f2', borderRadius: 4, padding: '10px 14px', fontSize: 12, fontWeight: 800, color: '#b91c1c' }}>{decksError}</div>}
 
       {loadingDecks ? (
-        <div style={{ padding: 24, textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>Cargando mazos...</div>
+        <div style={{ padding: 24, textAlign: 'center', color: 'var(--clay-text-muted)', fontSize: 13 }}>Cargando mazos...</div>
       ) : (
         <>
           <div>
@@ -624,7 +624,7 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
           <div>
             <div style={{ ...eyebrowStyle, marginBottom: 10 }}>Mazos públicos de otros alumnos ({publicDecks.length})</div>
             {publicDecks.length === 0 ? (
-              <p style={{ fontSize: 12, fontWeight: 500, color: '#94a3b8' }}>Todavía no hay mazos públicos de otros alumnos.</p>
+              <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--clay-text-muted)' }}>Todavía no hay mazos públicos de otros alumnos.</p>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {publicDecks.map(deck => <DeckCard key={deck.id} deck={deck} onClick={() => void openDeck(deck)} />)}
@@ -639,13 +639,13 @@ export default function FlashcardDecks({ onExit }: { onExit?: () => void }) {
 
 function ViewHeader({ eyebrow, title, subtitle, onBack }: { eyebrow: string; title: string; subtitle: string; onBack: () => void }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingBottom: 16, borderBottom: '1px solid #e2e8f0' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingBottom: 16, borderBottom: '1px solid var(--clay-border)' }}>
       <div>
         <p style={eyebrowStyle}>{eyebrow}</p>
-        <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-.01em', margin: '5px 0 3px' }}>{title}</h3>
-        <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b' }}>{subtitle}</p>
+        <h3 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: 'var(--clay-text)', letterSpacing: '-.01em', margin: '5px 0 3px' }}>{title}</h3>
+        <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--clay-text-muted)' }}>{subtitle}</p>
       </div>
-      <button onClick={onBack} style={{ border: '1px solid #e2e8f0', background: 'white', borderRadius: 4, padding: '8px 13px', fontSize: 11, fontWeight: 900, color: '#64748b', cursor: 'pointer' }}>
+      <button onClick={onBack} style={{ border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', borderRadius: 4, padding: '8px 13px', fontSize: 11, fontWeight: 900, color: 'var(--clay-text-muted)', cursor: 'pointer' }}>
         Volver
       </button>
     </div>
@@ -655,24 +655,24 @@ function ViewHeader({ eyebrow, title, subtitle, onBack }: { eyebrow: string; tit
 function DeckCard({ deck, onClick }: { deck: DeckSummary; onClick: () => void }) {
   const subj = SUBJECTS.find(s => s.id === deck.subject)
   return (
-    <button onClick={onClick} style={{ textAlign: 'left', border: '1px solid #e2e8f0', borderRadius: 4, background: 'white', padding: '14px 16px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <button onClick={onClick} style={{ textAlign: 'left', border: '1px solid var(--clay-border)', borderRadius: 4, background: 'var(--clay-surface)', padding: '14px 16px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 6 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: subj?.color ?? '#2563eb' }}>{subjectLabel(deck.subject)}</span>
-        {deck.isPublic && <Globe2 size={12} color="#94a3b8" />}
+        <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: subj?.color ?? 'var(--clay-accent)' }}>{subjectLabel(deck.subject)}</span>
+        {deck.isPublic && <Globe2 size={12} color="var(--clay-text-muted)" />}
       </div>
-      <div style={{ fontSize: 14, fontWeight: 900, color: '#0f172a' }}>{deck.title}</div>
-      <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{deck.topic} · {deck.cardCount} tarjeta{deck.cardCount !== 1 ? 's' : ''}</div>
+      <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--clay-text)' }}>{deck.title}</div>
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--clay-text-muted)' }}>{deck.topic} · {deck.cardCount} tarjeta{deck.cardCount !== 1 ? 's' : ''}</div>
     </button>
   )
 }
 
 function EmptyDecksState({ onCreate }: { onCreate: () => void }) {
   return (
-    <div style={{ border: '1px dashed #bfdbfe', borderRadius: 4, background: '#f8fafc', padding: 28, textAlign: 'center' }}>
-      <Sparkles style={{ margin: '0 auto 10px', color: '#2563eb', display: 'block' }} size={26} />
-      <h4 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 16, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>Todavía no tienes mazos</h4>
-      <p style={{ fontSize: 13, fontWeight: 500, color: '#64748b', lineHeight: 1.7, marginBottom: 14 }}>Crea uno manualmente o importando texto/CSV.</p>
-      <button onClick={onCreate} style={{ background: '#0f172a', color: 'white', border: 'none', borderRadius: 4, padding: '9px 16px', fontSize: 12, fontWeight: 900, cursor: 'pointer' }}>Crear mi primer mazo</button>
+    <div style={{ border: '1px dashed var(--clay-border)', borderRadius: 4, background: 'var(--clay-bg)', padding: 28, textAlign: 'center' }}>
+      <Sparkles style={{ margin: '0 auto 10px', color: 'var(--clay-accent)', display: 'block' }} size={26} />
+      <h4 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 16, fontWeight: 700, color: 'var(--clay-text)', marginBottom: 6 }}>Todavía no tienes mazos</h4>
+      <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--clay-text-muted)', lineHeight: 1.7, marginBottom: 14 }}>Crea uno manualmente o importando texto/CSV.</p>
+      <button onClick={onCreate} style={{ background: 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', border: 'none', borderRadius: 4, padding: '9px 16px', fontSize: 12, fontWeight: 900, cursor: 'pointer' }}>Crear mi primer mazo</button>
     </div>
   )
 }
@@ -680,32 +680,32 @@ function EmptyDecksState({ onCreate }: { onCreate: () => void }) {
 function StatsPanel({ myStats }: { myStats: MyStats | null }) {
   if (!myStats || myStats.attemptsCount === 0) {
     return (
-      <div style={{ border: '1px solid #e2e8f0', borderRadius: 4, background: '#fafaf9', padding: 16 }}>
+      <div style={{ border: '1px solid var(--clay-border)', borderRadius: 4, background: 'var(--clay-bg)', padding: 16 }}>
         <div style={eyebrowStyle}>Tus estadísticas</div>
-        <p style={{ fontSize: 12, fontWeight: 500, color: '#94a3b8', marginTop: 8 }}>Todavía no has completado este mazo.</p>
+        <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--clay-text-muted)', marginTop: 8 }}>Todavía no has completado este mazo.</p>
       </div>
     )
   }
   return (
-    <div style={{ border: '1px solid #e2e8f0', borderRadius: 4, background: '#fafaf9', padding: 16 }}>
+    <div style={{ border: '1px solid var(--clay-border)', borderRadius: 4, background: 'var(--clay-bg)', padding: 16 }}>
       <div style={eyebrowStyle}>Tus estadísticas</div>
       <div style={{ display: 'flex', gap: 16, margin: '10px 0 14px' }}>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{myStats.bestCorrectFirstTry}</div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8' }}>mejor a la primera</div>
+          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--clay-text)' }}>{myStats.bestCorrectFirstTry}</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)' }}>mejor a la primera</div>
         </div>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{myStats.attemptsCount}</div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8' }}>intentos</div>
+          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--clay-text)' }}>{myStats.attemptsCount}</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)' }}>intentos</div>
         </div>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{formatDuration(myStats.totalTimeSeconds)}</div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8' }}>tiempo total</div>
+          <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--clay-text)' }}>{formatDuration(myStats.totalTimeSeconds)}</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)' }}>tiempo total</div>
         </div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
         {myStats.attempts.slice(0, 8).map(a => (
-          <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 600, color: '#475569' }}>
+          <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: 600, color: 'var(--clay-text)' }}>
             <span>{new Date(a.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}</span>
             <span>{a.correctFirstTry}/{a.totalCards} · {formatDuration(a.durationSeconds)}</span>
           </div>
@@ -717,26 +717,26 @@ function StatsPanel({ myStats }: { myStats: MyStats | null }) {
 
 function RankingPanel({ ranking, isPublic }: { ranking: RankingEntry[]; isPublic: boolean }) {
   return (
-    <div style={{ border: '1px solid #e2e8f0', borderRadius: 4, background: 'white', padding: 16 }}>
+    <div style={{ border: '1px solid var(--clay-border)', borderRadius: 4, background: 'var(--clay-surface)', padding: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
         <Trophy size={13} color="#CA8A04" />
         <span style={eyebrowStyle}>Ranking del mazo</span>
       </div>
       {!isPublic ? (
-        <p style={{ fontSize: 11, fontWeight: 500, color: '#94a3b8', marginTop: 8 }}>Publica el mazo para comparar resultados con otros alumnos.</p>
+        <p style={{ fontSize: 11, fontWeight: 500, color: 'var(--clay-text-muted)', marginTop: 8 }}>Publica el mazo para comparar resultados con otros alumnos.</p>
       ) : ranking.length === 0 ? (
-        <p style={{ fontSize: 11, fontWeight: 500, color: '#94a3b8', marginTop: 8 }}>Todavía nadie ha completado este mazo.</p>
+        <p style={{ fontSize: 11, fontWeight: 500, color: 'var(--clay-text-muted)', marginTop: 8 }}>Todavía nadie ha completado este mazo.</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 10 }}>
           {ranking.map(entry => (
-            <div key={entry.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, fontWeight: entry.isCurrentUser ? 900 : 600, color: entry.isCurrentUser ? '#0f172a' : '#475569', padding: '4px 6px', borderRadius: 4, background: entry.isCurrentUser ? '#eff6ff' : 'transparent' }}>
+            <div key={entry.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, fontWeight: entry.isCurrentUser ? 900 : 600, color: entry.isCurrentUser ? 'var(--clay-text)' : 'var(--clay-text-muted)', padding: '4px 6px', borderRadius: 4, background: entry.isCurrentUser ? 'var(--clay-accent-soft)' : 'transparent' }}>
               <span>#{entry.rank} {entry.name}</span>
               <span>{entry.correctFirstTry}/{entry.totalCards}</span>
             </div>
           ))}
         </div>
       )}
-      <p style={{ fontSize: 10, fontWeight: 500, color: '#cbd5e1', marginTop: 10, lineHeight: 1.5 }}>
+      <p style={{ fontSize: 10, fontWeight: 500, color: 'var(--clay-text-muted)', marginTop: 10, lineHeight: 1.5 }}>
         Ranking simple por ahora — el modo duelo 1v1 está pendiente de una futura versión.
       </p>
     </div>
@@ -748,13 +748,13 @@ function PlayCardFace({ label, text, subject, back = false }: { label: string; t
   return (
     <div style={{
       position: 'absolute', inset: 0, minHeight: 300, borderRadius: 6, padding: 26,
-      background: back ? '#f8fafc' : 'white', border: '1px solid #e2e8f0', boxShadow: '0 8px 32px rgba(0,0,0,.06)',
+      background: back ? 'var(--clay-bg)' : 'var(--clay-surface)', border: '1px solid var(--clay-border)', boxShadow: '0 8px 32px rgba(0,0,0,.06)',
       backfaceVisibility: 'hidden', transform: back ? 'rotateY(180deg)' : 'rotateY(0deg)',
       display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflowX: 'auto',
     }}>
       <span style={{ color, fontWeight: 900, fontSize: 10, letterSpacing: '.16em', textTransform: 'uppercase' }}>{label}</span>
       <MathMarkdown text={text} className={back ? 'text-lg font-semibold overflow-x-auto' : 'text-xl font-black overflow-x-auto'} />
-      <div style={{ color: '#94a3b8', fontSize: 11, fontWeight: 600 }}>Toca para girar</div>
+      <div style={{ color: 'var(--clay-text-muted)', fontSize: 11, fontWeight: 600 }}>Toca para girar</div>
     </div>
   )
 }

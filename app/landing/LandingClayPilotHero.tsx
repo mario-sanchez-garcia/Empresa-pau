@@ -16,19 +16,25 @@ const M = dmMono.style.fontFamily
 
 const CTA_PRESS_OFFSET = 7
 
-// El CTA del hero va en negro, no en el acento azul del clay. Sobre el fondo
+// El CTA del hero va blanco con texto negro, como el HeroCta original de
+// LandingCta.tsx (#fff / #111), no en el acento azul del clay: sobre el fondo
 // fotográfico cálido del hero el azul competía con la imagen y se despegaba
-// del resto de la landing, que ya es blanco y negro (cabecera #111, tira de
-// CTA intermedia #1c1c1c). Son colores propios de este botón en vez de un
+// del resto de la landing. Son colores propios de este botón en vez de un
 // cambio en --clay-accent porque ese token lo comparten insignias, barras de
 // progreso y el resto del rediseño clay, que sí siguen siendo azules.
-const CTA_FACE = '#1c1c1c'
-// Canto inferior de la "pieza de plastilina": más oscuro que la cara para que
-// el relieve se lea, igual que --clay-accent-deep hace con el acento.
-const CTA_EDGE = '#000000'
-// Blanco fijo: --clay-on-accent es oscuro en el tema clay oscuro (pensado para
-// un acento azul claro), y sobre negro sería ilegible.
-const CTA_LABEL = '#ffffff'
+const CTA_FACE = '#ffffff'
+// Canto inferior de la "pieza de plastilina": gris neutro, más oscuro que la
+// cara para que el relieve se lea, igual que --clay-accent-deep hace con el
+// acento. Neutro y no azulado para no reintroducir color en un botón que la
+// landing quiere en blanco y negro.
+const CTA_EDGE = '#c4c4c4'
+// Negro fijo, no --clay-on-accent: ese token está pensado para fondo de acento
+// (blanco en claro, oscuro en el tema clay oscuro) y aquí la cara es siempre
+// blanca, así que el texto tiene que ser siempre oscuro.
+const CTA_LABEL = '#111111'
+// El subtítulo "sin tarjeta" iba a --clay-on-accent con opacity .75; sobre
+// blanco necesita ser un gris explícito, como el rgba(0,0,0,.45) del original.
+const CTA_LABEL_MUTED = 'rgba(0, 0, 0, 0.45)'
 
 // Piloto de claymorfismo, solo para la sección hero de la landing (ver
 // components/clay/). Sustituye el CTA circular y las mini-cards de vista
@@ -42,12 +48,11 @@ export function ClayHeroCta() {
   const { theme } = useClayThemePreference()
   const isAuthed = status === 'authed'
   const isLoading = status === 'loading'
-  const restShadow = [
-    `0 ${CTA_PRESS_OFFSET}px 0 0 ${CTA_EDGE}`,
-    '0 18px 30px rgba(0, 0, 0, 0.32)',
-    'inset 0 2px 3px rgba(255, 255, 255, 0.22)',
-  ].join(', ')
-  const pressedShadow = [`0 2px 0 0 ${CTA_EDGE}`, 'inset 0 2px 3px rgba(255, 255, 255, 0.22)'].join(', ')
+  // Sin el brillo interior blanco que llevan el resto de piezas clay: aquí la
+  // cara ya es blanca, así que no se vería. El relieve lo dan el canto sólido
+  // y la sombra proyectada sobre la foto del hero.
+  const restShadow = [`0 ${CTA_PRESS_OFFSET}px 0 0 ${CTA_EDGE}`, '0 18px 30px rgba(0, 0, 0, 0.32)'].join(', ')
+  const pressedShadow = `0 2px 0 0 ${CTA_EDGE}`
   return (
     <ClayThemeScope theme={theme} style={{ background: 'transparent', display: 'inline-block' }}>
       <Link
@@ -89,7 +94,7 @@ export function ClayHeroCta() {
           {isAuthed ? label : <>Empieza<br />gratis</>}
         </span>
         {!isAuthed && (
-          <span style={{ fontFamily: M, fontSize: 9, color: CTA_LABEL, opacity: 0.75, letterSpacing: '.1em', textTransform: 'uppercase' }}>sin tarjeta</span>
+          <span style={{ fontFamily: M, fontSize: 9, color: CTA_LABEL_MUTED, letterSpacing: '.1em', textTransform: 'uppercase' }}>sin tarjeta</span>
         )}
       </Link>
     </ClayThemeScope>

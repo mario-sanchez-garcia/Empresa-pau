@@ -8,7 +8,7 @@ export default function CookiePreferencesButton() {
     <button
       type="button"
       onClick={openPreferences}
-      style={{ color: 'var(--clay-accent-text, #60a5fa)', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+      style={{ color: '#60a5fa', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
     >
       Cambiar mis preferencias de cookies
     </button>

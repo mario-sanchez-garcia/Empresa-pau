@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, type FormEvent } from 'react'
-import ClayButton from '@/components/clay/ClayButton'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -57,7 +56,7 @@ export default function ContactForm({ M }: { M: string }) {
     return (
       <div style={{ padding: '28px 24px', borderRadius: 12, background: 'rgba(34,197,94,.08)', border: '1px solid rgba(34,197,94,.25)' }}>
         <p style={{ fontSize: 15, fontWeight: 700, color: '#86efac', margin: '0 0 6px' }}>Mensaje enviado.</p>
-        <p style={{ fontSize: 13, color: 'var(--clay-text-muted)', margin: 0, lineHeight: 1.6 }}>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', margin: 0, lineHeight: 1.6 }}>
           Te responderemos a tu email en 1–2 días laborables.
         </p>
       </div>
@@ -68,16 +67,16 @@ export default function ContactForm({ M }: { M: string }) {
     width: '100%',
     padding: '11px 14px',
     borderRadius: 10,
-    background: 'var(--clay-surface-raised)',
-    border: `1px solid ${hasError ? 'rgba(248,113,113,.6)' : 'var(--clay-border)'}`,
-    color: 'var(--clay-text)',
+    background: 'rgba(255,255,255,.04)',
+    border: `1px solid ${hasError ? 'rgba(248,113,113,.6)' : 'rgba(255,255,255,.12)'}`,
+    color: '#fff',
     fontSize: 14,
     fontFamily: 'inherit',
     outline: 'none',
   })
 
   const labelStyle: React.CSSProperties = {
-    fontFamily: M, fontSize: 10, color: 'var(--clay-text-muted)', letterSpacing: '.1em',
+    fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.4)', letterSpacing: '.1em',
     textTransform: 'uppercase', marginBottom: 6, display: 'block',
   }
 
@@ -144,12 +143,32 @@ export default function ContactForm({ M }: { M: string }) {
         <p style={{ fontSize: 13, color: '#f87171', margin: 0 }}>{errorMsg}</p>
       )}
 
-      <ClayButton type="submit" disabled={status === 'sending'} style={{ alignSelf: 'flex-start', borderRadius: 999, padding: '12px 28px', fontSize: 13, letterSpacing: '.04em' }}>
+      <button
+        type="submit"
+        disabled={status === 'sending'}
+        className="contact-submit"
+        style={{
+          alignSelf: 'flex-start',
+          padding: '12px 28px',
+          borderRadius: 999,
+          border: 'none',
+          background: '#2563eb',
+          color: '#fff',
+          fontSize: 13,
+          fontWeight: 700,
+          letterSpacing: '.04em',
+          cursor: status === 'sending' ? 'default' : 'pointer',
+          opacity: status === 'sending' ? 0.7 : 1,
+          transition: 'background 140ms, transform 140ms',
+        }}
+      >
         {status === 'sending' ? 'Enviando…' : 'Enviar mensaje'}
-      </ClayButton>
+      </button>
 
       <style>{`
-        .contact-input:focus { border-color: var(--clay-accent) !important; background: var(--clay-accent-soft) !important; }
+        .contact-input:focus { border-color: #2563eb !important; background: rgba(37,99,235,.06) !important; }
+        .contact-submit:hover:not(:disabled) { background: #1d4ed8 !important; }
+        .contact-submit:active:not(:disabled) { transform: scale(0.97); }
         @media (max-width: 560px) {
           .contact-input { font-size: 16px !important; }
           .contact-grid { grid-template-columns: 1fr !important; }

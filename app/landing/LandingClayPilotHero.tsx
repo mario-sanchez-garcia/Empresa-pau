@@ -16,6 +16,20 @@ const M = dmMono.style.fontFamily
 
 const CTA_PRESS_OFFSET = 7
 
+// El CTA del hero va en negro, no en el acento azul del clay. Sobre el fondo
+// fotográfico cálido del hero el azul competía con la imagen y se despegaba
+// del resto de la landing, que ya es blanco y negro (cabecera #111, tira de
+// CTA intermedia #1c1c1c). Son colores propios de este botón en vez de un
+// cambio en --clay-accent porque ese token lo comparten insignias, barras de
+// progreso y el resto del rediseño clay, que sí siguen siendo azules.
+const CTA_FACE = '#1c1c1c'
+// Canto inferior de la "pieza de plastilina": más oscuro que la cara para que
+// el relieve se lea, igual que --clay-accent-deep hace con el acento.
+const CTA_EDGE = '#000000'
+// Blanco fijo: --clay-on-accent es oscuro en el tema clay oscuro (pensado para
+// un acento azul claro), y sobre negro sería ilegible.
+const CTA_LABEL = '#ffffff'
+
 // Piloto de claymorfismo, solo para la sección hero de la landing (ver
 // components/clay/). Sustituye el CTA circular y las mini-cards de vista
 // previa por versiones clay — el fondo fotográfico y el titular del hero
@@ -29,11 +43,11 @@ export function ClayHeroCta() {
   const isAuthed = status === 'authed'
   const isLoading = status === 'loading'
   const restShadow = [
-    `0 ${CTA_PRESS_OFFSET}px 0 0 var(--clay-accent-deep)`,
-    '0 18px 30px var(--clay-shadow-elevate)',
-    'inset 0 2px 3px var(--clay-shadow-light)',
+    `0 ${CTA_PRESS_OFFSET}px 0 0 ${CTA_EDGE}`,
+    '0 18px 30px rgba(0, 0, 0, 0.32)',
+    'inset 0 2px 3px rgba(255, 255, 255, 0.22)',
   ].join(', ')
-  const pressedShadow = ['0 2px 0 0 var(--clay-accent-deep)', 'inset 0 2px 3px var(--clay-shadow-light)'].join(', ')
+  const pressedShadow = [`0 2px 0 0 ${CTA_EDGE}`, 'inset 0 2px 3px rgba(255, 255, 255, 0.22)'].join(', ')
   return (
     <ClayThemeScope theme={theme} style={{ background: 'transparent', display: 'inline-block' }}>
       <Link
@@ -45,7 +59,7 @@ export function ClayHeroCta() {
           width: 140,
           height: 140,
           borderRadius: '50%',
-          background: 'var(--clay-accent)',
+          background: CTA_FACE,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -71,11 +85,11 @@ export function ClayHeroCta() {
           e.currentTarget.style.boxShadow = restShadow
         }}
       >
-        <span style={{ fontFamily: B, fontSize: 17, letterSpacing: '.06em', color: 'var(--clay-on-accent)', textAlign: 'center', lineHeight: 1.1, fontWeight: isAuthed ? 700 : undefined }}>
+        <span style={{ fontFamily: B, fontSize: 17, letterSpacing: '.06em', color: CTA_LABEL, textAlign: 'center', lineHeight: 1.1, fontWeight: isAuthed ? 700 : undefined }}>
           {isAuthed ? label : <>Empieza<br />gratis</>}
         </span>
         {!isAuthed && (
-          <span style={{ fontFamily: M, fontSize: 9, color: 'var(--clay-on-accent)', opacity: 0.75, letterSpacing: '.1em', textTransform: 'uppercase' }}>sin tarjeta</span>
+          <span style={{ fontFamily: M, fontSize: 9, color: CTA_LABEL, opacity: 0.75, letterSpacing: '.1em', textTransform: 'uppercase' }}>sin tarjeta</span>
         )}
       </Link>
     </ClayThemeScope>

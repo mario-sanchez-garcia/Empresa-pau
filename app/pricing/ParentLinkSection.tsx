@@ -31,54 +31,51 @@ export default function ParentLinkSection() {
         </div>
       </div>
       <style jsx>{`
+        /* Banda clara de cierre, con el mismo par de valores que usa la
+           landing para sus secciones claras (#f9f9f9 sobre #1c1c1c) en vez
+           del azul y el cristal que traia antes: /precios es oscura, y esta
+           seccion cierra por contraste igual que hace .v4c-cta-split en la
+           landing. Plano y con filete de 1px, sin radios grandes ni sombras. */
         .family-payment {
-          background: #edf4ff;
-          color: #17284d;
-          padding: 0 24px 72px;
+          background: #f9f9f9;
+          color: #1c1c1c;
+          padding: 72px 72px 80px;
+          border-top: 1px solid #e0e0e0;
         }
         .family-payment__shell {
           align-items: center;
-          backdrop-filter: blur(18px);
-          background: rgba(255, 255, 255, .64);
-          border: 1px solid rgba(255, 255, 255, .82);
-          border-radius: 32px;
-          box-shadow: 0 22px 60px rgba(53, 94, 150, .12), inset 0 1px 0 rgba(255, 255, 255, .9);
           display: grid;
-          gap: clamp(32px, 7vw, 96px);
+          gap: clamp(32px, 6vw, 72px);
           grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
           margin: 0 auto;
-          max-width: 1120px;
-          padding: clamp(32px, 5vw, 60px);
+          max-width: 1040px;
         }
         .family-payment__copy p {
-          color: #6580a9;
+          color: #999;
           font-size: 10px;
           letter-spacing: .18em;
-          margin: 0 0 12px;
+          margin: 0 0 14px;
           text-transform: uppercase;
         }
         .family-payment__copy h2 {
-          color: #17284d;
-          font-size: clamp(32px, 4vw, 52px);
+          color: #1c1c1c;
+          font-size: clamp(32px, 4vw, 56px);
           letter-spacing: .01em;
-          line-height: .98;
+          line-height: .95;
           margin: 0 0 18px;
           max-width: 12ch;
         }
         .family-payment__copy span {
-          color: #55709b;
+          color: #666;
           display: block;
           font-size: 14px;
           line-height: 1.7;
           max-width: 52ch;
         }
         .family-payment__module { min-width: 0; }
-        @media (max-width: 760px) {
-          .family-payment { padding: 0 12px 52px; }
-          .family-payment__shell {
-            grid-template-columns: 1fr;
-            padding: 28px 20px;
-          }
+        @media (max-width: 860px) {
+          .family-payment { padding: 48px 24px 56px; }
+          .family-payment__shell { grid-template-columns: 1fr; }
           .family-payment__copy h2 { max-width: 14ch; }
         }
       `}</style>

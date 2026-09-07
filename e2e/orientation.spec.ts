@@ -544,7 +544,7 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       await selectTarget(page, catalanTarget)
       await expect(page.getByText(/Nota de referencia · 1.ª asignación de junio/)).toBeVisible()
       await saveTarget(page, catalanTarget)
-      await expect(page.getByTestId('camino-orientation-target')).toHaveCount(0)
+      await expect(page.getByTestId('camino-orientation-target')).toContainText(catalanTarget.degree)
       const restored = await expectRestoredTarget(page, catalanTarget)
       expect(restored.savedTarget?.community).toMatch(/Cataluña|Catalunya/)
 
@@ -603,7 +603,7 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       await switchCommunity(page, 'Madrid')
       await expect(page.getByText(/Tu objetivo guardado está en Cataluña\. Puedes explorar Madrid sin sustituirlo\./)).toBeVisible()
       await page.getByRole('link', { name: 'Camino PAU' }).click()
-      await expect(page.getByTestId('camino-orientation-target')).toHaveCount(0)
+      await expect(page.getByTestId('camino-orientation-target')).toContainText(catalanTarget.degree)
       await openOrientation(page)
       await switchCommunity(page, 'Madrid')
       await selectTarget(page, secondTarget)

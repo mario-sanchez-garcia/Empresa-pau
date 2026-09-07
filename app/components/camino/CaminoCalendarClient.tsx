@@ -2346,6 +2346,30 @@ export default function CaminoCalendarClient() {
           <WeeklyCheckinBanner />
           <div style={{ order: -2 }}><ExamCoverageBanner /></div>
 
+          {/* ── OBJETIVO DE ORIENTACIÓN ──
+              0f1e99e lo escondió a propósito (su test "oculta el objetivo
+              visual pero conserva su prioridad interna") dejando solo las
+              razones de prioridad de la misión. Mario pide la estética
+              anterior: la tarjeta vuelve tal cual, con order:-2 para caer
+              junto a los banners, encima del hero. La prioridad interna que
+              añadió ese commit se queda: son cosas distintas. */}
+          {orientationTarget && (
+            <div style={{ order: -2, padding: '10px 20px', borderBottom: '1px solid #e2e8f0', background: 'linear-gradient(135deg,rgba(239,246,255,.72),rgba(255,255,255,.68))' }}>
+              <div className="camino-target-card kairo-soft-panel" data-testid="camino-orientation-target" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 14, padding: '10px 14px', border: '1px solid rgba(191,219,254,.72)', background: 'rgba(255,255,255,.68)', backdropFilter: 'blur(14px)', boxShadow: '0 8px 28px rgba(37,99,235,.07), inset 0 1px 0 rgba(255,255,255,.9)' }}>
+                <div className="camino-target-objective" style={{ minWidth: 0 }}>
+                  <span className="camino-target-label">Objetivo</span>
+                  <p style={{ margin: '3px 0 0', fontSize: 13, fontWeight: 900, color: '#0f172a', lineHeight: 1.25 }}>{orientationTarget.degree} · {orientationUniversity}</p>
+                </div>
+                <div className="camino-target-metrics">
+                  <div><span className="camino-target-label">Referencia</span><strong>{formatOrientationScore(orientationTarget.admissionScore)}</strong></div>
+                  {orientationContext?.calculationComplete && orientationContext.estimatedScore != null && <div><span className="camino-target-label">Tu escenario</span><strong>{formatOrientationScore(orientationContext.estimatedScore)}</strong></div>}
+                  {orientationContext?.calculationComplete && orientationContext.gap != null && <div><span className="camino-target-label">Gap</span><strong className={orientationContext.gap < 0 ? 'is-below' : 'is-above'}>{orientationContext.gap > 0 ? '+' : ''}{formatOrientationScore(Math.abs(orientationContext.gap))}</strong></div>}
+                </div>
+                <a href="/orientacion" style={{ flexShrink: 0, fontSize: 10.5, fontWeight: 900, color: '#2563eb', textDecoration: 'none', whiteSpace: 'nowrap' }}>Ver orientación →</a>
+              </div>
+            </div>
+          )}
+
           {/* ── HERO ──
               Lo eliminó 0f1e99e (feat(camino): integrar chat seguro con
               calendario) junto con el reordenado de la columna izquierda, pero
@@ -2635,7 +2659,7 @@ export default function CaminoCalendarClient() {
           })()}
 
           {/* ── WEEK SECTION ── */}
-          <section data-testid="camino-week-overview" aria-label="Mi semana" style={{ order: -1, padding: '18px 20px', borderBottom: '1px solid #e2e8f0', background: 'linear-gradient(180deg,rgba(239,246,255,.72),rgba(255,255,255,.96))' }}>
+          <section data-testid="camino-week-overview" aria-label="Mi semana" style={{ padding: '18px 20px', borderBottom: '1px solid #e2e8f0', background: 'linear-gradient(180deg,rgba(239,246,255,.72),rgba(255,255,255,.96))' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Esta semana</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -2701,6 +2725,10 @@ export default function CaminoCalendarClient() {
               {calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}
             </button>
             {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} />}
+            {/* "Personaliza tu repaso libre" / "Sugiéreme qué repasar": lo
+                borró 0f1e99e al convertir este div en <section>. Ningún test
+                lo cubría y su función seguía viva y sin usar en el fichero. */}
+            <FreeReviewPanel subjects={onboardingSubjects} />
           </section>
 
           {/* ── EXAMS SECTION ── */}

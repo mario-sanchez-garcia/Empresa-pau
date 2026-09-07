@@ -60,9 +60,20 @@ function Num({ n, color }: { n: number; color?: string }) {
 }
 
 function PlanBadge({ plan }: { plan: 'premium' | 'free' }) {
-  return plan === 'premium'
-    ? <span style={{ background: '#f5f3ff', color: '#6d28d9', border: '1px solid #ddd6fe', borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap' }}>Premium</span>
-    : <span style={{ background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap' }}>Free</span>
+  const { theme } = useClayThemePreference()
+  const dark = theme === 'dark'
+  if (plan === 'premium') {
+    return (
+      <span style={{ ...(dark ? { background: 'rgba(167,139,250,0.16)', color: '#c4b5fd', border: '1px solid rgba(167,139,250,0.35)' } : { background: '#f5f3ff', color: '#6d28d9', border: '1px solid #ddd6fe' }), borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap' }}>
+        Premium
+      </span>
+    )
+  }
+  return (
+    <span style={{ ...(dark ? { background: 'var(--clay-surface-raised)', color: 'var(--clay-text-muted)', border: '1px solid var(--clay-border)' } : { background: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0' }), borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap' }}>
+      Free
+    </span>
+  )
 }
 
 const COLS = [

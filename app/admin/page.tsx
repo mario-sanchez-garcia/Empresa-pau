@@ -170,26 +170,40 @@ function Table({ cols, rows, emptyMsg = 'Sin datos' }: {
   )
 }
 
+// Colores semánticos (rojo/verde/ámbar) que --clay-* no trae, igual que
+// --o-ok/--o-warn en orientation.module.css. Claro/color no se tocan (sus
+// pasteles ya encajaban con el fondo casi blanco); oscuro usa el mismo
+// patrón rgba-sobre-superficie que el resto del piloto.
+const BADGE_DARK = {
+  danger: { background: 'rgba(248,113,113,0.14)', color: '#fca5a5', border: '1px solid rgba(248,113,113,0.35)' },
+  ok: { background: 'rgba(52,211,153,0.14)', color: '#34d399', border: '1px solid rgba(52,211,153,0.35)' },
+  warn: { background: 'rgba(251,191,36,0.14)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.35)' },
+}
+
 function StatusBadge({ status, errorCode }: { status: string; errorCode?: string | null }) {
+  const { theme } = useClayThemePreference()
+  const dark = theme === 'dark'
   if (status === 'error') {
     return (
-      <span style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap' }}>
+      <span style={{ ...(dark ? BADGE_DARK.danger : { background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }), borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap' }}>
         Error{errorCode ? `: ${errorCode}` : ''}
       </span>
     )
   }
   return (
-    <span style={{ background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>
+    <span style={{ ...(dark ? BADGE_DARK.ok : { background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0' }), borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>
       OK
     </span>
   )
 }
 
 function EstadoBadge({ estado }: { estado: string }) {
+  const { theme } = useClayThemePreference()
+  const dark = theme === 'dark'
   if (estado === 'completado') {
-    return <span style={{ background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>Completado</span>
+    return <span style={{ ...(dark ? BADGE_DARK.ok : { background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0' }), borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>Completado</span>
   }
-  return <span style={{ background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a', borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>En progreso</span>
+  return <span style={{ ...(dark ? BADGE_DARK.warn : { background: '#fffbeb', color: '#b45309', border: '1px solid #fde68a' }), borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>En progreso</span>
 }
 
 // ─── Alerts ──────────────────────────────────────────────────────────────────────

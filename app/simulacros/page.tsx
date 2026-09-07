@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { CheckCircle2, Eye, EyeOff, PlayCircle, RotateCcw, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
+import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 import { SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
 import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroRecord, SimulacroSubject } from '@/components/simulacros/types'
 import { useCCAA } from '@/app/hooks/useCCAA'
@@ -45,6 +46,8 @@ const OPTION_CHOICES: Array<{ id: OptionChoice; label: string; description: stri
 ]
 
 function SimulacrosPage() {
+  const { theme: clayTheme } = useClayThemePreference()
+  const clayDark = clayTheme === 'dark'
   const searchParams = useSearchParams()
   const caminoBlock = searchParams.get('block')
   const caminoSource = searchParams.get('source')
@@ -608,8 +611,8 @@ function SimulacrosPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                     <a href={rowHref} style={{ display: 'contents', textDecoration: 'none', color: 'inherit' }}>
                       {item.estado === 'completado'
-                        ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#f0fdf4', color: '#15803d' }}><CheckCircle2 size={11} />Completado</span>
-                        : <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#b45309' }}>En progreso</span>}
+                        ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, ...(clayDark ? { background: 'rgba(52,211,153,0.14)', color: '#34d399' } : { background: '#f0fdf4', color: '#15803d' }) }}><CheckCircle2 size={11} />Completado</span>
+                        : <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, ...(clayDark ? { background: 'rgba(251,191,36,0.14)', color: '#fbbf24' } : { background: '#fffbeb', color: '#b45309' }) }}>En progreso</span>}
                       <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: 'var(--clay-bg)', color: 'var(--clay-text-muted)' }}>{optionSummaryForRecord(item)}</span>
                     </a>
                     {suggestRepeat && (
@@ -648,7 +651,7 @@ function SimulacrosPage() {
 
         {/* Error */}
         {errorMessage && (
-          <div role="alert" style={{ marginBottom: 20, padding: '12px 16px', borderRadius: 10, background: '#fef2f2', border: '1px solid #fecaca', fontSize: 13, fontWeight: 600, color: '#b91c1c' }}>{errorMessage}</div>
+          <div role="alert" style={{ marginBottom: 20, padding: '12px 16px', borderRadius: 10, fontSize: 13, fontWeight: 600, ...(clayDark ? { background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.35)', color: '#fca5a5' } : { background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c' }) }}>{errorMessage}</div>
         )}
 
         {/* ── STEP 1: ASIGNATURA ── */}
@@ -670,7 +673,7 @@ function SimulacrosPage() {
                 >
                   <div style={{ width: 12, height: 12, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
                   <div style={{ fontSize: 11, fontWeight: 800, color: isActive ? s.color : 'var(--clay-text)', lineHeight: 1.3 }}>{s.label}</div>
-                  {!s.available && <span style={{ position: 'absolute', top: 4, right: 4, fontSize: 8, fontWeight: 900, padding: '1px 4px', borderRadius: 999, background: '#f0fdf4', color: '#15803d' }}>Pronto</span>}
+                  {!s.available && <span style={{ position: 'absolute', top: 4, right: 4, fontSize: 8, fontWeight: 900, padding: '1px 4px', borderRadius: 999, ...(clayDark ? { background: 'rgba(52,211,153,0.14)', color: '#34d399' } : { background: '#f0fdf4', color: '#15803d' }) }}>Pronto</span>}
                 </button>
               )
             })}

@@ -92,6 +92,7 @@ function weeklyDaysLabel(days: number | null) {
 export default function SettingsPage() {
   const router = useRouter()
   const { theme } = useClayThemePreference()
+  const dark = theme === 'dark'
   const { ccaa, setCCAA } = useCCAA()
   const [userId, setUserId] = useState('')
   const [email, setEmail] = useState('')
@@ -639,15 +640,15 @@ export default function SettingsPage() {
                     <div style={{ paddingRight: 10, flexShrink: 0 }}>
                       {usernameStatus === 'checking' && <div style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid #e2e8f0', borderTopColor: '#2563eb', animation: 'spin .6s linear infinite' }} />}
                       {usernameStatus === 'available' && <span style={{ color: '#16a34a', fontSize: 14 }}>✓</span>}
-                      {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <span style={{ color: '#dc2626', fontSize: 14 }}>✗</span>}
+                      {(usernameStatus === 'taken' || usernameStatus === 'invalid') && <span style={{ color: dark ? '#fca5a5' : '#dc2626', fontSize: 14 }}>✗</span>}
                     </div>
                   </div>
                   {usernameStatus === 'invalid' && usernameError && (
-                    <p style={{ margin: '4px 0 0', fontSize: 11, fontWeight: 600, color: '#dc2626' }}>{usernameError}</p>
+                    <p style={{ margin: '4px 0 0', fontSize: 11, fontWeight: 600, color: dark ? '#fca5a5' : '#dc2626' }}>{usernameError}</p>
                   )}
                   {usernameStatus === 'taken' && (
                     <div style={{ marginTop: 6 }}>
-                      <p style={{ fontSize: 11, fontWeight: 600, color: '#dc2626', marginBottom: 4 }}>Nombre en uso</p>
+                      <p style={{ fontSize: 11, fontWeight: 600, color: dark ? '#fca5a5' : '#dc2626', marginBottom: 4 }}>Nombre en uso</p>
                       {usernameSuggestions.length > 0 && (
                         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                           {usernameSuggestions.map(s => (
@@ -708,7 +709,7 @@ export default function SettingsPage() {
                 <div>
                   <strong style={{ display: 'block', fontSize: 13, fontWeight: 700, color: 'var(--clay-text)' }}>Gestionar mi suscripción</strong>
                   <small style={{ display: 'block', marginTop: 4, fontSize: 11, color: 'var(--clay-text-muted)' }}>Cambia tu método de pago, descarga facturas o cancela tu plan cuando quieras.</small>
-                  {portalError && <small style={{ display: 'block', marginTop: 6, fontSize: 11, fontWeight: 700, color: '#dc2626' }}>{portalError}</small>}
+                  {portalError && <small style={{ display: 'block', marginTop: 6, fontSize: 11, fontWeight: 700, color: dark ? '#fca5a5' : '#dc2626' }}>{portalError}</small>}
                 </div>
                 <button type="button" onClick={openBillingPortal} disabled={portalLoading}
                   style={{ padding: '9px 18px', borderRadius: 999, background: 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', fontSize: 12, fontWeight: 900, border: 'none', cursor: portalLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0, opacity: portalLoading ? .7 : 1 }}>
@@ -890,7 +891,7 @@ export default function SettingsPage() {
             >
               {recalculating ? 'Recalculando…' : 'Recalcular mi plan ahora'}
             </button>
-            {recalculateStatus && <span style={{ fontSize: 11, fontWeight: 700, color: recalculateStatus.startsWith('No') ? '#dc2626' : '#16a34a' }}>{recalculateStatus}</span>}
+            {recalculateStatus && <span style={{ fontSize: 11, fontWeight: 700, color: recalculateStatus.startsWith('No') ? (dark ? '#fca5a5' : '#dc2626') : '#16a34a' }}>{recalculateStatus}</span>}
           </div>
 
           <Toggle
@@ -931,15 +932,15 @@ export default function SettingsPage() {
         {/* Save bar */}
         <div className="settings-savebar" style={{ background: 'var(--clay-surface)', borderTop: '2px solid var(--clay-text)', padding: '12px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button type="button" onClick={logout} style={{ padding: '9px 18px', borderRadius: 999, background: 'var(--clay-surface)', color: '#dc2626', fontSize: 12, fontWeight: 900, border: '1px solid #fee2e2', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
+            <button type="button" onClick={logout} style={{ padding: '9px 18px', borderRadius: 999, background: 'var(--clay-surface)', fontSize: 12, fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, ...(dark ? { color: '#fca5a5', border: '1px solid rgba(248,113,113,0.35)' } : { color: '#dc2626', border: '1px solid #fee2e2' }) }}>
               <LogOut size={14} /> Cerrar sesión
             </button>
-            <button type="button" onClick={openDeleteModal} style={{ padding: '9px 18px', borderRadius: 999, background: '#fff7ed', color: '#c2410c', fontSize: 12, fontWeight: 900, border: '1px solid #fed7aa', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
+            <button type="button" onClick={openDeleteModal} style={{ padding: '9px 18px', borderRadius: 999, fontSize: 12, fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, ...(dark ? { background: 'rgba(248,113,113,0.14)', color: '#fca5a5', border: '1px solid rgba(248,113,113,0.35)' } : { background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa' }) }}>
               <Trash2 size={14} /> Borrar cuenta
             </button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-            {saveError && <div style={{ maxWidth: 360, borderRadius: 10, border: '1px solid #fee2e2', background: '#fff5f5', padding: '8px 14px', fontSize: 11, fontWeight: 600, color: '#dc2626' }}>{saveError}</div>}
+            {saveError && <div style={{ maxWidth: 360, borderRadius: 10, padding: '8px 14px', fontSize: 11, fontWeight: 600, ...(dark ? { border: '1px solid rgba(248,113,113,0.35)', background: 'rgba(248,113,113,0.12)', color: '#fca5a5' } : { border: '1px solid #fee2e2', background: '#fff5f5', color: '#dc2626' }) }}>{saveError}</div>}
             <button type="button" onClick={save} style={{ padding: '10px 22px', borderRadius: 999, background: 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', fontSize: 12, fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
               <Save size={14} /> {saved ? 'Cambios guardados' : 'Guardar cambios'}
             </button>
@@ -949,10 +950,10 @@ export default function SettingsPage() {
 
       {showDeleteModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(15,23,42,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div role="dialog" aria-modal="true" aria-labelledby="delete-account-title" style={{ width: 'min(460px, 100%)', borderRadius: 24, background: 'var(--clay-surface)', boxShadow: '0 24px 70px rgba(15,23,42,.26)', border: '1px solid #fee2e2', overflow: 'hidden' }}>
-            <div style={{ padding: '22px 24px 18px', borderBottom: '1px solid #fee2e2', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-account-title" style={{ width: 'min(460px, 100%)', borderRadius: 24, background: 'var(--clay-surface)', boxShadow: '0 24px 70px rgba(15,23,42,.26)', overflow: 'hidden', border: dark ? '1px solid rgba(248,113,113,0.35)' : '1px solid #fee2e2' }}>
+            <div style={{ padding: '22px 24px 18px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, borderBottom: dark ? '1px solid rgba(248,113,113,0.35)' : '1px solid #fee2e2' }}>
               <div>
-                <div style={{ width: 42, height: 42, borderRadius: 16, background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c2410c', marginBottom: 12 }}>
+                <div style={{ width: 42, height: 42, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12, ...(dark ? { background: 'rgba(248,113,113,0.14)', color: '#fca5a5' } : { background: '#fff7ed', color: '#c2410c' }) }}>
                   <Trash2 size={20} />
                 </div>
                 <h2 id="delete-account-title" style={{ margin: 0, fontSize: 22, fontWeight: 900, letterSpacing: '-.04em', color: 'var(--clay-text)' }}>Borrar cuenta</h2>
@@ -964,19 +965,21 @@ export default function SettingsPage() {
             </div>
             <div style={{ padding: 24 }}>
               <label>
-                <span style={{ display: 'block', marginBottom: 8, fontSize: 11, fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase', color: '#991b1b' }}>Escribe BORRAR para confirmar</span>
+                <span style={{ display: 'block', marginBottom: 8, fontSize: 11, fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase', color: dark ? '#fca5a5' : '#991b1b' }}>Escribe BORRAR para confirmar</span>
                 <input
                   value={deleteConfirm}
                   onChange={e => setDeleteConfirm(e.target.value)}
                   disabled={deleting}
                   placeholder="BORRAR"
-                  style={{ ...inputStyle, borderColor: deleteConfirm && deleteConfirm !== 'BORRAR' ? '#fecaca' : '#fed7aa', background: '#fff7ed' }}
+                  style={dark
+                    ? { ...inputStyle, borderColor: deleteConfirm && deleteConfirm !== 'BORRAR' ? '#fca5a5' : 'rgba(248,113,113,0.35)', background: 'rgba(248,113,113,0.12)' }
+                    : { ...inputStyle, borderColor: deleteConfirm && deleteConfirm !== 'BORRAR' ? '#fecaca' : '#fed7aa', background: '#fff7ed' }}
                 />
               </label>
-              {deleteError && <div style={{ marginTop: 12, borderRadius: 12, border: '1px solid #fecaca', background: '#fff5f5', padding: '10px 12px', fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{deleteError}</div>}
+              {deleteError && <div style={{ marginTop: 12, borderRadius: 12, padding: '10px 12px', fontSize: 12, fontWeight: 700, ...(dark ? { border: '1px solid rgba(248,113,113,0.35)', background: 'rgba(248,113,113,0.12)', color: '#fca5a5' } : { border: '1px solid #fecaca', background: '#fff5f5', color: '#dc2626' }) }}>{deleteError}</div>}
               <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
                 <button type="button" onClick={() => setShowDeleteModal(false)} disabled={deleting} style={{ padding: '10px 16px', borderRadius: 999, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', color: 'var(--clay-text-muted)', fontSize: 12, fontWeight: 900, cursor: deleting ? 'not-allowed' : 'pointer' }}>Cancelar</button>
-                <button type="button" onClick={deleteAccount} disabled={deleting || deleteConfirm !== 'BORRAR'} style={{ padding: '10px 16px', borderRadius: 999, border: 'none', background: deleteConfirm === 'BORRAR' ? '#dc2626' : '#fecaca', color: 'white', fontSize: 12, fontWeight: 900, cursor: deleting || deleteConfirm !== 'BORRAR' ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
+                <button type="button" onClick={deleteAccount} disabled={deleting || deleteConfirm !== 'BORRAR'} style={{ padding: '10px 16px', borderRadius: 999, border: 'none', fontSize: 12, fontWeight: 900, cursor: deleting || deleteConfirm !== 'BORRAR' ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 7, ...(deleteConfirm === 'BORRAR' ? { background: '#dc2626', color: 'white' } : dark ? { background: 'var(--clay-surface-raised)', color: 'var(--clay-text-muted)' } : { background: '#fecaca', color: 'white' }) }}>
                   <Trash2 size={14} /> {deleting ? 'Borrando…' : 'Borrar definitivamente'}
                 </button>
               </div>

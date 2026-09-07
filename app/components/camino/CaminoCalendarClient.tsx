@@ -10,6 +10,7 @@ import WeeklyCheckinBanner from '@/app/components/camino/WeeklyCheckinBanner'
 import ExamCoverageBanner from '@/app/components/camino/ExamCoverageBanner'
 import HistoriaTopicChips from '@/app/components/camino/HistoriaTopicChips'
 import GoogleCalendarConnection from '@/app/components/camino/GoogleCalendarConnection'
+import CaminoAssistant from '@/app/components/camino/CaminoAssistant'
 import SidebarNav from '@/app/components/SidebarNav'
 import { supabase } from '@/app/lib/supabase'
 import { clearOnboarding, loadOnboarding, restoreOnboardingFromServer, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
@@ -2266,6 +2267,24 @@ export default function CaminoCalendarClient() {
   const orientationUniversity = orientationContext?.target.universityAcronym || orientationTarget?.university || ''
   const formatOrientationScore = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 3 })
 
+  async function refreshAfterChat() {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user?.id || !session.access_token) return
+    const [calendarDays, profileResponse] = await Promise.all([
+      fetchCaminoCalendar(session.user.id),
+      fetch('/api/profile', { headers: { Authorization: `Bearer ${session.access_token}` }, cache: 'no-store' }),
+    ])
+    if (calendarDays) {
+      setCalendar(calendarDays)
+      saveCalendarWeeksToCache(calendarDays)
+    }
+    if (profileResponse.ok) {
+      const profile = await profileResponse.json() as { student_exams?: StudentExam[] }
+      if (Array.isArray(profile.student_exams)) setExams(profile.student_exams)
+    }
+    setCalendarAvailabilityRefreshKey(key => key + 1)
+  }
+
   return (
     <Shell>
       <UsernameGate />
@@ -2294,6 +2313,7 @@ export default function CaminoCalendarClient() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#93c5fd', flexShrink: 0, display: 'inline-block' }} />{streak > 0 ? `${streak} días de racha` : 'Empieza tu racha hoy'}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#93c5fd', flexShrink: 0, display: 'inline-block' }} />{completedMainWithSims}/{Math.min(totalMain, 5)} principales</div>
           {weeklyXP > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#93c5fd', flexShrink: 0, display: 'inline-block' }} />+{weeklyXP} XP semana</div>}
+          <div data-testid="camino-days-until-pau" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#93c5fd', flexShrink: 0, display: 'inline-block' }} />{daysUntilPAU} días para la PAU</div>
           {upcomingPartial && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 800, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />Parcial · {upcomingPartial.subject}</div>}
           {/* El botón "Clasificación →" de siempre vive en el panel derecho
               (RIGHT PANEL, hidden lg:flex) — invisible por debajo de lg. Este
@@ -2317,46 +2337,14 @@ export default function CaminoCalendarClient() {
 
           {/* Banners */}
           {BETA_FEEDBACK_URL && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '8px 20px', background: '#eff6ff', borderBottom: '1px solid #dbeafe' }}>
+            <div style={{ order: -3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '8px 20px', background: '#eff6ff', borderBottom: '1px solid #dbeafe' }}>
               <p style={{ fontSize: 11, fontWeight: 600, color: '#1e40af', margin: 0 }}>Beta privada · Matemáticas II, Matemáticas CCSS, Lengua e Historia.</p>
               <a href={BETA_FEEDBACK_URL} target="_blank" rel="noreferrer" style={{ fontSize: 11, fontWeight: 800, color: '#2563eb', background: 'white', borderRadius: 8, padding: '3px 10px', textDecoration: 'none', whiteSpace: 'nowrap' }}>Feedback</a>
             </div>
           )}
-          {isRescueMode && <div style={{ padding: '8px 20px', background: '#fef3c7', borderBottom: '1px solid #fde68a' }}><p style={{ fontSize: 11, fontWeight: 900, color: '#92400e', margin: 0 }}>⚠️ Modo Rescate PAU — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
+          {isRescueMode && <div style={{ order: -3, padding: '8px 20px', background: '#fef3c7', borderBottom: '1px solid #fde68a' }}><p style={{ fontSize: 11, fontWeight: 900, color: '#92400e', margin: 0 }}>⚠️ Modo Rescate PAU — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
           <WeeklyCheckinBanner />
-          <ExamCoverageBanner />
-
-          {orientationTarget && (
-            <div style={{ padding: '10px 20px', borderBottom: '1px solid #e2e8f0', background: 'linear-gradient(135deg,rgba(239,246,255,.72),rgba(255,255,255,.68))' }}>
-              <div className="camino-target-card kairo-soft-panel" data-testid="camino-orientation-target" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 14, padding: '10px 14px', border: '1px solid rgba(191,219,254,.72)', background: 'rgba(255,255,255,.68)', backdropFilter: 'blur(14px)', boxShadow: '0 8px 28px rgba(37,99,235,.07), inset 0 1px 0 rgba(255,255,255,.9)' }}>
-                <div className="camino-target-objective" style={{ minWidth: 0 }}>
-                  <span className="camino-target-label">Objetivo</span>
-                  <p style={{ margin: '3px 0 0', fontSize: 13, fontWeight: 900, color: '#0f172a', lineHeight: 1.25 }}>{orientationTarget.degree} · {orientationUniversity}</p>
-                </div>
-                <div className="camino-target-metrics">
-                  <div><span className="camino-target-label">Referencia</span><strong>{formatOrientationScore(orientationTarget.admissionScore)}</strong></div>
-                  {orientationContext?.calculationComplete && orientationContext.estimatedScore != null && <div><span className="camino-target-label">Tu escenario</span><strong>{formatOrientationScore(orientationContext.estimatedScore)}</strong></div>}
-                  {orientationContext?.calculationComplete && orientationContext.gap != null && <div><span className="camino-target-label">Gap</span><strong className={orientationContext.gap < 0 ? 'is-below' : 'is-above'}>{orientationContext.gap > 0 ? '+' : ''}{formatOrientationScore(Math.abs(orientationContext.gap))}</strong></div>}
-                </div>
-                <a href="/orientacion" style={{ flexShrink: 0, fontSize: 10.5, fontWeight: 900, color: '#2563eb', textDecoration: 'none', whiteSpace: 'nowrap' }}>Ver orientación →</a>
-              </div>
-            </div>
-          )}
-
-          {/* ── HERO ── */}
-          <div className="camino-hero" style={{ position: 'relative', height: 214, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
-            <img src={heroImageUrl} alt="" loading="eager" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.48) saturate(0.68)', display: 'block' }} />
-            <div className="camino-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.88) 0%, rgba(10,15,30,0.36) 72%, rgba(10,15,30,0.18) 100%)', padding: '24px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-              <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Días hasta selectividad</div>
-              <div className="camino-hero-days" style={{ fontSize: 72, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 8 }}>Restan</div>
-              <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}><span style={{ fontSize: 15, fontWeight: 900, color: 'white' }}>{streak > 0 ? streak : '—'}</span><span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.42)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}><span style={{ fontSize: 15, fontWeight: 900, color: 'white' }}>{displayedXP.toLocaleString('es-ES')}</span><span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.42)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>XP</span></div>
-                {heroRank != null && <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}><span style={{ fontSize: 15, fontWeight: 900, color: 'white' }}>#{heroRank}</span><span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.42)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div>}
-              </div>
-            </div>
-          </div>
+          <div style={{ order: -2 }}><ExamCoverageBanner /></div>
 
           {/* Sunday mock */}
           {isSunday && sundayMockSession !== undefined && sundayMockSimSubject && sundayMockBlock && (() => {
@@ -2624,7 +2612,7 @@ export default function CaminoCalendarClient() {
           })()}
 
           {/* ── WEEK SECTION ── */}
-          <div style={{ padding: '16px 20px', borderTop: '2px solid #0f172a' }}>
+          <section data-testid="camino-week-overview" aria-label="Mi semana" style={{ order: -1, padding: '18px 20px', borderBottom: '1px solid #e2e8f0', background: 'linear-gradient(180deg,rgba(239,246,255,.72),rgba(255,255,255,.96))' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Esta semana</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -2690,8 +2678,7 @@ export default function CaminoCalendarClient() {
               {calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}
             </button>
             {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} />}
-            <FreeReviewPanel subjects={onboardingSubjects} />
-          </div>
+          </section>
 
           {/* ── EXAMS SECTION ── */}
           <div style={{ padding: '16px 20px', borderTop: '1px solid #e2e8f0' }}>
@@ -2933,6 +2920,7 @@ export default function CaminoCalendarClient() {
           otro sitio. Renderizado aquí, al nivel de los demás modales, queda
           siempre disponible sin importar el ancho de pantalla. */}
       <AnimatePresence>{showFullRanking && fullRankingToken && <FullRankingModal token={fullRankingToken} onClose={() => setShowFullRanking(false)} />}</AnimatePresence>
+      <CaminoAssistant onChanged={refreshAfterChat} />
     </Shell>
   )
 }

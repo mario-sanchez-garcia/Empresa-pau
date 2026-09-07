@@ -1,4 +1,5 @@
-import { expect, test, type Page, type Request } from '@playwright/test'
+import type { Page, Request } from '@playwright/test'
+import { expect, test } from './authenticated-test'
 import { hasAuthenticatedSession } from './auth-session'
 import { groupOrientationTargets } from '../app/orientacion/catalog'
 import type { OrientationTarget } from '../app/orientacion/data'
@@ -543,7 +544,7 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       await selectTarget(page, catalanTarget)
       await expect(page.getByText(/Nota de referencia · 1.ª asignación de junio/)).toBeVisible()
       await saveTarget(page, catalanTarget)
-      await expect(page.getByTestId('camino-orientation-target')).toContainText(catalanTarget.degree)
+      await expect(page.getByTestId('camino-orientation-target')).toHaveCount(0)
       const restored = await expectRestoredTarget(page, catalanTarget)
       expect(restored.savedTarget?.community).toMatch(/Cataluña|Catalunya/)
 
@@ -602,7 +603,7 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       await switchCommunity(page, 'Madrid')
       await expect(page.getByText(/Tu objetivo guardado está en Cataluña\. Puedes explorar Madrid sin sustituirlo\./)).toBeVisible()
       await page.getByRole('link', { name: 'Camino PAU' }).click()
-      await expect(page.getByTestId('camino-orientation-target')).toContainText(catalanTarget.degree)
+      await expect(page.getByTestId('camino-orientation-target')).toHaveCount(0)
       await openOrientation(page)
       await switchCommunity(page, 'Madrid')
       await selectTarget(page, secondTarget)

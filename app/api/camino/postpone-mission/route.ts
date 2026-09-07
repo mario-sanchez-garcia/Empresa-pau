@@ -4,6 +4,7 @@ import { createServiceClient } from '@/app/lib/billing/supabase'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { addDays, getMadridToday, isStudyDay } from '@/app/lib/camino/studyDays'
 import { recordMissionBehaviorEvent } from '@/app/lib/camino/missionBehavior'
+import { unlinkKairoMissionFromGoogle } from '@/app/lib/calendar/sync'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,6 +31,7 @@ export async function POST(request: NextRequest) {
 
     const subject = typeof body.subject === 'string' ? body.subject : null
     const v2SortOrder = typeof body.v2SortOrder === 'number' ? body.v2SortOrder : null
+    const actionSource = body.source === 'kairo_chat' ? 'kairo_chat' : 'camino'
 
     if (!subject || v2SortOrder == null) {
       return NextResponse.json({ error: 'subject y v2SortOrder son obligatorios' }, { status: 400 })
@@ -154,9 +156,16 @@ export async function POST(request: NextRequest) {
           subject,
           v2_sort_order: v2SortOrder,
           block_key: queueItem.block_key,
+          source: actionSource,
         }).catch(err => {
           console.warn('[postpone-mission] mission behavior event skipped', err)
         })
+        try {
+          await unlinkKairoMissionFromGoogle(user.id, updatedPostpone[0].id, db)
+        } catch (syncError) {
+          console.warn('[postpone-mission] google unlink failed', syncError)
+          return NextResponse.json({ error: 'google_sync_failed', persisted: true }, { status: 502 })
+        }
       }
     }
 

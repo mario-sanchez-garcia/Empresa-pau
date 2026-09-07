@@ -123,7 +123,8 @@ assert(
     route.includes('mission_type: missionType') &&
     route.includes('locked: true') &&
     route.includes("source: 'manual'") &&
-    route.includes("generated_by: 'calendar_editor'") &&
+    route.includes("generated_by: sourceTag") &&
+    route.includes("body.source, 40) === 'kairo_chat'") &&
     route.includes('.select(selectColumns)') &&
     route.includes(".eq('id', inserted.id)") &&
     route.includes('mission: verified')

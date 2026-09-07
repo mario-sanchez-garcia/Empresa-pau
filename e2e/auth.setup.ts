@@ -25,7 +25,19 @@ test('guardar una sesión iniciada manualmente', async ({ page, context }) => {
   }
 
   await fs.mkdir(path.dirname(authState), { recursive: true })
-  await context.storageState({ path: authState })
+  const state = await context.storageState()
+  const storageOrigin = process.env.E2E_STORAGE_ORIGIN?.replace(/\/$/, '')
+  const currentOrigin = new URL(page.url()).origin
+  const currentStorage = state.origins.find(origin => origin.origin === currentOrigin)
+  if (storageOrigin && currentStorage && !state.origins.some(origin => origin.origin === storageOrigin)) {
+    // Supabase stores the browser session in localStorage. Login against the
+    // deployed HTTPS origin (where email/OAuth redirects are reliable), then
+    // copy only those storage entries to the local E2E origin. No credential
+    // is printed and the ignored storageState remains the only persisted file.
+    const supabaseSession = currentStorage.localStorage.filter(entry => entry.name.startsWith('sb-') && entry.name.endsWith('-auth-token'))
+    state.origins.push({ origin: storageOrigin, localStorage: supabaseSession })
+  }
+  await fs.writeFile(authState, JSON.stringify(state), { encoding: 'utf8', mode: 0o600 })
   try { await fs.chmod(authState, 0o600) } catch { /* Windows may not expose POSIX permissions. */ }
   process.stdout.write('Sesión detectada y guardada de forma local.\n')
 })

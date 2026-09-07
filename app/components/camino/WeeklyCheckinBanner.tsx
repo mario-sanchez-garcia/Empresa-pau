@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
@@ -11,7 +11,14 @@ export default function WeeklyCheckinBanner() {
   const router = useRouter()
   const [visible, setVisible] = useState(false)
   const [dailyMinutes, setDailyMinutes] = useState<number | null>(null)
-  const [busy, setBusy] = useState<'confirm' | 'dismiss' | null>(null)
+  const [busy, setBusy] = useState<'confirm' | 'dismiss' | 'change' | null>(null)
+  const [confirmed, setConfirmed] = useState(false)
+  const [error, setError] = useState(false)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -46,27 +53,26 @@ export default function WeeklyCheckinBanner() {
   async function markCheckin() {
     const { data: { session } } = await supabase.auth.getSession()
     const token = session?.access_token
-    if (!token) return
-    await fetch('/api/profile', {
+    if (!token) return false
+    const response = await fetch('/api/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ mark_weekly_checkin: true }),
-    }).catch(() => undefined)
-    return token
+    }).catch(() => null)
+    return response?.ok === true
   }
 
   async function confirmSame() {
     setBusy('confirm')
+    setError(false)
     try {
-      const token = await markCheckin()
-      if (token) {
-        await fetch('/api/camino/ensure-calendar', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ force: true }),
-        }).catch(() => undefined)
+      const saved = await markCheckin()
+      if (!saved) {
+        setError(true)
+        return
       }
-      setVisible(false)
+      setConfirmed(true)
+      closeTimer.current = setTimeout(() => setVisible(false), 650)
     } finally {
       setBusy(null)
     }
@@ -74,50 +80,59 @@ export default function WeeklyCheckinBanner() {
 
   async function dismiss() {
     setBusy('dismiss')
+    setError(false)
     try {
-      await markCheckin()
+      const saved = await markCheckin()
+      if (!saved) {
+        setError(true)
+        return
+      }
       setVisible(false)
     } finally {
       setBusy(null)
     }
   }
 
-  function goChange() {
-    markCheckin()
-    router.push('/settings')
+  async function goChange() {
+    setBusy('change')
+    setError(false)
+    const saved = await markCheckin()
+    if (!saved) {
+      setError(true)
+      setBusy(null)
+      return
+    }
+    router.push('/settings?focus=availability')
   }
 
   if (!visible) return null
 
   return (
-    <div style={{
-      display: 'flex', alignItems: 'flex-start', gap: 12,
-      padding: '14px 16px', margin: '12px 20px 0',
-      background: '#f8fafc', borderLeft: '3px solid #2563eb', borderRadius: 8,
-    }}>
+    <aside className="weekly-checkin-card" role="dialog" aria-label="Comprobación semanal de disponibilidad">
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', marginBottom: 3, lineHeight: 1.4 }}>
-          {dailyMinutes ? `¿Sigues con ${dailyMinutes} min/día? ¿Cómo vas?` : '¿Cómo vas esta semana?'}
+          {confirmed ? 'Entendido ✓' : dailyMinutes ? `¿Sigues estudiando ${dailyMinutes} min/día?` : '¿Tu tiempo de estudio sigue igual?'}
         </p>
-        <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>
-          Cada semana te lo preguntamos para que tu Camino refleje tu ritmo real.
-        </p>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {!confirmed && <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>
+          Así tu semana sigue encajando contigo.
+        </p>}
+        {error && <p role="alert" style={{ fontSize: 11, fontWeight: 700, color: '#b91c1c', marginBottom: 8 }}>No se ha podido guardar. Reinténtalo.</p>}
+        {!confirmed && <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button
             onClick={confirmSame}
             disabled={busy !== null}
             style={{ padding: '7px 12px', borderRadius: 8, border: 'none', background: '#2563eb', color: 'white', fontSize: 11, fontWeight: 800, cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.7 : 1 }}
           >
-            {busy === 'confirm' ? 'Recalculando…' : 'Sigo igual'}
+            Sigo igual
           </button>
           <button
             onClick={goChange}
             disabled={busy !== null}
             style={{ padding: '7px 12px', borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', color: '#334155', fontSize: 11, fontWeight: 800, cursor: busy ? 'default' : 'pointer' }}
           >
-            Quiero cambiarlo
+            {busy === 'change' ? 'Abriendo…' : 'Cambiarlo'}
           </button>
-        </div>
+        </div>}
       </div>
       <button
         onClick={dismiss}
@@ -127,6 +142,30 @@ export default function WeeklyCheckinBanner() {
       >
         <X size={15} />
       </button>
-    </div>
+      <style jsx>{`
+        .weekly-checkin-card {
+          position: fixed;
+          right: 190px;
+          bottom: 22px;
+          z-index: 45;
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          width: min(340px, calc(100vw - 32px));
+          padding: 15px 16px;
+          border: 1px solid rgba(148, 163, 184, .3);
+          border-radius: 18px;
+          background: rgba(248, 250, 252, .94);
+          box-shadow: 0 18px 48px rgba(15, 23, 42, .16), inset 0 1px 0 rgba(255, 255, 255, .9);
+          backdrop-filter: blur(18px);
+        }
+        @media (max-width: 640px) {
+          .weekly-checkin-card {
+            right: 16px;
+            bottom: calc(136px + env(safe-area-inset-bottom));
+          }
+        }
+      `}</style>
+    </aside>
   )
 }

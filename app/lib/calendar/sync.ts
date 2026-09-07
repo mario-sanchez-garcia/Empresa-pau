@@ -430,6 +430,30 @@ export async function deleteKairoMission(userId: string, missionId: string, db =
   return { deleted: true as const, external }
 }
 
+/** Removes only the linked Google event. The Camino row remains available
+ * for completed/postponed history and learning-engine audit. */
+export async function unlinkKairoMissionFromGoogle(userId: string, missionId: string, db = createServiceClient()) {
+  const { data: linkData, error: linkError } = await db
+    .from('calendar_event_links')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('provider', 'google')
+    .eq('entity_type', 'mission')
+    .eq('entity_id', missionId)
+    .maybeSingle()
+  if (linkError) throw linkError
+  const link = linkData as CalendarEventLink | null
+  if (!link) return { external: 'not_linked' as const }
+  const connection = await getConnection(db, userId)
+  if (link.external_event_id && connection?.sync_enabled) {
+    const provider = await providerForConnection(db, connection)
+    await provider.deleteEvent(link.external_calendar_id, link.external_event_id)
+  }
+  const { error } = await db.from('calendar_event_links').delete().eq('id', link.id).eq('user_id', userId)
+  if (error) throw error
+  return { external: connection?.sync_enabled ? 'deleted' as const : 'disconnected' as const }
+}
+
 async function applyExternalEvent(db: SupabaseClient, connection: CalendarConnection, event: CalendarEvent) {
   const calendarId = connection.external_calendar_id
   if (!calendarId) return

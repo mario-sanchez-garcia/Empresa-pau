@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test } from './authenticated-test'
 
 import { hasAuthenticatedSession } from './auth-session'
 
@@ -27,7 +28,7 @@ async function deleteMission(page: Page, missionId: string) {
 
 async function dismissCookieBanner(page: Page) {
   const reject = page.getByRole('button', { name: 'Rechazar' })
-  if (await reject.isVisible().catch(() => false)) await reject.click()
+  await reject.click({ timeout: 2_000 }).catch(() => undefined)
 }
 
 test('guardar elimina una misión persistida y F5 no la restaura', async ({ page }) => {

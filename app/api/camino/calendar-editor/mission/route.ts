@@ -5,6 +5,7 @@ import { normalizeSubjectSlug, sanitizeLessonTitle } from '@/app/lib/camino/cami
 import { getAvailabilityForDate, hasTimeConflict } from '@/app/lib/calendar/availability'
 import { deleteKairoMission, syncExistingKairoMissionToGoogle, syncKairoMissionsToGoogle } from '@/app/lib/calendar/sync'
 import { DEFAULT_MISSION_DURATION_MINUTES } from '@/app/lib/camino/calendarEditorConfig'
+import { recordMissionBehaviorEvent } from '@/app/lib/camino/missionBehavior'
 
 export const dynamic = 'force-dynamic'
 
@@ -168,6 +169,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const sourceTag = cleanString(body.source, 40) === 'kairo_chat' ? 'kairo_chat' : 'calendar_editor'
     const metadata = {
       ...(typeof body.metadata === 'object' && body.metadata ? body.metadata : {}),
       manual_editor: true,
@@ -177,6 +179,7 @@ export async function POST(request: NextRequest) {
       start_time: startTime || undefined,
       end_time: endTime || undefined,
       calendar_sync_status: startTime && endTime ? 'pending' : 'pending_no_time',
+      action_source: sourceTag,
     }
 
     const { data: inserted, error: insertError } = await db
@@ -195,7 +198,7 @@ export async function POST(request: NextRequest) {
         status: 'pending',
         locked: true,
         source: 'manual',
-        generated_by: 'calendar_editor',
+        generated_by: sourceTag,
         start_time: startTime,
         end_time: endTime,
         metadata,
@@ -239,6 +242,116 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[camino/calendar-editor/mission]', error)
     return NextResponse.json({ error: 'No se pudo guardar la misión.' }, { status: 500 })
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const auth = await getAuthContext(request)
+    if ('response' in auth) return auth.response
+
+    let body: Record<string, unknown> = {}
+    try { body = await request.json() } catch { /* handled below */ }
+    const missionId = cleanString(body.missionId, 80)
+    if (!missionId) return NextResponse.json({ error: 'mission_id_required' }, { status: 400 })
+
+    const db = createServiceClient()
+    const selectColumns = 'id, scheduled_date, subject, title, block_key, block_slug, mission_type, is_main, is_bonus, status, v2_sort_order, xp_awarded, start_time, end_time, metadata'
+    const { data: mission, error: missionError } = await db
+      .from('camino_calendar')
+      .select(selectColumns)
+      .eq('id', missionId)
+      .eq('user_id', auth.user.id)
+      .maybeSingle()
+    if (missionError) throw missionError
+    if (!mission || mission.status !== 'pending') {
+      return NextResponse.json({ error: 'mission_not_found' }, { status: 404 })
+    }
+
+    const scheduledDate = cleanString(body.scheduledDate, 20) || mission.scheduled_date
+    if (!isIsoDate(scheduledDate)) return NextResponse.json({ error: 'scheduled_date_invalid' }, { status: 400 })
+    const originalStart = normalizeTime(mission.start_time)
+    const originalEnd = normalizeTime(mission.end_time)
+    const originalDuration = originalStart && originalEnd
+      ? Math.max(5, minutesFromTime(originalEnd) - minutesFromTime(originalStart))
+      : cleanNumber((mission.metadata as Record<string, unknown> | null)?.estimated_minutes, DEFAULT_MISSION_DURATION_MINUTES, 5, 180)
+    const durationMinutes = cleanNumber(body.estimatedMinutes, originalDuration, 5, 180)
+    const startTime = body.startTime === null ? null : normalizeTime(body.startTime) ?? originalStart
+    const endTime = addMinutesToTime(startTime, durationMinutes)
+    if (startTime && !endTime) return NextResponse.json({ error: 'end_time_after_midnight' }, { status: 400 })
+
+    if (startTime && endTime) {
+      const { data: sameDayRows, error: sameDayError } = await db
+        .from('camino_calendar')
+        .select('id, start_time, end_time')
+        .eq('user_id', auth.user.id)
+        .eq('scheduled_date', scheduledDate)
+        .eq('status', 'pending')
+        .neq('id', missionId)
+        .not('start_time', 'is', null)
+        .not('end_time', 'is', null)
+      if (sameDayError) throw sameDayError
+      const kairoBusy = (sameDayRows ?? []).flatMap(row => row.start_time && row.end_time
+        ? [{ start: row.start_time.slice(0, 5), end: row.end_time.slice(0, 5) }]
+        : [])
+      const externalBusy = await getAvailabilityForDate(auth.user.id, scheduledDate)
+      const requestedSlot = { start: startTime, end: endTime }
+      const kairoConflict = kairoBusy.some(slot => hasTimeConflict(requestedSlot, slot))
+      const isOwnOldSlot = scheduledDate === mission.scheduled_date && originalStart && originalEnd
+        ? (slot: { start: string; end: string }) => slot.start === originalStart && slot.end === originalEnd
+        : () => false
+      const externalConflict = externalBusy.some(slot => !isOwnOldSlot(slot) && hasTimeConflict(requestedSlot, slot))
+      if (kairoConflict || externalConflict) {
+        return NextResponse.json({
+          ok: false,
+          code: 'TIME_CONFLICT',
+          conflictType: kairoConflict ? 'kairo' : 'external',
+          suggestedStart: findNextFreeStart(startTime, durationMinutes, [...kairoBusy, ...externalBusy.filter(slot => !isOwnOldSlot(slot))]),
+        }, { status: 409 })
+      }
+    }
+
+    const sourceTag = cleanString(body.source, 40) === 'kairo_chat' ? 'kairo_chat' : 'calendar_editor'
+    const previousMetadata = (mission.metadata ?? {}) as Record<string, unknown>
+    const metadata = {
+      ...previousMetadata,
+      estimated_minutes: durationMinutes,
+      start_time: startTime || undefined,
+      end_time: endTime || undefined,
+      calendar_sync_status: startTime && endTime ? 'pending' : 'pending_no_time',
+      action_source: sourceTag,
+    }
+    const { data: updated, error: updateError } = await db
+      .from('camino_calendar')
+      .update({ scheduled_date: scheduledDate, start_time: startTime, end_time: endTime, metadata })
+      .eq('id', missionId)
+      .eq('user_id', auth.user.id)
+      .select(selectColumns)
+      .single()
+    if (updateError) throw updateError
+
+    await recordMissionBehaviorEvent(db, auth.user.id, missionId, 'rescheduled_manual', `${sourceTag}:${missionId}:${scheduledDate}:${startTime ?? 'no-time'}`, {
+      source: sourceTag,
+      from_date: mission.scheduled_date,
+      to_date: scheduledDate,
+      from_time: originalStart,
+      to_time: startTime,
+    }).catch(error => console.warn('[camino/calendar-editor/mission] audit event skipped', error))
+
+    let calendarSync = startTime && endTime ? 'pending' : 'pending_no_time'
+    if (startTime && endTime) {
+      try {
+        const result = await syncExistingKairoMissionToGoogle(auth.user.id, missionId, db)
+        calendarSync = result.updated ? 'synced' : result.reason
+      } catch (error) {
+        console.warn('[camino/calendar-editor/mission] google update failed', error)
+        return NextResponse.json({ ok: false, persisted: true, mission: updated, calendarSync: 'error', error: 'google_sync_failed' }, { status: 502 })
+      }
+    }
+    return NextResponse.json({ ok: true, persisted: true, mission: updated, calendarSync })
+  } catch (error) {
+    console.error('[camino/calendar-editor/mission/patch]', error)
+    return NextResponse.json({ error: 'No se pudo mover la misión. Reintentar.' }, { status: 500 })
   }
 }
 

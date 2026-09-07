@@ -1184,54 +1184,66 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         try {
           const { data: userData } = await withTimeout(supabase.auth.getUser(), 8000)
           if (!userData.user) return
-          await supabase.from('historial_examenes').insert({
-            user_id: userData.user.id,
-            asignatura: currentTopic.subject,
-            tipo: 'Camino PAU',
-            año: new Date().getFullYear(),
-            bloque: currentTopic.blockTitle,
-            opcion: pendingMissionType === 'review' ? 'Repaso' : 'Curso',
-            nota: rawScore,
-            nota_maxima: maxScore,
-            enunciado: statement.substring(0, 2000),
-            respuesta: answerMode === 'imagen' ? `Respuesta manuscrita adjunta (${images.length} imagen${images.length === 1 ? '' : 'es'}).` : studentAnswer.substring(0, 4000),
-            correccion: storedCorrection,
-            v2_sort_order: selectedSortOrder
-          }).abortSignal(AbortSignal.timeout(8000))
+          try {
+            await supabase.from('historial_examenes').insert({
+              user_id: userData.user.id,
+              asignatura: currentTopic.subject,
+              tipo: 'Camino PAU',
+              año: new Date().getFullYear(),
+              bloque: currentTopic.blockTitle,
+              opcion: pendingMissionType === 'review' ? 'Repaso' : 'Curso',
+              nota: rawScore,
+              nota_maxima: maxScore,
+              enunciado: statement.substring(0, 2000),
+              respuesta: answerMode === 'imagen' ? `Respuesta manuscrita adjunta (${images.length} imagen${images.length === 1 ? '' : 'es'}).` : studentAnswer.substring(0, 4000),
+              correccion: storedCorrection,
+              v2_sort_order: selectedSortOrder
+            }).abortSignal(AbortSignal.timeout(8000))
+          } catch (error) {
+            console.warn('[camino/topic] historial insert skipped', error)
+          }
           calcularRacha(userData.user.id, supabase).then(s => setStreak(s)).catch(() => undefined)
           if (rawScore != null) {
-            const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
-            const [nextRes, blockRes] = await Promise.all([
-              supabase
-                .from('camino_calendar')
-                .select('title')
-                .eq('user_id', userData.user.id)
-                .eq('status', 'pending')
-                .gt('scheduled_date', todayStr)
-                .order('scheduled_date', { ascending: true })
-                .limit(1)
-                .abortSignal(AbortSignal.timeout(8000)),
-              supabase
-                .from('camino_calendar')
-                .select('status')
-                .eq('user_id', userData.user.id)
-                .eq('subject', currentTopic.subject)
-                .eq('block_slug', currentTopic.blockSlug)
-                .abortSignal(AbortSignal.timeout(8000)),
-            ])
-            setNextMissionTitle(nextRes.data?.[0]?.title ?? null)
-            const blockRows = blockRes.data ?? []
-            setBlockProgress({
-              completed: blockRows.filter(r => r.status === 'completed').length,
-              total: blockRows.length,
-            })
+            // El modal de éxito se dispara ya, sin esperar a "próxima
+            // misión"/progreso del bloque: son puro embellecimiento del
+            // modal, y si su fetch falla o tarda más de 8s no debe llevarse
+            // el modal (con la foto de +XP) por delante con él.
             setTimeout(() => setShowSuccessModal(true), 1000)
+            try {
+              const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
+              const [nextRes, blockRes] = await Promise.all([
+                supabase
+                  .from('camino_calendar')
+                  .select('title')
+                  .eq('user_id', userData.user.id)
+                  .eq('status', 'pending')
+                  .gt('scheduled_date', todayStr)
+                  .order('scheduled_date', { ascending: true })
+                  .limit(1)
+                  .abortSignal(AbortSignal.timeout(8000)),
+                supabase
+                  .from('camino_calendar')
+                  .select('status')
+                  .eq('user_id', userData.user.id)
+                  .eq('subject', currentTopic.subject)
+                  .eq('block_slug', currentTopic.blockSlug)
+                  .abortSignal(AbortSignal.timeout(8000)),
+              ])
+              setNextMissionTitle(nextRes.data?.[0]?.title ?? null)
+              const blockRows = blockRes.data ?? []
+              setBlockProgress({
+                completed: blockRows.filter(r => r.status === 'completed').length,
+                total: blockRows.length,
+              })
+            } catch (error) {
+              console.warn('[camino/topic] next-mission side effects skipped', error)
+            }
           }
         } catch (error) {
           // Ninguno de estos datos es imprescindible (ya se guardó todo lo
-          // que importa arriba) — si algo de esto falla o tarda de más, el
-          // alumno se queda sin el modal de éxito o sin "próxima misión" en
-          // el toast, pero nunca sin la corrección ni con el botón colgado.
+          // que importa arriba) — si getUser() falla o tarda de más, el
+          // alumno se queda sin el modal de éxito, pero nunca sin la
+          // corrección ni con el botón colgado.
           console.warn('[camino/topic] correction side effects skipped', error)
         }
       })()

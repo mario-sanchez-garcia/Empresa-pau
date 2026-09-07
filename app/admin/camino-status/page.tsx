@@ -20,6 +20,26 @@ const C = {
   shadow: '0 10px 0 var(--clay-shadow-shelf), 0 16px 28px var(--clay-shadow-elevate)',
 }
 
+// Colores de estado (cyan/verde/ambar/rojo/naranja) para las cifras de la
+// tabla: fijos por tono, no tokens --clay-*, porque necesitan leerse igual
+// de "semaforo" en los 3 temas. Sin variante por tema, el mismo hex fallaba
+// por debajo de 4.5:1 en claro/color (pensados para fondo blanco puro) o en
+// oscuro (pensados para fondo claro) — cada tono lleva su propia versión
+// clara/oscura verificada con contraste real contra --clay-surface Y
+// --clay-surface-raised de cada tema.
+const STATUS_COLORS = {
+  blue:   { light: '#2563eb', dark: '#60a5fa', color: '#2563eb' },
+  cyan:   { light: '#0e7490', dark: '#22d3ee', color: '#0e7490' },
+  green:  { light: '#146c3b', dark: '#4ade80', color: '#146c3b' },
+  amber:  { light: '#a04b08', dark: '#fbbf24', color: '#a04b08' },
+  red:    { light: '#b91c1c', dark: '#f87171', color: '#b91c1c' },
+  orange: { light: '#c2410c', dark: '#fb923c', color: '#c2410c' },
+} as const
+
+function sc(hue: keyof typeof STATUS_COLORS, theme: 'light' | 'dark' | 'color'): string {
+  return STATUS_COLORS[hue][theme]
+}
+
 type UserStatus = {
   email: string
   subjects: string
@@ -112,11 +132,11 @@ export default function CaminoStatusPage() {
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
-              <Link href="/admin" style={{ color: '#93c5fd', fontSize: 11, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.05em' }}>
+              <Link href="/admin" style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.05em' }}>
                 ← Panel admin
               </Link>
               <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>·</span>
-              <Link href="/" style={{ color: '#93c5fd', fontSize: 11, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.05em' }}>
+              <Link href="/" style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.05em' }}>
                 Volver a Kairo
               </Link>
               <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>·</span>
@@ -128,7 +148,7 @@ export default function CaminoStatusPage() {
               Estado Camino PAU — por usuario
             </h1>
             {state.status === 'loaded' && (
-              <p style={{ color: '#93c5fd', fontSize: 12, margin: '3px 0 0', fontWeight: 500 }}>
+              <p style={{ color: '#bfdbfe', fontSize: 12, margin: '3px 0 0', fontWeight: 500 }}>
                 {state.users.length} usuario{state.users.length !== 1 ? 's' : ''} · {fmtDateShort(state.generatedAt)}
               </p>
             )}
@@ -186,9 +206,9 @@ export default function CaminoStatusPage() {
             {/* Legend */}
             <div style={{ marginBottom: 14, display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 11, color: C.muted, fontWeight: 600 }}>
               <span>Días cal.: días futuros con misión pendiente</span>
-              <span style={{ color: '#16a34a' }}>≥7 días = verde</span>
-              <span style={{ color: '#d97706' }}>3–6 = ámbar</span>
-              <span style={{ color: '#dc2626' }}>0–2 = rojo</span>
+              <span style={{ color: sc('green', theme) }}>≥7 días = verde</span>
+              <span style={{ color: sc('amber', theme) }}>3–6 = ámbar</span>
+              <span style={{ color: sc('red', theme) }}>0–2 = rojo</span>
             </div>
 
             <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', boxShadow: C.shadow }}>
@@ -221,24 +241,24 @@ export default function CaminoStatusPage() {
                           {u.subjects}
                         </td>
                         <td style={{ padding: '8px 14px', borderBottom: `1px solid ${C.border}` }}>
-                          <Num n={u.queuePending} color="#2563eb" />
+                          <Num n={u.queuePending} color={sc('blue', theme)} />
                         </td>
                         <td style={{ padding: '8px 14px', borderBottom: `1px solid ${C.border}` }}>
-                          <Num n={u.queueScheduled} color="#0891b2" />
+                          <Num n={u.queueScheduled} color={sc('cyan', theme)} />
                         </td>
                         <td style={{ padding: '8px 14px', borderBottom: `1px solid ${C.border}` }}>
-                          <Num n={u.queueCompleted} color="#16a34a" />
+                          <Num n={u.queueCompleted} color={sc('green', theme)} />
                         </td>
                         <td style={{ padding: '8px 14px', borderBottom: `1px solid ${C.border}` }}>
-                          <Num n={u.queuePostponed} color="#d97706" />
+                          <Num n={u.queuePostponed} color={sc('amber', theme)} />
                         </td>
-                        <td style={{ padding: '8px 14px', borderBottom: `1px solid ${C.border}`, fontWeight: 700, color: u.futureDays >= 7 ? '#16a34a' : u.futureDays >= 3 ? '#d97706' : '#dc2626' }}>
+                        <td style={{ padding: '8px 14px', borderBottom: `1px solid ${C.border}`, fontWeight: 700, color: u.futureDays >= 7 ? sc('green', theme) : u.futureDays >= 3 ? sc('amber', theme) : sc('red', theme) }}>
                           {u.futureDays}
                         </td>
                         <td style={{ padding: '8px 14px', borderBottom: `1px solid ${C.border}`, whiteSpace: 'nowrap', color: C.muted, fontSize: 11 }}>
                           {fmtDateShort(u.lastCompleted)}
                         </td>
-                        <td style={{ padding: '8px 14px', borderBottom: `1px solid ${C.border}`, fontWeight: 700, color: u.streak > 0 ? '#ea580c' : C.muted }}>
+                        <td style={{ padding: '8px 14px', borderBottom: `1px solid ${C.border}`, fontWeight: 700, color: u.streak > 0 ? sc('orange', theme) : C.muted }}>
                           {u.streak > 0 ? `🔥 ${u.streak}` : '0'}
                         </td>
                         <td style={{ padding: '8px 14px', borderBottom: `1px solid ${C.border}`, fontWeight: 700, color: u.xpTotal > 0 ? C.ink : C.muted }}>

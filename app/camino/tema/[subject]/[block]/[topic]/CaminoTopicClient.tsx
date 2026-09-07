@@ -176,6 +176,22 @@ function progressKey(topic: CaminoCurriculumTopic) {
   return `${topic.subject}:${topic.blockSlug}:${topic.topicSlug}`
 }
 
+// supabase.auth.getUser() no acepta AbortSignal (a diferencia de las
+// queries .from(...), que sí lo soportan vía .abortSignal(...)) — esto le
+// pone un límite igual por fuera. Usado solo por el tramo decorativo tras
+// entregar un ejercicio (ver correctCourseExercise): si Supabase se queda
+// colgado ahí, este timeout es lo que evita que "Corrigiendo..." se quede
+// pegado para siempre aunque la corrección ya esté guardada de verdad.
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`Tiempo de espera agotado (${ms}ms)`)), ms)
+    promise.then(
+      value => { clearTimeout(timer); resolve(value) },
+      error => { clearTimeout(timer); reject(error) }
+    )
+  })
+}
+
 function daysSince(isoDate: string): number {
   const createdDay = new Date(isoDate).toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
   const todayDay = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
@@ -1153,50 +1169,72 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         setToast(toastText)
       }
 
-      const { data: userData } = await supabase.auth.getUser()
-      if (userData.user) {
-        await supabase.from('historial_examenes').insert({
-          user_id: userData.user.id,
-          asignatura: currentTopic.subject,
-          tipo: 'Camino PAU',
-          año: new Date().getFullYear(),
-          bloque: currentTopic.blockTitle,
-          opcion: pendingMissionType === 'review' ? 'Repaso' : 'Curso',
-          nota: rawScore,
-          nota_maxima: maxScore,
-          enunciado: statement.substring(0, 2000),
-          respuesta: answerMode === 'imagen' ? `Respuesta manuscrita adjunta (${images.length} imagen${images.length === 1 ? '' : 'es'}).` : studentAnswer.substring(0, 4000),
-          correccion: storedCorrection,
-          v2_sort_order: selectedSortOrder
-        })
-        calcularRacha(userData.user.id, supabase).then(s => setStreak(s)).catch(() => undefined)
-        if (rawScore != null) {
-          const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
-          const [nextRes, blockRes] = await Promise.all([
-            supabase
-              .from('camino_calendar')
-              .select('title')
-              .eq('user_id', userData.user.id)
-              .eq('status', 'pending')
-              .gt('scheduled_date', todayStr)
-              .order('scheduled_date', { ascending: true })
-              .limit(1),
-            supabase
-              .from('camino_calendar')
-              .select('status')
-              .eq('user_id', userData.user.id)
-              .eq('subject', currentTopic.subject)
-              .eq('block_slug', currentTopic.blockSlug),
-          ])
-          setNextMissionTitle(nextRes.data?.[0]?.title ?? null)
-          const blockRows = blockRes.data ?? []
-          setBlockProgress({
-            completed: blockRows.filter(r => r.status === 'completed').length,
-            total: blockRows.length,
-          })
-          setTimeout(() => setShowSuccessModal(true), 1000)
+      // A partir de aquí ya está lo importante en pantalla (corrección
+      // visible, XP/misión resuelta, toast) — lo que queda es puro
+      // embellecimiento del modal de éxito (próxima misión, progreso del
+      // bloque) más el registro en Historial. Se lanza sin esperar (void,
+      // sin await) para que "Corrigiendo..." se suelte ya — antes este
+      // tramo vivía dentro del mismo try que bloqueaba setCorrecting(false)
+      // en el finally de abajo, así que un Supabase colgado aquí dejaba el
+      // botón pegado para siempre aunque el servidor ya hubiera terminado
+      // bien. Cada llamada lleva su propio timeout para que, si falla o
+      // tarda, el modal se muestre igual sin ese dato decorativo en vez de
+      // quedarse a medias.
+      void (async () => {
+        try {
+          const { data: userData } = await withTimeout(supabase.auth.getUser(), 8000)
+          if (!userData.user) return
+          await supabase.from('historial_examenes').insert({
+            user_id: userData.user.id,
+            asignatura: currentTopic.subject,
+            tipo: 'Camino PAU',
+            año: new Date().getFullYear(),
+            bloque: currentTopic.blockTitle,
+            opcion: pendingMissionType === 'review' ? 'Repaso' : 'Curso',
+            nota: rawScore,
+            nota_maxima: maxScore,
+            enunciado: statement.substring(0, 2000),
+            respuesta: answerMode === 'imagen' ? `Respuesta manuscrita adjunta (${images.length} imagen${images.length === 1 ? '' : 'es'}).` : studentAnswer.substring(0, 4000),
+            correccion: storedCorrection,
+            v2_sort_order: selectedSortOrder
+          }).abortSignal(AbortSignal.timeout(8000))
+          calcularRacha(userData.user.id, supabase).then(s => setStreak(s)).catch(() => undefined)
+          if (rawScore != null) {
+            const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
+            const [nextRes, blockRes] = await Promise.all([
+              supabase
+                .from('camino_calendar')
+                .select('title')
+                .eq('user_id', userData.user.id)
+                .eq('status', 'pending')
+                .gt('scheduled_date', todayStr)
+                .order('scheduled_date', { ascending: true })
+                .limit(1)
+                .abortSignal(AbortSignal.timeout(8000)),
+              supabase
+                .from('camino_calendar')
+                .select('status')
+                .eq('user_id', userData.user.id)
+                .eq('subject', currentTopic.subject)
+                .eq('block_slug', currentTopic.blockSlug)
+                .abortSignal(AbortSignal.timeout(8000)),
+            ])
+            setNextMissionTitle(nextRes.data?.[0]?.title ?? null)
+            const blockRows = blockRes.data ?? []
+            setBlockProgress({
+              completed: blockRows.filter(r => r.status === 'completed').length,
+              total: blockRows.length,
+            })
+            setTimeout(() => setShowSuccessModal(true), 1000)
+          }
+        } catch (error) {
+          // Ninguno de estos datos es imprescindible (ya se guardó todo lo
+          // que importa arriba) — si algo de esto falla o tarda de más, el
+          // alumno se queda sin el modal de éxito o sin "próxima misión" en
+          // el toast, pero nunca sin la corrección ni con el botón colgado.
+          console.warn('[camino/topic] correction side effects skipped', error)
         }
-      }
+      })()
     } catch (error) {
       console.warn('[camino/topic] correction failed', error)
       setCorrection('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')

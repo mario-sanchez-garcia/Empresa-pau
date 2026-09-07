@@ -45,6 +45,7 @@ import PhotoAttachButton, { type PhotoAttachment } from '@/components/shared/Pho
 import { normalizeSubjectSlug } from './lib/camino/caminoCurriculumPlan'
 import { AYUDA_FAQS } from './lib/ayudaFaqs'
 import { DEFAULT_GRADE_THRESHOLD_CONFIG, resolveGradeThreshold, shouldSuggestRepeat, type GradeThresholdConfig } from './lib/camino/gradeThreshold'
+import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 import {
   ArrowUpRight,
   Atom,
@@ -337,6 +338,24 @@ const darkMdComponents: Partial<Components> = {
   ul: ({children}) => <ul style={{ paddingLeft: '1.2rem', margin: '0.5rem 0' }}>{children}</ul>,
   ol: ({children}) => <ol style={{ paddingLeft: '1.2rem', margin: '0.5rem 0' }}>{children}</ol>,
   blockquote: ({children}) => <blockquote style={{ border: '1px solid #dbe7fb', borderLeft: '4px solid #60a5fa', borderRadius: '16px', padding: '0.9rem 1rem', margin: '0.85rem 0', color: '#475569', background: 'linear-gradient(135deg, #ffffff, #f8fbff)', boxShadow: '0 12px 26px rgba(37,99,235,0.06)' }}>{children}</blockquote>,
+}
+
+// Mismo mapa que darkMdComponents (nombre existente, pese a lo que sugiere:
+// "dark" ahí es "texto oscuro sobre fondo claro", no "para tema oscuro") pero
+// con la paleta --clay-* de oscuro en valores literales, ya que este objeto
+// vive fuera de cualquier componente y no puede leer variables CSS. Usado
+// solo en el chat cuando clayTheme === 'dark' (ver seccion === 'chat' más
+// abajo) — no toca Exámenes ni Historial.
+const chatMdComponentsClayDark: Partial<Components> = {
+  h1: ({children}) => <h1 style={{ fontSize: '1.05rem', fontWeight: 850, margin: '1.1rem 0 0.55rem', borderBottom: '1px solid rgba(96,165,250,0.20)', paddingBottom: '0.3rem', color: '#eef2fb', letterSpacing: '-0.02em' }}>{children}</h1>,
+  h2: ({children}) => <h2 style={{ fontSize: '0.95rem', fontWeight: 850, margin: '0.95rem 0 0.45rem', color: '#60a5fa', letterSpacing: '-0.01em' }}>{children}</h2>,
+  h3: ({children}) => <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#9aa7c4', margin: '0.85rem 0 0.35rem' }}>{children}</h3>,
+  strong: ({children}) => <strong style={{ fontWeight: 850, color: '#eef2fb' }}>{children}</strong>,
+  p: ({children}) => <p style={{ margin: '0.6rem 0', color: '#c7d0e6', lineHeight: 1.82 }}>{children}</p>,
+  li: ({children}) => <li style={{ margin: '0.32rem 0', color: '#c7d0e6', lineHeight: 1.78 }}>{children}</li>,
+  ul: ({children}) => <ul style={{ paddingLeft: '1.2rem', margin: '0.5rem 0' }}>{children}</ul>,
+  ol: ({children}) => <ol style={{ paddingLeft: '1.2rem', margin: '0.5rem 0' }}>{children}</ol>,
+  blockquote: ({children}) => <blockquote style={{ border: '1px solid rgba(96,165,250,0.20)', borderLeft: '4px solid #60a5fa', borderRadius: '16px', padding: '0.9rem 1rem', margin: '0.85rem 0', color: '#c7d0e6', background: '#1c2440', boxShadow: 'none' }}>{children}</blockquote>,
 }
 
 const planMdComponents: Partial<Components> = {
@@ -938,6 +957,12 @@ function HistorialTrendChart({ points }: { points: Array<{ label: string; avg: n
 }
 
 export default function Home() {
+  // Piloto clay SOLO del Chat con Kairo (seccion === 'chat') — el resto de
+  // este archivo (Exámenes, Historial) no lee clayTheme en ningún sitio, así
+  // que no cambian. Ver data-kairo-clay-theme en el <main> del chat y las
+  // reglas [data-kairo-clay-theme="dark"] .tutor-* al final del <style> de
+  // más abajo.
+  const { theme: clayTheme } = useClayThemePreference()
   const [usuario, setUsuario] = useState<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   const [seccion, setSeccion] = useState<Seccion>('examenes')
   const [asignatura, setAsignatura] = useState<Asignatura>('mates')
@@ -5379,6 +5404,158 @@ function cambiarTipo(t: Tipo) {
             display: none;
           }
         }
+
+        /* ── Piloto clay del Chat con Kairo — SOLO tema oscuro ──
+           Escopado por [data-kairo-clay-theme="dark"], atributo que solo
+           lleva el <main> de seccion==='chat' (ver JSX más abajo). Exámenes
+           e Historial no tienen ese atributo en ningún ancestro, así que
+           estas reglas no les llegan aunque compartan el mismo <style> del
+           archivo. Claro/color no se tocan — coexisten con el glassmorphism
+           de c7cc073 tal cual, sin ninguna regla nueva que los alcance. */
+        [data-kairo-clay-theme="dark"].tutor-screen {
+          background:
+            radial-gradient(circle at 12% 0%, rgba(96,165,250,.10), transparent 32%),
+            linear-gradient(180deg, #10162a 0%, #0d1220 100%);
+        }
+        [data-kairo-clay-theme="dark"] .tutor-chat-card {
+          background: rgba(23,30,56,.88);
+          border: 1px solid rgba(96,165,250,.20);
+          box-shadow: 0 16px 44px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+        }
+        [data-kairo-clay-theme="dark"] .tutor-welcome h2 {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-welcome h2 span {
+          color: #60a5fa;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-welcome p {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-quick-action {
+          border-color: rgba(96,165,250,.24);
+          background: #1c2440;
+          color: #c7d0e6;
+          box-shadow: none;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-quick-action:hover {
+          border-color: #60a5fa;
+          background: rgba(96,165,250,.14);
+          color: #60a5fa;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-day-divider {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-day-divider::before,
+        [data-kairo-clay-theme="dark"] .tutor-day-divider::after {
+          background: rgba(96,165,250,.20);
+        }
+        [data-kairo-clay-theme="dark"] .tutor-msg-ai-bubble {
+          background: #171e38;
+          border-color: rgba(96,165,250,.16);
+          box-shadow: 0 8px 22px rgba(0,0,0,.28);
+        }
+        [data-kairo-clay-theme="dark"] .tutor-msg-ai-label {
+          color: #60a5fa;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-msg-footer small {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-msg-feedback {
+          border-color: rgba(96,165,250,.20);
+          background: #1c2440;
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-msg-feedback:hover {
+          border-color: #60a5fa;
+          color: #60a5fa;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-msg-feedback.is-active {
+          border-color: #60a5fa;
+          background: rgba(96,165,250,.16);
+          color: #60a5fa;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-followup-pill {
+          border-color: rgba(96,165,250,.24);
+          background: #1c2440;
+          color: #60a5fa;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-followup-pill:hover {
+          background: rgba(96,165,250,.16);
+        }
+        [data-kairo-clay-theme="dark"] .tutor-msg-user-bubble {
+          background: linear-gradient(180deg, #1e3a6e, #1c3560);
+          border-color: rgba(96,165,250,.30);
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-msg-user-meta {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-input-zone {
+          border-top-color: rgba(96,165,250,.20);
+          background: rgba(16,22,42,.72);
+        }
+        [data-kairo-clay-theme="dark"] .tutor-input-hint {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .chat-input-wrap {
+          background: #1c2440;
+          border-color: rgba(96,165,250,.24);
+        }
+        [data-kairo-clay-theme="dark"] .chat-input-wrap:focus-within {
+          border-color: #60a5fa;
+          background: #202a4c;
+          box-shadow: 0 0 0 3px rgba(96,165,250,.14);
+        }
+        [data-kairo-clay-theme="dark"] .tutor-chat-textarea::placeholder {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .chat-send-btn:disabled {
+          background: rgba(96,165,250,.14);
+          color: #7d879e;
+        }
+        /* .tutor-side-card se combina con .history-card (compartida con
+           Historial) que trae fondo/borde/sombra propios — se redeclaran
+           aquí para ganarle por especificidad sin tocar la regla
+           compartida .history-card, así Historial no cambia. */
+        [data-kairo-clay-theme="dark"] .tutor-side-card {
+          background: rgba(23,30,56,.88);
+          border-color: rgba(96,165,250,.20);
+          box-shadow: 0 16px 44px rgba(0,0,0,.28);
+        }
+        [data-kairo-clay-theme="dark"] .tutor-side-card > h2 {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-context-row {
+          border-bottom-color: rgba(96,165,250,.16);
+        }
+        [data-kairo-clay-theme="dark"] .tutor-context-row span {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-context-row b {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-shortcut {
+          border-bottom-color: rgba(96,165,250,.16);
+          color: #c7d0e6;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-shortcut:hover {
+          color: #60a5fa;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-recent-q {
+          border-bottom-color: rgba(96,165,250,.16);
+        }
+        [data-kairo-clay-theme="dark"] .tutor-recent-q span {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-recent-q small {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-recent-empty {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .tutor-recent-viewall {
+          color: #60a5fa;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -6208,7 +6385,7 @@ function cambiarTipo(t: Tipo) {
         )}
 
         {seccion === 'chat' && (
-          <main className="tutor-screen pau-reveal">
+          <main className="tutor-screen pau-reveal" data-kairo-clay-theme={clayTheme}>
             <div className="tutor-shell">
               <div className="tutor-hero">
                 <img src={SUBJECT_HERO_IMGS[asignatura] ?? BOOKS_IMG} alt="" loading="eager" />
@@ -6272,18 +6449,18 @@ function cambiarTipo(t: Tipo) {
                                         {(() => {
                                           if (isStreamingMessage) {
                                             return (
-                                              <div style={{ fontSize: 14, lineHeight: 1.85, color: '#334155' }}>
-                                                <MathMarkdown text={msg.texto} isStreaming components={darkMdComponents} />
+                                              <div style={{ fontSize: 14, lineHeight: 1.85, color: clayTheme === 'dark' ? '#eef2fb' : '#334155' }}>
+                                                <MathMarkdown text={msg.texto} isStreaming components={clayTheme === 'dark' ? chatMdComponentsClayDark : darkMdComponents} />
                                               </div>
                                             )
                                           }
                                           const { main, why } = splitWhyExplanationMarkdown(msg.texto)
                                           return (
                                             <>
-                                              <div style={{ fontSize: 14, lineHeight: 1.85, color: '#334155' }}>
-                                                <MathMarkdown text={main} format={false} components={darkMdComponents} />
+                                              <div style={{ fontSize: 14, lineHeight: 1.85, color: clayTheme === 'dark' ? '#eef2fb' : '#334155' }}>
+                                                <MathMarkdown text={main} format={false} components={clayTheme === 'dark' ? chatMdComponentsClayDark : darkMdComponents} />
                                               </div>
-                                              <WhyExplanation markdown={why} components={darkMdComponents} />
+                                              <WhyExplanation markdown={why} components={clayTheme === 'dark' ? chatMdComponentsClayDark : darkMdComponents} />
                                             </>
                                           )
                                         })()}
@@ -6364,7 +6541,7 @@ function cambiarTipo(t: Tipo) {
                     <div className="tutor-input-zone">
                       <div className="chat-input-wrap">
                         <PhotoAttachButton value={chatAdjuntos} onChange={setChatAdjuntos} disabled={cargandoChat} compact />
-                        <textarea ref={chatInputRef} value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder={chatAdjuntos.length > 0 ? 'Pregúntale a Kairo sobre esta foto (opcional)...' : 'Pregunta lo que quieras a Kairo...'} rows={1} style={{ flex: 1, minHeight: 40, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: '#0f172a', fontFamily: 'inherit', padding: '8px 4px 8px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' as const }} />
+                        <textarea ref={chatInputRef} className="tutor-chat-textarea" value={inputChat} onChange={e => setInputChat(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarChat() } }} placeholder={chatAdjuntos.length > 0 ? 'Pregúntale a Kairo sobre esta foto (opcional)...' : 'Pregunta lo que quieras a Kairo...'} rows={1} style={{ flex: 1, minHeight: 40, maxHeight: 180, border: 'none', outline: 'none', fontSize: 14, lineHeight: '24px', resize: 'none', overflowY: 'hidden', background: 'transparent', color: clayTheme === 'dark' ? '#eef2fb' : '#0f172a', fontFamily: 'inherit', padding: '8px 4px 8px 0', boxSizing: 'border-box', scrollbarWidth: 'thin' as const }} />
                         <button className="chat-send-btn" onClick={() => enviarChat()} disabled={(!inputChat.trim() && chatAdjuntos.length === 0) || cargandoChat}>
                           {cargandoChat ? <KairoLoadingDot /> : <SendHorizontal size={15} />}
                           {cargandoChat ? 'Pensando...' : 'Enviar'}

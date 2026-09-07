@@ -249,10 +249,18 @@ function computeAlerts(m: AdminMetrics): Alert[] {
 }
 
 function AlertsPanel({ alerts }: { alerts: Alert[] }) {
+  const { theme } = useClayThemePreference()
+  const dark = theme === 'dark'
   if (alerts.length === 0) return null
-  const bgMap: Record<AlertLevel, string> = { ok: '#f0fdf4', warn: '#fffbeb', danger: '#fef2f2' }
-  const borderMap: Record<AlertLevel, string> = { ok: '#bbf7d0', warn: '#fde68a', danger: '#fecaca' }
-  const colorMap: Record<AlertLevel, string> = { ok: '#166534', warn: '#92400e', danger: '#991b1b' }
+  const bgMap: Record<AlertLevel, string> = dark
+    ? { ok: BADGE_DARK.ok.background, warn: BADGE_DARK.warn.background, danger: BADGE_DARK.danger.background }
+    : { ok: '#f0fdf4', warn: '#fffbeb', danger: '#fef2f2' }
+  const borderMap: Record<AlertLevel, string> = dark
+    ? { ok: 'rgba(52,211,153,0.35)', warn: 'rgba(251,191,36,0.35)', danger: 'rgba(248,113,113,0.35)' }
+    : { ok: '#bbf7d0', warn: '#fde68a', danger: '#fecaca' }
+  const colorMap: Record<AlertLevel, string> = dark
+    ? { ok: '#34d399', warn: '#fbbf24', danger: '#fca5a5' }
+    : { ok: '#166534', warn: '#92400e', danger: '#991b1b' }
   const icon: Record<AlertLevel, string> = { ok: '✓', warn: '!', danger: '!!' }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

@@ -469,9 +469,9 @@ function SimulacrosPage() {
     return 'Ajustable'
   }
   const modeBadgeColor = (m: SimulacroMode) => {
-    if (m === 'errores') return weakCandidateCount > 0 ? '#15803d' : '#b45309'
-    if (m === 'personalizado') return '#64748b'
-    return cfg.color
+    if (m === 'errores') return weakCandidateCount > 0 ? (clayDark ? '#34d399' : '#15803d') : (clayDark ? '#fbbf24' : '#b45309')
+    if (m === 'personalizado') return clayDark ? 'var(--clay-text-muted)' : '#64748b'
+    return clayDark ? 'var(--clay-accent-text)' : cfg.color
   }
 
   if (isCaminoPartial) {
@@ -658,7 +658,7 @@ function SimulacrosPage() {
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--clay-text-muted)' }}>Asignatura</div>
-            <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 999, background: cfg.light, color: cfg.color, border: `1px solid ${cfg.color}30` }}>{cfg.label}</span>
+            <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 999, ...(clayDark ? { background: 'var(--clay-accent-soft)', color: 'var(--clay-accent-text)', border: '1px solid var(--clay-border)' } : { background: cfg.light, color: cfg.color, border: `1px solid ${cfg.color}30` }) }}>{cfg.label}</span>
           </div>
           <div className="sim-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
             {(Object.keys(SUBJECTS) as SimulacroSubject[]).map(key => {
@@ -669,10 +669,10 @@ function SimulacrosPage() {
                   key={key}
                   disabled={!s.available}
                   onClick={() => s.available && setSubject(key)}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, border: `2px solid ${isActive ? s.color : 'var(--clay-border)'}`, background: isActive ? s.light : 'var(--clay-surface)', cursor: s.available ? 'pointer' : 'not-allowed', opacity: s.available ? 1 : 0.45, transition: 'all .12s', position: 'relative', textAlign: 'center' }}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, cursor: s.available ? 'pointer' : 'not-allowed', opacity: s.available ? 1 : 0.45, transition: 'all .12s', position: 'relative', textAlign: 'center', border: `2px solid ${isActive ? (clayDark ? 'var(--clay-accent)' : s.color) : 'var(--clay-border)'}`, background: isActive ? (clayDark ? 'var(--clay-accent-soft)' : s.light) : 'var(--clay-surface)' }}
                 >
                   <div style={{ width: 12, height: 12, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
-                  <div style={{ fontSize: 11, fontWeight: 800, color: isActive ? s.color : 'var(--clay-text)', lineHeight: 1.3 }}>{s.label}</div>
+                  <div style={{ fontSize: 11, fontWeight: 800, color: isActive ? (clayDark ? 'var(--clay-accent-text)' : s.color) : 'var(--clay-text)', lineHeight: 1.3 }}>{s.label}</div>
                   {!s.available && <span style={{ position: 'absolute', top: 4, right: 4, fontSize: 8, fontWeight: 900, padding: '1px 4px', borderRadius: 999, ...(clayDark ? { background: 'rgba(52,211,153,0.14)', color: '#34d399' } : { background: '#f0fdf4', color: '#15803d' }) }}>Pronto</span>}
                 </button>
               )
@@ -698,14 +698,14 @@ function SimulacrosPage() {
                     gap: 6,
                     padding: '12px 14px',
                     borderRadius: 12,
-                    border: `1.5px solid ${isActive ? cfg.color : 'var(--clay-border)'}`,
-                    background: isActive ? cfg.light : 'var(--clay-surface)',
+                    border: `1.5px solid ${isActive ? (clayDark ? 'var(--clay-accent)' : cfg.color) : 'var(--clay-border)'}`,
+                    background: isActive ? (clayDark ? 'var(--clay-accent-soft)' : cfg.light) : 'var(--clay-surface)',
                     cursor: 'pointer',
                     transition: 'border-color .12s, background .12s',
                     textAlign: 'left',
                   }}
                 >
-                  <span style={{ fontSize: 12, fontWeight: 800, color: isActive ? cfg.color : 'var(--clay-text)', lineHeight: 1.2 }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: isActive ? (clayDark ? 'var(--clay-accent-text)' : cfg.color) : 'var(--clay-text)', lineHeight: 1.2 }}>
                     {labels[m]}
                   </span>
                   <span style={{
@@ -713,7 +713,7 @@ function SimulacrosPage() {
                     fontWeight: 900,
                     letterSpacing: '.08em',
                     textTransform: 'uppercase',
-                    color: isActive ? cfg.color : modeBadgeColor(m),
+                    color: isActive ? (clayDark ? 'var(--clay-accent-text)' : cfg.color) : modeBadgeColor(m),
                     opacity: isActive ? 1 : 0.75,
                   }}>
                     {modeBadgeLabel(m)}
@@ -743,7 +743,7 @@ function SimulacrosPage() {
                   <button
                     key={item.id}
                     onClick={() => setYearChoice(item.id)}
-                    style={{ fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 10, border: `1px solid ${isActive ? cfg.color : 'var(--clay-border)'}`, background: isActive ? cfg.light : 'var(--clay-surface)', color: isActive ? cfg.color : 'var(--clay-text)', cursor: 'pointer', transition: 'all .12s' }}
+                    style={{ fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 10, cursor: 'pointer', transition: 'all .12s', border: `1px solid ${isActive ? (clayDark ? 'var(--clay-accent)' : cfg.color) : 'var(--clay-border)'}`, background: isActive ? (clayDark ? 'var(--clay-accent-soft)' : cfg.light) : 'var(--clay-surface)', color: isActive ? (clayDark ? 'var(--clay-accent-text)' : cfg.color) : 'var(--clay-text)' }}
                   >
                     {item.label}
                   </button>
@@ -765,7 +765,7 @@ function SimulacrosPage() {
                       <button
                         key={item.id}
                         onClick={() => setOptionChoice(item.id)}
-                        style={{ fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 10, border: `1px solid ${isActive ? cfg.color : 'var(--clay-border)'}`, background: isActive ? cfg.light : 'var(--clay-surface)', color: isActive ? cfg.color : 'var(--clay-text)', cursor: 'pointer', transition: 'all .12s' }}
+                        style={{ fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 10, cursor: 'pointer', transition: 'all .12s', border: `1px solid ${isActive ? (clayDark ? 'var(--clay-accent)' : cfg.color) : 'var(--clay-border)'}`, background: isActive ? (clayDark ? 'var(--clay-accent-soft)' : cfg.light) : 'var(--clay-surface)', color: isActive ? (clayDark ? 'var(--clay-accent-text)' : cfg.color) : 'var(--clay-text)' }}
                       >
                         {item.label}
                       </button>
@@ -774,7 +774,7 @@ function SimulacrosPage() {
                 </div>
               </>
             ) : (
-              <div style={{ padding: '10px 14px', borderRadius: 10, background: `${cfg.color}0f`, border: `1px solid ${cfg.color}24`, fontSize: 12, fontWeight: 600, color: 'var(--clay-text-muted)', lineHeight: 1.5 }}>
+              <div style={{ padding: '10px 14px', borderRadius: 10, fontSize: 12, fontWeight: 600, color: 'var(--clay-text-muted)', lineHeight: 1.5, ...(clayDark ? { background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)' } : { background: `${cfg.color}0f`, border: `1px solid ${cfg.color}24` }) }}>
                 Lengua se genera como examen oficial coherente. Kairo elige automáticamente la versión compatible con el banco de ejercicios.
               </div>
             )}
@@ -790,7 +790,7 @@ function SimulacrosPage() {
                 {cfg.label} · {buildConfigLabel(mode, effectiveYearChoiceRender, optionSelectionRender)}
               </div>
             </div>
-            <span style={{ fontSize: 10, fontWeight: 800, padding: '4px 12px', borderRadius: 999, background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }}>{ccaa}</span>
+            <span style={{ fontSize: 10, fontWeight: 800, padding: '4px 12px', borderRadius: 999, ...(clayDark ? { background: 'var(--clay-accent-soft)', color: 'var(--clay-accent-text)', border: '1px solid var(--clay-border)' } : { background: `${cfg.color}12`, color: cfg.color, border: `1px solid ${cfg.color}22` }) }}>{ccaa}</span>
           </div>
           <button
             onClick={createSimulacro}

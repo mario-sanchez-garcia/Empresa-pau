@@ -13,7 +13,7 @@ export default function PaywallPreviewPage() {
   return (
     <ClayThemeScope theme={theme} className="flex min-h-screen flex-col items-center justify-center p-6">
       {/* Label de preview */}
-      <p className="mb-6 rounded-full px-4 py-1.5 text-xs font-black uppercase tracking-[0.12em]" style={{ background: 'rgba(245,158,11,.15)', color: '#b45309' }}>
+      <p className="mb-6 rounded-full px-4 py-1.5 text-xs font-black uppercase tracking-[0.12em]" style={{ background: 'rgba(245,158,11,.15)', color: theme === 'dark' ? '#fbbf24' : '#92400e' }}>
         Preview · día 7 paywall
       </p>
 

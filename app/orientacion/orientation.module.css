@@ -106,6 +106,16 @@
 .savedTarget b { overflow: hidden; color: var(--clay-text); font-size: var(--t-sm); text-overflow: ellipsis; white-space: nowrap; }
 .savedTarget strong { margin-left: auto; flex: 0 0 auto; color: var(--clay-accent-text); font-size: var(--t-lg); font-variant-numeric: tabular-nums; }
 .savedElsewhere { margin-bottom: 14px; display: flex; align-items: center; gap: 8px; padding: 11px 14px; border: 1px solid transparent; border-radius: var(--r-lg); background: var(--o-warn-soft); color: var(--o-warn); font-size: var(--t-sm); font-weight: var(--w-strong); }
+.modeChooser { margin-bottom: 14px; display: grid; grid-template-columns: minmax(240px, 1fr) minmax(360px, 1.2fr); align-items: center; gap: 20px; padding: 16px 18px; border: 1px solid var(--clay-border); border-radius: var(--r-lg); background: color-mix(in srgb, var(--clay-surface) 88%, transparent); box-shadow: 0 10px 30px color-mix(in srgb, var(--clay-shadow-elevate) 34%, transparent); backdrop-filter: blur(14px); }
+.modeChooser h2 { margin: 7px 0 3px; font-size: var(--t-lg); letter-spacing: -.02em; }
+.modeChooser p { margin: 0; color: var(--clay-text-muted); font-size: var(--t-sm); }
+.modeOptions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 4px; border: 1px solid var(--clay-border); border-radius: var(--r-lg); background: var(--clay-surface-raised); }
+.modeOptions button { min-width: 0; display: flex; align-items: center; gap: 10px; border: 1px solid transparent; border-radius: var(--r-md); background: transparent; padding: 11px 12px; color: var(--clay-text-muted); text-align: left; cursor: pointer; }
+.modeOptions button > span { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.modeOptions b { overflow: hidden; color: inherit; font-size: var(--t-sm); text-overflow: ellipsis; white-space: nowrap; }
+.modeOptions small { color: var(--clay-text-muted); font-size: var(--t-xs); }
+.modeOptions button[aria-checked='true'] { border-color: var(--clay-accent); background: var(--clay-accent-soft); color: var(--clay-accent-text); box-shadow: inset 0 1px 0 color-mix(in srgb, white 36%, transparent); }
+.modeOptions button:focus-visible { outline: 2px solid var(--clay-accent); outline-offset: 3px; }
 
 /* ── Banda fotográfica del objetivo (misma imagen y tratamiento que el hero de Simulacros) ── */
 /* Mismo hero a sangre que La Zona: altura 200, imagen recortada al 40% de
@@ -114,14 +124,15 @@
 .heroImage { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center 40%; filter: brightness(.5) saturate(.7); }
 .heroOverlay { position: absolute; inset: 0; display: flex; align-items: flex-end; padding: 20px 28px; background: linear-gradient(to top, rgba(0, 0, 0, .82) 0%, rgba(0, 0, 0, .46) 46%, transparent 88%); }
 
-.heroTitle { margin: 0; color: #fff; font-size: var(--t-hero); font-weight: var(--w-display); line-height: .9; letter-spacing: -.03em; }
+.heroTitle { margin: 0; color: #fff; font-size: var(--t-hero); font-weight: var(--w-display); line-height: 1; letter-spacing: -.03em; }
 .heroCaption { max-width: 62ch; margin: 9px 0 0; color: rgba(255, 255, 255, .62); font-size: var(--t-sm); }
 
 /* ── Barra de nota pegajosa: se ve mientras ajustas las materias ── */
 /* Banda de ancho completo, como el hero y las pestañas: al quedarse pegada
    arriba encaja a ras con ellas, sin esquinas redondeadas que dejen ver el
    contenido pasando por detrás. */
-.scoreBar { position: sticky; top: 0; z-index: 20; margin: 6px -24px 18px; display: grid; grid-template-columns: auto auto auto minmax(180px, 1fr) auto auto; align-items: center; gap: 20px; padding: 13px 24px; border-top: 2px solid var(--clay-text); border-bottom: 1px solid var(--clay-border); background: var(--clay-surface); }
+.scoreBar { position: sticky; top: 0; z-index: 6; margin: 6px -24px 18px; display: grid; grid-template-columns: auto auto auto minmax(180px, 1fr) auto auto; align-items: center; gap: 20px; padding: 13px 24px; border-top: 2px solid var(--clay-text); border-bottom: 1px solid var(--clay-border); background: var(--clay-surface); }
+.scoreBarFree { position: relative; top: auto; z-index: 1; margin: 6px 0 18px; border: 1px solid var(--clay-border); border-top: 2px solid var(--clay-accent); border-radius: var(--r-lg); background: color-mix(in srgb, var(--clay-surface) 92%, transparent); box-shadow: 0 12px 34px color-mix(in srgb, var(--clay-shadow-elevate) 34%, transparent); }
 .scoreDial { position: relative; width: 54px; height: 54px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(var(--clay-accent) calc(var(--dial, 0) * 100%), var(--clay-surface-deep) 0); transition: background 220ms ease-out; }
 .scoreDial::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: var(--clay-surface); }
 .scoreDialInner { position: relative; color: var(--clay-accent-text); font-size: var(--t-xs); font-weight: var(--w-strong); font-variant-numeric: tabular-nums; }
@@ -153,8 +164,14 @@
 .stack { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
 
 /* ── Tarjetas de sección ── */
-.targetPicker, .controlsPanel, .recommendations, .caminoCard, .alternatives, .explorer, .correctionGuide { padding: 20px; border: 1px solid var(--clay-border); border-radius: var(--r-lg); background: var(--clay-surface); scroll-margin-top: 100px; }
+.targetPicker, .freeStart, .controlsPanel, .recommendations, .caminoCard, .alternatives, .explorer, .correctionGuide { padding: 20px; border: 1px solid var(--clay-border); border-radius: var(--r-lg); background: var(--clay-surface); scroll-margin-top: 100px; }
 .targetPicker { position: relative; z-index: 10; display: grid; grid-template-columns: minmax(210px, .56fr) minmax(0, 1.44fr); gap: 22px; }
+.freeStart { position: relative; z-index: 1; }
+.freeStartHeading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding-bottom: 16px; margin-bottom: 2px; border-bottom: 1px solid var(--clay-border); }
+.freeStartHeading > div:first-child { min-width: 0; display: flex; align-items: flex-start; gap: 11px; }
+.freeStartHeading h2 { margin: 0; font-size: var(--t-lg); letter-spacing: -.02em; }
+.freeStartHeading p { margin: 4px 0 0; color: var(--clay-text-muted); font-size: var(--t-sm); }
+.freeStartHeading .autosaveIndicator { flex: 0 0 auto; align-self: flex-start; }
 .pickerTitle { display: flex; align-items: flex-start; gap: 12px; color: var(--clay-accent-text); }
 .pickerTitle > div { display: flex; flex-direction: column; gap: 4px; }
 
@@ -292,6 +309,7 @@
 .emptyState > div { width: 48px; height: 48px; display: grid; place-items: center; border-radius: var(--r-lg); background: var(--clay-surface-raised); color: var(--clay-text-muted); }
 .emptyState h2 { margin: 18px 0 7px; font-size: var(--t-lg); letter-spacing: -.02em; }
 .emptyState p { margin: 0; color: var(--clay-text-muted); font-size: var(--t-sm); }
+.emptyState button { margin-top: 18px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--clay-accent); border-radius: var(--r-md); background: var(--clay-accent-soft); padding: 10px 14px; color: var(--clay-accent-text); font: inherit; font-size: var(--t-sm); font-weight: var(--w-strong); cursor: pointer; }
 
 /* ── Paso 2 · controles ── */
 .sectionHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 14px; margin-bottom: 6px; border-bottom: 1px solid var(--clay-border); }
@@ -361,6 +379,11 @@
 .recommendation span, .recommendations p { margin: 0; color: var(--clay-text-muted); font-size: var(--t-sm); }
 .recommendations p { padding-top: 12px; }
 .recommendation strong { color: var(--o-ok); font-size: var(--t-md); font-variant-numeric: tabular-nums; }
+.freeBreakdown { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 9px; }
+.freeBreakdown > div { min-width: 0; display: flex; flex-direction: column; gap: 3px; padding: 12px 13px; border: 1px solid var(--clay-border); border-radius: var(--r-md); background: var(--clay-surface-raised); }
+.freeBreakdown b { color: var(--clay-accent-text); font-size: var(--t-md); }
+.freeBreakdown span { color: var(--clay-text-muted); font-size: var(--t-xs); }
+.freeHint { margin-top: 12px !important; padding-top: 12px !important; border-top: 1px solid var(--clay-border); line-height: 1.55; }
 
 /* ── Paso 4 · llevar a Camino ── */
 .caminoCard { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
@@ -508,7 +531,8 @@
 
 @media (max-width: 1080px) {
   .workspace { grid-template-columns: 1fr; }
-  .stepRail { position: static; flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
+  .stepRail { position: static; max-width: 100%; flex-direction: row; overflow-x: auto; padding: 0 0 4px; scrollbar-width: none; }
+  .stepRail::-webkit-scrollbar { display: none; }
   .stepRail a { white-space: nowrap; }
   .railNote { margin-top: 10px; }
   .filterPanel { grid-template-columns: repeat(2, 1fr); }
@@ -521,7 +545,8 @@
   .communityBar { grid-template-columns: 1fr auto; }
   .communityBar > span { display: none; }
   .page { padding: 0 16px 92px; }
-  .scoreBar { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+  .scoreBar { position: relative; top: auto; z-index: 1; margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+  .scoreBarFree { margin-left: 0; margin-right: 0; }
   .heroBand { height: 130px; }
   .heroTitle { font-size: var(--t-2xl); }
   .heroOverlay { padding: 16px 20px; }
@@ -548,10 +573,13 @@
   .savedTarget { align-items: flex-start; flex-wrap: wrap; }
   .savedTarget strong { margin-left: 0; }
   .savedTarget button { margin-left: auto; }
+  .modeChooser { grid-template-columns: 1fr; gap: 14px; padding: 15px; }
+  .modeOptions { grid-template-columns: 1fr; }
   .scoreBar { grid-template-columns: 1fr; }
   .scoreDial { display: none; }
   .scoreCta { width: 100%; justify-content: center; }
-  .targetPicker, .controlsPanel, .recommendations, .caminoCard, .alternatives, .explorer, .correctionGuide { padding: 16px; }
+  .targetPicker, .freeStart, .controlsPanel, .recommendations, .caminoCard, .alternatives, .explorer, .correctionGuide { padding: 16px; }
+  .freeStartHeading { align-items: flex-start; flex-direction: column; }
   .correctionMeta, .degreeGrid, .alternativeGrid, .filterPanel, .criterionCard, .accessPathDetails { grid-template-columns: 1fr; }
   .comboboxPanel { inset: 72px 0 auto; }
   .chosenDegree, .offerStageHeading { align-items: flex-start; flex-direction: column; }

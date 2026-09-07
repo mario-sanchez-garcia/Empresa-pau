@@ -289,8 +289,65 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
     expect(firstTarget).toBeTruthy()
     expect(secondTarget).toBeTruthy()
 
+    await test.step('el modo libre calcula, persiste y no sobrescribe el objetivo oficial', async () => {
+      let targetSaveRequests = 0
+      const countTargetSaves = (request: Request) => {
+        if (isOrientationRequest(request, 'POST')) targetSaveRequests += 1
+      }
+      page.on('request', countTargetSaves)
+      try {
+        const freeStateResponse = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
+        await page.getByRole('radio', { name: /Solo calcular mi nota/ }).click()
+        await expect(page.getByRole('radio', { name: /Solo calcular mi nota/ })).toHaveAttribute('aria-checked', 'true')
+        await expect(page.getByRole('region', { name: 'Simulador sin objetivo' })).toBeVisible()
+        await expect(page.getByRole('combobox', { name: 'Buscar grado' })).toHaveCount(0)
+        expect((await freeStateResponse).ok()).toBe(true)
+
+        const estimate = page.getByRole('region', { name: 'Tu estimación libre', exact: true })
+        const estimateBefore = await estimate.innerText()
+        const bachilleratoInput = page.getByRole('spinbutton', { name: 'Nota media Bachillerato, nota numérica' })
+        const bachilleratoValue = Number(await bachilleratoInput.inputValue())
+        const nextBachilleratoValue = Math.abs(bachilleratoValue - 7.75) < 0.001 ? '9.25' : '7.75'
+        const scenarioStateResponse = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
+        await bachilleratoInput.fill(nextBachilleratoValue)
+        await expect.poll(() => estimate.innerText()).not.toBe(estimateBefore)
+        await expect(estimate).toContainText('/ 10')
+        await expect(page.getByRole('region', { name: 'Qué mejorar sin objetivo' })).toBeVisible()
+        expect((await scenarioStateResponse).ok()).toBe(true)
+
+        const orientationResponse = page.waitForResponse(response => isOrientationRequest(response.request(), 'GET'))
+        await page.reload()
+        const payload = await (await orientationResponse).json() as OrientationPayload
+        await expect(page.getByRole('radio', { name: /Solo calcular mi nota/ })).toHaveAttribute('aria-checked', 'true')
+        await expect(page.getByRole('region', { name: 'Simulador sin objetivo' })).toBeVisible()
+        expect(payload.savedTarget?.degreeId ?? null).toBe(initialSavedTarget?.degreeId ?? null)
+        expect(payload.savedTarget?.universityId ?? null).toBe(initialSavedTarget?.universityId ?? null)
+        expect(targetSaveRequests).toBe(0)
+
+        const targetStateResponse = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
+        await page.getByRole('radio', { name: /^Con objetivo/ }).click()
+        expect((await targetStateResponse).ok()).toBe(true)
+        await expect(page.getByRole('combobox', { name: 'Buscar grado' }).or(page.getByRole('button', { name: /Cambiar grado/ }))).toBeVisible()
+      } finally {
+        page.off('request', countTargetSaves)
+      }
+    })
+
     await test.step('selección y guardado por identificadores estables', async () => {
-      const autosaveResponse = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
+      const firstTargetAlreadySelected = await page.locator(`[data-selected-id="${firstTarget.id}"]`).count() > 0
+      if (firstTargetAlreadySelected) {
+        const alternateAutosave = page.waitForResponse(
+          response => isOrientationStateRequest(response.request(), 'PATCH'),
+          { timeout: 15_000 },
+        )
+        await selectTarget(page, secondTarget)
+        expect((await alternateAutosave).ok()).toBe(true)
+      }
+
+      const autosaveResponse = page.waitForResponse(
+        response => isOrientationStateRequest(response.request(), 'PATCH'),
+        { timeout: 15_000 },
+      )
       await selectTarget(page, firstTarget)
       const savedExplorationResponse = await autosaveResponse
       expect(savedExplorationResponse.ok()).toBe(true)
@@ -601,8 +658,14 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
     await test.step('el selector y el simulador no desbordan en móvil', async () => {
       await page.setViewportSize({ width: 390, height: 844 })
       await expect(page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })).toBeVisible()
+      const modeResponse = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
+      await page.getByRole('radio', { name: /Solo calcular mi nota/ }).click()
+      expect((await modeResponse).ok()).toBe(true)
+      const freeSimulator = page.getByRole('region', { name: 'Simulador sin objetivo' })
+      await expect(freeSimulator).toBeVisible()
       const layout = await page.evaluate(() => ({
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        scorePosition: getComputedStyle(document.querySelector('[aria-label="Tu estimación libre"]')!).position,
         offenders: [...document.querySelectorAll<HTMLElement>('body *')]
           .map(element => ({ element, rect: element.getBoundingClientRect() }))
           .filter(({ rect }) => rect.right > document.documentElement.clientWidth + 1 || rect.left < -1)
@@ -610,6 +673,7 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
           .map(({ element, rect }) => ({ tag: element.tagName, className: element.className, left: rect.left, right: rect.right, text: element.textContent?.trim().slice(0, 60) })),
       }))
       expect(layout.overflow, JSON.stringify(layout.offenders)).toBeLessThanOrEqual(1)
+      expect(layout.scorePosition).not.toBe('sticky')
     })
   } finally {
     if (originalSavedTarget?.degreeId && originalSavedTarget.universityId && page.url() !== 'about:blank') {

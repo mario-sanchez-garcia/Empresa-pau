@@ -30,6 +30,17 @@ test('valida y normaliza el documento completo de estado v1', () => {
   assert.equal(parseOrientationState(`{"padding":"${'x'.repeat(70_000)}"}`), null)
 })
 
+test('persiste el modo libre y migra estados anteriores al modo con objetivo', () => {
+  const state = validState()
+  state.mode = 'free'
+  assert.equal(parseOrientationState(state)?.mode, 'free')
+
+  const legacy = structuredClone(state) as Partial<typeof state>
+  delete legacy.mode
+  assert.equal(parseOrientationState(legacy)?.mode, 'target')
+  assert.equal(parseOrientationState({ ...state, mode: 'unknown' }), null)
+})
+
 test('reconcilia por updatedAt y el servidor gana los empates', () => {
   const older = validState('2026-09-03T09:00:00.000Z')
   const newer = validState('2026-09-03T11:00:00.000Z')

@@ -6,6 +6,8 @@ export const ORIENTATION_STATE_STORAGE_KEY = 'kairo.orientation.state.v1'
 export const ORIENTATION_STATE_MAX_BYTES = 64 * 1024
 const MAX_SUBJECTS_PER_PATH = 128
 
+export type OrientationMode = 'target' | 'free'
+
 export type OrientationExploration = {
   community: OrientationCommunity
   degreeGroupKey: string | null
@@ -17,6 +19,7 @@ export type OrientationExploration = {
 export type OrientationStateV1 = {
   version: 1
   updatedAt: string
+  mode: OrientationMode
   activeCommunity: OrientationCommunity
   activeAccessPath: AccessPathId
   exploration: OrientationExploration
@@ -111,6 +114,9 @@ export function parseOrientationState(value: unknown): OrientationStateV1 | null
     const candidate = record(typeof value === 'string' ? JSON.parse(value) : value)
     if (!candidate || candidate.version !== 1 || typeof candidate.updatedAt !== 'string' || !Number.isFinite(Date.parse(candidate.updatedAt))) return null
     const activeCommunity = normalizeOrientationCommunity(candidate.activeCommunity)
+    const mode: OrientationMode | null = candidate.mode === undefined || candidate.mode === 'target'
+      ? 'target'
+      : candidate.mode === 'free' ? 'free' : null
     const activeAccessPath = typeof candidate.activeAccessPath === 'string' && ACCESS_PATH_IDS.includes(candidate.activeAccessPath as AccessPathId) ? candidate.activeAccessPath as AccessPathId : null
     const exploration = record(candidate.exploration)
     const explorationCommunity = normalizeOrientationCommunity(exploration?.community)
@@ -120,11 +126,12 @@ export function parseOrientationState(value: unknown): OrientationStateV1 | null
     const universityId = uuid(exploration?.universityId)
     const scenarios = parseScenarios(candidate.scenarios)
     const subjectInputs = parseSubjectInputs(candidate.subjectInputs)
-    if (!activeCommunity || !activeAccessPath || !exploration || !explorationCommunity || degreeGroupKey === undefined || degreeName === undefined
+    if (!activeCommunity || !mode || !activeAccessPath || !exploration || !explorationCommunity || degreeGroupKey === undefined || degreeName === undefined
       || degreeId === undefined || universityId === undefined || Boolean(degreeId) !== Boolean(universityId) || !scenarios || !subjectInputs) return null
     return {
       version: 1,
       updatedAt: new Date(candidate.updatedAt).toISOString(),
+      mode,
       activeCommunity,
       activeAccessPath,
       exploration: { community: explorationCommunity, degreeGroupKey, degreeName, degreeId, universityId },
@@ -141,6 +148,7 @@ export function createOrientationState(community: OrientationCommunity, accessSt
   return {
     version: 1,
     updatedAt,
+    mode: 'target',
     activeCommunity: community,
     activeAccessPath: stored.selectedPath,
     exploration: { community, degreeGroupKey: null, degreeName: null, degreeId: null, universityId: null },
@@ -158,6 +166,7 @@ export function reconcileOrientationStates(localState: OrientationStateV1 | null
 export function orientationStateContentKey(state: OrientationStateV1) {
   return JSON.stringify({
     version: state.version,
+    mode: state.mode,
     activeCommunity: state.activeCommunity,
     activeAccessPath: state.activeAccessPath,
     exploration: state.exploration,

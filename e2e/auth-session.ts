@@ -16,6 +16,13 @@ export async function hasAuthenticatedSession(page: Page) {
     }
     if (!accessToken) return false
     try {
+      const payloadSegment = accessToken.split('.')[1]
+      if (!payloadSegment) return false
+      const normalizedPayload = payloadSegment.replace(/-/g, '+').replace(/_/g, '/')
+      const paddedPayload = normalizedPayload.padEnd(Math.ceil(normalizedPayload.length / 4) * 4, '=')
+      const payload = JSON.parse(window.atob(paddedPayload)) as { exp?: unknown }
+      if (typeof payload.exp !== 'number' || payload.exp <= Math.floor(Date.now() / 1000) + 5) return false
+
       // /api/admin/me exige rol interno -- una cuenta de alumno normal nunca
       // lo pasa, así que este check se quedaba esperando para siempre.
       // /api/onboarding/me solo exige sesión válida (getAuthContext), que es

@@ -20,7 +20,7 @@ import { ORIENTATION_FIXTURES, type AdmissionSubject, type OfficialCriterion, ty
 import GradeControl from './GradeControl'
 import { classifyOpportunity, rankOpportunities } from './opportunities'
 import { loadOrientationState, persistOrientationState, persistOrientationTarget } from './persistence'
-import { createOrientationState, mergeStoredSubjectInputs, orientationStateContentKey, ORIENTATION_STATE_STORAGE_KEY, parseOrientationState, reconcileOrientationStates, toAccessPathStorage, type OrientationExploration, type OrientationStateV1 } from './state'
+import { createOrientationState, mergeStoredSubjectInputs, orientationStateContentKey, ORIENTATION_STATE_STORAGE_KEY, parseOrientationState, reconcileOrientationStates, toAccessPathStorage, type OrientationExploration, type OrientationMode, type OrientationStateV1 } from './state'
 import TargetCombobox from './TargetCombobox'
 import UniversityExplorer from './UniversityExplorer'
 import styles from './orientation.module.css'
@@ -41,6 +41,7 @@ export default function OrientationSimulator() {
   const [officialTargets, setOfficialTargets] = useState<OrientationTarget[]>([])
   const [criteria, setCriteria] = useState<OfficialCriterion[]>([])
   const [savedTarget, setSavedTarget] = useState<SavedOrientationTarget | null>(null)
+  const [orientationMode, setOrientationMode] = useState<OrientationMode>('target')
   const [community, setCommunity] = useState<OrientationCommunity>('Madrid')
   const [selectedDegreeKey, setSelectedDegreeKey] = useState('')
   const [targetId, setTargetId] = useState('')
@@ -69,7 +70,7 @@ export default function OrientationSimulator() {
   const subjects = subjectsByPath[accessPath]
   const scenario = scenarios[accessPath]
   const pathDefinition = getAccessPath(accessPath, community)
-  const calculation = useMemo(() => calculateAccessPathScore(scenario, subjects, community), [community, scenario, subjects])
+  const calculation = useMemo(() => calculateAccessPathScore(scenario, orientationMode === 'free' ? [] : subjects, community), [community, orientationMode, scenario, subjects])
   const score = calculation.finalScore
   const difference = target && calculation.complete ? score - target.referenceScore : 0
   const degreeGroups = useMemo(() => groupOrientationTargets(targets), [targets])
@@ -157,6 +158,7 @@ export default function OrientationSimulator() {
     let cancelled = false
     function applyState(state: OrientationStateV1) {
       storedSubjectInputs.current = state.subjectInputs
+      setOrientationMode(state.mode)
       setCommunity(state.activeCommunity)
       setAccessPath(state.activeAccessPath)
       setScenarios(state.scenarios)
@@ -218,6 +220,7 @@ export default function OrientationSimulator() {
     const state: OrientationStateV1 = {
       version: 1,
       updatedAt: stateUpdatedAt,
+      mode: orientationMode,
       activeCommunity: community,
       activeAccessPath: accessPath,
       exploration: {
@@ -239,7 +242,7 @@ export default function OrientationSimulator() {
       queuedContentRef.current = contentKey
       autosaveRef.current?.update(state)
     }
-  }, [accessPath, authenticated, community, scenarios, selectedDegree, stateReady, stateUpdatedAt, subjectsByPath, target])
+  }, [accessPath, authenticated, community, orientationMode, scenarios, selectedDegree, stateReady, stateUpdatedAt, subjectsByPath, target])
 
   useEffect(() => {
     if (!showMethod) return
@@ -296,6 +299,13 @@ export default function OrientationSimulator() {
     markStateChanged()
   }
 
+  function chooseMode(mode: OrientationMode) {
+    if (mode === orientationMode) return
+    setOrientationMode(mode)
+    setSaveState('idle')
+    markStateChanged()
+  }
+
   async function saveAndOpenCamino() {
     if (!target) return
     setSaveState('saving')
@@ -342,11 +352,15 @@ export default function OrientationSimulator() {
     correccion: ['Cómo se corrige', 'Baremos oficiales explicados sin mezclar fuente e interpretación.'],
   } as const
 
-  const pct = (value: number) => Math.max(0, Math.min(100, ((value - 5) / 9) * 100))
-  const statusPositive = calculation.complete && difference >= 0
-  const statusHeadline = calculation.complete
-    ? difference >= 0 ? `Por encima de la referencia · +${formatGrade(difference)}` : `Te faltan ${formatGrade(Math.abs(difference))} puntos`
-    : 'Completa los requisitos de tu vía'
+  const scaleMinimum = orientationMode === 'free' ? 0 : 5
+  const scaleMaximum = orientationMode === 'free' ? 10 : 14
+  const pct = (value: number) => Math.max(0, Math.min(100, ((value - scaleMinimum) / (scaleMaximum - scaleMinimum)) * 100))
+  const statusPositive = calculation.complete && (orientationMode === 'free' || Boolean(target && difference >= 0))
+  const statusHeadline = !calculation.complete
+    ? 'Completa los requisitos de tu vía'
+    : orientationMode === 'free'
+      ? `Tu nota de acceso estimada · ${formatGrade(score)} / 10`
+      : difference >= 0 ? `Por encima de la referencia · +${formatGrade(difference)}` : `Te faltan ${formatGrade(Math.abs(difference))} puntos`
 
   const TABS = [
     { id: 'objetivo', label: 'Mi objetivo', Icon: Target },
@@ -392,62 +406,79 @@ export default function OrientationSimulator() {
           <section className={styles.savedTarget}>
             <div><Check size={16} /><span><small>Objetivo guardado</small><b>{savedTarget.degree} · {savedTarget.university}</b></span></div>
             <strong>{formatReference(savedTarget.admissionScore)}</strong>
-            <button onClick={() => { setSelectedDegreeKey(''); setTargetId(''); setSubjectsByPath(createEmptySubjectsByPath()); markStateChanged() }}>Cambiar</button>
+            <button onClick={() => { chooseMode('target'); setSelectedDegreeKey(''); setTargetId(''); setSubjectsByPath(createEmptySubjectsByPath()); markStateChanged() }}>Cambiar</button>
+          </section>
+        )}
+
+        {activeTab === 'objetivo' && (
+          <section className={styles.modeChooser} aria-labelledby="orientation-mode-title">
+            <div><span className={styles.sectionKicker}>Elige cómo empezar</span><h2 id="orientation-mode-title">¿Ya tienes un objetivo?</h2><p>Puedes calcular tu nota ahora y elegir grado más adelante.</p></div>
+            <div className={styles.modeOptions} role="radiogroup" aria-label="Modo de Orientación">
+              <button type="button" role="radio" aria-checked={orientationMode === 'target'} onClick={() => chooseMode('target')}><Target size={17} /><span><b>Con objetivo</b><small>Grado y universidad</small></span></button>
+              <button type="button" role="radio" aria-checked={orientationMode === 'free'} onClick={() => chooseMode('free')}><RotateCcw size={17} /><span><b>Solo calcular mi nota</b><small>Sin elegir carrera</small></span></button>
+            </div>
           </section>
         )}
 
         {activeTab === 'universidades' ? <UniversityExplorer targets={officialTargets} estimatedScore={calculation.complete ? score : null} loadState={loadState} onRetry={retryLoad} /> : activeTab === 'correccion' ? <CorrectionGuide community={community} databaseCriteria={criteria} /> : (
           <>
-            {target && (
-              <section className={styles.scoreBar} aria-live="polite" aria-label="Tu distancia al objetivo">
+            {(target || orientationMode === 'free') && (
+              <section className={`${styles.scoreBar} ${orientationMode === 'free' ? styles.scoreBarFree : ''}`} aria-live="polite" aria-label={orientationMode === 'free' ? 'Tu estimación libre' : 'Tu distancia al objetivo'}>
                 <div className={styles.scoreDial} style={{ '--dial': calculation.complete ? pct(score) / 100 : 0 } as React.CSSProperties}><span className={styles.scoreDialInner}><Target size={16} /></span></div>
                 <div className={styles.scoreNow}>
-                  <span>Tu nota</span>
-                  <b key={`${accessPath}-${score}`}>{calculation.complete ? <>{formatGrade(score)}<small> / 14</small></> : 'Pendiente'}</b>
-                  <small>{calculation.complete ? `${formatGrade(calculation.baseScore)} base + ${formatGrade(calculation.weightedPoints)} admisión` : 'Falta completar tu vía'}</small>
+                  <span>{orientationMode === 'free' ? 'Tu estimación' : 'Tu nota'}</span>
+                  <b key={`${orientationMode}-${accessPath}-${score}`}>{calculation.complete ? <>{formatGrade(score)}<small> / {scaleMaximum}</small></> : 'Pendiente'}</b>
+                  <small>{calculation.complete ? orientationMode === 'free' ? 'Nota de acceso, sin ponderaciones de un grado' : `${formatGrade(calculation.baseScore)} base + ${formatGrade(calculation.weightedPoints)} admisión` : 'Falta completar tu vía'}</small>
                 </div>
-                <div className={styles.scoreRef}><span>Referencia</span><b>{formatReference(target.referenceScore)}</b><small>{target.referenceLabel}</small></div>
+                {target && orientationMode === 'target' ? <div className={styles.scoreRef}><span>Referencia</span><b>{formatReference(target.referenceScore)}</b><small>{target.referenceLabel}</small></div> : <div className={styles.scoreRef}><span>Modo libre</span><b>Sin meta</b><small>No se guarda ningún grado</small></div>}
                 {calculation.complete ? (
-                  <div className={styles.goalChart} aria-label={`Tu nota estimada es ${formatGrade(score)} sobre 14; referencia ${formatReference(target.referenceScore)}`}>
-                    <div className={styles.chartLabels}><span>5</span><span>14</span></div>
+                  <div className={styles.goalChart} aria-label={target && orientationMode === 'target' ? `Tu nota estimada es ${formatGrade(score)} sobre 14; referencia ${formatReference(target.referenceScore)}` : `Tu nota de acceso estimada es ${formatGrade(score)} sobre 10`}>
+                    <div className={styles.chartLabels}><span>{scaleMinimum}</span><span>{scaleMaximum}</span></div>
                     <div className={styles.track}>
                       <div className={styles.trackFill} style={{ '--fill': pct(score) / 100 } as React.CSSProperties} />
                       <div className={`${styles.marker} ${styles.yourMarker}`} style={{ left: `${pct(score)}%` }}><span>Tú</span></div>
-                      <div className={`${styles.marker} ${styles.targetMarker}`} style={{ left: `${pct(target.referenceScore)}%` }}><span>Meta</span></div>
+                      {target && orientationMode === 'target' && <div className={`${styles.marker} ${styles.targetMarker}`} style={{ left: `${pct(target.referenceScore)}%` }}><span>Meta</span></div>}
                     </div>
                   </div>
                 ) : <p className={styles.scoreBarPending}>{calculation.incompleteReason ?? 'Completa los requisitos de tu vía para ver la distancia.'}</p>}
                 <span className={`${styles.scorePill} ${statusPositive ? styles.positive : ''}`}>{statusPositive ? <Check size={14} /> : <Target size={14} />} {statusHeadline}</span>
-                <a className={styles.scoreCta} href="#paso-4">Llevar a Camino <ArrowRight size={14} /></a>
+                {orientationMode === 'free' ? <button className={styles.scoreCta} type="button" onClick={() => chooseMode('target')}>Elegir objetivo <ArrowRight size={14} /></button> : <a className={styles.scoreCta} href="#paso-4">Llevar a Camino <ArrowRight size={14} /></a>}
               </section>
             )}
 
-            <div className={styles.workspace}>
-              <nav className={styles.railColumn} aria-label="Pasos para definir tu objetivo">
+            <div className={styles.workspace} data-orientation-mode={orientationMode}>
+              <nav className={styles.railColumn} aria-label={orientationMode === 'free' ? 'Pasos de exploración libre' : 'Pasos para definir tu objetivo'}>
                 <ol className={styles.stepRail}>
-                  <li className={styles.flowActive}><a href="#paso-1"><b>1</b><span>Elige objetivo</span></a></li>
-                  <li className={target ? styles.flowActive : ''}><a href="#paso-2"><b>2</b><span>Ajusta notas</span></a></li>
-                  <li className={target ? styles.flowActive : ''}><a href="#paso-3"><b>3</b><span>Qué mejorar</span></a></li>
-                  <li className={target ? styles.flowActive : ''}><a href="#paso-4"><b>4</b><span>Llévalo a Camino</span></a></li>
-                  <li className={target && calculation.complete ? styles.flowActive : ''}><a href="#paso-5"><b>5</b><span>Alternativas</span></a></li>
+                  {orientationMode === 'free' ? <>
+                    <li className={styles.flowActive}><a href="#paso-1"><b>1</b><span>Ajusta notas</span></a></li>
+                    <li className={calculation.complete ? styles.flowActive : ''}><a href="#paso-2"><b>2</b><span>Qué mejorar</span></a></li>
+                    <li className={calculation.complete ? styles.flowActive : ''}><a href="#paso-3"><b>3</b><span>Explora opciones</span></a></li>
+                  </> : <>
+                    <li className={styles.flowActive}><a href="#paso-1"><b>1</b><span>Elige objetivo</span></a></li>
+                    <li className={target ? styles.flowActive : ''}><a href="#paso-2"><b>2</b><span>Ajusta notas</span></a></li>
+                    <li className={target ? styles.flowActive : ''}><a href="#paso-3"><b>3</b><span>Qué mejorar</span></a></li>
+                    <li className={target ? styles.flowActive : ''}><a href="#paso-4"><b>4</b><span>Llévalo a Camino</span></a></li>
+                    <li className={target && calculation.complete ? styles.flowActive : ''}><a href="#paso-5"><b>5</b><span>Alternativas</span></a></li>
+                  </>}
                 </ol>
                 <p className={styles.railNote}><Info size={14} /><span>Simulación orientativa: no garantiza la admisión.</span></p>
               </nav>
 
               <div className={styles.stack}>
-                <section className={styles.targetPicker} id="paso-1">
-                  <div className={styles.pickerTitle}><span className={styles.stepNo}>1</span><div><b>Define tu objetivo</b><span>Elige el grado y después la oferta oficial donde quieres estudiarlo.</span></div></div>
-                  {stateReady && (
-                    <div className={styles.autosaveIndicator} data-state={authenticated ? autosaveStatus : 'local'} aria-live="polite">
-                      {!authenticated ? 'Guardado en este dispositivo' : autosaveStatus === 'saving' ? 'Guardando cambios…' : autosaveStatus === 'error' ? <><span>Cambios pendientes</span><button type="button" onClick={() => autosaveRef.current?.retry()}><RefreshCw size={14} /> Reintentar</button></> : autosaveStatus === 'saved' ? <><Check size={14} /> Guardado</> : 'Sin cambios pendientes'}
-                    </div>
-                  )}
-                  {loadState === 'loading' ? <div className={styles.selectSkeleton} /> : <TargetCombobox targets={targets} selectedId={targetId} selectedDegreeKey={selectedDegreeKey} onDegreeSelect={chooseDegree} onSelect={selectTarget} />}
-                  <AccessPathSelector value={accessPath} onChange={pathId => { setAccessPath(pathId); setSaveState('idle'); markStateChanged() }} />
-                </section>
-                {catalogAvailable === false && <div className={styles.fallbackNotice}><Info size={14} /><span>No se pudo leer el catálogo verificado. No mostraremos datos demo hasta poder confirmar la fuente oficial.</span><button onClick={retryLoad}><RefreshCw size={14} /> Reintentar</button></div>}
+                {orientationMode === 'target' ? <>
+                  <section className={styles.targetPicker} id="paso-1">
+                    <div className={styles.pickerTitle}><span className={styles.stepNo}>1</span><div><b>Define tu objetivo</b><span>Elige el grado y después la oferta oficial donde quieres estudiarlo.</span></div></div>
+                    {stateReady && (
+                      <div className={styles.autosaveIndicator} data-state={authenticated ? autosaveStatus : 'local'} aria-live="polite">
+                        {!authenticated ? 'Guardado en este dispositivo' : autosaveStatus === 'saving' ? 'Guardando cambios…' : autosaveStatus === 'error' ? <><span>Cambios pendientes</span><button type="button" onClick={() => autosaveRef.current?.retry()}><RefreshCw size={14} /> Reintentar</button></> : autosaveStatus === 'saved' ? <><Check size={14} /> Guardado</> : 'Sin cambios pendientes'}
+                      </div>
+                    )}
+                    {loadState === 'loading' ? <div className={styles.selectSkeleton} /> : <TargetCombobox targets={targets} selectedId={targetId} selectedDegreeKey={selectedDegreeKey} onDegreeSelect={chooseDegree} onSelect={selectTarget} />}
+                    <AccessPathSelector value={accessPath} onChange={pathId => { setAccessPath(pathId); setSaveState('idle'); markStateChanged() }} />
+                  </section>
+                  {catalogAvailable === false && <div className={styles.fallbackNotice}><Info size={14} /><span>No se pudo leer el catálogo verificado. No mostraremos datos demo hasta poder confirmar la fuente oficial.</span><button onClick={retryLoad}><RefreshCw size={14} /> Reintentar</button></div>}
 
-                {!target ? <section className={styles.emptyState}><div><Target size={24} /></div><h2>Empieza por un grado.</h2><p>En cuanto lo elijas verás la referencia, tu escenario y el cambio con más impacto.</p></section> : (
+                  {!target ? <section className={styles.emptyState}><div><Target size={24} /></div><h2>Elige un grado o calcula sin objetivo.</h2><p>Puedes seleccionar una meta concreta o usar el modo libre para estimar tu nota sin decidir todavía.</p><button type="button" onClick={() => chooseMode('free')}>Solo quiero calcular mi nota <ArrowRight size={14} /></button></section> : (
                   <>
                     <section className={styles.controlsPanel} id="paso-2">
                       <div className={styles.sectionHeading}><div><span className={styles.stepNo}>2</span><h2>Ajusta tu escenario</h2></div><button onClick={resetScenario}><RotateCcw size={14} /> Restablecer</button></div>
@@ -475,7 +506,34 @@ export default function OrientationSimulator() {
                       <p className={styles.opportunityDisclaimer}>Las notas de corte son históricas y pueden variar. Estar por encima no garantiza la admisión.</p>
                     </section>}
                   </>
-                )}
+                  )}
+                </> : <>
+                  <section className={styles.freeStart} id="paso-1" aria-label="Simulador sin objetivo">
+                    <div className={styles.freeStartHeading}><div><span className={styles.stepNo}>1</span><div><h2 id="free-simulator-title">Calcula tu nota sin elegir carrera</h2><p>Ajusta únicamente tu vía y tus calificaciones. Tu objetivo guardado no cambiará.</p></div></div>
+                      {stateReady && <div className={styles.autosaveIndicator} data-state={authenticated ? autosaveStatus : 'local'} aria-live="polite">{!authenticated ? 'Guardado en este dispositivo' : autosaveStatus === 'saving' ? 'Guardando cambios…' : autosaveStatus === 'error' ? <><span>Cambios pendientes</span><button type="button" onClick={() => autosaveRef.current?.retry()}><RefreshCw size={14} /> Reintentar</button></> : autosaveStatus === 'saved' ? <><Check size={14} /> Guardado</> : 'Sin cambios pendientes'}</div>}
+                    </div>
+                    <AccessPathSelector value={accessPath} onChange={pathId => { setAccessPath(pathId); setSaveState('idle'); markStateChanged() }} />
+                    <AccessPathInputs community={community} scenario={scenario} onChange={updateScenario} />
+                  </section>
+
+                  <section className={styles.recommendations} id="paso-2" aria-label="Qué mejorar sin objetivo">
+                    <div><span className={styles.stepNo}>2</span><h2>Qué puedes mejorar</h2></div>
+                    <div className={`${styles.status} ${calculation.complete ? styles.positive : ''}`}>{calculation.complete ? <Check size={16} /> : <Target size={16} />}<div><b>{statusHeadline}</b><span>{calculation.incompleteReason ?? 'Cambia una nota y verás el resultado al instante.'}</span></div></div>
+                    {calculation.complete && <div className={styles.freeBreakdown}>{calculation.formulaParts.map((part, index) => <div key={`${part.label}-${index}`}><b>{part.value}</b><span>{part.label}</span></div>)}</div>}
+                    <p className={styles.freeHint}>Prueba a subir cada calificación por separado para comprobar cuál mueve más tu nota de acceso. Las ponderaciones específicas aparecerán cuando elijas un grado.</p>
+                  </section>
+
+                  <section className={styles.caminoCard} id="paso-3">
+                    <div><span className={styles.stepNo}>3</span><h2>Explora cuando estés preparado</h2><p>Compara esta estimación con el catálogo oficial o añade una meta concreta más adelante.</p></div>
+                    <button className={`${styles.caminoCta} kairo-clay-action`} type="button" onClick={() => setActiveTab('universidades')}><span>Explorar grados</span><ArrowRight size={16} /></button>
+                  </section>
+
+                  {calculation.complete && <section className={styles.alternatives} aria-label="Posibilidades con tu estimación libre">
+                    <div className={styles.alternativesHeading}><div><h2>Referencias próximas a tu nota base</h2><p>Una primera vista del catálogo, todavía sin ponderaciones específicas del grado.</p></div><button onClick={() => chooseMode('target')}>Elegir objetivo <ArrowRight size={14} /></button></div>
+                    <div className={styles.alternativeGrid}>{alternatives.map(item => <article key={item.id}><div><GraduationCap size={16} /><span>Referencia oficial</span></div><h3>{item.degree}</h3><p>{item.universityAcronym ?? item.university}</p><strong>{formatReference(item.referenceScore)}</strong></article>)}</div>
+                    <p className={styles.opportunityDisclaimer}>No es una predicción de admisión: cada grado aplica sus propias ponderaciones y las notas pueden variar.</p>
+                  </section>}
+                </>}
               </div>
             </div>
           </>

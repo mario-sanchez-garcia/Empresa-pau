@@ -1212,6 +1212,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   // era más oscuro que --clay-surface, solo faltaba usarlo aquí. Claro/color
   // no se tocan (sus fondos casi blancos ya encajaban con el `#fdfdfc` fijo).
   const isClayPilotDark = isClayPilot && clayTheme === 'dark'
+  // Replica la condición interna de MathEditor (hasContent && hasLatex) que
+  // decide si se muestra la capa de LaTeX renderizado por encima del
+  // textarea — la usan textareaStyle/renderedViewStyle más abajo para que
+  // el textarea se quede transparente exactamente cuando esa capa está
+  // visible (si no, su fondo opaco la tapa por completo).
+  const ANSWER_HAS_LATEX_OVERLAY = studentAnswer.trim().length > 0 && /\$|\\\[|\\\(|\\begin\{/.test(studentAnswer)
 
   return (
     <Shell clayTheme={isClayPilot ? clayTheme : undefined} clayDarkBg={isClayPilotDark}>
@@ -1333,8 +1339,11 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 </LearningCard>
                 {selectedV2Card.worked_example_markdown && (
                   <LearningCard title="Caso práctico resuelto" dark={isClayPilotDark}>
-                    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '14px 16px' }}>
-                      <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700">
+                    <div style={isClayPilotDark
+                      ? { background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)', borderRadius: 6, padding: '14px 16px' }
+                      : { background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '14px 16px' }}
+                    >
+                      <div className="prose prose-slate max-w-none text-sm font-semibold leading-7 text-slate-700" style={isClayPilotDark ? { color: 'var(--clay-text)' } : undefined}>
                         <LessonMarkdown text={selectedV2Card.worked_example_markdown} format="raw" />
                       </div>
                     </div>
@@ -1484,31 +1493,38 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 <h2 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 20, fontWeight: 700, color: isClayPilotDark ? 'var(--clay-text)' : '#0f172a', letterSpacing: '-.01em' }}>Entrega tu ejercicio</h2>
                 <p style={{ marginTop: 4, fontSize: 13, fontWeight: 500, color: isClayPilotDark ? 'var(--clay-text-muted)' : '#64748b' }}>Corrige el ejercicio para registrar XP. La nota ajusta el bonus.</p>
               </div>
-              <span style={{ borderRadius: 999, background: missionXpStatus === 'pending' ? '#eff6ff' : missionXpStatus === 'already_completed' ? '#f0fdf4' : '#f8fafc', padding: '3px 10px', fontSize: 10, fontWeight: 900, color: missionXpStatus === 'pending' ? '#2563eb' : missionXpStatus === 'already_completed' ? '#059669' : '#64748b', border: `1px solid ${missionXpStatus === 'pending' ? '#bfdbfe' : missionXpStatus === 'already_completed' ? '#bbf7d0' : '#e2e8f0'}` }}>
+              <span style={isClayPilotDark
+                ? { borderRadius: 999, background: missionXpStatus === 'pending' || missionXpStatus === 'already_completed' ? 'var(--clay-accent-soft)' : 'var(--clay-bg)', padding: '3px 10px', fontSize: 10, fontWeight: 900, color: missionXpStatus === 'pending' || missionXpStatus === 'already_completed' ? 'var(--clay-accent-text)' : 'var(--clay-text-muted)', border: '1px solid var(--clay-border)' }
+                : { borderRadius: 999, background: missionXpStatus === 'pending' ? '#eff6ff' : missionXpStatus === 'already_completed' ? '#f0fdf4' : '#f8fafc', padding: '3px 10px', fontSize: 10, fontWeight: 900, color: missionXpStatus === 'pending' ? '#2563eb' : missionXpStatus === 'already_completed' ? '#059669' : '#64748b', border: `1px solid ${missionXpStatus === 'pending' ? '#bfdbfe' : missionXpStatus === 'already_completed' ? '#bbf7d0' : '#e2e8f0'}` }}>
                 {missionXpStatus === 'checking' ? 'Comprobando XP...' : missionXpStatus === 'pending' ? 'Misión con XP' : missionXpStatus === 'already_completed' ? 'Misión ya completada' : 'Práctica libre · no suma XP'}
               </span>
             </div>
             {missionXpStatus === 'already_completed' && !repeatOfId && !repeatConfirmed && !entryConfirmed ? (
-              <div style={{ borderRadius: 12, border: '1px solid #bbf7d0', background: '#f0fdf4', padding: '20px 18px', textAlign: 'center' }}>
-                <p style={{ fontSize: 14, fontWeight: 900, color: '#065f46', marginBottom: 6 }}>Ya has completado este ejercicio</p>
+              <div style={isClayPilotDark
+                ? { borderRadius: 12, border: '1px solid var(--clay-border)', background: 'var(--clay-surface-raised)', padding: '20px 18px', textAlign: 'center' }
+                : { borderRadius: 12, border: '1px solid #bbf7d0', background: '#f0fdf4', padding: '20px 18px', textAlign: 'center' }}
+              >
+                <p style={{ fontSize: 14, fontWeight: 900, color: isClayPilotDark ? 'var(--clay-text)' : '#065f46', marginBottom: 6 }}>Ya has completado este ejercicio</p>
                 {current.score != null && (
-                  <p style={{ fontSize: 26, fontWeight: 900, color: '#059669', marginBottom: 6 }}>{current.score}/10</p>
+                  <p style={{ fontSize: 26, fontWeight: 900, color: isClayPilotDark ? 'var(--clay-accent-text)' : '#059669', marginBottom: 6 }}>{current.score}/10</p>
                 )}
-                <p style={{ fontSize: 12.5, fontWeight: 600, color: '#166534', marginBottom: 16, lineHeight: 1.6 }}>
+                <p style={{ fontSize: 12.5, fontWeight: 600, color: isClayPilotDark ? 'var(--clay-text-muted)' : '#166534', marginBottom: 16, lineHeight: 1.6 }}>
                   {current.score != null ? 'Tu nota la última vez. Puedes repetirlo para intentar mejorarla, o volver a Mis Cursos.' : 'Puedes repetirlo para intentar mejorar tu nota, o volver a Mis Cursos.'}
                 </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
                   <button
                     type="button"
                     onClick={() => setRepeatConfirmed(true)}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 999, background: '#059669', padding: '10px 20px', fontSize: 13, fontWeight: 900, color: 'white', border: 'none', cursor: 'pointer' }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 999, background: isClayPilotDark ? 'var(--clay-accent)' : '#059669', padding: '10px 20px', fontSize: 13, fontWeight: 900, color: isClayPilotDark ? 'var(--clay-on-accent)' : 'white', border: 'none', cursor: 'pointer' }}
                   >
                     <RotateCcw size={14} /> Sí, quiero repetirlo
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push('/zona/cursos')}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 999, background: 'white', padding: '10px 20px', fontSize: 13, fontWeight: 900, color: '#065f46', border: '1px solid #bbf7d0', cursor: 'pointer' }}
+                    style={isClayPilotDark
+                      ? { display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 999, background: 'var(--clay-surface)', padding: '10px 20px', fontSize: 13, fontWeight: 900, color: 'var(--clay-text)', border: '1px solid var(--clay-border)', cursor: 'pointer' }
+                      : { display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 999, background: 'white', padding: '10px 20px', fontSize: 13, fontWeight: 900, color: '#065f46', border: '1px solid #bbf7d0', cursor: 'pointer' }}
                   >
                     Volver a Mis Cursos
                   </button>
@@ -1540,14 +1556,15 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   // (para poder mostrar la capa de LaTeX renderizado encima) y
                   // hereda el fondo de la página con texto oscuro fijo (#0f172a)
                   // — con <main> ya oscuro por el piloto, ese texto se volvía
-                  // invisible. textareaStyle ya es un prop expuesto por
-                  // MathEditor para esto exacto, sin tocar su componente.
-                  // ANSWER_HAS_LATEX_OVERLAY replica la misma condición interna
-                  // de MathEditor (hasContent && hasLatex) para NO forzar color
-                  // cuando el textarea debe quedarse transparente (superpuesto
-                  // sobre el LaTeX renderizado) — si lo forzáramos siempre,
-                  // se rompería esa superposición en cuanto el alumno escriba
-                  // una fórmula.
+                  // invisible. textareaStyle/renderedViewStyle son props
+                  // expuestos por MathEditor para esto exacto, sin tocar su
+                  // componente. ANSWER_HAS_LATEX_OVERLAY replica la misma
+                  // condición interna de MathEditor (hasContent && hasLatex):
+                  // cuando hay fórmula, el textarea DEBE quedarse transparente
+                  // (superpuesto sobre la capa de LaTeX renderizado, que a su
+                  // vez necesita su propio fondo oscuro vía renderedViewStyle)
+                  // — si el textarea llevara fondo opaco en ese momento,
+                  // taparía por completo el LaTeX renderizado debajo.
                   <MathEditor
                     subject={currentTopic.subject}
                     value={studentAnswer}
@@ -1558,8 +1575,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                     softColor={isClayPilotDark ? 'var(--clay-accent-soft)' : undefined}
                     borderColor={isClayPilotDark ? 'var(--clay-border)' : undefined}
                     textareaStyle={isClayPilotDark ? {
+                      background: ANSWER_HAS_LATEX_OVERLAY ? 'transparent' : 'var(--clay-surface-raised)',
+                      color: ANSWER_HAS_LATEX_OVERLAY ? 'transparent' : 'var(--clay-text)',
+                    } : undefined}
+                    renderedViewStyle={isClayPilotDark ? {
                       background: 'var(--clay-surface-raised)',
-                      color: (studentAnswer.trim().length > 0 && /\$|\\\[|\\\(|\\begin\{/.test(studentAnswer)) ? 'transparent' : 'var(--clay-text)',
+                      color: 'var(--clay-text)',
                     } : undefined}
                   />
                 ) : (
@@ -1609,18 +1630,26 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   {correcting ? <><KairoLoadingDot /> Corrigiendo con Kairo...</> : <>Corregir con Kairo <Check size={15} /></>}
                 </button>
                 {notEvaluable && (
-                  <div style={{ marginTop: 12, borderRadius: 4, background: '#fef2f2', border: '1px solid #fecaca', padding: '10px 14px' }}>
-                    <p style={{ margin: 0, fontSize: 13, fontWeight: 900, color: '#991b1b' }}>No se pudo leer tu respuesta — no evaluable</p>
-                    <p style={{ margin: '4px 0 8px', fontSize: 12, color: '#b91c1c', lineHeight: 1.4 }}>
+                  <div style={isClayPilotDark
+                    ? { marginTop: 12, borderRadius: 4, background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.35)', padding: '10px 14px' }
+                    : { marginTop: 12, borderRadius: 4, background: '#fef2f2', border: '1px solid #fecaca', padding: '10px 14px' }}
+                  >
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 900, color: isClayPilotDark ? '#fca5a5' : '#991b1b' }}>No se pudo leer tu respuesta — no evaluable</p>
+                    <p style={{ margin: '4px 0 8px', fontSize: 12, color: isClayPilotDark ? '#fca5a5' : '#b91c1c', lineHeight: 1.4 }}>
                       Ha sido un error técnico, no un problema con tu trabajo. No cuenta como intento ni afecta a tu Camino.
                     </p>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <button type="button" onClick={correctCourseExercise} style={{ fontSize: 12, fontWeight: 900, color: '#991b1b', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: 4, padding: '5px 12px', cursor: 'pointer' }}>
+                      <button type="button" onClick={correctCourseExercise} style={isClayPilotDark
+                        ? { fontSize: 12, fontWeight: 900, color: '#fca5a5', background: 'rgba(248,113,113,0.18)', border: '1px solid rgba(248,113,113,0.35)', borderRadius: 4, padding: '5px 12px', cursor: 'pointer' }
+                        : { fontSize: 12, fontWeight: 900, color: '#991b1b', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: 4, padding: '5px 12px', cursor: 'pointer' }}
+                      >
                         Reintentar corrección
                       </button>
                       <a
                         href="mailto:hola@kairo.es?subject=Error%20t%C3%A9cnico%20al%20corregir&body=Se%20produjo%20un%20error%20t%C3%A9cnico%20al%20corregir%20un%20ejercicio%20de%20Camino%20PAU."
-                        style={{ fontSize: 12, fontWeight: 900, color: '#475569', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 4, padding: '5px 12px', cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+                        style={isClayPilotDark
+                          ? { fontSize: 12, fontWeight: 900, color: 'var(--clay-text-muted)', background: 'var(--clay-surface)', border: '1px solid var(--clay-border)', borderRadius: 4, padding: '5px 12px', cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }
+                          : { fontSize: 12, fontWeight: 900, color: '#475569', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 4, padding: '5px 12px', cursor: 'pointer', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
                       >
                         Reportar error
                       </a>
@@ -1636,7 +1665,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 {isClayPilot ? (
                   <ClayThemeScope theme={clayTheme} style={{ background: 'transparent' }}>
                     {score != null && (
-                      <p style={{ marginTop: 12, borderRadius: 4, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 14px', fontSize: 13, fontWeight: 900, color: '#065f46' }}>
+                      <p style={isClayPilotDark
+                        ? { marginTop: 12, borderRadius: 4, background: 'var(--clay-accent-soft)', border: '1px solid var(--clay-border)', padding: '10px 14px', fontSize: 13, fontWeight: 900, color: 'var(--clay-accent-text)' }
+                        : { marginTop: 12, borderRadius: 4, background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '10px 14px', fontSize: 13, fontWeight: 900, color: '#065f46' }}
+                      >
                         Nota: {score}/10{xpAwarded != null ? ` · XP registrado: ${xpAwarded}` : ''}
                       </p>
                     )}

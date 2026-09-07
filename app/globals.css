@@ -244,6 +244,33 @@
   color: var(--clay-text-muted) !important;
 }
 
+/* Mismo motivo que el bloque de arriba: los botones de símbolo/plantilla
+   (bg-white + text-slate-700 de Tailwind, fijos) y el formulario de
+   plantillas rellenables (MathFillTemplates.tsx: tarjeta bg-white, franja
+   bg-slate-50, inputs con background:"#fff" inline) viven dentro de este
+   mismo componente compartido y quedaban como islas claras sobre la barra
+   ya oscurecida arriba. Se pisan también con !important, sin tocar esos
+   archivos. */
+[data-kairo-clay-theme="dark"] [data-kairo-math-toolbar="true"] .bg-white {
+  background: var(--clay-surface) !important;
+  border-color: var(--clay-border) !important;
+}
+[data-kairo-clay-theme="dark"] [data-kairo-math-toolbar="true"] .bg-slate-50 {
+  background: var(--clay-bg) !important;
+}
+[data-kairo-clay-theme="dark"] [data-kairo-math-toolbar="true"] input[type="text"] {
+  background: transparent !important;
+  color: var(--clay-text) !important;
+}
+[data-kairo-clay-theme="dark"] [data-kairo-math-toolbar="true"] .text-slate-700,
+[data-kairo-clay-theme="dark"] [data-kairo-math-toolbar="true"] .text-slate-500,
+[data-kairo-clay-theme="dark"] [data-kairo-math-toolbar="true"] .text-slate-400 {
+  color: var(--clay-text-muted) !important;
+}
+[data-kairo-clay-theme="dark"] [data-kairo-math-toolbar="true"] .text-slate-300 {
+  color: var(--clay-border) !important;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

@@ -15,6 +15,7 @@ interface MathEditorProps {
   borderColor?: string
   textareaClassName?: string
   textareaStyle?: React.CSSProperties
+  renderedViewStyle?: React.CSSProperties
 }
 
 const HAS_LATEX = /\$|\\\[|\\\(|\\begin\{/
@@ -96,6 +97,7 @@ export default function MathEditor({
   borderColor = "#dde8f8",
   textareaClassName,
   textareaStyle,
+  renderedViewStyle,
 }: MathEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [focused, setFocused] = useState(false)
@@ -153,6 +155,7 @@ export default function MathEditor({
               transition: "border-color 150ms, box-shadow 150ms, background 150ms",
               wordBreak: "break-word" as const,
               whiteSpace: "pre-wrap" as const,
+              ...renderedViewStyle,
             }}
           >
             {renderLatexSegments(value)}

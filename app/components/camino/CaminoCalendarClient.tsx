@@ -11,6 +11,7 @@ import ExamCoverageBanner from '@/app/components/camino/ExamCoverageBanner'
 import HistoriaTopicChips from '@/app/components/camino/HistoriaTopicChips'
 import GoogleCalendarConnection from '@/app/components/camino/GoogleCalendarConnection'
 import CaminoAssistant from '@/app/components/camino/CaminoAssistant'
+import CaminoSkeleton from '@/app/components/camino/CaminoSkeleton'
 import SidebarNav from '@/app/components/SidebarNav'
 import { supabase } from '@/app/lib/supabase'
 import { clearOnboarding, loadOnboarding, restoreOnboardingFromServer, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
@@ -2182,7 +2183,15 @@ export default function CaminoCalendarClient() {
     }
   }
 
-  if (onboarding === null || !hasProfile) return null
+  // Mientras la comprobación sigue en marcha (onboardingChecked === false)
+  // esto devolvía null, y eso es pantalla en blanco durante todo lo que tarden
+  // supabase.auth.getSession() y restoreOnboardingFromServer() — segundos en un
+  // navegador sin copia local en localStorage. El loading.tsx de la ruta no
+  // cubre este hueco: el render de servidor de /camino es instantáneo y se va
+  // antes de que empiece esta espera. Con la comprobación ya terminada sí se
+  // sigue devolviendo null, porque entonces el efecto de arriba está
+  // redirigiendo a /onboarding y pintar una silueta sería mentir.
+  if (onboarding === null || !hasProfile) return onboardingChecked ? null : <CaminoSkeleton />
 
   const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
 

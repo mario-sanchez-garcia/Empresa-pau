@@ -44,7 +44,7 @@ function Indicator({ ok, label }: { ok: boolean; label: string }) {
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 3,
       fontSize: 11, fontWeight: 700,
-      color: ok ? '#15803d' : '#94a3b8',
+      color: ok ? '#15803d' : '#475569',
       background: ok ? '#f0fdf4' : '#f8fafc',
       border: `1px solid ${ok ? '#bbf7d0' : '#e2e8f0'}`,
       borderRadius: 6, padding: '2px 7px', whiteSpace: 'nowrap',
@@ -60,6 +60,12 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
   subjectLabel: string
   blockOrder?: string[]
 }) {
+  // #15803d es un verde pensado para fondo blanco/casi blanco (como el badge
+  // "ok" de Indicator, que trae su propio fondo claro fijo) -- aquí en cambio
+  // el texto va directo sobre --clay-surface-raised, que sí cambia con el
+  // tema, así que necesita su propia versión clara para oscuro.
+  const { theme } = useClayThemePreference()
+  const blockCoverageColor = theme === 'dark' ? '#4ade80' : '#15803d'
   const byBlock: Record<string, V2Row[]> = {}
   for (const row of rows) {
     if (!byBlock[row.block_key]) byBlock[row.block_key] = []
@@ -97,10 +103,10 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
               </div>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 11, color: C.muted, fontWeight: 600 }}>{blockRows.length} misiones</span>
-                <span style={{ fontSize: 11, color: '#15803d', fontWeight: 700 }}>🎥 {conVideo}</span>
-                <span style={{ fontSize: 11, color: '#15803d', fontWeight: 700 }}>📝 {conConcepto}/{blockRows.length} concepto</span>
-                <span style={{ fontSize: 11, color: '#15803d', fontWeight: 700 }}>🟢 {conCaso}/{blockRows.length} caso</span>
-                <span style={{ fontSize: 11, color: '#15803d', fontWeight: 700 }}>✏️ {conEjercicio}/{blockRows.length} ejercicio</span>
+                <span style={{ fontSize: 11, color: blockCoverageColor, fontWeight: 700 }}>🎥 {conVideo}</span>
+                <span style={{ fontSize: 11, color: blockCoverageColor, fontWeight: 700 }}>📝 {conConcepto}/{blockRows.length} concepto</span>
+                <span style={{ fontSize: 11, color: blockCoverageColor, fontWeight: 700 }}>🟢 {conCaso}/{blockRows.length} caso</span>
+                <span style={{ fontSize: 11, color: blockCoverageColor, fontWeight: 700 }}>✏️ {conEjercicio}/{blockRows.length} ejercicio</span>
               </div>
             </div>
             <div style={{ overflowX: 'auto' }}>
@@ -150,7 +156,7 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
                             <span style={{
                               display: 'inline-flex', alignItems: 'center', gap: 3,
                               fontSize: 11, fontWeight: 700,
-                              color: row.video_id ? '#1d4ed8' : '#94a3b8',
+                              color: row.video_id ? '#1d4ed8' : '#475569',
                               background: row.video_id ? '#eff6ff' : '#f8fafc',
                               border: `1px solid ${row.video_id ? '#bfdbfe' : '#e2e8f0'}`,
                               borderRadius: 6, padding: '2px 7px', whiteSpace: 'nowrap',
@@ -277,11 +283,11 @@ export default function CaminoPreviewPage() {
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
-              <Link href="/admin" style={{ color: '#93c5fd', fontSize: 11, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.05em' }}>
+              <Link href="/admin" style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.05em' }}>
                 ← Panel admin
               </Link>
               <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>·</span>
-              <Link href="/" style={{ color: '#93c5fd', fontSize: 11, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.05em' }}>
+              <Link href="/" style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.05em' }}>
                 Volver a Kairo
               </Link>
               <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>·</span>
@@ -292,7 +298,7 @@ export default function CaminoPreviewPage() {
             <h1 style={{ color: '#ffffff', fontSize: 20, fontWeight: 800, margin: 0, lineHeight: 1.2 }}>
               Preview Camino PAU
             </h1>
-            <p style={{ color: '#93c5fd', fontSize: 12, margin: '3px 0 0', fontWeight: 500 }}>
+            <p style={{ color: '#bfdbfe', fontSize: 12, margin: '3px 0 0', fontWeight: 500 }}>
               curriculum_content_v2
             </p>
           </div>

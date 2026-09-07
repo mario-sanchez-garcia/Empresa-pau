@@ -2379,16 +2379,16 @@ export default function CaminoCalendarClient() {
               (order:-3) y encima de "Esta semana" (order:-1), que es la nueva
               cabecera de la columna. El contador pequeño del ticker
               (camino-days-until-pau) se queda: no estorba y algún test lo usa. */}
-          <div className="camino-hero" style={{ order: -2, position: 'relative', height: 214, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
-            <img src={heroImageUrl} alt="" loading="eager" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.48) saturate(0.68)', display: 'block' }} />
-            <div className="camino-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.88) 0%, rgba(10,15,30,0.36) 72%, rgba(10,15,30,0.18) 100%)', padding: '24px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          <div className="camino-hero" style={{ order: -2, position: 'relative', height: 340, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
+            <img src={heroImageUrl} alt="" loading="eager" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.52) saturate(0.7)', display: 'block' }} />
+            <div className="camino-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.9) 0%, rgba(10,15,30,0.25) 70%)', padding: '28px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
               <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Días hasta selectividad</div>
-              <div className="camino-hero-days" style={{ fontSize: 72, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
+              <div className="camino-hero-days" style={{ fontSize: 100, fontWeight: 900, color: 'white', lineHeight: 0.88, letterSpacing: '-0.04em' }}>{daysUntilPAU}</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 8 }}>Restan</div>
-              <div style={{ display: 'flex', gap: 16, marginTop: 12 }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}><span style={{ fontSize: 15, fontWeight: 900, color: 'white' }}>{streak > 0 ? streak : '—'}</span><span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.42)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}><span style={{ fontSize: 15, fontWeight: 900, color: 'white' }}>{displayedXP.toLocaleString('es-ES')}</span><span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.42)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>XP</span></div>
-                {heroRank != null && <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}><span style={{ fontSize: 15, fontWeight: 900, color: 'white' }}>#{heroRank}</span><span style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.42)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div>}
+              <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>{streak > 0 ? `🔥 ${streak}` : '—'}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>{displayedXP.toLocaleString('es-ES')}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>XP total</span></div>
+                {heroRank != null && <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>#{heroRank}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div>}
               </div>
             </div>
           </div>

@@ -1320,3 +1320,40 @@ button:active:not(:disabled),
   width: 100%;
   height: 100%;
 }
+
+/* ── Skeletons de carga ────────────────────────────────────────────────────
+   Sustituyen al KairoLoader azul en las pantallas a las que se navega ya
+   dentro de la app (Camino, Exámenes, Simulacros). El KairoLoader se queda
+   para el arranque (app/loading.tsx) y el checkout, donde la animación de la
+   marca es el punto, no la espera.
+   Las reglas viven aquí y no en cada componente para no repetir el mismo
+   @keyframes en cuatro <style> distintos; los componentes solo ponen la
+   clase (ver app/components/ui/Skeleton.tsx). */
+.kairo-skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  /* Tokens clay con fallback claro: los loading.tsx se pintan antes de que el
+     cliente fije data-kairo-clay-theme, así que la variable puede no existir
+     todavía en el primer frame. */
+  background: var(--clay-surface-deep, #dde6f5);
+}
+.kairo-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  animation: kairo-skeleton-sweep 1.5s ease-in-out infinite;
+}
+[data-kairo-clay-theme="dark"] .kairo-skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+}
+@keyframes kairo-skeleton-sweep {
+  to { transform: translateX(100%); }
+}
+/* Sin barrido para quien pide menos movimiento: el bloque gris ya comunica
+   "esto está cargando" sin animar nada. */
+@media (prefers-reduced-motion: reduce) {
+  .kairo-skeleton::after { display: none; }
+}

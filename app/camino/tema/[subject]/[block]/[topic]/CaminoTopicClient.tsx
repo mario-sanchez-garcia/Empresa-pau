@@ -1273,11 +1273,11 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     <Shell clayTheme={isClayPilot ? clayTheme : undefined} clayDarkBg={isClayPilotDark}>
       {/* ── Dark topbar ── */}
       <div className="topic-topbar" style={{ background: '#0f172a', padding: '11px 32px', display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
-        <Link href="/camino" style={{ color: '#475569', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none' }}>
+        <Link href="/camino" style={{ color: '#94a3b8', fontSize: 12, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5, textDecoration: 'none' }}>
           <ArrowLeft size={13} /> Volver
         </Link>
         <span style={{ width: 1, height: 14, background: '#1e293b', flexShrink: 0 }} />
-        <p className="topic-topbar-breadcrumb" style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#475569', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p className="topic-topbar-breadcrumb" style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#94a3b8', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           Camino PAU &rsaquo; {subjectLabelFromSlug(currentTopic.subject)} &rsaquo; <span style={{ color: '#93c5fd' }}>{currentTopic.blockTitle}</span>
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
@@ -1545,7 +1545,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               </div>
               <span style={isClayPilotDark
                 ? { borderRadius: 999, background: missionXpStatus === 'pending' || missionXpStatus === 'already_completed' ? 'var(--clay-accent-soft)' : 'var(--clay-bg)', padding: '3px 10px', fontSize: 10, fontWeight: 900, color: missionXpStatus === 'pending' || missionXpStatus === 'already_completed' ? 'var(--clay-accent-text)' : 'var(--clay-text-muted)', border: '1px solid var(--clay-border)' }
-                : { borderRadius: 999, background: missionXpStatus === 'pending' ? '#eff6ff' : missionXpStatus === 'already_completed' ? '#f0fdf4' : '#f8fafc', padding: '3px 10px', fontSize: 10, fontWeight: 900, color: missionXpStatus === 'pending' ? '#2563eb' : missionXpStatus === 'already_completed' ? '#059669' : '#64748b', border: `1px solid ${missionXpStatus === 'pending' ? '#bfdbfe' : missionXpStatus === 'already_completed' ? '#bbf7d0' : '#e2e8f0'}` }}>
+                : { borderRadius: 999, background: missionXpStatus === 'pending' ? '#eff6ff' : missionXpStatus === 'already_completed' ? '#f0fdf4' : '#f8fafc', padding: '3px 10px', fontSize: 10, fontWeight: 900, color: missionXpStatus === 'pending' ? '#2563eb' : missionXpStatus === 'already_completed' ? '#065f46' : '#64748b', border: `1px solid ${missionXpStatus === 'pending' ? '#bfdbfe' : missionXpStatus === 'already_completed' ? '#bbf7d0' : '#e2e8f0'}` }}>
                 {missionXpStatus === 'checking' ? 'Comprobando XP...' : missionXpStatus === 'pending' ? 'Misión con XP' : missionXpStatus === 'already_completed' ? 'Misión ya completada' : 'Práctica libre · no suma XP'}
               </span>
             </div>
@@ -1565,7 +1565,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   <button
                     type="button"
                     onClick={() => setRepeatConfirmed(true)}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 999, background: isClayPilotDark ? 'var(--clay-accent)' : '#059669', padding: '10px 20px', fontSize: 13, fontWeight: 900, color: isClayPilotDark ? 'var(--clay-on-accent)' : 'white', border: 'none', cursor: 'pointer' }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 999, background: isClayPilotDark ? 'var(--clay-accent)' : '#065f46', padding: '10px 20px', fontSize: 13, fontWeight: 900, color: isClayPilotDark ? 'var(--clay-on-accent)' : 'white', border: 'none', cursor: 'pointer' }}
                   >
                     <RotateCcw size={14} /> Sí, quiero repetirlo
                   </button>
@@ -2003,7 +2003,10 @@ function TopicAsideBody({
   // kairo-glass) no necesitan esto, ya resuelven su propio contraste.
   const isClayPilotDark = isClayPilot && clayTheme === 'dark'
   const asideText = isClayPilotDark ? 'var(--clay-text)' : '#0f172a'
-  const asideMuted = isClayPilotDark ? 'var(--clay-text-muted)' : '#94a3b8'
+  // #94a3b8 fijo (fuera del piloto clay) no llega a 4.5:1 sobre el fondo
+  // real del aside (rgba(248,251,255,.82)) ni sobre "kairo-glass" — en los
+  // 3 temas del piloto (no solo oscuro) usa el token, que sí pasa AA.
+  const asideMuted = isClayPilot ? 'var(--clay-text-muted)' : '#94a3b8'
   const asideBody = isClayPilotDark ? 'var(--clay-text-muted)' : '#64748b'
   const asideBorder = isClayPilotDark ? 'var(--clay-border)' : '#e2e8f0'
   const asideAccent = isClayPilotDark ? 'var(--clay-accent)' : '#2563eb'
@@ -2060,7 +2063,7 @@ function TopicAsideBody({
 
       {/* Chat Kairo */}
       <div className="kairo-glass" style={{ marginBottom: 18, padding: 14, borderRadius: 16 }}>
-        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#94a3b8', marginBottom: 10 }}>Pregunta a Kairo</p>
+        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.18em', textTransform: 'uppercase' as const, color: '#475569', marginBottom: 10 }}>Pregunta a Kairo</p>
         <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>Pregunta sobre este tema con el contexto ya preparado.</p>
         <details style={{ marginBottom: 10 }}>
           <summary style={{ cursor: 'pointer', fontSize: 10, fontWeight: 900, color: '#7c3aed' }}>Preguntas rápidas</summary>

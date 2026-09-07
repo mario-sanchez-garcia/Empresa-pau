@@ -95,9 +95,14 @@ function StatCard({
   label: string; value: string; sub?: string
   accent?: boolean; warn?: boolean; danger?: boolean
 }) {
-  const bg = danger ? '#fef2f2' : warn ? '#fffbeb' : accent ? C.light : C.surface
-  const border = danger ? '#fecaca' : warn ? '#fde68a' : accent ? 'var(--clay-border)' : C.border
-  const valColor = danger ? '#dc2626' : warn ? '#b45309' : C.ink
+  // fondo/borde de danger y warn son hex fijos (rojo/ambar pastel) que no
+  // pasaban a oscuro -- el texto sí lo hacía vía C.muted/valColor, lo que
+  // dejaba texto ya-adaptado-a-oscuro sobre un fondo que seguía siendo claro.
+  const { theme } = useClayThemePreference()
+  const dark = theme === 'dark'
+  const bg = danger ? (dark ? 'rgba(248,113,113,0.10)' : '#fef2f2') : warn ? (dark ? 'rgba(251,191,36,0.10)' : '#fffbeb') : accent ? C.light : C.surface
+  const border = danger ? (dark ? 'rgba(248,113,113,0.30)' : '#fecaca') : warn ? (dark ? 'rgba(251,191,36,0.30)' : '#fde68a') : accent ? 'var(--clay-border)' : C.border
+  const valColor = danger ? (dark ? '#fca5a5' : '#b91c1c') : warn ? (dark ? '#fbbf24' : '#b45309') : C.ink
   return (
     <div style={{ background: bg, border: `1px solid ${border}`, borderRadius: 14, padding: '18px 20px', boxShadow: C.shadow }}>
       <p style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.09em', margin: '0 0 8px' }}>{label}</p>
@@ -185,7 +190,7 @@ function StatusBadge({ status, errorCode }: { status: string; errorCode?: string
   const dark = theme === 'dark'
   if (status === 'error') {
     return (
-      <span style={{ ...(dark ? BADGE_DARK.danger : { background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }), borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap' }}>
+      <span style={{ ...(dark ? BADGE_DARK.danger : { background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }), borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap' }}>
         Error{errorCode ? `: ${errorCode}` : ''}
       </span>
     )
@@ -195,6 +200,11 @@ function StatusBadge({ status, errorCode }: { status: string; errorCode?: string
       OK
     </span>
   )
+}
+
+function ErrorCount({ n }: { n: number }) {
+  const { theme } = useClayThemePreference()
+  return <span style={{ color: theme === 'dark' ? '#f87171' : '#b91c1c', fontWeight: 700 }}>{fmtNumber(n)}</span>
 }
 
 function EstadoBadge({ estado }: { estado: string }) {
@@ -524,7 +534,7 @@ function Dashboard({ m }: { m: AdminMetrics }) {
             fmtTokens(r.tokens),
             fmtCurrency(r.costEur),
             r.errors > 0
-              ? <span style={{ color: '#dc2626', fontWeight: 700 }}>{fmtNumber(r.errors)}</span>
+              ? <ErrorCount n={r.errors} />
               : '0'
           ])}
           emptyMsg="Sin eventos IA en los últimos 7 días"
@@ -654,7 +664,7 @@ function Dashboard({ m }: { m: AdminMetrics }) {
             <p style={{ fontSize: 11, color: C.muted, marginBottom: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Distribución de rutas</p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {Object.entries(m.caminoMetrics.routeDistribution).sort((a, b) => b[1] - a[1]).map(([route, count]) => (
-                <span key={route} style={{ background: C.border, borderRadius: 6, padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>
+                <span key={route} style={{ background: C.border, color: C.ink, borderRadius: 6, padding: '3px 10px', fontSize: 12, fontWeight: 600 }}>
                   {route}: {count}
                 </span>
               ))}
@@ -718,7 +728,7 @@ export default function AdminPage() {
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-              <Link href="/" style={{ color: '#93c5fd', fontSize: 11, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.05em' }}>
+              <Link href="/" style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 700, textDecoration: 'none', letterSpacing: '0.05em' }}>
                 ← Volver a Kairo
               </Link>
               <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>·</span>
@@ -729,7 +739,7 @@ export default function AdminPage() {
             <h1 style={{ color: '#ffffff', fontSize: 20, fontWeight: 800, margin: 0, lineHeight: 1.2 }}>
               Panel interno
             </h1>
-            <p style={{ color: '#93c5fd', fontSize: 12, margin: '3px 0 0', fontWeight: 500 }}>
+            <p style={{ color: '#bfdbfe', fontSize: 12, margin: '3px 0 0', fontWeight: 500 }}>
               Métricas básicas para controlar la beta de Kairo.
             </p>
           </div>

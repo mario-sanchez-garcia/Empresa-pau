@@ -93,7 +93,8 @@ assert(
 
 assert(
   'calendar editor has unified Semana Mes calendar surface',
-  client.includes('<CalendarDays size={13} /> Calendario') &&
+  client.includes('<GoogleCalendarConnection onOpenCalendar={() => setShowCalendarEditor(true)} />') &&
+    googleConnectionClient.includes('Mi calendario Kairo') &&
     client.includes("const [calendarView, setCalendarView] = useState<'week' | 'month'>('week')") &&
     client.includes("setCalendarView('week')") &&
     client.includes("setCalendarView('month')") &&
@@ -459,7 +460,7 @@ assert(
   client.includes("const syncResponse = await fetch('/api/calendar/google/sync'") &&
     client.includes("Guardado en Kairo. No se pudo sincronizar con Google Calendar · Reintentar") &&
     client.includes("saveState === 'error' ? 'Reintentar'") &&
-    googleConnectionClient.includes('No se pudo comprobar Google Calendar · Reintentar')
+    googleConnectionClient.includes('No se pudo comprobar Google · Reintentar')
 )
 
 assert(

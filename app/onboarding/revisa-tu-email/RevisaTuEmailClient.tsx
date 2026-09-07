@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { SUPPORT_EMAIL } from '@/app/lib/support'
 
 // Pantalla de "revisa tu correo" propia del flujo Fase 2 (onboarding
 // anónimo → signup al final). No reemplaza /confirmar-email (login clásico,
@@ -54,7 +55,7 @@ function RevisaTuEmailContent() {
         Revisa tu correo
       </div>
       <p style={{ fontSize: 13, color: 'rgba(255,255,255,.5)', maxWidth: 380, lineHeight: 1.6, margin: 0 }}>
-        Hemos enviado un enlace de confirmación{email ? <> a <strong style={{ color: '#fff' }}>{email}</strong></> : ''}. Ábrelo para terminar de crear tu cuenta y generar tu Camino.
+        Hemos solicitado el enlace de confirmación{email ? <> para <strong style={{ color: '#fff' }}>{email}</strong></> : ''}. Si el proveedor lo entrega correctamente, ábrelo para terminar tu cuenta.
       </p>
 
       <div style={{ width: '100%', maxWidth: 380, display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8, textAlign: 'left' }}>
@@ -84,6 +85,8 @@ function RevisaTuEmailContent() {
       >
         {status === 'sending' ? 'Reenviando…' : cooldown ? 'Reenviado — espera 1 minuto' : '¿No has recibido el correo? Reenviar'}
       </button>
+
+      <p style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', margin: 0 }}>¿Sigue sin llegar? <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: 'rgba(255,255,255,.65)' }}>Escríbenos a soporte</a>.</p>
 
       <button
         onClick={() => router.push('/onboarding')}

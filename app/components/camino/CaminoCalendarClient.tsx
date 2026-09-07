@@ -2305,10 +2305,7 @@ export default function CaminoCalendarClient() {
             <span className="camino-header-title" style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>Tu semana de estudio</span>
           </div>
           <div className="camino-header-actions" style={{ display: 'flex', gap: 8 }}>
-            <GoogleCalendarConnection />
-            <button className="kairo-soft-control" onClick={() => setShowCalendarEditor(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', cursor: 'pointer', color: '#334155', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
-              <CalendarDays size={13} /> Calendario
-            </button>
+            <GoogleCalendarConnection onOpenCalendar={() => setShowCalendarEditor(true)} />
             <button className="kairo-soft-control" onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', cursor: 'pointer', color: '#334155', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
               <Plus size={13} /> Examen
             </button>

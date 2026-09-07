@@ -63,7 +63,8 @@ test('guardar elimina una misión persistida y F5 no la restaura', async ({ page
 
     await page.route('**/api/calendar/google/sync', route => route.fulfill({ status: 200, contentType: 'application/json', json: { ok: true, pushed: 0, failed: 0 } }))
     await page.reload()
-    await page.getByRole('button', { name: 'Calendario', exact: true }).click()
+    await page.getByRole('button', { name: 'Calendario' }).click()
+    await page.getByRole('button', { name: 'Mi calendario Kairo' }).click()
     const missionTitle = page.getByText(title, { exact: true })
     await expect(missionTitle).toBeVisible()
     await missionTitle.locator('..').getByRole('button', { name: 'Eliminar' }).click()
@@ -77,7 +78,8 @@ test('guardar elimina una misión persistida y F5 no la restaura', async ({ page
     await expect(page.getByText(title, { exact: true })).toHaveCount(0)
 
     await page.reload()
-    await page.getByRole('button', { name: 'Calendario', exact: true }).click()
+    await page.getByRole('button', { name: 'Calendario' }).click()
+    await page.getByRole('button', { name: 'Mi calendario Kairo' }).click()
     await expect(page.getByText(title, { exact: true })).toHaveCount(0)
     missionId = null
   } finally {
@@ -90,7 +92,8 @@ test('el calendario conserva controles útiles a 390 px sin overflow horizontal'
   await page.goto('/camino')
   await dismissCookieBanner(page)
   await expect.poll(() => hasAuthenticatedSession(page), { timeout: 12_000 }).toBe(true)
-  await page.getByRole('button', { name: 'Calendario', exact: true }).click()
+  await page.getByRole('button', { name: 'Calendario' }).click()
+  await page.getByRole('button', { name: 'Mi calendario Kairo' }).click()
   await expect(page.getByRole('button', { name: 'Guardar cambios' })).toBeVisible()
   const dimensions = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }))
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1)

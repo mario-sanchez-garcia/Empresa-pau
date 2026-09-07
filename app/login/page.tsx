@@ -7,6 +7,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { PLATFORM_STRUCTURED_EXERCISES_LABEL, PLATFORM_STRUCTURED_EXERCISES_TEXT } from '@/app/lib/platformStats'
 import { clearOnboarding } from '@/app/lib/onboarding/onboardingStorage'
 import { resolveOnboardingDestination } from '@/app/lib/onboarding/resolveOnboardingDestination'
+import { SUPPORT_EMAIL } from '@/app/lib/support'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -68,14 +69,14 @@ export default function Login() {
 
   // ── UI state ─────────────────────────────────────────────────────────────────
   const [showPwd, setShowPwd]               = useState(false)
-  const isError   = !!mensaje && !mensaje.includes('confirmar')
-  const isSuccess = !!mensaje && mensaje.includes('confirmar')
+  const isError = Boolean(mensaje)
 
   const B = bebas.style.fontFamily
   const M = dmMono.style.fontFamily
 
   // ── Google OAuth ──────────────────────────────────────────────────────────────
   const handleGoogleLogin = async () => {
+    if (cargando) return
     setCargando(true)
     const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin
     const callbackUrl = returnTo !== '/camino'
@@ -95,6 +96,7 @@ export default function Login() {
 
   // ── Email/password handler (login únicamente — /login ya no crea cuentas) ────
   async function handleSubmit() {
+    if (cargando) return
     if (!email && !password) {
       setMensaje('Escribe tu email y tu contraseña.')
       return
@@ -140,7 +142,7 @@ export default function Login() {
       } catch {
         // Nunca bloquear el login por esta comprobación.
       }
-      window.location.href = dest
+      window.location.assign(dest)
     }
     setCargando(false)
   }
@@ -490,6 +492,11 @@ export default function Login() {
             >
               {mensaje}
             </div>
+          )}
+          {isError && (
+            <p style={{ margin: '8px 0 0', fontSize: 11, color: 'rgba(255,255,255,.35)' }}>
+              ¿Sigue sin funcionar? <a href={`mailto:${SUPPORT_EMAIL}`} className="lg-link">Escríbenos a soporte</a>.
+            </p>
           )}
 
           {/* Submit */}

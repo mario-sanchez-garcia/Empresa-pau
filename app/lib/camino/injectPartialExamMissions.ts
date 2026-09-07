@@ -1,7 +1,7 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { getCaminoPlanLimits } from './caminoPlanLimits'
-import { computeExamCoverage, type ExamCoverage } from './examCoverage'
+import { computeExamCoverage, decideAutomaticExamMissionFate, type ExamCoverage } from './examCoverage'
 import { EXAM_SUBJECT_SLUG, SIMULACRO_SUBJECT } from './partialExamSubjects'
 import { createDayScheduler, estimatedMinutesForMissionType } from './scheduleTimeSlot'
 import { SIMULACRO_MINUTES } from './xpMap'
@@ -13,7 +13,6 @@ import type { ExamConfidence, ExamPriority, ExamScope, StudentExam } from './cle
 // computeExamCoverage antes de generarse, para respetar el orden
 // Curso → Ejercicios → Simulacro (ver decideMissionFate).
 type PartialMissionType = 'exercise_practice' | 'final_mini_mock'
-type MissionFate = 'generate' | 'delay' | 'cancelled' | 'monthly_limit'
 
 const BLOCK_DISPLAY: Record<string, string> = {
   Algebra: 'Álgebra',
@@ -170,32 +169,11 @@ async function countFullMocksThisMonth(supabase: SupabaseClient, userId: string)
 
 // Decide qué pasa con cada misión de la secuencia según la cobertura de
 // Curso (y, solo para el Simulacro, el cupo mensual del plan):
-//  - exercise_practice: 'delay' si aún no se ha completado NINGÚN tema del
-//    examen (practicar ejercicios sin haber visto nada de Curso no tiene
-//    sentido) — se reintentará en una ejecución futura, no es un "no" final.
-//    'cancelled' si, comprimiendo al máximo, no se llegaría al 80% a tiempo.
+//  - exercise_practice: se mantiene como preparación dirigida aunque la
+//    cobertura sea baja o todavía no se pueda medir.
 //  - final_mini_mock: 'monthly_limit' si ya no quedan Simulacros este mes
-//    (chequeo aparte, antes que el de cobertura). 'cancelled' con el mismo
-//    umbral del 80% que ya existía.
-//  - computable=false (asignatura sin topic_id, examen sin exam_topics) ->
-//    'generate' siempre, sin ninguna restricción de cobertura.
-function decideMissionFate(
-  mType: PartialMissionType,
-  coverage: ExamCoverage,
-  coverageDecision: 'full' | 'partial' | 'cancelled' | null,
-  monthlyLimitReached: boolean,
-): MissionFate {
-  if (mType === 'final_mini_mock') {
-    if (monthlyLimitReached) return 'monthly_limit'
-    if (coverageDecision === 'cancelled') return 'cancelled'
-    return 'generate'
-  }
-  if (!coverage.computable) return 'generate'
-  if (coverage.completedCount === 0) return 'delay'
-  if (coverageDecision === 'cancelled') return 'cancelled'
-  return 'generate'
-}
-
+//    (chequeo aparte). Solo se genera con evidencia real: cobertura
+//    computable, al menos un tema completado y proyección >= 80%.
 function toSlug(text: string): string {
   return text.toLowerCase()
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -429,7 +407,8 @@ export async function injectPartialExamMissions(
   // comprimiendo al máximo el ritmo, PUEDE llegar a estar — razonablemente
   // cubierto antes de la fecha. computable=false (asignatura sin topic_id
   // todavía, o examen sin exam_topics) deja coverageDecision en null, así que
-  // ambas misiones se generan sin ninguna restricción de cobertura.
+  // la práctica dirigida puede generarse, pero el Simulacro exige evidencia
+  // medible y al menos un tema completado (decideMissionFate).
   const coverage = await computeExamCoverage(supabase, userId, partialExam.id, subjectSlug, partialExam.date, today)
   const coverageDecision: 'full' | 'partial' | 'cancelled' | null = !coverage.computable
     ? null
@@ -475,7 +454,7 @@ export async function injectPartialExamMissions(
     const mType = targetSequence[i]
     if (!slot) continue
 
-    const fate = decideMissionFate(mType, coverage, coverageDecision, monthlyLimitReached)
+    const fate = decideAutomaticExamMissionFate(mType, coverage, coverageDecision, monthlyLimitReached)
     // 'delay': ni siquiera se crea un aviso — no es un "no" definitivo, solo
     // "todavía no hay nada de Curso hecho de este examen", y se reintenta en
     // una ejecución futura (misma cadencia que el resto de esta función:

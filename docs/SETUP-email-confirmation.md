@@ -54,11 +54,9 @@ The confirmation link Supabase generates will land on `/auth/callback`, which al
 
 ---
 
-## 5. Disable email confirmation in Supabase settings
+## 5. Enable email confirmation in Supabase settings
 
-Dashboard → Authentication → Email → **uncheck** "Enable email confirmations".
-
-Wait — this sounds backwards. The reason: our code now calls `signUp()` from the server, and Supabase respects the SMTP config to send the email. The "Enable email confirmations" toggle in the Auth dashboard controls whether Supabase *blocks* sign-in until confirmed. You want users to be blocked until confirmed, so **leave it checked** (enabled).
+Dashboard → Authentication → Email → leave **Enable email confirmations** checked.
 
 Summary: Enable email confirmations = ON, custom SMTP filled in → Supabase sends the email via Resend and blocks login until the user clicks the link.
 
@@ -75,7 +73,11 @@ EMAIL_CONFIRMATION_ENABLED=true
 Redeploy. From this point on:
 - New signups → `{ needsConfirmation: true }` → redirected to `/confirmar-email`
 - They click the Resend email → Supabase redirects to `/auth/callback` → they land in the app
-- "Resend" button on `/confirmar-email` → calls `/api/auth/resend-confirmation` → 1-per-minute rate limit
+- "Resend" button on `/confirmar-email` → calls `/api/auth/resend-confirmation` → durable 1-per-minute email cooldown and per-IP protection
+
+Apply `supabase/migrations/20260907120000_create_auth_email_attempts.sql` before deploying the new resend route.
+
+Supabase accepting `signUp()` or `resend()` confirms the request, not inbox delivery. For a real delivery incident, check both Supabase Auth logs and the SMTP provider delivery/bounce logs. The UI deliberately says that the request was accepted and offers retry plus the canonical support address.
 
 ---
 

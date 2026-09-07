@@ -11,6 +11,8 @@ import { NavLoginLink, BottomCta, HeroFreeLink, PricingPlanCta, PricingSectionTr
 import { ClayHeroCta, ClayHeroMiniCards } from './LandingClayPilotHero'
 import RevealOnScroll from '@/app/components/ui/RevealOnScroll'
 import { SUBJECT_OPTS } from '@/app/lib/subjectCatalog'
+import TeacherTestimonials from './TeacherTestimonials'
+import LandingNavThemeObserver from './LandingNavThemeObserver'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -26,25 +28,7 @@ const STATS = [
 const STEPS = [
   { n: '01', title: 'Recibe tu Camino PAU',            desc: 'Misiones diarias de 15 min calculadas a partir de tu fecha de examen y asignaturas.' },
   { n: '02', title: 'Resuelve exámenes reales',        desc: 'Exámenes oficiales de Madrid y Cataluña 2015–2025. A mano, como en el examen real.' },
-  { n: '03', title: 'La IA te corrige en 30 segundos', desc: 'Subes una foto. Rúbrica oficial exacta. Nota, desglose, y cómo mejorar.' },
-]
-
-const TESTIMONIALS = [
-  {
-    name: 'María G.',   city: 'Madrid, 18 años',
-    score: '8,4 en Mat. II',  prev: 'Antes: 5,1',
-    quote: 'El desglose por apartados es lo mejor. Supe exactamente en qué fallaba y no volví a cometer el mismo error. Subí tres puntos en dos meses.',
-  },
-  {
-    name: 'Carlos M.',  city: 'Alcalá de Henares, 17 años',
-    score: '9,2 en Historia', prev: 'Sin academia',
-    quote: 'Sin dinero para academia. Solo Kairo y la biblioteca municipal. El plan semanal me dijo qué estudiar cada día.',
-  },
-  {
-    name: 'Lucía P.',   city: 'Leganés, 18 años',
-    score: '8,8 en Física',   prev: 'Empezó 4 semanas antes',
-    quote: 'Empecé justo un mes antes de la PAU. La corrección me explicó todo y fui mejorando rápido.',
-  },
+  { n: '03', title: 'Entiende cómo mejorar', desc: 'Sube tu respuesta y recibe una corrección explicada con nota, desglose y próximos pasos.' },
 ]
 
 type CompareRow =
@@ -53,13 +37,13 @@ type CompareRow =
 
 const COMPARE_ROWS: CompareRow[] = [
   { label: 'Exámenes PAU Madrid y Cataluña', kairo: true,            academia: true,        solo: true  },
-  { label: 'Corrección instantánea por IA',  kairo: true,            academia: false,       solo: false },
+  { label: 'Corrección explicada por IA',    kairo: true,            academia: false,       solo: false },
   { label: 'Desglose por apartado/criterio', kairo: true,            academia: false,       solo: false },
   { label: 'Plan de estudio personalizado',  kairo: true,            academia: false,       solo: false },
   { label: 'Disponible 24 horas al día',     kairo: true,            academia: false,       solo: true  },
   { label: 'Chat con tutor IA',              kairo: true,            academia: false,       solo: false },
   { label: 'Historial de progreso',          kairo: true,            academia: false,       solo: false },
-  { label: 'Precio mensual',                 kairo: `${getPlanPriceDisplay('free')} / ${getPlanPriceDisplay('premium')}`,  academia: '100–200€',  solo: 'Gratis' },
+  { label: 'Precio mensual',                 kairo: `${getPlanPriceDisplay('free')} / ${getPlanPriceDisplay('premium')}`,  academia: 'Varía',  solo: 'Gratis' },
 ]
 
 // Derivado de SUBJECT_OPTS (app/components/onboarding/OnboardingFlow.tsx) —
@@ -376,7 +360,7 @@ export default function LandingPage() {
             Lo que tenías antes no funcionaba.
           </h2>
           <p style={{ fontSize: 14, lineHeight: 1.8, color: '#5a5a5a', maxWidth: '44ch' }}>
-            Las academias cuestan hasta 200 € al mes. Los PDFs de exámenes no te corrigen. La IA genérica no usa la rúbrica oficial. Kairo resuelve exactamente eso.
+            Practicar por tu cuenta es difícil cuando nadie te explica dónde has fallado. Kairo une exámenes reales, planificación y feedback para que sepas qué hacer después.
           </p>
         </div>
         <div className="v4c-data">
@@ -426,10 +410,10 @@ export default function LandingPage() {
         <div className="v4c-copy">
           <span style={{ fontFamily: M, fontSize: 10, color: '#999', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 20, display: 'block' }}>La corrección</span>
           <h2 style={{ fontFamily: B, fontSize: 'clamp(36px, 4vw, 52px)', letterSpacing: '.01em', color: '#1c1c1c', lineHeight: .95, marginBottom: 20 }}>
-            La rúbrica del profesor. En tu móvil.
+            Una corrección que puedes entender.
           </h2>
           <p style={{ fontSize: 14, lineHeight: 1.8, color: '#5a5a5a', maxWidth: '44ch' }}>
-            No es corrección automática genérica. Es la rúbrica oficial de tu comunidad aplicada respuesta a respuesta, con el mismo criterio que usará tu corrector en junio.
+            Kairo analiza tu respuesta y explica qué está bien, qué falta y cómo mejorarlo. Cuando el ejercicio dispone de criterios oficiales, los usa como referencia y mantiene visible la fuente.
           </p>
         </div>
         <div className="v4c-data" style={{ background: '#f3f3f3', padding: '56px 48px' }}>
@@ -475,34 +459,9 @@ export default function LandingPage() {
       </div>
       </RevealOnScroll>
 
-      {/* ── Block 4: Prueba social (dark) ────────────────────────────────────── */}
+      {/* ── Block 4: profesorado (sin testimonios inventados) ───────────────── */}
       <RevealOnScroll as="div">
-      <div className="v4c-block v4c-dark" style={{ background: '#111' }}>
-        <div className="v4c-copy">
-          <span style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 20, display: 'block' }}>Resultados</span>
-          <h2 style={{ fontFamily: B, fontSize: 'clamp(36px, 4vw, 52px)', letterSpacing: '.01em', color: '#fff', lineHeight: .95, marginBottom: 20 }}>
-            Los que lo usaron.
-          </h2>
-          <p style={{ fontSize: 14, lineHeight: 1.8, color: 'rgba(255,255,255,.5)', maxWidth: '44ch' }}>
-            Estudiantes de 2º de bachillerato de Madrid y Cataluña preparando la PAU de 2024.
-          </p>
-        </div>
-        <div className="v4c-data" style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-          {TESTIMONIALS.map((t, i) => (
-            <div key={t.name} style={{ paddingBottom: 24, paddingTop: i > 0 ? 24 : 0, borderBottom: i < TESTIMONIALS.length - 1 ? '1px solid rgba(255,255,255,.08)' : 'none' }}>
-              <p style={{ fontSize: 14, lineHeight: 1.75, color: 'rgba(255,255,255,.8)', fontWeight: 300, marginBottom: 14 }}>
-                &ldquo;{t.quote}&rdquo;
-              </p>
-              <p style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.35)', letterSpacing: '.06em' }}>
-                <strong style={{ fontFamily: 'inherit', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,.75)', display: 'block', letterSpacing: 0, marginBottom: 2 }}>
-                  {t.name} — {t.city}
-                </strong>
-                {t.score} · {t.prev}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <TeacherTestimonials headingFont={B} monoFont={M} />
       </RevealOnScroll>
 
       {/* ── Mid-page CTA strip ────────────────────────────────────────────────── */}
@@ -634,7 +593,7 @@ export default function LandingPage() {
       <div className="v4c-cta-split">
         <div data-theme="light" className="v4c-cta-left">
           <h2 style={{ fontFamily: B, fontSize: 'clamp(36px, 4.5vw, 60px)', letterSpacing: '.01em', color: '#1c1c1c', lineHeight: .95, marginBottom: 16 }}>
-            Sin academia.<br />Sin horario.<br />Sin excusas.
+            A tu ritmo.<br />Con un plan.<br />Con feedback.
           </h2>
           <p style={{ fontSize: 14, color: '#5a5a5a', maxWidth: '34ch', lineHeight: 1.7 }}>
             Empieza gratis, sin tarjeta. Cancela cuando quieras si pasas a Premium.
@@ -674,25 +633,7 @@ export default function LandingPage() {
         <span style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.18)' }}>© 2026 KAIRO · Beta privada · Madrid y Cataluña</span>
       </footer>
 
-      {/* ── Nav scroll script ────────────────────────────────────────────────── */}
-      <script dangerouslySetInnerHTML={{ __html: `
-(function(){
-  var nav = document.getElementById('v4c-nav');
-  if (!nav) return;
-  var NAV_H = 54;
-  function check() {
-    var els = document.querySelectorAll('[data-theme="light"]');
-    var onLight = false;
-    for (var i = 0; i < els.length; i++) {
-      var r = els[i].getBoundingClientRect();
-      if (r.top < NAV_H && r.bottom > 0) { onLight = true; break; }
-    }
-    nav.classList.toggle('v4c-on-light', onLight);
-  }
-  window.addEventListener('scroll', check, { passive: true });
-  check();
-})();
-      `}} />
+      <LandingNavThemeObserver />
 
       <StickyMobileCta />
 

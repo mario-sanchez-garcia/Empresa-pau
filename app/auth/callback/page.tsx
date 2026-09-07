@@ -13,6 +13,7 @@ import { clearOnboarding } from '@/app/lib/onboarding/onboardingStorage'
 import { resolveOnboardingDestination } from '@/app/lib/onboarding/resolveOnboardingDestination'
 import { loadLocalDraft, setLocalDraftId } from '@/app/lib/onboarding/onboardingDraftStorage'
 import { sendOnboardingEvent, flushQueuedOnboardingEvents } from '@/app/lib/onboarding/onboardingEvents'
+import { SUPPORT_EMAIL } from '@/app/lib/support'
 
 function CallbackHandler() {
   const router = useRouter()
@@ -41,13 +42,12 @@ function CallbackHandler() {
         errorCode === 'otp_expired' ||
         /email link is invalid|expired|otp/i.test(description)
 
-      if (isExpiredEmailLink) {
-        setExpiredEmailLink(true)
-        setErrorMsg('El enlace de confirmación ha caducado o ya se ha usado. Pide un correo nuevo para continuar.')
-      } else {
-        setExpiredEmailLink(false)
-        setErrorMsg(description)
-      }
+      queueMicrotask(() => {
+        setExpiredEmailLink(isExpiredEmailLink)
+        setErrorMsg(isExpiredEmailLink
+          ? 'El enlace de confirmación ha caducado o ya se ha usado. Pide un correo nuevo para continuar.'
+          : 'No se pudo completar el inicio de sesión. Vuelve a intentarlo.')
+      })
       return
     }
 
@@ -213,6 +213,7 @@ function CallbackHandler() {
             Volver al login
           </button>
         </div>
+        <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: '#94a3b8', fontSize: 12 }}>¿Sigue sin funcionar? Escríbenos a soporte</a>
       </div>
     )
   }

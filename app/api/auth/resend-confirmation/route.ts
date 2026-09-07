@@ -1,8 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-// In-memory rate limit: 1 resend per email per minute
-const resendLog = new Map<string, number>()
+const RESEND_COOLDOWN_SECONDS = 60
+const RESEND_IP_HOURLY_LIMIT = 12
+
+function getRequestIp(headers: Headers): string {
+  return headers.get('x-real-ip') ?? headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+}
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -22,11 +26,22 @@ export async function POST(req: NextRequest) {
   const nextPath = typeof body.next === 'string' && body.next.startsWith('/') ? body.next : '/onboarding'
   const draftId = typeof body.draft_id === 'string' && UUID_RE.test(body.draft_id) ? body.draft_id : null
 
-  const lastSent = resendLog.get(email)
-  if (lastSent && Date.now() - lastSent < 60_000) {
+  const admin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+  const ip = getRequestIp(req.headers)
+  const cooldownSince = new Date(Date.now() - RESEND_COOLDOWN_SECONDS * 1000).toISOString()
+  const hourSince = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+  const [recentEmail, hourlyIp] = await Promise.all([
+    admin.from('auth_email_attempts').select('id', { count: 'exact', head: true }).eq('email', email).eq('action', 'signup_confirmation').gte('created_at', cooldownSince),
+    admin.from('auth_email_attempts').select('id', { count: 'exact', head: true }).eq('ip', ip).eq('action', 'signup_confirmation').gte('created_at', hourSince),
+  ])
+  if ((!recentEmail.error && (recentEmail.count ?? 0) > 0) || (!hourlyIp.error && (hourlyIp.count ?? 0) >= RESEND_IP_HOURLY_LIMIT)) {
     return NextResponse.json(
       { error: 'Espera 1 minuto antes de volver a intentarlo.' },
-      { status: 429, headers: { 'Retry-After': '60' } }
+      { status: 429, headers: { 'Retry-After': String(RESEND_COOLDOWN_SECONDS) } }
     )
   }
 
@@ -56,6 +71,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No se pudo reenviar el correo. Inténtalo más tarde.' }, { status: 500 })
   }
 
-  resendLog.set(email, Date.now())
+  const { error: auditError } = await admin.from('auth_email_attempts').insert({ email, ip, action: 'signup_confirmation' })
+  if (auditError) console.error('[resend-confirmation] failed to record attempt:', auditError.message)
   return NextResponse.json({ ok: true })
 }

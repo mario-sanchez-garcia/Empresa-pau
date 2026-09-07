@@ -30,15 +30,26 @@ test('valida y normaliza el documento completo de estado v1', () => {
   assert.equal(parseOrientationState(`{"padding":"${'x'.repeat(70_000)}"}`), null)
 })
 
-test('persiste el modo libre y migra estados anteriores al modo con objetivo', () => {
+test('persiste el modo libre y migra estados anteriores al modo simple', () => {
   const state = validState()
   state.mode = 'free'
   assert.equal(parseOrientationState(state)?.mode, 'free')
 
   const legacy = structuredClone(state) as Partial<typeof state>
   delete legacy.mode
-  assert.equal(parseOrientationState(legacy)?.mode, 'target')
+  assert.equal(parseOrientationState(legacy)?.mode, 'free')
   assert.equal(parseOrientationState({ ...state, mode: 'unknown' }), null)
+})
+
+test('persiste optativas libres y migra estados que aún no las tenían', () => {
+  const state = validState()
+  state.freeElectives = [{ id: 'free-1', subject: 'Química', grade: 8.5, weighting: 0.2 }]
+  assert.deepEqual(parseOrientationState(state)?.freeElectives, state.freeElectives)
+
+  const legacy = structuredClone(state) as Partial<typeof state>
+  delete legacy.freeElectives
+  assert.deepEqual(parseOrientationState(legacy)?.freeElectives, [])
+  assert.equal(parseOrientationState({ ...state, freeElectives: [{ ...state.freeElectives[0], weighting: 0.3 }] }), null)
 })
 
 test('reconcilia por updatedAt y el servidor gana los empates', () => {

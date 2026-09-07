@@ -9,7 +9,7 @@ type CalendarStatus =
   | { connected: false; error?: string }
   | { connected: true; accountEmail: string | null; calendarId: string | null; calendarSummary: string | null; lastSyncedAt: string | null; watchExpiration: string | null }
 
-export default function GoogleCalendarConnection() {
+export default function GoogleCalendarConnection({ onOpenCalendar }: { onOpenCalendar: () => void }) {
   const [status, setStatus] = useState<CalendarStatus>({ connected: false })
   const [loading, setLoading] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -114,7 +114,7 @@ export default function GoogleCalendarConnection() {
     cursor: loading ? 'default' : 'pointer',
     border: '1px solid #e2e8f0',
     background: 'white',
-    color: status.connected ? '#15803d' : '#334155',
+    color: '#334155',
     transition: 'all .15s',
     flexShrink: 0,
     whiteSpace: 'nowrap',
@@ -123,42 +123,31 @@ export default function GoogleCalendarConnection() {
 
   return (
     <div ref={rootRef} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-      {status.connected ? (
-        <button type="button" onClick={() => setMenuOpen(v => !v)} disabled={loading} style={buttonBase}>
-          {loading ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
-          Google Calendar
-          <ChevronDown size={12} />
-        </button>
-      ) : (
-        <button type="button" onClick={connect} disabled={loading} style={buttonBase}>
-          {loading ? <Loader2 size={13} className="animate-spin" /> : <Link2 size={13} />}
-          Conectar Google Calendar
-        </button>
-      )}
+      <button type="button" onClick={() => setMenuOpen(v => !v)} disabled={loading} style={buttonBase} aria-expanded={menuOpen}>
+        {loading ? <Loader2 size={13} className="animate-spin" /> : <CalendarDays size={13} />}
+        Calendario
+        {status.connected && <Check size={12} color="#16a34a" aria-label="Google Calendar conectado" />}
+        <ChevronDown size={12} />
+      </button>
 
-      {menuOpen && status.connected && (
-        <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 60, width: 220, borderRadius: 12, border: '1px solid #e2e8f0', background: 'white', boxShadow: '0 18px 44px rgba(15,23,42,.16)', padding: 6 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderBottom: '1px solid #f1f5f9', marginBottom: 4 }}>
-            <CalendarDays size={15} color="#16a34a" />
-            <span style={{ minWidth: 0, fontSize: 11, fontWeight: 800, color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {status.accountEmail ?? 'Conectado'}
-            </span>
-          </div>
-          <button type="button" onClick={disconnect} disabled={loading} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px', borderRadius: 8, border: 'none', background: 'white', color: '#dc2626', fontSize: 12, fontWeight: 800, cursor: loading ? 'default' : 'pointer', textAlign: 'left' }}>
-            <X size={14} /> Desconectar
+      {menuOpen && (
+        <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 60, width: 260, borderRadius: 12, border: '1px solid #e2e8f0', background: 'white', boxShadow: '0 18px 44px rgba(15,23,42,.16)', padding: 6 }}>
+          <button type="button" onClick={() => { setMenuOpen(false); onOpenCalendar() }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '10px', borderRadius: 8, border: 'none', background: 'white', color: '#0f172a', fontSize: 12, fontWeight: 850, cursor: 'pointer', textAlign: 'left' }}>
+            <CalendarDays size={15} color="#2563eb" /> Mi calendario Kairo
           </button>
+          <div style={{ height: 1, background: '#f1f5f9', margin: '3px 6px' }} />
+          {status.connected ? <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px' }}>
+              <Check size={14} color="#16a34a" />
+              <span style={{ minWidth: 0, fontSize: 11, fontWeight: 800, color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Google Calendar · {status.accountEmail ?? 'Conectado'}</span>
+            </div>
+            <button type="button" onClick={disconnect} disabled={loading} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px', borderRadius: 8, border: 'none', background: 'white', color: '#dc2626', fontSize: 12, fontWeight: 800, cursor: loading ? 'default' : 'pointer', textAlign: 'left' }}><X size={14} /> Desconectar Google</button>
+          </> : (
+            <button type="button" onClick={connect} disabled={loading} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '10px', borderRadius: 8, border: 'none', background: 'white', color: '#334155', fontSize: 12, fontWeight: 800, cursor: loading ? 'default' : 'pointer', textAlign: 'left' }}><Link2 size={14} /> Conectar Google Calendar</button>
+          )}
+          {statusError && <button type="button" onClick={() => void refreshStatus()} style={{ border: 0, background: 'transparent', color: '#dc2626', fontSize: 11, fontWeight: 800, cursor: 'pointer', padding: '8px 10px' }}>No se pudo comprobar Google · Reintentar</button>}
+          {message && <p style={{ margin: '5px 10px', fontSize: 11, fontWeight: 750, color: message.startsWith('No') ? '#dc2626' : '#16a34a' }}>{message}</p>}
         </div>
-      )}
-
-      {message && (
-        <span style={{ fontSize: 11, fontWeight: 750, color: message.startsWith('No') ? '#dc2626' : '#16a34a', whiteSpace: 'nowrap' }}>
-          {message}
-        </span>
-      )}
-      {statusError && (
-        <button type="button" onClick={() => void refreshStatus()} style={{ border: 0, background: 'transparent', color: '#dc2626', fontSize: 11, fontWeight: 800, cursor: 'pointer', padding: 0 }}>
-          No se pudo comprobar Google Calendar · Reintentar
-        </button>
       )}
     </div>
   )

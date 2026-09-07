@@ -3,6 +3,7 @@
 import { Suspense, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
+import { SUPPORT_EMAIL } from '@/app/lib/support'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -348,7 +349,7 @@ function ConfirmarEmailContent() {
           <div className="ce-d5" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
             {status === 'sent' && (
               <p style={{ fontFamily: M, fontSize: 11, color: '#4ade80', margin: '0 0 4px', letterSpacing: '.04em' }}>
-                ✓ Correo reenviado. Revisa tu bandeja de entrada.
+                ✓ Solicitud aceptada. Revisa tu bandeja de entrada.
               </p>
             )}
             {status === 'error' && (
@@ -366,6 +367,9 @@ function ConfirmarEmailContent() {
                 ? 'Reenviado · espera 1 minuto para volver a intentarlo'
                 : '¿No has recibido el correo? Reenviar →'}
             </button>
+            <p style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.28)', margin: '8px 0 0' }}>
+              ¿Sigue sin llegar? <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: 'rgba(255,255,255,.55)' }}>Escríbenos a soporte</a>.
+            </p>
           </div>
 
         </div>

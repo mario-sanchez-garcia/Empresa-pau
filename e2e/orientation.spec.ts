@@ -122,8 +122,17 @@ async function openOrientation(page: Page) {
   expect(response.ok()).toBe(true)
   const payload = await response.json() as OrientationPayload
   await expect(page.getByRole('heading', { name: 'Mi objetivo' })).toBeVisible()
-  await expect(page.getByRole('combobox', { name: 'Buscar grado' }).or(page.getByRole('button', { name: /Cambiar grado/ }))).toBeVisible()
+  await expect(page.getByRole('radiogroup', { name: 'Modo de Orientación' })).toBeVisible()
   return payload
+}
+
+async function chooseOrientationMode(page: Page, mode: 'free' | 'target') {
+  const name = mode === 'free' ? /Solo calcular mi nota/ : /Tengo un objetivo/
+  const option = page.getByRole('radio', { name })
+  if (await option.getAttribute('aria-checked') === 'true') return
+  const saved = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
+  await option.click()
+  expect((await saved).ok()).toBe(true)
 }
 
 async function selectTarget(page: Page, target: Target) {
@@ -136,7 +145,7 @@ async function selectTarget(page: Page, target: Target) {
     return
   }
   const changeDegree = page.getByRole('button', { name: /Cambiar grado/ })
-  if (await changeDegree.isVisible().catch(() => false)) await changeDegree.click()
+  if (await changeDegree.count()) await changeDegree.dispatchEvent('click')
   const group = groupOrientationTargets([target as unknown as OrientationTarget])[0]
   const combobox = page.getByRole('combobox', { name: 'Buscar grado' })
   await combobox.fill(group.name)
@@ -297,12 +306,10 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       }
       page.on('request', countTargetSaves)
       try {
-        const freeStateResponse = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
-        await page.getByRole('radio', { name: /Solo calcular mi nota/ }).click()
+        await chooseOrientationMode(page, 'free')
         await expect(page.getByRole('radio', { name: /Solo calcular mi nota/ })).toHaveAttribute('aria-checked', 'true')
         await expect(page.getByRole('region', { name: 'Simulador sin objetivo' })).toBeVisible()
         await expect(page.getByRole('combobox', { name: 'Buscar grado' })).toHaveCount(0)
-        expect((await freeStateResponse).ok()).toBe(true)
 
         const estimate = page.getByRole('region', { name: 'Tu estimación libre', exact: true })
         const estimateBefore = await estimate.innerText()
@@ -312,22 +319,34 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
         const scenarioStateResponse = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
         await bachilleratoInput.fill(nextBachilleratoValue)
         await expect.poll(() => estimate.innerText()).not.toBe(estimateBefore)
-        await expect(estimate).toContainText('/ 10')
-        await expect(page.getByRole('region', { name: 'Qué mejorar sin objetivo' })).toBeVisible()
+        await expect(estimate).toContainText('/ 14')
         expect((await scenarioStateResponse).ok()).toBe(true)
+
+        const electiveSaved = page.waitForResponse(async response => {
+          if (!isOrientationStateRequest(response.request(), 'PATCH') || !response.ok()) return false
+          const body = await response.json().catch(() => null) as { state?: OrientationStateV1 } | null
+          return body?.state?.freeElectives?.some(item => item.subject === 'Química' && item.weighting === 0.2) ?? false
+        })
+        await page.getByRole('button', { name: 'Añadir optativa' }).click()
+        const electiveSelect = page.getByRole('combobox', { name: /Asignatura optativa/ }).first()
+        await expect(electiveSelect).toBeVisible()
+        await electiveSelect.selectOption({ label: 'Química' })
+        await page.getByRole('button', { name: '0,1' }).last().click()
+        await expect(estimate).toContainText('/ 14')
+        await page.getByRole('button', { name: '0,2' }).last().click()
+        expect((await electiveSaved).ok()).toBe(true)
 
         const orientationResponse = page.waitForResponse(response => isOrientationRequest(response.request(), 'GET'))
         await page.reload()
         const payload = await (await orientationResponse).json() as OrientationPayload
         await expect(page.getByRole('radio', { name: /Solo calcular mi nota/ })).toHaveAttribute('aria-checked', 'true')
         await expect(page.getByRole('region', { name: 'Simulador sin objetivo' })).toBeVisible()
+        await expect(page.getByRole('combobox', { name: /Asignatura optativa Química/ })).toBeVisible()
         expect(payload.savedTarget?.degreeId ?? null).toBe(initialSavedTarget?.degreeId ?? null)
         expect(payload.savedTarget?.universityId ?? null).toBe(initialSavedTarget?.universityId ?? null)
         expect(targetSaveRequests).toBe(0)
 
-        const targetStateResponse = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
-        await page.getByRole('radio', { name: /^Con objetivo/ }).click()
-        expect((await targetStateResponse).ok()).toBe(true)
+        await chooseOrientationMode(page, 'target')
         await expect(page.getByRole('combobox', { name: 'Buscar grado' }).or(page.getByRole('button', { name: /Cambiar grado/ }))).toBeVisible()
       } finally {
         page.off('request', countTargetSaves)
@@ -435,7 +454,9 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       const ibStateSaved = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
       await accessPaths.getByRole('radio', { name: /^IB/ }).click()
       expect((await ibStateSaved).ok()).toBe(true)
+      const restoredOrientation = page.waitForResponse(response => isOrientationRequest(response.request(), 'GET'))
       await page.reload()
+      expect((await restoredOrientation).ok()).toBe(true)
       const restoredPaths = page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })
       await expect(restoredPaths.getByRole('radio', { name: /^IB/ })).toHaveAttribute('aria-checked', 'true')
       await expect(page.getByRole('spinbutton', { name: 'Media de las materias del Diploma IB, nota numérica' })).toBeVisible()
@@ -443,8 +464,9 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
     })
 
     await test.step('buscador accesible y filtros útiles del catálogo', async () => {
+      await chooseOrientationMode(page, 'target')
       const changeDegree = page.getByRole('button', { name: /Cambiar grado/ })
-      if (await changeDegree.isVisible().catch(() => false)) await changeDegree.click()
+      if (await changeDegree.count()) await changeDegree.dispatchEvent('click')
       const groupedMadridTargets = groupOrientationTargets(initial.targets as unknown as OrientationTarget[])
       const economicsOffer = initial.targets.find(item => /econom/i.test(item.degree) && /Carlos III/i.test(item.university))
       const economicsGroupModel = groupedMadridTargets.find(group => group.offerings.some(item => item.id === economicsOffer?.id))
@@ -521,7 +543,7 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
       }
       await expect(page.getByText(/Datos oficiales de preinscripción 2026/)).toBeVisible()
       const selectedGroupButton = page.getByRole('button', { name: /Cambiar grado/ })
-      if (await selectedGroupButton.isVisible().catch(() => false)) await selectedGroupButton.click()
+      if (await selectedGroupButton.count()) await selectedGroupButton.dispatchEvent('click')
       const targetSearch = page.getByRole('combobox', { name: 'Buscar grado' })
       await targetSearch.fill('tecnologia ciencia')
       const degreeOptions = page.getByRole('listbox', { name: 'Resultados de titulaciones' }).getByRole('option')
@@ -659,9 +681,7 @@ test('Orientación conserva el objetivo autenticado y mantiene el simulador loca
     await test.step('el selector y el simulador no desbordan en móvil', async () => {
       await page.setViewportSize({ width: 390, height: 844 })
       await expect(page.getByRole('radiogroup', { name: 'Vía de acceso a la universidad' })).toBeVisible()
-      const modeResponse = page.waitForResponse(response => isOrientationStateRequest(response.request(), 'PATCH'))
-      await page.getByRole('radio', { name: /Solo calcular mi nota/ }).click()
-      expect((await modeResponse).ok()).toBe(true)
+      await chooseOrientationMode(page, 'free')
       const freeSimulator = page.getByRole('region', { name: 'Simulador sin objetivo' })
       await expect(freeSimulator).toBeVisible()
       const layout = await page.evaluate(() => ({

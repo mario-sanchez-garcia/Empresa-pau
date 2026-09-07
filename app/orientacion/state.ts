@@ -8,6 +8,13 @@ const MAX_SUBJECTS_PER_PATH = 128
 
 export type OrientationMode = 'target' | 'free'
 
+export type FreeElective = {
+  id: string
+  subject: string
+  grade: number
+  weighting: 0.1 | 0.2
+}
+
 export type OrientationExploration = {
   community: OrientationCommunity
   degreeGroupKey: string | null
@@ -25,6 +32,7 @@ export type OrientationStateV1 = {
   exploration: OrientationExploration
   scenarios: AccessScenarioMap
   subjectInputs: StoredSubjectInputs
+  freeElectives: FreeElective[]
 }
 
 type UnknownRecord = Record<string, unknown>
@@ -107,6 +115,22 @@ function parseSubjectInputs(value: unknown): StoredSubjectInputs | null {
   return result
 }
 
+function parseFreeElectives(value: unknown): FreeElective[] | null {
+  if (value === undefined) return []
+  if (!Array.isArray(value) || value.length > 8) return null
+  const result: FreeElective[] = []
+  for (const raw of value) {
+    const item = record(raw)
+    const id = item && typeof item.id === 'string' && item.id.length <= 80 ? item.id : null
+    const subject = item ? text(item.subject, 100) : undefined
+    const grade = item ? number(item.grade, 0, 10) : null
+    const weighting = item?.weighting === 0.1 || item?.weighting === 0.2 ? item.weighting : null
+    if (!id || !subject || grade === null || !weighting) return null
+    result.push({ id, subject, grade, weighting })
+  }
+  return result
+}
+
 export function parseOrientationState(value: unknown): OrientationStateV1 | null {
   try {
     const serialized = typeof value === 'string' ? value : JSON.stringify(value)
@@ -114,8 +138,10 @@ export function parseOrientationState(value: unknown): OrientationStateV1 | null
     const candidate = record(typeof value === 'string' ? JSON.parse(value) : value)
     if (!candidate || candidate.version !== 1 || typeof candidate.updatedAt !== 'string' || !Number.isFinite(Date.parse(candidate.updatedAt))) return null
     const activeCommunity = normalizeOrientationCommunity(candidate.activeCommunity)
-    const mode: OrientationMode | null = candidate.mode === undefined || candidate.mode === 'target'
-      ? 'target'
+    const mode: OrientationMode | null = candidate.mode === undefined
+      ? 'free'
+      : candidate.mode === 'target'
+        ? 'target'
       : candidate.mode === 'free' ? 'free' : null
     const activeAccessPath = typeof candidate.activeAccessPath === 'string' && ACCESS_PATH_IDS.includes(candidate.activeAccessPath as AccessPathId) ? candidate.activeAccessPath as AccessPathId : null
     const exploration = record(candidate.exploration)
@@ -126,8 +152,9 @@ export function parseOrientationState(value: unknown): OrientationStateV1 | null
     const universityId = uuid(exploration?.universityId)
     const scenarios = parseScenarios(candidate.scenarios)
     const subjectInputs = parseSubjectInputs(candidate.subjectInputs)
+    const freeElectives = parseFreeElectives(candidate.freeElectives)
     if (!activeCommunity || !mode || !activeAccessPath || !exploration || !explorationCommunity || degreeGroupKey === undefined || degreeName === undefined
-      || degreeId === undefined || universityId === undefined || Boolean(degreeId) !== Boolean(universityId) || !scenarios || !subjectInputs) return null
+      || degreeId === undefined || universityId === undefined || Boolean(degreeId) !== Boolean(universityId) || !scenarios || !subjectInputs || !freeElectives) return null
     return {
       version: 1,
       updatedAt: new Date(candidate.updatedAt).toISOString(),
@@ -137,6 +164,7 @@ export function parseOrientationState(value: unknown): OrientationStateV1 | null
       exploration: { community: explorationCommunity, degreeGroupKey, degreeName, degreeId, universityId },
       scenarios,
       subjectInputs,
+      freeElectives,
     }
   } catch {
     return null
@@ -148,12 +176,13 @@ export function createOrientationState(community: OrientationCommunity, accessSt
   return {
     version: 1,
     updatedAt,
-    mode: 'target',
+    mode: 'free',
     activeCommunity: community,
     activeAccessPath: stored.selectedPath,
     exploration: { community, degreeGroupKey: null, degreeName: null, degreeId: null, universityId: null },
     scenarios: stored.scenarios,
     subjectInputs: stored.subjectInputs,
+    freeElectives: [],
   }
 }
 
@@ -172,6 +201,7 @@ export function orientationStateContentKey(state: OrientationStateV1) {
     exploration: state.exploration,
     scenarios: state.scenarios,
     subjectInputs: state.subjectInputs,
+    freeElectives: state.freeElectives,
   })
 }
 

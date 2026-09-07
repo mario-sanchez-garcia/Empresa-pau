@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import { missionPlanForMinutes } from './dailyTimeCapacity'
+import { missionPlanForMinutes } from './dailyTimeCapacity.ts'
 
 // Copia local, no importada de injectPartialExamMissions.ts a propósito —
 // ese módulo importa computeExamCoverage de aquí, así que importar de vuelta
@@ -38,6 +38,24 @@ export type ExamCoverage = {
   maxProjectedCoveragePct: number
   /** missionPlanForMinutes(dailyMinutes).count — how many Curso lessons/day compression can realistically add, at this student's declared pace. Exposed so callers can project coverage at a specific EARLIER checkpoint (e.g. "3 weekdays before the exam"), not just at the exam date itself — see injectPartialExamMissions.ts's final_mini_mock placement. */
   maxPerDayCapacity: number
+}
+
+export type AutomaticExamMissionType = 'exercise_practice' | 'final_mini_mock'
+export type AutomaticExamMissionFate = 'generate' | 'delay' | 'cancelled' | 'monthly_limit'
+
+/** Conservative gate used only by automatic calendar missions. Manual access
+ * to /simulacros remains independent. */
+export function decideAutomaticExamMissionFate(
+  missionType: AutomaticExamMissionType,
+  coverage: ExamCoverage,
+  coverageDecision: 'full' | 'partial' | 'cancelled' | null,
+  monthlyLimitReached: boolean,
+): AutomaticExamMissionFate {
+  if (missionType === 'final_mini_mock') {
+    if (!coverage.computable || coverage.completedCount === 0 || coverageDecision === 'cancelled') return 'delay'
+    if (monthlyLimitReached) return 'monthly_limit'
+  }
+  return 'generate'
 }
 
 const NOT_COMPUTABLE: ExamCoverage = {

@@ -134,7 +134,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 409 })
       }
 
-      // Confirmation email sent — record consent proof non-blocking
+      // Supabase accepted the request. Actual delivery is owned by the
+      // configured SMTP provider and must not be claimed as confirmed here.
       const userId = data.user?.id
       if (userId && draftId) {
         void adminSupabase.from('billing_events').insert({
@@ -155,7 +156,7 @@ export async function POST(req: NextRequest) {
         })
       }
 
-      return NextResponse.json({ needsConfirmation: true })
+      return NextResponse.json({ needsConfirmation: true, delivery: 'requested' })
     }
 
     // ── Immediate session flow (EMAIL_CONFIRMATION_ENABLED = false) ───────────

@@ -80,7 +80,7 @@ function ErrorPage({ title, body }: { title: string; body: string }) {
           <div style={{ width: 56, height: 56, background: '#fff1f2', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20, fontSize: 24 }}>⏰</div>
           <h1 style={{ margin: '0 0 12px', fontSize: 20, fontWeight: 900, color: '#0d1424' }}>{title}</h1>
           <p style={{ margin: '0 0 24px', fontSize: 14, color: '#55627a', lineHeight: 1.6 }}>{body}</p>
-          <p style={{ margin: 0, fontSize: 12, color: '#8fa3bc' }}>Puedes pedir al alumno que comparta un enlace nuevo desde su cuenta de Kairo.</p>
+          <p style={{ margin: 0, fontSize: 12, color: '#55627a' }}>Puedes pedir al alumno que comparta un enlace nuevo desde su cuenta de Kairo.</p>
         </div>
       </div>
     </Layout>
@@ -115,7 +115,7 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
               <div key={stat.label} style={{ background: '#eef3fc', borderRadius: 16, padding: '14px 10px', textAlign: 'center', boxShadow: '0 6px 0 rgba(37,99,235,0.10), 0 10px 18px rgba(37,99,235,0.18), inset 0 2px 3px rgba(255,255,255,0.95)' }}>
                 <div style={{ fontSize: 20, marginBottom: 4 }}>{stat.icon}</div>
                 <div style={{ fontSize: 22, fontWeight: 900, color: '#0d1424', letterSpacing: '-0.02em' }}>{stat.value}</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#8fa3bc', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{stat.label}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#55627a', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{stat.label}</div>
               </div>
             ))}
           </div>
@@ -145,7 +145,7 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
                       <>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 3 }}>
                           <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{s.name}</span>
-                          <span style={{ fontSize: 11, color: '#94a3b8' }}>{nota!.toFixed(1)}/10</span>
+                          <span style={{ fontSize: 11, color: '#55627a' }}>{nota!.toFixed(1)}/10</span>
                         </div>
                         <p style={{ margin: '0 0 5px', fontSize: 12, fontWeight: 700, color: '#475569' }}>
                           Trabajando para llegar al 5
@@ -157,7 +157,7 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
                           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 2, height: 12, background: '#64748b', borderRadius: 2 }} />
                         </div>
                         <div style={{ position: 'relative', height: 12 }}>
-                          <span style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', fontSize: 10, fontWeight: 700, color: '#94a3b8' }}>5</span>
+                          <span style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', fontSize: 10, fontWeight: 700, color: '#55627a' }}>5</span>
                         </div>
                       </>
                     ) : (
@@ -166,11 +166,11 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
                           <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{s.name}</span>
                           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
                             {s.confidence === 'low' ? (
-                              <span style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8' }}>Aún con pocos datos</span>
+                              <span style={{ fontSize: 12, fontWeight: 600, color: '#55627a' }}>Aún con pocos datos</span>
                             ) : nota !== null ? (
                               <>
                                 <span style={{ fontSize: 18, fontWeight: 900, color }}>{nota.toFixed(1)}</span>
-                                <span style={{ fontSize: 12, color: '#94a3b8' }}>/10</span>
+                                <span style={{ fontSize: 12, color: '#55627a' }}>/10</span>
                                 {s.trend7d !== null && Math.abs(s.trend7d) >= 0.1 && (
                                   <span style={{ fontSize: 12, fontWeight: 800, color: s.trend7d > 0 ? '#16a34a' : '#dc2626' }}>
                                     {s.trend7d > 0 ? '▲' : '▼'} {s.trend7d > 0 ? '+' : ''}{s.trend7d.toFixed(1)}
@@ -189,7 +189,7 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
                 )
               })}
             </div>
-            <p style={{ margin: '14px 0 0', fontSize: 11, color: '#94a3b8' }}>
+            <p style={{ margin: '14px 0 0', fontSize: 11, color: '#55627a' }}>
               Proyección basada en correcciones IA · se actualiza con cada práctica
             </p>
           </div>
@@ -209,7 +209,7 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
         {/* Footer */}
         <div style={{ textAlign: 'center', paddingTop: 16, borderTop: '1px solid rgba(37,99,235,0.14)' }}>
           {isPremium ? (
-            <p style={{ margin: 0, fontSize: 12, color: '#8fa3bc' }}>
+            <p style={{ margin: 0, fontSize: 12, color: '#55627a' }}>
               Informe generado por <strong style={{ color: '#1d4ed8' }}>Kairo</strong> · Preparación PAU
             </p>
           ) : (
@@ -228,7 +228,7 @@ function ReportPage({ report, isPremium, appUrl }: { report: WeeklyReport; isPre
               >
                 Conoce el Pack Curso PAU →
               </a>
-              <p style={{ margin: '12px 0 0', fontSize: 11, color: '#8fa3bc' }}>
+              <p style={{ margin: '12px 0 0', fontSize: 11, color: '#55627a' }}>
                 Generado por <strong>Kairo</strong>
               </p>
             </div>

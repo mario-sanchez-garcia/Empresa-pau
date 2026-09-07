@@ -25,7 +25,7 @@ export default function KairoBrand({
 }: KairoBrandProps) {
   const s = scale[size]
   const inverse = variant === 'inverse'
-  const subColor = inverse ? 'rgba(255,255,255,0.64)' : '#7c8da5'
+  const subColor = inverse ? 'rgba(255,255,255,0.64)' : '#55627a'
   const stacked = format === 'stacked'
 
   const mark = (

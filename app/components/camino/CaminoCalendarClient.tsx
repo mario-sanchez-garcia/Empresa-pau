@@ -2910,37 +2910,37 @@ export default function CaminoCalendarClient() {
         </div>
 
         {/* ── RIGHT PANEL ── */}
-        <div style={{ width: 288, flexShrink: 0, flexDirection: 'column', background: 'white', borderLeft: '1px solid #e2e8f0', position: 'sticky', top: 81, maxHeight: 'calc(100vh - 81px)', overflowY: 'auto' }} className="hidden lg:flex">
+        <div style={{ width: 288, flexShrink: 0, flexDirection: 'column', background: 'var(--clay-surface)', borderLeft: '1px solid var(--clay-border)', position: 'sticky', top: 81, maxHeight: 'calc(100vh - 81px)', overflowY: 'auto' }} className="hidden lg:flex">
 
           {/* XP + División */}
-          <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
-            <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10 }}>Tu progreso</div>
+          <div style={{ padding: 16, borderBottom: '1px solid var(--clay-border)' }}>
+            <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--clay-text)', marginBottom: 10 }}>Tu progreso</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-              <span style={{ fontSize: 36, fontWeight: 900, color: '#2563eb', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{displayedXP.toLocaleString('es-ES')}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>XP</span>
+              <span style={{ fontSize: 36, fontWeight: 900, color: 'var(--clay-accent-text)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{displayedXP.toLocaleString('es-ES')}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--clay-text-muted)' }}>XP</span>
             </div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 8, padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, background: division.bg, color: division.text }}>
               <DivisionIcon tierIndex={DIVISIONS.indexOf(division)} size={12} color={division.text} strokeWidth={1.1} />
               {division.name}{nextDivision ? ` · ${nextDivision.name} en ${Math.max(0, nextDivision.min - displayedXP)} XP` : ''}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10 }}>
-              <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: 10, padding: '10px 12px' }}>
-                <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{streak > 0 ? `🔥 ${streak}` : '—'}</div>
-                <div style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>Racha</div>
+              <div style={{ background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)', borderRadius: 10, padding: '10px 12px' }}>
+                <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--clay-text)' }}>{streak > 0 ? `🔥 ${streak}` : '—'}</div>
+                <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--clay-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>Racha</div>
               </div>
-              <div style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: 10, padding: '10px 12px' }}>
-                <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{completedMainWithSims}/{Math.min(totalMain, 5)}</div>
-                <div style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>Esta semana</div>
+              <div style={{ background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)', borderRadius: 10, padding: '10px 12px' }}>
+                <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--clay-text)' }}>{completedMainWithSims}/{Math.min(totalMain, 5)}</div>
+                <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--clay-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>Esta semana</div>
               </div>
             </div>
             {caminoPlanId === 'free' && daysSinceReg !== null && (
-              <div style={{ marginTop: 8, background: '#eff6ff', borderRadius: 8, padding: '6px 10px', fontSize: 11, fontWeight: 700, color: '#1d4ed8' }}>Te quedan {Math.max(0, 7 - daysSinceReg)} días de prueba</div>
+              <div style={{ marginTop: 8, background: 'var(--clay-accent-soft)', borderRadius: 8, padding: '6px 10px', fontSize: 11, fontWeight: 700, color: 'var(--clay-accent-text)' }}>Te quedan {Math.max(0, 7 - daysSinceReg)} días de prueba</div>
             )}
           </div>
 
           {/* Mini week */}
-          <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
-            <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10 }}>{selectedWeekLabel}</div>
+          <div style={{ padding: 16, borderBottom: '1px solid var(--clay-border)' }}>
+            <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--clay-text)', marginBottom: 10 }}>{selectedWeekLabel}</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
               {weekCalendar.map((day, i) => {
                 const isPast = day.date < realToday
@@ -2950,11 +2950,11 @@ export default function CaminoCalendarClient() {
                 const dayDone = dayMain.length > 0 && dayMain.every(m => m.status === 'done')
                 return (
                   <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                    <span style={{ fontSize: 8, fontWeight: 700, color: '#94a3b8' }}>{dayLetter}</span>
+                    <span style={{ fontSize: 8, fontWeight: 700, color: 'var(--clay-text-muted)' }}>{dayLetter}</span>
                     <div style={{ position: 'relative' }}>
-                      <div style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, background: day.isToday ? '#2563eb' : isPast ? '#0f172a' : '#f1f5f9', color: day.isToday || isPast ? 'white' : '#64748b' }}>{dayNum}</div>
+                      <div style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, background: day.isToday ? 'var(--clay-accent)' : isPast ? 'var(--clay-text)' : 'var(--clay-surface-raised)', color: day.isToday ? 'var(--clay-on-accent)' : isPast ? 'var(--clay-bg)' : 'var(--clay-text-muted)' }}>{dayNum}</div>
                       {dayDone && (
-                        <span style={{ position: 'absolute', top: -3, right: -3, width: 13, height: 13, borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid white' }}>
+                        <span style={{ position: 'absolute', top: -3, right: -3, width: 13, height: 13, borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid var(--clay-surface)' }}>
                           <Check size={8} color="white" strokeWidth={3} />
                         </span>
                       )}
@@ -2966,31 +2966,31 @@ export default function CaminoCalendarClient() {
           </div>
 
           {/* Mi liga */}
-          <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
+          <div style={{ padding: 16, borderBottom: '1px solid var(--clay-border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <div style={{ fontSize: 11, fontWeight: 900, color: '#334155' }}>Mi liga</div>
+              <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--clay-text)' }}>Mi liga</div>
               <button
                 onClick={openFullRanking}
-                style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                style={{ fontSize: 10, fontWeight: 800, color: 'var(--clay-accent-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
               >
                 Clasificación →
               </button>
             </div>
             <LigaSection ligas={ligas} loading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
             {globalTop && globalTop.length > 0 && (
-              <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #f1f5f9' }}>
-                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Top 5 Global</p>
+              <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--clay-border)' }}>
+                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--clay-text-muted)]">Top 5 Global</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {globalTop.map(entry => (
-                    <RankingRow key={entry.rank} rank={entry.rank} name={entry.name} xp={entry.xp} isMe={entry.isCurrentUser} theme="light" />
+                    <RankingRow key={entry.rank} rank={entry.rank} name={entry.name} xp={entry.xp} isMe={entry.isCurrentUser} theme={clayHubTheme === 'dark' ? 'dark' : 'light'} />
                   ))}
                 </div>
                 {globalMyRank != null && globalMyRank > 5 && (
-                  <p className="mt-2 text-center text-[11px] font-bold text-slate-400">Tu puesto: #{globalMyRank}</p>
+                  <p className="mt-2 text-center text-[11px] font-bold text-[var(--clay-text-muted)]">Tu puesto: #{globalMyRank}</p>
                 )}
                 {globalNextTarget && (
-                  <p className="mt-1 text-center text-[11px] font-bold text-slate-400">
-                    Te faltan <span className="font-black text-blue-600">{globalNextTarget.xpNeeded.toLocaleString('es-ES')} XP</span> para adelantar a {globalNextTarget.name}
+                  <p className="mt-1 text-center text-[11px] font-bold text-[var(--clay-text-muted)]">
+                    Te faltan <span className="font-black text-[var(--clay-accent-text)]">{globalNextTarget.xpNeeded.toLocaleString('es-ES')} XP</span> para adelantar a {globalNextTarget.name}
                   </p>
                 )}
               </div>
@@ -2999,8 +2999,8 @@ export default function CaminoCalendarClient() {
 
           {/* Avance por asignatura */}
           {(subjectProgress.matematicas_ii != null || subjectProgress.matematicas_ccss != null || subjectProgress.lengua != null || subjectProgress.historia_espana != null || subjectProgress.fisica != null || subjectProgress.quimica != null) && (
-            <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10 }}>Tu avance</div>
+            <div style={{ padding: 16, borderBottom: '1px solid var(--clay-border)' }}>
+              <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--clay-text)', marginBottom: 10 }}>Tu avance</div>
               {([
                 { subject: 'matematicas_ii',   label: 'Matemáticas II',  total: 9,  color: '#2563eb' },
                 { subject: 'historia_espana',  label: 'Historia España', total: 10, color: '#b45309' },
@@ -3014,10 +3014,10 @@ export default function CaminoCalendarClient() {
                 return (
                   <div key={subject} style={{ marginBottom: 10 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
-                      <span style={{ fontWeight: 700, color: '#334155' }}>{label}</span>
-                      <span style={{ fontWeight: 600, color: '#94a3b8' }}>{done}/{total}</span>
+                      <span style={{ fontWeight: 700, color: 'var(--clay-text)' }}>{label}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--clay-text-muted)' }}>{done}/{total}</span>
                     </div>
-                    <div style={{ height: 4, background: '#f1f5f9', borderRadius: 2, overflow: 'hidden' }}>
+                    <div style={{ height: 4, background: 'var(--clay-border)', borderRadius: 2, overflow: 'hidden' }}>
                       <div style={{ height: '100%', borderRadius: 2, background: color, width: `${pct}%`, transition: 'width 500ms' }} />
                     </div>
                   </div>
@@ -3033,7 +3033,7 @@ export default function CaminoCalendarClient() {
             </div>
           )}
 
-          <button onClick={() => setShowAddSubjectModal(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: 10, fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: 'none', borderTop: '1px solid #f1f5f9', cursor: 'pointer' }}>+ Añadir asignatura</button>
+          <button onClick={() => setShowAddSubjectModal(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: 10, fontSize: 11, fontWeight: 700, color: 'var(--clay-text-muted)', background: 'none', border: 'none', borderTop: '1px solid var(--clay-border)', cursor: 'pointer' }}>+ Añadir asignatura</button>
         </div>
       </div>
 
@@ -3219,16 +3219,18 @@ function Shell({ children }: { children: React.ReactNode }) {
 type BlockEntry = { bloque: string; nota_proyectada: number; num_entries: number; avg_max_pts: number | null }
 type ProjectionEntry = { asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null; bloques: BlockEntry[] }
 
-function gradeColors(nota: number, confidence: 'low' | 'medium' | 'high'): { text: string; bar: string; bg: string } {
-  if (confidence === 'low') return { text: '#64748b', bar: '#94a3b8', bg: '#f8fafc' }
-  if (nota >= 7) return { text: '#15803d', bar: '#16a34a', bg: '#f0fdf4' }
-  if (nota >= 5) return { text: '#b45309', bar: '#d97706', bg: '#fffbeb' }
-  if (nota >= 4) return { text: '#92400e', bar: '#d97706', bg: '#fffbeb' }
+function gradeColors(nota: number, confidence: 'low' | 'medium' | 'high', dark: boolean): { text: string; bar: string; bg: string } {
+  if (confidence === 'low') return dark ? { text: '#9aa7c4', bar: '#94a3b8', bg: '#f8fafc' } : { text: '#64748b', bar: '#94a3b8', bg: '#f8fafc' }
+  if (nota >= 7) return dark ? { text: '#4ade80', bar: '#16a34a', bg: '#f0fdf4' } : { text: '#15803d', bar: '#16a34a', bg: '#f0fdf4' }
+  if (nota >= 5) return dark ? { text: '#fbbf24', bar: '#d97706', bg: '#fffbeb' } : { text: '#b45309', bar: '#d97706', bg: '#fffbeb' }
+  if (nota >= 4) return dark ? { text: '#fb923c', bar: '#d97706', bg: '#fffbeb' } : { text: '#92400e', bar: '#d97706', bg: '#fffbeb' }
   // nota < 4: neutral dark
-  return { text: '#1e293b', bar: '#94a3b8', bg: '#f8fafc' }
+  return dark ? { text: '#eef2fb', bar: '#94a3b8', bg: '#f8fafc' } : { text: '#1e293b', bar: '#94a3b8', bg: '#f8fafc' }
 }
 
 function NotaProyectadaCard({ projections, heroAsignatura }: { projections: ProjectionEntry[]; heroAsignatura: string | null }) {
+  const { theme: notaTheme } = useClayThemePreference()
+  const isDark = notaTheme === 'dark'
   const hero = projections.find(p => p.asignatura === heroAsignatura) ?? projections[0] ?? null
   const rest = projections.filter(p => p !== hero)
 
@@ -3244,36 +3246,36 @@ function NotaProyectadaCard({ projections, heroAsignatura }: { projections: Proj
 
   return (
     <>
-      <p style={{ fontSize: 11, fontWeight: 900, color: '#334155', marginBottom: 10 }}>Nota proyectada PAU</p>
+      <p style={{ fontSize: 11, fontWeight: 900, color: 'var(--clay-text)', marginBottom: 10 }}>Nota proyectada PAU</p>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           {hero.confidence === 'low' ? (
             <>
-              <p style={{ fontSize: 18, fontWeight: 900, color: '#64748b', lineHeight: 1, margin: 0 }}>Aún afinando</p>
-              <p style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 }}>
+              <p style={{ fontSize: 18, fontWeight: 900, color: 'var(--clay-text-muted)', lineHeight: 1, margin: 0 }}>Aún afinando</p>
+              <p style={{ fontSize: 9, fontWeight: 700, color: 'var(--clay-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 }}>
                 {Math.max(1, 3 - hero.recent_entries)} ejercicio{3 - hero.recent_entries !== 1 ? 's' : ''} más
               </p>
             </>
           ) : heroNota !== null ? (
             <>
-              <span style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>{heroNota.toFixed(1)}</span>
-              <div style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 }}>{subtitle}</div>
+              <span style={{ fontSize: 32, fontWeight: 900, color: 'var(--clay-text)', lineHeight: 1 }}>{heroNota.toFixed(1)}</span>
+              <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--clay-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 }}>{subtitle}</div>
             </>
           ) : (
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8' }}>Sin datos</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--clay-text-muted)' }}>Sin datos</span>
           )}
         </div>
         {heroNota !== null && hero.confidence !== 'low' && (
           <div style={{ textAlign: 'right' }}>
             {hasTrend ? (
               <>
-                <div style={{ fontSize: 13, fontWeight: 800, color: trend! > 0 ? '#16a34a' : '#dc2626' }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: trend! > 0 ? (isDark ? '#4ade80' : '#16a34a') : (isDark ? '#f87171' : '#dc2626') }}>
                   {trend! > 0 ? '▲' : '▼'} {trend! > 0 ? '+' : ''}{trend!.toFixed(1)}
                 </div>
-                <div style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2 }}>esta semana</div>
+                <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--clay-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2 }}>esta semana</div>
               </>
             ) : (
-              <div style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>estable</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--clay-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>estable</div>
             )}
           </div>
         )}
@@ -3282,12 +3284,12 @@ function NotaProyectadaCard({ projections, heroAsignatura }: { projections: Proj
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 12 }}>
           {rest.map(p => {
             const nota = p.nota_proyectada
-            const colors = nota !== null && p.confidence !== 'low' ? gradeColors(nota, p.confidence) : null
+            const colors = nota !== null && p.confidence !== 'low' ? gradeColors(nota, p.confidence, isDark) : null
             return (
-              <div key={p.asignatura} style={{ display: 'flex', alignItems: 'center', gap: 5, borderRadius: 99, border: '1px solid #f1f5f9', background: '#f8fafc', padding: '4px 10px' }}>
-                <span style={{ fontSize: 10, fontWeight: 800, color: '#64748b' }}>{subjectLabelFromSlug(p.asignatura)}</span>
+              <div key={p.asignatura} style={{ display: 'flex', alignItems: 'center', gap: 5, borderRadius: 99, border: '1px solid var(--clay-border)', background: 'var(--clay-surface-raised)', padding: '4px 10px' }}>
+                <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--clay-text-muted)' }}>{subjectLabelFromSlug(p.asignatura)}</span>
                 {p.confidence === 'low' ? (
-                  <span style={{ fontSize: 10, fontWeight: 600, color: '#cbd5e1' }}>—</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--clay-text-muted)' }}>—</span>
                 ) : nota !== null && colors ? (
                   <span style={{ fontSize: 10, fontWeight: 900, color: colors.text }}>{nota.toFixed(1)}</span>
                 ) : null}
@@ -5508,6 +5510,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) { return <div className="rounded-2xl bg-white p-3"><div className="mb-1 flex items-center gap-1.5 text-blue-700">{icon}<span className="text-[10px] font-black uppercase tracking-[0.12em]">{label}</span></div><p className="text-sm font-black text-slate-900">{value}</p></div> }
 
 function LigaSection({ ligas, loading, onCreateLiga, onJoinLiga }: { ligas: LigaInfo[]; loading: boolean; onCreateLiga: (nombre: string) => Promise<{ error?: string }>; onJoinLiga: (codigo: string) => Promise<{ error?: string }> }) {
+  const { theme: ligaTheme } = useClayThemePreference()
+  const isDark = ligaTheme === 'dark'
   const [mode, setMode] = useState<'idle' | 'creating' | 'joining'>('idle')
   const [nombre, setNombre] = useState('')
   const [codigo, setCodigo] = useState('')
@@ -5545,15 +5549,15 @@ function LigaSection({ ligas, loading, onCreateLiga, onJoinLiga }: { ligas: Liga
     setTimeout(() => setCopied(false), 2000)
   }
 
-  if (loading) return <p className="text-xs font-bold text-slate-400">Cargando ligas…</p>
+  if (loading) return <p className="text-xs font-bold text-[var(--clay-text-muted)]">Cargando ligas…</p>
 
   if (mode === 'creating') return (
     <div>
-      <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Crear liga</p>
+      <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--clay-text-muted)]">Crear liga</p>
       <div className="flex gap-2">
-        <input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre de la liga" maxLength={40} className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-blue-300 focus:bg-white" onKeyDown={e => e.key === 'Enter' && handleCreate()} />
-        <button onClick={handleCreate} disabled={busy || !nombre.trim()} className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50">{busy ? '…' : 'Crear'}</button>
-        <button onClick={() => { setMode('idle'); setErr(null) }} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-500">×</button>
+        <input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Nombre de la liga" maxLength={40} className="min-w-0 flex-1 rounded-xl border border-[var(--clay-border)] bg-[var(--clay-surface-raised)] px-3 py-2 text-xs font-bold text-[var(--clay-text)] outline-none focus:border-[var(--clay-accent)] focus:bg-[var(--clay-surface)]" onKeyDown={e => e.key === 'Enter' && handleCreate()} />
+        <button onClick={handleCreate} disabled={busy || !nombre.trim()} className="rounded-xl bg-[var(--clay-accent)] px-3 py-2 text-xs font-black text-[var(--clay-on-accent)] disabled:opacity-50">{busy ? '…' : 'Crear'}</button>
+        <button onClick={() => { setMode('idle'); setErr(null) }} className="rounded-xl border border-[var(--clay-border)] px-3 py-2 text-xs font-black text-[var(--clay-text-muted)]">×</button>
       </div>
       {err && <p className="mt-1.5 text-[11px] font-bold text-red-500">{err}</p>}
     </div>
@@ -5561,11 +5565,11 @@ function LigaSection({ ligas, loading, onCreateLiga, onJoinLiga }: { ligas: Liga
 
   if (mode === 'joining') return (
     <div>
-      <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Unirme a una liga</p>
+      <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--clay-text-muted)]">Unirme a una liga</p>
       <div className="flex gap-2">
-        <input value={codigo} onChange={e => setCodigo(e.target.value.toUpperCase())} placeholder="Código (ej. AB3K7M)" maxLength={10} className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-blue-300 focus:bg-white" onKeyDown={e => e.key === 'Enter' && handleJoin()} />
-        <button onClick={handleJoin} disabled={busy || !codigo.trim()} className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-black text-white disabled:opacity-50">{busy ? '…' : 'Entrar'}</button>
-        <button onClick={() => { setMode('idle'); setErr(null) }} className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-500">×</button>
+        <input value={codigo} onChange={e => setCodigo(e.target.value.toUpperCase())} placeholder="Código (ej. AB3K7M)" maxLength={10} className="min-w-0 flex-1 rounded-xl border border-[var(--clay-border)] bg-[var(--clay-surface-raised)] px-3 py-2 text-xs font-bold text-[var(--clay-text)] outline-none focus:border-[var(--clay-accent)] focus:bg-[var(--clay-surface)]" onKeyDown={e => e.key === 'Enter' && handleJoin()} />
+        <button onClick={handleJoin} disabled={busy || !codigo.trim()} className="rounded-xl bg-[var(--clay-accent)] px-3 py-2 text-xs font-black text-[var(--clay-on-accent)] disabled:opacity-50">{busy ? '…' : 'Entrar'}</button>
+        <button onClick={() => { setMode('idle'); setErr(null) }} className="rounded-xl border border-[var(--clay-border)] px-3 py-2 text-xs font-black text-[var(--clay-text-muted)]">×</button>
       </div>
       {err && <p className="mt-1.5 text-[11px] font-bold text-red-500">{err}</p>}
     </div>
@@ -5573,12 +5577,12 @@ function LigaSection({ ligas, loading, onCreateLiga, onJoinLiga }: { ligas: Liga
 
   if (ligas.length === 0) return (
     <div>
-      <p className="mb-3 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">Mi liga</p>
+      <p className="mb-3 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--clay-text-muted)]">Mi liga</p>
       <div className="flex flex-wrap gap-2">
-        <button onClick={() => { setMode('creating'); setErr(null) }} className="inline-flex items-center gap-1 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-100">
+        <button onClick={() => { setMode('creating'); setErr(null) }} className="inline-flex items-center gap-1 rounded-xl border border-[var(--clay-border)] bg-[var(--clay-accent-soft)] px-3 py-2 text-xs font-black text-[var(--clay-accent-text)] transition hover:opacity-85">
           + Crear liga
         </button>
-        <button onClick={() => { setMode('joining'); setErr(null) }} className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 hover:bg-slate-50">
+        <button onClick={() => { setMode('joining'); setErr(null) }} className="inline-flex items-center gap-1 rounded-xl border border-[var(--clay-border)] bg-[var(--clay-surface)] px-3 py-2 text-xs font-black text-[var(--clay-text)] transition hover:bg-[var(--clay-surface-raised)]">
           Unirme a una liga
         </button>
       </div>
@@ -5598,7 +5602,7 @@ function LigaSection({ ligas, loading, onCreateLiga, onJoinLiga }: { ligas: Liga
               key={l.id}
               onClick={() => setSelectedIndex(i)}
               className="rounded-full px-2.5 py-1 text-[10.5px] font-black transition"
-              style={{ background: i === activeIndex ? '#2563eb' : '#f1f5f9', color: i === activeIndex ? 'white' : '#64748b' }}
+              style={{ background: i === activeIndex ? 'var(--clay-accent)' : 'var(--clay-surface-raised)', color: i === activeIndex ? 'var(--clay-on-accent)' : 'var(--clay-text-muted)' }}
             >
               {l.nombre}
             </button>
@@ -5606,22 +5610,22 @@ function LigaSection({ ligas, loading, onCreateLiga, onJoinLiga }: { ligas: Liga
         </div>
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        <div style={{ fontSize: 11, fontWeight: 900, color: '#334155' }}>{activeLiga?.nombre}</div>
+        <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--clay-text)' }}>{activeLiga?.nombre}</div>
         <button
           onClick={copyLink}
-          style={{ fontSize: 10, fontWeight: 800, color: copied ? '#16a34a' : '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          style={{ fontSize: 10, fontWeight: 800, color: copied ? (isDark ? '#4ade80' : '#16a34a') : 'var(--clay-accent-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
         >
           {copied ? '✓ Copiado' : 'Compartir liga'}
         </button>
       </div>
       {ranked.map(m => (
-        <RankingRow key={m.user_id} rank={m.rank} name={m.name} xp={m.total_xp} isMe={m.name === 'Tú'} theme="light" />
+        <RankingRow key={m.user_id} rank={m.rank} name={m.name} xp={m.total_xp} isMe={m.name === 'Tú'} theme={isDark ? 'dark' : 'light'} />
       ))}
       {canAddMore && (
         <div className="mt-2.5 flex items-center gap-2">
-          <button onClick={() => { setMode('creating'); setErr(null) }} className="text-[10.5px] font-black text-blue-700">+ Crear otra liga</button>
-          <span className="text-slate-300">·</span>
-          <button onClick={() => { setMode('joining'); setErr(null) }} className="text-[10.5px] font-black text-slate-500">Unirme a otra</button>
+          <button onClick={() => { setMode('creating'); setErr(null) }} className="text-[10.5px] font-black text-[var(--clay-accent-text)]">+ Crear otra liga</button>
+          <span className="text-[var(--clay-text-muted)]">·</span>
+          <button onClick={() => { setMode('joining'); setErr(null) }} className="text-[10.5px] font-black text-[var(--clay-text-muted)]">Unirme a otra</button>
         </div>
       )}
     </div>

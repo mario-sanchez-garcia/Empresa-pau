@@ -21,7 +21,7 @@ export function RankingRow({ rank, name, xp, isMe, theme = 'dark' }: { rank: num
     : {
         bg: isMe ? '#eff6ff' : 'transparent',
         border: isMe ? '1px solid #dbeafe' : '1px solid transparent',
-        rankColor: '#94a3b8',
+        rankColor: '#475569',
         nameColor: isMe ? '#1d40af' : '#334155',
         xpColor: '#2563eb',
       }

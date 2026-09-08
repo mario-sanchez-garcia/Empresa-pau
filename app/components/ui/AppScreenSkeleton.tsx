@@ -8,8 +8,8 @@ import Skeleton, { SkeletonLines } from '@/app/components/ui/Skeleton'
 // forma del contenido.
 //
 // Dónde NO se usa esto, a propósito:
-//   · app/loading.tsx — el arranque de la app se queda con el KairoLoader de
-//     las letras: ahí la animación es marca, no espera.
+//   · app/loading.tsx — el arranque de la app conserva el KairoLoader de las
+//     letras: ahí la animación es la primera impresión de la marca.
 //   · /checkout y /parent-checkout — durante un pago, una silueta parece que
 //     la página ya cargó y está rota. Mejor un loader explícito.
 //   · /onboarding/finalizando — mientras se genera el Camino hay una pantalla
@@ -43,7 +43,7 @@ export default function AppScreenSkeleton({
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         {heroHeight > 0 && (
           <div
-            className="kairo-skeleton"
+            className="kairo-skeleton kairo-skeleton--dark"
             style={{ height: heroHeight, flexShrink: 0, borderRadius: 0, background: '#131c30' }}
           >
             <div

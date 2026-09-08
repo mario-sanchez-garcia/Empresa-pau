@@ -1349,6 +1349,14 @@ button:active:not(:disabled),
 [data-kairo-clay-theme="dark"] .kairo-skeleton::after {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
 }
+/* Los heroes de Camino, Zona y Ajustes son bloques oscuros grandes que imitan
+   una foto con velo negro. Con el barrido al 50 % de blanco quedaban lavados
+   de lado a lado — parecían un degradado gris, no una foto a punto de entrar.
+   Esta variante lo baja al 10 %: se sigue notando que algo está cargando, sin
+   destruir el tono oscuro que hace que la transición a la foto no dé saltos. */
+.kairo-skeleton--dark::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
 @keyframes kairo-skeleton-sweep {
   to { transform: translateX(100%); }
 }

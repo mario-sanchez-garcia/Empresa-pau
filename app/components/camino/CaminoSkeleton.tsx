@@ -60,7 +60,7 @@ export default function CaminoSkeleton() {
                 pieza real es una foto con un velo rgba(10,15,30,.88): un
                 placeholder claro daría un fogonazo blanco justo antes de que
                 entre la foto. */}
-            <div className="kairo-skeleton" style={{ height: 340, borderRadius: 0, borderBottom: '1px solid #e2e8f0', background: '#131c30' }}>
+            <div className="kairo-skeleton kairo-skeleton--dark" style={{ height: 340, borderRadius: 0, borderBottom: '1px solid #e2e8f0', background: '#131c30' }}>
               <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '24px 32px', gap: 12 }}>
                 <Skeleton width={148} height={9} radius={4} style={{ background: 'rgba(255,255,255,.16)' }} />
                 <Skeleton width={230} height={88} radius={10} style={{ background: 'rgba(255,255,255,.24)' }} />

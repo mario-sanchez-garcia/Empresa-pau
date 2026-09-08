@@ -32,7 +32,7 @@ export default function ZonaSkeleton({ variant = 'estudio' }: { variant?: ZonaVa
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
 
         {/* Hero */}
-        <div className="kairo-skeleton zona-skeleton-hero" style={{ height: 200, flexShrink: 0, borderRadius: 0, background: '#131c30' }}>
+        <div className="kairo-skeleton kairo-skeleton--dark zona-skeleton-hero" style={{ height: 200, flexShrink: 0, borderRadius: 0, background: '#131c30' }}>
           <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '20px 28px', gap: 10 }}>
             <Skeleton width={118} height={8} radius={4} style={{ background: 'rgba(255,255,255,.16)' }} />
             <Skeleton width={variant === 'cursos' ? 210 : 168} height={34} radius={8} style={{ background: 'rgba(255,255,255,.24)' }} />

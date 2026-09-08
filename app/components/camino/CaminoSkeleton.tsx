@@ -18,7 +18,7 @@ export default function CaminoSkeleton() {
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
 
         {/* Cabecera: "CAMINO PAU / Tu semana de estudio" + los cuatro botones */}
-        <div style={{ background: 'white', borderBottom: '1px solid #e2e8f0', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+        <div style={{ background: 'var(--clay-surface, white)', borderBottom: '1px solid var(--clay-border, #e2e8f0)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
             <Skeleton width={78} height={8} radius={4} />
             <Skeleton width={196} height={17} radius={6} />
@@ -29,18 +29,18 @@ export default function CaminoSkeleton() {
         </div>
 
         {/* Ticker de chips */}
-        <div style={{ background: 'rgba(248,251,255,.82)', borderBottom: '1px solid #dbeafe', padding: '8px 20px', display: 'flex', gap: 16 }}>
+        <div style={{ background: 'var(--clay-surface-raised, rgba(248,251,255,.82))', borderBottom: '1px solid var(--clay-border, #dbeafe)', padding: '8px 20px', display: 'flex', gap: 16 }}>
           {[92, 84, 88, 104, 118].map((w, i) => <Skeleton key={i} width={w} height={9} radius={5} />)}
         </div>
 
         <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
 
           {/* Columna izquierda */}
-          <div style={{ flex: 1, minWidth: 0, borderRight: '1px solid #e2e8f0', background: 'rgba(255,255,255,.86)' }}>
+          <div style={{ flex: 1, minWidth: 0, borderRight: '1px solid var(--clay-border, #e2e8f0)', background: 'var(--clay-bg, rgba(255,255,255,.86))' }}>
 
             {/* Tarjeta de objetivo */}
-            <div style={{ padding: '10px 20px', borderBottom: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 14px', border: '1px solid rgba(191,219,254,.72)', borderRadius: 12, background: 'rgba(255,255,255,.68)' }}>
+            <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--clay-border, #e2e8f0)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 14px', border: '1px solid var(--clay-border, rgba(191,219,254,.72))', borderRadius: 12, background: 'var(--clay-surface, rgba(255,255,255,.68))' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
                   <Skeleton width={54} height={8} radius={4} />
                   <Skeleton width={320} height={12} radius={6} />
@@ -60,7 +60,7 @@ export default function CaminoSkeleton() {
                 pieza real es una foto con un velo rgba(10,15,30,.88): un
                 placeholder claro daría un fogonazo blanco justo antes de que
                 entre la foto. */}
-            <div className="kairo-skeleton kairo-skeleton--dark" style={{ height: 340, borderRadius: 0, borderBottom: '1px solid #e2e8f0', background: '#131c30' }}>
+            <div className="kairo-skeleton kairo-skeleton--dark" style={{ height: 340, borderRadius: 0, borderBottom: '1px solid var(--clay-border, #e2e8f0)', background: '#131c30' }}>
               <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '24px 32px', gap: 12 }}>
                 <Skeleton width={148} height={9} radius={4} style={{ background: 'rgba(255,255,255,.16)' }} />
                 <Skeleton width={230} height={88} radius={10} style={{ background: 'rgba(255,255,255,.24)' }} />
@@ -71,7 +71,7 @@ export default function CaminoSkeleton() {
             </div>
 
             {/* Próximo parcial */}
-            <div style={{ margin: '14px 16px', padding: '18px 22px', borderLeft: '3px solid #dbeafe', background: 'rgba(255,255,255,.7)', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ margin: '14px 16px', padding: '18px 22px', borderLeft: '3px solid var(--clay-border, #dbeafe)', background: 'var(--clay-surface, rgba(255,255,255,.7))', borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div style={{ display: 'flex', gap: 8 }}>
                 <Skeleton width={104} height={9} radius={4} />
                 <Skeleton width={54} height={9} radius={4} />
@@ -90,7 +90,7 @@ export default function CaminoSkeleton() {
               <Skeleton width={92} height={10} radius={5} />
             </div>
             {[0, 1].map(i => (
-              <div key={i} style={{ margin: '0 16px 12px', padding: '20px 22px', borderLeft: '3px solid #e2e8f0', background: 'rgba(255,255,255,.7)', borderRadius: 12, display: 'flex', gap: 20, opacity: i === 1 ? 0.55 : 1 }}>
+              <div key={i} style={{ margin: '0 16px 12px', padding: '20px 22px', borderLeft: '3px solid var(--clay-border, #e2e8f0)', background: 'var(--clay-surface, rgba(255,255,255,.7))', borderRadius: 12, display: 'flex', gap: 20, opacity: i === 1 ? 0.55 : 1 }}>
                 <Skeleton width={34} height={30} radius={7} />
                 <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <div style={{ display: 'flex', gap: 8 }}>
@@ -108,7 +108,7 @@ export default function CaminoSkeleton() {
           </div>
 
           {/* Panel derecho: 288 px, oculto por debajo de lg igual que el real */}
-          <div className="camino-skeleton-aside" style={{ width: 288, flexShrink: 0, background: 'white', borderLeft: '1px solid #e2e8f0', padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 22 }}>
+          <div className="camino-skeleton-aside" style={{ width: 288, flexShrink: 0, background: 'var(--clay-surface, white)', borderLeft: '1px solid var(--clay-border, #e2e8f0)', padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 22 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <Skeleton width={86} height={10} radius={5} />
               <Skeleton width={132} height={30} radius={8} />

@@ -48,7 +48,7 @@ export function SkeletonLines({ lines = 3, height = 11, gap = 8, lastWidth = '62
  * `label` es lo único que anuncia el estado a lectores de pantalla: los bloques
  * van aria-hidden porque no significan nada leídos en voz alta.
  */
-export function SkeletonScreen({ children, background = '#f4f7fb', label = 'Cargando' }: {
+export function SkeletonScreen({ children, background = 'var(--clay-bg, #f4f7fb)', label = 'Cargando' }: {
   children: React.ReactNode
   background?: string
   label?: string
@@ -56,7 +56,7 @@ export function SkeletonScreen({ children, background = '#f4f7fb', label = 'Carg
   return (
     <div role="status" aria-live="polite" aria-busy="true" style={{ display: 'flex', minHeight: '100vh', background }}>
       <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}>{label}</span>
-      <div style={{ width: 60, flexShrink: 0, borderRight: '1px solid rgba(15,23,42,.06)' }} aria-hidden />
+      <div style={{ width: 60, flexShrink: 0, borderRight: '1px solid var(--clay-border, rgba(15,23,42,.06))' }} aria-hidden />
       {children}
     </div>
   )

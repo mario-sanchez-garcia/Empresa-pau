@@ -2382,8 +2382,14 @@ export default function CaminoCalendarClient() {
               usaba nadie. Vuelve con order:-2 para quedar bajo los banners
               (order:-3) y encima de "Esta semana" (order:-1), que es la nueva
               cabecera de la columna. El contador pequeño del ticker
-              (camino-days-until-pau) se queda: no estorba y algún test lo usa. */}
-          <div className="camino-hero" style={{ order: -2, position: 'relative', height: 340, overflow: 'hidden', borderBottom: '1px solid #e2e8f0', flexShrink: 0 }}>
+              (camino-days-until-pau) se queda: no estorba y algún test lo usa.
+
+              Rediseño clay, fase 1: solo el contenedor (esquinas + sombra de
+              color) — el texto interior (blanco fijo sobre el degradado
+              oscuro de la foto) no se toca, ya tiene su propio contraste
+              garantizado (10.6:1), igual que el hero de la landing. */}
+          <ClayThemeScope theme={clayHubTheme} style={{ order: -2, background: 'transparent' }}>
+            <div className="camino-hero" style={{ position: 'relative', height: 340, overflow: 'hidden', borderRadius: 20, boxShadow: '0 10px 0 var(--clay-shadow-shelf), 0 16px 28px var(--clay-shadow-elevate)', flexShrink: 0, margin: '0 20px', width: 'calc(100% - 40px)' }}>
             <img src={heroImageUrl} alt="" loading="eager" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.52) saturate(0.7)', display: 'block' }} />
             <div className="camino-hero-overlay" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.9) 0%, rgba(10,15,30,0.25) 70%)', padding: '28px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
               <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#93c5fd', marginBottom: 6 }}>Días hasta selectividad</div>
@@ -2395,7 +2401,8 @@ export default function CaminoCalendarClient() {
                 {heroRank != null && <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>#{heroRank}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div>}
               </div>
             </div>
-          </div>
+            </div>
+          </ClayThemeScope>
 
           {/* Sunday mock */}
           {isSunday && sundayMockSession !== undefined && sundayMockSimSubject && sundayMockBlock && (() => {

@@ -2451,14 +2451,15 @@ export default function CaminoCalendarClient() {
               a "Exámenes parciales" (rediseño clay, fase 1 del hub) — ver esa
               sección más abajo. */}
 
+          <ClayThemeScope theme={clayHubTheme} style={{ background: 'transparent' }}>
           {/* ── MISSIONS HEADER ── */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid #eef2f7', background: 'rgba(255,255,255,.72)' }}>
-            <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Haz esto ahora</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid var(--clay-border)', background: 'var(--clay-surface-raised)' }}>
+            <span style={{ fontSize: 13, fontWeight: 900, color: 'var(--clay-text)' }}>Haz esto ahora</span>
             {/* "principales" deja claro que este contador es solo del objetivo
                 semanal (role='main', tope de 5) — las bonus no cuentan aquí y
                 nunca bloquean nada, así que "sigue con las bonus" evita que
                 llegar a 5/5 se lea como un tope duro de toda la app. */}
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{completedMainWithSims}/{Math.min(totalMain, 5)} principales</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--clay-text-muted)' }}>{completedMainWithSims}/{Math.min(totalMain, 5)} principales</span>
           </div>
 
           {/* Trabajo de hoy hecho por iniciativa propia fuera de Camino
@@ -2468,8 +2469,8 @@ export default function CaminoCalendarClient() {
               (Mis Cursos) ya aparece como misión normal más abajo, marcada
               "✎ Por tu cuenta". */}
           {freeActivitySubjectsToday.length > 0 && (
-            <div style={{ padding: '10px 20px', borderBottom: '1px solid #f1f5f9', background: '#ecfdf5' }}>
-              <span style={{ fontSize: 11.5, fontWeight: 700, color: '#059669' }}>
+            <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--clay-border)', background: 'var(--clay-accent-soft)' }}>
+              <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--clay-accent-text)' }}>
                 ✎ Hoy también trabajaste por tu cuenta: {freeActivitySubjectsToday.join(', ')}
               </span>
             </div>
@@ -2477,21 +2478,21 @@ export default function CaminoCalendarClient() {
 
           {/* ── MISSION 01 — PRINCIPAL ── */}
           {mainMission ? (
-            <div className="camino-mission-card kairo-raised" data-testid="camino-main-mission" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, margin: '16px 20px', padding: '20px', borderRadius: 16, borderLeft: '3px solid #2563eb', cursor: 'default' }}>
-              <div className="camino-mission-number" style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#93c5fd', flexShrink: 0, width: 48, paddingTop: 2, fontVariantNumeric: 'tabular-nums' }}>01</div>
+            <div className="camino-mission-card" data-testid="camino-main-mission" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, margin: '16px 20px', padding: '20px', borderRadius: 16, background: 'var(--clay-surface)', boxShadow: '0 10px 0 var(--clay-shadow-shelf), 0 16px 28px var(--clay-shadow-elevate)', borderLeft: '3px solid var(--clay-accent)', cursor: 'default' }}>
+              <div className="camino-mission-number" style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: 'var(--clay-accent-soft)', flexShrink: 0, width: 48, paddingTop: 2, fontVariantNumeric: 'tabular-nums' }}>01</div>
               <div className="camino-main-body" data-testid="camino-main-body" style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6, alignItems: 'center' }}>
-                  <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mainMission.subject}</span>
-                  {(formatBlockLabel(mainMission.blockKey) || mainMission.block) && <><span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{formatBlockLabel(mainMission.blockKey) || mainMission.block}</span></>}
-                  <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#2563eb', color: 'white' }}>Principal</span>
-                  {!!mainMission.metadata?.express && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#d97706' }}>⚡ Exprés</span>}
+                  <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--clay-accent-text)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mainMission.subject}</span>
+                  {(formatBlockLabel(mainMission.blockKey) || mainMission.block) && <><span style={{ color: 'var(--clay-text-muted)', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: 'var(--clay-accent-text)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{formatBlockLabel(mainMission.blockKey) || mainMission.block}</span></>}
+                  <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: 'var(--clay-accent)', color: 'var(--clay-on-accent)' }}>Principal</span>
+                  {!!mainMission.metadata?.express && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: clayHubTheme === 'dark' ? 'rgba(251,191,36,0.14)' : '#fffbeb', color: clayHubTheme === 'dark' ? '#fbbf24' : '#d97706' }}>⚡ Exprés</span>}
                 </div>
-                <div style={{ fontSize: 16, fontWeight: 800, lineHeight: 1.3, marginBottom: 8, color: mainMission.status === 'done' ? '#94a3b8' : '#0f172a', textDecoration: mainMission.status === 'done' ? 'line-through' : 'none' }}>{mainMission.title}</div>
+                <div style={{ fontSize: 16, fontWeight: 800, lineHeight: 1.3, marginBottom: 8, color: mainMission.status === 'done' ? 'var(--clay-text-muted)' : 'var(--clay-text)', textDecoration: mainMission.status === 'done' ? 'line-through' : 'none' }}>{mainMission.title}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                  <div style={{ flex: 1, height: 3, background: '#dbeafe', borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', background: '#2563eb', borderRadius: 2, width: mainMission.status === 'done' ? '100%' : '0%' }} />
+                  <div style={{ flex: 1, height: 3, background: 'var(--clay-border)', borderRadius: 2, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', background: 'var(--clay-accent)', borderRadius: 2, width: mainMission.status === 'done' ? '100%' : '0%' }} />
                   </div>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{mainMission.estimatedMinutes} min · {mainMission.status === 'done' ? 'Completada' : 'Sin comenzar'}</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--clay-text-muted)' }}>{mainMission.estimatedMinutes} min · {mainMission.status === 'done' ? 'Completada' : 'Sin comenzar'}</span>
                 </div>
                 {!!mainPriorityPresentation?.visibleReasons.length && (
                   <div className="camino-reason-list" data-testid="camino-priority-reasons" aria-label="Razones de esta recomendación">
@@ -2511,55 +2512,56 @@ export default function CaminoCalendarClient() {
                     <p>{mainPriorityPresentation.explanation}</p>
                   </details>
                 )}
-                {mainReason && <div style={{ marginTop: 6, fontSize: 12, fontWeight: 600, color: '#64748b' }}>{mainReason}</div>}
+                {mainReason && <div style={{ marginTop: 6, fontSize: 12, fontWeight: 600, color: 'var(--clay-text-muted)' }}>{mainReason}</div>}
                 {mainMission.status !== 'done' && (
                   <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-                    <button onClick={() => postponeMission(mainMission.id)} style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>↺ Posponer</button>
+                    <button onClick={() => postponeMission(mainMission.id)} style={{ fontSize: 11, fontWeight: 700, color: 'var(--clay-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>↺ Posponer</button>
                     {canMarkNotSeen(mainMission) && (
-                      <button onClick={() => setShowNotSeenConfirm(true)} style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Aún no lo he dado</button>
+                      <button onClick={() => setShowNotSeenConfirm(true)} style={{ fontSize: 11, fontWeight: 700, color: 'var(--clay-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Aún no lo he dado</button>
                     )}
                   </div>
                 )}
               </div>
               <div className="camino-main-action" data-testid="camino-main-action" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
-                  <span style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8' }}>+{mainMission.baseXP} XP</span>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--clay-text-muted)' }}>+{mainMission.baseXP} XP</span>
                 {mainMission.status === 'done' ? (
                   mainMission.missionType === 'partial_practice' && mainTarget?.href ? (
-                    <a href={mainTarget.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669', textDecoration: 'none' }}>✓ Hecha · Ver resultado</a>
+                    <ClayLinkButton href={mainTarget.href} variant="secondary" style={{ width: 'auto', padding: '8px 16px', fontSize: 12, borderRadius: 10, color: clayHubTheme === 'dark' ? '#4ade80' : '#065f46' }}>✓ Hecha · Ver resultado</ClayLinkButton>
                   ) : (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669' }}>✓ Hecha</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)', color: clayHubTheme === 'dark' ? '#4ade80' : '#065f46' }}>✓ Hecha</span>
                   )
                 ) : mainTarget?.href ? (
-                  <a href={mainTarget.href} className="kairo-clay-action" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 900, padding: '10px 18px', borderRadius: 12, color: 'white', textDecoration: 'none' }}>Empezar misión →</a>
+                  <ClayLinkButton href={mainTarget.href} variant="primary" style={{ width: 'auto', padding: '10px 18px', fontSize: 12, borderRadius: 12 }}>Empezar misión →</ClayLinkButton>
                 ) : (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#f1f5f9', border: '1px solid #e2e8f0', color: '#94a3b8' }}>En preparación</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)', color: 'var(--clay-text-muted)' }}>En preparación</span>
                 )}
               </div>
             </div>
           ) : microMission ? (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid #f1f5f9', background: '#eff6ff', borderLeft: '3px solid #2563eb' }}>
-              <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#93c5fd', flexShrink: 0, width: 48 }}>01</div>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid var(--clay-border)', background: 'var(--clay-accent-soft)', borderLeft: '3px solid var(--clay-accent)' }}>
+              <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: 'var(--clay-accent)', flexShrink: 0, width: 48 }}>01</div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
-                  <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase' }}>{microMission.subject}</span>
-                  <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#2563eb', color: 'white' }}>Reto exprés</span>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--clay-accent-text)', textTransform: 'uppercase' }}>{microMission.subject}</span>
+                  <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: 'var(--clay-accent)', color: 'var(--clay-on-accent)' }}>Reto exprés</span>
                 </div>
-                <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>Reto exprés de hoy</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', marginTop: 4 }}>{microMission.topic} · repaso rápido</div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--clay-text)', lineHeight: 1.3 }}>Reto exprés de hoy</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--clay-text-muted)', marginTop: 4 }}>{microMission.topic} · repaso rápido</div>
               </div>
               <div style={{ flexShrink: 0 }}>
-                <a href={microMission.href} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: '#2563eb', color: 'white', textDecoration: 'none' }}>Empezar →</a>
+                <ClayLinkButton href={microMission.href} variant="primary" style={{ width: 'auto', padding: '8px 16px', fontSize: 12, borderRadius: 10 }}>Empezar →</ClayLinkButton>
               </div>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid #f1f5f9' }}>
-              <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#dbeafe', flexShrink: 0, width: 48 }}>01</div>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid var(--clay-border)' }}>
+              <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: 'var(--clay-border)', flexShrink: 0, width: 48 }}>01</div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 16, fontWeight: 800, color: '#94a3b8' }}>Completa tu perfil para empezar</div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', marginTop: 4 }}>Configura tu perfil y construiremos tu Camino PAU.</div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--clay-text-muted)' }}>Completa tu perfil para empezar</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--clay-text-muted)', marginTop: 4 }}>Configura tu perfil y construiremos tu Camino PAU.</div>
               </div>
             </div>
           )}
+          </ClayThemeScope>
 
           {/* ── BONUS SECTION (Mañana) ── */}
           {todayBonus.length > 0 && (
@@ -3008,20 +3010,20 @@ function Shell({ children }: { children: React.ReactNode }) {
           align-items: center;
           min-height: 25px;
           max-width: 100%;
-          border: 1px solid rgba(203,213,225,.9);
+          border: 1px solid var(--clay-border);
           border-radius: 999px;
-          background: #f8fafc;
-          box-shadow: inset 1px 1px 3px rgba(15,23,42,.06), inset -1px -1px 3px rgba(255,255,255,.95);
-          color: #475569;
+          background: var(--clay-surface);
+          box-shadow: inset 1px 1px 3px rgba(15,23,42,.06), inset -1px -1px 3px var(--clay-shadow-light);
+          color: var(--clay-text-muted);
           font-size: 10.5px;
           font-weight: 800;
           line-height: 1.25;
           padding: 5px 10px;
         }
         .camino-reason-chip--primary {
-          border-color: #bfdbfe;
-          background: #eff6ff;
-          color: #1d4ed8;
+          border-color: var(--clay-border);
+          background: var(--clay-accent-soft);
+          color: var(--clay-accent-text);
           font-weight: 900;
         }
         .camino-reason-chip--primary.camino-reason-chip--urgent {
@@ -3030,33 +3032,38 @@ function Shell({ children }: { children: React.ReactNode }) {
           box-shadow: 0 4px 10px rgba(234,88,12,.12), inset 0 1px 0 rgba(255,255,255,.92);
           color: #c2410c;
         }
+        [data-kairo-clay-theme="dark"] .camino-reason-chip--primary.camino-reason-chip--urgent {
+          border-color: rgba(251,191,36,0.35);
+          background: rgba(251,191,36,0.14);
+          box-shadow: none;
+          color: #fbbf24;
+        }
         .camino-reason-chip--orientation {
-          border-color: #bfdbfe;
-          background: #eff6ff;
-          color: #1d4ed8;
+          border-color: var(--clay-border);
+          background: var(--clay-accent-soft);
+          color: var(--clay-accent-text);
         }
         .camino-why-now {
           width: fit-content;
           max-width: 100%;
           margin-top: 8px;
-          border: 1px solid rgba(219,234,254,.8);
+          border: 1px solid var(--clay-border);
           border-radius: 10px;
-          background: rgba(255,255,255,.58);
-          backdrop-filter: blur(10px);
-          color: #64748b;
+          background: var(--clay-surface-raised);
+          color: var(--clay-text-muted);
           font-size: 11px;
         }
         .camino-why-now summary {
           cursor: pointer;
           list-style-position: inside;
           padding: 6px 9px;
-          color: #475569;
+          color: var(--clay-text);
           font-weight: 850;
         }
         .camino-why-now[open] { width: 100%; }
         .camino-why-now p {
           margin: 0;
-          border-top: 1px solid rgba(219,234,254,.72);
+          border-top: 1px solid var(--clay-border);
           padding: 8px 10px 9px;
           line-height: 1.45;
         }

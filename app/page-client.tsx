@@ -5690,7 +5690,7 @@ function cambiarTipo(t: Tipo) {
                 })()}
               </div>
             </div>
-            <main className="exams-screen pau-reveal" style={{ flex: 1, padding: '20px 24px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
+            <main className="exams-screen" style={{ flex: 1, padding: '20px 24px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
 
             <SectionIntroCard
               hintKey="hint_examenes"
@@ -6434,7 +6434,7 @@ function cambiarTipo(t: Tipo) {
         )}
 
         {seccion === 'chat' && (
-          <main className="tutor-screen pau-reveal" data-kairo-clay-theme={clayTheme}>
+          <main className="tutor-screen" data-kairo-clay-theme={clayTheme}>
             <div className="tutor-shell">
               <div className="tutor-hero">
                 <img src={SUBJECT_HERO_IMGS[asignatura] ?? BOOKS_IMG} alt="" loading="eager" />
@@ -6673,7 +6673,7 @@ function cambiarTipo(t: Tipo) {
         )}
 
         {seccion === 'historial' && (
-          <main className="history-screen pau-reveal">
+          <main className="history-screen">
             <div className="history-shell">
               <div className="history-hero">
                 <img
@@ -7025,7 +7025,7 @@ function cambiarTipo(t: Tipo) {
         )}
 
         {seccion === 'planning' && (
-          <main className="pau-reveal" style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
+          <main style={{ flex: 1, padding: '28px 32px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
             <div style={{ background: WARM.surface, borderRadius: '28px', border: '1px solid #dbe7fb', padding: '30px', marginBottom: '20px', textAlign: 'center', boxShadow: WARM.shadow }}>
               <div style={{ width: '64px', height: '64px', borderRadius: '22px', background: 'linear-gradient(145deg, #1d4ed8, #2563eb 52%, #38bdf8)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px', boxShadow: '0 18px 38px rgba(37,99,235,0.24), inset 0 1px 0 rgba(255,255,255,0.28)' }}><Rocket size={30} /></div>
               <div style={{ fontSize: '18px', fontWeight: 700, color: WARM.ink, marginBottom: '8px' }}>Plan de estudio personalizado</div>

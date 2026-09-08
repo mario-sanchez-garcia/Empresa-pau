@@ -13,6 +13,9 @@ import GoogleCalendarConnection from '@/app/components/camino/GoogleCalendarConn
 import CaminoAssistant from '@/app/components/camino/CaminoAssistant'
 import CaminoSkeleton from '@/app/components/camino/CaminoSkeleton'
 import SidebarNav from '@/app/components/SidebarNav'
+import ClayThemeScope from '@/components/clay/ClayThemeScope'
+import ClayButton from '@/components/clay/ClayButton'
+import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 import { supabase } from '@/app/lib/supabase'
 import { clearOnboarding, loadOnboarding, restoreOnboardingFromServer, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, getTopicByV2SortOrder, normalizeCaminoSlug, normalizeSubjectSlug, normalizeTopicSlug, resolveCaminoTopic, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
@@ -1000,6 +1003,7 @@ function calendarMatchesOnboarding(calendar: DayPlan[], onboarding: OnboardingDa
 }
 
 export default function CaminoCalendarClient() {
+  const { theme: clayHubTheme } = useClayThemePreference()
   const router = useRouter()
   const searchParams = useSearchParams()
   const isFirstSession = searchParams.get('first_session') === '1'
@@ -2293,43 +2297,49 @@ export default function CaminoCalendarClient() {
   return (
     <Shell>
       <UsernameGate />
-      {/* ── HEADER ── */}
-      <header className="kairo-topbar" style={{ position: 'sticky', top: 0, zIndex: 30 }}>
-        <div className="camino-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#2563eb' }}>Camino PAU</span>
-            <span className="camino-header-title" style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>Tu semana de estudio</span>
+      {/* ── HEADER ──
+          Rediseño clay del hub, fase 1: cabecera + ticker con tokens clay en
+          vez de la clase global .kairo-topbar (hex fijo, blanco/azul) — esa
+          clase se deja intacta en globals.css porque la usan otras
+          pantallas fuera de esta fase. */}
+      <ClayThemeScope theme={clayHubTheme} style={{ background: 'transparent' }}>
+        <header style={{ position: 'sticky', top: 0, zIndex: 30, background: 'var(--clay-surface)', borderBottom: '1px solid var(--clay-border)', boxShadow: '0 8px 28px var(--clay-shadow-elevate)' }}>
+          <div className="camino-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--clay-accent-text)' }}>Camino PAU</span>
+              <span className="camino-header-title" style={{ fontSize: 20, fontWeight: 900, color: 'var(--clay-text)', lineHeight: 1 }}>Tu semana de estudio</span>
+            </div>
+            <div className="camino-header-actions" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <GoogleCalendarConnection onOpenCalendar={() => setShowCalendarEditor(true)} />
+              <ClayButton variant="secondary" onClick={openNewExam} style={{ padding: '8px 14px', fontSize: 12, borderRadius: 12, whiteSpace: 'nowrap' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Plus size={13} /> Examen</span>
+              </ClayButton>
+              <ClayButton variant="primary" onClick={() => setShowAddSubjectModal(true)} style={{ padding: '8px 14px', fontSize: 12, borderRadius: 12, whiteSpace: 'nowrap' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><BookPlus size={13} /> Asignatura</span>
+              </ClayButton>
+            </div>
           </div>
-          <div className="camino-header-actions" style={{ display: 'flex', gap: 8 }}>
-            <GoogleCalendarConnection onOpenCalendar={() => setShowCalendarEditor(true)} />
-            <button className="kairo-soft-control" onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', cursor: 'pointer', color: '#334155', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
-              <Plus size={13} /> Examen
-            </button>
-            <button className="kairo-clay-action" onClick={() => setShowAddSubjectModal(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 14px', borderRadius: 12, cursor: 'pointer', border: 'none', color: 'white', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
-              <BookPlus size={13} /> Asignatura
+          {/* Ticker */}
+          <div style={{ background: 'var(--clay-surface-raised)', borderTop: '1px solid var(--clay-border)', padding: '5px 20px', display: 'flex', gap: 16, overflowX: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--clay-accent)', flexShrink: 0, display: 'inline-block' }} />{streak > 0 ? `${streak} días de racha` : 'Empieza tu racha hoy'}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--clay-accent)', flexShrink: 0, display: 'inline-block' }} />{completedMainWithSims}/{Math.min(totalMain, 5)} principales</div>
+            {weeklyXP > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--clay-accent)', flexShrink: 0, display: 'inline-block' }} />+{weeklyXP} XP semana</div>}
+            <div data-testid="camino-days-until-pau" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--clay-accent)', flexShrink: 0, display: 'inline-block' }} />{daysUntilPAU} días para la PAU</div>
+            {upcomingPartial && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 800, color: 'var(--clay-accent-text)', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--clay-accent)', flexShrink: 0, display: 'inline-block' }} />Parcial · {upcomingPartial.subject}</div>}
+            {/* El botón "Clasificación →" de siempre vive en el panel derecho
+                (RIGHT PANEL, hidden lg:flex) — invisible por debajo de lg. Este
+                es el mismo punto de entrada (openFullRanking) para mobile/tablet;
+                en lg+ el de la derecha ya cubre el caso y este se oculta. */}
+            <button
+              onClick={openFullRanking}
+              className="lg:hidden"
+              style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)', whiteSpace: 'nowrap', background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
+            >
+              <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--clay-accent)', flexShrink: 0, display: 'inline-block' }} />Clasificación →
             </button>
           </div>
-        </div>
-        {/* Ticker */}
-        <div style={{ background: 'rgba(248,251,255,.82)', borderBottom: '1px solid #dbeafe', padding: '5px 20px', display: 'flex', gap: 16, overflowX: 'auto', backdropFilter: 'blur(10px)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#93c5fd', flexShrink: 0, display: 'inline-block' }} />{streak > 0 ? `${streak} días de racha` : 'Empieza tu racha hoy'}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#93c5fd', flexShrink: 0, display: 'inline-block' }} />{completedMainWithSims}/{Math.min(totalMain, 5)} principales</div>
-          {weeklyXP > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#93c5fd', flexShrink: 0, display: 'inline-block' }} />+{weeklyXP} XP semana</div>}
-          <div data-testid="camino-days-until-pau" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#93c5fd', flexShrink: 0, display: 'inline-block' }} />{daysUntilPAU} días para la PAU</div>
-          {upcomingPartial && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 800, color: '#1e40af', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#2563eb', flexShrink: 0, display: 'inline-block' }} />Parcial · {upcomingPartial.subject}</div>}
-          {/* El botón "Clasificación →" de siempre vive en el panel derecho
-              (RIGHT PANEL, hidden lg:flex) — invisible por debajo de lg. Este
-              es el mismo punto de entrada (openFullRanking) para mobile/tablet;
-              en lg+ el de la derecha ya cubre el caso y este se oculta. */}
-          <button
-            onClick={openFullRanking}
-            className="lg:hidden"
-            style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap', background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
-          >
-            <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#93c5fd', flexShrink: 0, display: 'inline-block' }} />Clasificación →
-          </button>
-        </div>
-      </header>
+        </header>
+      </ClayThemeScope>
 
       {/* ── CONTENT GRID ── */}
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
@@ -2339,12 +2349,20 @@ export default function CaminoCalendarClient() {
 
           {/* Banners */}
           {BETA_FEEDBACK_URL && (
-            <div style={{ order: -3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '8px 20px', background: '#eff6ff', borderBottom: '1px solid #dbeafe' }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: '#1e40af', margin: 0 }}>Beta privada · Matemáticas II, Matemáticas CCSS, Lengua e Historia.</p>
-              <a href={BETA_FEEDBACK_URL} target="_blank" rel="noreferrer" style={{ fontSize: 11, fontWeight: 800, color: '#2563eb', background: 'white', borderRadius: 8, padding: '3px 10px', textDecoration: 'none', whiteSpace: 'nowrap' }}>Feedback</a>
-            </div>
+            <ClayThemeScope theme={clayHubTheme} style={{ order: -3, background: 'transparent' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '8px 20px', background: 'var(--clay-accent-soft)', borderBottom: '1px solid var(--clay-border)' }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--clay-accent-text)', margin: 0 }}>Beta privada · Matemáticas II, Matemáticas CCSS, Lengua e Historia.</p>
+                <a href={BETA_FEEDBACK_URL} target="_blank" rel="noreferrer" style={{ fontSize: 11, fontWeight: 800, color: 'var(--clay-accent-text)', background: 'var(--clay-surface)', borderRadius: 8, padding: '3px 10px', textDecoration: 'none', whiteSpace: 'nowrap' }}>Feedback</a>
+              </div>
+            </ClayThemeScope>
           )}
-          {isRescueMode && <div style={{ order: -3, padding: '8px 20px', background: '#fef3c7', borderBottom: '1px solid #fde68a' }}><p style={{ fontSize: 11, fontWeight: 900, color: '#92400e', margin: 0 }}>⚠️ Modo Rescate PAU — nos centramos en los temas más importantes para maximizar tu nota.</p></div>}
+          {isRescueMode && (
+            <ClayThemeScope theme={clayHubTheme} style={{ order: -3, background: 'transparent' }}>
+              <div style={{ padding: '8px 20px', background: clayHubTheme === 'dark' ? 'rgba(251,191,36,0.14)' : '#fef3c7', borderBottom: clayHubTheme === 'dark' ? '1px solid rgba(251,191,36,0.35)' : '1px solid #fde68a' }}>
+                <p style={{ fontSize: 11, fontWeight: 900, color: clayHubTheme === 'dark' ? '#fbbf24' : '#92400e', margin: 0 }}>⚠️ Modo Rescate PAU — nos centramos en los temas más importantes para maximizar tu nota.</p>
+              </div>
+            </ClayThemeScope>
+          )}
           <WeeklyCheckinBanner />
           <div style={{ order: -2 }}><ExamCoverageBanner /></div>
 

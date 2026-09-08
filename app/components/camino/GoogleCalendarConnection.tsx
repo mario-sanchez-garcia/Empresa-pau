@@ -4,12 +4,17 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { CalendarDays, Check, ChevronDown, Link2, Loader2, X } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
+import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 
 type CalendarStatus =
   | { connected: false; error?: string }
   | { connected: true; accountEmail: string | null; calendarId: string | null; calendarSummary: string | null; lastSyncedAt: string | null; watchExpiration: string | null }
 
 export default function GoogleCalendarConnection({ onOpenCalendar }: { onOpenCalendar: () => void }) {
+  const { theme: gcalTheme } = useClayThemePreference()
+  const isDark = gcalTheme === 'dark'
+  const redText = isDark ? '#f87171' : '#b91c1c'
+  const greenText = isDark ? '#4ade80' : '#15803d'
   const [status, setStatus] = useState<CalendarStatus>({ connected: false })
   const [loading, setLoading] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -112,9 +117,9 @@ export default function GoogleCalendarConnection({ onOpenCalendar }: { onOpenCal
     padding: '8px 12px',
     borderRadius: 10,
     cursor: loading ? 'default' : 'pointer',
-    border: '1px solid #e2e8f0',
-    background: 'white',
-    color: '#334155',
+    border: '1px solid var(--clay-border)',
+    background: 'var(--clay-surface)',
+    color: 'var(--clay-text)',
     transition: 'all .15s',
     flexShrink: 0,
     whiteSpace: 'nowrap',
@@ -126,27 +131,27 @@ export default function GoogleCalendarConnection({ onOpenCalendar }: { onOpenCal
       <button type="button" onClick={() => setMenuOpen(v => !v)} disabled={loading} style={buttonBase} aria-expanded={menuOpen}>
         {loading ? <Loader2 size={13} className="animate-spin" /> : <CalendarDays size={13} />}
         Calendario
-        {status.connected && <Check size={12} color="#16a34a" aria-label="Google Calendar conectado" />}
+        {status.connected && <Check size={12} color={greenText} aria-label="Google Calendar conectado" />}
         <ChevronDown size={12} />
       </button>
 
       {menuOpen && (
-        <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 60, width: 260, borderRadius: 12, border: '1px solid #e2e8f0', background: 'white', boxShadow: '0 18px 44px rgba(15,23,42,.16)', padding: 6 }}>
-          <button type="button" onClick={() => { setMenuOpen(false); onOpenCalendar() }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '10px', borderRadius: 8, border: 'none', background: 'white', color: '#0f172a', fontSize: 12, fontWeight: 850, cursor: 'pointer', textAlign: 'left' }}>
-            <CalendarDays size={15} color="#2563eb" /> Mi calendario Kairo
+        <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 60, width: 260, borderRadius: 12, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', boxShadow: '0 18px 44px rgba(15,23,42,.16)', padding: 6 }}>
+          <button type="button" onClick={() => { setMenuOpen(false); onOpenCalendar() }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '10px', borderRadius: 8, border: 'none', background: 'var(--clay-surface)', color: 'var(--clay-text)', fontSize: 12, fontWeight: 850, cursor: 'pointer', textAlign: 'left' }}>
+            <CalendarDays size={15} color="var(--clay-accent-text)" /> Mi calendario Kairo
           </button>
-          <div style={{ height: 1, background: '#f1f5f9', margin: '3px 6px' }} />
+          <div style={{ height: 1, background: 'var(--clay-border)', margin: '3px 6px' }} />
           {status.connected ? <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px' }}>
-              <Check size={14} color="#16a34a" />
-              <span style={{ minWidth: 0, fontSize: 11, fontWeight: 800, color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Google Calendar · {status.accountEmail ?? 'Conectado'}</span>
+              <Check size={14} color={greenText} />
+              <span style={{ minWidth: 0, fontSize: 11, fontWeight: 800, color: 'var(--clay-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Google Calendar · {status.accountEmail ?? 'Conectado'}</span>
             </div>
-            <button type="button" onClick={disconnect} disabled={loading} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px', borderRadius: 8, border: 'none', background: 'white', color: '#dc2626', fontSize: 12, fontWeight: 800, cursor: loading ? 'default' : 'pointer', textAlign: 'left' }}><X size={14} /> Desconectar Google</button>
+            <button type="button" onClick={disconnect} disabled={loading} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px', borderRadius: 8, border: 'none', background: 'var(--clay-surface)', color: redText, fontSize: 12, fontWeight: 800, cursor: loading ? 'default' : 'pointer', textAlign: 'left' }}><X size={14} /> Desconectar Google</button>
           </> : (
-            <button type="button" onClick={connect} disabled={loading} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '10px', borderRadius: 8, border: 'none', background: 'white', color: '#334155', fontSize: 12, fontWeight: 800, cursor: loading ? 'default' : 'pointer', textAlign: 'left' }}><Link2 size={14} /> Conectar Google Calendar</button>
+            <button type="button" onClick={connect} disabled={loading} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '10px', borderRadius: 8, border: 'none', background: 'var(--clay-surface)', color: 'var(--clay-text)', fontSize: 12, fontWeight: 800, cursor: loading ? 'default' : 'pointer', textAlign: 'left' }}><Link2 size={14} /> Conectar Google Calendar</button>
           )}
-          {statusError && <button type="button" onClick={() => void refreshStatus()} style={{ border: 0, background: 'transparent', color: '#dc2626', fontSize: 11, fontWeight: 800, cursor: 'pointer', padding: '8px 10px' }}>No se pudo comprobar Google · Reintentar</button>}
-          {message && <p style={{ margin: '5px 10px', fontSize: 11, fontWeight: 750, color: message.startsWith('No') ? '#dc2626' : '#16a34a' }}>{message}</p>}
+          {statusError && <button type="button" onClick={() => void refreshStatus()} style={{ border: 0, background: 'transparent', color: redText, fontSize: 11, fontWeight: 800, cursor: 'pointer', padding: '8px 10px' }}>No se pudo comprobar Google · Reintentar</button>}
+          {message && <p style={{ margin: '5px 10px', fontSize: 11, fontWeight: 750, color: message.startsWith('No') ? redText : greenText }}>{message}</p>}
         </div>
       )}
     </div>

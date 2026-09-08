@@ -2419,30 +2419,9 @@ export default function CaminoCalendarClient() {
             )
           })()}
 
-          {upcomingPartial && (() => {
-            // Debe ser la misión de HOY del MISMO examen que el banner
-            // muestra (upcomingPartial), no cualquier partial_practice de
-            // hoy: con dos parciales activos (p.ej. Mates y Historia) cuyas
-            // prácticas caen el mismo día, filtrar solo por missionType
-            // podía coger la de Mates aunque el banner mostrara Historia —
-            // ese missionId viajaba a /api/practica-parcial, que lo usa
-            // para reutilizar/devolver una sesión existente sin mirar
-            // subject/block, así que "Empezar" en el parcial de Historia
-            // podía abrir (o reanudar) la sesión de Mates.
-            const todayPartialMission = today.missions.find(
-              m => m.missionType === 'partial_practice' && m.metadata?.partial_exam_id === upcomingPartial.id
-            )
-            return (
-              <div style={{ padding: '8px 20px', borderBottom: '1px solid #f1f5f9' }}>
-                <PartialExamBanner
-                  exam={upcomingPartial}
-                  today={realToday}
-                  completedToday={todayPartialMission?.status === 'done'}
-                  missionId={todayPartialMission?.status === 'pending' ? todayPartialMission.id : undefined}
-                />
-              </div>
-            )
-          })()}
+          {/* PartialExamBanner se mueve debajo del calendario semanal, junto
+              a "Exámenes parciales" (rediseño clay, fase 1 del hub) — ver esa
+              sección más abajo. */}
 
           {/* ── MISSIONS HEADER ── */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid #eef2f7', background: 'rgba(255,255,255,.72)' }}>
@@ -2719,6 +2698,30 @@ export default function CaminoCalendarClient() {
 
           {/* ── EXAMS SECTION ── */}
           <div style={{ padding: '16px 20px', borderTop: '1px solid #e2e8f0' }}>
+            {upcomingPartial && (() => {
+              // Debe ser la misión de HOY del MISMO examen que el banner
+              // muestra (upcomingPartial), no cualquier partial_practice de
+              // hoy: con dos parciales activos (p.ej. Mates y Historia) cuyas
+              // prácticas caen el mismo día, filtrar solo por missionType
+              // podía coger la de Mates aunque el banner mostrara Historia —
+              // ese missionId viajaba a /api/practica-parcial, que lo usa
+              // para reutilizar/devolver una sesión existente sin mirar
+              // subject/block, así que "Empezar" en el parcial de Historia
+              // podía abrir (o reanudar) la sesión de Mates.
+              const todayPartialMission = today.missions.find(
+                m => m.missionType === 'partial_practice' && m.metadata?.partial_exam_id === upcomingPartial.id
+              )
+              return (
+                <div style={{ marginBottom: 12 }}>
+                  <PartialExamBanner
+                    exam={upcomingPartial}
+                    today={realToday}
+                    completedToday={todayPartialMission?.status === 'done'}
+                    missionId={todayPartialMission?.status === 'pending' ? todayPartialMission.id : undefined}
+                  />
+                </div>
+              )
+            })()}
             <div style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               Exámenes parciales
               <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, padding: '5px 10px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155' }}>+ Añadir</button>

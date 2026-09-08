@@ -97,22 +97,14 @@ async function interceptPriorityMission(page: Page) {
   })
 }
 
-test('muestra el objetivo persistido y el escenario local coincidente', async ({ page }) => {
+test('el objetivo persistido y el escenario local influyen en la prioridad', async ({ page }) => {
   await page.addInitScript(context => localStorage.setItem('kairo.orientation.camino-context.v1', JSON.stringify(context)), localContext)
   await interceptProfile(page, target)
   await interceptPriorityMission(page)
   await page.goto('/camino')
 
-  const targetCard = page.getByTestId('camino-orientation-target')
-  await expect(targetCard.getByText('Objetivo', { exact: true })).toBeVisible()
-  await expect(targetCard.getByText('Economía · UC3M', { exact: true })).toBeVisible()
-  await expect(targetCard.getByText('Referencia', { exact: true })).toBeVisible()
-  await expect(targetCard.getByText('11,7', { exact: true })).toBeVisible()
-  await expect(targetCard.getByText('Tu escenario', { exact: true })).toBeVisible()
-  await expect(targetCard.getByText('11,2', { exact: true })).toBeVisible()
-  await expect(targetCard.getByText('Gap', { exact: true })).toBeVisible()
-  await expect(targetCard.getByText('0,5', { exact: true })).toBeVisible()
-  await expect(targetCard.getByRole('link', { name: 'Ver orientación' })).toHaveAttribute('href', '/orientacion')
+  await expect(page.getByTestId('camino-main-mission')).toBeVisible()
+  await expect(page.getByTestId('camino-orientation-target')).toHaveCount(0)
   const reasons = page.getByTestId('camino-priority-reasons').locator('.camino-reason-chip')
   await expect(reasons).toHaveCount(2)
   await expect(reasons.nth(0)).toHaveText('Examen en 4 días')
@@ -126,20 +118,27 @@ test('sin objetivo no añade el bloque y Camino sigue siendo responsive', async 
   await page.setViewportSize({ width: 390, height: 844 })
   await page.addInitScript(() => localStorage.removeItem('kairo.orientation.camino-context.v1'))
   await interceptProfile(page, null)
+  await interceptPriorityMission(page)
   await page.goto('/camino')
 
+  await expect(page.getByTestId('camino-main-mission')).toBeVisible()
   await expect(page.getByTestId('camino-orientation-target')).toHaveCount(0)
+  const reasons = page.getByTestId('camino-priority-reasons').locator('.camino-reason-chip')
+  await expect(reasons).toHaveCount(1)
+  await expect(reasons.nth(0)).toHaveText('Examen en 4 días')
+  await expect(page.locator('.camino-reason-chip--orientation')).toHaveCount(0)
   const dimensions = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }))
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1)
 })
 
-test('un objetivo catalán llega a Camino con sus razones territoriales', async ({ page }) => {
+test('un objetivo catalán llega a las prioridades con sus razones territoriales', async ({ page }) => {
   await page.addInitScript(context => localStorage.setItem('kairo.orientation.camino-context.v1', JSON.stringify(context)), catalunyaContext)
   await interceptProfile(page, catalunyaTarget)
   await interceptPriorityMission(page)
   await page.goto('/camino')
 
-  await expect(page.getByTestId('camino-orientation-target')).toContainText('Dret (Barcelona) · UB')
+  await expect(page.getByTestId('camino-main-mission')).toBeVisible()
+  await expect(page.getByTestId('camino-orientation-target')).toHaveCount(0)
   const reasons = page.getByTestId('camino-priority-reasons').locator('.camino-reason-chip')
   await expect(reasons.nth(0)).toHaveText('Examen en 4 días')
   await expect(reasons.nth(1)).toHaveText('Pondera 0,2 para tu objetivo')
@@ -147,14 +146,14 @@ test('un objetivo catalán llega a Camino con sus razones territoriales', async 
   await expect(page.getByTestId('camino-why-now')).toContainText('Dret (Barcelona) en UB')
 })
 
-test('a 390 px el objetivo, la semana y la misión principal conservan ancho útil sin overflow', async ({ page }) => {
+test('a 390 px la semana y la misión principal conservan ancho útil sin overflow', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.addInitScript(context => localStorage.setItem('kairo.orientation.camino-context.v1', JSON.stringify(context)), localContext)
   await interceptProfile(page, target)
   await interceptPriorityMission(page)
   await page.goto('/camino')
 
-  await expect(page.getByTestId('camino-orientation-target')).toBeVisible()
+  await expect(page.getByTestId('camino-orientation-target')).toHaveCount(0)
   await expect(page.getByTestId('camino-week-overview')).toBeVisible()
   await expect(page.getByTestId('camino-days-until-pau')).toBeVisible()
   const mission = page.getByTestId('camino-main-mission')

@@ -3041,12 +3041,12 @@ export default function CaminoCalendarClient() {
       <AnimatePresence>
         {showNotSeenConfirm && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="kairo-subtle-backdrop fixed inset-0 z-50 grid place-items-center p-4">
-            <motion.div initial={{ scale: 0.96, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} className="kairo-modal-card w-full max-w-sm p-6">
-              <h3 className="text-lg font-black text-slate-950">¿Aún no lo has dado en clase?</h3>
-              <p className="mt-2 text-sm font-semibold text-slate-500">Lo guardamos para más adelante. Hoy te daremos una alternativa para que no pierdas el ritmo.</p>
+            <motion.div initial={{ scale: 0.96, y: 12 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.96, y: 12 }} className="w-full max-w-sm p-6" style={{ background: 'var(--clay-surface)', border: '1px solid var(--clay-border)', borderRadius: 18, boxShadow: '0 18px 50px rgba(15,23,42,0.18)', backdropFilter: 'blur(18px) saturate(1.12)', WebkitBackdropFilter: 'blur(18px) saturate(1.12)' }}>
+              <h3 className="text-lg font-black" style={{ color: 'var(--clay-text)' }}>¿Aún no lo has dado en clase?</h3>
+              <p className="mt-2 text-sm font-semibold" style={{ color: 'var(--clay-text-muted)' }}>Lo guardamos para más adelante. Hoy te daremos una alternativa para que no pierdas el ritmo.</p>
               <div className="mt-5 flex justify-end gap-2">
-                <button disabled={markNotSeenBusy} onClick={() => setShowNotSeenConfirm(false)} className="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-black text-slate-500 disabled:opacity-60">Cancelar</button>
-                <button disabled={markNotSeenBusy} onClick={markNotSeenHero} className="rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-black text-white disabled:opacity-60">{markNotSeenBusy ? 'Guardando…' : 'Confirmar'}</button>
+                <button disabled={markNotSeenBusy} onClick={() => setShowNotSeenConfirm(false)} className="rounded-2xl border px-4 py-2.5 text-sm font-black disabled:opacity-60" style={{ borderColor: 'var(--clay-border)', color: 'var(--clay-text-muted)' }}>Cancelar</button>
+                <button disabled={markNotSeenBusy} onClick={markNotSeenHero} className="rounded-2xl px-4 py-2.5 text-sm font-black disabled:opacity-60" style={{ background: 'var(--clay-accent)', color: 'var(--clay-on-accent)' }}>{markNotSeenBusy ? 'Guardando…' : 'Confirmar'}</button>
               </div>
             </motion.div>
           </motion.div>

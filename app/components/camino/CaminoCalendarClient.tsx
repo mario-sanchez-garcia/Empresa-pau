@@ -1544,7 +1544,6 @@ export default function CaminoCalendarClient() {
 
   const realToday = todayMadrid()
   const orientationContext = matchingOrientationContext(localOrientationContext, persistedOrientationTarget)
-  const orientationTarget: PersistedOrientationGoal | null = persistedOrientationTarget ?? null
   const visibleCalendar = visibleCalendarForOnboarding(calendar, onboarding).map(day => ({
     ...day,
     missions: day.missions.map(mission => withPriorityReasons(mission, orientationContext, realToday)),
@@ -2273,9 +2272,6 @@ export default function CaminoCalendarClient() {
   const mainReason = mainMission && mainPriorityPresentation?.visibleReasons.length === 0
     ? heroReason(mainMission, blockCompletedCount, nextMissionInCalendar?.title ?? null)
     : null
-  const orientationUniversity = orientationContext?.target.universityAcronym || orientationTarget?.university || ''
-  const formatOrientationScore = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 3 })
-
   async function refreshAfterChat() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user?.id || !session.access_token) return
@@ -2353,28 +2349,12 @@ export default function CaminoCalendarClient() {
           <div style={{ order: -2 }}><ExamCoverageBanner /></div>
 
           {/* ── OBJETIVO DE ORIENTACIÓN ──
-              0f1e99e lo escondió a propósito (su test "oculta el objetivo
-              visual pero conserva su prioridad interna") dejando solo las
-              razones de prioridad de la misión. Mario pide la estética
-              anterior: la tarjeta vuelve tal cual, con order:-2 para caer
-              junto a los banners, encima del hero. La prioridad interna que
-              añadió ese commit se queda: son cosas distintas. */}
-          {orientationTarget && (
-            <div style={{ order: -2, padding: '10px 20px', borderBottom: '1px solid #e2e8f0', background: 'linear-gradient(135deg,rgba(239,246,255,.72),rgba(255,255,255,.68))' }}>
-              <div className="camino-target-card kairo-soft-panel" data-testid="camino-orientation-target" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 14, padding: '10px 14px', border: '1px solid rgba(191,219,254,.72)', background: 'rgba(255,255,255,.68)', backdropFilter: 'blur(14px)', boxShadow: '0 8px 28px rgba(37,99,235,.07), inset 0 1px 0 rgba(255,255,255,.9)' }}>
-                <div className="camino-target-objective" style={{ minWidth: 0 }}>
-                  <span className="camino-target-label">Objetivo</span>
-                  <p style={{ margin: '3px 0 0', fontSize: 13, fontWeight: 900, color: '#0f172a', lineHeight: 1.25 }}>{orientationTarget.degree} · {orientationUniversity}</p>
-                </div>
-                <div className="camino-target-metrics">
-                  <div><span className="camino-target-label">Referencia</span><strong>{formatOrientationScore(orientationTarget.admissionScore)}</strong></div>
-                  {orientationContext?.calculationComplete && orientationContext.estimatedScore != null && <div><span className="camino-target-label">Tu escenario</span><strong>{formatOrientationScore(orientationContext.estimatedScore)}</strong></div>}
-                  {orientationContext?.calculationComplete && orientationContext.gap != null && <div><span className="camino-target-label">Gap</span><strong className={orientationContext.gap < 0 ? 'is-below' : 'is-above'}>{orientationContext.gap > 0 ? '+' : ''}{formatOrientationScore(Math.abs(orientationContext.gap))}</strong></div>}
-                </div>
-                <a href="/orientacion" style={{ flexShrink: 0, fontSize: 10.5, fontWeight: 900, color: '#2563eb', textDecoration: 'none', whiteSpace: 'nowrap' }}>Ver orientación →</a>
-              </div>
-            </div>
-          )}
+              Se quita de esta pantalla (rediseño clay, fase 1 del hub) — deja
+              de mostrarse aquí, pero orientationTarget/orientationContext NO
+              se tocan: siguen alimentando la prioridad de misiones
+              (generateCalendar, withPriorityReasons, rankMissionCandidates) y
+              las razones de prioridad visibles en la propia tarjeta de
+              misión. Solo se retira este bloque de JSX. */}
 
           {/* ── HERO ──
               Lo eliminó 0f1e99e (feat(camino): integrar chat seguro con
@@ -2986,33 +2966,6 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
       <style>{`
-        .camino-target-label {
-          display: block;
-          color: #64748b;
-          font-size: 8.5px;
-          font-weight: 900;
-          letter-spacing: .1em;
-          line-height: 1.2;
-          text-transform: uppercase;
-        }
-        .camino-target-objective .camino-target-label { color: #2563eb; }
-        .camino-target-metrics {
-          display: flex;
-          align-items: center;
-          gap: 18px;
-          margin-left: auto;
-        }
-        .camino-target-metrics > div { min-width: 58px; }
-        .camino-target-metrics strong {
-          display: block;
-          margin-top: 2px;
-          color: #0f172a;
-          font-size: 12px;
-          font-variant-numeric: tabular-nums;
-          line-height: 1.2;
-        }
-        .camino-target-metrics strong.is-below { color: #b45309; }
-        .camino-target-metrics strong.is-above { color: #047857; }
         .camino-reason-list {
           display: flex;
           flex-wrap: wrap;
@@ -3107,18 +3060,12 @@ function Shell({ children }: { children: React.ReactNode }) {
           }
           .camino-main-action > a,
           .camino-main-action > span:not(:first-child) { justify-content: center; min-width: 0; }
-          .camino-target-card { align-items: flex-end !important; }
-          .camino-target-objective { flex-basis: 100%; }
-          .camino-target-metrics { order: 2; margin-left: 0; gap: 15px; }
-          .camino-target-card > a { order: 3; }
         }
 
         @media (max-width: 420px) {
           .camino-mission-card { margin-left: 12px !important; margin-right: 12px !important; gap: 12px !important; }
           .camino-main-body { flex-basis: calc(100% - 48px) !important; }
           .camino-main-action { width: calc(100% - 48px) !important; margin-left: 48px !important; }
-          .camino-target-metrics { width: 100%; justify-content: space-between; }
-          .camino-target-card > a { margin-top: 1px; }
         }
       `}</style>
       <SidebarNav />

@@ -36,7 +36,12 @@ export async function POST(request: NextRequest) {
   }
 
   // Require explicit withdrawal waiver
-  if (!body.withdrawal_accepted) {
+  // A19 de la auditoría: esto era `if (!body.withdrawal_accepted)`, que acepta
+  // cualquier valor truthy — la cadena "no" incluida. Es un consentimiento con
+  // efectos legales (renuncia al desistimiento), así que se exige el booleano
+  // exacto. Los dos clientes que llaman aquí ya envían `true` literal
+  // (app/checkout/page.tsx y ParentCheckoutClient.tsx), así que no rompe nada.
+  if (body.withdrawal_accepted !== true) {
     return NextResponse.json({ error: 'Debes aceptar la renuncia al desistimiento antes de pagar.' }, { status: 400 })
   }
   const withdrawalVersion = typeof body.withdrawal_version === 'string' ? body.withdrawal_version : 'unknown'

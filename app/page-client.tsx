@@ -4711,6 +4711,26 @@ function cambiarTipo(t: Tipo) {
           }
         }
 
+        /* A12 de la auditoría del 7-8 de septiembre de 2026: entre 768 y
+           1024 px el contenido se metía debajo de la navegación fija.
+           Causa: la regla de arriba pasa el shell a display:block, y en
+           flujo de bloque .kairo-sidebar-spacer (el div de 60 px de
+           SidebarNav) deja de empujar el contenido a la derecha — se apila
+           encima. Como el rail sigue siendo de posición fija hasta los
+           767 px, el contenido arranca en x=0 y queda tapado.
+           Se sustituye el empuje del spacer por padding en el propio shell,
+           sin tocar el display:block que ya esperaba el resto del layout.
+           Por debajo de 768 px no aplica: ahí el rail se convierte en barra
+           inferior y SidebarNav ya oculta el spacer. */
+        @media (min-width: 768px) and (max-width: 1024px) {
+          .kairo-app-shell {
+            padding-left: 60px;
+          }
+          .kairo-sidebar-spacer {
+            display: none !important;
+          }
+        }
+
         /* iPad/tablet: estos heroes (200px, pensados para escritorio) solo
            tenían recorte para móvil (max-width:767px) — en tablet se
            quedaban a altura completa, dejando muy poco sitio para el

@@ -438,10 +438,17 @@ export default function LandingPage() {
                 <div style={{ height: 2, background: '#1c1c1c', width: '78%' }} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                {/* A13 de la auditoría del 7-8 de septiembre de 2026: esta demo
+                    tenía dos errores. Las tres filas sumaban 6,8 sobre 8 puntos
+                    mientras el titular anunciaba 7,8 sobre 10 — faltaba un
+                    criterio entero que el visitante no veía. Ahora los cuatro
+                    criterios suman 10 y lo obtenido suma 7,8, que es la nota
+                    que se muestra arriba. */}
                 {[
-                  { item: 'Derivada calculada', pts: '3,0 / 3,0' },
-                  { item: 'Puntos críticos',    pts: '2,0 / 2,0' },
-                  { item: 'Tabla de monotonía', pts: '1,8 / 3,0' },
+                  { item: 'Derivada calculada',      pts: '3,0 / 3,0' },
+                  { item: 'Puntos críticos',         pts: '2,0 / 2,0' },
+                  { item: 'Tabla de monotonía',      pts: '1,8 / 3,0' },
+                  { item: 'Conclusión de monotonía', pts: '1,0 / 2,0' },
                 ].map((row) => (
                   <div key={row.item} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
                     <span style={{ color: '#5a5a5a' }}>{row.item}</span>
@@ -449,7 +456,13 @@ export default function LandingPage() {
                   </div>
                 ))}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginTop: 6, paddingTop: 6, borderTop: '1px solid #eee' }}>
-                  <span style={{ color: '#aaa', fontSize: 10 }}>Falta intervalo (0, 1/e)</span>
+                  {/* El otro error de A13, y el peor: el intervalo estaba mal.
+                      f(x) = x³·ln(x) tiene f'(x) = x²·(3·ln x + 1), que se anula
+                      en ln x = −1/3, o sea en x = e^(−1/3) ≈ 0,717. El texto
+                      anterior decía 1/e ≈ 0,368, que no es raíz de nada aquí.
+                      Publicar una demo de corrección con las matemáticas mal es
+                      el peor sitio posible para equivocarse. */}
+                  <span style={{ color: '#aaa', fontSize: 10 }}>Falta el intervalo (0, e^(−1/3))</span>
                   <span style={{ fontFamily: M, color: '#aaa', fontSize: 10 }}>−1,2</span>
                 </div>
               </div>

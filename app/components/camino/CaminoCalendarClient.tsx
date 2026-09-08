@@ -15,6 +15,7 @@ import CaminoSkeleton from '@/app/components/camino/CaminoSkeleton'
 import SidebarNav from '@/app/components/SidebarNav'
 import ClayThemeScope from '@/components/clay/ClayThemeScope'
 import ClayButton from '@/components/clay/ClayButton'
+import ClayLinkButton from '@/components/clay/ClayLinkButton'
 import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 import { supabase } from '@/app/lib/supabase'
 import { clearOnboarding, loadOnboarding, restoreOnboardingFromServer, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
@@ -2408,39 +2409,41 @@ export default function CaminoCalendarClient() {
           {isSunday && sundayMockSession !== undefined && sundayMockSimSubject && sundayMockBlock && (() => {
             const simLimitReached = monthlySimsUsed >= getCaminoPlanLimits(caminoPlanId).partialsPerMonth
             return (
-              <div style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9' }}>
-                {sundayMockSession !== null ? (
-                  <div style={{ borderRadius: 14, border: '1px solid #bfdbfe', background: 'linear-gradient(135deg,#eff6ff,#eef2ff)', padding: '12px 16px' }}>
-                    <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#2563eb', margin: 0 }}>Simulacro del Domingo</p>
-                    <p style={{ fontSize: 14, fontWeight: 900, color: '#1e293b', margin: '4px 0 0' }}>Simulacro del Domingo hecho ✓</p>
-                    {(() => {
-                      const heroProj = filteredProjection?.find(p => p.asignatura === heroAsignatura)
-                      const nota = sundayMockSession.nota_final
-                      const proj = heroProj?.nota_proyectada ?? null
-                      if (nota == null) return null
-                      if (proj != null && heroProj?.confidence !== 'low') {
-                        const delta = Math.round((nota - proj) * 10) / 10
-                        const sign = delta >= 0 ? '+' : ''
-                        return <p style={{ fontSize: 12, color: '#1d4ed8', margin: '4px 0 0', fontWeight: 600 }}>{sign}{delta.toFixed(1).replace('.', ',')} vs proyección · {nota.toFixed(1)}/10</p>
-                      }
-                      return <p style={{ fontSize: 12, color: '#1d4ed8', margin: '4px 0 0', fontWeight: 600 }}>Sacaste {nota.toFixed(1)}/10 esta semana</p>
-                    })()}
-                  </div>
-                ) : simLimitReached ? (
-                  <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', background: '#f8fafc', padding: '16px 20px' }}>
-                    <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>Simulacro del Domingo</p>
-                    <p style={{ fontSize: 15, fontWeight: 900, color: '#64748b', margin: '6px 0 4px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} · ~20 min</p>
-                    <p style={{ fontSize: 12, color: '#94a3b8', margin: 0, fontWeight: 600 }}>Has alcanzado el límite de simulacros de este mes. {monthlyLimitResetNotice()}</p>
-                  </div>
-                ) : (
-                  <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: '3px solid #0f172a', background: 'white', padding: '16px 20px' }}>
-                    <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>Simulacro del Domingo</p>
-                    <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} · ~20 min</p>
-                    <p style={{ fontSize: 12, color: '#64748b', margin: 0, fontWeight: 600 }}>El momento que más mueve tu Nota Proyectada.</p>
-                    <button onClick={startSundayMock} style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 10, background: '#2563eb', padding: '8px 16px', fontSize: 12, fontWeight: 800, color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 4px 14px rgba(37,99,235,.22)' }}>Empezar simulacro →</button>
-                  </div>
-                )}
-              </div>
+              <ClayThemeScope theme={clayHubTheme} style={{ background: 'transparent' }}>
+                <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--clay-border)' }}>
+                  {sundayMockSession !== null ? (
+                    <div style={{ borderRadius: 14, border: '1px solid var(--clay-border)', background: 'var(--clay-accent-soft)', padding: '12px 16px' }}>
+                      <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--clay-accent-text)', margin: 0 }}>Simulacro del Domingo</p>
+                      <p style={{ fontSize: 14, fontWeight: 900, color: 'var(--clay-text)', margin: '4px 0 0' }}>Simulacro del Domingo hecho ✓</p>
+                      {(() => {
+                        const heroProj = filteredProjection?.find(p => p.asignatura === heroAsignatura)
+                        const nota = sundayMockSession.nota_final
+                        const proj = heroProj?.nota_proyectada ?? null
+                        if (nota == null) return null
+                        if (proj != null && heroProj?.confidence !== 'low') {
+                          const delta = Math.round((nota - proj) * 10) / 10
+                          const sign = delta >= 0 ? '+' : ''
+                          return <p style={{ fontSize: 12, color: 'var(--clay-accent-text)', margin: '4px 0 0', fontWeight: 600 }}>{sign}{delta.toFixed(1).replace('.', ',')} vs proyección · {nota.toFixed(1)}/10</p>
+                        }
+                        return <p style={{ fontSize: 12, color: 'var(--clay-accent-text)', margin: '4px 0 0', fontWeight: 600 }}>Sacaste {nota.toFixed(1)}/10 esta semana</p>
+                      })()}
+                    </div>
+                  ) : simLimitReached ? (
+                    <div style={{ borderRadius: 14, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', padding: '16px 20px' }}>
+                      <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--clay-text-muted)', margin: 0 }}>Simulacro del Domingo</p>
+                      <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--clay-text-muted)', margin: '6px 0 4px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} · ~20 min</p>
+                      <p style={{ fontSize: 12, color: 'var(--clay-text-muted)', margin: 0, fontWeight: 600 }}>Has alcanzado el límite de simulacros de este mes. {monthlyLimitResetNotice()}</p>
+                    </div>
+                  ) : (
+                    <div style={{ borderRadius: 14, border: '1px solid var(--clay-border)', borderLeft: '3px solid var(--clay-accent)', background: 'var(--clay-surface)', padding: '16px 20px' }}>
+                      <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--clay-text-muted)', margin: 0 }}>Simulacro del Domingo</p>
+                      <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--clay-text)', margin: '6px 0 4px', lineHeight: 1.3 }}>3 ejercicios de {sundayMockBlock} · ~20 min</p>
+                      <p style={{ fontSize: 12, color: 'var(--clay-text-muted)', margin: 0, fontWeight: 600 }}>El momento que más mueve tu Nota Proyectada.</p>
+                      <ClayButton variant="primary" onClick={startSundayMock} style={{ marginTop: 12, padding: '8px 16px', fontSize: 12, borderRadius: 10 }}>Empezar simulacro →</ClayButton>
+                    </div>
+                  )}
+                </div>
+              </ClayThemeScope>
             )
           })()}
 
@@ -4384,6 +4387,7 @@ const PARTIAL_BLOCK_DISPLAY: Record<string, string> = {
 }
 
 function PartialExamBanner({ exam, today, completedToday = false, missionId }: { exam: StudentExam; today: string; completedToday?: boolean; missionId?: string }) {
+  const { theme: peTheme } = useClayThemePreference()
   const daysDiff = Math.round(
     (new Date(exam.date + 'T12:00:00Z').getTime() - new Date(today + 'T12:00:00Z').getTime()) / 86400000
   )
@@ -4415,19 +4419,28 @@ function PartialExamBanner({ exam, today, completedToday = false, missionId }: {
   // render a partir de exam.examScope, así que cambiarlo al editar el
   // examen se refleja al instante sin ningún estado aparte.
   const isGlobalScope = exam.examScope === 'global'
-  const scopeColor = isGlobalScope ? '#7c3aed' : '#2563eb'
+  // Morado (global) / azul (parcial): mismo reparto semántico de siempre,
+  // con variante clara/oscura propia porque el hex fijo original solo
+  // pasaba contraste sobre fondo claro.
+  const scopeColor = isGlobalScope ? (peTheme === 'dark' ? '#c4b5fd' : '#7c3aed') : 'var(--clay-accent-text)'
   const scopeBadge = (
-    <span style={{ display: 'inline-flex', alignItems: 'center', borderRadius: 999, padding: '2px 8px', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.06em', color: scopeColor, background: isGlobalScope ? '#f5f3ff' : '#eff6ff', border: `1px solid ${scopeColor}33` }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', borderRadius: 999, padding: '2px 8px', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.06em', color: scopeColor, background: 'var(--clay-surface-raised)', border: `1px solid var(--clay-border)` }}>
       {isGlobalScope ? 'Global' : 'Parcial'}
     </span>
   )
+  // #059669 (verde "hecho") solo pasaba 3.58:1 sobre su propio fondo claro
+  // (#ecfdf5) -- pasa a #065f46 en claro/color (7.29:1) y a #4ade80 en
+  // oscuro, mismo patrón ya aplicado en la ficha de Bohr.
+  const doneColor = peTheme === 'dark' ? '#4ade80' : '#065f46'
 
   if (daysDiff === 0) {
     return (
-      <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: '3px solid #0f172a', background: '#0f172a', padding: '16px 20px' }}>
-        <p style={{ fontSize: 15, fontWeight: 900, color: 'white', margin: 0 }}>¡Hoy es tu parcial de {exam.subject}!</p>
-        <p style={{ fontSize: 12, color: '#94a3b8', margin: '4px 0 0', fontWeight: 600 }}>Ya has preparado todo lo necesario. ¡Mucho ánimo!</p>
-      </div>
+      <ClayThemeScope theme={peTheme} style={{ background: 'transparent' }}>
+        <div style={{ borderRadius: 14, border: '1px solid var(--clay-border)', borderLeft: '3px solid var(--clay-accent)', background: 'var(--clay-accent-deep)', padding: '16px 20px' }}>
+          <p style={{ fontSize: 15, fontWeight: 900, color: '#ffffff', margin: 0 }}>¡Hoy es tu parcial de {exam.subject}!</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', margin: '4px 0 0', fontWeight: 600 }}>Ya has preparado todo lo necesario. ¡Mucho ánimo!</p>
+        </div>
+      </ClayThemeScope>
     )
   }
 
@@ -4436,54 +4449,52 @@ function PartialExamBanner({ exam, today, completedToday = false, missionId }: {
   // corregirla que ya se había entregado (ver hrefForMission/DayCard).
   if (completedToday) {
     return (
-      <div style={{ borderRadius: 14, border: '1px solid #bbf7d0', borderLeft: '3px solid #059669', background: '#ecfdf5', padding: '16px 20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#059669', margin: 0 }}>Próximo parcial</p>
-          {scopeBadge}
+      <ClayThemeScope theme={peTheme} style={{ background: 'transparent' }}>
+        <div style={{ borderRadius: 14, border: '1px solid var(--clay-border)', borderLeft: `3px solid ${doneColor}`, background: 'var(--clay-surface)', padding: '16px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: doneColor, margin: 0 }}>Próximo parcial</p>
+            {scopeBadge}
+          </div>
+          <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--clay-text)', margin: '6px 0 4px', lineHeight: 1.3 }}>
+            {daysDiff === 1 ? 'Mañana' : `En ${daysDiff} días`}
+            {exam.subject ? ` · ${exam.subject}` : ''}
+            {blockDisplay ? ` · ${blockDisplay}` : ''}
+          </p>
+          <p style={{ fontSize: 12, color: doneColor, margin: '0 0 12px', fontWeight: 700 }}>✓ Ya has practicado hoy para este parcial.</p>
+          <a
+            href={simulacroHref}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, border: `1.5px solid ${doneColor}`, background: 'var(--clay-surface-raised)', color: doneColor, fontSize: 12, fontWeight: 800, textDecoration: 'none' }}
+          >
+            Simulacro completo <ArrowRight size={13} />
+          </a>
         </div>
-        <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px', lineHeight: 1.3 }}>
-          {daysDiff === 1 ? 'Mañana' : `En ${daysDiff} días`}
-          {exam.subject ? ` · ${exam.subject}` : ''}
-          {blockDisplay ? ` · ${blockDisplay}` : ''}
-        </p>
-        <p style={{ fontSize: 12, color: '#059669', margin: '0 0 12px', fontWeight: 700 }}>✓ Ya has practicado hoy para este parcial.</p>
-        <a
-          href={simulacroHref}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, border: '1.5px solid #059669', background: 'white', color: '#059669', fontSize: 12, fontWeight: 800, textDecoration: 'none' }}
-        >
-          Simulacro completo <ArrowRight size={13} />
-        </a>
-      </div>
+      </ClayThemeScope>
     )
   }
 
   return (
-    <div style={{ borderRadius: 14, border: '1px solid #e2e8f0', borderLeft: `3px solid ${scopeColor}`, background: 'white', padding: '16px 20px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: scopeColor, margin: 0 }}>Próximo parcial</p>
-        {scopeBadge}
+    <ClayThemeScope theme={peTheme} style={{ background: 'transparent' }}>
+      <div style={{ borderRadius: 14, border: '1px solid var(--clay-border)', borderLeft: `3px solid ${isGlobalScope ? scopeColor : 'var(--clay-accent)'}`, background: 'var(--clay-surface)', padding: '16px 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: scopeColor, margin: 0 }}>Próximo parcial</p>
+          {scopeBadge}
+        </div>
+        <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--clay-text)', margin: '6px 0 4px', lineHeight: 1.3 }}>
+          {daysDiff === 1 ? 'Mañana' : `En ${daysDiff} días`}
+          {exam.subject ? ` · ${exam.subject}` : ''}
+          {blockDisplay ? ` · ${blockDisplay}` : ''}
+        </p>
+        <p style={{ fontSize: 12, color: 'var(--clay-text-muted)', margin: '0 0 12px', fontWeight: 600 }}>Kairo ha ajustado esta semana para que llegues preparado.</p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          <ClayLinkButton href={href} variant="primary" style={{ width: 'auto', padding: '9px 16px', fontSize: 12, borderRadius: 10 }}>
+            Empezar práctica <ArrowRight size={13} />
+          </ClayLinkButton>
+          <ClayLinkButton href={simulacroHref} variant="secondary" style={{ width: 'auto', padding: '9px 16px', fontSize: 12, borderRadius: 10 }}>
+            Simulacro completo <ArrowRight size={13} />
+          </ClayLinkButton>
+        </div>
       </div>
-      <p style={{ fontSize: 15, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px', lineHeight: 1.3 }}>
-        {daysDiff === 1 ? 'Mañana' : `En ${daysDiff} días`}
-        {exam.subject ? ` · ${exam.subject}` : ''}
-        {blockDisplay ? ` · ${blockDisplay}` : ''}
-      </p>
-      <p style={{ fontSize: 12, color: '#64748b', margin: '0 0 12px', fontWeight: 600 }}>Kairo ha ajustado esta semana para que llegues preparado.</p>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        <a
-          href={href}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, background: '#2563eb', color: 'white', fontSize: 12, fontWeight: 800, textDecoration: 'none', boxShadow: '0 4px 14px rgba(37,99,235,.22)' }}
-        >
-          Empezar práctica <ArrowRight size={13} />
-        </a>
-        <a
-          href={simulacroHref}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 10, border: '1.5px solid #2563eb', background: 'white', color: '#2563eb', fontSize: 12, fontWeight: 800, textDecoration: 'none' }}
-        >
-          Simulacro completo <ArrowRight size={13} />
-        </a>
-      </div>
-    </div>
+    </ClayThemeScope>
   )
 }
 

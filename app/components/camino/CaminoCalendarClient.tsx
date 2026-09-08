@@ -2426,8 +2426,12 @@ export default function CaminoCalendarClient() {
       {/* ── CONTENT GRID ── */}
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
 
-        {/* ── LEFT COLUMN ── */}
-        <div style={{ flex: 1, minWidth: 0, borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,.86)' }}>
+        {/* ── LEFT COLUMN ──
+            Igual que Shell: fondo blanco semitransparente fijo (86%) que
+            nunca se migró -- sobre el --clay-bg oscuro ya corregido de Shell,
+            esa blancura seguía intacta y tapaba cualquier hueco/margen entre
+            tarjetas con un velo claro. */}
+        <div style={{ flex: 1, minWidth: 0, borderRight: '1px solid var(--clay-border)', display: 'flex', flexDirection: 'column', background: 'var(--clay-bg)' }}>
 
           {/* Banners */}
           {BETA_FEEDBACK_URL && (
@@ -3090,8 +3094,14 @@ export default function CaminoCalendarClient() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
+  // Fondo raíz de toda la pantalla, nunca migrado: se quedaba en #f4f7fb fijo
+  // (blanco-azulado) detrás de todo, así que cualquier hueco/margen entre las
+  // tarjetas ya en clay (fase 1 del hub) dejaba ver una rendija clara incluso
+  // en oscuro. #f4f7fb y --clay-bg claro (#e9eefb) son casi idénticos a la
+  // vista, así que claro/color no cambian visualmente -- solo se corrige oscuro.
+  const { theme: shellTheme } = useClayThemePreference()
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f7fb' }}>
+    <div data-kairo-clay-theme={shellTheme} style={{ display: 'flex', minHeight: '100vh', background: 'var(--clay-bg)' }}>
       <style>{`
         .camino-reason-list {
           display: flex;

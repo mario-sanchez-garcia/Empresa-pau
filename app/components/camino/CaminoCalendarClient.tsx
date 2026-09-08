@@ -2752,22 +2752,22 @@ export default function CaminoCalendarClient() {
           })()}
 
           {/* ── WEEK SECTION ── */}
-          <section data-testid="camino-week-overview" aria-label="Mi semana" style={{ padding: '18px 20px', borderBottom: '1px solid #e2e8f0', background: 'linear-gradient(180deg,rgba(239,246,255,.72),rgba(255,255,255,.96))' }}>
+          <section data-testid="camino-week-overview" aria-label="Mi semana" style={{ padding: '18px 20px', borderBottom: '1px solid var(--clay-border)', background: 'var(--clay-surface)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <span style={{ fontSize: 13, fontWeight: 900, color: '#0f172a' }}>Esta semana</span>
+              <span style={{ fontSize: 13, fontWeight: 900, color: 'var(--clay-text)' }}>Esta semana</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <button onClick={() => goToWeek(weekOffset(selectedWeekStart, -1))} style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6 }}>← Ant</button>
-                <button onClick={goToCurrentWeek} style={{ fontSize: 11, fontWeight: 800, color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6 }}>Hoy</button>
-                <button onClick={() => goToWeek(weekOffset(selectedWeekStart, 1))} style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6 }}>Sig →</button>
+                <button onClick={() => goToWeek(weekOffset(selectedWeekStart, -1))} style={{ fontSize: 11, fontWeight: 800, color: 'var(--clay-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6 }}>← Ant</button>
+                <button onClick={goToCurrentWeek} style={{ fontSize: 11, fontWeight: 800, color: 'var(--clay-accent-text)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6 }}>Hoy</button>
+                <button onClick={() => goToWeek(weekOffset(selectedWeekStart, 1))} style={{ fontSize: 11, fontWeight: 800, color: 'var(--clay-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6 }}>Sig →</button>
               </div>
             </div>
             {calendarConflicts.length > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '10px 12px', borderRadius: 12, border: '1px solid #fed7aa', background: '#fff7ed' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '10px 12px', borderRadius: 12, border: clayHubTheme === 'dark' ? '1px solid rgba(251,146,60,0.35)' : '1px solid #fed7aa', background: clayHubTheme === 'dark' ? 'rgba(251,146,60,0.14)' : '#fff7ed' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 900, color: '#9a3412' }}>
+                  <div style={{ fontSize: 12, fontWeight: 900, color: clayHubTheme === 'dark' ? '#fdba74' : '#9a3412' }}>
                     Tu calendario ha cambiado · {calendarConflicts.length} {calendarConflicts.length === 1 ? 'misión afectada' : 'misiones afectadas'}.
                   </div>
-                  <div style={{ marginTop: 2, fontSize: 10, fontWeight: 700, color: '#c2410c' }}>
+                  <div style={{ marginTop: 2, fontSize: 10, fontWeight: 700, color: clayHubTheme === 'dark' ? '#fdba74' : '#c2410c' }}>
                     {calendarConflicts[0].date} · {calendarConflicts[0].start}-{calendarConflicts[0].end} coincide con {calendarConflicts[0].busyStart}-{calendarConflicts[0].busyEnd} Ocupado.
                   </div>
                 </div>
@@ -2777,7 +2777,7 @@ export default function CaminoCalendarClient() {
               </div>
             )}
             {calendarConflictStatus === 'unavailable' && (
-              <div style={{ marginBottom: 12, fontSize: 10, fontWeight: 700, color: '#94a3b8' }}>Disponibilidad externa no disponible; Camino sigue usando tu calendario Kairo.</div>
+              <div style={{ marginBottom: 12, fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)' }}>Disponibilidad externa no disponible; Camino sigue usando tu calendario Kairo.</div>
             )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
               {weekCalendar.map((day, i) => {
@@ -2800,11 +2800,11 @@ export default function CaminoCalendarClient() {
                     onClick={() => { setExpandedDayDate(day.date); setCalendarExpanded(true); setCalendarAvailabilityRefreshKey(key => key + 1) }}
                     style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                   >
-                    <span style={{ fontSize: 9, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>{dayLetter}</span>
+                    <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--clay-text-muted)', textTransform: 'uppercase' }}>{dayLetter}</span>
                     <div style={{ position: 'relative' }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, background: day.isToday ? '#2563eb' : isPast ? '#0f172a' : '#f1f5f9', color: day.isToday || isPast ? 'white' : '#64748b', border: isSelected ? '2px solid #93c5fd' : day.isToday || isPast ? 'none' : '1px solid #e2e8f0', boxShadow: isSelected ? '0 0 0 2px #eff6ff' : 'none' }}>{dayNum}</div>
+                      <div style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, background: day.isToday ? 'var(--clay-accent)' : isPast ? 'var(--clay-text)' : 'var(--clay-surface-raised)', color: day.isToday ? 'var(--clay-on-accent)' : isPast ? 'var(--clay-bg)' : 'var(--clay-text-muted)', border: isSelected ? '2px solid var(--clay-accent)' : day.isToday || isPast ? 'none' : '1px solid var(--clay-border)', boxShadow: isSelected ? '0 0 0 2px var(--clay-accent-soft)' : 'none' }}>{dayNum}</div>
                       {dayDone && (
-                        <span style={{ position: 'absolute', top: -3, right: -3, width: 14, height: 14, borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid white' }}>
+                        <span style={{ position: 'absolute', top: -3, right: -3, width: 14, height: 14, borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid var(--clay-surface)' }}>
                           <Check size={9} color="white" strokeWidth={3} />
                         </span>
                       )}
@@ -2813,7 +2813,7 @@ export default function CaminoCalendarClient() {
                 )
               })}
             </div>
-            <button onClick={toggleCalendarExpanded} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', marginTop: 10, padding: 6, fontSize: 10, fontWeight: 800, color: '#94a3b8', background: 'none', border: '1px solid #e2e8f0', borderRadius: 8, cursor: 'pointer' }}>
+            <button onClick={toggleCalendarExpanded} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', marginTop: 10, padding: 6, fontSize: 10, fontWeight: 800, color: 'var(--clay-text-muted)', background: 'none', border: '1px solid var(--clay-border)', borderRadius: 8, cursor: 'pointer' }}>
               <ChevronDown style={{ transition: 'transform 200ms', transform: calendarExpanded ? 'rotate(180deg)' : 'none' }} size={12} />
               {calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}
             </button>
@@ -2825,7 +2825,7 @@ export default function CaminoCalendarClient() {
           </section>
 
           {/* ── EXAMS SECTION ── */}
-          <div style={{ padding: '16px 20px', borderTop: '1px solid #e2e8f0' }}>
+          <div style={{ padding: '16px 20px', borderTop: '1px solid var(--clay-border)' }}>
             {upcomingPartial && (() => {
               // Debe ser la misión de HOY del MISMO examen que el banner
               // muestra (upcomingPartial), no cualquier partial_practice de
@@ -2850,60 +2850,60 @@ export default function CaminoCalendarClient() {
                 </div>
               )
             })()}
-            <div style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: 'var(--clay-text)', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               Exámenes parciales
-              <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, padding: '5px 10px', borderRadius: 10, cursor: 'pointer', border: '1px solid #e2e8f0', background: 'white', color: '#334155' }}>+ Añadir</button>
+              <button onClick={openNewExam} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, padding: '5px 10px', borderRadius: 10, cursor: 'pointer', border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', color: 'var(--clay-text)' }}>+ Añadir</button>
             </div>
             {activeExams.length ? activeExams.map(exam => (
-              <div key={exam.id} style={{ padding: '8px 0 8px 8px', borderBottom: '1px solid #f1f5f9', borderLeft: `2px solid ${exam.examScope === 'global' ? '#7c3aed' : '#2563eb'}` }}>
+              <div key={exam.id} style={{ padding: '8px 0 8px 8px', borderBottom: '1px solid var(--clay-border)', borderLeft: `2px solid ${exam.examScope === 'global' ? '#7c3aed' : '#2563eb'}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em', width: 56, flexShrink: 0 }}>{formatDate(exam.date)}</span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#334155', flex: 1 }}>{exam.subject} · {exam.topic || exam.name || 'Parcial'}</span>
+                  <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--clay-accent-text)', textTransform: 'uppercase', letterSpacing: '0.06em', width: 56, flexShrink: 0 }}>{formatDate(exam.date)}</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--clay-text)', flex: 1 }}>{exam.subject} · {exam.topic || exam.name || 'Parcial'}</span>
                   {exam.examScope === 'global' && (
-                    <span style={{ fontSize: 8, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.06em', color: '#7c3aed', background: '#f5f3ff', border: '1px solid #7c3aed33', borderRadius: 999, padding: '2px 6px', flexShrink: 0 }}>Global</span>
+                    <span style={{ fontSize: 8, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.06em', color: '#7c3aed', background: 'var(--clay-accent-soft)', border: '1px solid var(--clay-border)', borderRadius: 999, padding: '2px 6px', flexShrink: 0 }}>Global</span>
                   )}
                   <button
                     onClick={() => recalculateExamCamino(exam)}
                     disabled={recalcExamId === exam.id}
                     title="Recalcular mi Camino para este examen"
-                    style={{ fontSize: 11, color: recalcExamId === exam.id ? '#93c5fd' : '#cbd5e1', background: 'none', border: 'none', cursor: recalcExamId === exam.id ? 'default' : 'pointer', padding: 3 }}
+                    style={{ fontSize: 11, color: recalcExamId === exam.id ? 'var(--clay-accent-text)' : 'var(--clay-text-muted)', background: 'none', border: 'none', cursor: recalcExamId === exam.id ? 'default' : 'pointer', padding: 3 }}
                   >
                     <TimerReset size={13} className={recalcExamId === exam.id ? 'animate-spin' : undefined} />
                   </button>
-                  <button onClick={() => openEditExam(exam)} style={{ fontSize: 11, color: '#cbd5e1', background: 'none', border: 'none', cursor: 'pointer', padding: 3 }}><Pencil size={13} /></button>
-                  <button onClick={() => deleteExam(exam.id)} style={{ fontSize: 11, color: '#cbd5e1', background: 'none', border: 'none', cursor: 'pointer', padding: 3 }}><Trash2 size={13} /></button>
+                  <button onClick={() => openEditExam(exam)} style={{ fontSize: 11, color: 'var(--clay-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 3 }}><Pencil size={13} /></button>
+                  <button onClick={() => deleteExam(exam.id)} style={{ fontSize: 11, color: 'var(--clay-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 3 }}><Trash2 size={13} /></button>
                 </div>
                 {recalcResult?.examId === exam.id && (
-                  <div style={{ marginTop: 8, marginLeft: 66, display: 'flex', alignItems: 'start', gap: 8, background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '8px 10px' }}>
-                    <p style={{ fontSize: 11, fontWeight: 600, color: '#1e40af', flex: 1, lineHeight: 1.4 }}>{recalcResult.message}</p>
-                    <button onClick={() => setRecalcResult(null)} style={{ fontSize: 10, color: '#93c5fd', background: 'none', border: 'none', cursor: 'pointer', padding: 2, flexShrink: 0 }}>✕</button>
+                  <div style={{ marginTop: 8, marginLeft: 66, display: 'flex', alignItems: 'start', gap: 8, background: 'var(--clay-accent-soft)', border: '1px solid var(--clay-border)', borderRadius: 10, padding: '8px 10px' }}>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--clay-accent-text)', flex: 1, lineHeight: 1.4 }}>{recalcResult.message}</p>
+                    <button onClick={() => setRecalcResult(null)} style={{ fontSize: 10, color: 'var(--clay-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, flexShrink: 0 }}>✕</button>
                   </div>
                 )}
               </div>
             )) : null}
             {pastExams.length > 0 && (
               <div style={{ marginTop: 4 }}>
-                <button onClick={() => setShowPastExams(v => !v)} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0' }}>
+                <button onClick={() => setShowPastExams(v => !v)} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: 'var(--clay-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0' }}>
                   <ChevronDown size={11} style={{ transform: showPastExams ? 'rotate(180deg)' : 'none', transition: 'transform 150ms' }} />Pasados ({pastExams.length})
                 </button>
                 {showPastExams && pastExams.map(exam => (
                   <div key={exam.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0 6px 8px', opacity: 0.5, borderLeft: `2px solid ${exam.examScope === 'global' ? '#7c3aed' : '#2563eb'}` }}>
-                    <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', width: 56, flexShrink: 0 }}>{formatDate(exam.date)}</span>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#334155', flex: 1 }}>{exam.subject} · {exam.topic || exam.name || 'Parcial'}</span>
-                    <button onClick={() => deleteExam(exam.id)} style={{ color: '#cbd5e1', background: 'none', border: 'none', cursor: 'pointer', padding: 3 }}><Trash2 size={13} /></button>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--clay-accent-text)', width: 56, flexShrink: 0 }}>{formatDate(exam.date)}</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--clay-text)', flex: 1 }}>{exam.subject} · {exam.topic || exam.name || 'Parcial'}</span>
+                    <button onClick={() => deleteExam(exam.id)} style={{ color: 'var(--clay-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 3 }}><Trash2 size={13} /></button>
                   </div>
                 ))}
               </div>
             )}
-            <button onClick={openNewExam} style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', marginTop: 8, padding: 8, fontSize: 11, fontWeight: 700, color: '#94a3b8', background: 'none', border: '1px dashed #e2e8f0', borderRadius: 8, cursor: 'pointer' }}>+ Añadir examen</button>
+            <button onClick={openNewExam} style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', marginTop: 8, padding: 8, fontSize: 11, fontWeight: 700, color: 'var(--clay-text-muted)', background: 'none', border: '1px dashed var(--clay-border)', borderRadius: 8, cursor: 'pointer' }}>+ Añadir examen</button>
           </div>
 
           {/* Centro Pulso */}
           {centroPulso && (
-            <div style={{ padding: '14px 20px', borderTop: '1px solid #e2e8f0' }}>
-              <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8', margin: '0 0 4px' }}>Tu instituto</p>
-              <p style={{ fontSize: 13, fontWeight: 900, color: '#0f172a', margin: 0 }}>Los alumnos de {centroPulso.centroDisplay} van por <span style={{ color: '#2563eb' }}>{centroPulso.topicName}</span></p>
-              <p style={{ fontSize: 11, fontWeight: 600, color: '#64748b', margin: '4px 0 0' }}>{centroPulso.position === 'ahead' ? `Vas ${centroPulso.delta} ${centroPulso.delta === 1 ? 'tema' : 'temas'} por delante — mantén el ritmo` : centroPulso.position === 'same' ? 'Vas al ritmo de tu clase' : `Estás a ${centroPulso.delta} ${centroPulso.delta === 1 ? 'tema' : 'temas'} — tu Camino ya lo tiene en cuenta`}</p>
+            <div style={{ padding: '14px 20px', borderTop: '1px solid var(--clay-border)' }}>
+              <p style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--clay-text-muted)', margin: '0 0 4px' }}>Tu instituto</p>
+              <p style={{ fontSize: 13, fontWeight: 900, color: 'var(--clay-text)', margin: 0 }}>Los alumnos de {centroPulso.centroDisplay} van por <span style={{ color: 'var(--clay-accent-text)' }}>{centroPulso.topicName}</span></p>
+              <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--clay-text-muted)', margin: '4px 0 0' }}>{centroPulso.position === 'ahead' ? `Vas ${centroPulso.delta} ${centroPulso.delta === 1 ? 'tema' : 'temas'} por delante — mantén el ritmo` : centroPulso.position === 'same' ? 'Vas al ritmo de tu clase' : `Estás a ${centroPulso.delta} ${centroPulso.delta === 1 ? 'tema' : 'temas'} — tu Camino ya lo tiene en cuenta`}</p>
             </div>
           )}
 
@@ -4619,6 +4619,10 @@ function PartialExamBanner({ exam, today, completedToday = false, missionId }: {
 // instructions to pick a subject and a focus note, with a deterministic
 // fallback if the AI call fails.
 function FreeReviewPanel({ subjects }: { subjects: string[] }) {
+  const { theme: frpTheme } = useClayThemePreference()
+  const addedBg = frpTheme === 'dark' ? 'rgba(74,222,128,0.16)' : '#ecfdf5'
+  const addedText = frpTheme === 'dark' ? '#4ade80' : '#047857'
+  const addedBorder = frpTheme === 'dark' ? 'rgba(74,222,128,0.35)' : '#bbf7d0'
   const [notes, setNotes] = useState('')
   const [notesLoaded, setNotesLoaded] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -4765,23 +4769,23 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
   const selectedAddInfo = selectedSuggestionKey ? addInfoByKey[selectedSuggestionKey] : ''
 
   return (
-    <div className="mt-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-3">
-      <p className="mb-2 text-[10px] font-black uppercase tracking-[.12em] text-slate-400">Personaliza tu repaso libre</p>
+    <div className="mt-3 rounded-2xl border border-[var(--clay-border)] bg-[var(--clay-bg)] p-3">
+      <p className="mb-2 text-[10px] font-black uppercase tracking-[.12em] text-[var(--clay-text-muted)]">Personaliza tu repaso libre</p>
       <textarea
         value={notes}
         onChange={e => setNotes(e.target.value.slice(0, 600))}
         placeholder={notesLoaded ? 'Ej: "en mis días libres quiero repasar más Historia", "prefiero ejercicios cortos"...' : 'Cargando…'}
         disabled={!notesLoaded}
         rows={2}
-        className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-[11px] font-semibold text-slate-700 outline-none focus:border-blue-200 disabled:opacity-60"
+        className="w-full rounded-lg border border-[var(--clay-border)] bg-[var(--clay-surface)] px-2.5 py-2 text-[11px] font-semibold text-[var(--clay-text)] outline-none focus:border-[var(--clay-accent)] disabled:opacity-60"
         style={{ resize: 'vertical' }}
       />
       <div className="mt-2 flex items-center justify-between gap-2">
-        <p className="text-[9px] font-semibold text-slate-400">Mismo campo que Ajustes → Personalización IA.</p>
+        <p className="text-[9px] font-semibold text-[var(--clay-text-muted)]">Mismo campo que Ajustes → Personalización IA.</p>
         <button
           onClick={suggest}
           disabled={loadingSuggestion || saving || !notesLoaded}
-          className="shrink-0 rounded-lg bg-[#0f172a] px-3 py-1.5 text-[10px] font-black text-white disabled:opacity-40"
+          className="shrink-0 rounded-lg bg-[var(--clay-accent)] px-3 py-1.5 text-[10px] font-black text-[var(--clay-on-accent)] disabled:opacity-40"
         >
           {loadingSuggestion || saving ? 'Pensando…' : 'Sugiéreme qué repasar'}
         </button>
@@ -4800,19 +4804,19 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
                   onClick={() => selectOption(i)}
                   className="rounded-xl px-3 py-2 text-left transition"
                   style={{
-                    background: active ? CONTENT_TYPE_COLORS.suggestion.bg : 'white',
-                    border: `1px solid ${active ? CONTENT_TYPE_COLORS.suggestion.border : '#e2e8f0'}`,
+                    background: active ? CONTENT_TYPE_COLORS.suggestion.bg : 'var(--clay-surface)',
+                    border: `1px solid ${active ? CONTENT_TYPE_COLORS.suggestion.border : 'var(--clay-border)'}`,
                   }}
                 >
-                  <p className="text-[11px] font-black" style={{ color: active ? CONTENT_TYPE_COLORS.suggestion.text : '#334155' }}>{opt.subject}</p>
-                  {opt.focusNote && <p className="mt-0.5 text-[10px] font-semibold" style={{ color: active ? CONTENT_TYPE_COLORS.suggestion.text : '#94a3b8', opacity: active ? 0.85 : 1 }}>{opt.focusNote}</p>}
+                  <p className="text-[11px] font-black" style={{ color: active ? CONTENT_TYPE_COLORS.suggestion.text : 'var(--clay-text)' }}>{opt.subject}</p>
+                  {opt.focusNote && <p className="mt-0.5 text-[10px] font-semibold" style={{ color: active ? CONTENT_TYPE_COLORS.suggestion.text : 'var(--clay-text-muted)', opacity: active ? 0.85 : 1 }}>{opt.focusNote}</p>}
                 </button>
               )
             })}
           </div>
           {suggestion && (
             <div className="mt-2">
-              <p className="mb-1.5 text-[9px] font-black uppercase tracking-[.1em] text-slate-400">
+              <p className="mb-1.5 text-[9px] font-black uppercase tracking-[.1em] text-[var(--clay-text-muted)]">
                 ¿Cómo repasas &quot;{suggestion.subject}&quot;?
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -4821,7 +4825,7 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
                   onClick={addSuggestedMission}
                   disabled={selectedAdding || selectedAdded}
                   className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-black disabled:cursor-default disabled:opacity-80"
-                  style={{ background: selectedAdded ? '#ecfdf5' : CONTENT_TYPE_COLORS.suggestion.text, color: selectedAdded ? '#047857' : 'white', border: selectedAdded ? '1px solid #bbf7d0' : 'none' }}
+                  style={{ background: selectedAdded ? addedBg : CONTENT_TYPE_COLORS.suggestion.text, color: selectedAdded ? addedText : 'white', border: selectedAdded ? `1px solid ${addedBorder}` : 'none' }}
                 >
                   {selectedAdding ? <Loader2 size={12} className="animate-spin" /> : selectedAdded ? <Check size={12} /> : <Plus size={12} />}
                   {selectedAdding ? 'Añadiendo...' : selectedAdded ? 'Añadida' : selectedAddError ? 'No se ha podido añadir. Reintentar' : 'Añadir misión sugerida'}
@@ -4839,13 +4843,13 @@ function FreeReviewPanel({ subjects }: { subjects: string[] }) {
                   <a
                     href={`/zona/cursos?subject=${encodeURIComponent(caminoSlug)}&source=camino_free_review`}
                     className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-black"
-                    style={{ background: 'white', color: CONTENT_TYPE_COLORS.suggestion.text, border: `1px solid ${CONTENT_TYPE_COLORS.suggestion.border}` }}
+                    style={{ background: 'var(--clay-surface)', color: CONTENT_TYPE_COLORS.suggestion.text, border: `1px solid ${CONTENT_TYPE_COLORS.suggestion.border}` }}
                   >
                     📘 Hacer el curso
                   </a>
                 )}
               </div>
-              {selectedAddInfo && <p className="mt-1.5 text-[9px] font-bold text-slate-500">{selectedAddInfo}</p>}
+              {selectedAddInfo && <p className="mt-1.5 text-[9px] font-bold text-[var(--clay-text-muted)]">{selectedAddInfo}</p>}
             </div>
           )}
         </div>
@@ -5105,6 +5109,8 @@ function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusy
   // toggle opens it (conditional render, not display:none), so seeding from
   // the day just clicked in the mini week strip above is enough to land
   // straight on that day without lifting the whole accordion state up.
+  const { theme: cwvTheme } = useClayThemePreference()
+  const doneColor = cwvTheme === 'dark' ? '#4ade80' : '#065f46'
   const [expandedDate, setExpandedDate] = useState<string | null>(initialExpandedDate)
   // Solo lectura: la sugerencia la genera/guarda FreeReviewPanel. Se lee una
   // vez al montar — este widget no necesita reaccionar en vivo a que el
@@ -5115,7 +5121,7 @@ function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusy
   })
   const selectedFreeReviewOption = freeReviewSuggestion?.options[freeReviewSuggestion.selectedIndex] ?? freeReviewSuggestion?.options[0] ?? null
   return (
-    <div className="mt-3 divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100">
+    <div className="mt-3 divide-y divide-[var(--clay-border)] overflow-hidden rounded-2xl border border-[var(--clay-border)] bg-[var(--clay-surface)]">
       {days.map(day => {
         // Igual que en DayCard: el trabajo hecho por iniciativa propia
         // (metadata.free_initiative) cuenta como actividad real del día,
@@ -5138,14 +5144,14 @@ function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusy
           <div key={day.date}>
             <button
               onClick={() => setExpandedDate(isExpanded ? null : day.date)}
-              className={`flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50 ${isToday ? 'bg-blue-50/60' : 'bg-white'}`}
+              className={`flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-[var(--clay-surface-raised)] ${isToday ? 'bg-[var(--clay-accent-soft)]' : 'bg-[var(--clay-surface)]'}`}
             >
-              <span className={`flex w-24 shrink-0 items-center gap-1.5 text-xs font-black capitalize ${isToday ? 'text-blue-700' : 'text-slate-500'}`}>
+              <span className={`flex w-24 shrink-0 items-center gap-1.5 text-xs font-black capitalize ${isToday ? 'text-[var(--clay-accent-text)]' : 'text-[var(--clay-text-muted)]'}`}>
                 {compactDayLabel(day.date)}
-                {isToday && <span className="h-1.5 w-1.5 rounded-full bg-blue-600" aria-label="Hoy" />}
+                {isToday && <span className="h-1.5 w-1.5 rounded-full bg-[var(--clay-accent)]" aria-label="Hoy" />}
               </span>
-              <span className="flex-1 text-sm font-semibold text-slate-700">{subjectLabel}</span>
-              {isToday && <span className="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}
+              <span className="flex-1 text-sm font-semibold text-[var(--clay-text)]">{subjectLabel}</span>
+              {isToday && <span className="shrink-0 rounded-full bg-[var(--clay-accent-soft)] px-2 py-0.5 text-[10px] font-black text-[var(--clay-accent-text)]">Hoy</span>}
               {main.some(m => m.missionType === 'partial_practice') && (
                 <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>
               )}
@@ -5155,7 +5161,7 @@ function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusy
               {conflictCount > 0 && (
                 <span className="shrink-0 rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-black text-orange-700">Conflicto</span>
               )}
-              <span className={`shrink-0 text-xs font-bold ${done ? 'text-emerald-600' : missionCount === 0 ? 'text-slate-300' : 'text-slate-400'}`}>
+              <span className={`shrink-0 text-xs font-bold ${missionCount === 0 ? 'text-[var(--clay-border)]' : done ? '' : 'text-[var(--clay-text-muted)]'}`} style={done ? { color: doneColor } : undefined}>
                 {done ? '✅ Hecho' : missionCount === 0 ? 'Repaso libre' : `${missionCount} misión${missionCount !== 1 ? 'es' : ''}`}
               </span>
               {showSuggestion && (
@@ -5172,10 +5178,10 @@ function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusy
                   💡 {shortSubjectLabel(selectedFreeReviewOption?.subject ?? '')}
                 </span>
               )}
-              <ChevronDown size={13} className={`shrink-0 text-slate-300 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+              <ChevronDown size={13} className={`shrink-0 text-[var(--clay-text-muted)] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
             </button>
             {isExpanded && (
-              <div className="border-t border-slate-100 bg-slate-50/50 p-3">
+              <div className="border-t border-[var(--clay-border)] bg-[var(--clay-bg)] p-3">
                 <DayCard day={day} exams={exams.filter(e => e.date === day.date)} externalBusy={externalBusyByDate[day.date] ?? []} conflicts={conflicts.filter(conflict => conflict.date === day.date)} />
               </div>
             )}
@@ -5229,11 +5235,11 @@ function DayCard({ day, exams, externalBusy, conflicts }: { day: DayPlan; exams:
   const main = day.missions.filter(mission => mission.role === 'main' || mission.metadata?.free_initiative)
   const done = main.length > 0 && main.every(mission => mission.status === 'done')
   return (
-    <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-blue-300 bg-blue-50/70' : 'border-slate-100 bg-slate-50/80'}`}>
+    <article className={`min-h-[210px] rounded-3xl border p-3 ${day.isToday ? 'border-[var(--clay-accent)] bg-[var(--clay-accent-soft)]' : 'border-[var(--clay-border)] bg-[var(--clay-surface)]'}`}>
       <div className="mb-3 flex items-center justify-between">
-        <h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-blue-800' : 'text-slate-900'}`}>{day.label}</h3>
+        <h3 className={`text-sm font-black capitalize ${day.isToday ? 'text-[var(--clay-accent-text)]' : 'text-[var(--clay-text)]'}`}>{day.label}</h3>
         <div className="flex items-center gap-1.5">
-          {day.isToday && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700">Hoy</span>}
+          {day.isToday && <span className="rounded-full bg-[var(--clay-accent-soft)] px-2 py-0.5 text-[10px] font-black text-[var(--clay-accent-text)]">Hoy</span>}
           {done && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">Hecho</span>}
         </div>
       </div>
@@ -5243,7 +5249,7 @@ function DayCard({ day, exams, externalBusy, conflicts }: { day: DayPlan; exams:
       {externalBusy.length > 0 && (
         <div className="mb-2 grid gap-1.5">
           {externalBusy.map((slot, index) => (
-            <div key={`${slot.start}-${slot.end}-${index}`} className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-100/80 px-3 py-2 text-[11px] font-black text-slate-500">
+            <div key={`${slot.start}-${slot.end}-${index}`} className="flex items-center gap-2 rounded-2xl border border-[var(--clay-border)] bg-[var(--clay-surface-raised)] px-3 py-2 text-[11px] font-black text-[var(--clay-text-muted)]">
               <Clock3 size={12} />
               <span>{formatTimeRange(slot.start, slot.end)} · Ocupado</span>
             </div>
@@ -5258,24 +5264,24 @@ function DayCard({ day, exams, externalBusy, conflicts }: { day: DayPlan; exams:
           const content = (
             <>
               <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black text-slate-500">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--clay-surface-raised)] px-2 py-0.5 text-[10px] font-black text-[var(--clay-text-muted)]">
                   <Clock3 size={11} />
                   {formatTimeRange(mission.startTime, mission.endTime)}
                 </span>
                 {conflict && <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-black text-orange-700">Conflicto</span>}
               </div>
-              <p className="text-[11px] font-black" style={{ color: themeFor(mission.subject).text }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>
+              <p className="text-[11px] font-black" style={{ color: 'var(--clay-text)' }}>{mission.subject}{mission.topic ? ` · ${mission.topic}` : ''}</p>
               {mission.missionType === 'partial_practice' && <span className="mb-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-700">Prep. parcial</span>}
               {!!mission.metadata?.free_initiative && <span className="mb-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">✎ Por tu cuenta</span>}
-              <p className={`mt-1 text-xs font-bold ${mission.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{mission.title}</p>
+              <p className={`mt-1 text-xs font-bold ${mission.status === 'done' ? 'text-[var(--clay-text-muted)] line-through' : 'text-[var(--clay-text)]'}`}>{mission.title}</p>
               {conflict && <p className="mt-1 text-[10px] font-bold text-orange-700">Coincide con {formatTimeRange(conflict.busyStart, conflict.busyEnd)} ocupado.</p>}
-              <p className="mt-2 text-[11px] font-bold text-slate-400">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p>
+              <p className="mt-2 text-[11px] font-bold text-[var(--clay-text-muted)]">{mission.status === 'done' ? 'Completada' : target.href ? 'Ir a practicar' : 'Todavía no hemos preparado este contenido.'}</p>
             </>
           )
           return target.href
-            ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-white p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: conflict ? '#fdba74' : themeFor(mission.subject).border }}>{content}</a>
-            : <div key={mission.id} className="rounded-2xl border bg-white p-3 text-left" style={{ borderColor: conflict ? '#fdba74' : themeFor(mission.subject).border }}>{content}</div>
-        }) : <p className="text-xs font-semibold text-slate-400">Descanso o repaso libre.</p>}
+            ? <a key={mission.id} href={target.href} className="rounded-2xl border bg-[var(--clay-surface)] p-3 text-left transition hover:-translate-y-0.5" style={{ borderColor: conflict ? '#fdba74' : themeFor(mission.subject).border }}>{content}</a>
+            : <div key={mission.id} className="rounded-2xl border bg-[var(--clay-surface)] p-3 text-left" style={{ borderColor: conflict ? '#fdba74' : themeFor(mission.subject).border }}>{content}</div>
+        }) : <p className="text-xs font-semibold text-[var(--clay-text-muted)]">Descanso o repaso libre.</p>}
       </div>
     </article>
   )

@@ -291,6 +291,21 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
 
   const usage = extractAnthropicTokenUsage(message)
   console.info('[exam/correct] llm_done', { ms: Date.now() - llmStart, stopReason: message.stop_reason ?? 'unknown' })
+
+  // A10 de la auditoría del 7-8 de septiembre de 2026: este registro iba ANTES
+  // de parsear, con status 'success' fijo. Si el parseo fallaba el alumno
+  // recibía un 502 pero el evento ya constaba como corrección entregada: se le
+  // gastaba crédito del mes (los contadores filtran por status 'success') y la
+  // métrica de coste por corrección del panel se calculaba sobre entregas que
+  // nunca existieron — justo el número con el que se van a decidir precios.
+  //
+  // Ahora se parsea primero y se registra un único evento con el estado real.
+  // Los tokens se registran en los dos casos a propósito: el proveedor ha
+  // cobrado igual y borrar ese rastro falsearía el coste hacia abajo, que es
+  // el error contrario y peor.
+  const rawText = message.content.filter(item => item.type === 'text').map(item => item.text).join('\n')
+  const parsed = parseCorrectionJson(rawText)
+
   await logAiUsageEventForPhotos({
     userId: authContext.user.id,
     route: '/api/chat',
@@ -299,14 +314,16 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
     totalTokens: usage.totalTokens,
-    status: 'success',
-    metadata: { ...metadata, truncated: message.stop_reason === 'max_tokens' },
+    status: parsed ? 'success' : 'invalid_output',
+    metadata: {
+      ...metadata,
+      truncated: message.stop_reason === 'max_tokens',
+      ...(parsed ? {} : { invalidOutputReason: 'parse_failed', stopReason: message.stop_reason ?? 'unknown' }),
+    },
     photoCount: allImages.length,
     accessToken: authContext.accessToken
   })
 
-  const rawText = message.content.filter(item => item.type === 'text').map(item => item.text).join('\n')
-  const parsed = parseCorrectionJson(rawText)
   if (!parsed) {
     console.error('[exam/correct] failed', { phase: 'parse', ms: Date.now() - totalStart, rawPreview: rawText.slice(0, 150) })
     return NextResponse.json(

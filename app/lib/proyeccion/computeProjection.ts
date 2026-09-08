@@ -39,6 +39,34 @@ const SUBJECT_NORMALIZE: Record<string, string> = {
   'historia de espana': 'historia_espana',
   'historia_espana': 'historia_espana',
   'historia espana': 'historia_espana',
+  // A17 de la auditoría del 7-8 de septiembre de 2026: faltaban variantes y
+  // asignaturas enteras del catálogo (app/lib/subjectCatalog.ts). Lo que no
+  // está en esta tabla cae al `?? key` de abajo y se queda con su propio
+  // bucket, así que "Lengua Castellana" y "Lengua Castellana y Literatura II"
+  // aparecían como DOS asignaturas distintas en la proyección del alumno, cada
+  // una con media y tendencia propias sobre la mitad de sus datos.
+  'lengua castellana y literatura ii': 'lengua',
+  'lengua castellana ii': 'lengua',
+  'lengua ii': 'lengua',
+  // Historia de España se guarda a veces con el "II" del currículo.
+  'historia de espana ii': 'historia_espana',
+  // Resto del catálogo. Sin entrada propia funcionaban por casualidad (el key
+  // crudo ya coincidía consigo mismo), pero cualquier variante con II o con
+  // artículo las partía igual que a Lengua.
+  'historia de la filosofia': 'historia_filosofia',
+  'filosofia': 'historia_filosofia',
+  'historia_filosofia': 'historia_filosofia',
+  'ingles': 'ingles',
+  'ingles ii': 'ingles',
+  'fisica': 'fisica',
+  'fisica ii': 'fisica',
+  'quimica': 'quimica',
+  'quimica ii': 'quimica',
+  'biologia': 'biologia',
+  'biologia ii': 'biologia',
+  'economia de la empresa': 'economia_empresa',
+  'economia': 'economia_empresa',
+  'economia_empresa': 'economia_empresa',
 }
 
 function normalizeSubject(raw: string): string {

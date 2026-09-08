@@ -2,7 +2,16 @@ import 'server-only'
 
 import { createClient } from '@supabase/supabase-js'
 
-type AiUsageStatus = 'success' | 'error'
+// A10 de la auditoría del 7-8 de septiembre de 2026: solo había 'success' y
+// 'error', así que una respuesta que el proveedor devolvía bien pero que no se
+// podía parsear se registraba como 'success' — contaba como corrección
+// entregada y consumía crédito del alumno, aunque él recibía un 502.
+//
+// 'invalid_output' es ese tercer caso: el proveedor cobró (los tokens se
+// registran igual, para no falsear el coste real) pero no se entregó nada
+// útil. Como los contadores de cuota filtran por status = 'success'
+// (más abajo y en billing/serverUsage.ts), deja de gastar crédito.
+type AiUsageStatus = 'success' | 'error' | 'invalid_output'
 
 type LogAiUsageArgs = {
   userId: string

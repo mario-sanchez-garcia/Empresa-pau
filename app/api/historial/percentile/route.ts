@@ -18,6 +18,14 @@ async function getUser(token: string) {
 }
 
 function normalizedScore(nota: unknown, notaMaxima: unknown): number | null {
+  // A17 de la auditoría del 7-8 de septiembre de 2026: la guarda de abajo
+  // parecía cubrir el caso vacío, pero no lo hacía. Number(null) es 0, y 0 es
+  // finito — igual que Number('') y Number([]). Así que una corrección sin
+  // evaluar (historial_examenes.nota admite NULL) entraba como un CERO real y
+  // hundía la media del alumno y su percentil frente a los demás.
+  // Hay que descartar el vacío ANTES de convertir a número.
+  if (nota === null || nota === undefined || nota === '') return null
+  if (notaMaxima === null || notaMaxima === undefined || notaMaxima === '') return null
   const score = Number(nota)
   const max = Number(notaMaxima)
   if (!Number.isFinite(score) || !Number.isFinite(max) || max <= 0) return null

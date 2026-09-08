@@ -14,7 +14,7 @@ function getBearerToken(request: NextRequest): string | null {
 type QueueRow = { user_id: string; subject: string; queue_status: string }
 type CalRow = { user_id: string; status: string; scheduled_date: string; completed_at: string | null }
 type ProgressRow = { user_id: string; xp_total: number; streak_days: number }
-type EntitlementRow = { student_user_id: string }
+type EntitlementRow = { user_id: string }
 
 export async function GET(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -40,11 +40,27 @@ export async function GET(request: NextRequest) {
     db.from('camino_user_progress').select('user_id, xp_total, streak_days'),
   ])
 
+  // A16 de la auditoría del 7-8 de septiembre de 2026: esta consulta buscaba
+  // `student_user_id`, columna de parent_checkout_links, no de
+  // user_entitlements (que usa `user_id`, igual que el resto del sistema —
+  // ver el patrón canónico en app/api/billing/me/route.ts). El error de
+  // Supabase por columna inexistente no lanza excepción aquí: entRes.error
+  // se ignoraba y el catch nunca se disparaba, así que premiumSet se quedaba
+  // vacío en silencio y el panel mostraba "free" a todo el mundo. También
+  // faltaba filtrar expiración: un pack ya caducado con status aún 'active'
+  // en base de datos se contaba como premium.
   let premiumSet = new Set<string>()
-  try {
-    const entRes = await db.from('user_entitlements').select('student_user_id').eq('status', 'active')
-    premiumSet = new Set((entRes.data as EntitlementRow[] ?? []).map(e => e.student_user_id))
-  } catch { /* table may not exist in all envs */ }
+  const now = new Date().toISOString()
+  const entRes = await db
+    .from('user_entitlements')
+    .select('user_id')
+    .eq('status', 'active')
+    .or(`expires_at.is.null,expires_at.gt.${now}`)
+  if (entRes.error) {
+    console.error('[admin/camino-status] no se pudo leer user_entitlements', { message: entRes.error.message })
+  } else {
+    premiumSet = new Set((entRes.data as EntitlementRow[] ?? []).map(e => e.user_id))
+  }
 
   const queueRows = (queueRes.data ?? []) as QueueRow[]
   const calRows = (calRes.data ?? []) as CalRow[]

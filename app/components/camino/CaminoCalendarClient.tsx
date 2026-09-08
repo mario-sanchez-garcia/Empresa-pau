@@ -3389,6 +3389,7 @@ function fillWeekGaps(weekStartISO: string, days: DayPlan[]): DayPlan[] {
 }
 
 function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curriculum, planId, externalBusyByDate, conflicts, reorganizeStatus, onReorganize, onEditorWeekChange, onNavigateWeek, onClose, onAddExam, onPersist, onSave }: { calendar: DayPlan[]; weekStartISO: string; exams: StudentExam[]; subjects: string[]; curriculum: CurriculumItem[]; planId: CaminoPlanId; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[]; reorganizeStatus: 'idle' | 'saving' | 'done' | 'error'; onReorganize: () => void; onEditorWeekChange: (weekStartISO: string) => void; onNavigateWeek: (weekStartISO: string) => DayPlan[]; onClose: () => void; onAddExam: () => void; onPersist: (calendar: DayPlan[]) => void; onSave: (calendar: DayPlan[]) => void }) {
+  const { theme: ceoTheme } = useClayThemePreference()
   const safeSubjects: string[] = subjects
   // `calendar` is the whole multi-week calendar loaded in the parent, not
   // just this week — seeding the editor's draft from it directly (instead of
@@ -3901,22 +3902,22 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 14, scale: 0.987 }}
         transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-        className="kairo-glass flex w-full flex-col overflow-hidden rounded-2xl"
-        style={{ width: 'min(96vw, 1400px)', height: 'min(92dvh, 920px)', boxShadow: '0 6px 18px rgba(15,23,42,0.14), 0 30px 90px rgba(15,23,42,0.28)' }}
+        className="flex w-full flex-col overflow-hidden rounded-2xl"
+        style={{ width: 'min(96vw, 1400px)', height: 'min(92dvh, 920px)', background: 'var(--clay-surface)', border: '1px solid var(--clay-border)', boxShadow: '0 6px 18px rgba(15,23,42,0.14), 0 30px 90px rgba(15,23,42,0.28)', backdropFilter: 'blur(16px) saturate(1.12)', WebkitBackdropFilter: 'blur(16px) saturate(1.12)' }}
       >
         {/* ── Dark header ── */}
         <header className="shrink-0 bg-[#0f172a] px-5 py-4">
           <div className="mb-3 flex items-start justify-between gap-4">
             <div>
-              <p className="text-[8px] font-black uppercase tracking-[.24em] text-slate-500">Camino PAU · Calendario</p>
+              <p className="text-[8px] font-black uppercase tracking-[.24em] text-slate-400">Camino PAU · Calendario</p>
               <h2 className="mt-1 text-[22px] font-black text-slate-100" style={{ letterSpacing: '-0.025em', lineHeight: 1 }}>
                 {calendarView === 'week' ? weekRangeLabel(editorWeekStart) : monthLabel(monthCursor)}
               </h2>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-2">
               <div className="kairo-inset flex items-center gap-1 rounded-lg p-1">
-                <button type="button" onClick={() => setCalendarView('week')} className="rounded-md px-3 py-1.5 text-[10px] font-black transition" style={{ background: calendarView === 'week' ? 'white' : 'transparent', color: calendarView === 'week' ? '#0f172a' : '#cbd5e1' }}>Semana</button>
-                <button type="button" onClick={() => setCalendarView('month')} className="rounded-md px-3 py-1.5 text-[10px] font-black transition" style={{ background: calendarView === 'month' ? 'white' : 'transparent', color: calendarView === 'month' ? '#0f172a' : '#cbd5e1' }}>Mes</button>
+                <button type="button" onClick={() => setCalendarView('week')} className="rounded-md px-3 py-1.5 text-[10px] font-black transition" style={{ background: calendarView === 'week' ? 'white' : 'transparent', color: calendarView === 'week' ? '#0f172a' : '#64748b' }}>Semana</button>
+                <button type="button" onClick={() => setCalendarView('month')} className="rounded-md px-3 py-1.5 text-[10px] font-black transition" style={{ background: calendarView === 'month' ? 'white' : 'transparent', color: calendarView === 'month' ? '#0f172a' : '#64748b' }}>Mes</button>
               </div>
               <button onClick={onAddExam} className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] font-black text-slate-400 transition hover:bg-white/[0.11]"><Plus size={13} /> Parcial</button>
               <button type="button" data-calendar-editor-action="top-add" onClick={handleTopAddClick} className="inline-flex items-center gap-1.5 rounded-lg border border-white/70 bg-white/90 px-3 py-2 text-[11px] font-black text-[#0f172a] transition hover:bg-white" style={{ boxShadow: 'var(--kairo-shadow-soft)' }}><Plus size={13} /> {missionPanelOpen ? 'Cerrar formulario' : 'Nueva misión'}</button>
@@ -4018,10 +4019,10 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
 
           {calendarView === 'month' && (
-            <div className="shrink-0 border-b border-[#f1f5f9] bg-white px-6 py-5">
+            <div className="shrink-0 border-b border-[var(--clay-border)] bg-[var(--clay-surface)] px-6 py-5">
               <div className="grid grid-cols-7 gap-1.5 text-center">
                 {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(label => (
-                  <div key={label} className="pb-1 text-[9px] font-black uppercase tracking-[.14em] text-slate-400">{label}</div>
+                  <div key={label} className="pb-1 text-[9px] font-black uppercase tracking-[.14em] text-[var(--clay-text-muted)]">{label}</div>
                 ))}
               </div>
               <div className="grid grid-cols-7 gap-1.5" style={{ gridAutoRows: 'minmax(64px, 1fr)' }}>
@@ -4035,14 +4036,14 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                       key={dateISO}
                       type="button"
                       onClick={() => selectEditorDay(dateISO)}
-                      className="flex min-h-16 flex-col items-stretch rounded-lg p-1.5 text-left transition-all hover:border-blue-200 hover:bg-blue-50"
+                      className="flex min-h-16 flex-col items-stretch rounded-lg p-1.5 text-left transition-all hover:border-[var(--clay-accent)] hover:bg-[var(--clay-accent-soft)]"
                       style={{
-                        background: isSelected ? '#eff6ff' : 'white',
-                        border: `1.5px solid ${isSelected ? '#2563eb' : isToday ? 'rgba(37,99,235,.35)' : '#f1f5f9'}`,
+                        background: isSelected ? 'var(--clay-accent-soft)' : 'var(--clay-surface)',
+                        border: `1.5px solid ${isSelected ? 'var(--clay-accent)' : isToday ? 'var(--clay-accent)' : 'var(--clay-border)'}`,
                         opacity: inMonth ? 1 : 0.4,
                       }}
                     >
-                      <span className="mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-black" style={{ background: isToday ? '#2563eb' : 'transparent', color: isToday ? 'white' : '#334155' }}>
+                      <span className="mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-black" style={{ background: isToday ? 'var(--clay-accent)' : 'transparent', color: isToday ? 'var(--clay-on-accent)' : 'var(--clay-text)' }}>
                         {parseInt(dateISO.slice(-2), 10)}
                       </span>
                       <div className="flex flex-1 flex-col gap-0.5 overflow-hidden">
@@ -4050,7 +4051,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                           const theme = themeFor(mission.subject)
                           return <span key={mission.id} className="truncate rounded px-1 py-0.5 text-[9px] font-bold" style={{ background: theme.bg, color: theme.text }}>{mission.title}</span>
                         })}
-                        {missions.length > 2 && <span className="text-[9px] font-black text-slate-400">+{missions.length - 2} más</span>}
+                        {missions.length > 2 && <span className="text-[9px] font-black text-[var(--clay-text-muted)]">+{missions.length - 2} más</span>}
                       </div>
                     </button>
                   )
@@ -4060,32 +4061,32 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
           )}
 
           {/* Day header */}
-          <div className="shrink-0 border-b border-[#f1f5f9] px-5 py-3">
+          <div className="shrink-0 border-b border-[var(--clay-border)] px-5 py-3">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2" style={{ marginBottom: 6 }}>
                   {selectedDay?.isToday && (
-                    <span className="text-[8px] font-black uppercase tracking-[.14em] rounded-full bg-blue-50 px-2 py-0.5 text-blue-600">Hoy</span>
+                    <span className="text-[8px] font-black uppercase tracking-[.14em] rounded-full bg-[var(--clay-accent-soft)] px-2 py-0.5 text-[var(--clay-accent-text)]">Hoy</span>
                   )}
-                  <span className="text-[8px] font-black uppercase tracking-[.22em] text-slate-400">
+                  <span className="text-[8px] font-black uppercase tracking-[.22em] text-[var(--clay-text-muted)]">
                     {selectedDay?.date ? new Date(selectedDay.date + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'long' }).replace(/^\w/, c => c.toUpperCase()) : ''}
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <div className="font-black text-slate-900 leading-none" style={{ fontSize: 34, letterSpacing: '-0.04em', lineHeight: 0.88 }}>
+                  <div className="font-black leading-none" style={{ fontSize: 34, letterSpacing: '-0.04em', lineHeight: 0.88, color: 'var(--clay-text)' }}>
                     {selectedDay?.date ? parseInt(selectedDay.date.slice(-2), 10) : ''}
                   </div>
-                  <div className="text-[13px] uppercase tracking-[0em]" style={{ fontWeight: 800, color: '#64748b' }}>
+                  <div className="text-[13px] uppercase tracking-[0em]" style={{ fontWeight: 800, color: 'var(--clay-text-muted)' }}>
                     {selectedDay?.date ? new Date(selectedDay.date + 'T12:00:00').toLocaleDateString('es-ES', { month: 'long' }) : ''}
                   </div>
                 </div>
-                <p className="mt-2 text-[9px] font-black uppercase tracking-[.12em] text-slate-300">
+                <p className="mt-2 text-[9px] font-black uppercase tracking-[.12em] text-[var(--clay-text-muted)]">
                   {(selectedDay?.missions.filter(m => m.role === 'main').length ?? 0)} principales · {(selectedDay?.missions.filter(m => m.role === 'bonus').length ?? 0)} bonus
                 </p>
                 {selectedDayBusy.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {selectedDayBusy.map((slot, index) => (
-                      <span key={`${slot.start}-${slot.end}-${index}`} className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-500">
+                      <span key={`${slot.start}-${slot.end}-${index}`} className="inline-flex items-center gap-1 rounded-full bg-[var(--clay-surface-raised)] px-2.5 py-1 text-[10px] font-black text-[var(--clay-text-muted)]">
                         <Clock3 size={11} />
                         {formatTimeRange(slot.start, slot.end)} · Ocupado
                       </span>
@@ -4093,7 +4094,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                   </div>
                 )}
                 {selectedDayConflicts.length > 0 && (
-                  <p className="mt-2 text-[10px] font-black text-orange-600">{selectedDayConflicts.length} {selectedDayConflicts.length === 1 ? 'misión coincide' : 'misiones coinciden'} con tu disponibilidad externa.</p>
+                  <p className="mt-2 text-[10px] font-black" style={{ color: ceoTheme === 'dark' ? '#fdba74' : '#c2410c' }}>{selectedDayConflicts.length} {selectedDayConflicts.length === 1 ? 'misión coincide' : 'misiones coinciden'} con tu disponibilidad externa.</p>
                 )}
               </div>
             </div>
@@ -4101,10 +4102,10 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
 
           {/* Add mission panel */}
           {missionPanelOpen && (
-            <div className="shrink-0 border-b border-[#dbeafe] bg-[#f8fbff] px-6 py-4">
+            <div className="shrink-0 border-b border-[var(--clay-border)] bg-[var(--clay-surface-raised)] px-6 py-4">
               <div className="mb-3 flex items-center justify-between">
-                <p className="text-[9px] font-black uppercase tracking-[.14em] text-slate-400">Nueva misión</p>
-                <button type="button" onClick={() => setMissionPanelOpen(false)} className="rounded-lg border border-[#dbeafe] bg-white px-2.5 py-1 text-[10px] font-black text-slate-500 transition hover:bg-blue-50">Cerrar</button>
+                <p className="text-[9px] font-black uppercase tracking-[.14em] text-[var(--clay-text-muted)]">Nueva misión</p>
+                <button type="button" onClick={() => setMissionPanelOpen(false)} className="rounded-lg border border-[var(--clay-border)] bg-[var(--clay-surface)] px-2.5 py-1 text-[10px] font-black text-[var(--clay-text-muted)] transition hover:bg-[var(--clay-accent-soft)]">Cerrar</button>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <Field label="Día">
@@ -4122,7 +4123,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                     <option value="">Sugerido</option>
                     {topics.map(t => <option key={`${t.subject}-${t.sortOrder}`} value={t.topic}>{t.block} · {t.topic}</option>)}
                   </select>
-                  <button type="button" data-calendar-editor-action="suggested" onClick={suggestTopicInForm} className="mt-2 text-[10px] font-black text-blue-600 transition hover:text-blue-700">
+                  <button type="button" data-calendar-editor-action="suggested" onClick={suggestTopicInForm} className="mt-2 text-[10px] font-black text-[var(--clay-accent-text)] transition hover:opacity-80">
                     Sugerir tema
                   </button>
                 </Field>
@@ -4135,7 +4136,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                   <input type="time" value={newMission.startTime} onChange={e => setNewMission({ ...newMission, startTime: e.target.value })} className="inputish" />
                 </Field>
                 <div className="flex flex-col justify-end gap-2">
-                  <label className="inline-flex cursor-pointer items-center gap-2 text-[11px] font-black text-slate-600">
+                  <label className="inline-flex cursor-pointer items-center gap-2 text-[11px] font-black text-[var(--clay-text)]">
                     <input type="checkbox" checked={newMission.bonus} onChange={e => setNewMission({ ...newMission, bonus: e.target.checked })} />
                     Opcional / bonus
                   </label>
@@ -4145,10 +4146,10 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                 </div>
               </div>
               {timeConflictNotice && (
-                <div className="mt-3 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-[11px] font-bold text-orange-800">
+                <div className="mt-3 rounded-xl px-3 py-2 text-[11px] font-bold" style={{ border: ceoTheme === 'dark' ? '1px solid rgba(251,146,60,0.35)' : '1px solid #fed7aa', background: ceoTheme === 'dark' ? 'rgba(251,146,60,0.14)' : '#fff7ed', color: ceoTheme === 'dark' ? '#fdba74' : '#9a3412' }}>
                   <p>{timeConflictNotice.type === 'external' ? 'Ese horario coincide con un evento de tu calendario.' : 'Ese horario ya está ocupado.'}</p>
                   {timeConflictNotice.suggestedStart && (
-                    <button type="button" onClick={() => setNewMission(current => ({ ...current, startTime: timeConflictNotice.suggestedStart ?? current.startTime }))} className="mt-1.5 rounded-lg bg-white px-2.5 py-1 text-[10px] font-black text-orange-700 shadow-sm">
+                    <button type="button" onClick={() => setNewMission(current => ({ ...current, startTime: timeConflictNotice.suggestedStart ?? current.startTime }))} className="mt-1.5 rounded-lg px-2.5 py-1 text-[10px] font-black shadow-sm" style={{ background: 'var(--clay-surface)', color: ceoTheme === 'dark' ? '#fdba74' : '#9a3412' }}>
                       Usar {timeConflictNotice.suggestedStart}
                     </button>
                   )}
@@ -4159,7 +4160,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
 
           {/* Notice */}
           {editorNotice && (
-            <div className="mx-6 mt-4 shrink-0 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-[11px] font-black text-amber-800">{editorNotice}</div>
+            <div className="mx-6 mt-4 shrink-0 rounded-lg px-4 py-2.5 text-[11px] font-black" style={{ border: ceoTheme === 'dark' ? '1px solid rgba(251,191,36,0.35)' : '1px solid #fde68a', background: ceoTheme === 'dark' ? 'rgba(251,191,36,0.14)' : '#fef3c7', color: ceoTheme === 'dark' ? '#fbbf24' : '#92400e' }}>{editorNotice}</div>
           )}
 
           {/* Scrollable missions area */}
@@ -4186,7 +4187,7 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                 onToggleRole={(missionId, role) => updateMission(missionId, { role })}
               />
             )}
-            <p className="mb-3 text-[8px] font-black uppercase tracking-[.22em] text-slate-300">Misiones principales</p>
+            <p className="mb-3 text-[8px] font-black uppercase tracking-[.22em] text-[var(--clay-text-muted)]">Misiones principales</p>
             <div className="flex flex-col gap-2">
               {(selectedDay?.missions.filter(m => m.role === 'main') ?? []).map(mission => {
                 const theme = themeFor(mission.subject)
@@ -4197,28 +4198,28 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                     draggable
                     onDragStart={() => setDraggedMissionId(mission.id)}
                     onDragEnd={() => setDraggedMissionId(null)}
-                    className="kairo-raised overflow-hidden rounded-xl transition-shadow hover:shadow-sm"
+                    className="overflow-hidden rounded-xl border border-[var(--clay-border)] bg-[var(--clay-surface)] transition-shadow hover:shadow-sm"
                     style={{ display: 'grid', gridTemplateColumns: '4px 1fr', cursor: 'grab' }}
                   >
                     <div style={{ background: theme.text }} />
                     <div className="p-3.5">
                       <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2.5 py-0.5 text-[9px] font-black text-slate-500">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--clay-surface-raised)] px-2.5 py-0.5 text-[9px] font-black text-[var(--clay-text-muted)]">
                           <Clock3 size={11} />
                           {formatTimeRange(mission.startTime, mission.endTime)}
                         </span>
                         <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[.08em]" style={{ background: theme.bg, color: theme.text }}>{mission.subject}</span>
-                        <span className="rounded-full bg-slate-50 px-2.5 py-0.5 text-[8px] font-black uppercase tracking-[.1em] text-slate-400">{missionKindLabel(mission.kind, mission.missionType)}</span>
+                        <span className="rounded-full bg-[var(--clay-surface-raised)] px-2.5 py-0.5 text-[8px] font-black uppercase tracking-[.1em] text-[var(--clay-text-muted)]">{missionKindLabel(mission.kind, mission.missionType)}</span>
                         {conflict && <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-[9px] font-black text-orange-700">Conflicto</span>}
                         <div className="ml-auto flex items-center gap-1">
-                          <button type="button" onClick={() => updateMission(mission.id, { role: 'bonus' })} aria-label="Mover a bonus" className="flex h-6 w-6 items-center justify-center rounded-md border border-[#f1f5f9] bg-transparent text-slate-300 transition hover:bg-slate-50 hover:text-slate-500"><Bookmark size={12} /></button>
-                          <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar" className="flex h-6 w-6 items-center justify-center rounded-md border border-[#f1f5f9] bg-transparent text-red-200 transition hover:bg-red-50 hover:text-red-500"><Trash2 size={12} /></button>
+                          <button type="button" onClick={() => updateMission(mission.id, { role: 'bonus' })} aria-label="Mover a bonus" className="flex h-6 w-6 items-center justify-center rounded-md border border-[var(--clay-border)] bg-transparent text-[var(--clay-text-muted)] transition hover:bg-[var(--clay-surface-raised)]"><Bookmark size={12} /></button>
+                          <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar" className="flex h-6 w-6 items-center justify-center rounded-md border border-[var(--clay-border)] bg-transparent text-red-300 transition hover:bg-red-50 hover:text-red-500"><Trash2 size={12} /></button>
                         </div>
                       </div>
-                      <p className="text-[14px] font-black leading-snug text-slate-900">{mission.title}</p>
+                      <p className="text-[14px] font-black leading-snug" style={{ color: 'var(--clay-text)' }}>{mission.title}</p>
                       <div className="mt-1.5 flex items-center gap-3">
-                        <span className="text-[10px] font-semibold text-slate-400">{mission.estimatedMinutes} min</span>
-                        <span className="text-[10px] font-black text-blue-600">+{mission.baseXP} XP</span>
+                        <span className="text-[10px] font-semibold text-[var(--clay-text-muted)]">{mission.estimatedMinutes} min</span>
+                        <span className="text-[10px] font-black text-[var(--clay-accent-text)]">+{mission.baseXP} XP</span>
                       </div>
                       {conflict && <p className="mt-1.5 text-[10px] font-bold text-orange-700">Coincide con {formatTimeRange(conflict.busyStart, conflict.busyEnd)} ocupado.</p>}
                       <select
@@ -4237,18 +4238,18 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
               })}
 
               {(selectedDay?.missions.filter(m => m.role === 'main').length ?? 0) === 0 && (
-                <div className="flex w-full items-center gap-3 rounded-xl border-2 border-dashed border-[#e2e8f0] bg-[#fafbfc] px-5 py-4 text-left">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#e2e8f0] bg-white text-[15px] font-black text-slate-400">+</span>
-                  <span className="text-[12px] font-bold text-slate-400">Sin misiones este día.</span>
+                <div className="flex w-full items-center gap-3 rounded-xl border-2 border-dashed border-[var(--clay-border)] bg-[var(--clay-surface-raised)] px-5 py-4 text-left">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[var(--clay-border)] bg-[var(--clay-surface)] text-[15px] font-black text-[var(--clay-text-muted)]">+</span>
+                  <span className="text-[12px] font-bold text-[var(--clay-text-muted)]">Sin misiones este día.</span>
                 </div>
               )}
             </div>
 
             {/* Bonus */}
-            <div className="mt-7 border-t border-[#f1f5f9] pt-5">
+            <div className="mt-7 border-t border-[var(--clay-border)] pt-5">
               <div className="mb-3 flex items-center justify-between">
-                <p className="text-[8px] font-black uppercase tracking-[.22em] text-slate-300">Misiones extra · Bonus</p>
-                <span className="rounded-full border border-[#e2e8f0] px-2.5 py-0.5 text-[9px] font-black text-slate-400">{bonusMissions.length} bonus</span>
+                <p className="text-[8px] font-black uppercase tracking-[.22em] text-[var(--clay-text-muted)]">Misiones extra · Bonus</p>
+                <span className="rounded-full border border-[var(--clay-border)] px-2.5 py-0.5 text-[9px] font-black text-[var(--clay-text-muted)]">{bonusMissions.length} bonus</span>
               </div>
               {bonusMissions.length > 0 ? (
                 <div className="flex flex-col gap-2">
@@ -4256,38 +4257,38 @@ function CalendarEditorOverlay({ calendar, weekStartISO, exams, subjects, curric
                     const theme = themeFor(mission.subject)
                     const conflict = missionConflictFor(mission, conflicts.filter(item => item.date === bonusDay.date))
                     return (
-                      <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="flex items-center gap-3 rounded-xl border border-[#f1f5f9] bg-[#fafbfc] px-4 py-2.5" style={{ cursor: 'grab' }}>
-                        <GripVertical size={12} className="shrink-0 text-slate-300" />
-                        <span className="shrink-0 text-[10px] font-black text-slate-400">{formatTimeRange(mission.startTime, mission.endTime)}</span>
+                      <div key={mission.id} draggable onDragStart={() => setDraggedMissionId(mission.id)} onDragEnd={() => setDraggedMissionId(null)} className="flex items-center gap-3 rounded-xl border border-[var(--clay-border)] bg-[var(--clay-surface-raised)] px-4 py-2.5" style={{ cursor: 'grab' }}>
+                        <GripVertical size={12} className="shrink-0 text-[var(--clay-text-muted)]" />
+                        <span className="shrink-0 text-[10px] font-black text-[var(--clay-text-muted)]">{formatTimeRange(mission.startTime, mission.endTime)}</span>
                         <span className="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black" style={{ background: theme.bg, color: theme.text }}>{mission.subject.split(' ')[0]}</span>
                         {conflict && <span className="shrink-0 rounded-full bg-orange-100 px-2 py-0.5 text-[9px] font-black text-orange-700">Conflicto</span>}
-                        <p className="min-w-0 flex-1 truncate text-[12px] font-bold text-slate-700">{mission.title}</p>
-                        <span className="shrink-0 text-[10px] font-semibold text-slate-400">{bonusDay.label.split(',')[0]}</span>
-                        <button type="button" onClick={() => updateMission(mission.id, { role: 'main' })} aria-label="Hacer principal" className="shrink-0 rounded-md p-1.5 text-slate-300 transition hover:bg-white hover:text-[#0f172a]"><Bookmark size={13} /></button>
-                        <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar" className="shrink-0 rounded-md p-1.5 text-red-200 transition hover:bg-red-50 hover:text-red-500"><Trash2 size={13} /></button>
+                        <p className="min-w-0 flex-1 truncate text-[12px] font-bold" style={{ color: 'var(--clay-text)' }}>{mission.title}</p>
+                        <span className="shrink-0 text-[10px] font-semibold text-[var(--clay-text-muted)]">{bonusDay.label.split(',')[0]}</span>
+                        <button type="button" onClick={() => updateMission(mission.id, { role: 'main' })} aria-label="Hacer principal" className="shrink-0 rounded-md p-1.5 text-[var(--clay-text-muted)] transition hover:bg-[var(--clay-surface)] hover:text-[var(--clay-text)]"><Bookmark size={13} /></button>
+                        <button type="button" onClick={() => deleteMission(mission.id)} aria-label="Eliminar" className="shrink-0 rounded-md p-1.5 text-red-300 transition hover:bg-red-50 hover:text-red-500"><Trash2 size={13} /></button>
                       </div>
                     )
                   })}
                 </div>
               ) : (
-                <p className="text-[11px] font-semibold text-[#cbd5e1]">No hay bonus opcionales esta semana.</p>
+                <p className="text-[11px] font-semibold text-[var(--clay-text-muted)]">No hay bonus opcionales esta semana.</p>
               )}
             </div>
           </div>
         </div>
 
         {/* ── Footer ── */}
-        <footer className="flex shrink-0 items-center justify-between gap-3 border-t-2 border-[#0f172a] bg-white px-6 py-4">
-          <p className="text-[11px] font-bold text-slate-400">{mainMissionCount} misiones principales · {bonusMissions.length} bonus opcionales</p>
+        <footer className="flex shrink-0 items-center justify-between gap-3 border-t-2 border-[#0f172a] bg-[var(--clay-surface)] px-6 py-4">
+          <p className="text-[11px] font-bold text-[var(--clay-text-muted)]">{mainMissionCount} misiones principales · {bonusMissions.length} bonus opcionales</p>
           <div className="flex gap-2">
-            <button onClick={onClose} className="rounded-lg border border-[#e2e8f0] bg-white px-5 py-2.5 text-[12px] font-black text-slate-500 transition hover:bg-slate-50">Cancelar</button>
+            <button onClick={onClose} className="rounded-lg border border-[var(--clay-border)] bg-[var(--clay-surface)] px-5 py-2.5 text-[12px] font-black text-[var(--clay-text-muted)] transition hover:bg-[var(--clay-surface-raised)]">Cancelar</button>
             <button type="button" onClick={handleSave} disabled={saveState === 'saving'} className="rounded-lg bg-[#0f172a] px-5 py-2.5 text-[12px] font-black text-white transition hover:bg-slate-800 disabled:opacity-60">
               {saveState === 'saving' ? 'Guardando...' : saveState === 'saved' ? '✓ Guardado' : saveState === 'error' ? 'Reintentar' : 'Guardar cambios'}
             </button>
           </div>
         </footer>
 
-        <style>{`.inputish{width:100%;border-radius:8px;border:1px solid #f1f5f9;background:#fafbfc;padding:8px 12px;font-size:12px;font-weight:700;color:#334155;outline:none}.inputish:focus{border-color:#bfdbfe;background:white}`}</style>
+        <style>{`.inputish{width:100%;border-radius:8px;border:1px solid var(--clay-border);background:var(--clay-surface-raised);padding:8px 12px;font-size:12px;font-weight:700;color:var(--clay-text);outline:none}.inputish:focus{border-color:var(--clay-accent);background:var(--clay-surface)}`}</style>
       </motion.section>
     </motion.div>
   )
@@ -4981,6 +4982,7 @@ function positionTimelineBlocks(blocks: TimelineBlock[]): PositionedTimelineBloc
 }
 
 function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, selectedDayDate, onSelectDay, onEmptySlotClick, onDeleteMission, onToggleRole }: { days: DayPlan[]; exams: StudentExam[]; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[]; selectedDayDate: string | null; onSelectDay: (date: string) => void; onEmptySlotClick: (date: string, startTime: string) => void; onDeleteMission: (missionId: string) => void; onToggleRole: (missionId: string, role: MissionRole) => void }) {
+  const { theme: ceoTheme } = useClayThemePreference()
   const range = buildTimelineRange(days, externalBusyByDate)
   const height = Math.max(360, (range.end - range.start) * TIMELINE_PX_PER_MINUTE)
   const hours = Array.from({ length: Math.floor((range.end - range.start) / 60) + 1 }, (_, index) => range.start + index * 60)
@@ -4988,24 +4990,24 @@ function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, sele
   const unprogrammed = days.map(day => ({ day, missions: day.missions.filter(mission => timeToMinutes(mission.startTime) === null || timeToMinutes(mission.endTime) === null) })).filter(item => item.missions.length > 0)
 
   return (
-    <section className="mb-5 rounded-2xl border border-slate-100 bg-white shadow-sm">
-      <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
+    <section className="mb-5 rounded-2xl border border-[var(--clay-border)] bg-[var(--clay-surface)] shadow-sm">
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--clay-border)] px-4 py-3">
         <div>
-          <p className="text-[8px] font-black uppercase tracking-[.22em] text-slate-400">Semana temporal</p>
-          <p className="mt-1 text-xs font-bold text-slate-500">Misiones Kairo y disponibilidad externa, sin detalles privados.</p>
+          <p className="text-[8px] font-black uppercase tracking-[.22em] text-[var(--clay-text-muted)]">Semana temporal</p>
+          <p className="mt-1 text-xs font-bold text-[var(--clay-text-muted)]">Misiones Kairo y disponibilidad externa, sin detalles privados.</p>
         </div>
         {conflicts.length > 0 && <span className="rounded-full bg-orange-100 px-2.5 py-1 text-[10px] font-black text-orange-700">{conflicts.length} conflicto{conflicts.length !== 1 ? 's' : ''}</span>}
       </div>
       <div className="overflow-x-auto">
         <div className="min-w-[820px]">
-          <div className="grid border-b border-slate-100 bg-slate-50/80" style={{ gridTemplateColumns: '56px repeat(7, minmax(104px, 1fr))' }}>
-            <div className="px-2 py-2 text-[9px] font-black uppercase tracking-[.12em] text-slate-300">Hora</div>
+          <div className="grid border-b border-[var(--clay-border)] bg-[var(--clay-surface-raised)]" style={{ gridTemplateColumns: '56px repeat(7, minmax(104px, 1fr))' }}>
+            <div className="px-2 py-2 text-[9px] font-black uppercase tracking-[.12em] text-[var(--clay-text-muted)]">Hora</div>
             {days.map(day => {
               const dayConflicts = conflicts.filter(conflict => conflict.date === day.date).length
               return (
-                <button key={day.date} type="button" onClick={() => onSelectDay(day.date)} className="border-l border-slate-100 px-2 py-2 text-left transition hover:bg-blue-50" style={{ background: selectedDayDate === day.date ? '#eff6ff' : 'transparent' }}>
+                <button key={day.date} type="button" onClick={() => onSelectDay(day.date)} className="border-l border-[var(--clay-border)] px-2 py-2 text-left transition hover:bg-[var(--clay-accent-soft)]" style={{ background: selectedDayDate === day.date ? 'var(--clay-accent-soft)' : 'transparent' }}>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-[.1em] text-slate-500">{compactDayLabel(day.date)}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[.1em] text-[var(--clay-text-muted)]">{compactDayLabel(day.date)}</span>
                     {dayConflicts > 0 && <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[9px] font-black text-orange-700">!</span>}
                   </div>
                 </button>
@@ -5013,9 +5015,9 @@ function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, sele
             })}
           </div>
           <div className="grid" style={{ gridTemplateColumns: '56px repeat(7, minmax(104px, 1fr))' }}>
-            <div className="relative bg-slate-50/50" style={{ height }}>
+            <div className="relative bg-[var(--clay-surface-raised)]" style={{ height }}>
               {hours.map(hour => (
-                <div key={hour} className="absolute right-2 text-[10px] font-bold text-slate-400" style={{ top: Math.max(0, (hour - range.start) * TIMELINE_PX_PER_MINUTE - 7) }}>
+                <div key={hour} className="absolute right-2 text-[10px] font-bold text-[var(--clay-text-muted)]" style={{ top: Math.max(0, (hour - range.start) * TIMELINE_PX_PER_MINUTE - 7) }}>
                   {minutesToHHMM(hour)}
                 </div>
               ))}
@@ -5027,7 +5029,7 @@ function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, sele
                   key={day.date}
                   role="button"
                   tabIndex={0}
-                  className="relative border-l border-slate-100 bg-white text-left transition hover:bg-blue-50/30"
+                  className="relative border-l border-[var(--clay-border)] bg-[var(--clay-surface)] text-left transition hover:bg-[var(--clay-accent-soft)]"
                   style={{ height }}
                   onClick={event => {
                     const rect = event.currentTarget.getBoundingClientRect()
@@ -5042,7 +5044,7 @@ function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, sele
                   }}
                 >
                   {hours.map(hour => (
-                    <div key={hour} className="absolute left-0 right-0 border-t border-slate-100" style={{ top: (hour - range.start) * TIMELINE_PX_PER_MINUTE }} />
+                    <div key={hour} className="absolute left-0 right-0 border-t border-[var(--clay-border)]" style={{ top: (hour - range.start) * TIMELINE_PX_PER_MINUTE }} />
                   ))}
                   {exams.filter(exam => exam.date === day.date).map((exam, index) => (
                     <div key={exam.id} className="absolute left-1 right-1 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-[9px] font-black text-amber-800" style={{ top: 4 + index * 24 }}>
@@ -5056,7 +5058,7 @@ function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, sele
                     const left = block.lane * width
                     if (block.kind === 'busy') {
                       return (
-                        <div key={block.id} className="absolute rounded-lg border border-slate-200 bg-slate-100/70 px-2 py-1 text-[9px] font-bold text-slate-400" style={{ top, height: blockHeight, left: `calc(${left}% + 4px)`, width: `calc(${width}% - 8px)` }} onClick={event => event.stopPropagation()}>
+                        <div key={block.id} className="absolute rounded-lg border border-[var(--clay-border)] bg-[var(--clay-surface-raised)] px-2 py-1 text-[9px] font-bold text-[var(--clay-text-muted)]" style={{ top, height: blockHeight, left: `calc(${left}% + 4px)`, width: `calc(${width}% - 8px)` }} onClick={event => event.stopPropagation()}>
                           <div>{formatTimeRange(minutesToHHMM(block.start), minutesToHHMM(block.end))}</div>
                           <div>Ocupado</div>
                         </div>
@@ -5064,17 +5066,17 @@ function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, sele
                     }
                     const theme = themeFor(block.mission.subject)
                     return (
-                      <div key={block.id} className="absolute overflow-hidden rounded-lg border bg-white px-2 py-1 shadow-sm" style={{ top, height: blockHeight, left: `calc(${left}% + 4px)`, width: `calc(${width}% - 8px)`, borderColor: block.hasConflict ? '#fdba74' : theme.border }} onClick={event => { event.stopPropagation(); onSelectDay(day.date) }}>
-                        <div className="flex items-center gap-1 text-[9px] font-black" style={{ color: block.hasConflict ? '#c2410c' : theme.text }}>
+                      <div key={block.id} className="absolute overflow-hidden rounded-lg border bg-[var(--clay-surface)] px-2 py-1 shadow-sm" style={{ top, height: blockHeight, left: `calc(${left}% + 4px)`, width: `calc(${width}% - 8px)`, borderColor: block.hasConflict ? '#fdba74' : theme.border }} onClick={event => { event.stopPropagation(); onSelectDay(day.date) }}>
+                        <div className="flex items-center gap-1 text-[9px] font-black" style={{ color: block.hasConflict ? (ceoTheme === 'dark' ? '#fdba74' : '#c2410c') : 'var(--clay-text)' }}>
                           <span>{formatTimeRange(block.mission.startTime, block.mission.endTime)}</span>
                           {block.hasConflict && <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[8px] text-orange-700">Conflicto</span>}
                         </div>
-                        <div className="truncate text-[10px] font-black" style={{ color: theme.text }}>{block.mission.subject}</div>
-                        {blockHeight >= 54 && <div className="truncate text-[10px] font-bold text-slate-700">{block.mission.title}</div>}
+                        <div className="truncate text-[10px] font-black" style={{ color: 'var(--clay-text)' }}>{block.mission.subject}</div>
+                        {blockHeight >= 54 && <div className="truncate text-[10px] font-bold" style={{ color: 'var(--clay-text-muted)' }}>{block.mission.title}</div>}
                         {blockHeight >= 62 && (
                           <div className="mt-1 flex gap-1">
-                            <button type="button" onClick={event => { event.stopPropagation(); onToggleRole(block.mission.id, block.mission.role === 'main' ? 'bonus' : 'main') }} className="rounded bg-slate-50 px-1.5 py-0.5 text-[8px] font-black text-slate-500">{block.mission.role === 'main' ? 'Bonus' : 'Principal'}</button>
-                            <button type="button" onClick={event => { event.stopPropagation(); onDeleteMission(block.mission.id) }} className="rounded bg-red-50 px-1.5 py-0.5 text-[8px] font-black text-red-500">Eliminar</button>
+                            <button type="button" onClick={event => { event.stopPropagation(); onToggleRole(block.mission.id, block.mission.role === 'main' ? 'bonus' : 'main') }} className="rounded bg-[var(--clay-surface-raised)] px-1.5 py-0.5 text-[8px] font-black text-[var(--clay-text-muted)]">{block.mission.role === 'main' ? 'Bonus' : 'Principal'}</button>
+                            <button type="button" onClick={event => { event.stopPropagation(); onDeleteMission(block.mission.id) }} className="rounded bg-red-50 px-1.5 py-0.5 text-[8px] font-black text-red-700">Eliminar</button>
                           </div>
                         )}
                       </div>
@@ -5087,12 +5089,12 @@ function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, sele
         </div>
       </div>
       {unprogrammed.length > 0 && (
-        <div className="border-t border-slate-100 px-4 py-3">
-          <p className="mb-2 text-[8px] font-black uppercase tracking-[.22em] text-slate-400">Sin programar</p>
+        <div className="border-t border-[var(--clay-border)] px-4 py-3">
+          <p className="mb-2 text-[8px] font-black uppercase tracking-[.22em] text-[var(--clay-text-muted)]">Sin programar</p>
           <div className="flex flex-wrap gap-2">
             {unprogrammed.flatMap(({ day, missions }) => missions.map(mission => (
-              <button key={`${day.date}-${mission.id}`} type="button" onClick={() => { onSelectDay(day.date); onEmptySlotClick(day.date, '') }} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left text-[11px] font-bold text-slate-600">
-                <span className="font-black text-slate-400">{compactDayLabel(day.date)} · Sin hora</span>
+              <button key={`${day.date}-${mission.id}`} type="button" onClick={() => { onSelectDay(day.date); onEmptySlotClick(day.date, '') }} className="rounded-xl border border-[var(--clay-border)] bg-[var(--clay-surface-raised)] px-3 py-2 text-left text-[11px] font-bold text-[var(--clay-text)]">
+                <span className="font-black text-[var(--clay-text-muted)]">{compactDayLabel(day.date)} · Sin hora</span>
                 <span className="block max-w-[220px] truncate">{mission.subject} · {mission.title}</span>
               </button>
             )))}

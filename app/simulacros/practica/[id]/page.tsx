@@ -13,7 +13,7 @@ import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import ExamStatement from '@/components/shared/ExamStatement'
 import MathAnswerToolbar from '@/components/shared/MathAnswerToolbar'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
-import KairoSpinner from '@/app/components/ui/KairoSpinner'
+import SimulacroPracticaSkeleton from '@/app/components/simulacros/SimulacroPracticaSkeleton'
 import { PARCIAL_MINUTES } from '@/app/lib/camino/xpMap'
 import { isValidSegments, totalElapsedSeconds, type TimeSegment } from '@/app/lib/simulacros/timeSegments'
 
@@ -501,7 +501,8 @@ function PracticaPageInner() {
     )
   }
 
-  if (!record) return <KairoSpinner />
+  // Antes: KairoSpinner, la rueda azul sobre pantalla vacía.
+  if (!record) return <SimulacroPracticaSkeleton />
 
   // Pantalla distinta para "en pausa" — deja claro que no es una sesión
   // nueva ni una ya completada, y que se puede retomar justo donde se dejó.
@@ -1014,7 +1015,7 @@ function formatTime(seconds: number) {
 
 export default function PracticaPage() {
   return (
-    <Suspense fallback={<KairoSpinner />}>
+    <Suspense fallback={<SimulacroPracticaSkeleton />}>
       <PracticaPageInner />
     </Suspense>
   )

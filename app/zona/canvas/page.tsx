@@ -1,6 +1,7 @@
 'use client'
 
 import { CANVAS_ENABLED } from '@/app/zona/canvasFlags'
+import ZonaSkeleton from '@/app/components/zona/ZonaSkeleton'
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
@@ -59,16 +60,10 @@ export default function ZonaCanvasPage() {
     )
   }
 
-  if (loading || !user) {
-    return (
-      <ClayThemeScope theme={theme} style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ margin: '0 auto 16px', width: 56, height: 56, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 24, background: 'var(--clay-accent)', color: 'var(--clay-on-accent)' }}><Zap size={28} /></div>
-          <p style={{ fontWeight: 900, color: 'var(--clay-text-muted)', margin: 0 }}>Abriendo Mi Espacio...</p>
-        </div>
-      </ClayThemeScope>
-    )
-  }
+  // Antes: un icono centrado con "Abriendo Mi Espacio...". Se cambia por la
+  // silueta real de la pantalla — mismo criterio que /zona y /zona/cursos, y
+  // así las tres pestañas cargan igual en vez de cada una a su manera.
+  if (loading || !user) return <ZonaSkeleton variant="canvas" />
 
   return (
     <ClayThemeScope theme={theme} style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>

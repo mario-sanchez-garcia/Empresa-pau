@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { BookOpen, LayoutGrid, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SidebarNav from '@/app/components/SidebarNav'
-import KairoSpinner from '@/app/components/ui/KairoSpinner'
+import ZonaSkeleton from '@/app/components/zona/ZonaSkeleton'
 import Flashcards from '@/components/zona/Flashcards'
 import SectionIntroCard from '@/components/shared/SectionIntroCard'
 import type { Flashcard, ZonaUser } from '@/components/zona/types'
@@ -55,7 +55,10 @@ export default function ZonaPage() {
 
   const { theme } = useClayThemePreference()
 
-  if (loading || !user) return <KairoSpinner />
+  // Antes: KairoSpinner, una rueda azul girando sobre pantalla vacía.
+  // Ahora la silueta real de la pantalla, para que no cambie el layout
+  // al entrar los datos.
+  if (loading || !user) return <ZonaSkeleton variant="estudio" />
 
   return (
     <ClayThemeScope theme={theme} style={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { BookOpen, CheckCircle2, LayoutGrid, Lock, RotateCcw, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SidebarNav from '@/app/components/SidebarNav'
-import KairoSpinner from '@/app/components/ui/KairoSpinner'
+import ZonaSkeleton from '@/app/components/zona/ZonaSkeleton'
 import SectionIntroCard from '@/components/shared/SectionIntroCard'
 import { useBillingStatus } from '@/app/hooks/useBillingStatus'
 import { useIsInternalUser } from '@/app/hooks/useIsInternalUser'
@@ -275,7 +275,9 @@ export default function ZonaCursosPage() {
     return stats
   }, [groups])
 
-  if (loading || !user || billing.loading || internalUser.loading) return <KairoSpinner />
+  // Antes: KairoSpinner. Aquí la espera es más larga que en /zona porque
+  // además resuelve plan de facturación y usuario interno.
+  if (loading || !user || billing.loading || internalUser.loading) return <ZonaSkeleton variant="cursos" />
 
   // Mis Cursos is a paid-plan feature — internal/staff accounts always pass.
   const canAccess = billing.hasActivePack || internalUser.isInternalUser

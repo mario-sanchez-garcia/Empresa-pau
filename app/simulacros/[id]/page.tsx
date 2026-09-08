@@ -13,7 +13,7 @@ import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import ExamStatement from '@/components/shared/ExamStatement'
 import MathEditor from '@/components/shared/MathEditor'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
-import KairoSpinner from '@/app/components/ui/KairoSpinner'
+import SimulacroDetalleSkeleton from '@/app/components/simulacros/SimulacroDetalleSkeleton'
 import { isValidSegments, totalElapsedSeconds } from '@/app/lib/simulacros/timeSegments'
 
 const DEFAULT_DURATION_MINUTES = 90
@@ -416,7 +416,8 @@ export default function SimulacroActivoPage() {
     }
   }
 
-  if (!record) return <KairoSpinner />
+  // Antes: KairoSpinner, la rueda azul sobre pantalla vacía.
+  if (!record) return <SimulacroDetalleSkeleton />
 
   if (!examStarted || isPaused) {
     const community = record.comunidad ?? record.bloques[0]?.comunidad ?? 'Madrid'

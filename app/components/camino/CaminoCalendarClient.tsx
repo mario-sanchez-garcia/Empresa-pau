@@ -2565,52 +2565,58 @@ export default function CaminoCalendarClient() {
 
           {/* ── BONUS SECTION (Mañana) ── */}
           {todayBonus.length > 0 && (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', borderTop: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8' }}>Mañana</span>
+            <ClayThemeScope theme={clayHubTheme} style={{ background: 'transparent' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', background: 'var(--clay-surface-raised)', borderBottom: '1px solid var(--clay-border)', borderTop: '1px solid var(--clay-border)' }}>
+                <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--clay-text-muted)' }}>Mañana</span>
               </div>
               {todayBonus.map((mission, idx) => {
                 const bonusTarget = hrefForMission(mission)
+                const doneColor = clayHubTheme === 'dark' ? '#4ade80' : '#065f46'
                 return (
-                  <div key={mission.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid #f1f5f9', opacity: mission.status === 'done' ? 0.55 : 1 }}>
-                    <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: '#dbeafe', flexShrink: 0, width: 48, paddingTop: 2 }}>0{idx + 2}</div>
+                  <div key={mission.id} style={{ padding: '18px 20px', background: 'var(--clay-surface)', borderBottom: '1px solid var(--clay-border)' }}>
+                  {/* opacity en un wrapper interno, no en el div con el fondo
+                      -- si no, también desvanecería el fondo clay hacia el
+                      blanco ambiental de detrás cuando status==='done'. */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, opacity: mission.status === 'done' ? 0.55 : 1 }}>
+                    <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: 'var(--clay-border)', flexShrink: 0, width: 48, paddingTop: 2 }}>0{idx + 2}</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6, alignItems: 'center' }}>
-                        <span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.subject}</span>
-                        {mission.block && <><span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.block}</span></>}
+                        <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--clay-accent-text)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.subject}</span>
+                        {mission.block && <><span style={{ color: 'var(--clay-text-muted)', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: 'var(--clay-accent-text)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.block}</span></>}
                         {mission.metadata?.free_initiative ? (
-                          <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#ecfdf5', color: '#059669' }}>✎ Por tu cuenta</span>
+                          <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)', color: doneColor }}>✎ Por tu cuenta</span>
                         ) : (
-                          <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#f3e8ff', color: '#7c3aed' }}>Extra</span>
+                          <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: 'var(--clay-accent-soft)', color: 'var(--clay-accent-text)' }}>Extra</span>
                         )}
-                        {!!mission.metadata?.express && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: '#fffbeb', color: '#d97706' }}>⚡ Exprés</span>}
+                        {!!mission.metadata?.express && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: clayHubTheme === 'dark' ? 'rgba(251,191,36,0.14)' : '#fffbeb', color: clayHubTheme === 'dark' ? '#fbbf24' : '#d97706' }}>⚡ Exprés</span>}
                       </div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: mission.status === 'done' ? '#94a3b8' : '#0f172a', lineHeight: 1.3, textDecoration: mission.status === 'done' ? 'line-through' : 'none', marginBottom: 8 }}>{mission.title}</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: mission.status === 'done' ? 'var(--clay-text-muted)' : 'var(--clay-text)', lineHeight: 1.3, textDecoration: mission.status === 'done' ? 'line-through' : 'none', marginBottom: 8 }}>{mission.title}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ flex: 1, height: 3, background: '#f1f5f9', borderRadius: 2, overflow: 'hidden' }}>
-                          <div style={{ height: '100%', background: mission.status === 'done' ? '#34d399' : '#2563eb', borderRadius: 2, width: mission.status === 'done' ? '100%' : '0%' }} />
+                        <div style={{ flex: 1, height: 3, background: 'var(--clay-border)', borderRadius: 2, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', background: mission.status === 'done' ? doneColor : 'var(--clay-accent)', borderRadius: 2, width: mission.status === 'done' ? '100%' : '0%' }} />
                         </div>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8' }}>{mission.estimatedMinutes} min · {mission.status === 'done' ? 'Completada' : 'Sin comenzar'}</span>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--clay-text-muted)' }}>{mission.estimatedMinutes} min · {mission.status === 'done' ? 'Completada' : 'Sin comenzar'}</span>
                       </div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
-                      <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb' }}>+{mission.baseXP} XP</span>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--clay-accent-text)' }}>+{mission.baseXP} XP</span>
                       {mission.status === 'done' ? (
                         mission.missionType === 'partial_practice' && bonusTarget?.href ? (
-                          <a href={bonusTarget.href} style={{ fontSize: 12, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669', textDecoration: 'none' }}>✓ Hecha · Ver</a>
+                          <ClayLinkButton href={bonusTarget.href} variant="secondary" style={{ width: 'auto', padding: '6px 12px', fontSize: 12, borderRadius: 8, color: doneColor }}>✓ Hecha · Ver</ClayLinkButton>
                         ) : (
-                          <span style={{ fontSize: 12, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#ecfdf5', border: '1px solid #bbf7d0', color: '#059669' }}>✓ Hecha</span>
+                          <span style={{ fontSize: 12, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)', color: doneColor }}>✓ Hecha</span>
                         )
                       ) : bonusTarget?.href ? (
-                        <a href={bonusTarget.href} style={{ fontSize: 11, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', textDecoration: 'none' }}>Ir →</a>
+                        <ClayLinkButton href={bonusTarget.href} variant="secondary" style={{ width: 'auto', padding: '6px 12px', fontSize: 11, borderRadius: 8 }}>Ir →</ClayLinkButton>
                       ) : (
-                        <span style={{ fontSize: 11, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: '#f1f5f9', color: '#94a3b8', border: '1px solid #e2e8f0' }}>Sin pantalla</span>
+                        <span style={{ fontSize: 11, fontWeight: 800, padding: '6px 12px', borderRadius: 8, background: 'var(--clay-surface-raised)', color: 'var(--clay-text-muted)', border: '1px solid var(--clay-border)' }}>Sin pantalla</span>
                       )}
                     </div>
                   </div>
+                  </div>
                 )
               })}
-            </>
+            </ClayThemeScope>
           )}
 
           {/* ── PRÓXIMAS MISIONES ── */}
@@ -2622,9 +2628,9 @@ export default function CaminoCalendarClient() {
             if (nextDays.length === 0) return null
             const todayMs = new Date(realToday + 'T00:00:00').getTime()
             return (
-              <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', borderTop: '1px solid #e2e8f0' }}>
-                  <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8' }}>Próximas misiones</span>
+              <ClayThemeScope theme={clayHubTheme} style={{ background: 'transparent' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', background: 'var(--clay-surface-raised)', borderBottom: '1px solid var(--clay-border)', borderTop: '1px solid var(--clay-border)' }}>
+                  <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--clay-text-muted)' }}>Próximas misiones</span>
                 </div>
                 {nextDays.map((day, di) => {
                   const mission = day.missions.find(m => m.role === 'main')
@@ -2632,24 +2638,31 @@ export default function CaminoCalendarClient() {
                   const diff = Math.round((new Date(day.date + 'T00:00:00').getTime() - todayMs) / 86400000)
                   const dayName = diff === 1 ? 'Mañana' : diff === 2 ? 'Pasado mañana' : calendarDayLabel(day.date)
                   const num = String(2 + todayBonus.length + di).padStart(2, '0')
+                  const dayColor = di === 0 ? 'var(--clay-accent-text)' : (clayHubTheme === 'dark' ? '#c4b5fd' : '#7c3aed')
+                  const dayBorderColor = di === 0 ? 'var(--clay-accent)' : (clayHubTheme === 'dark' ? '#c4b5fd' : '#7c3aed')
                   return (
-                    <div key={day.date} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '16px 20px', borderBottom: '1px solid #f1f5f9', borderLeft: `3px solid ${di === 0 ? '#2563eb' : '#8b5cf6'}`, opacity: 0.45 }}>
-                      <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: di === 0 ? '#2563eb' : '#8b5cf6', flexShrink: 0, width: 48, paddingTop: 2 }}>{num}</div>
+                    <div key={day.date} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '16px 20px', background: 'var(--clay-surface)', borderBottom: '1px solid var(--clay-border)', borderLeft: `3px solid ${dayBorderColor}` }}>
+                      {/* opacity va en un wrapper interno, no en este div -- si
+                          fuera aquí, también desvanecería el fondo clay recién
+                          añadido hacia el blanco ambiental de detrás. */}
+                      <div style={{ display: 'flex', gap: 16, opacity: 0.45 }}>
+                      <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: dayColor, flexShrink: 0, width: 48, paddingTop: 2 }}>{num}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: di === 0 ? '#2563eb' : '#8b5cf6', marginBottom: 5 }}>{dayName}</div>
+                        <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: '0.1em', textTransform: 'uppercase', color: dayColor, marginBottom: 5 }}>{dayName}</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 5, alignItems: 'center' }}>
-                          <span style={{ fontSize: 10, fontWeight: 800, color: di === 0 ? '#2563eb' : '#8b5cf6', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.subject}</span>
+                          <span style={{ fontSize: 10, fontWeight: 800, color: dayColor, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mission.subject}</span>
                           {(formatBlockLabel(mission.blockKey) || mission.block) && (
-                            <><span style={{ color: '#cbd5e1', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{formatBlockLabel(mission.blockKey) || mission.block}</span></>
+                            <><span style={{ color: 'var(--clay-text-muted)', fontSize: 10 }}>·</span><span style={{ fontSize: 10, fontWeight: 800, color: 'var(--clay-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{formatBlockLabel(mission.blockKey) || mission.block}</span></>
                           )}
                         </div>
-                        <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>{mission.title}</div>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', marginTop: 4 }}>{mission.estimatedMinutes} min</div>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--clay-text)', lineHeight: 1.3 }}>{mission.title}</div>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--clay-text-muted)', marginTop: 4 }}>{mission.estimatedMinutes} min</div>
+                      </div>
                       </div>
                     </div>
                   )
                 })}
-              </>
+              </ClayThemeScope>
             )
           })()}
 

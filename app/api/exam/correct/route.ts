@@ -25,7 +25,10 @@ const MODEL = 'claude-sonnet-4-6'
 // budget doesn't just truncate cleanly — it makes the model rush and blur field
 // boundaries near the end (headers/content bleeding across JSON string values).
 const MAX_TOKENS = 4000
-const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
+// El tope agregado de imágenes vive en app/lib/imagePayloadLimits.ts:
+// estaba duplicado en estas tres rutas y por encima del límite de
+// transporte de la plataforma, así que su 413 era inalcanzable (A18).
+import { MAX_IMAGE_PAYLOAD_CHARS, imagePayloadTooLargeMessage } from '@/app/lib/imagePayloadLimits'
 
 function examSystemLabel(comunidad: string) {
   return comunidad === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid'
@@ -155,7 +158,7 @@ async function handlePost(request: NextRequest) {
   ]
   const imagePayloadChars = allImages.reduce((sum, img) => sum + img.data.length, 0)
   if (imagePayloadChars > MAX_IMAGE_PAYLOAD_CHARS) {
-    return NextResponse.json({ error: 'Las imágenes son demasiado grandes en conjunto. Sube fotos más ligeras o menos páginas.' }, { status: 413 })
+    return NextResponse.json({ error: imagePayloadTooLargeMessage(imagePayloadChars, allImages.length) }, { status: 413 })
   }
 
   const action: RateLimitAction = allImages.length > 0 ? 'image_correction' : 'chat'

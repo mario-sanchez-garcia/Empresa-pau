@@ -510,15 +510,29 @@ export default function SimulacroResultsPage() {
             >
               <Copy size={15} />Compartir resultado
             </button>
+            {/* A11 de la auditoría del 7-8 de septiembre de 2026: estos dos
+                botones eran enlaces pelados que no llevaban nada del resultado.
+                El primero decía "Crear misión de repaso" y solo navegaba a
+                /camino — no creaba ninguna misión. Prometer una operación que
+                no existe es peor que no ofrecerla, así que pasa a decir lo que
+                de verdad hace. Crear la misión de verdad exige validar el
+                resultado en servidor y escribir en camino_calendar; queda
+                pendiente y anotado. */}
             <a
               href="/camino"
               className="campus-primary no-underline"
               style={{ padding: '10px 16px', borderRadius: 14, display: 'inline-flex', alignItems: 'center', gap: 8 }}
             >
-              <Route size={15} />Crear misión de repaso
+              <Route size={15} />Ver mi Camino
             </a>
+            {/* El tutor sí puede recibir contexto sin inventar nada: /examenes
+                ya lee ?subject= y lo valida contra su catálogo
+                (readSubjectFromUrl en app/page-client.tsx), y record.asignatura
+                usa exactamente los mismos slugs. Antes se abría un chat
+                genérico y el alumno tenía que volver a elegir asignatura
+                después de un simulacro de esa misma asignatura. */}
             <Link
-              href="/examenes?view=chat"
+              href={`/examenes?view=chat&subject=${encodeURIComponent(record.asignatura)}`}
               className="pau-button-secondary no-underline"
             >
               <MessageCircle size={15} />Preguntar a Kairo

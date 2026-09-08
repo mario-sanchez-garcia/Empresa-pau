@@ -23,6 +23,7 @@ import { splitWhyExplanationMarkdown } from './lib/whyExplanation'
 import { formatExamText } from './lib/mathFormatting'
 import { getApiErrorMessage } from './lib/rateLimitMessages'
 import { compressImageToBase64 } from './lib/clientImageCompression'
+import { MAX_IMAGE_PAYLOAD_CHARS, imagePayloadTooLargeMessage } from './lib/imagePayloadLimits'
 import { isIncompleteOfficialExercise } from './lib/contentQuality'
 import { getRandomEvauExerciseForMission, normalizeCaminoExamSubject, rememberRecentEvauExerciseIds } from './lib/camino/randomEvauExercise'
 import { normalizeScoreToTen } from './lib/camino/scoreNormalization'
@@ -2216,10 +2217,38 @@ function cambiarTipo(t: Tipo) {
     })))
     const succeeded = results.filter((r): r is PromiseFulfilledResult<{ data: string; type: string; preview: string }> => r.status === 'fulfilled').map(r => r.value)
     const failedCount = results.length - succeeded.length
-    if (succeeded.length) {
-      setImagenes(current => [...current, ...succeeded])
+
+    // A18 de la auditoría del 7-8 de septiembre de 2026: cada foto se comprime
+    // por separado (1568 px), pero nadie miraba lo que SUMAN. Cuatro páginas
+    // podían pasar de los 4,5 MB que admite la plataforma, y entonces la
+    // petición moría antes de llegar al código: el alumno veía un error
+    // genérico después de haber escrito su respuesta entera.
+    // Ahora el corte es aquí, al adjuntar: se entera al añadir la foto que
+    // sobra, no al enviar, y no pierde nada de lo escrito.
+    const alreadyChars = imagenes.reduce((sum, img) => sum + img.data.length, 0)
+    const kept: typeof succeeded = []
+    let runningChars = alreadyChars
+    let rejectedBySize = 0
+    for (const img of succeeded) {
+      if (runningChars + img.data.length > MAX_IMAGE_PAYLOAD_CHARS) {
+        rejectedBySize++
+        URL.revokeObjectURL(img.preview)
+        continue
+      }
+      runningChars += img.data.length
+      kept.push(img)
+    }
+    if (rejectedBySize > 0) {
+      // Se le informa del total que INTENTABA enviar, no del que ha quedado:
+      // el que ha quedado cabe, y decirle esa cifra no explicaría el rechazo.
+      const attemptedChars = alreadyChars + succeeded.reduce((sum, img) => sum + img.data.length, 0)
+      setImagenError(imagePayloadTooLargeMessage(attemptedChars, imagenes.length + succeeded.length))
+    }
+
+    if (kept.length) {
+      setImagenes(current => [...current, ...kept])
       const imageMs = Math.round(performance.now() - imageStart)
-      const totalChars = succeeded.reduce((sum, img) => sum + img.data.length, 0)
+      const totalChars = kept.reduce((sum, img) => sum + img.data.length, 0)
       lastImageTimingRef.current = { requestId: imageRequestId, ms: imageMs, chars: totalChars }
       console.info('[correction-timing] image_prepare_ms', {
         requestId: imageRequestId,

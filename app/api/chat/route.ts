@@ -10,7 +10,10 @@ import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 
 const client = new Anthropic()
-const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
+// El tope agregado de imágenes vive en app/lib/imagePayloadLimits.ts:
+// estaba duplicado en estas tres rutas y por encima del límite de
+// transporte de la plataforma, así que su 413 era inalcanzable (A18).
+import { MAX_IMAGE_PAYLOAD_CHARS, imagePayloadTooLargeMessage } from '@/app/lib/imagePayloadLimits'
 const STREAM_TRUNCATION_SENTINEL = '[[KAIRO_TRUNCATED_7f3a9b2c]]'
 const CHAT_RESPONSE_FORMAT_RULES = `Reglas de formato de respuesta:
 - Usa Markdown claro con titulos, parrafos cortos y listas separadas por saltos de linea.
@@ -100,7 +103,7 @@ async function handlePost(request: NextRequest) {
 
   if (imagePayloadSize > MAX_IMAGE_PAYLOAD_CHARS) {
     return NextResponse.json(
-      { error: 'La imagen es demasiado grande. Sube una imagen más ligera.' },
+      { error: imagePayloadTooLargeMessage(imagePayloadSize, Array.isArray(imagenes) ? imagenes.length : 1) },
       { status: 413 }
     )
   }

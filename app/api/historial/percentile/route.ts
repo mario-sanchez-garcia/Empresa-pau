@@ -46,14 +46,41 @@ export async function GET(request: NextRequest) {
   if (error || !user) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const db = createServiceClient()
-  const { data: rows, error: fetchError } = await db
-    .from('historial_examenes')
-    .select('user_id, nota, nota_maxima')
 
-  if (fetchError) return NextResponse.json({ error: fetchError.message }, { status: 500 })
+  // A15 de la auditoría del 7-8 de septiembre de 2026: esto era un select sin
+  // rango. Supabase devuelve como máximo 1.000 filas por defecto y NO avisa —
+  // no da error, simplemente entrega menos. Como esta consulta es global (todos
+  // los usuarios, no solo el que pregunta), ese techo se alcanza con un puñado
+  // de alumnos activos, y a partir de ahí el percentil se calcula contra un
+  // trozo arbitrario del historial mientras sigue presentándose como el real.
+  // Es el modo de fallo peor: no se rompe, miente.
+  //
+  // Se pagina explícitamente. El tope duro existe para que un histórico enorme
+  // no tumbe la ruta; si se alcanza queda registrado, en vez de recortar en
+  // silencio como hasta ahora. El destino final de esto es una agregación en
+  // SQL (una media por usuario, no traerse las filas), pero eso pide migración
+  // y aquí lo que urge es dejar de mentir.
+  const PAGE_SIZE = 1000
+  const MAX_ROWS = 50_000
+  const rows: Array<{ user_id: string; nota: unknown; nota_maxima: unknown }> = []
+  for (let from = 0; from < MAX_ROWS; from += PAGE_SIZE) {
+    const { data: page, error: fetchError } = await db
+      .from('historial_examenes')
+      .select('user_id, nota, nota_maxima')
+      .range(from, from + PAGE_SIZE - 1)
+
+    if (fetchError) return NextResponse.json({ error: fetchError.message }, { status: 500 })
+    if (!page?.length) break
+    rows.push(...page)
+    if (page.length < PAGE_SIZE) break
+    if (rows.length >= MAX_ROWS) {
+      console.warn('[historial/percentile] tope de filas alcanzado; el percentil se calcula sobre una muestra parcial', { maxRows: MAX_ROWS })
+      break
+    }
+  }
 
   const sums = new Map<string, { total: number; count: number }>()
-  for (const row of rows ?? []) {
+  for (const row of rows) {
     const score = normalizedScore(row.nota, row.nota_maxima)
     if (score === null) continue
     const entry = sums.get(row.user_id) ?? { total: 0, count: 0 }

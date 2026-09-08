@@ -22,7 +22,10 @@ export const dynamic = 'force-dynamic'
 
 const MODEL = 'claude-sonnet-4-6'
 const MAX_TOKENS = 2200
-const MAX_IMAGE_PAYLOAD_CHARS = 8_000_000
+// El tope agregado de imágenes vive en app/lib/imagePayloadLimits.ts:
+// estaba duplicado en estas tres rutas y por encima del límite de
+// transporte de la plataforma, así que su 413 era inalcanzable (A18).
+import { MAX_IMAGE_PAYLOAD_CHARS, imagePayloadTooLargeMessage } from '@/app/lib/imagePayloadLimits'
 const CORRECTION_UNAVAILABLE_MESSAGE = 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'
 const DEV_MOCK_CORRECTIONS = process.env.NODE_ENV !== 'production' && process.env.DEV_MOCK_CORRECTIONS === 'true'
 const DEV_MOCK_CORRECTIONS_ERROR = process.env.NODE_ENV !== 'production' && process.env.DEV_MOCK_CORRECTIONS_ERROR === 'true'
@@ -101,7 +104,7 @@ export async function POST(request: NextRequest) {
   ]
   const imagePayloadChars = allImages.reduce((sum, img) => sum + img.data.length, 0)
   if (imagePayloadChars > MAX_IMAGE_PAYLOAD_CHARS) {
-    return NextResponse.json({ error: 'Las imágenes son demasiado grandes en conjunto. Sube fotos más ligeras o menos páginas.' }, { status: 413 })
+    return NextResponse.json({ error: imagePayloadTooLargeMessage(imagePayloadChars, allImages.length) }, { status: 413 })
   }
 
   const userSupabase = createUserSupabase(authContext.accessToken)

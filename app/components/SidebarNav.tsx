@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { CheckCircle2, ClipboardList, Clock, Compass, CreditCard, GraduationCap, HelpCircle, LayoutDashboard, LayoutGrid, LogOut, MessageCircle, MoreVertical, Settings, ShieldCheck, Sparkles, UserRound, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
@@ -49,6 +50,40 @@ const MOBILE_NAV = [
 // useSearchParams, which would force every page embedding this sidebar into a
 // Suspense boundary) — section switches under /examenes are full navigations
 // via plain <a href>, so a fresh read on mount is always correct.
+// Hasta ahora TODOS los enlaces de la barra eran <a href> planos, y eso hacía
+// que cada cambio de sección fuese una recarga completa del documento. La
+// consecuencia visible: el navegador tira la pantalla actual y se queda en
+// blanco hasta que llega el HTML nuevo, y el loading.tsx de la ruta destino no
+// llega a pintarse nunca — el servidor termina de renderizar antes de mandar
+// nada, así que el skeleton viaja en el HTML ya resuelto y oculto. Por eso los
+// skeletons solo se veían en Camino y La Zona: los de esas dos los pinta su
+// componente de cliente mientras carga datos, no el loading.tsx.
+//
+// Con <Link>, Next mantiene la pantalla actual visible, muestra el loading.tsx
+// del destino mientras prepara la ruta y no hay blanco.
+//
+// La excepción son los destinos con ?view= (Tutor e Historial): viven dentro de
+// /examenes y esa pantalla lee `view` de window.location.search al montar, a
+// propósito, para no obligar a cada página que incrusta esta barra a envolverse
+// en Suspense (ver el comentario de isActive más abajo). Un <Link> entre
+// ?view=chat y ?view=historial no remonta la pantalla y dejaría la vista
+// anterior, así que esos siguen con <a> — es una recarga, pero de la misma ruta
+// y sin cambio de sección. Cambiar de RUTA sí remonta la barra, así que la
+// lectura de `view` al montar sigue siendo correcta con Link.
+function usesFullReload(href: string): boolean {
+  return href.includes('?view=')
+}
+
+/**
+ * Un enlace de la barra. Usa <Link> (navegación de cliente, sin recarga y con
+ * el skeleton de la ruta destino) salvo en los destinos con ?view=, que
+ * necesitan recarga completa — ver usesFullReload.
+ */
+function NavAnchor({ href, children, ...rest }: React.ComponentProps<'a'> & { href: string }) {
+  if (usesFullReload(href)) return <a href={href} {...rest}>{children}</a>
+  return <Link href={href} {...rest}>{children}</Link>
+}
+
 function isActive(href: string, pathname: string, currentView: string | null): boolean {
   const [hrefPath, hrefQuery] = href.split('?')
   if (hrefPath === '/camino')     return pathname.startsWith('/camino')
@@ -184,7 +219,7 @@ export default function SidebarNav() {
           {allNav.map(({ label, href, icon: Icon }) => {
             const active = isActive(href, pathname, currentView)
             return (
-              <a
+              <NavAnchor
                 key={label}
                 href={href}
                 className="kairo-nav-item"
@@ -218,7 +253,7 @@ export default function SidebarNav() {
                 }}>
                   {label}
                 </span>
-              </a>
+              </NavAnchor>
             )
           })}
 
@@ -336,7 +371,7 @@ export default function SidebarNav() {
                 padding: 6, overflow: 'hidden',
               }}>
                 {ACCOUNT_MENU.map(({ label, href, icon: Icon }) => (
-                  <a
+                  <NavAnchor
                     key={label}
                     href={href}
                     onClick={() => setAccountMenuOpen(false)}
@@ -349,7 +384,7 @@ export default function SidebarNav() {
                     }}
                   >
                     <Icon size={15} color="#64748b" /> {label}
-                  </a>
+                  </NavAnchor>
                 ))}
                 <div style={{ height: 1, background: '#f1f5f9', margin: '4px 6px' }} />
                 <button
@@ -388,7 +423,7 @@ export default function SidebarNav() {
         {MOBILE_NAV.map(({ label, href, icon: Icon }) => {
           const active = isActive(href, pathname, currentView)
           return (
-            <a
+            <NavAnchor
               key={href}
               href={href}
               style={{
@@ -411,7 +446,7 @@ export default function SidebarNav() {
               }}>
                 {label}
               </span>
-            </a>
+            </NavAnchor>
           )
         })}
       </nav>

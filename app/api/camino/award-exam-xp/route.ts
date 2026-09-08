@@ -6,6 +6,7 @@ import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects
 import { normalizeScoreToTen } from '@/app/lib/camino/scoreNormalization'
 import { countRepeatDepth } from '@/app/lib/camino/repeatImprovement'
 import { EXAM_CORRECTION_XP } from '@/app/lib/camino/xpMap'
+import { getMadridDate, getMadridToday } from '@/app/lib/camino/studyDays'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,8 +64,8 @@ export async function POST(request: NextRequest) {
     }
 
     const missionDate = typeof examen.created_at === 'string'
-      ? examen.created_at.slice(0, 10)
-      : new Date().toISOString().slice(0, 10)
+      ? getMadridDate(examen.created_at)
+      : getMadridToday()
     const subject = caminoSubjectFromSimulacro(String(examen.asignatura))
     const newScoreOnTen = normalizeScoreToTen(examen.nota, examen.nota_maxima)
 

@@ -52,6 +52,7 @@ export default function SimulacroResultsPage() {
 
   const result = record?.resultado_json ?? {}
   const correctionFailed = Boolean(result.correction_error || result.estado_correccion === 'error')
+  const calendarMissionCompletionPending = result.calendarMissionCompletionPending === true
   // Use resultado_json.nota_final as the authoritative grade source.
   // Falling back to the DB column risks showing 0 (DB default) before correction runs.
   const nota = safeNumber(result.nota_final ?? record?.nota_final, 0)
@@ -238,6 +239,11 @@ export default function SimulacroResultsPage() {
                   <div className="mt-2 text-sm font-black" style={{ color: '#7c3aed' }}>
                     +{result.xpAwarded} XP{typeof result.bonusXp === 'number' && result.bonusXp > 0 ? ` · +${result.bonusXp} bonus extra` : ''}
                     {result.repeatImproved === true ? ' · ¡nota mejorada!' : ''}
+                  </div>
+                )}
+                {calendarMissionCompletionPending && (
+                  <div role="alert" className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+                    La corrección está guardada, pero Camino no pudo actualizar la misión. Vuelve a Camino y recarga para comprobarla.
                   </div>
                 )}
                 {hasGrade && result.repeatImproved === false && (

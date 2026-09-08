@@ -5,6 +5,7 @@ import { busySlotsForMadridDate, getAvailability } from '@/app/lib/calendar/avai
 import { syncExistingKairoMissionToGoogle } from '@/app/lib/calendar/sync'
 import { estimatedMinutesForMissionType, placeBestAcrossDates, type TimeRange } from '@/app/lib/camino/scheduleTimeSlot'
 import { recordMissionBehaviorEvent } from '@/app/lib/camino/missionBehavior'
+import { isValidIsoCalendarDate } from '@/app/lib/camino/madridDate'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({})) as Record<string, unknown>
     const missionIds = uniqueIds(body.missionIds)
     const sourceDate = typeof body.sourceDate === 'string' ? body.sourceDate.slice(0, 10) : ''
-    if (missionIds.length === 0 || !/^20\d{2}-\d{2}-\d{2}$/.test(sourceDate)) {
+    if (missionIds.length === 0 || !isValidIsoCalendarDate(sourceDate)) {
       return NextResponse.json({ error: 'invalid_reorganization' }, { status: 400 })
     }
 

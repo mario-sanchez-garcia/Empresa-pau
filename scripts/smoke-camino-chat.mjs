@@ -27,6 +27,6 @@ check('multiple moves roll back DB and Google on partial failure', reorganize.in
 check('postpone removes the same linked Google event', postpone.includes('unlinkKairoMissionFromGoogle') && postpone.includes("source: actionSource"))
 check('errors never render a success response', assistant.includes('if (!response.ok)') && assistant.includes('No he podido aplicar el cambio.') && assistant.includes('Reintentar'))
 check('weekly same-answer does not regenerate the plan', weekly.includes('Entendido ✓') && !weekly.includes('ensure-calendar') && !weekly.includes('Recalculando'))
-check('Camino keeps the week block, the visual orientation target and the hero', camino.includes('data-testid="camino-week-overview"') && camino.includes('data-testid="camino-orientation-target"') && camino.includes('Días hasta selectividad'))
+check('Camino keeps the week block and the hero', camino.includes('data-testid="camino-week-overview"') && camino.includes('Días hasta selectividad'))
 
 if (failed) process.exitCode = 1

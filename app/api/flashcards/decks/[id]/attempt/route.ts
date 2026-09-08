@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, createUserSupabase } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { awardXp } from '@/app/lib/camino/awardXp'
+import { getMadridToday } from '@/app/lib/camino/studyDays'
 import { FLASHCARD_DECK_COMPLETION_XP, FLASHCARD_DECK_AUTHOR_BONUS_XP } from '@/app/lib/camino/xpMap'
 
 export const dynamic = 'force-dynamic'
@@ -64,7 +65,7 @@ export async function POST(
   }
 
   const scoreOnTen = Math.min(10, (Math.min(correctFirstTry, totalCards) / totalCards) * 10)
-  const missionDate = new Date().toISOString().slice(0, 10)
+  const missionDate = getMadridToday()
 
   const serviceDb = createServiceClient()
   const studentResult = await awardXp(serviceDb, user.id, {

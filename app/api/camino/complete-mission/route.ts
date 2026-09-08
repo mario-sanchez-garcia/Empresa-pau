@@ -8,6 +8,7 @@ import { getTopicByV2SortOrder, sanitizeLessonTitle } from '@/app/lib/camino/cam
 import { resolveTopicIdentity } from '@/app/lib/camino/resolveTopicIdentity'
 import { maybeGenerateBlockPracticeMission } from '@/app/lib/camino/generateBlockPracticeMission'
 import { completionDelayMinutes, minutesBetweenIso, recordMissionBehaviorEvent } from '@/app/lib/camino/missionBehavior'
+import { getMadridToday } from '@/app/lib/camino/studyDays'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     const db = createServiceClient()
     const now = new Date().toISOString()
-    const today = now.slice(0, 10)
+    const today = getMadridToday()
 
     // PASO 1.5 — Resolver la fila EXACTA a completar antes de escribir nada.
     // calendarRowId es lo normal (el alumno abrió esta misión desde una
@@ -141,15 +142,16 @@ export async function POST(request: NextRequest) {
         .maybeSingle()
 
       if (queueRow?.id) {
-        await db
+        const { error: queueCompleteError } = await db
           .from('user_learning_queue')
           .update({ queue_status: 'completed' })
           .eq('id', queueRow.id)
+        if (queueCompleteError) throw queueCompleteError
       }
 
       const topic = getTopicByV2SortOrder(subject, v2SortOrder)
       const { topicId } = await resolveTopicIdentity(db, subject, v2SortOrder)
-      await db.from('camino_calendar').upsert({
+      const { error: freeCalendarError } = await db.from('camino_calendar').upsert({
         user_id: user.id,
         scheduled_date: today,
         subject,
@@ -167,6 +169,7 @@ export async function POST(request: NextRequest) {
         generated_by: 'free_initiative_v1',
         metadata: topicId ? { free_initiative: true, topic_id: topicId } : { free_initiative: true },
       }, { onConflict: 'user_id,scheduled_date,subject,v2_sort_order' })
+      if (freeCalendarError) throw freeCalendarError
 
       if (missionType === 'concept' || missionType === 'review') {
         await maybeGenerateBlockPracticeMission(db, user.id, subject, v2SortOrder).catch(err => {
@@ -188,18 +191,22 @@ export async function POST(request: NextRequest) {
     let telemetryAvailable = true
     let { data: targetRow, error: targetRowError } = await db
       .from('camino_calendar')
-      .select('id, started_at, scheduled_date, end_time')
+      .select('id, started_at, scheduled_date, end_time, status')
       .eq('id', targetId)
       .eq('user_id', user.id)
+      .eq('subject', subject)
+      .eq('v2_sort_order', v2SortOrder)
       .maybeSingle()
 
     if (isMissingTelemetrySchema(targetRowError)) {
       telemetryAvailable = false
       const legacyTarget = await db
         .from('camino_calendar')
-        .select('id, scheduled_date, end_time')
+        .select('id, scheduled_date, end_time, status')
         .eq('id', targetId)
         .eq('user_id', user.id)
+        .eq('subject', subject)
+        .eq('v2_sort_order', v2SortOrder)
         .maybeSingle()
       targetRow = legacyTarget.data as typeof targetRow
       targetRowError = legacyTarget.error
@@ -226,6 +233,8 @@ export async function POST(request: NextRequest) {
       .update(completionPayload)
       .eq('id', targetId)
       .eq('user_id', user.id)
+      .eq('subject', subject)
+      .eq('v2_sort_order', v2SortOrder)
       .in('status', ['pending', 'missed'])
       .select('id')
 
@@ -238,6 +247,8 @@ export async function POST(request: NextRequest) {
         .update({ status: 'completed', xp_awarded: xp, updated_at: now })
         .eq('id', targetId)
         .eq('user_id', user.id)
+        .eq('subject', subject)
+        .eq('v2_sort_order', v2SortOrder)
         .in('status', ['pending', 'missed'])
         .select('id')
       updated = legacyUpdate.data ?? []
@@ -247,6 +258,44 @@ export async function POST(request: NextRequest) {
 
     // PASO 4 — Idempotencia: 0 filas afectadas = ya completada entre medias
     if (updated.length === 0) {
+      // Si el calendario se llegó a completar pero un fallo transitorio
+      // interrumpió la petición antes del ledger de XP, el reintento debe
+      // reparar ese último paso. awardXp es idempotente por sourceId: una
+      // finalización realmente duplicada seguirá otorgando 0.
+      if (targetRow?.status === 'completed') {
+        const { error: recoveryQueueError } = await db
+          .from('user_learning_queue')
+          .update({ queue_status: 'completed' })
+          .eq('user_id', user.id)
+          .eq('subject', subject)
+          .eq('v2_sort_order', v2SortOrder)
+        if (recoveryQueueError) throw recoveryQueueError
+
+        const { error: recoveryCleanupError } = await db
+          .from('camino_calendar')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('subject', subject)
+          .eq('v2_sort_order', v2SortOrder)
+          .neq('id', targetId)
+          .in('status', ['pending', 'missed', 'postponed'])
+          .in('source', ['algorithm', 'partial'])
+        if (recoveryCleanupError) throw recoveryCleanupError
+
+        const recovery = await awardXp(db, user.id, {
+          effortXp: xp,
+          sourceType: 'mission_completion',
+          sourceId: String(targetId),
+          subject,
+          missionDate: targetRow.scheduled_date ?? today,
+          missionsCompletedDelta: 1,
+          scoreOnTen,
+        })
+        if (recovery.awarded) {
+          await db.from('camino_calendar').update({ xp_awarded: recovery.xpAwarded }).eq('id', targetId).eq('user_id', user.id)
+          return NextResponse.json({ success: true, recovered: true, xpAwarded: recovery.xpAwarded, bonusXp: recovery.bonusXp, totalXp: recovery.totalXp, streakDays: recovery.streakDays, leagueUpgrade: recovery.leagueUpgrade })
+        }
+      }
       return NextResponse.json({ success: false, reason: 'already_completed' })
     }
 
@@ -276,12 +325,13 @@ export async function POST(request: NextRequest) {
     }
 
     // PASO 2b — Marcar cola como completada (best-effort)
-    await db
+    const { error: queueCompleteError } = await db
       .from('user_learning_queue')
       .update({ queue_status: 'completed' })
       .eq('user_id', user.id)
       .eq('subject', subject)
       .eq('v2_sort_order', v2SortOrder)
+    if (queueCompleteError) throw queueCompleteError
 
     // PASO 2c — Si esta misma pieza de contenido (mismo subject+v2_sort_order)
     // tenía OTRAS filas todavía activas — una reprogramación tras un missed
@@ -290,7 +340,7 @@ export async function POST(request: NextRequest) {
     // hacia delante algo ya hecho, el mismo problema que ya se corrigió para
     // las misiones de repaso automáticas. Solo se tocan filas generadas por
     // el algoritmo — nunca una misión que el alumno haya añadido a mano.
-    await db
+    const { error: duplicateCleanupError } = await db
       .from('camino_calendar')
       .delete()
       .eq('user_id', user.id)
@@ -299,6 +349,7 @@ export async function POST(request: NextRequest) {
       .neq('id', updated[0].id)
       .in('status', ['pending', 'missed', 'postponed'])
       .in('source', ['algorithm', 'partial'])
+    if (duplicateCleanupError) throw duplicateCleanupError
 
     await recordBetaMetric(db, user.id, 'correction_completed', {
       subject,
@@ -322,7 +373,7 @@ export async function POST(request: NextRequest) {
       sourceType: 'mission_completion',
       sourceId: String(updated[0].id),
       subject,
-      missionDate: now.slice(0, 10),
+      missionDate: targetRow?.scheduled_date ?? today,
       missionsCompletedDelta: 1,
       scoreOnTen,
     })

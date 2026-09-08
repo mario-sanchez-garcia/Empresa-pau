@@ -6,6 +6,7 @@ import { getAvailabilityForDate, hasTimeConflict } from '@/app/lib/calendar/avai
 import { deleteKairoMission, syncExistingKairoMissionToGoogle, syncKairoMissionsToGoogle } from '@/app/lib/calendar/sync'
 import { DEFAULT_MISSION_DURATION_MINUTES } from '@/app/lib/camino/calendarEditorConfig'
 import { recordMissionBehaviorEvent } from '@/app/lib/camino/missionBehavior'
+import { isValidIsoCalendarDate } from '@/app/lib/camino/madridDate'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,10 +20,6 @@ function cleanNumber(value: unknown, fallback: number, min: number, max: number)
   const numberValue = typeof value === 'number' ? value : Number(value)
   if (!Number.isFinite(numberValue)) return fallback
   return Math.max(min, Math.min(max, Math.round(numberValue)))
-}
-
-function isIsoDate(value: string) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value)
 }
 
 function normalizeTime(value: unknown) {
@@ -80,7 +77,7 @@ export async function POST(request: NextRequest) {
     try { body = await request.json() } catch { /* ok */ }
 
     const scheduledDate = cleanString(body.scheduledDate, 20)
-    if (!isIsoDate(scheduledDate)) {
+    if (!isValidIsoCalendarDate(scheduledDate)) {
       return NextResponse.json({ error: 'scheduled_date_invalid' }, { status: 400 })
     }
 
@@ -269,7 +266,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const scheduledDate = cleanString(body.scheduledDate, 20) || mission.scheduled_date
-    if (!isIsoDate(scheduledDate)) return NextResponse.json({ error: 'scheduled_date_invalid' }, { status: 400 })
+    if (!isValidIsoCalendarDate(scheduledDate)) return NextResponse.json({ error: 'scheduled_date_invalid' }, { status: 400 })
     const originalStart = normalizeTime(mission.start_time)
     const originalEnd = normalizeTime(mission.end_time)
     const originalDuration = originalStart && originalEnd

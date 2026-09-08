@@ -29,33 +29,44 @@ export async function markCalendarMissionCompleted(
   calendarRowId: string,
   resultId: string,
   xpAwarded?: number,
-): Promise<void> {
-  try {
-    const { data: row } = await db
-      .from('camino_calendar')
-      .select('metadata')
-      .eq('id', calendarRowId)
-      .eq('user_id', userId)
-      .in('status', ['pending', 'missed'])
-      .maybeSingle()
+): Promise<boolean> {
+  const { data: row, error: rowError } = await db
+    .from('camino_calendar')
+    .select('metadata, status')
+    .eq('id', calendarRowId)
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (rowError) throw rowError
 
-    if (!row) return // ya completada, no existe, o no es de este usuario
+  if (!row) return false
 
-    const existingMetadata = (row.metadata ?? {}) as Record<string, unknown>
-
-    await db
-      .from('camino_calendar')
-      .update({
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-        metadata: { ...existingMetadata, practica_simulacro_id: resultId },
-        ...(typeof xpAwarded === 'number' && xpAwarded > 0 ? { xp_awarded: xpAwarded } : {}),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', calendarRowId)
-      .eq('user_id', userId)
-      .in('status', ['pending', 'missed'])
-  } catch (error) {
-    console.error('[markCalendarMissionCompleted] failed', { calendarRowId, message: (error as Error)?.message?.slice(0, 200) })
+  const existingMetadata = (row.metadata ?? {}) as Record<string, unknown>
+  if (row.status === 'completed') {
+    if (typeof xpAwarded === 'number' && xpAwarded > 0) {
+      const { error: badgeError } = await db
+        .from('camino_calendar')
+        .update({ xp_awarded: xpAwarded, metadata: { ...existingMetadata, practica_simulacro_id: resultId }, updated_at: new Date().toISOString() })
+        .eq('id', calendarRowId)
+        .eq('user_id', userId)
+      if (badgeError) throw badgeError
+    }
+    return true
   }
+  if (row.status !== 'pending' && row.status !== 'missed') return false
+
+  const { data: updated, error: updateError } = await db
+    .from('camino_calendar')
+    .update({
+      status: 'completed',
+      completed_at: new Date().toISOString(),
+      metadata: { ...existingMetadata, practica_simulacro_id: resultId },
+      ...(typeof xpAwarded === 'number' && xpAwarded > 0 ? { xp_awarded: xpAwarded } : {}),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', calendarRowId)
+    .eq('user_id', userId)
+    .in('status', ['pending', 'missed'])
+    .select('id')
+  if (updateError) throw updateError
+  return Boolean(updated?.length)
 }

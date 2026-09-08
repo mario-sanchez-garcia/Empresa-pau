@@ -369,7 +369,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [imageError, setImageError] = useState('')
   const [score, setScore] = useState<number | null>(null)
   const [xpAwarded, setXpAwarded] = useState<number | null>(null)
-  const [firstSessionMarked, setFirstSessionMarked] = useState(false)
+  const firstSessionMarkedRef = useRef(false)
   const [leagueUpgrade, setLeagueUpgrade] = useState<{ from: string; to: string } | null>(null)
   const [correcting, setCorrecting] = useState(false)
   const [diegoContent, setDiegoContent] = useState<string | null>(null)
@@ -388,6 +388,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [nextMissionTitle, setNextMissionTitle] = useState<string | null>(null)
   const [blockProgress, setBlockProgress] = useState<{ completed: number; total: number }>({ completed: 0, total: 0 })
   const [missionXpStatus, setMissionXpStatus] = useState<MissionXpStatus>('checking')
+  const [markingNotSeen, setMarkingNotSeen] = useState(false)
   const [pendingCalendarRowId, setPendingCalendarRowId] = useState<string | null>(null)
   const [pendingMissionType, setPendingMissionType] = useState<string>('concept')
   // Sin este gate, cualquier enlace directo a un tema ya completado (tarjeta
@@ -449,8 +450,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   }, [missionId, shouldStartExercise])
 
   useEffect(() => {
-    if (!isFirstSession || score === null || !correction || mockCorrection || firstSessionMarked) return
-    setFirstSessionMarked(true)
+    if (!isFirstSession || score === null || !correction || mockCorrection || firstSessionMarkedRef.current) return
+    firstSessionMarkedRef.current = true
     supabase.auth.getSession().then(({ data }) => {
       const token = data.session?.access_token
       if (!token) return
@@ -459,7 +460,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         headers: { Authorization: `Bearer ${token}` },
       }).catch(() => undefined)
     })
-  }, [isFirstSession, score, correction, mockCorrection, firstSessionMarked])
+  }, [isFirstSession, score, correction, mockCorrection])
 
   useEffect(() => {
     if (!topic) {
@@ -815,6 +816,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   }
 
   async function markNotSeen() {
+    if (markingNotSeen) return
     const now = new Date().toISOString()
     const feedback = loadJson<SchoolFeedback>(SCHOOL_FEEDBACK_KEY, [])
     const next = [...feedback, { schoolName: onboarding.schoolName, community: onboarding.community, subject: currentTopic.subject, block: currentTopic.blockSlug, topic: currentTopic.topicSlug, reason: 'not_seen_in_class' as const, date: now }]
@@ -836,71 +838,94 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       date: now,
     }
 
-    saveJson(SCHOOL_FEEDBACK_KEY, next)
-    saveJson(SCHOOL_ADJUSTMENTS_KEY, [
-      adjustment,
-      ...loadJson<SchoolAdjustment[]>(SCHOOL_ADJUSTMENTS_KEY, []).filter(item =>
-        !(item.schoolName === adjustment.schoolName &&
-          item.subject === adjustment.subject &&
-          item.blockSlug === adjustment.blockSlug &&
-          item.topicSlug === adjustment.topicSlug)
-      )
-    ].slice(0, 80))
-    saveJson(CALENDAR_REFRESH_KEY, true)
-    window.localStorage.removeItem(CALENDAR_KEY)
-    window.dispatchEvent(new CustomEvent('kairo:school-topic-feedback', { detail: adjustment }))
-    setToast('Entendido. Ajustando tu Camino...')
-
+    setMarkingNotSeen(true)
+    setToast('Guardando el cambio en tu Camino…')
     try {
       const { data } = await supabase.auth.getSession()
       const token = data.session?.access_token
-      if (!token) { router.push('/camino'); return }
-
-      // Sync institute pace signal (best-effort). The server resolves institute membership.
-      const response = await fetch('/api/camino/pace-signal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          subject: currentTopic.subject,
-          blockSlug: currentTopic.blockSlug,
-          topicSlug: currentTopic.topicSlug,
-          v2SortOrder: currentTopic.v2SortOrder,
-          signalType: 'not_taught_yet',
-          source: 'topic_page',
-        }),
-      })
-      if (response.ok) {
-        const remote = await response.json() as { individualOnly?: boolean }
-        setToast(remote.individualOnly
-          ? 'Entendido. Ajustamos tu Camino para no priorizar este tema por ahora.'
-          : 'Entendido. Ajustamos tu Camino y tendremos en cuenta el ritmo de tu instituto.')
-      } else {
-        setToast('Entendido. Ajustamos tu Camino para no priorizar este tema por ahora.')
+      if (!token) {
+        setToast('Tu sesión ha caducado. Inicia sesión y vuelve a intentarlo.')
+        return
       }
 
-      // Persist postpone to Supabase queue + calendar
+      let googlePending = false
       if (currentTopic.v2SortOrder != null) {
         const postponeRes = await fetch('/api/camino/postpone-mission', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ subject: currentTopic.subject, v2SortOrder: currentTopic.v2SortOrder }),
         })
-        if (postponeRes.ok) {
-          const postponeData = await postponeRes.json() as { success?: boolean; warning?: boolean; blockSkipped?: boolean; retryScheduled?: boolean }
-          if (postponeData.warning) {
-            setToast('Avisamos: tendrás que ver este bloque antes de la PAU')
-          } else if (postponeData.blockSkipped) {
-            setToast('Entendido, pasamos directamente al siguiente tema.')
-          } else if (postponeData.retryScheduled) {
-            setToast('Entendido, te lo volveremos a proponer en unos días.')
-          }
+        const postponeData = await postponeRes.json().catch(() => null) as { warning?: boolean; blockSkipped?: boolean; retryScheduled?: boolean; persisted?: boolean } | null
+        if (!postponeRes.ok && !postponeData?.persisted) {
+          setToast('No se pudo guardar el cambio. La misión no se ha modificado; reinténtalo.')
+          return
+        }
+        googlePending = !postponeRes.ok && Boolean(postponeData?.persisted)
+        if (postponeData?.warning) setToast('Avisamos: tendrás que ver este bloque antes de la PAU.')
+        else if (postponeData?.blockSkipped) setToast('Entendido, pasamos directamente al siguiente tema.')
+        else if (postponeData?.retryScheduled) setToast('Entendido, te lo volveremos a proponer en unos días.')
+      }
+
+      let paceResult: { individualOnly?: boolean } | null = null
+      try {
+        const response = await fetch('/api/camino/pace-signal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            subject: currentTopic.subject,
+            blockSlug: currentTopic.blockSlug,
+            topicSlug: currentTopic.topicSlug,
+            v2SortOrder: currentTopic.v2SortOrder,
+            signalType: 'not_taught_yet',
+            source: 'topic_page',
+          }),
+        })
+        if (response.ok) paceResult = await response.json() as { individualOnly?: boolean }
+        else if (currentTopic.v2SortOrder == null) {
+          setToast('No se pudo guardar el cambio. El tema no se ha modificado; reinténtalo.')
+          return
+        }
+      } catch {
+        // Con v2SortOrder, postpone-mission ya es la persistencia principal.
+        // En contenido legacy pace-signal es la única escritura remota y su
+        // fallo sí debe detener el éxito/redirect.
+        if (currentTopic.v2SortOrder == null) {
+          setToast('No se pudo guardar el cambio. El tema no se ha modificado; reinténtalo.')
+          return
         }
       }
-    } catch {
-      // Local adjustment already applied; best-effort.
-    }
 
-    setTimeout(() => router.push('/camino'), 1600)
+      // La copia local solo cambia después de confirmar persistencia remota;
+      // de ese modo un fallo de red no crea un éxito que desaparece al F5.
+      saveJson(SCHOOL_FEEDBACK_KEY, next)
+      saveJson(SCHOOL_ADJUSTMENTS_KEY, [
+        adjustment,
+        ...loadJson<SchoolAdjustment[]>(SCHOOL_ADJUSTMENTS_KEY, []).filter(item =>
+          !(item.schoolName === adjustment.schoolName &&
+            item.subject === adjustment.subject &&
+            item.blockSlug === adjustment.blockSlug &&
+            item.topicSlug === adjustment.topicSlug)
+        )
+      ].slice(0, 80))
+      saveJson(CALENDAR_REFRESH_KEY, true)
+      window.localStorage.removeItem(CALENDAR_KEY)
+      window.dispatchEvent(new CustomEvent('kairo:school-topic-feedback', { detail: adjustment }))
+
+      if (googlePending) {
+        setToast('Cambio guardado en Kairo. Google Calendar queda pendiente de sincronizar.')
+      } else if (paceResult) {
+        setToast(paceResult.individualOnly
+          ? 'Entendido. Ajustamos tu Camino para no priorizar este tema por ahora.'
+          : 'Entendido. Ajustamos tu Camino y tendremos en cuenta el ritmo de tu instituto.')
+      } else {
+        setToast('Entendido. Ajustamos tu Camino para no priorizar este tema por ahora.')
+      }
+      setTimeout(() => router.push('/camino'), 1600)
+    } catch {
+      setToast('No se pudo guardar el cambio. La misión no se ha modificado; reinténtalo.')
+    } finally {
+      setMarkingNotSeen(false)
+    }
   }
 
   function chatHref(prompt?: string) {
@@ -1075,7 +1100,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         let toastText = `Intento guardado · nota ${rawScore}/10`
         const { data: userData } = await supabase.auth.getUser()
         if (userData.user) {
-          const { data: inserted } = await supabase.from('historial_examenes').insert({
+          const { data: inserted, error: insertError } = await supabase.from('historial_examenes').insert({
             user_id: userData.user.id,
             asignatura: currentTopic.subject,
             tipo: 'Camino PAU',
@@ -1090,19 +1115,23 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             repeated_from_id: repeatOfId,
             v2_sort_order: selectedSortOrder,
           }).select('id').single()
-          if (inserted?.id) {
+          if (insertError || !inserted?.id) {
+            toastText = `Corrección lista · nota ${rawScore}/10, pero no se pudo guardar el intento. Reinténtalo.`
+          } else {
             try {
               const repeatRes = await fetch('/api/camino/award-exam-xp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
                 body: JSON.stringify({ historialExamenId: inserted.id, repeatedFromId: repeatOfId }),
               })
-              const repeatJson = await repeatRes.json()
+              const repeatJson = await repeatRes.json().catch(() => null) as { success?: boolean; xpAwarded?: number; streakDays?: number; leagueUpgrade?: { from: string; to: string }; improved?: boolean } | null
               // Con el nuevo sistema de XP, repetir sin mejorar ya no da 0
               // XP (se queda con el XP reducido de repetición de siempre) —
               // repeatJson.improved (no xpAwarded > 0, que ahora es casi
               // siempre true) es lo que distingue si hubo bonus de mejora.
-              if (repeatJson.success && typeof repeatJson.xpAwarded === 'number' && repeatJson.xpAwarded > 0) {
+              if (!repeatRes.ok || !repeatJson) {
+                toastText = `Intento guardado · nota ${rawScore}/10. El XP queda pendiente de confirmar; puedes reintentar.`
+              } else if (repeatJson.success && typeof repeatJson.xpAwarded === 'number' && repeatJson.xpAwarded > 0) {
                 setXpAwarded(repeatJson.xpAwarded)
                 if (typeof repeatJson.streakDays === 'number') setStreak(repeatJson.streakDays)
                 toastText = repeatJson.improved
@@ -1112,7 +1141,9 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
               } else {
                 toastText = `Intento guardado · nota ${rawScore}/10. No ha mejorado tu mejor nota, así que no suma XP extra.`
               }
-            } catch { /* silent */ }
+            } catch {
+              toastText = `Intento guardado · nota ${rawScore}/10. El XP queda pendiente de confirmar; puedes reintentar.`
+            }
           }
           calcularRacha(userData.user.id, supabase).then(s => setStreak(s)).catch(() => undefined)
         }
@@ -1137,8 +1168,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 score: rawScore,
               }),
             })
-            const cmJson = await cmRes.json()
-            if (cmJson.success && typeof cmJson.xpAwarded === 'number') {
+            const cmJson = await cmRes.json().catch(() => null) as { success?: boolean; xpAwarded?: number; streakDays?: number; bonusXp?: number; leagueUpgrade?: { from: string; to: string }; reason?: string; error?: string } | null
+            if (!cmRes.ok || !cmJson) {
+              toastText = 'Corrección lista, pero no pudimos completar la misión ni confirmar su XP. Reintenta el envío.'
+            } else if (cmJson.success && typeof cmJson.xpAwarded === 'number') {
               recordConfirmedCorrectionXp(rawScore, cmJson.xpAwarded)
               setXpAwarded(cmJson.xpAwarded)
               setMissionXpStatus('already_completed')
@@ -1158,9 +1191,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             } else if (cmJson.reason === 'no_pending_mission') {
               setMissionXpStatus('free_practice')
               toastText = `Práctica libre guardada. El XP se gana con las misiones de tu Camino.`
+            } else {
+              toastText = 'Corrección lista, pero Camino no confirmó la finalización. Reintenta el envío.'
             }
           } catch (error) {
             console.warn('[camino/topic] complete mission skipped', error)
+            toastText = 'Corrección lista, pero no pudimos completar la misión ni confirmar su XP. Reintenta el envío.'
           }
         } else {
           setMissionXpStatus('free_practice')
@@ -1283,8 +1319,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           {streak > 0 && <span style={{ fontSize: 10, fontWeight: 900, color: '#f59e0b', background: 'rgba(245,158,11,.1)', border: '1px solid rgba(245,158,11,.2)', borderRadius: 999, padding: '3px 10px' }}>🔥 {streak}</span>}
           {NOT_SEEN_BUTTON_TOPICS.has(`${currentTopic.subject}:${currentTopic.topicSlug}`) && (
-            <button onClick={markNotSeen} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 800, color: '#92400e', background: 'rgba(251,191,36,.08)', border: '1px solid rgba(245,158,11,.2)', borderRadius: 5, padding: '5px 10px', cursor: 'pointer' }}>
-              <School size={13} /> No lo he dado en clase
+            <button disabled={markingNotSeen} onClick={markNotSeen} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 800, color: '#92400e', background: 'rgba(251,191,36,.08)', border: '1px solid rgba(245,158,11,.2)', borderRadius: 5, padding: '5px 10px', cursor: markingNotSeen ? 'wait' : 'pointer', opacity: markingNotSeen ? 0.65 : 1 }}>
+              <School size={13} /> {markingNotSeen ? 'Guardando…' : 'No lo he dado en clase'}
             </button>
           )}
         </div>

@@ -10,6 +10,7 @@ import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
 import { getWeakAreas } from '@/app/lib/camino/caminoWeakAreasServer'
 import { normalizeSubjectSlug, subjectLabelFromSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
+import { getMadridToday } from '@/app/lib/camino/studyDays'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,12 +42,12 @@ function toCaminoSlug(raw: string): string {
 // always get *something* to suggest, AI or not.
 function fallbackSubject(subjects: string[], offset = 0): string {
   if (subjects.length === 0) return ''
-  const dow = new Date().getDay()
+  const dow = new Date(`${getMadridToday()}T12:00:00Z`).getUTCDay()
   return subjects[(dow + offset) % subjects.length]
 }
 
 function daysUntil(dateStr: string): number {
-  const today = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z')
+  const today = new Date(getMadridToday() + 'T00:00:00Z')
   const target = new Date(dateStr + 'T00:00:00Z')
   return Math.round((target.getTime() - today.getTime()) / 86_400_000)
 }
@@ -203,7 +204,7 @@ export async function POST(request: NextRequest) {
   }
 
   const activeSlugs = activeSubjects.map(normalizeSubjectSlug)
-  const todayStr = new Date().toISOString().slice(0, 10)
+  const todayStr = getMadridToday()
 
   // Mismo acceso de solo lectura al historial que ya usa Chat con Kairo
   // (ver getHistorialResumen en app/page-client.tsx) — aquí en versión

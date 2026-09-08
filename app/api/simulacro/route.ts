@@ -14,6 +14,7 @@ import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects
 import { PARCIAL_COMPLETION_XP, SIMULACRO_COMPLETION_XP } from '@/app/lib/camino/xpMap'
 import { countRepeatDepth } from '@/app/lib/camino/repeatImprovement'
 import { closeSegment, isValidSegments, totalElapsedSeconds } from '@/app/lib/simulacros/timeSegments'
+import { getMadridDate, getMadridToday } from '@/app/lib/camino/studyDays'
 
 // 50s SDK timeout leaves ~10s for the function to return a clean JSON error
 // before Vercel's 60s maxDuration kills the process and returns an HTML 504.
@@ -531,8 +532,8 @@ export async function POST(request: NextRequest) {
     let repeatImproved: boolean | null = null
     try {
       const missionDate = typeof simulacroRecord.created_at === 'string'
-        ? simulacroRecord.created_at.slice(0, 10)
-        : new Date().toISOString().slice(0, 10)
+        ? getMadridDate(simulacroRecord.created_at)
+        : getMadridToday()
       const effortXp = isPracticeSession ? PARCIAL_COMPLETION_XP : SIMULACRO_COMPLETION_XP
       // "Dificultad del bloque" (nuevo ingrediente del XP) — reutiliza la
       // columna dificultad ya existente en historial_simulacros ('Fácil'/
@@ -584,13 +585,24 @@ export async function POST(request: NextRequest) {
     // calendario, márcala como completada ahora que la corrección ya se
     // guardó — así deja de mostrarse como "Empezar" y el enlace pasa a
     // apuntar a esta misma corrección.
+    let calendarMissionCompletionPending = false
     if (missionId) {
-      await markCalendarMissionCompleted(authContext.supabase, authContext.user.id, missionId, simulacro_id, xpResult?.xpAwarded)
+      try {
+        calendarMissionCompletionPending = !await markCalendarMissionCompleted(authContext.supabase, authContext.user.id, missionId, simulacro_id, xpResult?.xpAwarded)
+      } catch (calendarError) {
+        calendarMissionCompletionPending = true
+        console.error('[simulacro] calendar_mission_completion_failed', { missionId, message: (calendarError as Error)?.message?.slice(0, 200) })
+      }
     }
     // Misma idea, rama aparte: Simulacro completo (90 min) entrado desde la
     // misión final_mini_mock en vez de una práctica de 45 min.
     if (fullSimulacroMissionId) {
-      await markCalendarMissionCompleted(authContext.supabase, authContext.user.id, fullSimulacroMissionId, simulacro_id, xpResult?.xpAwarded)
+      try {
+        calendarMissionCompletionPending = !await markCalendarMissionCompleted(authContext.supabase, authContext.user.id, fullSimulacroMissionId, simulacro_id, xpResult?.xpAwarded) || calendarMissionCompletionPending
+      } catch (calendarError) {
+        calendarMissionCompletionPending = true
+        console.error('[simulacro] full_calendar_mission_completion_failed', { missionId: fullSimulacroMissionId, message: (calendarError as Error)?.message?.slice(0, 200) })
+      }
     }
 
     console.info('[simulacro] done', { totalMs: Date.now() - t0, failedBlocks: failedCount })
@@ -599,6 +611,7 @@ export async function POST(request: NextRequest) {
       xpAwarded: xpResult?.xpAwarded ?? 0,
       bonusXp: xpResult?.bonusXp ?? 0,
       totalXp: xpResult?.totalXp ?? null,
+      calendarMissionCompletionPending,
       streakDays: xpResult?.streakDays ?? null,
       leagueUpgrade: xpResult?.leagueUpgrade ?? null,
       repeatImproved,

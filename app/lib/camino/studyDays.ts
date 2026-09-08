@@ -1,7 +1,10 @@
 import { SPAIN_HOLIDAYS } from './spainHolidays'
+import { getMadridDate } from './madridDate'
+
+export { getMadridDate } from './madridDate'
 
 export function getMadridToday(): string {
-  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
+  return getMadridDate(new Date())
 }
 
 export function addDays(dateStr: string, n: number): string {

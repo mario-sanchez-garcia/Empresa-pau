@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { getMadridToday } from './studyDays'
+import { isValidIsoCalendarDate } from './madridDate'
 
 // DAILY_TASK_IDS se mantiene para compatibilidad con misiones sin task_ids guardados.
 export const DAILY_TASK_IDS = ['flashcards-integrales', 'ejercicios-analisis', 'correccion-corta', 'repaso-areas']
@@ -13,12 +15,13 @@ export function isValidRouteId(value: unknown): value is string {
 }
 
 export function isValidDateString(value: unknown): value is string {
-  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
+  return isValidIsoCalendarDate(value)
 }
 
-// Verifica que missionDate esté dentro de ±1 día respecto a la fecha UTC del servidor
+// Verifica que missionDate esté dentro de ±1 día respecto al calendario
+// académico de Madrid, no respecto al día UTC (que difiere tras medianoche).
 export function isDateWithinWindow(missionDate: string): boolean {
-  const serverTs = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z').getTime()
+  const serverTs = new Date(getMadridToday() + 'T00:00:00Z').getTime()
   const missionTs = new Date(missionDate + 'T00:00:00Z').getTime()
   return Math.abs(missionTs - serverTs) <= 24 * 60 * 60 * 1000
 }

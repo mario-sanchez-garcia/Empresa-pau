@@ -20,6 +20,15 @@ const legacyRoute = read('app/camino/tema/[subject]/[block]/[topic]/page.tsx')
 const calendarClient = read('app/components/camino/CaminoCalendarClient.tsx')
 const topicClient = read('app/camino/tema/[subject]/[block]/[topic]/CaminoTopicClient.tsx')
 const correctRoute = read('app/api/camino/correct/route.ts')
+const completeMissionRoute = read('app/api/camino/complete-mission/route.ts')
+const postponeMissionRoute = read('app/api/camino/postpone-mission/route.ts')
+const awardXp = read('app/lib/camino/awardXp.ts')
+const atomicXpMigration = read('supabase/migrations/20260908130000_atomic_camino_xp_award.sql')
+const calendarEditorRoute = read('app/api/camino/calendar-editor/mission/route.ts')
+const chatReorganizeRoute = read('app/api/camino/chat/reorganize/route.ts')
+const simulacroRoute = read('app/api/simulacro/route.ts')
+const calendarCompletion = read('app/lib/camino/markCalendarMissionCompleted.ts')
+const simulacroResults = read('app/simulacros/[id]/results/page.tsx')
 
 assert(
   'Historia mission canonical topic exists in Camino seed',
@@ -93,4 +102,57 @@ assert(
   topicClient.includes('function parseCaminoCorrectionResponse') &&
     topicClient.includes('await response.text()') &&
     !topicClient.includes('const data = await response.json()')
+)
+
+assert(
+  'XP ledger and both aggregates are awarded in one server-only transaction',
+  awardXp.includes(".rpc('award_camino_xp'") &&
+    atomicXpMigration.includes('insert into public.camino_xp_events') &&
+    atomicXpMigration.includes('insert into public.camino_subject_xp') &&
+    atomicXpMigration.includes('insert into public.camino_user_progress') &&
+    atomicXpMigration.includes('on conflict (user_id, source_type, source_id, mission_date) do nothing') &&
+    atomicXpMigration.includes('revoke all on function public.award_camino_xp')
+)
+
+assert(
+  'completed calendar rows can repair an interrupted XP award idempotently',
+  completeMissionRoute.includes("targetRow?.status === 'completed'") &&
+    completeMissionRoute.includes('recovered: true') &&
+    completeMissionRoute.includes('missionDate: targetRow?.scheduled_date ?? today')
+)
+
+assert(
+  'complete-mission binds a supplied calendar id to the authenticated subject and topic',
+  completeMissionRoute.match(/\.eq\('subject', subject\)/g)?.length >= 3 &&
+    completeMissionRoute.match(/\.eq\('v2_sort_order', v2SortOrder\)/g)?.length >= 3
+)
+
+assert(
+  'Camino completion and postpone use the Madrid academic date',
+  completeMissionRoute.includes('const today = getMadridToday()') &&
+    postponeMissionRoute.includes(".lte('scheduled_date', getMadridToday())") &&
+    !postponeMissionRoute.includes("new Date().toISOString().slice(0, 10)")
+)
+
+assert(
+  'postpone controls persist remotely and never claim success after an API failure',
+  calendarClient.includes("fetch('/api/camino/calendar-editor/mission'") &&
+    calendarClient.includes('if (!res.ok && !payload?.persisted)') &&
+    calendarClient.includes('if (!res.ok && !json?.persisted)') &&
+    calendarClient.includes(".in('status', ['pending', 'missed', 'completed'])") &&
+    topicClient.indexOf("fetch('/api/camino/postpone-mission'") < topicClient.indexOf('saveJson(SCHOOL_FEEDBACK_KEY, next)')
+)
+
+assert(
+  'calendar editor and chat reject impossible calendar dates before Postgres',
+  calendarEditorRoute.includes('isValidIsoCalendarDate(scheduledDate)') &&
+    chatReorganizeRoute.includes('isValidIsoCalendarDate(sourceDate)')
+)
+
+assert(
+  'simulacro calendar completion failures are returned and shown honestly',
+  calendarCompletion.includes('Promise<boolean>') &&
+    calendarCompletion.includes('if (updateError) throw updateError') &&
+    simulacroRoute.includes('calendarMissionCompletionPending') &&
+    simulacroResults.includes('result.calendarMissionCompletionPending === true')
 )

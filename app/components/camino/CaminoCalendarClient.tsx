@@ -563,6 +563,11 @@ async function fetchCaminoCalendar(userId: string): Promise<DayPlan[] | null> {
     .select('id, scheduled_date, subject, title, block_key, block_slug, is_main, is_bonus, status, v2_sort_order, mission_type, xp_awarded, start_time, end_time, metadata')
     .eq('user_id', userId)
     .gte('scheduled_date', weekStartStr)
+    // Una fila postponed se conserva en BD como auditoría del motor, pero
+    // ya no es una misión activa. Pintarla como pending (el modelo de UI
+    // solo distingue pending/done) hacía que “Aún no lo he dado” reapareciese
+    // al recargar aunque el servidor lo hubiera guardado correctamente.
+    .in('status', ['pending', 'missed', 'completed'])
     .order('scheduled_date', { ascending: true })
     // Filas, no días — un día puede tener más de una misión (bonus,
     // comment_text, prácticas de parcial). ensureCaminoCalendar mantiene
@@ -1072,6 +1077,8 @@ export default function CaminoCalendarClient() {
   const [caminoReadyStatus, setCaminoReadyStatus] = useState<'checking' | 'no_queue' | 'no_future' | 'ready'>('checking')
   const [isGenerating, setIsGenerating] = useState(false)
   const [showNotSeenConfirm, setShowNotSeenConfirm] = useState(false)
+  const [markNotSeenBusy, setMarkNotSeenBusy] = useState(false)
+  const [postponingMissionId, setPostponingMissionId] = useState<string | null>(null)
   const [projection, setProjection] = useState<Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null; bloques: Array<{ bloque: string; nota_proyectada: number; num_entries: number; avg_max_pts: number | null }> }> | null>(null)
   const [centroPulso, setCentroPulso] = useState<{ enoughData: true; centroDisplay: string; subject: string; topicName: string; position: 'ahead' | 'same' | 'behind'; delta: number; peers: number } | null>(null)
   const [sundayMockSession, setSundayMockSession] = useState<{ id: string; nota_final: number | null } | null | undefined>(undefined)
@@ -1928,14 +1935,57 @@ export default function CaminoCalendarClient() {
     saveJson(CALENDAR_VISIBILITY_KEY, next)
     if (next) setCalendarAvailabilityRefreshKey(key => key + 1)
   }
-  function postponeMission(missionId: string) {
+  async function postponeMission(missionId: string) {
+    if (postponingMissionId) return
     const dayIndex = calendar.findIndex(day => day.missions.some(mission => mission.id === missionId))
-    if (dayIndex < 0 || dayIndex >= calendar.length - 1) return
+    if (dayIndex < 0 || dayIndex >= calendar.length - 1) {
+      setToast('No hay un día siguiente disponible en el calendario. Ábrelo para elegir otra fecha.')
+      return
+    }
     const mission = calendar[dayIndex].missions.find(item => item.id === missionId)
     if (!mission) return
-    const nextCalendar = calendar.map((day, index) => index === dayIndex ? { ...day, missions: day.missions.filter(item => item.id !== missionId) } : index === dayIndex + 1 ? { ...day, missions: [...day.missions, { ...mission, id: `${day.date}-${mission.role}-postponed-${day.missions.length + 1}` }] } : day)
-    recordCalendarSource('client', 'postpone', { weekStart: selectedWeekStart, missionCount: missionCount(nextCalendar) })
-    persist(nextCalendar); setToast('Misión pospuesta a mañana')
+    const nextDate = calendar[dayIndex + 1].date
+    setPostponingMissionId(missionId)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setToast('No se pudo verificar tu sesión. Recarga la página e inténtalo de nuevo.')
+        return
+      }
+      const res = await fetch('/api/camino/calendar-editor/mission', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ missionId, scheduledDate: nextDate }),
+      })
+      const payload = await res.json().catch(() => null) as { persisted?: boolean; code?: string; error?: string } | null
+      if (!res.ok && !payload?.persisted) {
+        setToast(payload?.code === 'TIME_CONFLICT'
+          ? 'Mañana ya tienes ese horario ocupado. Abre el calendario para elegir otro hueco.'
+          : 'No se pudo posponer la misión. Inténtalo de nuevo.')
+        return
+      }
+
+      const calDays = await fetchCaminoCalendar(session.user.id)
+      if (calDays) {
+        setCalendar(calDays)
+        saveCalendarWeeksToCache(calDays)
+        setSupabaseCalLoaded(true)
+      } else {
+        const nextCalendar = calendar.map((day, index) => index === dayIndex
+          ? { ...day, missions: day.missions.filter(item => item.id !== missionId) }
+          : index === dayIndex + 1
+            ? { ...day, missions: [...day.missions, mission] }
+            : day)
+        setCalendar(nextCalendar)
+        saveCalendarWeeksToCache(nextCalendar)
+      }
+      setCalendarAvailabilityRefreshKey(key => key + 1)
+      setToast(res.ok ? 'Misión pospuesta a mañana.' : 'Misión pospuesta en Kairo. Google Calendar queda pendiente de sincronizar.')
+    } catch {
+      setToast('No se pudo posponer la misión. Comprueba tu conexión y reintenta.')
+    } finally {
+      setPostponingMissionId(null)
+    }
   }
   function resetExamDraft() {
     setEditingExamId(null)
@@ -2166,24 +2216,55 @@ export default function CaminoCalendarClient() {
   }
 
   async function markNotSeenHero() {
+    if (markNotSeenBusy) return
     const mission = todayMain[0]
     if (!canMarkNotSeen(mission)) return
     const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
-    setCalendar(current => current.map(day => ({
-      ...day,
-      missions: day.missions.filter(m => m.id !== mission.id),
-    })))
+    if (!session) {
+      setToast('No se pudo verificar tu sesión. Recarga la página e inténtalo de nuevo.')
+      return
+    }
+    setMarkNotSeenBusy(true)
     try {
       const res = await fetch('/api/camino/postpone-mission', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify({ subject: mission.subjectSlug, v2SortOrder: mission.v2SortOrder }),
       })
-      const json = await res.json()
-      setToast(json.warning ? 'Avisamos: tendrás que ver este bloque antes de la PAU.' : 'Tema marcado como no visto en clase.')
+      const json = await res.json().catch(() => null) as { success?: boolean; warning?: boolean; blockSkipped?: boolean; retryScheduled?: boolean; persisted?: boolean } | null
+      if (!res.ok && !json?.persisted) {
+        setToast('No se pudo guardar el cambio. La misión sigue en tu Camino; reinténtalo.')
+        return
+      }
+
+      const calDays = await fetchCaminoCalendar(session.user.id)
+      if (calDays) {
+        setCalendar(calDays)
+        saveCalendarWeeksToCache(calDays)
+        setSupabaseCalLoaded(true)
+      } else {
+        const nextCalendar = calendar.map(day => ({
+          ...day,
+          missions: day.missions.filter(item => item.id !== mission.id),
+        }))
+        setCalendar(nextCalendar)
+        saveCalendarWeeksToCache(nextCalendar)
+      }
+      setShowNotSeenConfirm(false)
+      setCalendarAvailabilityRefreshKey(key => key + 1)
+      setToast(!res.ok && json?.persisted
+        ? 'Cambio guardado en Kairo. Google Calendar queda pendiente de sincronizar.'
+        : json?.warning
+          ? 'Avisamos: tendrás que ver este bloque antes de la PAU.'
+          : json?.blockSkipped
+            ? 'Entendido, pasamos directamente al siguiente tema.'
+            : json?.retryScheduled
+              ? 'Entendido, te lo volveremos a proponer en unos días.'
+              : 'Tema marcado como no visto en clase.')
     } catch {
-      setToast('Error al marcar el tema.')
+      setToast('No se pudo guardar el cambio. La misión sigue en tu Camino; reinténtalo.')
+    } finally {
+      setMarkNotSeenBusy(false)
     }
   }
 
@@ -2515,7 +2596,7 @@ export default function CaminoCalendarClient() {
                 {mainReason && <div style={{ marginTop: 6, fontSize: 12, fontWeight: 600, color: 'var(--clay-text-muted)' }}>{mainReason}</div>}
                 {mainMission.status !== 'done' && (
                   <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-                    <button onClick={() => postponeMission(mainMission.id)} style={{ fontSize: 11, fontWeight: 700, color: 'var(--clay-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4 }}>↺ Posponer</button>
+                    <button disabled={postponingMissionId === mainMission.id} onClick={() => postponeMission(mainMission.id)} style={{ fontSize: 11, fontWeight: 700, color: 'var(--clay-text-muted)', background: 'none', border: 'none', cursor: postponingMissionId === mainMission.id ? 'wait' : 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4, opacity: postponingMissionId === mainMission.id ? 0.65 : 1 }}>↺ {postponingMissionId === mainMission.id ? 'Guardando…' : 'Posponer'}</button>
                     {canMarkNotSeen(mainMission) && (
                       <button onClick={() => setShowNotSeenConfirm(true)} style={{ fontSize: 11, fontWeight: 700, color: 'var(--clay-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Aún no lo he dado</button>
                     )}
@@ -2960,8 +3041,8 @@ export default function CaminoCalendarClient() {
               <h3 className="text-lg font-black text-slate-950">¿Aún no lo has dado en clase?</h3>
               <p className="mt-2 text-sm font-semibold text-slate-500">Lo guardamos para más adelante. Hoy te daremos una alternativa para que no pierdas el ritmo.</p>
               <div className="mt-5 flex justify-end gap-2">
-                <button onClick={() => setShowNotSeenConfirm(false)} className="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-black text-slate-500">Cancelar</button>
-                <button onClick={() => { setShowNotSeenConfirm(false); markNotSeenHero() }} className="rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-black text-white">Confirmar</button>
+                <button disabled={markNotSeenBusy} onClick={() => setShowNotSeenConfirm(false)} className="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-black text-slate-500 disabled:opacity-60">Cancelar</button>
+                <button disabled={markNotSeenBusy} onClick={markNotSeenHero} className="rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-black text-white disabled:opacity-60">{markNotSeenBusy ? 'Guardando…' : 'Confirmar'}</button>
               </div>
             </motion.div>
           </motion.div>

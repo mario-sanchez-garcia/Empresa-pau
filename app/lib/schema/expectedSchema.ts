@@ -94,6 +94,8 @@ export const EXPECTED_FUNCTIONS: ExpectedFunction[] = [
     porque: 'Esta misma comprobación' },
   { name: 'increment_camino_progress',
     porque: 'awardXp() la usa para incrementar xp_total de forma atómica; sin ella el ranking puede perder XP por condición de carrera' },
+  { name: 'award_camino_xp',
+    porque: 'awardXp() la usa para escribir ledger, XP por asignatura y progreso global en una única transacción idempotente' },
 ]
 
 /**

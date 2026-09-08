@@ -75,6 +75,55 @@ async function writeXpAward(
     streakDaysKnown: boolean
   },
 ): Promise<AwardXpResult> {
+  // La función nueva inserta el ledger y actualiza ambos agregados dentro de
+  // la MISMA transacción de Postgres. Así un timeout/fallo intermedio no
+  // puede dejar camino_xp_events por delante del total que lee el ranking.
+  const { data: atomicRow, error: atomicError } = await db
+    .rpc('award_camino_xp', {
+      p_user_id: userId,
+      p_xp_amount: args.xpTotal,
+      p_source_type: args.sourceType,
+      p_source_id: args.sourceId,
+      p_mission_date: args.missionDate,
+      p_subject: args.subject ?? null,
+      p_missions_delta: args.missionsCompletedDelta ?? 0,
+      p_streak_days: args.streakDays,
+      p_longest_streak: args.streakDays,
+      p_has_streak: args.streakDaysKnown,
+    })
+    .single()
+
+  if (!atomicError && atomicRow) {
+    const atomic = atomicRow as { awarded: boolean; old_xp_total: number; new_xp_total: number }
+    if (!atomic.awarded) {
+      return { awarded: false, xpAwarded: 0, baseXp: 0, bonusXp: 0, qualityBonusXp: 0, streakBonusXp: 0, totalXp: Number(atomic.new_xp_total) || 0, streakDays: null, leagueUpgrade: null }
+    }
+
+    const oldXpTotal = Number(atomic.old_xp_total) || 0
+    const newXpTotal = Number(atomic.new_xp_total) || 0
+    const oldDivision = divisionFor(oldXpTotal)
+    const newDivision = divisionFor(newXpTotal)
+    return {
+      awarded: true,
+      xpAwarded: args.xpTotal,
+      baseXp: args.baseXp,
+      bonusXp: args.bonusXp,
+      qualityBonusXp: args.qualityBonusXp,
+      streakBonusXp: args.streakBonusXp,
+      totalXp: newXpTotal,
+      streakDays: args.streakDaysKnown ? args.streakDays : null,
+      leagueUpgrade: newDivision.name !== oldDivision.name ? { from: oldDivision.name, to: newDivision.name } : null,
+    }
+  }
+
+  // Despliegue compatible: el código puede llegar unos minutos antes que la
+  // migración en un entorno. Solo se usa el camino legado cuando PostgREST
+  // confirma que la función aún no existe; cualquier otro error se propaga
+  // para no convertir un fallo real en un éxito parcial.
+  if (atomicError?.code !== 'PGRST202' && atomicError?.code !== '42883') {
+    throw new Error(`awardXp: atomic award failed: ${atomicError?.message}`)
+  }
+
   const { error: xpError } = await db.from('camino_xp_events').insert({
     user_id: userId,
     xp_amount: args.xpTotal,

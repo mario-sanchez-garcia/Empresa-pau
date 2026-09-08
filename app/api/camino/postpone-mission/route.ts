@@ -50,7 +50,9 @@ export async function POST(request: NextRequest) {
       .maybeSingle()
 
     if (!queueItem) {
-      return NextResponse.json({ success: true, warning: false, notFound: true })
+      // No afirmar éxito: sin fila de cola no se ha persistido ninguna de
+      // las decisiones académicas que implica "aún no lo he dado".
+      return NextResponse.json({ success: false, error: 'queue_item_not_found' }, { status: 404 })
     }
 
     // PASO 2: Decidir cómo tratar el "no lo he dado" según su posición en el
@@ -132,7 +134,7 @@ export async function POST(request: NextRequest) {
       .eq('subject', subject)
       .eq('v2_sort_order', v2SortOrder)
       .eq('status', 'pending')
-      .lte('scheduled_date', new Date().toISOString().slice(0, 10))
+      .lte('scheduled_date', getMadridToday())
       .order('scheduled_date', { ascending: false })
       .limit(1)
 

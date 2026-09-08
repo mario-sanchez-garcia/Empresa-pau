@@ -1,0 +1,69 @@
+# A23 de la auditoría del 7-8 de septiembre de 2026: el repositorio no tenía
+# ningún workflow versionado, así que nada impedía que un commit deshiciera
+# silenciosamente cualquiera de los arreglos anteriores. Todas las
+# comprobaciones que van aquí se venían ejecutando a mano, que es otra forma de
+# decir "cuando alguien se acuerda".
+#
+# Criterio de qué bloquea y qué informa: solo bloquea lo que HOY está en verde.
+# Un CI que nace en rojo se ignora a la semana y entonces no protege nada.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    name: Tipos, lint y pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # `npm ci` y no `npm install`: instala exactamente el lockfile.
+      # Esto además resuelve el "TypeScript global no pasa" del informe de
+      # auditoría — no era un fallo del código, sino que @playwright/test
+      # estaba declarado en package.json pero sin instalar en local, y los
+      # errores de e2e/*.spec.ts eran todos derivados de esa ausencia.
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Comprobación de tipos
+        run: npx tsc --noEmit
+
+      # Bloquea solo por errores. Los 137 avisos actuales son deuda conocida y
+      # no deben frenar a nadie; si se convierten en puerta sin haberlos
+      # triado, el equipo aprende a saltarse el CI.
+      - name: Lint
+        run: npx eslint .
+
+      - name: Pruebas unitarias
+        run: |
+          npm run test:pricing
+          npm run test:billing
+          npm run test:camino
+          npm run test:orientation
+
+      # Comprobaciones estructurales por patrones de código. Estas dos están en
+      # verde hoy (16/16 y 12/12), así que bloquean.
+      - name: Smoke de Stripe y del chat de Camino
+        run: |
+          node scripts/smoke-stripe-p0.mjs
+          node scripts/smoke-camino-chat.mjs
+
+      # smoke-p0 va aparte y sin bloquear: hoy da 30 OK / 25 FAIL, y según la
+      # propia auditoría buena parte de esos FAIL son expectativas textuales
+      # antiguas, no flujos rotos. Se ejecuta para que el número quede a la
+      # vista y alguien pueda triarlo; el día que llegue a 0 FAIL, se le quita
+      # el continue-on-error y pasa a bloquear como los demás.
+      - name: Smoke P0 (informativo, pendiente de triaje)
+        continue-on-error: true
+        run: node scripts/smoke-p0.mjs
+
+      - name: Datos de orientación
+        run: npm run validate:orientation-data

@@ -5926,6 +5926,20 @@ function cambiarTipo(t: Tipo) {
         [data-kairo-clay-theme="dark"] .history-activity-grid span {
           color: #9aa7c4;
         }
+
+        /* ── Piloto clay de Exámenes — Bloque 0: fundamento ── Escopado por
+           [data-kairo-clay-theme="dark"], que llevan el <main
+           className="exams-screen"> y el <div className="exams-subject-hero">
+           de seccion==='examenes' (hermanos dentro del mismo fragment — el
+           hero necesita su propio atributo porque no es descendiente del
+           <main>). Historial y Chat no tienen ese atributo en ningún
+           ancestro de su propio árbol, así que estas reglas no les llegan. */
+        [data-kairo-clay-theme="dark"].exams-screen {
+          background:
+            radial-gradient(circle at 12% 0%, rgba(96,165,250,.10), transparent 32%),
+            linear-gradient(180deg, #10162a 0%, #0d1220 100%);
+          color: #eef2fb;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -5984,7 +5998,7 @@ function cambiarTipo(t: Tipo) {
               )}
             </nav>
             {/* V4 Mesa de Trabajo — photo hero */}
-            <div className="exams-subject-hero" style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
+            <div className="exams-subject-hero" data-kairo-clay-theme={clayTheme} style={{ position: 'relative', height: 200, flexShrink: 0, overflow: 'hidden' }}>
               <img src={SUBJECT_HERO_IMGS[asignatura] ?? STUDY_DESK_IMG} alt="" loading="eager" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 30%', filter: 'brightness(.5) saturate(.7)', transition: 'opacity 400ms ease' }} />
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '20px 28px', background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 70%)' }}>
                 <div>
@@ -6011,7 +6025,7 @@ function cambiarTipo(t: Tipo) {
                 })()}
               </div>
             </div>
-            <main className="exams-screen" style={{ flex: 1, padding: '20px 24px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
+            <main className="exams-screen" data-kairo-clay-theme={clayTheme} style={{ flex: 1, padding: '20px 24px 56px', maxWidth: '1420px', width: '100%', margin: '0 auto' }}>
 
             <SectionIntroCard
               hintKey="hint_examenes"

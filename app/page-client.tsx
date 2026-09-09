@@ -6187,6 +6187,45 @@ function cambiarTipo(t: Tipo) {
           border-color: #60a5fa;
           color: #93c5fd;
         }
+
+        /* ── Piloto clay de Exámenes — Bloque: tarjeta de pregunta
+           (exams-question-card / ExamStatement) ── ExamStatement no se
+           toca (componente compartido con el modal de Historial); solo se
+           tematiza el contenedor. Los colores por asignatura (cfg.color/
+           cfg.light/cfg.soft — badges de bloque, chips de conceptos,
+           "Ejercicio en preparación") no se tocan: son acentos vivos por
+           asignatura, no dependen del tema, mismo criterio que
+           --subject-color en Historial. Todo lo inline lleva !important. */
+        [data-kairo-clay-theme="dark"] .exams-q-card {
+          background: #171e38 !important;
+          border-color: rgba(96,165,250,.20) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-q-header {
+          background: rgba(96,165,250,.06) !important;
+          border-bottom-color: rgba(96,165,250,.14) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-q-muted {
+          color: #9aa7c4 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-q-points-badge {
+          background: rgba(96,165,250,.16) !important;
+          color: #93c5fd !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-q-title {
+          color: #eef2fb !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-source-card {
+          background: #1c2440 !important;
+          border-color: rgba(96,165,250,.20) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-q-body {
+          background: rgba(96,165,250,.08) !important;
+          border-color: rgba(96,165,250,.20) !important;
+          color: #c7d0e6 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-q-caption {
+          color: #9aa7c4 !important;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -6656,8 +6695,8 @@ function cambiarTipo(t: Tipo) {
             )}
 
             {!isCatalunaExam && preguntaActiva && (
-             <div className="exams-question-card" key={preguntaActivaKey} style={{ background: 'white', borderRadius: 14, border: '1px solid #e2e8f0', overflow: 'hidden', marginBottom: 22 }}>
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', background: '#fafbfc' }}>
+             <div className="exams-question-card exams-q-card" key={preguntaActivaKey} style={{ background: 'white', borderRadius: 14, border: '1px solid #e2e8f0', overflow: 'hidden', marginBottom: 22 }}>
+                <div className="exams-q-header" style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9', background: '#fafbfc' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', whiteSpace: 'nowrap' }}>{examSystemLabel(ccaa)} {examenActivo?.año} · {tipo}</span>
                     {bloqueActivoLabel && <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color, whiteSpace: 'nowrap' }}>{bloqueActivoLabel}</span>}
@@ -6667,16 +6706,16 @@ function cambiarTipo(t: Tipo) {
                     {(asignatura === 'lengua' || asignatura === 'ingles' || asignatura === 'biologia') && versionExamenSeleccionada && (
                       <span style={{ fontSize: 9, fontWeight: 900, padding: '2px 8px', borderRadius: 999, border: '1px solid ' + cfg.soft, background: cfg.light, color: cfg.color }}>{versionExamenSeleccionada}</span>
                     )}
-                    <span style={{ fontSize: 9, fontWeight: 600, color: '#94a3b8' }}>
+                    <span className="exams-q-muted" style={{ fontSize: 9, fontWeight: 600, color: '#94a3b8' }}>
                       {asignatura === 'lengua' ? 'Versión' : asignatura === 'ingles' || asignatura === 'biologia' ? 'Sesión' : 'Opción'} {opcionMostrada}
                     </span>
-                    <span style={{ marginLeft: 'auto', background: '#0f172a', color: 'white', fontSize: 11, fontWeight: 900, padding: '4px 12px', borderRadius: 999, whiteSpace: 'nowrap' }}>{formatPts(puntuacionPreguntaActiva)} pts</span>
+                    <span className="exams-q-points-badge" style={{ marginLeft: 'auto', background: '#0f172a', color: 'white', fontSize: 11, fontWeight: 900, padding: '4px 12px', borderRadius: 999, whiteSpace: 'nowrap' }}>{formatPts(puntuacionPreguntaActiva)} pts</span>
                   </div>
-                  {bloqueActivoLabel && <p style={{ marginTop: 8, fontSize: 18, fontWeight: 900, color: '#0f172a', lineHeight: 1.2 }}>{bloqueActivoLabel}</p>}
+                  {bloqueActivoLabel && <p className="exams-q-title" style={{ marginTop: 8, fontSize: 18, fontWeight: 900, color: '#0f172a', lineHeight: 1.2 }}>{bloqueActivoLabel}</p>}
                 </div>
                 <div style={{ padding: 18, overflowY: 'auto' }}>
                   {!preguntaActivaIncompleta && asignatura === 'ingles' && (preguntaActiva as any)?.texto_fuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                    <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                    <div className="exams-source-card" style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Text</div>
                       <ExamStatement
                         key={`${preguntaActivaKey}-texto`}
@@ -6691,7 +6730,7 @@ function cambiarTipo(t: Tipo) {
                     </div>
                   )}
                   {!preguntaActivaIncompleta && (asignatura === 'historia' || (asignatura === 'lengua' && bloqueIdx > 0)) && (preguntaActiva as any)?.texto_fuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                    <div style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                    <div className="exams-source-card" style={{ marginBottom: '18px', padding: '18px 20px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Texto fuente oficial</div>
                       <ExamStatement
                         text={(preguntaActiva as any).texto_fuente} // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
@@ -6704,7 +6743,7 @@ function cambiarTipo(t: Tipo) {
                     </div>
                   )}
                   {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).imagen_url && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                    <div style={{ marginBottom: '18px', padding: '14px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                    <div className="exams-source-card" style={{ marginBottom: '18px', padding: '14px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Documento visual</div>
                       <img
                         src={(preguntaActiva as any).imagen_url} // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
@@ -6716,7 +6755,7 @@ function cambiarTipo(t: Tipo) {
                     </div>
                   )}
                   {!preguntaActivaIncompleta && asignatura === 'historia' && (preguntaActiva as any).imagenFuente && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                    <div style={{ marginBottom: '18px', padding: '14px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
+                    <div className="exams-source-card" style={{ marginBottom: '18px', padding: '14px', borderRadius: '20px', background: '#fff', border: '1px solid #e5edf9', boxShadow: '0 12px 30px rgba(37,99,235,0.06)' }}>
                       <div style={{ fontSize: '11px', fontWeight: 850, color: cfg.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Fuente histórica oficial</div>
                       <img src={(preguntaActiva as { imagenFuente?: string }).imagenFuente} alt="Fuente histórica oficial" loading="lazy" decoding="async" style={{ width: '100%', maxHeight: '420px', objectFit: 'contain', borderRadius: '8px', display: 'block' }} />
                     </div>
@@ -6724,7 +6763,7 @@ function cambiarTipo(t: Tipo) {
                   {!preguntaActivaIncompleta && Array.isArray((preguntaActiva as any).imagenes) && (preguntaActiva as any).imagenes.length > 0 && ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
                     <div style={{ margin: '2px auto 20px', display: 'grid', justifyItems: 'center', gap: '12px' }}>
                       {(preguntaActiva as any).imagenes.map((src: string, i: number) => ( // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
-                        <img key={src} src={src} alt={`Imagen oficial ${i + 1}`} loading="lazy" decoding="async" style={{ width: 'min(100%, 640px)', maxHeight: '260px', objectFit: 'contain', borderRadius: '12px', border: '1px solid #e5edf9', background: '#fff', boxShadow: '0 8px 22px rgba(15, 23, 42, 0.055)' }} />
+                        <img key={src} className="exams-source-card" src={src} alt={`Imagen oficial ${i + 1}`} loading="lazy" decoding="async" style={{ width: 'min(100%, 640px)', maxHeight: '260px', objectFit: 'contain', borderRadius: '12px', border: '1px solid #e5edf9', background: '#fff', boxShadow: '0 8px 22px rgba(15, 23, 42, 0.055)' }} />
                       ))}
                     </div>
                   )}
@@ -6753,12 +6792,12 @@ function cambiarTipo(t: Tipo) {
                       la tarjeta del ejercicio; ahora comparte este bloque con el resto
                       de asignaturas para que la estructura sea la misma en todas. */}
                   <div>
-                    <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#94a3b8', marginBottom: 8 }}>Enunciado</div>
+                    <div className="exams-q-muted" style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#94a3b8', marginBottom: 8 }}>Enunciado</div>
                     {preguntaActivaIncompleta ? (
-                      <div style={{ padding: '22px', borderRadius: '18px', background: cfg.light, border: '1px solid ' + cfg.soft, color: '#334155' }}>
+                      <div className="exams-q-body" style={{ padding: '22px', borderRadius: '18px', background: cfg.light, border: '1px solid ' + cfg.soft, color: '#334155' }}>
                         <div style={{ fontSize: '17px', fontWeight: 850, color: cfg.color, marginBottom: '8px' }}>Ejercicio en preparación</div>
                         <div style={{ fontSize: '15px', lineHeight: 1.6, fontWeight: 650 }}>Estamos terminando de adaptar este contenido.</div>
-                        <div style={{ marginTop: '8px', fontSize: '14px', lineHeight: 1.5, color: '#64748b', fontWeight: 650 }}>Prueba otro ejercicio mientras tanto.</div>
+                        <div className="exams-q-caption" style={{ marginTop: '8px', fontSize: '14px', lineHeight: 1.5, color: '#64748b', fontWeight: 650 }}>Prueba otro ejercicio mientras tanto.</div>
                       </div>
                     ) : (
                       <ExamStatement

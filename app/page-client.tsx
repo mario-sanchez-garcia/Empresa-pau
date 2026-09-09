@@ -5584,9 +5584,12 @@ function cambiarTipo(t: Tipo) {
         [data-kairo-clay-theme="dark"] .tutor-chat-textarea::placeholder {
           color: #7d879e;
         }
+        [data-kairo-clay-theme="dark"] .tutor-no-manual-fix {
+          color: #9aa7c4 !important;
+        }
         [data-kairo-clay-theme="dark"] .chat-send-btn:disabled {
           background: rgba(96,165,250,.14);
-          color: #7d879e;
+          color: #9aa7c4;
         }
         /* .tutor-side-card se combina con .history-card (compartida con
            Historial) que trae fondo/borde/sombra propios — se redeclaran
@@ -6038,7 +6041,7 @@ function cambiarTipo(t: Tipo) {
           color: #eef2fb !important;
         }
         [data-kairo-clay-theme="dark"] .exams-side-pts-fallback {
-          color: #4b5468 !important;
+          color: #9aa7c4 !important;
         }
         [data-kairo-clay-theme="dark"] .exams-side-track {
           background: rgba(96,165,250,.14) !important;
@@ -7449,7 +7452,7 @@ function cambiarTipo(t: Tipo) {
 
                   <div className="history-card tutor-side-card">
                     <h2><LifeBuoy size={14} /> ¿No es lo que esperabas?</h2>
-                    <p style={{ margin: '2px 0 10px', fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
+                    <p className="tutor-no-manual-fix" style={{ margin: '2px 0 10px', fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
                       Kairo no puede cambiar notas ni corregir manualmente desde el chat — si crees que hay un error, escríbenos directamente.
                     </p>
                     <a

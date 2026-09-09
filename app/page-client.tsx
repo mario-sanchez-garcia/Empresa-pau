@@ -332,6 +332,21 @@ const sidebarCorrectionMdComponents: Partial<Components> = {
   code: ({ children }) => <code style={{ borderRadius: 6, background: '#f1f5f9', padding: '1px 4px', fontFamily: 'inherit', color: '#334155' }}>{children}</code>,
 }
 
+// Mismo mapa que sidebarCorrectionMdComponents, mismo motivo que
+// chatMdComponentsClayDark más abajo: vive fuera de cualquier componente y
+// no puede leer var(--clay-*), así que la paleta de oscuro va en literal.
+// Usado solo en exams-side-card (piloto clay del panel de IA de Exámenes)
+// cuando clayTheme === 'dark' — no toca Historial ni Chat.
+const sidebarCorrectionMdComponentsClayDark: Partial<Components> = {
+  p: ({ children }) => <span style={{ margin: 0, fontSize: 12, color: '#c7d0e6', lineHeight: 1.55 }}>{children}</span>,
+  strong: ({ children }) => <strong style={{ fontWeight: 850, color: '#eef2fb' }}>{children}</strong>,
+  em: ({ children }) => <em style={{ fontStyle: 'italic' }}>{children}</em>,
+  ul: ({ children }) => <span style={{ display: 'grid', gap: 4 }}>{children}</span>,
+  ol: ({ children }) => <span style={{ display: 'grid', gap: 4 }}>{children}</span>,
+  li: ({ children }) => <span style={{ display: 'block', fontSize: 12, color: '#c7d0e6', lineHeight: 1.55 }}>{children}</span>,
+  code: ({ children }) => <code style={{ borderRadius: 6, background: '#0d1220', padding: '1px 4px', fontFamily: 'inherit', color: '#c7d0e6' }}>{children}</code>,
+}
+
 const darkMdComponents: Partial<Components> = {
   h1: ({children}) => <h1 style={{ fontSize: '1.05rem', fontWeight: 850, margin: '1.1rem 0 0.55rem', borderBottom: '1px solid #dbe7fb', paddingBottom: '0.3rem', color: '#0f172a', letterSpacing: '-0.02em' }}>{children}</h1>,
   h2: ({children}) => <h2 style={{ fontSize: '0.95rem', fontWeight: 850, margin: '0.95rem 0 0.45rem', color: '#1e3a8a', letterSpacing: '-0.01em' }}>{children}</h2>,
@@ -5988,6 +6003,75 @@ function cambiarTipo(t: Tipo) {
         [data-kairo-clay-theme="dark"] .exams-footer-link {
           color: #9aa7c4 !important;
         }
+
+        /* ── Piloto clay de Exámenes — panel de IA (exams-ai-panel /
+           exams-side-card) ── Todos los colores de este bloque son fijos
+           (encabezados de sección "Puntos fuertes"/"Errores a corregir",
+           iconos, chips) y no cambian según nota/aprobado-suspenso/límite
+           alcanzado — verificado línea por línea antes de tocar. Los
+           estados de carga/error/límite alcanzado y CorrectionResultCard
+           viven en otra tarjeta ("Corrección de Kairo", fuera de
+           exams-side-card) que queda fuera de este piloto. .exams-side-card
+           es una clase real (no inline), se sobreescribe sin !important; el
+           resto de colores viven inline en el JSX, así que llevan
+           !important, mismo patrón ya usado en el buscador y el pie. */
+        [data-kairo-clay-theme="dark"] .exams-side-card {
+          background: #171e38;
+          border-color: rgba(96,165,250,.20);
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-nota-box {
+          background: rgba(96,165,250,.06) !important;
+          border-bottom-color: rgba(96,165,250,.14) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-divider {
+          border-bottom-color: rgba(96,165,250,.14) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-muted {
+          color: #9aa7c4 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-score {
+          color: #eef2fb !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-pts-fallback {
+          color: #4b5468 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-track {
+          background: rgba(96,165,250,.14) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-xp {
+          color: #c4b5fd !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-heading-positive {
+          color: #4ade80 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-bullet-positive {
+          background: rgba(74,222,128,.16) !important;
+          color: #4ade80 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-body {
+          color: #c7d0e6 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-heading-negative {
+          color: #f87171 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-bullet-negative {
+          background: rgba(248,113,113,.16) !important;
+          color: #f87171 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-block-pill {
+          background: rgba(96,165,250,.14) !important;
+          color: #93c5fd !important;
+          border-color: rgba(96,165,250,.30) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-link {
+          color: #60a5fa !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-session {
+          background: rgba(74,222,128,.10) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-side-session-sub {
+          color: #86efac !important;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -6731,27 +6815,27 @@ function cambiarTipo(t: Tipo) {
                     const parts = correctionScoreLabel !== '--' ? correctionScoreLabel.split('/') : null
                     const ratio = parts ? parseFloat(parts[0]) / parseFloat(parts[1]) : null
                     return (
-                      <div style={{ padding: 16, borderBottom: '1px solid #f1f5f9', background: '#fafbfc' }}>
-                        <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94a3b8', marginBottom: 6 }}>Nota estimada</div>
+                      <div className="exams-side-nota-box" style={{ padding: 16, borderBottom: '1px solid #f1f5f9', background: '#fafbfc' }}>
+                        <div className="exams-side-muted" style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94a3b8', marginBottom: 6 }}>Nota estimada</div>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                          <span style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>
+                          <span className="exams-side-score" style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', lineHeight: 1 }}>
                             {correccion ? (parts?.[0] ?? '--') : cargando ? '…' : '--'}
                           </span>
-                          {parts && <span style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>/{parts[1]}</span>}
+                          {parts && <span className="exams-side-muted" style={{ fontSize: 13, fontWeight: 600, color: '#94a3b8' }}>/{parts[1]}</span>}
                           {!parts && !cargando && (
-                            <span style={{ fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>/pts</span>
+                            <span className="exams-side-pts-fallback" style={{ fontSize: 13, fontWeight: 600, color: '#cbd5e1' }}>/pts</span>
                           )}
                         </div>
-                        <div style={{ height: 4, borderRadius: 999, background: '#f1f5f9', marginTop: 10, overflow: 'hidden' }}>
+                        <div className="exams-side-track" style={{ height: 4, borderRadius: 999, background: '#f1f5f9', marginTop: 10, overflow: 'hidden' }}>
                           <div style={{ height: '100%', width: ratio !== null ? `${Math.min(ratio * 100, 100).toFixed(0)}%` : '0%', background: 'linear-gradient(90deg,#2563eb,#60a5fa)', borderRadius: 999, transition: 'width 700ms cubic-bezier(0.4,0,0.2,1)' }} />
                         </div>
                         {!correccion && (
-                          <p style={{ margin: '8px 0 0', fontSize: 11, color: '#94a3b8', lineHeight: 1.5 }}>
+                          <p className="exams-side-muted" style={{ margin: '8px 0 0', fontSize: 11, color: '#94a3b8', lineHeight: 1.5 }}>
                             {cargando ? 'Calculando con la rúbrica oficial…' : 'Resuelve el ejercicio y Kairo te dará feedback.'}
                           </p>
                         )}
                         {correccion && examXpResult && (
-                          <p style={{ margin: '8px 0 0', fontSize: 12, fontWeight: 800, color: '#7c3aed' }}>
+                          <p className="exams-side-xp" style={{ margin: '8px 0 0', fontSize: 12, fontWeight: 800, color: '#7c3aed' }}>
                             +{examXpResult.xpAwarded} XP{examXpResult.bonusXp > 0 ? ` · +${examXpResult.bonusXp} bonus extra` : ''}
                           </p>
                         )}
@@ -6760,60 +6844,60 @@ function cambiarTipo(t: Tipo) {
                   })()}
 
                   {/* ── Puntos fuertes ── */}
-                  <div style={{ padding: '14px 16px', borderBottom: '1px solid #f1f5f9' }}>
-                    <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#15803d', marginBottom: 10 }}>Puntos fuertes</div>
+                  <div className="exams-side-divider" style={{ padding: '14px 16px', borderBottom: '1px solid #f1f5f9' }}>
+                    <div className="exams-side-heading-positive" style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#15803d', marginBottom: 10 }}>Puntos fuertes</div>
                     {correctionFuertes.length > 0 ? correctionFuertes.map((point, i) => (
                       <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-                        <div style={{ width: 16, height: 16, borderRadius: '50%', display: 'grid', placeItems: 'center', background: '#dcfce7', color: '#16a34a', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 1 }}>✓</div>
-                        <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: '#334155', lineHeight: 1.55 }}>
-                          <MathMarkdown text={point} format={false} components={sidebarCorrectionMdComponents} />
+                        <div className="exams-side-bullet-positive" style={{ width: 16, height: 16, borderRadius: '50%', display: 'grid', placeItems: 'center', background: '#dcfce7', color: '#16a34a', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 1 }}>✓</div>
+                        <div className="exams-side-body" style={{ flex: 1, minWidth: 0, fontSize: 12, color: '#334155', lineHeight: 1.55 }}>
+                          <MathMarkdown text={point} format={false} components={clayTheme === 'dark' ? sidebarCorrectionMdComponentsClayDark : sidebarCorrectionMdComponents} />
                         </div>
                       </div>
                     )) : (
-                      <p style={{ margin: 0, fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>
+                      <p className="exams-side-muted" style={{ margin: 0, fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>
                         {cargando ? 'Analizando…' : 'Aquí aparecerán tus puntos fuertes.'}
                       </p>
                     )}
                   </div>
 
                   {/* ── Errores a corregir ── */}
-                  <div style={{ padding: '14px 16px', borderBottom: '1px solid #f1f5f9' }}>
-                    <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#b91c1c', marginBottom: 10 }}>Errores a corregir</div>
+                  <div className="exams-side-divider" style={{ padding: '14px 16px', borderBottom: '1px solid #f1f5f9' }}>
+                    <div className="exams-side-heading-negative" style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#b91c1c', marginBottom: 10 }}>Errores a corregir</div>
                     {correctionErrores.length > 0 ? correctionErrores.map((err, i) => (
                       <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-                        <div style={{ width: 16, height: 16, borderRadius: '50%', display: 'grid', placeItems: 'center', background: '#fee2e2', color: '#dc2626', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 1 }}>!</div>
-                        <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: '#334155', lineHeight: 1.55 }}>
-                          <MathMarkdown text={err} format={false} components={sidebarCorrectionMdComponents} />
+                        <div className="exams-side-bullet-negative" style={{ width: 16, height: 16, borderRadius: '50%', display: 'grid', placeItems: 'center', background: '#fee2e2', color: '#dc2626', fontSize: 8, fontWeight: 900, flexShrink: 0, marginTop: 1 }}>!</div>
+                        <div className="exams-side-body" style={{ flex: 1, minWidth: 0, fontSize: 12, color: '#334155', lineHeight: 1.55 }}>
+                          <MathMarkdown text={err} format={false} components={clayTheme === 'dark' ? sidebarCorrectionMdComponentsClayDark : sidebarCorrectionMdComponents} />
                         </div>
                       </div>
                     )) : (
-                      <p style={{ margin: 0, fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>
+                      <p className="exams-side-muted" style={{ margin: 0, fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>
                         {cargando ? 'Revisando…' : 'Aquí verás qué debes corregir.'}
                       </p>
                     )}
                   </div>
 
                   {/* ── Bloque asociado ── */}
-                  <div style={{ padding: '14px 16px', borderBottom: '1px solid #f1f5f9' }}>
-                    <div style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94a3b8', marginBottom: 10 }}>Bloque asociado</div>
+                  <div className="exams-side-divider" style={{ padding: '14px 16px', borderBottom: '1px solid #f1f5f9' }}>
+                    <div className="exams-side-muted" style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', color: '#94a3b8', marginBottom: 10 }}>Bloque asociado</div>
                     {!isCatalunaExam && preguntaActiva ? (
                       <>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 999, background: '#eff6ff', color: '#1d4ed8', fontSize: 11, fontWeight: 800, border: '1px solid #bfdbfe' }}>
+                        <div className="exams-side-block-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 999, background: '#eff6ff', color: '#1d4ed8', fontSize: 11, fontWeight: 800, border: '1px solid #bfdbfe' }}>
                           📐 {bloqueActivoLabel}
                         </div>
-                        <a href="/camino" style={{ display: 'block', marginTop: 8, fontSize: 11, fontWeight: 700, color: '#2563eb', textDecoration: 'none' }}>Ver material de repaso →</a>
+                        <a href="/camino" className="exams-side-link" style={{ display: 'block', marginTop: 8, fontSize: 11, fontWeight: 700, color: '#2563eb', textDecoration: 'none' }}>Ver material de repaso →</a>
                       </>
                     ) : (
-                      <p style={{ margin: 0, fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>Selecciona un ejercicio para ver el bloque asociado.</p>
+                      <p className="exams-side-muted" style={{ margin: 0, fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>Selecciona un ejercicio para ver el bloque asociado.</p>
                     )}
                   </div>
 
                   {/* ── Sesión activa ── */}
-                  <div style={{ margin: '0 16px 16px', marginTop: 16, padding: '10px 12px', background: '#f0fdf4', borderRadius: 10, display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
+                  <div className="exams-side-session" style={{ margin: '0 16px 16px', marginTop: 16, padding: '10px 12px', background: '#f0fdf4', borderRadius: 10, display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <div className="exams-side-session-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', flexShrink: 0 }} />
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 800, color: '#15803d' }}>Sesión activa</div>
-                      <div style={{ fontSize: 10, color: '#86efac', marginTop: 1 }}>
+                      <div className="exams-side-heading-positive" style={{ fontSize: 12, fontWeight: 800, color: '#15803d' }}>Sesión activa</div>
+                      <div className="exams-side-session-sub" style={{ fontSize: 10, color: '#86efac', marginTop: 1 }}>
                         {respuesta.trim() || imagenes.length > 0 ? 'Respuesta en progreso' : 'Empieza con el enunciado actual'}
                       </div>
                     </div>

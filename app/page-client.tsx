@@ -211,37 +211,37 @@ function SafeProgressiveCorrectionStream() {
 
   return (
     <div style={{ display: 'grid', gap: 18 }} className="pau-reveal">
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 13, padding: '15px 16px', borderRadius: 14, background: '#f8fafc', border: '1px solid #eef1f6' }}>
-        <div style={{ width: 34, height: 34, borderRadius: 10, background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexShrink: 0 }}>
+      <div className="exams-c-loading-card" style={{ display: 'flex', alignItems: 'flex-start', gap: 13, padding: '15px 16px', borderRadius: 14, background: '#f8fafc', border: '1px solid #eef1f6' }}>
+        <div className="exams-c-loading-icon" style={{ width: 34, height: 34, borderRadius: 10, background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexShrink: 0 }}>
           <KairoLoadingDot />
         </div>
         <div>
-          <p style={{ margin: 0, fontSize: 14.5, fontWeight: 700, color: '#0f172a' }}>Kairo está corrigiendo tu ejercicio</p>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
+          <p className="exams-c-loading-title" style={{ margin: 0, fontSize: 14.5, fontWeight: 700, color: '#0f172a' }}>Kairo está corrigiendo tu ejercicio</p>
+          <p className="exams-c-loading-sub" style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
             Mostramos el avance sin enseñar fórmulas incompletas ni texto técnico.
           </p>
         </div>
       </div>
-      <div style={{ height: 6, borderRadius: 999, overflow: 'hidden', background: '#eef1f6' }}>
+      <div className="exams-c-loading-track" style={{ height: 6, borderRadius: 999, overflow: 'hidden', background: '#eef1f6' }}>
         <div style={{ width: '100%', height: '100%', borderRadius: 999, background: '#2563eb', transformOrigin: 'left center', transform: `scaleX(${progressPct / 100})`, transition: 'transform 420ms var(--ease-out)' }} />
       </div>
       <div style={{ display: 'grid', gap: 8 }}>
         {completedSteps.map(step => (
-          <div key={step} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#475569', fontSize: 13.5, fontWeight: 650 }}>
-            <span style={{ width: 20, height: 20, borderRadius: 999, display: 'grid', placeItems: 'center', background: '#dcfce7', color: '#16a34a', fontSize: 11, fontWeight: 900, flexShrink: 0 }}>✓</span>
+          <div key={step} className="exams-c-loading-done" style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#475569', fontSize: 13.5, fontWeight: 650 }}>
+            <span className="exams-side-bullet-positive" style={{ width: 20, height: 20, borderRadius: 999, display: 'grid', placeItems: 'center', background: '#dcfce7', color: '#16a34a', fontSize: 11, fontWeight: 900, flexShrink: 0 }}>✓</span>
             {step}
           </div>
         ))}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#1d4ed8', fontSize: 13.5, fontWeight: 700 }}>
-          <span style={{ width: 20, height: 20, borderRadius: 999, display: 'grid', placeItems: 'center', background: '#eff6ff', color: '#2563eb', flexShrink: 0 }}><KairoLoadingDot /></span>
+        <div className="exams-c-loading-current" style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#1d4ed8', fontSize: 13.5, fontWeight: 700 }}>
+          <span className="exams-c-loading-icon" style={{ width: 20, height: 20, borderRadius: 999, display: 'grid', placeItems: 'center', background: '#eff6ff', color: '#2563eb', flexShrink: 0 }}><KairoLoadingDot /></span>
           {currentStep}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#94a3b8', fontSize: 12.5, fontWeight: 600, paddingLeft: 30 }}>
+        <div className="exams-c-loading-muted" style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#94a3b8', fontSize: 12.5, fontWeight: 600, paddingLeft: 30 }}>
           {progressPct >= 86 ? 'Últimos detalles...' : 'Kairo está preparando esta parte...'}
         </div>
         {pendingSteps.map((step) => (
-          <div key={step} style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#94a3b8', fontSize: 13, fontWeight: 550 }}>
-            <span style={{ width: 8, height: 8, borderRadius: 999, background: '#e2e8f0', marginLeft: 6, flexShrink: 0 }} />
+          <div key={step} className="exams-c-loading-muted" style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#94a3b8', fontSize: 13, fontWeight: 550 }}>
+            <span className="exams-c-loading-dot" style={{ width: 8, height: 8, borderRadius: 999, background: '#e2e8f0', marginLeft: 6, flexShrink: 0 }} />
             {step}
           </div>
         ))}
@@ -6264,6 +6264,98 @@ function cambiarTipo(t: Tipo) {
         [data-kairo-clay-theme="dark"] .exams-a-footer {
           border-top-color: rgba(96,165,250,.14) !important;
         }
+
+        /* ── Piloto clay de Exámenes — Bloque: tarjeta "Corrección de
+           Kairo" ── CorrectionResultCard no se toca (componente compartido
+           con Camino, Simulacros y varias asignaturas de Cataluña,
+           confirmado antes de empezar: 13 archivos lo importan). Aquí SÍ
+           hay color condicionado por lógica de negocio real: qué bloque se
+           muestra (error de red / no evaluable / cargando / éxito /
+           truncado / fallo al guardar) depende de
+           correctionRequestError/correccionNoEvaluable/cargando/truncated/
+           historySaveError — esa cadena de condicionales no se toca, solo
+           se adapta el tono exacto de cada paleta fija (rojo error, ámbar
+           truncado, naranja fallo de guardado) para que siga siendo
+           legible en oscuro. Todo lleva !important por ser inline. */
+        [data-kairo-clay-theme="dark"] .exams-c-card {
+          background: #171e38 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-header {
+          border-bottom-color: rgba(96,165,250,.14) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-title {
+          color: #eef2fb !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-loading-card {
+          background: rgba(96,165,250,.06) !important;
+          border-color: rgba(96,165,250,.16) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-loading-icon {
+          background: rgba(96,165,250,.16) !important;
+          color: #93c5fd !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-loading-title {
+          color: #eef2fb !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-loading-sub {
+          color: #9aa7c4 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-loading-track {
+          background: rgba(96,165,250,.14) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-loading-done {
+          color: #9aa7c4 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-loading-current {
+          color: #93c5fd !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-loading-muted {
+          color: #7d879e !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-loading-dot {
+          background: rgba(96,165,250,.24) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-error-box {
+          background: rgba(248,113,113,.10) !important;
+          border-color: rgba(248,113,113,.35) !important;
+          color: #fca5a5 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-error-title {
+          color: #fca5a5 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-error-text {
+          color: #f1a9a9 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-error-btn {
+          background: rgba(248,113,113,.16) !important;
+          border-color: rgba(248,113,113,.35) !important;
+          color: #fca5a5 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-neutral-btn {
+          background: #1c2440 !important;
+          border-color: rgba(96,165,250,.24) !important;
+          color: #c7d0e6 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-warn-box {
+          background: rgba(251,191,36,.10) !important;
+          border-color: rgba(251,191,36,.35) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-warn-title {
+          color: #fbbf24 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-warn-text {
+          color: #f0cb85 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-warn-btn {
+          background: rgba(251,191,36,.16) !important;
+          border-color: rgba(251,191,36,.35) !important;
+          color: #fbbf24 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-c-save-error {
+          background: rgba(251,146,60,.10) !important;
+          border-color: rgba(251,146,60,.35) !important;
+          color: #fdba74 !important;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -6912,34 +7004,36 @@ function cambiarTipo(t: Tipo) {
             </div>}
 
             {!isCatalunaExam && (correccion || cargando || correccionNoEvaluable || correctionRequestError) && (
-              <div className="pau-reveal" style={{ borderRadius: 'var(--r-2xl)', overflow: 'hidden', background: '#ffffff', boxShadow: 'var(--shadow-sm)' }}>
-                <div style={{ padding: '15px 22px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid #f1f5f9' }}>
-                  <div style={{ width: '30px', height: '30px', borderRadius: '9px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexShrink: 0 }}><WandSparkles size={15} /></div>
-                  <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '14px', letterSpacing: '-0.01em' }}>Corrección de Kairo</span>
+              <div className="pau-reveal exams-c-card" style={{ borderRadius: 'var(--r-2xl)', overflow: 'hidden', background: '#ffffff', boxShadow: 'var(--shadow-sm)' }}>
+                <div className="exams-c-header" style={{ padding: '15px 22px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid #f1f5f9' }}>
+                  <div className="exams-c-loading-icon" style={{ width: '30px', height: '30px', borderRadius: '9px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexShrink: 0 }}><WandSparkles size={15} /></div>
+                  <span className="exams-c-title" style={{ fontWeight: 700, color: '#0f172a', fontSize: '14px', letterSpacing: '-0.01em' }}>Corrección de Kairo</span>
                 </div>
                 <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
                   {correctionRequestError ? (
-                    <div role="alert" style={{ padding: '14px 16px', borderRadius: 12, background: '#fef2f2', border: '1.5px solid #fecaca', color: '#991b1b' }}>
-                      <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>{correctionRequestError}</p>
-                      <p style={{ margin: '4px 0 8px', fontSize: 12.5, color: '#b91c1c', lineHeight: 1.4 }}>Tu respuesta sigue guardada en esta pantalla y este fallo no cuenta como intento.</p>
+                    <div role="alert" className="exams-c-error-box" style={{ padding: '14px 16px', borderRadius: 12, background: '#fef2f2', border: '1.5px solid #fecaca', color: '#991b1b' }}>
+                      <p className="exams-c-error-title" style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>{correctionRequestError}</p>
+                      <p className="exams-c-error-text" style={{ margin: '4px 0 8px', fontSize: 12.5, color: '#b91c1c', lineHeight: 1.4 }}>Tu respuesta sigue guardada en esta pantalla y este fallo no cuenta como intento.</p>
                       <button
                         onClick={corregir}
+                        className="exams-c-error-btn"
                         style={{ fontSize: 12.5, fontWeight: 700, color: '#991b1b', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: 8, padding: '5px 12px', cursor: 'pointer' }}
                       >
                         Reintentar corrección
                       </button>
                     </div>
                   ) : correccionNoEvaluable ? (
-                    <div style={{ padding: '14px 16px', borderRadius: 12, background: '#fef2f2', border: '1.5px solid #fecaca', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                    <div className="exams-c-error-box" style={{ padding: '14px 16px', borderRadius: 12, background: '#fef2f2', border: '1.5px solid #fecaca', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                       <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
                       <div>
-                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#991b1b' }}>No se pudo leer tu respuesta — no evaluable</p>
-                        <p style={{ margin: '4px 0 8px', fontSize: 12.5, color: '#b91c1c', lineHeight: 1.4 }}>
+                        <p className="exams-c-error-title" style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#991b1b' }}>No se pudo leer tu respuesta — no evaluable</p>
+                        <p className="exams-c-error-text" style={{ margin: '4px 0 8px', fontSize: 12.5, color: '#b91c1c', lineHeight: 1.4 }}>
                           Ha sido un error técnico, no un problema con tu trabajo. No se ha guardado como intento en tu historial ni afecta a tu itinerario.
                         </p>
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                           <button
                             onClick={corregir}
+                            className="exams-c-error-btn"
                             style={{ fontSize: 12.5, fontWeight: 700, color: '#991b1b', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: 8, padding: '5px 12px', cursor: 'pointer' }}
                           >
                             Reintentar corrección
@@ -6951,12 +7045,14 @@ function cambiarTipo(t: Tipo) {
                               setItemSeleccionado(null)
                               navegarASeccion('chat')
                             }}
+                            className="exams-c-neutral-btn"
                             style={{ fontSize: 12.5, fontWeight: 700, color: '#475569', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, padding: '5px 12px', cursor: 'pointer' }}
                           >
                             Reportar error
                           </button>
                           <a
                             href="/contacto"
+                            className="exams-c-neutral-btn"
                             style={{ fontSize: 12.5, fontWeight: 700, color: '#475569', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 8, padding: '5px 12px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
                           >
                             Escribir a soporte
@@ -6974,14 +7070,15 @@ function cambiarTipo(t: Tipo) {
                     />
                   )}
                   {truncated && (
-                    <div style={{ marginTop: 16, padding: '12px 16px', borderRadius: 12, background: '#fef3c7', border: '1.5px solid #fcd34d', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                    <div className="exams-c-warn-box" style={{ marginTop: 16, padding: '12px 16px', borderRadius: 12, background: '#fef3c7', border: '1.5px solid #fcd34d', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                       <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
                       <div>
-                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#92400e' }}>Respuesta incompleta</p>
-                        <p style={{ margin: '4px 0 8px', fontSize: 12.5, color: '#b45309', lineHeight: 1.4 }}>La corrección se ha cortado antes de terminar. No la hemos guardado en Historial para evitar guardar una explicación incompleta.</p>
-                        <p style={{ margin: '0 0 8px', fontSize: 12.5, color: '#b45309', lineHeight: 1.4 }}>Puedes reintentar con la misma respuesta o imagen; si vuelve a pasar, prueba con una foto más concreta.</p>
+                        <p className="exams-c-warn-title" style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#92400e' }}>Respuesta incompleta</p>
+                        <p className="exams-c-warn-text" style={{ margin: '4px 0 8px', fontSize: 12.5, color: '#b45309', lineHeight: 1.4 }}>La corrección se ha cortado antes de terminar. No la hemos guardado en Historial para evitar guardar una explicación incompleta.</p>
+                        <p className="exams-c-warn-text" style={{ margin: '0 0 8px', fontSize: 12.5, color: '#b45309', lineHeight: 1.4 }}>Puedes reintentar con la misma respuesta o imagen; si vuelve a pasar, prueba con una foto más concreta.</p>
                         <button
                           onClick={corregir}
+                          className="exams-c-warn-btn"
                           style={{ fontSize: 12.5, fontWeight: 700, color: '#92400e', background: '#fde68a', border: '1px solid #fcd34d', borderRadius: 8, padding: '5px 12px', cursor: 'pointer' }}
                         >
                           Reintentar corrección
@@ -6990,7 +7087,7 @@ function cambiarTipo(t: Tipo) {
                     </div>
                   )}
                   {historySaveError && !truncated && (
-                    <div role="alert" style={{ marginTop: 16, padding: '12px 16px', borderRadius: 12, background: '#fff7ed', border: '1.5px solid #fdba74', color: '#9a3412', fontSize: 12.5, fontWeight: 700, lineHeight: 1.45 }}>
+                    <div role="alert" className="exams-c-save-error" style={{ marginTop: 16, padding: '12px 16px', borderRadius: 12, background: '#fff7ed', border: '1.5px solid #fdba74', color: '#9a3412', fontSize: 12.5, fontWeight: 700, lineHeight: 1.45 }}>
                       {historySaveError}
                     </div>
                   )}

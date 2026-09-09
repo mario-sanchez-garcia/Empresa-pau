@@ -16,6 +16,7 @@ import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 import SimulacroPracticaSkeleton from '@/app/components/simulacros/SimulacroPracticaSkeleton'
 import { PARCIAL_MINUTES } from '@/app/lib/camino/xpMap'
 import { isValidSegments, totalElapsedSeconds, type TimeSegment } from '@/app/lib/simulacros/timeSegments'
+import { fetchCorrection } from '@/app/lib/correctionFetch'
 
 // Misma duración de referencia que usa el XP de esta acción (PARCIAL_COMPLETION_XP
 // en xpMap.ts, ver comentario ahí: "una sesión de parcial cronometrada"). El
@@ -53,6 +54,7 @@ function PracticaPageInner() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [reviewMarked, setReviewMarked] = useState<Record<string, boolean>>({})
   const [submitting, setSubmitting] = useState(false)
+  const submitInFlightRef = useRef(false)
   const [submitError, setSubmitError] = useState('')
   const [submitStage, setSubmitStage] = useState('')
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | 'dirty'>('saved')
@@ -391,7 +393,8 @@ function PracticaPageInner() {
   }
 
   async function submitSession() {
-    if (!record || submitting) return
+    if (!record || submitting || submitInFlightRef.current) return
+    submitInFlightRef.current = true
     setSubmitting(true)
     setSubmitError('')
     setSubmitStage('Guardando respuestas...')
@@ -410,7 +413,7 @@ function PracticaPageInner() {
         return
       }
 
-      const res = await fetch('/api/simulacro', {
+      const res = await fetchCorrection('/api/simulacro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
@@ -467,6 +470,8 @@ function PracticaPageInner() {
       setSubmitError('No hemos podido entregar la corrección. Tus respuestas están guardadas.')
       setSubmitStage('')
       setSubmitting(false)
+    } finally {
+      submitInFlightRef.current = false
     }
   }
 

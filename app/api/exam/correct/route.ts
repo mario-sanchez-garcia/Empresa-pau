@@ -5,13 +5,14 @@ import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsag
 import { isOverloadedError, withAnthropicRetry } from '@/app/lib/ai/withAnthropicRetry'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE, monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
-import { getUserBillingContext, getMonthlyActionCount, getMonthlyUniqueActionCount } from '@/app/lib/billing/serverUsage'
+import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
-import { buildBlockPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson, scoreFromCorrection } from '@/app/lib/correctionPrompt'
+import { buildBlockPrompt, buildCorrectionFormatRepairPrompt, combineCorrectionUsage, normalizeCorrectionForOfficialScores, parseCorrectionJson, scoreFromCorrection, shouldRepairCorrectionFormat, validateCorrectionJsonShape } from '@/app/lib/correctionPrompt'
 import { getTheoryContextForExercise, theoryContextToPrompt } from '@/app/lib/whyItWorksTheory'
-import { isValidExamHistoryId, issueExamXpGrant } from '@/app/lib/camino/examXpGrant'
+import { digestExamCorrection, isValidExamHistoryId, issueExamXpGrant } from '@/app/lib/camino/examXpGrant'
+import { validateCorrectionTextPayload } from '@/app/lib/correctionRequestValidation'
 
 // 55s SDK timeout leaves ~5s for the function to return a clean JSON error
 // before Vercel's 60s maxDuration (Hobby plan ceiling) kills the process.
@@ -29,46 +30,10 @@ const MAX_TOKENS = 4000
 // El tope agregado de imágenes vive en app/lib/imagePayloadLimits.ts:
 // estaba duplicado en estas tres rutas y por encima del límite de
 // transporte de la plataforma, así que su 413 era inalcanzable (A18).
-import { MAX_IMAGE_PAYLOAD_CHARS, imagePayloadTooLargeMessage } from '@/app/lib/imagePayloadLimits'
+import { validateCorrectionImagePayload } from '@/app/lib/imagePayloadLimits'
 
 function examSystemLabel(comunidad: string) {
   return comunidad === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid'
-}
-
-// The general "¿Por qué es así?" explanation for a topic (idea clave, método,
-// error típico, mini ejemplo) doesn't depend on which student or exercise
-// triggered it — only the topic does. Caching it by (subject, blockSlug,
-// topicSlug) skips asking the model to regenerate the same content every time,
-// which was adding real output tokens/latency to every correction. Best-effort:
-// a cache failure must never break the actual correction.
-async function getCachedWhyExplanation(subject: string, blockSlug: string, topicSlug: string) {
-  try {
-    const db = createServiceClient()
-    const { data } = await db
-      .from('topic_why_cache')
-      .select('porque_es_asi')
-      .eq('subject', subject)
-      .eq('block_slug', blockSlug)
-      .eq('topic_slug', topicSlug)
-      .maybeSingle()
-    return data?.porque_es_asi ?? null
-  } catch {
-    return null
-  }
-}
-
-async function cacheWhyExplanation(subject: string, blockSlug: string, topicSlug: string, porqueEsAsi: unknown) {
-  try {
-    const db = createServiceClient()
-    await db
-      .from('topic_why_cache')
-      .upsert(
-        { subject, block_slug: blockSlug, topic_slug: topicSlug, porque_es_asi: porqueEsAsi },
-        { onConflict: 'subject,block_slug,topic_slug', ignoreDuplicates: true }
-      )
-  } catch (error) {
-    console.error('[exam/correct] why_cache_write_failed', { message: (error as Error)?.message?.slice(0, 150) })
-  }
 }
 
 type ExamCorrectBody = {
@@ -135,15 +100,15 @@ async function handlePost(request: NextRequest) {
   const officialPrompt = asString(body.officialPrompt)
   const studentAnswer = asString(body.studentAnswer)
   const historyId = isValidExamHistoryId(body.historyId) ? body.historyId : null
-  const concepts = Array.isArray(body.concepts) ? body.concepts.filter((item): item is string => typeof item === 'string') : undefined
+  const concepts = Array.isArray(body.concepts)
+    ? body.concepts.filter((item): item is string => typeof item === 'string').slice(0, 30).map(item => item.slice(0, 200))
+    : undefined
   const criteria = asString(body.criteria) || undefined
   const sourceText = asString(body.sourceText) || undefined
 
-  if (!officialPrompt.trim()) {
-    return NextResponse.json({ error: 'Falta el enunciado del ejercicio.' }, { status: 400 })
-  }
-  if (!studentAnswer.trim()) {
-    return NextResponse.json({ error: 'Falta la respuesta del alumno.' }, { status: 400 })
+  const textValidation = validateCorrectionTextPayload({ officialPrompt, studentAnswer, criteria, sourceText })
+  if (!textValidation.valid) {
+    return NextResponse.json({ error: textValidation.error }, { status: textValidation.status })
   }
 
   // Legacy singular `imagen` still works (older clients / single-photo
@@ -152,22 +117,25 @@ async function handlePost(request: NextRequest) {
   const imagen = typeof body.imagen === 'string' && body.imagen.trim() ? body.imagen : null
   const imagenTipo = typeof body.imagenTipo === 'string' && body.imagenTipo.trim() ? body.imagenTipo : 'image/jpeg'
   const imagenes = Array.isArray(body.imagenes)
-    ? body.imagenes
-      .filter((item): item is { data: string; mediaType?: string } => Boolean(item && typeof (item as { data?: unknown }).data === 'string'))
-      .map(item => ({ data: item.data, mediaType: typeof item.mediaType === 'string' && item.mediaType.trim() ? item.mediaType : 'image/jpeg' }))
+    ? body.imagenes.map(item => ({
+      data: item && typeof (item as { data?: unknown }).data === 'string' ? (item as { data: string }).data : '',
+      mediaType: item && typeof (item as { mediaType?: unknown }).mediaType === 'string' ? (item as { mediaType: string }).mediaType : 'image/jpeg',
+    }))
     : []
-  const allImages = [
+  const unvalidatedImages = [
     ...(imagen ? [{ data: imagen, mediaType: imagenTipo }] : []),
     ...imagenes,
   ]
-  const imagePayloadChars = allImages.reduce((sum, img) => sum + img.data.length, 0)
-  if (imagePayloadChars > MAX_IMAGE_PAYLOAD_CHARS) {
-    return NextResponse.json({ error: imagePayloadTooLargeMessage(imagePayloadChars, allImages.length) }, { status: 413 })
+  const imageValidation = validateCorrectionImagePayload(unvalidatedImages)
+  if (!imageValidation.valid) {
+    return NextResponse.json({ error: imageValidation.error }, { status: imageValidation.status })
   }
+  const allImages = imageValidation.images
+  const imagePayloadChars = imageValidation.totalChars
 
   const action: RateLimitAction = allImages.length > 0 ? 'image_correction' : 'chat'
   const creditKey = typeof body.creditKey === 'string' && body.creditKey.trim() ? body.creditKey.trim().slice(0, 180) : null
-  const metadata = {
+  const metadata: Record<string, unknown> = {
     creditKey,
     subject,
     community,
@@ -189,16 +157,16 @@ async function handlePost(request: NextRequest) {
     // Comparte cupo con el chat general de Kairo (/api/chat): mismo action,
     // mismo route en checkAiRateLimit/logAiUsageEvent a propósito — ver nota
     // más abajo. Duplicar la ruta aquí crearía un cupo diario independiente.
-    const limitResponse = await enforceUsageLimits({
+    const limitResult = await enforceUsageLimits({
       userId: authContext.user.id,
       userCreatedAt: authContext.user.created_at,
       email: authContext.user.email,
       action,
-      creditKey,
       photoCount: allImages.length,
       accessToken: authContext.accessToken
     })
-    if (limitResponse) return limitResponse
+    if (limitResult.response) return limitResult.response
+    if (limitResult.reservationId) metadata.usageReservationId = limitResult.reservationId
   }
 
   const theoryContext = getTheoryContextForExercise({
@@ -214,13 +182,6 @@ async function handlePost(request: NextRequest) {
     concepts
   })
   const combinedCriteria = [criteria, theoryContextToPrompt(theoryContext)].filter(Boolean).join('\n\n')
-
-  // Only worth a cache lookup when a real topic was matched — fallbackReason
-  // means the generic "no theory found" path, which has no stable topic key.
-  const hasStableTopic = !theoryContext.fallbackReason && Boolean(theoryContext.blockSlug) && Boolean(theoryContext.topicSlug)
-  const cachedWhy = hasStableTopic
-    ? await getCachedWhyExplanation(subject, theoryContext.blockSlug, theoryContext.topicSlug)
-    : null
 
   const prompt = buildBlockPrompt({
     block: {
@@ -243,7 +204,6 @@ async function handlePost(request: NextRequest) {
     totalBlocks: 1,
     subject,
     community,
-    includeWhyExplanation: !cachedWhy
   }) + `
 
 Tienes espacio de sobra: prioriza una corrección completa y bien estructurada.
@@ -256,7 +216,7 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
   for (const img of allImages) {
     content.push({
       type: 'image',
-      source: { type: 'base64', media_type: sanitizeImageType(img.mediaType), data: img.data }
+      source: { type: 'base64', media_type: img.mediaType, data: img.data }
     })
   }
   content.push({ type: 'text', text: prompt })
@@ -296,7 +256,7 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
     throw error
   }
 
-  const usage = extractAnthropicTokenUsage(message)
+  let usage = extractAnthropicTokenUsage(message)
   console.info('[exam/correct] llm_done', { ms: Date.now() - llmStart, stopReason: message.stop_reason ?? 'unknown' })
 
   // A10 de la auditoría del 7-8 de septiembre de 2026: este registro iba ANTES
@@ -310,8 +270,55 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
   // Los tokens se registran en los dos casos a propósito: el proveedor ha
   // cobrado igual y borrar ese rastro falsearía el coste hacia abajo, que es
   // el error contrario y peor.
-  const rawText = message.content.filter(item => item.type === 'text').map(item => item.text).join('\n')
-  const parsed = parseCorrectionJson(rawText)
+  let rawText = message.content.filter(item => item.type === 'text').map(item => item.text).join('\n')
+  let parsed = parseCorrectionJson(rawText)
+  let validation = validateCorrectionJsonShape(parsed)
+  let repairedFormat = false
+  let providerStopReason = message.stop_reason ?? 'unknown'
+
+  // Un JSON sintácticamente válido no es necesariamente una corrección. Una
+  // única reparación de FORMATO recupera respuestas casi completas sin
+  // recalificar; si sigue faltando nota/desglose/feedback, se rechaza como
+  // salida inválida y nunca se guarda ni firma para XP.
+  if (!validation.valid && shouldRepairCorrectionFormat(rawText, parsed)) {
+    try {
+      const repairMessage = await withAnthropicRetry(
+        () => client.messages.create({
+          model: MODEL,
+          max_tokens: MAX_TOKENS,
+          messages: [{ role: 'user', content: buildCorrectionFormatRepairPrompt(rawText, validation) }],
+        }),
+        (intento, status) => console.warn('[exam/correct] reintento de formato por saturación', { intento, status }),
+      )
+      repairedFormat = true
+      usage = combineCorrectionUsage(usage, extractAnthropicTokenUsage(repairMessage))
+      rawText = repairMessage.content.filter(item => item.type === 'text').map(item => item.text).join('\n')
+      parsed = parseCorrectionJson(rawText)
+      validation = validateCorrectionJsonShape(parsed)
+      providerStopReason = repairMessage.stop_reason ?? 'unknown'
+    } catch (error) {
+      await logAiUsageEvent({
+        userId: authContext.user.id,
+        route: '/api/chat',
+        action,
+        model: MODEL,
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        totalTokens: usage.totalTokens,
+        status: 'error',
+        errorCode: getAiErrorCode(error),
+        metadata: { ...metadata, correctionFormatRepair: 'provider_error' },
+        accessToken: authContext.accessToken,
+      })
+      if (isOverloadedError(error)) {
+        return NextResponse.json(
+          { error: 'ai_overloaded', message: 'Hay mucha gente corrigiendo ahora mismo. Espera un minuto y vuelve a intentarlo — tu respuesta no se ha perdido.' },
+          { status: 503, headers: { 'Retry-After': '60' } },
+        )
+      }
+      return NextResponse.json({ error: 'No hemos podido formatear la corrección. Inténtalo de nuevo.' }, { status: 502 })
+    }
+  }
 
   await logAiUsageEventForPhotos({
     userId: authContext.user.id,
@@ -321,18 +328,31 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
     totalTokens: usage.totalTokens,
-    status: parsed ? 'success' : 'invalid_output',
+    status: validation.valid ? 'success' : 'invalid_output',
     metadata: {
       ...metadata,
-      truncated: message.stop_reason === 'max_tokens',
-      ...(parsed ? {} : { invalidOutputReason: 'parse_failed', stopReason: message.stop_reason ?? 'unknown' }),
+      truncated: providerStopReason === 'max_tokens',
+      repairedFormat,
+      ...(validation.valid ? {} : {
+        invalidOutputReason: validation.reason,
+        stopReason: providerStopReason,
+        fieldNames: validation.fieldNames,
+        missingFields: validation.missingFields,
+      }),
     },
     photoCount: allImages.length,
     accessToken: authContext.accessToken
   })
 
-  if (!parsed) {
-    console.error('[exam/correct] failed', { phase: 'parse', ms: Date.now() - totalStart, rawPreview: rawText.slice(0, 150) })
+  if (!validation.valid || !parsed) {
+    console.error('[exam/correct] failed', {
+      phase: 'parse',
+      ms: Date.now() - totalStart,
+      rawLength: rawText.length,
+      reason: validation.valid ? 'parse_error' : validation.reason,
+      fieldCount: validation.fieldNames.length,
+      missingFields: validation.valid ? [] : validation.missingFields,
+    })
     return NextResponse.json(
       { error: 'No hemos podido formatear la corrección. Inténtalo de nuevo.' },
       { status: 502 }
@@ -342,24 +362,12 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
   const normalized = normalizeCorrectionForOfficialScores(parsed, [maxScore])
   const score = scoreFromCorrection(normalized, maxScore)
   const xpGrant = historyId && score != null && !(normalized as { notEvaluable?: boolean })?.notEvaluable
-    ? issueExamXpGrant({ historyId, userId: authContext.user.id, score, maxScore })
+    ? issueExamXpGrant({ historyId, userId: authContext.user.id, score, maxScore, correctionDigest: digestExamCorrection(normalized) })
     : null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
-  const block = (normalized as any)?.desglose_bloques?.[0]
-
-  if (hasStableTopic && block) {
-    if (cachedWhy) {
-      // Cache hit: the model was told not to bother generating porqueEsAsi —
-      // attach the cached explanation now.
-      block.porqueEsAsi = cachedWhy
-    } else if (block.porqueEsAsi && block.porqueEsAsi.status === 'generated') {
-      // Cache miss: this is the first time this topic was seen, or the model
-      // produced a usable explanation despite a prior miss — save it for next time.
-      await cacheWhyExplanation(subject, theoryContext.blockSlug, theoryContext.topicSlug, block.porqueEsAsi)
-    }
-  }
-
-  console.info('[exam/correct] done', { ms: Date.now() - totalStart, whyExplanationCacheHit: Boolean(cachedWhy) })
+  // porqueEsAsi incluye studentConnection y por diseño depende del intento.
+  // Nunca se comparte/cacha entre usuarios: solo viaja con esta corrección y
+  // queda en el historial propio protegido por RLS.
+  console.info('[exam/correct] done', { ms: Date.now() - totalStart })
 
   if ((normalized as { notEvaluable?: boolean })?.notEvaluable) {
     console.warn('[exam/correct] not_evaluable', { ms: Date.now() - totalStart, hasImage: allImages.length > 0, imageCount: allImages.length })
@@ -369,8 +377,8 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
     correction: normalized,
     notEvaluable: Boolean((normalized as { notEvaluable?: boolean })?.notEvaluable),
     whyContext: theoryContext,
-    truncated: message.stop_reason === 'max_tokens',
-    finishReason: message.stop_reason ?? 'unknown',
+    truncated: providerStopReason === 'max_tokens',
+    finishReason: providerStopReason,
     xpGrant,
   })
 }
@@ -415,7 +423,6 @@ async function enforceUsageLimits({
   userCreatedAt,
   email,
   action,
-  creditKey,
   photoCount,
   accessToken
 }: {
@@ -423,44 +430,18 @@ async function enforceUsageLimits({
   userCreatedAt: string
   email: string | undefined
   action: RateLimitAction
-  creditKey: string | null
   photoCount: number
   accessToken: string
 }) {
   const billing = await getUserBillingContext(userId, userCreatedAt, email)
   if (!billing.hasActivePack && billing.daysSince >= 7) {
-    return NextResponse.json(
+    return { response: NextResponse.json(
       { error: 'free_plan_expired', message: 'Tu prueba gratuita ha terminado.', code: BILLING_BLOCK_CODE },
       { status: 403 }
-    )
+    ) }
   }
 
   const planLimits = await getEffectivePlanLimits(createServiceClient(), userId, getCaminoPlanLimits(billing.planId))
-  if (action === 'image_correction') {
-    const monthlyPhotos = creditKey
-      ? await getMonthlyUniqueActionCount(userId, ['image_correction'])
-      : await getMonthlyActionCount(userId, ['image_correction'])
-    // Rejects up front if THIS submission's photos would push the student
-    // over the limit (not just when already at/over it) — a 3-photo
-    // submission with only 1 slot left must be blocked entirely, not let
-    // through and silently under-charged.
-    if (monthlyPhotos + Math.max(1, photoCount) > planLimits.photosPerMonth) {
-      return NextResponse.json(
-        { error: 'photo_limit_reached', message: `Has alcanzado el límite de ${planLimits.photosPerMonth} correcciones con foto este mes. ${monthlyLimitResetNotice()}`, code: BILLING_BLOCK_CODE },
-        { status: 429 }
-      )
-    }
-  } else {
-    const monthlyCorrections = creditKey
-      ? await getMonthlyUniqueActionCount(userId, ['chat'])
-      : await getMonthlyActionCount(userId, ['chat'])
-    if (monthlyCorrections >= planLimits.correctionsPerMonth) {
-      return NextResponse.json(
-        { error: 'correction_limit_reached', message: `Has alcanzado el límite de ${planLimits.correctionsPerMonth} correcciones este mes. ${monthlyLimitResetNotice()}`, code: BILLING_BLOCK_CODE },
-        { status: 429 }
-      )
-    }
-  }
 
   // route: '/api/chat' a propósito — checkAiRateLimit filtra por (userId, route,
   // action), y este endpoint sustituye al flujo de corrección que antes vivía en
@@ -472,20 +453,29 @@ async function enforceUsageLimits({
     action,
     limit: action === 'image_correction' ? 5 : 20,
     windowSeconds: 24 * 60 * 60,
+    units: action === 'image_correction' ? Math.max(1, photoCount) : 1,
+    monthlyLimit: action === 'image_correction' ? planLimits.photosPerMonth : planLimits.correctionsPerMonth,
     accessToken
   })
 
   if (!rateLimit.allowed) {
-    return NextResponse.json(
-      createRateLimitPayload(action, rateLimit),
+    const monthly = rateLimit.blockedBy === 'monthly'
+    return { response: NextResponse.json(
+      monthly
+        ? {
+          error: action === 'image_correction' ? 'photo_limit_reached' : 'correction_limit_reached',
+          message: `Has alcanzado el límite de ${rateLimit.limit} ${action === 'image_correction' ? 'correcciones con foto' : 'correcciones'} este mes. ${monthlyLimitResetNotice()}`,
+          code: BILLING_BLOCK_CODE,
+        }
+        : createRateLimitPayload(action, rateLimit),
       {
         status: 429,
         headers: rateLimit.retryAfterSeconds ? { 'Retry-After': String(rateLimit.retryAfterSeconds) } : undefined
       }
-    )
+    ) }
   }
 
-  return null
+  return { reservationId: rateLimit.reservationId }
 }
 
 function asString(value: unknown) {
@@ -495,9 +485,4 @@ function asString(value: unknown) {
 function asNumber(value: unknown) {
   const numeric = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN
   return Number.isFinite(numeric) ? numeric : null
-}
-
-function sanitizeImageType(value: unknown): 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' {
-  if (value === 'image/png' || value === 'image/gif' || value === 'image/webp') return value
-  return 'image/jpeg'
 }

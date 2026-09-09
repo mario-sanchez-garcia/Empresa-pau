@@ -15,6 +15,7 @@ import MathEditor from '@/components/shared/MathEditor'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
 import SimulacroDetalleSkeleton from '@/app/components/simulacros/SimulacroDetalleSkeleton'
 import { isValidSegments, totalElapsedSeconds } from '@/app/lib/simulacros/timeSegments'
+import { fetchCorrection } from '@/app/lib/correctionFetch'
 
 const DEFAULT_DURATION_MINUTES = 90
 const TOTAL_SECONDS = DEFAULT_DURATION_MINUTES * 60
@@ -53,6 +54,7 @@ export default function SimulacroActivoPage() {
   const [reviewMarked, setReviewMarked] = useState<Record<string, boolean>>({})
   const [imageErrors, setImageErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
+  const submitInFlightRef = useRef(false)
   const [submitError, setSubmitError] = useState('')
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | 'dirty'>('saved')
   const [submitStage, setSubmitStage] = useState('')
@@ -325,7 +327,8 @@ export default function SimulacroActivoPage() {
   }
 
   async function submitExam() {
-    if (!record || submitting) return
+    if (!record || submitting || submitInFlightRef.current) return
+    submitInFlightRef.current = true
     setSubmitting(true)
     setSubmitError('')
     setSubmitStage('Guardando respuestas...')
@@ -343,7 +346,7 @@ export default function SimulacroActivoPage() {
         return
       }
 
-      const res = await fetch('/api/simulacro', {
+      const res = await fetchCorrection('/api/simulacro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
@@ -413,6 +416,8 @@ export default function SimulacroActivoPage() {
       setSubmitError('No hemos podido entregar la corrección. Tus respuestas están guardadas y puedes volver a intentarlo.')
       setSubmitStage('')
       setSubmitting(false)
+    } finally {
+      submitInFlightRef.current = false
     }
   }
 

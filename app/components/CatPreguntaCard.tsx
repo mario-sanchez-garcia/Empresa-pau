@@ -8,6 +8,7 @@ import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { supabase } from '@/app/lib/supabase'
 import { saveExamHistory } from '@/app/lib/examHistoryClient'
+import { fetchCorrection } from '@/app/lib/correctionFetch'
 import { examTextDraftKey, useExamTextDraft } from '@/app/hooks/useExamTextDraft'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
@@ -88,7 +89,7 @@ export default function CatPreguntaCard({ pregunta, draftOwnerId }: { pregunta: 
       }
 
       const historyId = crypto.randomUUID()
-      const res = await fetch('/api/exam/correct', {
+      const res = await fetchCorrection('/api/exam/correct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({

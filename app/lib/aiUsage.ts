@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { createClient } from '@supabase/supabase-js'
+import { normalizeRateLimitUnits, wouldExceedAiRateLimit } from './rateLimitMath'
 
 // A10 de la auditoría del 7-8 de septiembre de 2026: solo había 'success' y
 // 'error', así que una respuesta que el proveedor devolvía bien pero que no se
@@ -35,6 +36,12 @@ type CheckAiRateLimitArgs = {
   action: string
   limit: number
   windowSeconds: number
+  /** Quota units consumed by this request (e.g. number of photos). */
+  units?: number
+  /** Optional commercial monthly ceiling, enforced atomically with the daily window. */
+  monthlyLimit?: number
+  /** Server-derived idempotency key for quota purposes. Never pass a client-controlled key. */
+  creditKey?: string | null
   accessToken?: string | null
 }
 
@@ -43,6 +50,8 @@ export type AiRateLimitResult = {
   count: number
   limit: number
   retryAfterSeconds?: number
+  reservationId?: string
+  blockedBy?: 'daily' | 'monthly'
 }
 
 // Approximate internal estimates for Claude Sonnet-class pricing.
@@ -78,6 +87,40 @@ export async function checkAiRateLimit(args: CheckAiRateLimitArgs): Promise<AiRa
       return rateLimitUnavailable(args.limit)
     }
 
+    if (typeof args.monthlyLimit === 'number') {
+      const units = normalizeRateLimitUnits(args.units)
+      const { data, error } = await supabase.rpc('reserve_ai_usage_quota', {
+        p_user_id: args.userId,
+        p_route: args.route,
+        p_action: args.action,
+        p_daily_limit: Math.max(0, Math.floor(args.limit)),
+        p_window_seconds: Math.max(1, Math.floor(args.windowSeconds)),
+        p_monthly_limit: Math.max(0, Math.floor(args.monthlyLimit)),
+        p_units: units,
+        p_credit_key: args.creditKey?.trim() || null,
+      })
+
+      if (!error) {
+        const row = Array.isArray(data) ? data[0] : data
+        return {
+          allowed: Boolean(row?.allowed),
+          count: Number(row?.current_count) || 0,
+          limit: row?.blocked_by === 'monthly' ? Math.max(0, Math.floor(args.monthlyLimit)) : args.limit,
+          retryAfterSeconds: Number(row?.retry_after_seconds) || undefined,
+          reservationId: typeof row?.reservation_id === 'string' ? row.reservation_id : undefined,
+          blockedBy: row?.blocked_by === 'monthly' ? 'monthly' : row?.blocked_by === 'daily' ? 'daily' : undefined,
+        }
+      }
+
+      // Compatibility during the short deploy-before-migration window only.
+      // Production stays fail-closed for every other database failure.
+      if (error.code !== 'PGRST202' && error.code !== '42883') {
+        console.error('AI_RATE_LIMIT_RESERVATION_ERROR', { code: error.code ?? 'unknown' })
+        return rateLimitUnavailable(args.limit)
+      }
+      console.warn('AI_RATE_LIMIT_RESERVATION_NOT_DEPLOYED')
+    }
+
     const since = new Date(Date.now() - args.windowSeconds * 1000).toISOString()
     const { data, count, error } = await supabase
       .from('ai_usage_events')
@@ -95,7 +138,8 @@ export async function checkAiRateLimit(args: CheckAiRateLimitArgs): Promise<AiRa
     }
 
     const currentCount = count ?? data?.length ?? 0
-    if (currentCount < args.limit) {
+    const units = normalizeRateLimitUnits(args.units)
+    if (!wouldExceedAiRateLimit(currentCount, units, args.limit)) {
       return { allowed: true, count: currentCount, limit: args.limit }
     }
 
@@ -179,8 +223,35 @@ export async function logAiUsageEvent(args: LogAiUsageArgs) {
     })
 
     if (error) console.error('AI_USAGE_LOG_ERROR', error)
+
+    const reservationId = typeof args.metadata?.usageReservationId === 'string'
+      ? args.metadata.usageReservationId
+      : null
+    if (reservationId) {
+      await finalizeAiUsageReservation(reservationId, args.status ?? 'success', args.accessToken)
+    }
   } catch (error) {
     console.error('AI_USAGE_LOG_ERROR', error)
+  }
+}
+
+export async function finalizeAiUsageReservation(
+  reservationId: string,
+  status: AiUsageStatus,
+  accessToken?: string | null,
+) {
+  try {
+    const supabase = createUsageClient(accessToken)
+    if (!supabase) return
+    const { error } = await supabase.rpc('finalize_ai_usage_quota', {
+      p_reservation_id: reservationId,
+      p_status: status,
+    })
+    if (error && error.code !== 'PGRST202' && error.code !== '42883') {
+      console.error('AI_RATE_LIMIT_FINALIZE_ERROR', { code: error.code ?? 'unknown' })
+    }
+  } catch (error) {
+    console.error('AI_RATE_LIMIT_FINALIZE_ERROR', getAiErrorCode(error))
   }
 }
 

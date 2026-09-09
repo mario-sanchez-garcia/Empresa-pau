@@ -11,6 +11,7 @@ import RichTextArea from './RichTextArea'
 import KairoLoadingDot from './KairoLoadingDot'
 import MathMarkdown from './MathMarkdown'
 import { saveExamHistory } from '@/app/lib/examHistoryClient'
+import { fetchCorrection } from '@/app/lib/correctionFetch'
 
 export type RepeatExamSource = {
   id: string
@@ -88,7 +89,7 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
       if (!accessToken) { setError('Tu sesión ha caducado. Vuelve a iniciar sesión.'); return }
 
       const historyId = crypto.randomUUID()
-      const res = await fetch('/api/exam/correct', {
+      const res = await fetchCorrection('/api/exam/correct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({

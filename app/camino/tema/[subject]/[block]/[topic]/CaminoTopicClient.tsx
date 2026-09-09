@@ -13,6 +13,7 @@ import { saveExamHistory } from '@/app/lib/examHistoryClient'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
+import { fetchCorrection } from '@/app/lib/correctionFetch'
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { DIVISIONS } from '@/app/lib/camino/leagues'
 import { useBillingStatus } from '@/app/hooks/useBillingStatus'
@@ -1042,7 +1043,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       void recordMissionStart(accessToken)
       const statement = selectedV2Card?.practice_prompt ?? currentTopic.practicePrompt ?? currentTopic.guidedExample ?? ('Ejercicio de ' + selectedMissionTitle)
       const correctionHistoryId = crypto.randomUUID()
-      const response = await fetch('/api/camino/correct', {
+      const response = await fetchCorrection('/api/camino/correct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
@@ -1145,6 +1146,30 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       } else {
         setScore(rawScore)
         recordCorrectionWeakArea(rawScore)
+        try {
+          await saveExamHistory({
+            historyId: correctionHistoryId,
+            accessToken,
+            xpGrant: typeof data.xpGrant === 'string' ? data.xpGrant : null,
+            awardXp: false,
+            payload: {
+              asignatura: currentTopic.subject,
+              tipo: 'Camino PAU',
+              año: new Date().getFullYear(),
+              bloque: currentTopic.blockTitle,
+              opcion: pendingMissionType === 'review' ? 'Repaso' : 'Curso',
+              nota: rawScore,
+              nota_maxima: maxScore,
+              enunciado: statement.substring(0, 2000),
+              respuesta: answerMode === 'imagen' ? `Respuesta manuscrita adjunta (${images.length} imagen${images.length === 1 ? '' : 'es'}).` : studentAnswer.substring(0, 4000),
+              correccion: storedCorrection,
+              v2_sort_order: selectedSortOrder,
+            },
+          })
+        } catch {
+          setToast(`Corrección lista · nota ${rawScore}/10, pero no se pudo guardar en Historial. Reintenta antes de salir.`)
+          return
+        }
         let toastText = `Corrección guardada · nota ${rawScore}/10`
         if (selectedSortOrder != null) {
           try {
@@ -1200,7 +1225,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       // A partir de aquí ya está lo importante en pantalla (corrección
       // visible, XP/misión resuelta, toast) — lo que queda es puro
       // embellecimiento del modal de éxito (próxima misión, progreso del
-      // bloque) más el registro en Historial. Se lanza sin esperar (void,
+      // bloque). Se lanza sin esperar (void,
       // sin await) para que "Corrigiendo..." se suelte ya — antes este
       // tramo vivía dentro del mismo try que bloqueaba setCorrecting(false)
       // en el finally de abajo, así que un Supabase colgado aquí dejaba el
@@ -1212,24 +1237,6 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         try {
           const { data: userData } = await withTimeout(supabase.auth.getUser(), 8000)
           if (!userData.user) return
-          try {
-            await supabase.from('historial_examenes').insert({
-              user_id: userData.user.id,
-              asignatura: currentTopic.subject,
-              tipo: 'Camino PAU',
-              año: new Date().getFullYear(),
-              bloque: currentTopic.blockTitle,
-              opcion: pendingMissionType === 'review' ? 'Repaso' : 'Curso',
-              nota: rawScore,
-              nota_maxima: maxScore,
-              enunciado: statement.substring(0, 2000),
-              respuesta: answerMode === 'imagen' ? `Respuesta manuscrita adjunta (${images.length} imagen${images.length === 1 ? '' : 'es'}).` : studentAnswer.substring(0, 4000),
-              correccion: storedCorrection,
-              v2_sort_order: selectedSortOrder
-            }).abortSignal(AbortSignal.timeout(8000))
-          } catch (error) {
-            console.warn('[camino/topic] historial insert skipped', error)
-          }
           calcularRacha(userData.user.id, supabase).then(s => setStreak(s)).catch(() => undefined)
           if (rawScore != null) {
             // El modal de éxito se dispara ya, sin esperar a "próxima

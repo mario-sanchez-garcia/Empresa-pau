@@ -8,6 +8,7 @@ import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import { supabase } from '@/app/lib/supabase'
 import { saveExamHistory } from '@/app/lib/examHistoryClient'
+import { fetchCorrection } from '@/app/lib/correctionFetch'
 import { examTextDraftKey, useExamTextDraft } from '@/app/hooks/useExamTextDraft'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
@@ -187,7 +188,7 @@ export default function CatHistoriaEjercicioCard({ ejercicio, contexto, draftOwn
       }
 
       const historyId = crypto.randomUUID()
-      const response = await fetch('/api/exam/correct', {
+      const response = await fetchCorrection('/api/exam/correct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({

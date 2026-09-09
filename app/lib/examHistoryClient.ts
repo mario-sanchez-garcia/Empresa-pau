@@ -1,5 +1,3 @@
-import { supabase } from '@/app/lib/supabase'
-
 export type ExamHistoryPayload = {
   asignatura: string
   tipo: string
@@ -28,27 +26,9 @@ export type ExamXpResult = {
   leagueUpgrade?: { from: string; to: string }
 }
 
-const OPTIONAL_HISTORY_FIELDS = [
-  'why_it_works',
-  'why_it_works_context',
-  'detected_concepts',
-  'curriculum_source_ids',
-] as const
-
-function legacyPayload(payload: ExamHistoryPayload) {
-  const result = { ...payload } as Record<string, unknown>
-  for (const field of OPTIONAL_HISTORY_FIELDS) delete result[field]
-  return result
-}
-
-function isMissingOptionalColumn(error: { code?: string; message?: string } | null) {
-  const message = error?.message?.toLowerCase() ?? ''
-  return error?.code === 'PGRST204' && OPTIONAL_HISTORY_FIELDS.some(field => message.includes(field))
-}
-
 /**
- * Persists a correction under the authenticated user's RLS identity, then asks
- * the server to award XP with the signed grant returned by the correction API.
+ * Persists a correction through the authenticated server boundary that verifies
+ * the signed score grant, then optionally asks the existing XP endpoint to
  * A failed XP request does not undo a successfully saved correction.
  */
 export async function saveExamHistory({
@@ -56,43 +36,36 @@ export async function saveExamHistory({
   payload,
   accessToken,
   xpGrant,
+  awardXp = true,
 }: {
   historyId: string
   payload: ExamHistoryPayload
   accessToken: string
   xpGrant?: string | null
+  awardXp?: boolean
 }): Promise<{ historyId: string; xp: ExamXpResult | null; xpPending: boolean }> {
-  // The insert is authorized by Supabase RLS using the current access token.
-  // Reading the already validated local session avoids a second network auth
-  // round-trip between correction and persistence (and its avoidable failure
-  // window) without weakening ownership enforcement.
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-  const session = sessionData.session
-  const sessionUserId = session?.user.id
-  if (sessionError || !sessionUserId || session?.access_token !== accessToken) {
-    throw new Error('Tu sesión ha caducado. Vuelve a iniciar sesión para guardar la corrección.')
+  if (payload.nota == null || !xpGrant) {
+    throw new Error('La corrección no tiene una autorización válida para guardarse en Historial.')
   }
-
-  const fullPayload = { id: historyId, user_id: sessionUserId, ...payload }
-  let insertResult = await supabase.from('historial_examenes').insert(fullPayload).select('id').single()
-  if (insertResult.error && isMissingOptionalColumn(insertResult.error)) {
-    insertResult = await supabase
-      .from('historial_examenes')
-      .insert({ id: historyId, user_id: sessionUserId, ...legacyPayload(payload) })
-      .select('id')
-      .single()
-  }
-  if (insertResult.error || !insertResult.data?.id) {
+  const insertResponse = await fetch('/api/exam/history', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify({ historyId, payload, xpGrant }),
+    signal: AbortSignal.timeout(15_000),
+  })
+  const insertJson = await insertResponse.json().catch(() => null) as { id?: string } | null
+  if (!insertResponse.ok || insertJson?.id !== historyId) {
     throw new Error('La corrección está lista, pero no se ha podido guardar en Historial. Reintenta antes de salir de esta pantalla.')
   }
 
-  if (payload.nota == null || !xpGrant) return { historyId, xp: null, xpPending: payload.nota != null }
+  if (!awardXp) return { historyId, xp: null, xpPending: false }
 
   try {
     const response = await fetch('/api/camino/award-exam-xp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
       body: JSON.stringify({ historialExamenId: historyId, xpGrant }),
+      signal: AbortSignal.timeout(15_000),
     })
     const json = await response.json().catch(() => null) as Partial<ExamXpResult> | null
     if (!response.ok || !json?.success || typeof json.xpAwarded !== 'number') {

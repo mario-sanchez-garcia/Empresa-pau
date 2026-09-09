@@ -1,11 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
-import { buildBlockPrompt, parseCorrectionJson, blockHasGenuineContent } from '@/app/lib/correctionPrompt'
+import { checkAiRateLimit, extractAnthropicTokenUsage, finalizeAiUsageReservation, getAiErrorCode, logAiUsageEvent } from '@/app/lib/aiUsage'
+import { buildBlockPrompt, parseCorrectionJson, blockHasGenuineContent, isCorrectionExplicitlyNotEvaluable, validateCorrectionJsonShape } from '@/app/lib/correctionPrompt'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE, monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
-import { getUserBillingContext, getMonthlyActionCount } from '@/app/lib/billing/serverUsage'
+import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
 import { awardXp, awardRepeatImprovementXp } from '@/app/lib/camino/awardXp'
@@ -15,6 +15,8 @@ import { PARCIAL_COMPLETION_XP, SIMULACRO_COMPLETION_XP } from '@/app/lib/camino
 import { countRepeatDepth } from '@/app/lib/camino/repeatImprovement'
 import { closeSegment, isValidSegments, totalElapsedSeconds } from '@/app/lib/simulacros/timeSegments'
 import { getMadridDate, getMadridToday } from '@/app/lib/camino/studyDays'
+import { validateCorrectionImagePayload } from '@/app/lib/imagePayloadLimits'
+import { validateCorrectionTextPayload } from '@/app/lib/correctionRequestValidation'
 
 // 50s SDK timeout leaves ~10s for the function to return a clean JSON error
 // before Vercel's 60s maxDuration kills the process and returns an HTML 504.
@@ -40,11 +42,6 @@ type SimulacroBlock = {
 
 function examSystemLabel(comunidad: string) {
   return comunidad === 'Cataluña' ? 'PAU Catalunya' : 'EBAU Madrid'
-}
-
-function sanitizeImageType(value: unknown): 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' {
-  if (value === 'image/png' || value === 'image/gif' || value === 'image/webp') return value
-  return 'image/jpeg'
 }
 
 // A block's answer can carry a legacy single `image`/`imageType` (sessions
@@ -80,10 +77,13 @@ export async function POST(request: NextRequest) {
   let capturedSupabase: SupabaseClient | undefined
   let capturedUserId: string | undefined
   let capturedElapsed = 0
+  let capturedReservationId: string | undefined
+  let capturedAccessToken: string | undefined
 
   try {
     const authContext = await getAuthContext(request)
     if ('response' in authContext) return authContext.response
+    capturedAccessToken = authContext.accessToken
 
     const body = await request.json()
     const { bloques, asignatura, comunidad, opcion, tiempo_empleado, simulacro_id } = body
@@ -190,6 +190,14 @@ export async function POST(request: NextRequest) {
       }), { status: 400 })
     }
 
+    if (blocks.length > 10) {
+      return NextResponse.json(createCorrectionError({
+        simulacroId: simulacro_id,
+        subject,
+        message: 'El simulacro contiene más bloques de los permitidos.'
+      }), { status: 400 })
+    }
+
     if (typeof comunidad === 'string' && comunidad.trim() && comunidad.trim() !== storedCommunity) {
       return NextResponse.json(createCorrectionError({
         simulacroId: simulacro_id,
@@ -228,35 +236,6 @@ export async function POST(request: NextRequest) {
     // límite, solo no está sujeta al ritmo de 1/día).
     const isRepeat = Boolean(simulacroRecord.repeated_from_id)
     if (!internalUser) {
-      if (!isRepeat) {
-        const RATE_LIMIT_WINDOW_SECONDS = 24 * 60 * 60
-        const rateLimit = await checkAiRateLimit({
-          userId: authContext.user.id,
-          route: '/api/simulacro',
-          action: correctionAction,
-          limit: 1,
-          windowSeconds: RATE_LIMIT_WINDOW_SECONDS,
-          accessToken: authContext.accessToken
-        })
-
-        if (!rateLimit.allowed) {
-          // Excepción: si ESTE simulacro se empezó antes de que arrancara la
-          // ventana de la corrección diaria (es decir, ya estaba en marcha
-          // cuando se consumió el cupo de hoy con otro), se deja terminar
-          // igual — el límite diario existe para espaciar cuánto contenido
-          // NUEVO se corrige por día, no para dejar a medias trabajo que el
-          // alumno ya había empezado de verdad. Empezar uno nuevo mientras
-          // el cupo está gastado sigue bloqueado sin excepción: solo
-          // "creado antes de que empezara la ventana actual" cuenta, así que
-          // no sirve para crear uno nuevo y reclamar la excepción al momento.
-          const windowStart = Date.now() - RATE_LIMIT_WINDOW_SECONDS * 1000
-          const startedBeforeWindow = new Date(simulacroRecord.created_at as string).getTime() < windowStart
-          if (!startedBeforeWindow) {
-            return rateLimitResponse(correctionAction, rateLimit)
-          }
-        }
-      }
-
       const billing = await getUserBillingContext(authContext.user.id, authContext.user.created_at, authContext.user.email)
 
       if (!billing.hasActivePack && billing.daysSince >= 7) {
@@ -268,8 +247,21 @@ export async function POST(request: NextRequest) {
 
       const planLimits = await getEffectivePlanLimits(authContext.supabase, authContext.user.id, getCaminoPlanLimits(billing.planId))
       const monthlyLimit = isPracticeSession ? planLimits.partialsPerMonth : planLimits.fullMocksPerMonth
-      const monthlyUsed = await getMonthlyActionCount(authContext.user.id, [correctionAction])
-      if (monthlyUsed >= monthlyLimit) {
+      const RATE_LIMIT_WINDOW_SECONDS = 24 * 60 * 60
+      const windowStart = Date.now() - RATE_LIMIT_WINDOW_SECONDS * 1000
+      const startedBeforeWindow = new Date(simulacroRecord.created_at as string).getTime() < windowStart
+      const rateLimit = await checkAiRateLimit({
+        userId: authContext.user.id,
+        route: '/api/simulacro',
+        action: correctionAction,
+        limit: isRepeat || startedBeforeWindow ? 1_000_000 : 1,
+        windowSeconds: RATE_LIMIT_WINDOW_SECONDS,
+        monthlyLimit,
+        creditKey: String(simulacro_id),
+        accessToken: authContext.accessToken,
+      })
+
+      if (!rateLimit.allowed && rateLimit.blockedBy === 'monthly') {
         const noun = isPracticeSession ? 'práctica' : 'simulacro'
         // monthlyLimit=0 (p.ej. simulacros completos en el plan free) no es
         // un "límite alcanzado" — es que el plan actual no incluye esto, y
@@ -288,6 +280,8 @@ export async function POST(request: NextRequest) {
           { status: 429 }
         )
       }
+      if (!rateLimit.allowed) return rateLimitResponse(correctionAction, rateLimit)
+      capturedReservationId = rateLimit.reservationId
     }
 
     const t0 = Date.now()
@@ -298,7 +292,18 @@ export async function POST(request: NextRequest) {
     const imageCount = blocks.reduce((total: number, block: SimulacroBlock) => {
       return total + imagesForAnswer(storedAnswers?.[block.id]).length
     }, 0)
+    const allStoredImages = blocks.flatMap((block: SimulacroBlock) => imagesForAnswer(storedAnswers?.[block.id]))
+    const aggregateImageValidation = validateCorrectionImagePayload(allStoredImages, {
+      maxImages: Math.min(30, Math.max(5, blocks.length * 5)),
+    })
+    if (!aggregateImageValidation.valid) {
+      if (capturedReservationId) await finalizeAiUsageReservation(capturedReservationId, 'error', authContext.accessToken)
+      const errorResult = createCorrectionError({ simulacroId: simulacro_id, subject, message: aggregateImageValidation.error })
+      await updateSimulacroError(authContext.supabase, simulacro_id, authContext.user.id, errorResult, elapsed)
+      return NextResponse.json(errorResult, { status: aggregateImageValidation.status })
+    }
     const usageMetadata = {
+      simulacroId: String(simulacro_id),
       asignatura: subject,
       comunidad: correctionCommunity,
       opcion: storedOption || opcion || null,
@@ -317,7 +322,23 @@ export async function POST(request: NextRequest) {
     const blockResults: (any | null)[] = await Promise.all(
       blocks.map(async (block: SimulacroBlock, index: number) => {
         const answer = storedAnswers?.[block.id]
-        const blockImages = imagesForAnswer(answer)
+        const rawBlockImages = imagesForAnswer(answer)
+        const blockImageValidation = validateCorrectionImagePayload(rawBlockImages)
+        if (!blockImageValidation.valid) {
+          console.warn('[simulacro] invalid_block_image_payload', { blockIndex: index, reason: blockImageValidation.error })
+          return null
+        }
+        const blockImages = blockImageValidation.images
+        const blockTextValidation = validateCorrectionTextPayload({
+          officialPrompt: typeof block.enunciado === 'string' ? block.enunciado : '',
+          studentAnswer: blockImages.length > 0 ? 'Respuesta manuscrita adjunta.' : (typeof answer?.text === 'string' && answer.text.trim() ? answer.text : '(sin respuesta)'),
+          criteria: block.criterios,
+          sourceText: block.textoFuente,
+        })
+        if (!blockTextValidation.valid) {
+          console.warn('[simulacro] invalid_block_text_payload', { blockIndex: index, reason: blockTextValidation.error })
+          return null
+        }
         console.info('[simulacro] correcting_block', { blockIndex: index })
 
         const blockContent: Extract<Anthropic.MessageParam['content'], unknown[]> = []
@@ -334,7 +355,7 @@ export async function POST(request: NextRequest) {
         for (const img of blockImages) {
           blockContent.push({
             type: 'image',
-            source: { type: 'base64', media_type: sanitizeImageType(img.mediaType), data: img.data }
+            source: { type: 'base64', media_type: img.mediaType, data: img.data }
           })
         }
         blockContent.push({
@@ -373,6 +394,7 @@ export async function POST(request: NextRequest) {
 
           const raw = msg.content.filter(item => item.type === 'text').map(item => item.text).join('\n')
           const parsed = parseCorrectionJson(raw)
+          const validation = validateCorrectionJsonShape(parsed)
 
           const usage = extractAnthropicTokenUsage(msg)
           if (msg.stop_reason === 'max_tokens') {
@@ -386,17 +408,26 @@ export async function POST(request: NextRequest) {
             inputTokens: usage.inputTokens,
             outputTokens: usage.outputTokens,
             totalTokens: usage.totalTokens,
-            status: parsed ? 'success' : 'error',
-            metadata: blockMetadata,
+            status: validation.valid ? 'success' : 'invalid_output',
+            metadata: validation.valid ? blockMetadata : {
+              ...blockMetadata,
+              invalidOutputReason: validation.reason,
+              fieldNames: validation.fieldNames,
+              missingFields: validation.missingFields,
+              rawLength: raw.length,
+            },
             accessToken: authContext.accessToken
           }).catch(() => {})
 
-          if (!parsed) {
+          if (!validation.valid || !parsed) {
             console.error('[simulacro] failed', {
               phase: 'block_parse',
               blockIndex: index,
               ms: Date.now() - t0,
-              rawPreview: raw.slice(0, 150)
+              rawLength: raw.length,
+              reason: validation.valid ? 'parse_error' : validation.reason,
+              fieldCount: validation.fieldNames.length,
+              missingFields: validation.valid ? [] : validation.missingFields,
             })
             return null
           }
@@ -430,11 +461,12 @@ export async function POST(request: NextRequest) {
     // silencio a un 0 con texto de relleno inventado por textOrFallback,
     // indistinguible de una nota real de 0. Se trata igual que un bloque
     // que falló del todo (mismo placeholder "no disponible" ya existente).
-    const blockGenuine = blockResults.map(br => br !== null && blockHasGenuineContent(br))
+    const blockGenuine = blockResults.map(br => br !== null && blockHasGenuineContent(br) && !isCorrectionExplicitlyNotEvaluable(br))
 
     // All blocks failed — hard error, nothing to show
     if (blockGenuine.every(genuine => !genuine)) {
       console.error('[simulacro] failed', { phase: 'all_blocks_failed', ms: Date.now() - t0 })
+      if (capturedReservationId) await finalizeAiUsageReservation(capturedReservationId, 'invalid_output', authContext.accessToken)
       const errorResult = createCorrectionError({
         simulacroId: simulacro_id,
         subject,
@@ -511,6 +543,7 @@ export async function POST(request: NextRequest) {
 
     const updated = await updateSimulacro(authContext.supabase, simulacro_id, authContext.user.id, result, elapsed)
     if (!updated) {
+      if (capturedReservationId) await finalizeAiUsageReservation(capturedReservationId, 'error', authContext.accessToken)
       return NextResponse.json(createCorrectionError({
         simulacroId: simulacro_id,
         subject,
@@ -606,6 +639,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.info('[simulacro] done', { totalMs: Date.now() - t0, failedBlocks: failedCount })
+    if (capturedReservationId) await finalizeAiUsageReservation(capturedReservationId, 'success', authContext.accessToken)
     return NextResponse.json({
       ...result,
       xpAwarded: xpResult?.xpAwarded ?? 0,
@@ -622,6 +656,7 @@ export async function POST(request: NextRequest) {
       repeatNoImprovement: repeatImproved === false
     })
   } catch (error) {
+    if (capturedReservationId) await finalizeAiUsageReservation(capturedReservationId, 'error', capturedAccessToken)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorCode = (error as any)?.status ?? (error as any)?.code ?? 'unknown'
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

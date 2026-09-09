@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent, logAiUsageEventForPhotos } from '@/app/lib/aiUsage'
-import { getMonthlyActionCount, getMonthlyUniqueActionCount, getUserBillingContext } from '@/app/lib/billing/serverUsage'
+import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
 import { createServiceSupabase, createUserSupabase, getAuthContext } from '@/app/lib/camino/caminoProgressServer'
@@ -13,11 +13,13 @@ import {
   subjectLabelFromSlug,
 } from '@/app/lib/camino/caminoCurriculumPlan'
 import { isOverloadedError, withAnthropicRetry } from '@/app/lib/ai/withAnthropicRetry'
-import { buildCorrectionPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson, scoreFromCorrection, validateCorrectionJsonShape, type CorrectionSchemaValidation } from '@/app/lib/correctionPrompt'
+import { buildCorrectionFormatRepairPrompt, buildCorrectionPrompt, combineCorrectionUsage, normalizeCorrectionForOfficialScores, parseCorrectionJson, scoreFromCorrection, shouldRepairCorrectionFormat, validateCorrectionJsonShape } from '@/app/lib/correctionPrompt'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { BILLING_BLOCK_CODE, createRateLimitPayload, monthlyLimitResetNotice, type RateLimitAction } from '@/app/lib/rateLimitMessages'
-import { isValidExamHistoryId, issueExamXpGrant } from '@/app/lib/camino/examXpGrant'
+import { digestExamCorrection, isValidExamHistoryId, issueExamXpGrant } from '@/app/lib/camino/examXpGrant'
+import { validateCorrectionTextPayload } from '@/app/lib/correctionRequestValidation'
+import { validateCorrectionImagePayload } from '@/app/lib/imagePayloadLimits'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +28,6 @@ const MAX_TOKENS = 2200
 // El tope agregado de imágenes vive en app/lib/imagePayloadLimits.ts:
 // estaba duplicado en estas tres rutas y por encima del límite de
 // transporte de la plataforma, así que su 413 era inalcanzable (A18).
-import { MAX_IMAGE_PAYLOAD_CHARS, imagePayloadTooLargeMessage } from '@/app/lib/imagePayloadLimits'
 const CORRECTION_UNAVAILABLE_MESSAGE = 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'
 const DEV_MOCK_CORRECTIONS = process.env.NODE_ENV !== 'production' && process.env.DEV_MOCK_CORRECTIONS === 'true'
 const DEV_MOCK_CORRECTIONS_ERROR = process.env.NODE_ENV !== 'production' && process.env.DEV_MOCK_CORRECTIONS_ERROR === 'true'
@@ -97,17 +98,21 @@ export async function POST(request: NextRequest) {
   const imageData = responseMode === 'image' ? stripDataUrlPrefix(studentResponse) : null
   const extraImages = responseMode === 'image' && Array.isArray(body.studentResponseImages)
     ? body.studentResponseImages
-      .filter((item): item is { data: string; mediaType?: string } => Boolean(item && typeof (item as { data?: unknown }).data === 'string'))
-      .map(item => ({ data: stripDataUrlPrefix(item.data), mediaType: typeof item.mediaType === 'string' && item.mediaType.trim() ? item.mediaType : undefined }))
+      .map(item => ({
+        data: item && typeof (item as { data?: unknown }).data === 'string' ? stripDataUrlPrefix((item as { data: string }).data) : '',
+        mediaType: item && typeof (item as { mediaType?: unknown }).mediaType === 'string' ? (item as { mediaType: string }).mediaType : 'image/jpeg',
+      }))
     : []
   const allImages = [
-    ...(imageData ? [{ data: imageData, mediaType: typeof body.imageType === 'string' ? body.imageType : undefined }] : []),
+    ...(imageData ? [{ data: imageData, mediaType: typeof body.imageType === 'string' ? body.imageType : 'image/jpeg' }] : []),
     ...extraImages,
   ]
-  const imagePayloadChars = allImages.reduce((sum, img) => sum + img.data.length, 0)
-  if (imagePayloadChars > MAX_IMAGE_PAYLOAD_CHARS) {
-    return NextResponse.json({ error: imagePayloadTooLargeMessage(imagePayloadChars, allImages.length) }, { status: 413 })
+  const imageValidation = validateCorrectionImagePayload(allImages)
+  if (!imageValidation.valid) {
+    return NextResponse.json({ error: imageValidation.error }, { status: imageValidation.status })
   }
+  const validatedImages = imageValidation.images
+  const imagePayloadChars = imageValidation.totalChars
 
   const userSupabase = createUserSupabase(authContext.accessToken)
   const hasAccess = await userCanAccessTopic({
@@ -134,21 +139,30 @@ export async function POST(request: NextRequest) {
     ? await loadCurriculumV2Row(topic.subject, sortOrder, authContext.accessToken)
     : null
   const statement = row?.practice_prompt ?? topic.practicePrompt ?? topic.guidedExample ?? `Ejercicio de ${row?.title ?? topic.title}`
+  const privateCriteria = buildPrivateCriteria(topic.guidedExample, topic.referenceSolution)
+  const textValidation = validateCorrectionTextPayload({
+    officialPrompt: statement,
+    studentAnswer: responseMode === 'image' ? 'Respuesta manuscrita adjunta.' : studentResponse,
+    criteria: privateCriteria,
+  })
+  if (!textValidation.valid) {
+    return NextResponse.json({ error: textValidation.error }, { status: textValidation.status })
+  }
   const maxScore = 10
   const subjectLabel = subjectLabelFromSlug(topic.subject)
   const monthKey = new Date().toISOString().slice(0, 7)
   const topicKey = `${topic.subject}:${topic.blockSlug}:${topic.topicSlug}:${sortOrder ?? topic.v2SortOrder ?? 'legacy'}`
   const creditKey = `${authContext.user.id}:${topicKey}:${monthKey}`
   const action: RateLimitAction = responseMode === 'image' ? 'image_correction' : 'chat'
-  const metadata = {
+  const metadata: Record<string, unknown> = {
     creditKey,
     topicId: typeof body.topicId === 'string' ? body.topicId.slice(0, 180) : topicKey,
     subject: topic.subject,
     blockSlug: topic.blockSlug,
     topicSlug: topic.topicSlug,
     sortOrder: sortOrder ?? topic.v2SortOrder ?? null,
-    hasImage: allImages.length > 0,
-    imageCount: allImages.length,
+    hasImage: validatedImages.length > 0,
+    imageCount: validatedImages.length,
     imagePayloadChars,
     promptChars: statement.length,
   }
@@ -207,16 +221,17 @@ export async function POST(request: NextRequest) {
 
   const internalUser = isInternalUser(authContext.user.email)
   if (!internalUser) {
-    const limitResponse = await enforceUsageLimits({
+    const limitResult = await enforceUsageLimits({
       userId: authContext.user.id,
       userCreatedAt: authContext.user.created_at,
       email: authContext.user.email,
       action,
       creditKey,
-      photoCount: allImages.length,
+      photoCount: validatedImages.length,
       accessToken: authContext.accessToken,
     })
-    if (limitResponse) return limitResponse
+    if (limitResult.response) return limitResult.response
+    if (limitResult.reservationId) metadata.usageReservationId = limitResult.reservationId
   }
 
   const client = new Anthropic({ apiKey: anthropicApiKey, timeout: 55_000 })
@@ -234,20 +249,20 @@ export async function POST(request: NextRequest) {
       option: 'Curso',
       maxScore,
       officialPrompt: statement,
-      criteria: buildPrivateCriteria(topic.guidedExample, topic.referenceSolution),
-      studentAnswer: allImages.length > 0
-        ? `Respuesta manuscrita adjunta como ${allImages.length === 1 ? 'imagen' : `${allImages.length} imágenes — están en orden, léelas como páginas consecutivas de una misma respuesta`}. Corrígela leyendo la(s) imagen(es) enviada(s).`
+      criteria: privateCriteria,
+      studentAnswer: validatedImages.length > 0
+        ? `Respuesta manuscrita adjunta como ${validatedImages.length === 1 ? 'imagen' : `${validatedImages.length} imágenes — están en orden, léelas como páginas consecutivas de una misma respuesta`}. Corrígela leyendo la(s) imagen(es) enviada(s).`
         : studentResponse,
     }],
   })
 
   const content: Anthropic.Messages.ContentBlockParam[] = []
-  for (const img of allImages) {
+  for (const img of validatedImages) {
     content.push({
       type: 'image',
       source: {
         type: 'base64',
-        media_type: sanitizeImageType(img.mediaType),
+        media_type: img.mediaType,
         data: img.data,
       },
     })
@@ -314,7 +329,7 @@ export async function POST(request: NextRequest) {
         (intento, status) => console.warn('[camino/correct] reintento de formato por saturación', { intento, status }),
       )
       repairedFormat = true
-      usage = combineUsage(usage, extractAnthropicTokenUsage(repairMessage))
+      usage = combineCorrectionUsage(usage, extractAnthropicTokenUsage(repairMessage))
       rawText = repairMessage.content[0]?.type === 'text' ? repairMessage.content[0].text : ''
       parsed = parseCorrectionJson(rawText)
       validation = validateCorrectionJsonShape(parsed)
@@ -365,7 +380,7 @@ export async function POST(request: NextRequest) {
           providerStopReason: message.stop_reason ?? 'unknown',
         },
       },
-      photoCount: allImages.length,
+      photoCount: validatedImages.length,
       accessToken: authContext.accessToken,
     }).catch(logError => console.warn('[camino/correct] usage log skipped after invalid format', logError))
 
@@ -396,7 +411,7 @@ export async function POST(request: NextRequest) {
     totalTokens: usage.totalTokens,
     status: 'success',
     metadata: { ...metadata, truncated: message.stop_reason === 'max_tokens', repairedFormat },
-    photoCount: allImages.length,
+    photoCount: validatedImages.length,
     accessToken: authContext.accessToken,
   })
 
@@ -426,7 +441,7 @@ export async function POST(request: NextRequest) {
   }
   const historyId = isValidExamHistoryId(body.historyId) ? body.historyId : null
   const xpGrant = historyId && score != null && !(normalized as { notEvaluable?: boolean })?.notEvaluable
-    ? issueExamXpGrant({ historyId, userId: authContext.user.id, score, maxScore })
+    ? issueExamXpGrant({ historyId, userId: authContext.user.id, score, maxScore, correctionDigest: digestExamCorrection(normalized) })
     : null
   return NextResponse.json({
     correction: publicCorrection,
@@ -543,57 +558,6 @@ function buildDevMockCorrection({
   }
 }
 
-function shouldRepairCorrectionFormat(rawText: string, parsed: unknown) {
-  if (parsed && typeof parsed === 'object') return true
-  return /```json/i.test(rawText) ||
-    /^\s*\{/.test(rawText) ||
-    /"(?:nota_final|feedback_general|desglose_bloques|errores_principales|plan_repaso)"\s*:/.test(rawText)
-}
-
-function buildCorrectionFormatRepairPrompt(rawText: string, validation: CorrectionSchemaValidation) {
-  const missingFields = validation.valid ? [] : validation.missingFields
-  return `La respuesta anterior de corrección no cumple el formato técnico esperado.
-
-Tarea: reescribe la respuesta anterior como UN ÚNICO objeto JSON válido. No recalifiques desde cero, no cambies el criterio académico y no añadas explicación fuera del JSON.
-
-Campos críticos que deben existir si la información aparece en la respuesta anterior:
-- nota_final
-- feedback_general
-- desglose_bloques con al menos un bloque
-- desglose_bloques[].puntos_conseguidos
-- desglose_bloques[].puntos_maximos
-- desglose_bloques[].correccion_detalle o feedback equivalente
-
-Diagnóstico técnico:
-- reason: ${validation.valid ? 'parse_error' : validation.reason}
-- missingFields: ${missingFields.join(', ') || 'none'}
-- receivedFields: ${validation.fieldNames.join(', ') || 'none'}
-
-Devuelve únicamente JSON puro, sin markdown, sin \`\`\`, sin texto antes o después.
-
-Respuesta anterior:
-${rawText.slice(0, 12_000)}`
-}
-
-function combineUsage(
-  first: { inputTokens: number | null; outputTokens: number | null; totalTokens: number | null },
-  second: { inputTokens: number | null; outputTokens: number | null; totalTokens: number | null },
-) {
-  const inputTokens = sumNullable(first.inputTokens, second.inputTokens)
-  const outputTokens = sumNullable(first.outputTokens, second.outputTokens)
-  return {
-    inputTokens,
-    outputTokens,
-    totalTokens: inputTokens != null && outputTokens != null
-      ? inputTokens + outputTokens
-      : sumNullable(first.totalTokens, second.totalTokens),
-  }
-}
-
-function sumNullable(a: number | null, b: number | null) {
-  return a == null && b == null ? null : (a ?? 0) + (b ?? 0)
-}
-
 async function userCanAccessTopic({
   userSupabase,
   userId,
@@ -683,10 +647,10 @@ async function enforceUsageLimits({
 }) {
   const billing = await getUserBillingContext(userId, userCreatedAt, email)
   if (!billing.hasActivePack && billing.daysSince >= 7) {
-    return NextResponse.json(
+    return { response: NextResponse.json(
       { error: 'free_plan_expired', message: 'Tu prueba gratuita ha terminado.', code: BILLING_BLOCK_CODE },
       { status: 403 }
-    )
+    ) }
   }
 
   const planLimits = await getEffectivePlanLimits(
@@ -694,50 +658,36 @@ async function enforceUsageLimits({
     userId,
     getCaminoPlanLimits(billing.planId)
   )
-  if (action === 'image_correction') {
-    const monthlyPhotos = creditKey
-      ? await getMonthlyUniqueActionCount(userId, ['image_correction'])
-      : await getMonthlyActionCount(userId, ['image_correction'])
-    // Rejects up front if THIS submission's photos would push the student
-    // over the limit, not just once already at/over it.
-    if (monthlyPhotos + Math.max(1, photoCount) > planLimits.photosPerMonth) {
-      return NextResponse.json(
-        { error: 'photo_limit_reached', message: `Has alcanzado el límite de ${planLimits.photosPerMonth} correcciones con foto este mes. ${monthlyLimitResetNotice()}`, code: BILLING_BLOCK_CODE },
-        { status: 429 }
-      )
-    }
-  } else {
-    const monthlyCorrections = creditKey
-      ? await getMonthlyUniqueActionCount(userId, ['chat'])
-      : await getMonthlyActionCount(userId, ['chat'])
-    if (monthlyCorrections >= planLimits.correctionsPerMonth) {
-      return NextResponse.json(
-        { error: 'correction_limit_reached', message: `Has alcanzado el límite de ${planLimits.correctionsPerMonth} correcciones este mes. ${monthlyLimitResetNotice()}`, code: BILLING_BLOCK_CODE },
-        { status: 429 }
-      )
-    }
-  }
-
   const rateLimit = await checkAiRateLimit({
     userId,
     route: '/api/camino/correct',
     action,
     limit: action === 'image_correction' ? 5 : 20,
     windowSeconds: 24 * 60 * 60,
+    units: action === 'image_correction' ? Math.max(1, photoCount) : 1,
+    monthlyLimit: action === 'image_correction' ? planLimits.photosPerMonth : planLimits.correctionsPerMonth,
+    creditKey,
     accessToken,
   })
 
   if (!rateLimit.allowed) {
-    return NextResponse.json(
-      createRateLimitPayload(action, rateLimit),
+    const monthly = rateLimit.blockedBy === 'monthly'
+    return { response: NextResponse.json(
+      monthly
+        ? {
+          error: action === 'image_correction' ? 'photo_limit_reached' : 'correction_limit_reached',
+          message: `Has alcanzado el límite de ${rateLimit.limit} ${action === 'image_correction' ? 'correcciones con foto' : 'correcciones'} este mes. ${monthlyLimitResetNotice()}`,
+          code: BILLING_BLOCK_CODE,
+        }
+        : createRateLimitPayload(action, rateLimit),
       {
         status: 429,
         headers: rateLimit.retryAfterSeconds ? { 'Retry-After': String(rateLimit.retryAfterSeconds) } : undefined,
       }
-    )
+    ) }
   }
 
-  return null
+  return { reservationId: rateLimit.reservationId }
 }
 
 function buildPrivateCriteria(guidedExample?: string, referenceSolution?: string) {
@@ -780,9 +730,4 @@ function asNumber(value: unknown) {
 
 function stripDataUrlPrefix(value: string) {
   return value.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, '')
-}
-
-function sanitizeImageType(value: unknown): 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' {
-  if (value === 'image/png' || value === 'image/gif' || value === 'image/webp') return value
-  return 'image/jpeg'
 }

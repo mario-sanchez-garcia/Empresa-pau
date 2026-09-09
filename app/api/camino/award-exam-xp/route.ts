@@ -7,14 +7,13 @@ import { normalizeScoreToTen } from '@/app/lib/camino/scoreNormalization'
 import { countRepeatDepth } from '@/app/lib/camino/repeatImprovement'
 import { EXAM_CORRECTION_XP } from '@/app/lib/camino/xpMap'
 import { getMadridDate, getMadridToday } from '@/app/lib/camino/studyDays'
-import { verifyExamXpGrant } from '@/app/lib/camino/examXpGrant'
+import { digestExamCorrection, verifyExamXpGrant } from '@/app/lib/camino/examXpGrant'
 
 export const dynamic = 'force-dynamic'
 
 // La corrección de un ejercicio de examen (página Exámenes) se guarda en
-// historial_examenes directamente desde el cliente (ver page-client.tsx),
-// no a través de una API de servidor. Este endpoint es lo que sí corre en
-// servidor: recibe el id de la fila ya insertada, verifica que pertenece al
+// historial_examenes a través del endpoint de persistencia autoritativo. Este
+// endpoint recibe el id ya guardado, verifica que pertenece al
 // usuario y que tiene una nota real (una corrección no evaluable no da XP),
 // y otorga el XP a través del mismo awardXp compartido que complete-mission
 // y /api/simulacro.
@@ -46,7 +45,7 @@ export async function POST(request: NextRequest) {
     const db = createServiceClient()
     const { data: examen, error: examenError } = await db
       .from('historial_examenes')
-      .select('id,user_id,asignatura,nota,nota_maxima,created_at,repeated_from_id')
+      .select('id,user_id,asignatura,nota,nota_maxima,correccion,created_at,repeated_from_id')
       .eq('id', historialExamenId)
       .eq('user_id', user.id)
       .maybeSingle()
@@ -70,6 +69,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       score: Number(examen.nota),
       maxScore: Number(examen.nota_maxima),
+      correctionDigest: digestExamCorrection(examen.correccion),
     })) {
       return NextResponse.json({ success: false, reason: 'invalid_xp_grant' }, { status: 403 })
     }

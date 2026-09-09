@@ -16,7 +16,7 @@ import { examenesIngles } from './data/ingles'
 import { BIOLOGIA_TOPICS, examenesBiologia } from './data/biologia'
 import { examenesMatematicasCCSSMadrid, MATEMATICAS_CCSS_LABEL } from './data/matematicas_ccss_madrid'
 import { supabase } from './lib/supabase'
-import { correctionJsonToMarkdownWithOptions } from './lib/correctionPrompt'
+import { correctionJsonToMarkdownWithOptions, scoreFromCorrection } from './lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from './lib/correctionParsing'
 import { sanitizeCorrectionListItem } from './lib/correctionBlockValidation'
 import { splitWhyExplanationMarkdown } from './lib/whyExplanation'
@@ -47,6 +47,7 @@ import { normalizeSubjectSlug } from './lib/camino/caminoCurriculumPlan'
 import { AYUDA_FAQS } from './lib/ayudaFaqs'
 import { DEFAULT_GRADE_THRESHOLD_CONFIG, resolveGradeThreshold, shouldSuggestRepeat, type GradeThresholdConfig } from './lib/camino/gradeThreshold'
 import { saveExamHistory } from './lib/examHistoryClient'
+import { fetchCorrection } from './lib/correctionFetch'
 import { examTextDraftKey, useExamTextDraft } from './hooks/useExamTextDraft'
 import { cataloniaHistoryExamsForYear, selectCataloniaHistoryExam } from './lib/examSelection'
 import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
@@ -2338,7 +2339,7 @@ function cambiarTipo(t: Tipo) {
         })
       }
       const llmStart = performance.now()
-      const res = await fetch('/api/exam/correct', {
+      const res = await fetchCorrection('/api/exam/correct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
@@ -2396,9 +2397,7 @@ function cambiarTipo(t: Tipo) {
       // isTruncated is not persisted to historial_examenes (no column yet).
       setCorreccion(correccionGuardada)
       setTruncated(isTruncated)
-      const bloqueJson = correccionJson?.desglose_bloques?.[0]
-      const rawNota = bloqueJson?.puntos_conseguidos != null ? Number(bloqueJson.puntos_conseguidos) : null
-      const nota = rawNota === null ? null : clampScore(rawNota, puntuacionMax)
+      const nota = scoreFromCorrection(correccionJson, puntuacionMax)
       const notaMax = puntuacionMax
       if (!isTruncated) {
         const saveStart = performance.now()

@@ -5,7 +5,7 @@ import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsag
 import { isOverloadedError, withAnthropicRetry } from '@/app/lib/ai/withAnthropicRetry'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { createRateLimitPayload, type RateLimitAction, BILLING_BLOCK_CODE, monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
-import { getUserBillingContext, getMonthlyActionCount, getMonthlyUniqueActionCount } from '@/app/lib/billing/serverUsage'
+import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 
@@ -13,7 +13,8 @@ const client = new Anthropic()
 // El tope agregado de imágenes vive en app/lib/imagePayloadLimits.ts:
 // estaba duplicado en estas tres rutas y por encima del límite de
 // transporte de la plataforma, así que su 413 era inalcanzable (A18).
-import { MAX_IMAGE_PAYLOAD_CHARS, imagePayloadTooLargeMessage } from '@/app/lib/imagePayloadLimits'
+import { validateCorrectionImagePayload } from '@/app/lib/imagePayloadLimits'
+import { validateAiPrompt } from '@/app/lib/correctionRequestValidation'
 const STREAM_TRUNCATION_SENTINEL = '[[KAIRO_TRUNCATED_7f3a9b2c]]'
 const CHAT_RESPONSE_FORMAT_RULES = `Reglas de formato de respuesta:
 - Usa Markdown claro con titulos, parrafos cortos y listas separadas por saltos de linea.
@@ -94,48 +95,38 @@ async function handlePost(request: NextRequest) {
 
   const { pregunta, imagen, imagenTipo, imagenes, correctionMode, correctionBlock, correctionSessionId, creditKey } = await request.json()
 
-  const promptBuildStart = Date.now()
-  const imagePayloadSize =
-    (typeof imagen === 'string' ? imagen.length : 0) +
-    (Array.isArray(imagenes)
-      ? imagenes.reduce((total, item) => total + (typeof item?.data === 'string' ? item.data.length : 0), 0)
-      : 0)
-
-  if (imagePayloadSize > MAX_IMAGE_PAYLOAD_CHARS) {
-    return NextResponse.json(
-      { error: imagePayloadTooLargeMessage(imagePayloadSize, Array.isArray(imagenes) ? imagenes.length : 1) },
-      { status: 413 }
-    )
+  const promptValidation = validateAiPrompt(pregunta, 'La pregunta')
+  if (!promptValidation.valid) {
+    return NextResponse.json({ error: promptValidation.error }, { status: promptValidation.status })
   }
+
+  const promptBuildStart = Date.now()
+  const imageInput = [
+    ...(typeof imagen === 'string' && imagen.trim()
+      ? [{ data: imagen, mediaType: typeof imagenTipo === 'string' ? imagenTipo : 'image/jpeg' }]
+      : []),
+    ...(Array.isArray(imagenes) ? imagenes.map(item => ({
+      data: item && typeof item.data === 'string' ? item.data : '',
+      mediaType: item && typeof item.mediaType === 'string' ? item.mediaType : 'image/jpeg',
+    })) : []),
+  ]
+  const imageValidation = validateCorrectionImagePayload(imageInput)
+  if (!imageValidation.valid) {
+    return NextResponse.json({ error: imageValidation.error }, { status: imageValidation.status })
+  }
+  const validatedImages = imageValidation.images
+  const imagePayloadSize = imageValidation.totalChars
 
   const contenido: Anthropic.Messages.ContentBlockParam[] = []
 
-  if (imagen) {
+  for (const image of validatedImages) {
     contenido.push({
       type: 'image',
-      source: {
-        type: 'base64',
-        media_type: imagenTipo || 'image/jpeg',
-        data: imagen,
-      }
+      source: { type: 'base64', media_type: image.mediaType, data: image.data },
     })
   }
 
-  if (Array.isArray(imagenes)) {
-    for (const item of imagenes) {
-      if (!item?.data) continue
-      contenido.push({
-        type: 'image',
-        source: {
-          type: 'base64',
-          media_type: item.mediaType || 'image/jpeg',
-          data: item.data,
-        }
-      })
-    }
-  }
-
-  const imageCount = (imagen ? 1 : 0) + (Array.isArray(imagenes) ? imagenes.filter(item => item?.data).length : 0)
+  const imageCount = validatedImages.length
   const action = imageCount > 0 ? 'image_correction' : 'chat'
   const isChunkedCorrection = correctionMode === 'chunked_correction'
   const model = 'claude-sonnet-4-6'
@@ -145,7 +136,7 @@ async function handlePost(request: NextRequest) {
   const responseFormatRules = action === 'image_correction' && !isChunkedCorrection
     ? `${CHAT_RESPONSE_FORMAT_RULES}\n\n${IMAGE_CORRECTION_COMPACT_RULES}`
     : CHAT_RESPONSE_FORMAT_RULES
-  const metadata = {
+  const metadata: Record<string, unknown> = {
     hasImage: imageCount > 0,
     imageCount,
     imagePayloadChars: imagePayloadSize,
@@ -180,43 +171,31 @@ async function handlePost(request: NextRequest) {
 
     const planLimits = getCaminoPlanLimits(billing.planId)
 
-    if (action === 'image_correction') {
-      const monthlyPhotos = metadata.creditKey
-        ? await getMonthlyUniqueActionCount(authContext.user.id, ['image_correction'])
-        : await getMonthlyActionCount(authContext.user.id, ['image_correction'])
-      // Rejects up front if THIS submission's photos would push the student
-      // over the limit, not just once already at/over it — a 3-photo
-      // submission with only 1 slot left must be blocked entirely.
-      if (monthlyPhotos + Math.max(1, imageCount) > planLimits.photosPerMonth) {
-        return NextResponse.json(
-          { error: 'photo_limit_reached', message: `Has alcanzado el límite de ${planLimits.photosPerMonth} correcciones con foto este mes. ${monthlyLimitResetNotice()}`, code: BILLING_BLOCK_CODE },
-          { status: 429 }
-        )
-      }
-    } else {
-      const monthlyChats = metadata.creditKey
-        ? await getMonthlyUniqueActionCount(authContext.user.id, ['chat'])
-        : await getMonthlyActionCount(authContext.user.id, ['chat'])
-      if (monthlyChats >= planLimits.correctionsPerMonth) {
-        return NextResponse.json(
-          { error: 'correction_limit_reached', message: `Has alcanzado el límite de ${planLimits.correctionsPerMonth} correcciones este mes. ${monthlyLimitResetNotice()}`, code: BILLING_BLOCK_CODE },
-          { status: 429 }
-        )
-      }
-    }
-
     const rateLimit = await checkAiRateLimit({
       userId: authContext.user.id,
       route: '/api/chat',
       action,
       limit: action === 'image_correction' ? 5 : 20,
       windowSeconds: 24 * 60 * 60,
+      units: action === 'image_correction' ? Math.max(1, imageCount) : 1,
+      monthlyLimit: action === 'image_correction' ? planLimits.photosPerMonth : planLimits.correctionsPerMonth,
       accessToken: authContext.accessToken
     })
 
     if (!rateLimit.allowed) {
+      if (rateLimit.blockedBy === 'monthly') {
+        return NextResponse.json(
+          {
+            error: action === 'image_correction' ? 'photo_limit_reached' : 'correction_limit_reached',
+            message: `Has alcanzado el límite de ${rateLimit.limit} ${action === 'image_correction' ? 'correcciones con foto' : 'correcciones'} este mes. ${monthlyLimitResetNotice()}`,
+            code: BILLING_BLOCK_CODE,
+          },
+          { status: 429 },
+        )
+      }
       return rateLimitResponse(action, rateLimit)
     }
+    if (rateLimit.reservationId) metadata.usageReservationId = rateLimit.reservationId
   }
 
   const preparationFeeling = await getPreparationFeeling(authContext.user.id)

@@ -36,11 +36,10 @@ async function mockSuccessfulCorrection(page: Page) {
     correctionBodies.push(route.request().postDataJSON())
     await route.fulfill({ status: 200, contentType: 'application/json', json: { correction, notEvaluable: false, truncated: false, xpGrant: 'signed-e2e-grant' } })
   })
-  await page.route('**/rest/v1/historial_examenes*', async route => {
-    if (route.request().method() !== 'POST') return route.fallback()
+  await page.route('**/api/exam/history', async route => {
     const body = route.request().postDataJSON() as Record<string, unknown>
-    historyBodies.push(body)
-    await route.fulfill({ status: 201, contentType: 'application/json', json: { id: body.id } })
+    historyBodies.push({ ...(body.payload as Record<string, unknown>), id: body.historyId })
+    await route.fulfill({ status: 201, contentType: 'application/json', json: { id: body.historyId } })
   })
   await page.route('**/api/camino/award-exam-xp', async route => {
     xpBodies.push(route.request().postDataJSON())
@@ -122,9 +121,9 @@ test('error de corrección es honesto, conserva respuesta y permite reintentar',
     }
   })
   let historyWrites = 0
-  await page.route('**/rest/v1/historial_examenes*', async route => {
-    if (route.request().method() === 'POST') historyWrites++
-    await route.fallback()
+  await page.route('**/api/exam/history', async route => {
+    historyWrites++
+    await route.fulfill({ status: 201, contentType: 'application/json', json: { id: route.request().postDataJSON().historyId } })
   })
   await page.goto('/examenes?subject=mates')
   const answer = page.locator('.pau-rich-editor')
@@ -176,8 +175,7 @@ test('un fallo de persistencia no muestra éxito falso ni solicita XP', async ({
   await page.route('**/api/exam/correct', async route => {
     await route.fulfill({ status: 200, contentType: 'application/json', json: { correction, notEvaluable: false, truncated: false, xpGrant: 'signed-e2e-grant' } })
   })
-  await page.route('**/rest/v1/historial_examenes*', async route => {
-    if (route.request().method() !== 'POST') return route.fallback()
+  await page.route('**/api/exam/history', async route => {
     await route.fulfill({ status: 500, contentType: 'application/json', json: { code: 'E2E_SAVE_FAILURE', message: 'Fallo controlado de persistencia' } })
   })
   await page.route('**/api/camino/award-exam-xp', async route => {

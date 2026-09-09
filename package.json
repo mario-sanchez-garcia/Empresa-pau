@@ -23,6 +23,7 @@
     "test:pricing": "node --experimental-strip-types --test app/lib/pricing.test.ts",
     "test:billing": "node --experimental-strip-types --test app/lib/billing/stripeEvents.test.ts",
     "test:examenes": "node --experimental-strip-types --test app/lib/camino/examXpGrant.test.ts app/lib/examSelection.test.ts app/hooks/useExamTextDraft.test.ts",
+    "test:corrections": "node --experimental-strip-types --test app/lib/ai/withAnthropicRetry.test.ts app/lib/camino/examXpGrant.test.ts app/lib/correctionFetch.test.ts app/lib/correctionRequestValidation.test.ts app/lib/imagePayloadLimits.test.ts app/lib/rateLimitMath.test.ts && node scripts/smoke-correction-parser.cjs && node scripts/smoke-corrections-security.mjs",
     "validate:orientation-data": "node --test scripts/orientation/catalog.test.mjs scripts/orientation/catalunya-catalog.test.mjs",
     "qa:corrections:p0": "node scripts/qa-corrections-p0.mjs",
     "seed:math-curriculum": "node scripts/seed-math-curriculum.mjs",

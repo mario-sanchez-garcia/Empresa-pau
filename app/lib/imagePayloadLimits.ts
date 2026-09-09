@@ -15,6 +15,53 @@
 //
 // El límite vive aquí y no en cada ruta para que no vuelvan a divergir.
 export const MAX_IMAGE_PAYLOAD_CHARS = 4_000_000
+export const MAX_IMAGES_PER_CORRECTION = 5
+export const SUPPORTED_CORRECTION_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'] as const
+export type CorrectionImageType = typeof SUPPORTED_CORRECTION_IMAGE_TYPES[number]
+
+export type CorrectionImagePayload = { data: string; mediaType?: string }
+
+export type ImagePayloadValidation =
+  | { valid: true; images: Array<{ data: string; mediaType: CorrectionImageType }>; totalChars: number }
+  | { valid: false; status: 400 | 413; error: string }
+
+/**
+ * Boundary validation shared by every server route that forwards images to an
+ * AI provider. Browser-side compression is UX only; an attacker can call the
+ * endpoint directly, so count, MIME and base64 integrity are enforced here.
+ */
+export function validateCorrectionImagePayload(
+  input: CorrectionImagePayload[],
+  options: { maxImages?: number } = {},
+): ImagePayloadValidation {
+  const maxImages = options.maxImages ?? MAX_IMAGES_PER_CORRECTION
+  if (input.length > maxImages) {
+    return { valid: false, status: 413, error: `Puedes enviar como máximo ${maxImages} fotos por corrección.` }
+  }
+
+  const images: Array<{ data: string; mediaType: CorrectionImageType }> = []
+  let totalChars = 0
+  for (const image of input) {
+    const data = typeof image.data === 'string' ? image.data.trim() : ''
+    if (!data || data.length < 16 || data.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(data)) {
+      return { valid: false, status: 400, error: 'Una de las imágenes está vacía o tiene un formato inválido.' }
+    }
+    if (!isSupportedCorrectionImageType(image.mediaType)) {
+      return { valid: false, status: 400, error: 'Formato de imagen no compatible. Usa JPG, PNG, GIF o WebP.' }
+    }
+    totalChars += data.length
+    if (totalChars > MAX_IMAGE_PAYLOAD_CHARS) {
+      return { valid: false, status: 413, error: imagePayloadTooLargeMessage(totalChars, input.length) }
+    }
+    images.push({ data, mediaType: image.mediaType })
+  }
+
+  return { valid: true, images, totalChars }
+}
+
+export function isSupportedCorrectionImageType(value: unknown): value is CorrectionImageType {
+  return typeof value === 'string' && (SUPPORTED_CORRECTION_IMAGE_TYPES as readonly string[]).includes(value)
+}
 
 /** Suma de caracteres base64 de un conjunto de imágenes ya codificadas.
  *  Se llama sumImagePayloadChars y no imagePayloadChars porque dos de las rutas

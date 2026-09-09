@@ -5798,6 +5798,65 @@ function cambiarTipo(t: Tipo) {
         [data-kairo-clay-theme="dark"] .history-filter-clear {
           color: #60a5fa;
         }
+
+        /* ── Piloto clay de Historial — Bloque 4: lista principal agrupada
+           por mes ── Mismo escopado que los bloques anteriores. Bloque con
+           más volumen de texto/badges — cada variante de nota (good/mid/bad/
+           muted) se valida con el checker de contraste real via canvas. */
+        [data-kairo-clay-theme="dark"] .history-month-title {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-rows-card {
+          background: rgba(23,30,56,.88);
+          border-color: rgba(96,165,250,.20);
+          box-shadow: 0 10px 28px rgba(0,0,0,.24);
+        }
+        [data-kairo-clay-theme="dark"] .history-row {
+          border-bottom-color: rgba(96,165,250,.12);
+        }
+        [data-kairo-clay-theme="dark"] .history-row:hover {
+          background: rgba(96,165,250,.06);
+        }
+        [data-kairo-clay-theme="dark"] .history-row-date {
+          background: rgba(96,165,250,.14);
+        }
+        [data-kairo-clay-theme="dark"] .history-row-main strong {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-row-source {
+          background: rgba(96,165,250,.14);
+        }
+        [data-kairo-clay-theme="dark"] .history-row-score {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-row-score.good { color: #4ade80; }
+        [data-kairo-clay-theme="dark"] .history-row-score.mid { color: #fbbf24; }
+        [data-kairo-clay-theme="dark"] .history-row-score.bad { color: #f87171; }
+        [data-kairo-clay-theme="dark"] .history-row-score.muted { color: #7d879e; }
+        [data-kairo-clay-theme="dark"] .history-row-view {
+          border-color: rgba(96,165,250,.28);
+          background: #1c2440;
+          color: #60a5fa;
+        }
+        [data-kairo-clay-theme="dark"] .history-row-menu-btn {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .history-row-menu-btn:hover {
+          background: rgba(96,165,250,.14);
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-row-menu {
+          background: #1c2440;
+          border-color: rgba(96,165,250,.24);
+          box-shadow: 0 18px 40px rgba(0,0,0,.4);
+        }
+        [data-kairo-clay-theme="dark"] .history-row-menu button {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-row-menu button:hover {
+          background: rgba(96,165,250,.14);
+          color: #60a5fa;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>

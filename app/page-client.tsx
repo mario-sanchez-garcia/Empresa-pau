@@ -5976,6 +5976,18 @@ function cambiarTipo(t: Tipo) {
         [data-kairo-clay-theme="dark"] .exam-search-empty {
           color: #9aa7c4;
         }
+
+        /* ── Piloto clay de Exámenes — Bloque 2: pie de página ── */
+        [data-kairo-clay-theme="dark"] .exams-footer {
+          border-top-color: rgba(96,165,250,.16);
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .exams-footer-brand {
+          color: #eef2fb !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-footer-link {
+          color: #9aa7c4 !important;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -6813,14 +6825,14 @@ function cambiarTipo(t: Tipo) {
 
             <footer className="exams-footer">
               <div>
-                <strong style={{ color: '#111827' }}>Kairo</strong>
+                <strong className="exams-footer-brand" style={{ color: '#111827' }}>Kairo</strong>
                 <span style={{ marginLeft: 8 }}>Preparación EBAU de alto rendimiento.</span>
               </div>
               <div className="exams-footer-links" aria-label="Enlaces informativos">
-                <a href="/legal/privacidad" style={{ color: '#6b7280', textDecoration: 'none' }}>Privacidad</a>
-                <a href="/legal/terminos" style={{ color: '#6b7280', textDecoration: 'none' }}>Términos</a>
+                <a href="/legal/privacidad" className="exams-footer-link" style={{ color: '#6b7280', textDecoration: 'none' }}>Privacidad</a>
+                <a href="/legal/terminos" className="exams-footer-link" style={{ color: '#6b7280', textDecoration: 'none' }}>Términos</a>
                 <span>Metodología</span>
-                <a href="/contacto" style={{ color: '#6b7280', textDecoration: 'none' }}>Contacto</a>
+                <a href="/contacto" className="exams-footer-link" style={{ color: '#6b7280', textDecoration: 'none' }}>Contacto</a>
               </div>
             </footer>
           </main>

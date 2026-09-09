@@ -5739,6 +5739,65 @@ function cambiarTipo(t: Tipo) {
         [data-kairo-clay-theme="dark"] .history-recent-item small {
           color: #7d879e;
         }
+
+        /* ── Piloto clay de Historial — Bloque 3: fila de asignaturas +
+           panel de filtros colapsable ── Mismo escopado que los bloques
+           anteriores. */
+        [data-kairo-clay-theme="dark"] .history-subject-card {
+          border-color: rgba(96,165,250,.16);
+          background: #171e38;
+          box-shadow: 0 8px 20px rgba(0,0,0,.24);
+        }
+        [data-kairo-clay-theme="dark"] .history-subject-card:hover {
+          box-shadow: 0 12px 28px rgba(0,0,0,.32);
+        }
+        [data-kairo-clay-theme="dark"] .history-subject-card.active {
+          background: rgba(96,165,250,.10);
+          box-shadow: inset 0 0 0 2px var(--subject-color, #60a5fa), 0 10px 24px -8px rgba(0,0,0,.4);
+        }
+        [data-kairo-clay-theme="dark"] .history-subject-card b {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-subject-card strong {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-subject-card small {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .history-subject-card em {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .history-trend-up {
+          color: #4ade80;
+        }
+        [data-kairo-clay-theme="dark"] .history-trend-down {
+          color: #f87171;
+        }
+        [data-kairo-clay-theme="dark"] .history-input,
+        [data-kairo-clay-theme="dark"] .history-select {
+          border-color: rgba(96,165,250,.20);
+          background: #171e38;
+          color: #eef2fb;
+          box-shadow: none;
+        }
+        [data-kairo-clay-theme="dark"] .history-input {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .history-input input {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-input::placeholder {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .history-select span {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .history-select select {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-filter-clear {
+          color: #60a5fa;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>

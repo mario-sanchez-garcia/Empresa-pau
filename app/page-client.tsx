@@ -6226,6 +6226,44 @@ function cambiarTipo(t: Tipo) {
         [data-kairo-clay-theme="dark"] .exams-q-caption {
           color: #9aa7c4 !important;
         }
+
+        /* ── Piloto clay de Exámenes — Bloque: contenedor de la tarjeta de
+           respuesta (pestañas texto/foto) ── RichTextArea no se toca (ver
+           AGENTS.md). Las pestañas texto/imagen usan color condicionado por
+           UI (cuál está activa, no por nota/XP/límite) — se adapta el tono,
+           no la condición modo === m. El mensaje de imagenError es rojo fijo
+           (no varía según el tipo de error), mismo criterio que los
+           encabezados fijos del panel de IA. Los colores por asignatura
+           (cfg.color/cfg.light/cfg.accent en el dropzone de fotos) no se
+           tocan. El botón "Corregir con Kairo" (relleno sólido + texto
+           blanco) se deja igual en los 3 temas, mismo criterio ya aplicado
+           a los botones primarios de Historial. */
+        [data-kairo-clay-theme="dark"] .exams-a-card {
+          background: #171e38 !important;
+          border-color: rgba(96,165,250,.20) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-a-tabs {
+          border-bottom-color: rgba(96,165,250,.14) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-a-tab {
+          color: #7d879e !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-a-tab.is-active {
+          color: #60a5fa !important;
+          border-bottom-color: #60a5fa !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-a-thumb {
+          border-color: rgba(96,165,250,.30) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-a-caption {
+          color: #9aa7c4 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-a-error {
+          color: #f87171 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-a-footer {
+          border-top-color: rgba(96,165,250,.14) !important;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -6815,11 +6853,11 @@ function cambiarTipo(t: Tipo) {
               </div>
             )}
 
-           {!isCatalunaExam && preguntaActiva && <div className="exams-answer-card" style={{ background: 'white', borderRadius: 14, border: '1px solid #e2e8f0', overflow: 'hidden', marginBottom: 22 }}>
+           {!isCatalunaExam && preguntaActiva && <div className="exams-answer-card exams-a-card" style={{ background: 'white', borderRadius: 14, border: '1px solid #e2e8f0', overflow: 'hidden', marginBottom: 22 }}>
               {/* Tabs */}
-              <div style={{ display: 'flex', borderBottom: '1px solid #f1f5f9' }}>
+              <div className="exams-a-tabs" style={{ display: 'flex', borderBottom: '1px solid #f1f5f9' }}>
                 {(['texto', 'imagen'] as const).map(m => (
-                  <button key={m} onClick={() => setModo(m)} style={{ padding: '10px 16px', fontSize: 12, fontWeight: 700, color: modo === m ? '#2563eb' : '#94a3b8', borderBottom: modo === m ? '2px solid #2563eb' : '2px solid transparent', marginBottom: -1, background: 'none', border: 'none', borderBottomWidth: 2, borderBottomStyle: 'solid', borderBottomColor: modo === m ? '#2563eb' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <button key={m} className={`exams-a-tab ${modo === m ? 'is-active' : ''}`} onClick={() => setModo(m)} style={{ padding: '10px 16px', fontSize: 12, fontWeight: 700, color: modo === m ? '#2563eb' : '#94a3b8', borderBottom: modo === m ? '2px solid #2563eb' : '2px solid transparent', marginBottom: -1, background: 'none', border: 'none', borderBottomWidth: 2, borderBottomStyle: 'solid', borderBottomColor: modo === m ? '#2563eb' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                     {m === 'texto' ? <PenLine size={13} /> : <Camera size={13} />}{m === 'texto' ? '✏️ Escribir' : '📷 Subir foto'}
                   </button>
                 ))}
@@ -6844,7 +6882,7 @@ function cambiarTipo(t: Tipo) {
                       <div style={{ marginBottom: 10, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))', gap: 8 }}>
                         {imagenes.map((img, index) => (
                           <div key={`${img.preview}-${index}`} style={{ position: 'relative' }}>
-                            <img src={img.preview} alt={`Página ${index + 1}`} loading="lazy" decoding="async" style={{ height: 96, width: '100%', borderRadius: 10, border: '1.5px solid #dbe7fb', objectFit: 'cover' }} />
+                            <img className="exams-a-thumb" src={img.preview} alt={`Página ${index + 1}`} loading="lazy" decoding="async" style={{ height: 96, width: '100%', borderRadius: 10, border: '1.5px solid #dbe7fb', objectFit: 'cover' }} />
                             <span style={{ position: 'absolute', bottom: 4, left: 4, borderRadius: 6, background: 'rgba(15,23,42,0.75)', color: 'white', fontSize: 10, fontWeight: 900, padding: '1px 6px' }}>{index + 1}</span>
                             <button onClick={() => removeImagen(index)} aria-label={`Quitar página ${index + 1}`} style={{ position: 'absolute', top: -6, right: -6, width: 22, height: 22, borderRadius: '50%', background: cfg.color, color: '#fff', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={12} /></button>
                           </div>
@@ -6857,16 +6895,16 @@ function cambiarTipo(t: Tipo) {
                       {imagenes.length === 0 && <p style={{ fontSize: 11, color: cfg.accent, margin: 0 }}>Fotografía tu respuesta manuscrita</p>}
                     </div>
                     {imagenes.length > 1 && (
-                      <p style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: '#64748b' }}>Se corrigen juntas como páginas consecutivas de una misma respuesta.</p>
+                      <p className="exams-a-caption" style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: '#64748b' }}>Se corrigen juntas como páginas consecutivas de una misma respuesta.</p>
                     )}
                     {imagenError && (
-                      <p style={{ marginTop: 10, fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{imagenError}</p>
+                      <p className="exams-a-error" style={{ marginTop: 10, fontSize: 12, fontWeight: 700, color: '#dc2626' }}>{imagenError}</p>
                     )}
                   </div>
                 )}
               </div>
               {/* Footer row */}
-              <div style={{ padding: '10px 16px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+              <div className="exams-a-footer" style={{ padding: '10px 16px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                 <button className="campus-primary exams-correct-button" onClick={corregir} disabled={cargando || (modo === 'texto' ? !respuesta.trim() : imagenes.length === 0)} style={{ ...hoverVars(cfg.color, cfg.light, cfg.accent), padding: '9px 20px', borderRadius: 10, border: 'none', cursor: cargando ? 'not-allowed' : 'pointer', background: cargando ? '#94a3b8' : '#2563eb', color: '#fff', fontSize: 13, fontWeight: 800, opacity: (cargando || (modo === 'texto' ? !respuesta.trim() : imagenes.length === 0)) ? 0.5 : 1, boxShadow: cargando ? 'none' : '0 4px 16px rgba(37,99,235,.3)', display: 'flex', alignItems: 'center', gap: 7 }}>
                   {cargando ? <KairoLoadingDot /> : <WandSparkles size={15} />}{cargando ? 'Corrigiendo con Kairo...' : 'Corregir con Kairo'}
                 </button>

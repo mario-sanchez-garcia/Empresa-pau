@@ -5940,6 +5940,42 @@ function cambiarTipo(t: Tipo) {
             linear-gradient(180deg, #10162a 0%, #0d1220 100%);
           color: #eef2fb;
         }
+
+        /* ── Piloto clay de Exámenes — Bloque 1: hero + buscador ── El hero
+           (imagen + overlay oscuro) no necesita reglas nuevas, igual que en
+           Historial/Chat: ya es oscuro por diseño en los 3 temas. Solo el
+           buscador (fondo claro fijo) necesita override. */
+        [data-kairo-clay-theme="dark"] .exams-search-bar {
+          border-color: rgba(96,165,250,.24);
+          background: rgba(23,30,56,.92);
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .exams-search-input {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .exams-search-input::placeholder {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .exam-search-results {
+          background: #171e38;
+          border-color: rgba(96,165,250,.20);
+          box-shadow: 0 24px 70px rgba(0,0,0,.4);
+        }
+        [data-kairo-clay-theme="dark"] .exam-search-result:hover {
+          background: rgba(96,165,250,.10);
+        }
+        [data-kairo-clay-theme="dark"] .exam-search-result-title {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .exam-search-result-meta {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .exam-search-result-subtitle {
+          color: #9aa7c4 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exam-search-empty {
+          color: #9aa7c4;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -6058,7 +6094,7 @@ function cambiarTipo(t: Tipo) {
                         }}
                       >
                         <span className="exam-search-result-title">{result.title}</span>
-                        <span style={{ color: '#4b5563', fontSize: 12, fontWeight: 760, lineHeight: 1.35 }}>{result.subtitle}</span>
+                        <span className="exam-search-result-subtitle" style={{ color: '#4b5563', fontSize: 12, fontWeight: 760, lineHeight: 1.35 }}>{result.subtitle}</span>
                         <span className="exam-search-result-meta">
                           <span>{result.year}</span>
                           <span>·</span>

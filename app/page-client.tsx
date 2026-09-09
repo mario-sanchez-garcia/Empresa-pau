@@ -5605,6 +5605,74 @@ function cambiarTipo(t: Tipo) {
         [data-kairo-clay-theme="dark"] .tutor-recent-viewall {
           color: #60a5fa;
         }
+
+        /* ── Piloto clay de Historial — Bloque 1: fundamento, hero/topbar/
+           acciones, estados de carga/vacío ── Mismo patrón que el piloto del
+           Chat de arriba: escopado por [data-kairo-clay-theme="dark"], que
+           solo lleva el <main className="history-screen"> de
+           seccion==='historial'. Exámenes no tiene ese atributo en ningún
+           ancestro, así que estas reglas no le llegan aunque .history-card
+           se reutilice visualmente en ambas pantallas. Claro/color no se
+           tocan — heredan el glassmorphism existente tal cual. */
+        [data-kairo-clay-theme="dark"].history-screen {
+          background:
+            radial-gradient(circle at 12% 0%, rgba(96,165,250,.10), transparent 32%),
+            linear-gradient(180deg, #10162a 0%, #0d1220 100%);
+        }
+        [data-kairo-clay-theme="dark"] .history-card {
+          background: rgba(23,30,56,.88);
+          border-color: rgba(96,165,250,.20);
+          box-shadow: 0 16px 44px rgba(0,0,0,.30);
+        }
+        [data-kairo-clay-theme="dark"] .history-topbar h1 {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-topbar p {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .history-tab {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .history-tab.is-active {
+          color: #60a5fa;
+        }
+        [data-kairo-clay-theme="dark"] .history-tab.is-active::after {
+          background: #60a5fa;
+        }
+        [data-kairo-clay-theme="dark"] .history-button {
+          border-color: rgba(96,165,250,.24);
+          background: #1c2440;
+          color: #c7d0e6;
+          box-shadow: none;
+        }
+        [data-kairo-clay-theme="dark"] .history-button:hover {
+          border-color: #60a5fa;
+          color: #60a5fa;
+        }
+        [data-kairo-clay-theme="dark"] .history-button-primary {
+          border-color: #2563eb;
+          background: #2563eb;
+          color: #fff;
+        }
+        [data-kairo-clay-theme="dark"] .history-button-primary.is-open {
+          background: #1d4ed8;
+          border-color: #1d4ed8;
+        }
+        [data-kairo-clay-theme="dark"] .history-button-primary:hover {
+          border-color: #2563eb;
+          color: #fff;
+        }
+        [data-kairo-clay-theme="dark"] .history-empty {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .history-empty h2 {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-empty-icon {
+          background: rgba(96,165,250,.14);
+          color: #60a5fa;
+          box-shadow: none;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -6673,7 +6741,7 @@ function cambiarTipo(t: Tipo) {
         )}
 
         {seccion === 'historial' && (
-          <main className="history-screen">
+          <main className="history-screen" data-kairo-clay-theme={clayTheme}>
             <div className="history-shell">
               <div className="history-hero">
                 <img

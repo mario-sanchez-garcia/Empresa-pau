@@ -885,7 +885,7 @@ function HistorialDonut({ value, size = 96 }: { value: number | null; size?: num
   const offset = circumference * (1 - pct)
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0, transform: 'rotate(-90deg)' }}>
-      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e8eef7" strokeWidth={stroke} />
+      <circle className="history-donut-track" cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e8eef7" strokeWidth={stroke} />
       {value !== null && (
         <circle
           cx={size / 2} cy={size / 2} r={radius} fill="none"
@@ -958,11 +958,11 @@ function HistorialTrendChart({ points }: { points: Array<{ label: string; avg: n
 }
 
 export default function Home() {
-  // Piloto clay SOLO del Chat con Kairo (seccion === 'chat') — el resto de
-  // este archivo (Exámenes, Historial) no lee clayTheme en ningún sitio, así
-  // que no cambian. Ver data-kairo-clay-theme en el <main> del chat y las
-  // reglas [data-kairo-clay-theme="dark"] .tutor-* al final del <style> de
-  // más abajo.
+  // Piloto clay del Chat con Kairo (seccion === 'chat') y de Historial
+  // (seccion === 'historial') — Exámenes no lee clayTheme en ningún sitio,
+  // así que no cambia. Ver data-kairo-clay-theme en el <main> de cada
+  // pantalla y las reglas [data-kairo-clay-theme="dark"] .tutor-*/.history-*
+  // al final del <style> de más abajo.
   const { theme: clayTheme } = useClayThemePreference()
   const [usuario, setUsuario] = useState<any>(null) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   const [seccion, setSeccion] = useState<Seccion>('examenes')
@@ -5673,6 +5673,72 @@ function cambiarTipo(t: Tipo) {
           color: #60a5fa;
           box-shadow: none;
         }
+
+        /* ── Piloto clay de Historial — Bloque 2: barra de resumen +
+           HistorialDonut ── Mismo escopado por [data-kairo-clay-theme="dark"]
+           que el bloque 1. */
+        [data-kairo-clay-theme="dark"] .history-summary-zone {
+          border-right-color: rgba(96,165,250,.16);
+        }
+        [data-kairo-clay-theme="dark"] .history-total-copy > span {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .history-total-copy > strong {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-total-delta {
+          color: #4ade80;
+        }
+        [data-kairo-clay-theme="dark"] .history-illust-back {
+          fill: rgba(96,165,250,.22);
+        }
+        [data-kairo-clay-theme="dark"] .history-illust-front {
+          fill: #1c2440;
+          stroke: rgba(96,165,250,.35);
+        }
+        [data-kairo-clay-theme="dark"] .history-illust-badge {
+          fill: rgba(96,165,250,.14);
+        }
+        [data-kairo-clay-theme="dark"] .history-donut-track {
+          stroke: rgba(96,165,250,.16);
+        }
+        [data-kairo-clay-theme="dark"] .history-stat-label {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .history-stat-donut-row strong {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-stat-donut-row strong em {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .history-stat-big {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-stat-big.positive {
+          color: #4ade80;
+        }
+        [data-kairo-clay-theme="dark"] .history-stat-foot {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .history-stat-foot.muted {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .history-recent-item b {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-recent-item-subject {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .history-recent-item span {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-recent-item span.good { color: #4ade80; }
+        [data-kairo-clay-theme="dark"] .history-recent-item span.mid { color: #fbbf24; }
+        [data-kairo-clay-theme="dark"] .history-recent-item span.bad { color: #f87171; }
+        [data-kairo-clay-theme="dark"] .history-recent-item span.muted { color: #7d879e; }
+        [data-kairo-clay-theme="dark"] .history-recent-item small {
+          color: #7d879e;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -6819,10 +6885,10 @@ function cambiarTipo(t: Tipo) {
                       </div>
                       <div className="history-total-illustration" aria-hidden="true">
                         <svg width="54" height="54" viewBox="0 0 64 64" fill="none">
-                          <rect x="9" y="7" width="34" height="46" rx="6" fill="#bfdbfe" transform="rotate(-8 26 30)" />
-                          <rect x="15" y="8" width="34" height="46" rx="6" fill="#fff" stroke="#93c5fd" strokeWidth="1.5" />
+                          <rect className="history-illust-back" x="9" y="7" width="34" height="46" rx="6" fill="#bfdbfe" transform="rotate(-8 26 30)" />
+                          <rect className="history-illust-front" x="15" y="8" width="34" height="46" rx="6" fill="#fff" stroke="#93c5fd" strokeWidth="1.5" />
                           <path d="M21 19h22M21 26h22M21 33h15" stroke="#60a5fa" strokeWidth="2.25" strokeLinecap="round" />
-                          <rect x="21" y="40" width="11" height="6" rx="2" fill="#eff6ff" />
+                          <rect className="history-illust-badge" x="21" y="40" width="11" height="6" rx="2" fill="#eff6ff" />
                           <circle cx="47" cy="47" r="13.5" fill="#2563eb" />
                           <path d="M41 47l4.2 4.2L54 42.5" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>

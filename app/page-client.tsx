@@ -6356,6 +6356,21 @@ function cambiarTipo(t: Tipo) {
           border-color: rgba(251,146,60,.35) !important;
           color: #fdba74 !important;
         }
+
+        /* ── Piloto clay de Exámenes — fixes de contraste tras auditoría de
+           captura real ── Chips de asignatura: color condicionado por cuál
+           está seleccionada (isActive), no por lógica de negocio. En
+           inactivo el fondo era blanco fijo; en activo, var(--subject-light)
+           pastel — mismo problema que .history-subject-card.active en
+           Historial, se sustituye por un wash oscuro uniforme. */
+        [data-kairo-clay-theme="dark"] .exams-subject-chip {
+          background: #1c2440 !important;
+          border-color: rgba(96,165,250,.24) !important;
+          color: #c7d0e6 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-subject-chip.is-active {
+          background: rgba(96,165,250,.14) !important;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -6497,7 +6512,7 @@ function cambiarTipo(t: Tipo) {
 
             {/* V4 subject chips */}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 14 }}>
-              <span style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#94a3b8', marginRight: 4, whiteSpace: 'nowrap' }}>Asignatura</span>
+              <span className="exams-q-muted" style={{ fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#94a3b8', marginRight: 4, whiteSpace: 'nowrap' }}>Asignatura</span>
               {HOME_SUBJECTS.map(key => {
                 const val = ASIGNATURAS[key]
                 const card = SUBJECT_CARDS[key]
@@ -6506,6 +6521,7 @@ function cambiarTipo(t: Tipo) {
                   <button
                     key={key}
                     type="button"
+                    className={`exams-subject-chip ${isActive ? 'is-active' : ''}`}
                     onClick={() => navegarAAsignatura(key)}
                     style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 999, border: isActive ? `1.5px solid ${val.color}` : '1px solid #e2e8f0', background: isActive ? val.light : 'white', fontSize: 12, fontWeight: 700, color: isActive ? val.color : '#475569', cursor: 'pointer', transition: 'all 120ms ease-out' }}
                   >

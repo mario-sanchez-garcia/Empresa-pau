@@ -1080,6 +1080,71 @@ button:active:not(:disabled),
   }
 }
 
+/* ExamStatement es un componente compartido (Exámenes, Camino, Simulacros,
+   varias asignaturas de Cataluña) — no se toca el archivo, solo se añaden
+   overrides escopados por [data-kairo-clay-theme="dark"], mismo patrón ya
+   usado arriba para [data-kairo-math-toolbar]. Bug real encontrado: el
+   texto del enunciado (.math-markdown dentro de .exam-statement-body) tenía
+   color:#253044 fijo — pensado para fondo claro, sin relación con el tema —
+   dando un contraste pésimo sobre el fondo oscuro de Exámenes. No era
+   opacidad ni herencia de MathMarkdown: era este color literal sin cubrir
+   por ningún override existente. */
+[data-kairo-clay-theme="dark"] .exam-statement-action {
+  background: #1c2440;
+  /* var(--statement-accent) es el acento real de la asignatura (prop
+     accentColor) — se aclara con color-mix en vez de sustituirlo por un
+     azul fijo, para mantener el matiz por asignatura y aun asi despegar
+     del fondo oscuro del boton (el accent "puro" daba solo 2.95:1). */
+  color: color-mix(in srgb, var(--statement-accent) 70%, white);
+}
+[data-kairo-clay-theme="dark"] .exam-statement-help {
+  color: #9aa7c4;
+}
+[data-kairo-clay-theme="dark"] .exam-statement-confirm {
+  background: rgba(251,191,36,.10);
+  border-color: rgba(251,191,36,.35);
+  color: #fbbf24;
+}
+[data-kairo-clay-theme="dark"] .exam-statement-confirm button:first-of-type {
+  background: rgba(251,146,60,.14);
+  border-color: rgba(251,146,60,.35);
+  color: #fdba74;
+}
+[data-kairo-clay-theme="dark"] .exam-statement-confirm button:last-of-type {
+  background: #1c2440;
+  border-color: rgba(96,165,250,.24);
+  color: #c7d0e6;
+}
+[data-kairo-clay-theme="dark"] .exam-statement-highlight-menu {
+  background: #171e38;
+  border-color: rgba(96,165,250,.24);
+}
+[data-kairo-clay-theme="dark"] .exam-statement-highlight-menu span {
+  color: #9aa7c4;
+}
+[data-kairo-clay-theme="dark"] .exam-statement-highlight-menu button {
+  background: rgba(96,165,250,.14);
+}
+[data-kairo-clay-theme="dark"] .exam-statement-body .math-markdown {
+  color: #dbe2f0;
+}
+/* MathMarkdown renderiza <strong> con la clase Tailwind fija
+   "text-slate-950" (components/shared/MathMarkdown.tsx) — casi negro,
+   pensada para fondo claro. Esa utilidad vive en @layer utilities de
+   Tailwind v4, que en este proyecto gana el empate de cascada frente a
+   una regla de globals.css sin capa aunque esta tenga más especificidad
+   — comprobado en el navegador, no asumido. !important es necesario
+   aquí, no una preferencia de estilo. */
+[data-kairo-clay-theme="dark"] .exam-statement-body .math-markdown strong {
+  color: #f5f7fc !important;
+}
+[data-kairo-clay-theme="dark"] .exam-statement-body .math-markdown .katex {
+  color: #dbe2f0;
+}
+[data-kairo-clay-theme="dark"] .exam-statement-body .math-markdown mark.kairo-highlight {
+  color: #1a1a1a;
+}
+
 /* ─── Stitch: Glass card (Level 2 — scrolling content) ──────────── */
 .pau-card-glass {
   background: rgba(255, 255, 255, 0.72);

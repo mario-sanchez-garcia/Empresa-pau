@@ -5,3 +5,4 @@
 -- nota, máximo y grant.
 drop policy if exists "Users can create own exam history" on public.historial_examenes;
 drop policy if exists "Users can update own exam history" on public.historial_examenes;
+drop policy if exists "usuarios ven su propio historial" on public.historial_examenes;

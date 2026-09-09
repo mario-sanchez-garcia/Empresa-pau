@@ -27,7 +27,7 @@ check('Exámenes valida forma antes de éxito/XP', examRoute.includes('validateC
 check('Historial exige auth y grant exacto', historyRoute.includes('getAuthContext(request)') && historyRoute.includes('verifyExamXpGrant(xpGrant'))
 check('Cliente guarda historial solo por endpoint autoritativo', historyClient.includes("fetch('/api/exam/history'") && !historyClient.includes("from('historial_examenes').insert"))
 check('Camino normal usa guardado autoritativo sin XP duplicado', caminoTopic.includes('awardXp: false') && !caminoTopic.includes("from('historial_examenes').insert"))
-check('RLS elimina INSERT/UPDATE directo de notas', historyMigration.includes('drop policy if exists "Users can create own exam history"') && historyMigration.includes('drop policy if exists "Users can update own exam history"'))
+check('RLS elimina INSERT/UPDATE/ALL directo de notas', historyMigration.includes('drop policy if exists "Users can create own exam history"') && historyMigration.includes('drop policy if exists "Users can update own exam history"') && historyMigration.includes('drop policy if exists "usuarios ven su propio historial"'))
 check('Explicación específica no se comparte entre usuarios', !examRoute.includes('topic_why_cache') && cacheMigration.includes('delete from public.topic_why_cache'))
 check('Rutas de corrección no registran previews privados', ![examRoute, caminoRoute, simulacroRoute].some(source => source.includes('rawPreview')))
 check('Clave libre del cliente no deduplica cuota genérica', !examRoute.includes('getMonthlyUniqueActionCount') && !chatRoute.includes('getMonthlyUniqueActionCount'))

@@ -599,6 +599,12 @@ function stringifyForSearch(value: unknown): string {
 }
 
 function FilterDropdown({ label, value, options }: { label: string; value: string; options: FilterDropdownOption[] }) {
+  // El menú se renderiza via createPortal a document.body (más abajo) para
+  // escapar del overflow:auto de la barra de filtros en móvil — eso lo saca
+  // del árbol DOM de <main data-kairo-clay-theme>, así que no hereda el
+  // atributo de tema de ningún ancestro (mismo problema que el hero de
+  // Exámenes) y necesita leerlo por su cuenta.
+  const { theme: clayTheme } = useClayThemePreference()
   const [open, setOpen] = useState(false)
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({})
   const [mounted, setMounted] = useState(false)
@@ -676,7 +682,7 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
         <span className="exam-filter-label">{label}</span>
         <span className="exam-filter-sep">·</span>
         <span className="exam-filter-value">{value}</span>
-        <ChevronDown size={11} style={{ flexShrink: 0, color: open ? '#2563eb' : '#94a3b8', transition: 'transform 180ms cubic-bezier(0.23,1,0.32,1), color 140ms', transform: open ? 'rotate(180deg)' : 'rotate(0)' }} />
+        <ChevronDown className="exam-filter-chevron" size={11} style={{ flexShrink: 0, color: open ? '#2563eb' : '#94a3b8', transition: 'transform 180ms cubic-bezier(0.23,1,0.32,1), color 140ms', transform: open ? 'rotate(180deg)' : 'rotate(0)' }} />
       </button>
       {/* Portal a <body>: cualquier ancestro con transform (p. ej. .pau-reveal,
           cuya animación con fill-mode "both" deja el transform aplicado) pasa a
@@ -685,7 +691,7 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
       {open && mounted && createPortal(
         <>
           <div className="exam-filter-menu-backdrop" onClick={() => setOpen(false)} />
-          <div ref={menuRef} className="exam-filter-menu" style={menuStyle}>
+          <div ref={menuRef} className="exam-filter-menu" data-kairo-clay-theme={clayTheme} style={menuStyle}>
             {options.map(option => (
               <button
                 type="button"
@@ -694,7 +700,7 @@ function FilterDropdown({ label, value, options }: { label: string; value: strin
                 onClick={() => { option.onSelect(); setOpen(false) }}
               >
                 <span>{option.label}</span>
-                {option.active && <Check size={13} style={{ flexShrink: 0, color: '#2563eb' }} />}
+                {option.active && <Check className="exam-filter-check" size={13} style={{ flexShrink: 0, color: '#2563eb' }} />}
               </button>
             ))}
           </div>
@@ -6071,6 +6077,116 @@ function cambiarTipo(t: Tipo) {
         [data-kairo-clay-theme="dark"] .exams-side-session-sub {
           color: #86efac !important;
         }
+
+        /* ── Piloto clay de Exámenes — Bloque: barra de filtros
+           (exams-filter-card / exams-filter-bar) ── El menú de cada
+           FilterDropdown se renderiza via createPortal a document.body, así
+           que no hereda data-kairo-clay-theme de exams-screen — el propio
+           componente lee useClayThemePreference() y lo aplica en su nodo
+           (ver FilterDropdown). Todo lo demás es descendiente normal de
+           exams-screen. */
+        [data-kairo-clay-theme="dark"] .exams-filter-card {
+          background: #171e38 !important;
+          border-top-color: rgba(96,165,250,.20) !important;
+          border-bottom-color: rgba(96,165,250,.40) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-camino-notice {
+          background: rgba(96,165,250,.12) !important;
+          border-color: rgba(96,165,250,.30) !important;
+          color: #93c5fd !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-filter-intro {
+          color: #9aa7c4 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-filter-divider {
+          background: rgba(96,165,250,.20);
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-trigger {
+          border-color: rgba(96,165,250,.24);
+          background: #1c2440;
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-trigger:hover {
+          border-color: rgba(96,165,250,.40);
+          background: #202a4c;
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-trigger.has-value {
+          border-color: rgba(96,165,250,.40);
+          background: rgba(96,165,250,.14);
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-trigger.is-open {
+          border-color: #60a5fa;
+          box-shadow: 0 0 0 3px rgba(96,165,250,.16);
+          background: rgba(96,165,250,.14);
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-label {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-sep {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-value {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-trigger.has-value .exam-filter-value,
+        [data-kairo-clay-theme="dark"] .exam-filter-trigger.is-open .exam-filter-value {
+          color: #93c5fd;
+        }
+        /* globals.css trae una regla legado .exam-filter-trigger.is-open
+           .exam-filter-label { color:#2563eb } (misma especificidad que
+           .exam-filter-label de aquí) — se gana con un selector más
+           específico, no con !important, replicando la misma intención
+           (label y value pasan a acento cuando el filtro está abierto). */
+        [data-kairo-clay-theme="dark"] .exam-filter-trigger.is-open .exam-filter-label {
+          color: #93c5fd;
+        }
+        /* Misma razón: globals.css trae .exam-filter-trigger:hover
+           .exam-filter-value { color:#0f172a } — sin esto, en hover el valor
+           quedaría casi negro sobre la tarjeta oscura. */
+        [data-kairo-clay-theme="dark"] .exam-filter-trigger:hover .exam-filter-value {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-chevron {
+          color: #7d879e !important;
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-trigger.is-open .exam-filter-chevron {
+          color: #93c5fd !important;
+        }
+        [data-kairo-clay-theme="dark"].exam-filter-menu {
+          background: #171e38;
+          border-color: rgba(96,165,250,.24);
+          box-shadow: 0 8px 24px rgba(0,0,0,.4), 0 2px 6px rgba(0,0,0,.2);
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-option {
+          color: #c7d0e6;
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-option:hover {
+          background: rgba(96,165,250,.10);
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-option.is-active {
+          background: rgba(96,165,250,.16);
+          color: #93c5fd;
+        }
+        [data-kairo-clay-theme="dark"] .exam-filter-check {
+          color: #60a5fa !important;
+        }
+        [data-kairo-clay-theme="dark"] .exam-option-label {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .exam-option-button {
+          border-color: rgba(96,165,250,.24);
+          background: #1c2440;
+          color: #c7d0e6;
+        }
+        [data-kairo-clay-theme="dark"] .exam-option-button:hover {
+          background: #202a4c;
+          border-color: rgba(96,165,250,.40);
+        }
+        [data-kairo-clay-theme="dark"] .exam-option-button.is-active {
+          background: rgba(96,165,250,.16);
+          border-color: #60a5fa;
+          color: #93c5fd;
+        }
       `}</style>
       <SidebarNav />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -6232,11 +6348,11 @@ function cambiarTipo(t: Tipo) {
             </div>
            {!isPhilosophy && <div className="exams-filter-card" style={{ background: 'white', borderTop: '1px solid #e2e8f0', borderBottom: '2px solid #0f172a', padding: '12px 0', marginBottom: 20 }}>
               {caminoExerciseNotice && (
-                <div style={{ marginBottom: '14px', borderRadius: '14px', border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', padding: '10px 12px', fontSize: '12px', fontWeight: 760, lineHeight: 1.45 }}>
+                <div className="exams-camino-notice" style={{ marginBottom: '14px', borderRadius: '14px', border: '1px solid #bfdbfe', background: '#eff6ff', color: '#1d4ed8', padding: '10px 12px', fontSize: '12px', fontWeight: 760, lineHeight: 1.45 }}>
                   {caminoExerciseNotice}
                 </div>
               )}
-              <p style={{ margin: '0 20px 10px', fontSize: 12, fontWeight: 600, color: '#64748b' }}>
+              <p className="exams-filter-intro" style={{ margin: '0 20px 10px', fontSize: 12, fontWeight: 600, color: '#64748b' }}>
                 Selecciona un ejercicio de nuestro banco de PAU (por defecto elegimos uno nuevo para ti).
               </p>
               <div className="exams-filter-bar">

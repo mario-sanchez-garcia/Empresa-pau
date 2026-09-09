@@ -94,7 +94,11 @@ export interface GenerateCaminoPlanMission {
 }
 
 export type GenerateCaminoPlanResult =
-  | { success: true; daysGenerated: number; firstMission: GenerateCaminoPlanMission | null; missions: GenerateCaminoPlanMission[] }
+  // skippedSubjects: asignaturas elegidas por el alumno que la base de datos
+  // rechazó al sembrar la cola. El Camino se genera igual con las demás, pero
+  // el llamador debe registrarlo — es la señal de que el check constraint de
+  // user_learning_queue se ha quedado corto frente a ALLOWED_GENERATE_SUBJECTS.
+  | { success: true; daysGenerated: number; firstMission: GenerateCaminoPlanMission | null; missions: GenerateCaminoPlanMission[]; skippedSubjects: string[] }
   | { success: false; errorCode: 'queue_insert_failed' | 'calendar_insert_failed' | 'queue_update_failed' | 'already_onboarded' | 'internal_error' }
 
 export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Promise<GenerateCaminoPlanResult> {
@@ -157,6 +161,9 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
     const subjectsWithQueue = new Set((existingQueueCheck ?? []).map(r => r.subject))
     const subjectsToQueue = subjects.filter(s => !subjectsWithQueue.has(s))
 
+    const insertedSubjects = new Set<string>()
+    const failedSubjects: string[] = []
+
     if (subjectsToQueue.length > 0) {
       const { data: flashcards } = await db
         .from('curriculum_content_v2')
@@ -181,9 +188,11 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
         if (!bySubject[subject]?.length) bySubject[subject] = betaSequenceItems(subject)
       }
 
-      const queueRows = []
+      const queueRowsBySubject: Record<string, object[]> = {}
       for (const subject of subjectsToQueue) {
         const items = bySubject[subject] ?? []
+        const queueRows: object[] = []
+        queueRowsBySubject[subject] = queueRows
 
         let earlyBlocks = new Set<string | null>()
         if (startMode === 'mid') {
@@ -218,11 +227,47 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
         }
       }
 
-      if (queueRows.length > 0) {
+      // Inserción POR ASIGNATURA, no en lotes mezclados. La cola tiene un
+      // check constraint en `subject` mantenido a mano en la base de datos
+      // (ver 20260729130000_fix_user_learning_queue_subject_check.sql) que
+      // históricamente se ha quedado por detrás de
+      // ALLOWED_GENERATE_SUBJECTS: cuando el alumno elegía una asignatura
+      // aún no aceptada por el constraint, el lote entero —con las demás
+      // asignaturas dentro— era rechazado y el onboarding moría con
+      // queue_generation_failed, repitiéndose idéntico en cada "Reintentar"
+      // (caso real: dos cuentas con Historia de la Filosofía, 09/09/2026).
+      // Aislando cada asignatura, una que la base de datos rechace se
+      // descarta y el Camino se construye igualmente con el resto.
+      for (const subject of subjectsToQueue) {
+        const queueRows = queueRowsBySubject[subject] ?? []
+        if (queueRows.length === 0) continue
+
+        let insertError: string | null = null
         for (let i = 0; i < queueRows.length; i += 100) {
           const { error } = await db.from('user_learning_queue').insert(queueRows.slice(i, i + 100))
-          if (error) throw new Error(`Queue insert error: ${error.message}`)
+          if (error) { insertError = error.message; break }
         }
+
+        if (insertError) {
+          console.error(`[generateCaminoPlan] queue insert failed for subject "${subject}":`, insertError)
+          failedSubjects.push(subject)
+          // Si falló un lote intermedio, la asignatura queda a medias: se
+          // limpia para que el calendario no se construya sobre una cola
+          // parcial (y para que un reintento parta de cero).
+          await db.from('user_learning_queue')
+            .delete()
+            .eq('user_id', userId)
+            .eq('subject', subject)
+            .neq('queue_status', 'completed')
+        } else {
+          insertedSubjects.add(subject)
+        }
+      }
+
+      // Solo se considera fallo real cuando NINGUNA asignatura pudo
+      // sembrarse: con al menos una viva, el alumno tiene Camino.
+      if (insertedSubjects.size === 0 && failedSubjects.length > 0) {
+        throw new Error(`Queue insert error: ninguna asignatura pudo sembrarse (${failedSubjects.join(', ')})`)
       }
     }
 
@@ -254,7 +299,11 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
       if (!subjectQueues[item.subject]) subjectQueues[item.subject] = []
       subjectQueues[item.subject].push(item)
     }
-    const cursors: Record<string, number> = Object.fromEntries(subjects.map(s => [s, 0]))
+    // Solo se reparten días entre asignaturas que de verdad tienen cola. Sin
+    // esto, una asignatura descartada arriba (o sin temario publicado) seguía
+    // recibiendo su turno en subjectForDay y esos días se quedaban vacíos.
+    const scheduleSubjects = subjects.filter(s => (subjectQueues[s]?.length ?? 0) > 0)
+    const cursors: Record<string, number> = Object.fromEntries(scheduleSubjects.map(s => [s, 0]))
 
     const slotsPerDay = Math.max(startMode === 'review' ? 2 : 1, missionsPerDayForMinutes(dailyMinutes))
 
@@ -265,7 +314,7 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
     for (const dateStr of studyDays) {
       if (lockedDates.has(dateStr) || takenDates.has(dateStr)) continue
 
-      const subject = subjectForDay(dateStr, subjects)
+      const subject = subjectForDay(dateStr, scheduleSubjects)
       if (!subject) continue
 
       for (let slot = 0; slot < slotsPerDay; slot++) {
@@ -380,7 +429,7 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
       }
     }
 
-    return { success: true, daysGenerated: calRows.length, firstMission: missions[0] ?? null, missions }
+    return { success: true, daysGenerated: calRows.length, firstMission: missions[0] ?? null, missions, skippedSubjects: failedSubjects }
   } catch (err) {
     console.error('[generateCaminoPlan]', err)
     const message = err instanceof Error ? err.message : ''

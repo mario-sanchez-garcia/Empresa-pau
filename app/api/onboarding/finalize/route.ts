@@ -211,6 +211,10 @@ export async function POST(request: NextRequest) {
     flow_version: FLOW_VERSION,
     request_id: requestId,
     generation_duration_ms: Date.now() - generationStartedAt,
+    // Asignaturas que la base de datos rechazó al sembrar la cola: el Camino
+    // se ha construido con las demás en vez de fallar entero, pero cada valor
+    // aquí es un check constraint de user_learning_queue por ampliar.
+    skipped_subjects: genResult.skippedSubjects,
   })
 
   // ── verifying_calendar ───────────────────────────────────────────────────

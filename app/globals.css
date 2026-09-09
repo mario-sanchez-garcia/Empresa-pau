@@ -1128,13 +1128,18 @@ button:active:not(:disabled),
 [data-kairo-clay-theme="dark"] .exam-statement-body .math-markdown {
   color: #dbe2f0;
 }
-/* MathMarkdown renderiza <strong> con la clase Tailwind fija
-   "text-slate-950" (components/shared/MathMarkdown.tsx) — casi negro,
-   pensada para fondo claro. Esa utilidad vive en @layer utilities de
-   Tailwind v4, que en este proyecto gana el empate de cascada frente a
+/* MathMarkdown renderiza p/li/strong con clases Tailwind fijas
+   (text-slate-700 / text-slate-950 en components/shared/MathMarkdown.tsx)
+   — pensadas para fondo claro. Esas utilidades viven en @layer utilities
+   de Tailwind v4, que en este proyecto gana el empate de cascada frente a
    una regla de globals.css sin capa aunque esta tenga más especificidad
-   — comprobado en el navegador, no asumido. !important es necesario
-   aquí, no una preferencia de estilo. */
+   — comprobado en el navegador (barrido de contraste real), no asumido:
+   el override de arriba en .math-markdown por sí solo NO llegaba a estos
+   tres, hacía falta apuntarlos explícitamente con !important. */
+[data-kairo-clay-theme="dark"] .exam-statement-body .math-markdown p,
+[data-kairo-clay-theme="dark"] .exam-statement-body .math-markdown li {
+  color: #dbe2f0 !important;
+}
 [data-kairo-clay-theme="dark"] .exam-statement-body .math-markdown strong {
   color: #f5f7fc !important;
 }

@@ -932,21 +932,21 @@ function HistorialTrendChart({ points }: { points: Array<{ label: string; avg: n
       <div className="history-trend-max">10</div>
       <div className="history-trend-min">0</div>
       <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
-        <line x1={padX} y1={padTop} x2={width - padX} y2={padTop} stroke="#eef2f7" strokeWidth={1} />
-        <line x1={padX} y1={height - padBottom} x2={width - padX} y2={height - padBottom} stroke="#eef2f7" strokeWidth={1} />
-        <path d={areaPath} fill="rgba(37,99,235,0.12)" stroke="none" />
-        <path d={path} fill="none" stroke="#2563eb" strokeWidth={2.75} strokeLinecap="round" strokeLinejoin="round" />
+        <line className="history-trend-gridline" x1={padX} y1={padTop} x2={width - padX} y2={padTop} stroke="#eef2f7" strokeWidth={1} />
+        <line className="history-trend-gridline" x1={padX} y1={height - padBottom} x2={width - padX} y2={height - padBottom} stroke="#eef2f7" strokeWidth={1} />
+        <path className="history-trend-area" d={areaPath} fill="rgba(37,99,235,0.12)" stroke="none" />
+        <path className="history-trend-line" d={path} fill="none" stroke="#2563eb" strokeWidth={2.75} strokeLinecap="round" strokeLinejoin="round" />
         {pathPoints.map(([x, y], i) => {
           const pointIndex = withDataIndexes[i]
           const pointLabel = points[pointIndex].label
           const pointAvg = points[pointIndex].avg as number
           return (
-            <circle key={i} cx={x} cy={y} r={i === pathPoints.length - 1 ? 4 : 3} fill="#2563eb" stroke="#fff" strokeWidth={i === pathPoints.length - 1 ? 2 : 0}>
+            <circle key={i} className="history-trend-dot" cx={x} cy={y} r={i === pathPoints.length - 1 ? 4 : 3} fill="#2563eb" stroke="#fff" strokeWidth={i === pathPoints.length - 1 ? 2 : 0}>
               <title>{pointLabel}: {pointAvg.toFixed(1)}/10</title>
             </circle>
           )
         })}
-        <text x={Math.min(last[0] + 6, width - 20)} y={last[1] - 8} fontSize="12" fontWeight={900} fill="#1d4ed8">
+        <text className="history-trend-label" x={Math.min(last[0] + 6, width - 20)} y={last[1] - 8} fontSize="12" fontWeight={900} fill="#1d4ed8">
           {lastValue.toFixed(1)}
         </text>
       </svg>
@@ -5856,6 +5856,69 @@ function cambiarTipo(t: Tipo) {
         [data-kairo-clay-theme="dark"] .history-row-menu button:hover {
           background: rgba(96,165,250,.14);
           color: #60a5fa;
+        }
+
+        /* ── Piloto clay de Historial — Bloque 5: aside derecho
+           (HistorialTrendChart, asignaturas a reforzar, mejora reciente,
+           actividad) ── Mismo escopado que los bloques anteriores. */
+        [data-kairo-clay-theme="dark"] .history-side-card > h2 {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .history-side-card > p {
+          color: #9aa7c4;
+        }
+        [data-kairo-clay-theme="dark"] .history-side-row {
+          border-bottom-color: rgba(96,165,250,.14);
+        }
+        [data-kairo-clay-theme="dark"] .history-side-row span {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-side-row b {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-side-row b em {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .history-side-row.positive b {
+          color: #4ade80;
+        }
+        [data-kairo-clay-theme="dark"] .history-bar-track {
+          background: rgba(96,165,250,.14);
+        }
+        [data-kairo-clay-theme="dark"] .history-side-row-count {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .history-trend-max,
+        [data-kairo-clay-theme="dark"] .history-trend-min,
+        [data-kairo-clay-theme="dark"] .history-trend-labels span,
+        [data-kairo-clay-theme="dark"] .history-trend-empty {
+          color: #7d879e;
+        }
+        [data-kairo-clay-theme="dark"] .history-trend-gridline {
+          stroke: rgba(96,165,250,.16);
+        }
+        [data-kairo-clay-theme="dark"] .history-trend-area {
+          fill: rgba(96,165,250,.16);
+        }
+        [data-kairo-clay-theme="dark"] .history-trend-line {
+          stroke: #60a5fa;
+        }
+        [data-kairo-clay-theme="dark"] .history-trend-dot {
+          fill: #60a5fa;
+          stroke: #171e38;
+        }
+        [data-kairo-clay-theme="dark"] .history-trend-label {
+          fill: #93c5fd;
+        }
+        [data-kairo-clay-theme="dark"] .history-activity-grid > div {
+          background: rgba(96,165,250,.08);
+          border-color: rgba(96,165,250,.16);
+        }
+        [data-kairo-clay-theme="dark"] .history-activity-grid strong {
+          color: #eef2fb;
+        }
+        [data-kairo-clay-theme="dark"] .history-activity-grid span {
+          color: #9aa7c4;
         }
       `}</style>
       <SidebarNav />

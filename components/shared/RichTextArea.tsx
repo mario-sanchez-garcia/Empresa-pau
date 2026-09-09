@@ -31,13 +31,13 @@ export default function RichTextArea({
 }: RichTextAreaProps) {
   const editorRef = useRef<HTMLDivElement>(null)
 
-  // When the parent resets value to '', clear the editor
+  // Keep the DOM-backed contentEditable synchronized with restored drafts and
+  // programmatic resets. Typing remains uninterrupted because innerText already
+  // equals value on normal onInput-driven renders.
   useEffect(() => {
     const el = editorRef.current
     if (!el) return
-    if (value === "" && el.innerText.trim() !== "") {
-      el.innerHTML = ""
-    }
+    if (el.innerText !== value) el.innerText = value
   }, [value])
 
   const applyFormat = useCallback(

@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, type CSSProperties } from 'react'
+import { useRef, useState, type CSSProperties } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import type { EjercicioFisicaCataluna, ExamenFisicaCataluna } from '@/app/data/fisica_cataluna'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, scoreFromCorrection } from '@/app/lib/correctionPrompt'
-import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
+import { scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import { supabase } from '@/app/lib/supabase'
+import { saveExamHistory } from '@/app/lib/examHistoryClient'
+import { examTextDraftKey, useExamTextDraft } from '@/app/hooks/useExamTextDraft'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import RichTextArea from '@/components/shared/RichTextArea'
@@ -40,7 +41,8 @@ function IncompleteExerciseNotice() {
   )
 }
 
-export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: ExamenFisicaCataluna; ejercicio: EjercicioFisicaCataluna }) {
+export default function CatFisicaEjercicioCard({ examen, ejercicio, draftOwnerId }: { examen: ExamenFisicaCataluna; ejercicio: EjercicioFisicaCataluna; draftOwnerId?: string }) {
+  const correctionInFlightRef = useRef(false)
   const [opcionIdx, setOpcionIdx] = useState(0)
   const [respuesta, setRespuesta] = useState('')
   const [imagenes, setImagenes] = useState<UploadedImage[]>([])
@@ -57,6 +59,7 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
   const apartadoTexto = apartado ? `${apartado.letra}) ${apartado.enunciado}${apartado.puntos ? ` (${apartado.puntos} puntos)` : ''}` : ''
   const enunciado = [ejercicio.instrucciones, opcion?.enunciado ?? ejercicio.enunciado, apartadoTexto, ...(opcion?.datos ?? ejercicio.datos ?? [])].filter(Boolean).join('\n\n')
   const contenidoIncompleto = isIncompleteOfficialExercise({ ...ejercicio, opcion })
+  useExamTextDraft(draftOwnerId ? examTextDraftKey(['cat-fisica', draftOwnerId, examen.id, ejercicio.numero, opcion?.opcion, apartado?.letra]) : null, respuesta, setRespuesta)
 
   async function handleImagenes(event: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
@@ -107,30 +110,11 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && imagenes.length === 0) return
+    if (correctionInFlightRef.current) return
+    correctionInFlightRef.current = true
     setCargando(true)
     setCorreccion('')
     const option = opcion?.opcion ?? 'Única'
-    const prompt = buildCorrectionPrompt({
-      subject: 'Física PAU Cataluña',
-      community: 'Cataluña',
-      simulacroId: `${examen.id} · Ejercicio ${ejercicio.numero} · Apartado ${apartado?.letra ?? 'único'}`,
-      option,
-      elapsedMinutes: 0,
-      difficulty: 'Media',
-      blocks: [{
-        numeroBloque: `Ejercicio ${ejercicio.numero} · Apartado ${apartado?.letra ?? 'único'}`,
-        tema: `${ejercicio.bloque ?? titulo} · ${apartado?.letra ?? 'único'}`,
-        year: examen.anio,
-        convocatoria: examen.convocatoria,
-        option,
-        maxScore,
-        officialPrompt: enunciado,
-        studentAnswer: modo === 'imagen'
-          ? `Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada. Se adjuntan ${imagenes.length} imagen(es).`
-          : respuesta,
-      }],
-    })
-
     try {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
       const accessToken = sessionData.session?.access_token
@@ -139,13 +123,27 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
         return
       }
 
-      const response = await fetch('/api/chat', {
+      const historyId = crypto.randomUUID()
+      const response = await fetch('/api/exam/correct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
-          pregunta: prompt,
+          subject: 'Física',
+          community: 'Cataluña',
+          examLabel: `${examen.id} · Ejercicio ${ejercicio.numero} · Apartado ${apartado?.letra ?? 'único'}`,
+          option,
+          maxScore,
+          year: examen.anio,
+          examCall: examen.convocatoria,
+          exerciseId: `${examen.id}:${ejercicio.numero}:${apartado?.letra ?? 'unico'}:${option}`,
+          exerciseLabel: `${ejercicio.bloque ?? titulo} · ${apartado?.letra ?? 'único'}`,
+          officialPrompt: enunciado,
+          studentAnswer: modo === 'imagen'
+            ? `Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada. Se adjuntan ${imagenes.length} imagen(es).`
+            : respuesta,
           imagenes: modo === 'imagen' ? imagenes.map(imagen => ({ data: imagen.data, mediaType: imagen.type })) : [],
           creditKey: `cat-fisica:${examen.id}:${ejercicio.numero}:${apartado?.letra ?? 'unico'}:${option}`,
+          historyId,
         }),
       })
       const data = await response.json()
@@ -153,18 +151,24 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
         setCorreccion(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
         return
       }
-      const parsed = parseCorrectionPayload(data.respuesta)
-      const normalized = parsed ? normalizeCorrectionForOfficialScores(parsed, [maxScore]) : null
-      const visible = normalized
-        ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: maxScore })
-        : correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: maxScore })
-      const storedCorrection = normalized ? JSON.stringify(normalized) : visible
+      if (data.truncated) {
+        setCorreccion('La corrección se ha cortado antes de terminar. No se ha guardado; vuelve a intentarlo con la misma respuesta.')
+        return
+      }
+      if (data.notEvaluable || !data.correction) {
+        setCorreccion('No se pudo leer tu respuesta. No se ha guardado como intento; vuelve a intentarlo.')
+        return
+      }
+      const normalized = data.correction
+      const storedCorrection = JSON.stringify(normalized)
       setCorreccion(storedCorrection)
 
-      const { data: userData } = await supabase.auth.getUser()
-      if (userData.user) {
-        await supabase.from('historial_examenes').insert({
-          user_id: userData.user.id,
+      try {
+        const saved = await saveExamHistory({
+          historyId,
+          accessToken,
+          xpGrant: typeof data.xpGrant === 'string' ? data.xpGrant : null,
+          payload: {
           asignatura: 'fisica',
           tipo: `Cataluña · ${examen.convocatoria}`,
           año: examen.anio,
@@ -176,9 +180,16 @@ export default function CatFisicaEjercicioCard({ examen, ejercicio }: { examen: 
           respuesta: (modo === 'imagen' ? `${imagenes.length} imagen(es) adjuntas.` : respuesta).substring(0, 4000),
           // Do not truncate full correction: History modal needs complete feedback.
           correccion: storedCorrection,
+          },
         })
+        if (saved.xpPending) setCorreccion(`${storedCorrection}\n\n> La corrección se guardó, pero el XP queda pendiente de confirmar.`)
+      } catch (saveError) {
+        setCorreccion(`${storedCorrection}\n\n> ${saveError instanceof Error ? saveError.message : 'La corrección está lista, pero no se ha podido guardar en Historial.'}`)
       }
+    } catch {
+      setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
     } finally {
+      correctionInFlightRef.current = false
       setCargando(false)
     }
   }

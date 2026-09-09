@@ -3,11 +3,12 @@
 import { useRef, useState } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import type { PreguntaCat } from '@/app/data/examenes'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores } from '@/app/lib/correctionPrompt'
-import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
+import { scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { supabase } from '@/app/lib/supabase'
+import { saveExamHistory } from '@/app/lib/examHistoryClient'
+import { examTextDraftKey, useExamTextDraft } from '@/app/hooks/useExamTextDraft'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import RichTextArea from '@/components/shared/RichTextArea'
@@ -25,7 +26,7 @@ const CAT_UI = {
   shadow: '0 18px 45px rgba(37,99,235,0.08)'
 }
 
-export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat }) {
+export default function CatPreguntaCard({ pregunta, draftOwnerId }: { pregunta: PreguntaCat; draftOwnerId?: string }) {
   const [respuesta, setRespuesta] = useState('')
   const [imagenes, setImagenes] = useState<Array<{ data: string; type: string; preview: string }>>([])
   const [correccion, setCorreccion] = useState('')
@@ -33,6 +34,8 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
   const [cargando, setCargando] = useState(false)
   const [modo, setModo] = useState<'texto' | 'imagen'>('texto')
   const fileRef = useRef<HTMLInputElement>(null)
+  const correctionInFlightRef = useRef(false)
+  useExamTextDraft(draftOwnerId ? examTextDraftKey(['cat-mates', draftOwnerId, pregunta.id]) : null, respuesta, setRespuesta)
 
   async function handleImagen(event: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
@@ -68,33 +71,14 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && imagenes.length === 0) return
+    if (correctionInFlightRef.current) return
+    correctionInFlightRef.current = true
 
     setCargando(true)
     setCorreccion('')
 
     const option = pregunta.opcion ?? 'A'
     const officialPrompt = `${pregunta.enunciado}\n\n${pregunta.apartados.join('\n')}`
-    const prompt = buildCorrectionPrompt({
-      subject: 'Matemáticas II',
-      simulacroId: `Práctica Matemáticas II Cataluña ${pregunta.year} ${pregunta.tipo} ${pregunta.serie} Ejercicio ${pregunta.ejercicio}`,
-      option,
-      elapsedMinutes: 0,
-      difficulty: 'Media',
-      blocks: [{
-        numeroBloque: `Ejercicio ${pregunta.ejercicio}`,
-        tema: pregunta.tema,
-        year: pregunta.year,
-        convocatoria: pregunta.tipo,
-        option,
-        maxScore: pregunta.puntuacion,
-        officialPrompt,
-        criteria: pregunta.criterios,
-        studentAnswer: modo === 'imagen'
-          ? `Respuesta manuscrita adjunta como ${imagenes.length === 1 ? 'imagen' : `${imagenes.length} imágenes — están en orden, léelas como páginas consecutivas de una misma respuesta`}. Corrígela leyendo la(s) imagen(es) enviada(s).`
-          : respuesta
-      }]
-    })
-
     try {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
       const accessToken = sessionData.session?.access_token
@@ -103,15 +87,30 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
         return
       }
 
-      const res = await fetch('/api/chat', {
+      const historyId = crypto.randomUUID()
+      const res = await fetch('/api/exam/correct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
-          pregunta: prompt,
+          subject: 'Matemáticas II',
+          community: 'Cataluña',
+          examLabel: `Práctica Matemáticas II Cataluña ${pregunta.year} ${pregunta.tipo} ${pregunta.serie} Ejercicio ${pregunta.ejercicio}`,
+          option,
+          maxScore: pregunta.puntuacion,
+          year: pregunta.year,
+          examCall: pregunta.tipo,
+          exerciseId: pregunta.id,
+          exerciseLabel: `Ejercicio ${pregunta.ejercicio} · ${pregunta.tema}`,
+          officialPrompt,
+          criteria: pregunta.criterios,
+          studentAnswer: modo === 'imagen'
+            ? `Respuesta manuscrita adjunta como ${imagenes.length === 1 ? 'imagen' : `${imagenes.length} imágenes — están en orden, léelas como páginas consecutivas de una misma respuesta`}. Corrígela leyendo la(s) imagen(es) enviada(s).`
+            : respuesta,
           imagen: modo === 'imagen' ? imagenes[0]?.data ?? null : null,
           imagenTipo: modo === 'imagen' ? imagenes[0]?.type ?? null : null,
           imagenes: modo === 'imagen' ? imagenes.slice(1).map(img => ({ data: img.data, mediaType: img.type })) : undefined,
           creditKey: `cat-mates:${pregunta.year}:${pregunta.tipo}:${pregunta.serie}:${pregunta.ejercicio}:${option}`,
+          historyId,
         })
       })
       const data = await res.json()
@@ -119,26 +118,26 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
         setCorreccion(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
         return
       }
-      const parsedCorrection = parseCorrectionPayload(data.respuesta)
-      const correccionJson = parsedCorrection ? normalizeCorrectionForOfficialScores(parsedCorrection, [pregunta.puntuacion]) : null
-      const correccionVisible = correccionJson
-        ? correctionJsonToMarkdownWithOptions(correccionJson, { officialMaxScore: pregunta.puntuacion })
-        : sanitizeCorrectionScaleText(correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: pregunta.puntuacion }), pregunta.puntuacion)
-      const correccionGuardada = correccionJson ? JSON.stringify(correccionJson) : correccionVisible
+      if (data.truncated) {
+        setCorreccion('La corrección se ha cortado antes de terminar. No se ha guardado; vuelve a intentarlo con la misma respuesta.')
+        return
+      }
+      if (data.notEvaluable || !data.correction) {
+        setCorreccion('No se pudo leer tu respuesta. No se ha guardado como intento; vuelve a intentarlo.')
+        return
+      }
+      const correccionJson = data.correction
+      const correccionGuardada = JSON.stringify(correccionJson)
       setCorreccion(correccionGuardada)
 
-      const bloqueJson = correccionJson?.desglose_bloques?.[0]
-      const partes = !correccionJson ? data.respuesta?.match(/([0-9]+[.,]?[0-9]*)\s*\/\s*([0-9]+[.,]?[0-9]*)/) : null
-      const rawNota = bloqueJson?.puntos_conseguidos != null
-        ? Number(bloqueJson.puntos_conseguidos)
-        : partes ? parseFloat(partes[1].replace(',', '.')) : null
-      const nota = rawNota === null ? null : Math.min(pregunta.puntuacion, Math.max(0, rawNota))
+      const nota = scoreFromCorrection(correccionJson, pregunta.puntuacion)
       const notaMax = pregunta.puntuacion
-      const { data: userData } = await supabase.auth.getUser()
-
-      if (userData.user) {
-        await supabase.from('historial_examenes').insert({
-          user_id: userData.user.id,
+      try {
+        const saved = await saveExamHistory({
+          historyId,
+          accessToken,
+          xpGrant: typeof data.xpGrant === 'string' ? data.xpGrant : null,
+          payload: {
           asignatura: 'mates',
           tipo: pregunta.tipo,
           año: pregunta.year,
@@ -150,9 +149,16 @@ export default function CatPreguntaCard({ pregunta }: { pregunta: PreguntaCat })
           respuesta: modo === 'imagen' ? `Respuesta manuscrita adjunta (${imagenes.length} imagen${imagenes.length === 1 ? '' : 'es'}).` : respuesta.substring(0, 4000),
           // Do not truncate full correction: History modal needs complete feedback.
           correccion: correccionGuardada
+          },
         })
+        if (saved.xpPending) setCorreccion(`${correccionGuardada}\n\n> La corrección se guardó, pero el XP queda pendiente de confirmar.`)
+      } catch (saveError) {
+        setCorreccion(`${correccionGuardada}\n\n> ${saveError instanceof Error ? saveError.message : 'La corrección está lista, pero no se ha podido guardar en Historial.'}`)
       }
+    } catch {
+      setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
     } finally {
+      correctionInFlightRef.current = false
       setCargando(false)
     }
   }

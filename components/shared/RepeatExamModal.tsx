@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Camera, PenLine, UploadCloud, X } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import { scoreFromCorrection } from '@/app/lib/correctionPrompt'
@@ -10,6 +10,7 @@ import CorrectionResultCard from './CorrectionResultCard'
 import RichTextArea from './RichTextArea'
 import KairoLoadingDot from './KairoLoadingDot'
 import MathMarkdown from './MathMarkdown'
+import { saveExamHistory } from '@/app/lib/examHistoryClient'
 
 export type RepeatExamSource = {
   id: string
@@ -43,6 +44,7 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
   const [correction, setCorrection] = useState<unknown>(null)
   const [nota, setNota] = useState<number | null>(null)
   const [xpMessage, setXpMessage] = useState('')
+  const submitInFlightRef = useRef(false)
   const maxScore = source.nota_maxima ?? 10
   const canSubmit = modo === 'texto' ? Boolean(answer.trim()) : imagenes.length > 0
 
@@ -76,7 +78,8 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
   }
 
   async function submit() {
-    if (!canSubmit || submitting) return
+    if (!canSubmit || submitting || submitInFlightRef.current) return
+    submitInFlightRef.current = true
     setSubmitting(true)
     setError('')
     try {
@@ -84,6 +87,7 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
       const accessToken = sessionData.session?.access_token
       if (!accessToken) { setError('Tu sesión ha caducado. Vuelve a iniciar sesión.'); return }
 
+      const historyId = crypto.randomUUID()
       const res = await fetch('/api/exam/correct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
@@ -100,11 +104,16 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
           imagen: modo === 'imagen' ? imagenes[0]?.data ?? null : null,
           imagenTipo: modo === 'imagen' ? imagenes[0]?.type ?? null : null,
           imagenes: modo === 'imagen' ? imagenes.slice(1).map(img => ({ data: img.data, mediaType: img.type })) : undefined,
+          historyId,
         }),
       })
       const data = await res.json()
       if (!res.ok) {
         setError(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
+        return
+      }
+      if (data.truncated) {
+        setError('La corrección se ha cortado antes de terminar. No se ha guardado; vuelve a intentarlo con la misma respuesta.')
         return
       }
       // Antes esto pasaba data.respuesta (inexistente en la respuesta de
@@ -123,10 +132,12 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
       setCorrection(correctionJson)
       setNota(rawScore)
 
-      const { data: userData } = await supabase.auth.getUser()
-      if (!userData.user) return
-      const { data: inserted } = await supabase.from('historial_examenes').insert({
-        user_id: userData.user.id,
+      try {
+        const saved = await saveExamHistory({
+          historyId,
+          accessToken,
+          xpGrant: typeof data.xpGrant === 'string' ? data.xpGrant : null,
+          payload: {
         asignatura: source.asignatura,
         tipo: source.tipo ?? 'Examen',
         año: source.año ?? new Date().getFullYear(),
@@ -138,32 +149,21 @@ export default function RepeatExamModal({ source, onClose, onDone }: {
         respuesta: modo === 'imagen' ? `Respuesta manuscrita adjunta (${imagenes.length} imagen${imagenes.length === 1 ? '' : 'es'}).` : answer.slice(0, 4000),
         correccion: JSON.stringify(correctionJson),
         repeated_from_id: source.id,
-      }).select('id').single()
-
-      if (inserted?.id) {
-        try {
-          const xpRes = await fetch('/api/camino/award-exam-xp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-            body: JSON.stringify({ historialExamenId: inserted.id }),
-          })
-          const xpJson = await xpRes.json()
-          // Con el nuevo sistema de XP, repetir sin mejorar ya no da 0 XP
-          // (se queda con el XP reducido de repetición de siempre) — xpJson
-          // .improved (no xpAwarded > 0, casi siempre true ahora) es lo que
-          // distingue si hubo bonus de mejora de verdad.
-          if (xpJson.success && typeof xpJson.xpAwarded === 'number' && xpJson.xpAwarded > 0) {
-            setXpMessage(xpJson.improved
-              ? `+${xpJson.xpAwarded} XP${xpJson.bonusXp > 0 ? ` · +${xpJson.bonusXp} bonus por mejora` : ''} — ¡nota mejorada!`
-              : `+${xpJson.xpAwarded} XP. No has mejorado tu mejor nota anterior, así que sin bonus extra esta vez.`)
-            onDone?.({ xpAwarded: xpJson.xpAwarded, bonusXp: xpJson.bonusXp ?? 0, nota: rawScore, noImprovement: !xpJson.improved })
-          } else {
-            setXpMessage('No has mejorado tu mejor nota anterior, así que no hay XP extra esta vez.')
-            onDone?.({ xpAwarded: 0, bonusXp: 0, nota: rawScore, noImprovement: true })
-          }
-        } catch { /* silent */ }
+          },
+        })
+        if (saved.xp) {
+          setXpMessage(saved.xp.improved
+            ? `+${saved.xp.xpAwarded} XP${saved.xp.bonusXp > 0 ? ` · +${saved.xp.bonusXp} bonus por mejora` : ''} — ¡nota mejorada!`
+            : `+${saved.xp.xpAwarded} XP. No has mejorado tu mejor nota anterior, así que sin bonus extra esta vez.`)
+          onDone?.({ xpAwarded: saved.xp.xpAwarded, bonusXp: saved.xp.bonusXp, nota: rawScore, noImprovement: !saved.xp.improved })
+        } else if (saved.xpPending) {
+          setXpMessage('Intento guardado. El XP queda pendiente de confirmar.')
+        }
+      } catch (saveError) {
+        setError(saveError instanceof Error ? saveError.message : 'La corrección está lista, pero no se ha podido guardar en Historial.')
       }
     } finally {
+      submitInFlightRef.current = false
       setSubmitting(false)
     }
   }

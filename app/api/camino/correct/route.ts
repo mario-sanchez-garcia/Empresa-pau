@@ -17,6 +17,7 @@ import { buildCorrectionPrompt, normalizeCorrectionForOfficialScores, parseCorre
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { BILLING_BLOCK_CODE, createRateLimitPayload, monthlyLimitResetNotice, type RateLimitAction } from '@/app/lib/rateLimitMessages'
+import { isValidExamHistoryId, issueExamXpGrant } from '@/app/lib/camino/examXpGrant'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,6 +44,7 @@ type CaminoCorrectBody = {
   studentResponseImages?: unknown
   responseMode?: unknown
   imageType?: unknown
+  historyId?: unknown
 }
 
 type CurriculumV2Row = {
@@ -422,9 +424,14 @@ export async function POST(request: NextRequest) {
       truncated: message.stop_reason === 'max_tokens',
     })
   }
+  const historyId = isValidExamHistoryId(body.historyId) ? body.historyId : null
+  const xpGrant = historyId && score != null && !(normalized as { notEvaluable?: boolean })?.notEvaluable
+    ? issueExamXpGrant({ historyId, userId: authContext.user.id, score, maxScore })
+    : null
   return NextResponse.json({
     correction: publicCorrection,
     score,
+    xpGrant,
     notEvaluable: Boolean((normalized as { notEvaluable?: boolean })?.notEvaluable),
     truncated: message.stop_reason === 'max_tokens',
     finishReason: message.stop_reason ?? 'unknown',

@@ -7,6 +7,7 @@ import { normalizeScoreToTen } from '@/app/lib/camino/scoreNormalization'
 import { countRepeatDepth } from '@/app/lib/camino/repeatImprovement'
 import { EXAM_CORRECTION_XP } from '@/app/lib/camino/xpMap'
 import { getMadridDate, getMadridToday } from '@/app/lib/camino/studyDays'
+import { verifyExamXpGrant } from '@/app/lib/camino/examXpGrant'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,6 +38,7 @@ export async function POST(request: NextRequest) {
     try { body = await request.json() } catch { /* ok */ }
 
     const historialExamenId = typeof body.historialExamenId === 'string' ? body.historialExamenId : null
+    const xpGrant = typeof body.xpGrant === 'string' ? body.xpGrant : null
     if (!historialExamenId) {
       return NextResponse.json({ error: 'historialExamenId es obligatorio' }, { status: 400 })
     }
@@ -61,6 +63,15 @@ export async function POST(request: NextRequest) {
     if (examen.nota == null) {
       // Corrección guardada pero sin nota evaluable — no cuenta como corrección real.
       return NextResponse.json({ success: false, reason: 'not_gradable' })
+    }
+
+    if (!verifyExamXpGrant(xpGrant, {
+      historyId: String(examen.id),
+      userId: user.id,
+      score: Number(examen.nota),
+      maxScore: Number(examen.nota_maxima),
+    })) {
+      return NextResponse.json({ success: false, reason: 'invalid_xp_grant' }, { status: 403 })
     }
 
     const missionDate = typeof examen.created_at === 'string'

@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, type CSSProperties } from 'react'
+import { useRef, useState, type CSSProperties } from 'react'
 import { Camera, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, scoreFromCorrection } from '@/app/lib/correctionPrompt'
-import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
+import { scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import { supabase } from '@/app/lib/supabase'
+import { saveExamHistory } from '@/app/lib/examHistoryClient'
+import { examTextDraftKey, useExamTextDraft } from '@/app/hooks/useExamTextDraft'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import RichTextArea from '@/components/shared/RichTextArea'
@@ -67,15 +68,18 @@ export default function CatEjercicioCard({
   asignaturaLabel,
   examen,
   ejercicio,
+  draftOwnerId,
   colorScheme,
 }: {
   asignatura: 'quimica' | 'lengua'
   asignaturaLabel: string
   examen: ExamContext
   ejercicio: CatEjercicioView
+  draftOwnerId?: string
   colorScheme?: ColorScheme
 }) {
   const UI = colorScheme ?? DEFAULT_UI
+  const correctionInFlightRef = useRef(false)
   const [respuesta, setRespuesta] = useState('')
   const [imagenes, setImagenes] = useState<UploadedImage[]>([])
   const [correccion, setCorreccion] = useState('')
@@ -105,6 +109,7 @@ export default function CatEjercicioCard({
     ...(ejercicio.datos ?? []),
   ].filter(Boolean).join('\n\n')
   const contenidoIncompleto = isIncompleteOfficialExercise(ejercicio)
+  useExamTextDraft(draftOwnerId ? examTextDraftKey(['cat', draftOwnerId, asignatura, examen.id, ejercicio.id, apartado?.id]) : null, respuesta, setRespuesta)
 
   function cambiarApartado(index: number) {
     imagenes.forEach(imagen => URL.revokeObjectURL(imagen.preview))
@@ -147,30 +152,10 @@ export default function CatEjercicioCard({
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && imagenes.length === 0) return
+    if (correctionInFlightRef.current) return
+    correctionInFlightRef.current = true
     setCargando(true)
     setCorreccion('')
-    const prompt = buildCorrectionPrompt({
-      subject: asignaturaLabel,
-      community: 'Cataluña',
-      simulacroId: `${examen.id} · ${ejercicio.titulo} · ${apartado?.id ?? 'Sin apartado'}`,
-      option: ejercicio.opcion ?? 'Única',
-      elapsedMinutes: 0,
-      difficulty: 'Media',
-      blocks: [{
-        numeroBloque: `${ejercicio.titulo} · ${apartado?.id ?? 'Sin apartado'}`,
-        tema: apartado?.id ? `${ejercicio.titulo} · ${apartado.id}` : ejercicio.titulo,
-        year: examen.anio,
-        convocatoria: examen.convocatoria,
-        option: ejercicio.opcion ?? 'Única',
-        maxScore,
-        officialPrompt: enunciadoCompleto,
-        sourceText: [ejercicio.texto, ejercicio.fuente].filter(Boolean).join('\n'),
-        studentAnswer: modo === 'imagen'
-          ? `Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada. Se adjuntan ${imagenes.length} imagen(es).`
-          : respuesta.trim(),
-      }],
-    })
-
     try {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
       const accessToken = sessionData.session?.access_token
@@ -179,13 +164,28 @@ export default function CatEjercicioCard({
         return
       }
 
-      const response = await fetch('/api/chat', {
+      const historyId = crypto.randomUUID()
+      const response = await fetch('/api/exam/correct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
-          pregunta: prompt,
+          subject: asignaturaLabel,
+          community: 'Cataluña',
+          examLabel: `${examen.id} · ${ejercicio.titulo} · ${apartado?.id ?? 'Sin apartado'}`,
+          option: ejercicio.opcion ?? 'Única',
+          maxScore,
+          year: examen.anio,
+          examCall: examen.convocatoria,
+          exerciseId: `${examen.id}:${ejercicio.id}:${apartado?.id ?? 'unico'}`,
+          exerciseLabel: apartado?.id ? `${ejercicio.titulo} · ${apartado.id}` : ejercicio.titulo,
+          officialPrompt: enunciadoCompleto,
+          sourceText: [ejercicio.texto, ejercicio.fuente].filter(Boolean).join('\n'),
+          studentAnswer: modo === 'imagen'
+            ? `Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada. Se adjuntan ${imagenes.length} imagen(es).`
+            : respuesta.trim(),
           imagenes: modo === 'imagen' ? imagenes.map(imagen => ({ data: imagen.data, mediaType: imagen.type })) : [],
           creditKey: `cat-${asignatura}:${examen.id}:${ejercicio.titulo}:${apartado?.id ?? 'unico'}:${ejercicio.opcion ?? 'unica'}`,
+          historyId,
         }),
       })
       const data = await response.json()
@@ -193,18 +193,24 @@ export default function CatEjercicioCard({
         setCorreccion(getApiErrorMessage(data, 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.'))
         return
       }
-      const parsed = parseCorrectionPayload(data.respuesta)
-      const normalized = parsed ? normalizeCorrectionForOfficialScores(parsed, [maxScore]) : null
-      const visible = normalized
-        ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: maxScore })
-        : correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: maxScore })
-      const storedCorrection = normalized ? JSON.stringify(normalized) : visible
+      if (data.truncated) {
+        setCorreccion('La corrección se ha cortado antes de terminar. No se ha guardado; vuelve a intentarlo con la misma respuesta.')
+        return
+      }
+      if (data.notEvaluable || !data.correction) {
+        setCorreccion('No se pudo leer tu respuesta. No se ha guardado como intento; vuelve a intentarlo.')
+        return
+      }
+      const normalized = data.correction
+      const storedCorrection = JSON.stringify(normalized)
       setCorreccion(storedCorrection)
 
-      const { data: userData } = await supabase.auth.getUser()
-      if (userData.user) {
-        await supabase.from('historial_examenes').insert({
-          user_id: userData.user.id,
+      try {
+        const saved = await saveExamHistory({
+          historyId,
+          accessToken,
+          xpGrant: typeof data.xpGrant === 'string' ? data.xpGrant : null,
+          payload: {
           asignatura,
           tipo: `Cataluña · ${examen.convocatoria}`,
           año: examen.anio,
@@ -216,9 +222,16 @@ export default function CatEjercicioCard({
           respuesta: (modo === 'imagen' ? `${imagenes.length} imagen(es) adjuntas.` : respuesta).substring(0, 4000),
           // Do not truncate full correction: History modal needs complete feedback.
           correccion: storedCorrection,
+          },
         })
+        if (saved.xpPending) setCorreccion(`${storedCorrection}\n\n> La corrección se guardó, pero el XP queda pendiente de confirmar.`)
+      } catch (saveError) {
+        setCorreccion(`${storedCorrection}\n\n> ${saveError instanceof Error ? saveError.message : 'La corrección está lista, pero no se ha podido guardar en Historial.'}`)
       }
+    } catch {
+      setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
     } finally {
+      correctionInFlightRef.current = false
       setCargando(false)
     }
   }

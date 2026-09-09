@@ -9,6 +9,7 @@ import { buildEvauHref, subjectLabelFromSlug, type CaminoCurriculumTopic } from 
 import { loadOnboarding } from '@/app/lib/onboarding/onboardingStorage'
 import { correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
+import { saveExamHistory } from '@/app/lib/examHistoryClient'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { supabase } from '@/app/lib/supabase'
@@ -143,6 +144,7 @@ type CaminoCorrectionResponse = {
   truncated?: boolean
   finishReason?: string
   score?: number | null
+  xpGrant?: string | null
   mock?: boolean
 }
 type LessonSegment =
@@ -1039,6 +1041,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       }
       void recordMissionStart(accessToken)
       const statement = selectedV2Card?.practice_prompt ?? currentTopic.practicePrompt ?? currentTopic.guidedExample ?? ('Ejercicio de ' + selectedMissionTitle)
+      const correctionHistoryId = crypto.randomUUID()
       const response = await fetch('/api/camino/correct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
@@ -1054,6 +1057,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
           studentResponseImages: answerMode === 'imagen'
             ? images.slice(1).map(img => ({ data: img.data, mediaType: img.type }))
             : undefined,
+          historyId: correctionHistoryId,
         })
       })
       const data = parseCaminoCorrectionResponse(await response.text())
@@ -1100,8 +1104,12 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         let toastText = `Intento guardado · nota ${rawScore}/10`
         const { data: userData } = await supabase.auth.getUser()
         if (userData.user) {
-          const { data: inserted, error: insertError } = await supabase.from('historial_examenes').insert({
-            user_id: userData.user.id,
+          try {
+            const saved = await saveExamHistory({
+              historyId: correctionHistoryId,
+              accessToken,
+              xpGrant: typeof data.xpGrant === 'string' ? data.xpGrant : null,
+              payload: {
             asignatura: currentTopic.subject,
             tipo: 'Camino PAU',
             año: new Date().getFullYear(),
@@ -1114,36 +1122,20 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
             correccion: storedCorrection,
             repeated_from_id: repeatOfId,
             v2_sort_order: selectedSortOrder,
-          }).select('id').single()
-          if (insertError || !inserted?.id) {
-            toastText = `Corrección lista · nota ${rawScore}/10, pero no se pudo guardar el intento. Reinténtalo.`
-          } else {
-            try {
-              const repeatRes = await fetch('/api/camino/award-exam-xp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-                body: JSON.stringify({ historialExamenId: inserted.id, repeatedFromId: repeatOfId }),
-              })
-              const repeatJson = await repeatRes.json().catch(() => null) as { success?: boolean; xpAwarded?: number; streakDays?: number; leagueUpgrade?: { from: string; to: string }; improved?: boolean } | null
-              // Con el nuevo sistema de XP, repetir sin mejorar ya no da 0
-              // XP (se queda con el XP reducido de repetición de siempre) —
-              // repeatJson.improved (no xpAwarded > 0, que ahora es casi
-              // siempre true) es lo que distingue si hubo bonus de mejora.
-              if (!repeatRes.ok || !repeatJson) {
-                toastText = `Intento guardado · nota ${rawScore}/10. El XP queda pendiente de confirmar; puedes reintentar.`
-              } else if (repeatJson.success && typeof repeatJson.xpAwarded === 'number' && repeatJson.xpAwarded > 0) {
-                setXpAwarded(repeatJson.xpAwarded)
-                if (typeof repeatJson.streakDays === 'number') setStreak(repeatJson.streakDays)
-                toastText = repeatJson.improved
-                  ? `¡Nota mejorada! +${repeatJson.xpAwarded} XP · nota ${rawScore}/10`
-                  : `+${repeatJson.xpAwarded} XP · nota ${rawScore}/10. No ha mejorado tu mejor nota, así que sin bonus extra esta vez.`
-                if (repeatJson.leagueUpgrade) setLeagueUpgrade(repeatJson.leagueUpgrade)
-              } else {
-                toastText = `Intento guardado · nota ${rawScore}/10. No ha mejorado tu mejor nota, así que no suma XP extra.`
-              }
-            } catch {
+              },
+            })
+            if (saved.xp) {
+              setXpAwarded(saved.xp.xpAwarded)
+              if (typeof saved.xp.streakDays === 'number') setStreak(saved.xp.streakDays)
+              if (saved.xp.leagueUpgrade) setLeagueUpgrade(saved.xp.leagueUpgrade)
+              toastText = saved.xp.improved
+                ? `¡Nota mejorada! +${saved.xp.xpAwarded} XP · nota ${rawScore}/10`
+                : `+${saved.xp.xpAwarded} XP · nota ${rawScore}/10. No ha mejorado tu mejor nota, así que sin bonus extra esta vez.`
+            } else if (saved.xpPending) {
               toastText = `Intento guardado · nota ${rawScore}/10. El XP queda pendiente de confirmar; puedes reintentar.`
             }
+          } catch {
+            toastText = `Corrección lista · nota ${rawScore}/10, pero no se pudo guardar el intento. Reinténtalo.`
           }
           calcularRacha(userData.user.id, supabase).then(s => setStreak(s)).catch(() => undefined)
         }

@@ -9,8 +9,9 @@ import { getUserBillingContext, getMonthlyActionCount, getMonthlyUniqueActionCou
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
-import { buildBlockPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson } from '@/app/lib/correctionPrompt'
+import { buildBlockPrompt, normalizeCorrectionForOfficialScores, parseCorrectionJson, scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { getTheoryContextForExercise, theoryContextToPrompt } from '@/app/lib/whyItWorksTheory'
+import { isValidExamHistoryId, issueExamXpGrant } from '@/app/lib/camino/examXpGrant'
 
 // 55s SDK timeout leaves ~5s for the function to return a clean JSON error
 // before Vercel's 60s maxDuration (Hobby plan ceiling) kills the process.
@@ -89,6 +90,7 @@ type ExamCorrectBody = {
   imagenTipo?: unknown
   imagenes?: unknown
   creditKey?: unknown
+  historyId?: unknown
 }
 
 export async function POST(request: NextRequest) {
@@ -128,9 +130,11 @@ async function handlePost(request: NextRequest) {
   const community = asString(body.community) || 'Madrid'
   const examLabel = asString(body.examLabel) || subject
   const option = asString(body.option)
-  const maxScore = asNumber(body.maxScore) ?? 10
+  const requestedMaxScore = asNumber(body.maxScore) ?? 10
+  const maxScore = requestedMaxScore > 0 && requestedMaxScore <= 10 ? requestedMaxScore : 10
   const officialPrompt = asString(body.officialPrompt)
   const studentAnswer = asString(body.studentAnswer)
+  const historyId = isValidExamHistoryId(body.historyId) ? body.historyId : null
   const concepts = Array.isArray(body.concepts) ? body.concepts.filter((item): item is string => typeof item === 'string') : undefined
   const criteria = asString(body.criteria) || undefined
   const sourceText = asString(body.sourceText) || undefined
@@ -336,6 +340,10 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
   }
 
   const normalized = normalizeCorrectionForOfficialScores(parsed, [maxScore])
+  const score = scoreFromCorrection(normalized, maxScore)
+  const xpGrant = historyId && score != null && !(normalized as { notEvaluable?: boolean })?.notEvaluable
+    ? issueExamXpGrant({ historyId, userId: authContext.user.id, score, maxScore })
+    : null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON de corrección sin interfaz completa
   const block = (normalized as any)?.desglose_bloques?.[0]
 
@@ -362,7 +370,8 @@ un valor de texto, escapa los saltos de línea correctamente para no romper el J
     notEvaluable: Boolean((normalized as { notEvaluable?: boolean })?.notEvaluable),
     whyContext: theoryContext,
     truncated: message.stop_reason === 'max_tokens',
-    finishReason: message.stop_reason ?? 'unknown'
+    finishReason: message.stop_reason ?? 'unknown',
+    xpGrant,
   })
 }
 

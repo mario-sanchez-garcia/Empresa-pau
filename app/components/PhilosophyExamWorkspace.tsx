@@ -5,11 +5,12 @@ import { createPortal } from 'react-dom'
 import { Camera, Check, ChevronDown, PenLine, UploadCloud, WandSparkles, X } from 'lucide-react'
 import { examenesHistoriaFilosofiaMadrid } from '@/app/data/historia_filosofia_madrid'
 import { examenesHistoriaFilosofiaCataluna } from '@/app/data/historia_filosofia_cataluna'
-import { buildCorrectionPrompt, correctionJsonToMarkdownWithOptions, normalizeCorrectionForOfficialScores, scoreFromCorrection } from '@/app/lib/correctionPrompt'
-import { correctionPayloadToMarkdown, parseCorrectionPayload } from '@/app/lib/correctionParsing'
+import { scoreFromCorrection } from '@/app/lib/correctionPrompt'
 import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { supabase } from '@/app/lib/supabase'
+import { saveExamHistory } from '@/app/lib/examHistoryClient'
+import { examTextDraftKey, useExamTextDraft } from '@/app/hooks/useExamTextDraft'
 import ExamStatement from '@/components/shared/ExamStatement'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
@@ -29,7 +30,7 @@ function titleCase(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
-export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
+export default function PhilosophyExamWorkspace({ ccaa, draftOwnerId }: { ccaa: Comunidad; draftOwnerId?: string }) {
   const [convocatoria, setConvocatoria] = useState<Convocatoria>('ordinaria')
   const [year, setYear] = useState<number | null>(null)
   const [examId, setExamId] = useState('')
@@ -47,6 +48,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
   const [error, setError] = useState('')
   const [imageError, setImageError] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
+  const correctionInFlightRef = useRef(false)
 
   const exams = useMemo(() => (
     ccaa === 'Madrid'
@@ -139,6 +141,7 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
         isSelectedTextQuestion && selectedText?.solucionOrientativa ? `Solución orientativa disponible:\n${selectedText.solucionOrientativa}` : ''
       ].filter(Boolean).join('\n\n')
     : 'Valora la precisión conceptual, la comprensión del texto o problema filosófico, la argumentación, la comparación razonada y la claridad expresiva. Respeta el límite de palabras cuando se indique.'
+  useExamTextDraft(draftOwnerId ? examTextDraftKey(['filosofia', draftOwnerId, ccaa, selectedExam?.id, contextLabel]) : null, answer, setAnswer)
 
   async function chooseImage(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -171,31 +174,11 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
 
   async function correct() {
     if (!selectedQuestion || !selectedExam || (mode === 'text' ? !answer.trim() : !image)) return
+    if (correctionInFlightRef.current) return
+    correctionInFlightRef.current = true
     setLoading(true)
     setCorrection('')
     setError('')
-    const prompt = buildCorrectionPrompt({
-      subject: 'Historia de la Filosofía',
-      community: ccaa,
-      simulacroId: `Práctica Filosofía ${ccaa} ${selectedExam.anio} ${convocatoria} ${contextLabel}`,
-      option: ccaa === 'Madrid' ? textOption : selectedExercise?.opciones ? exerciseOption : 'Única',
-      elapsedMinutes: 0,
-      difficulty: 'Media',
-      blocks: [{
-        numeroBloque: contextLabel,
-        tema: selectedQuestion.titulo,
-        community: ccaa,
-        year: selectedExam.anio,
-        convocatoria,
-        option: ccaa === 'Madrid' ? textOption : selectedExercise?.opciones ? exerciseOption : 'Única',
-        maxScore,
-        officialPrompt: selectedQuestion.enunciado,
-        sourceText,
-        criteria,
-        studentAnswer: mode === 'image' ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.' : answer
-      }]
-    })
-
     try {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
       const accessToken = sessionData.session?.access_token
@@ -204,46 +187,65 @@ export default function PhilosophyExamWorkspace({ ccaa }: { ccaa: Comunidad }) {
         return
       }
 
-      const response = await fetch('/api/chat', {
+      const historyId = crypto.randomUUID()
+      const option = ccaa === 'Madrid' ? textOption : selectedExercise?.opciones ? exerciseOption : 'Única'
+      const response = await fetch('/api/exam/correct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({
-          pregunta: prompt,
+          subject: 'Historia de la Filosofía',
+          community: ccaa,
+          examLabel: `Práctica Filosofía ${ccaa} ${selectedExam.anio} ${convocatoria} ${contextLabel}`,
+          option,
+          maxScore,
+          year: selectedExam.anio,
+          examCall: convocatoria,
+          exerciseId: selectedQuestion.id ?? contextLabel,
+          exerciseLabel: contextLabel,
+          officialPrompt: selectedQuestion.enunciado,
+          sourceText,
+          criteria,
+          studentAnswer: mode === 'image' ? 'Respuesta manuscrita adjunta como imagen. Corrígela leyendo la imagen enviada.' : answer,
           imagen: mode === 'image' ? image : null,
           imagenTipo: mode === 'image' ? imageType : null,
           creditKey: `filosofia:${ccaa}:${selectedExam.anio}:${convocatoria}:${contextLabel}:${ccaa === 'Madrid' ? textOption : selectedExercise?.opciones ? exerciseOption : 'Única'}`,
+          historyId,
         })
       })
       const data = await response.json()
       if (!response.ok) throw new Error(getApiErrorMessage(data, 'No se pudo corregir la respuesta.'))
-      const parsed = parseCorrectionPayload(data.respuesta)
-      const normalized = parsed ? normalizeCorrectionForOfficialScores(parsed, [maxScore]) : null
-      const visible = normalized
-        ? correctionJsonToMarkdownWithOptions(normalized, { officialMaxScore: maxScore })
-        : correctionPayloadToMarkdown(data.respuesta ?? '', { officialMaxScore: maxScore })
-      const storedCorrection = normalized ? JSON.stringify(normalized) : visible
+      if (data.truncated) throw new Error('La corrección se ha cortado antes de terminar. No se ha guardado; vuelve a intentarlo con la misma respuesta.')
+      if (data.notEvaluable || !data.correction) throw new Error('No se pudo leer tu respuesta. No se ha guardado como intento; vuelve a intentarlo.')
+      const normalized = data.correction
+      const storedCorrection = JSON.stringify(normalized)
       setCorrection(storedCorrection)
-
-      const { data: userData } = await supabase.auth.getUser()
-      if (userData.user) {
-        await supabase.from('historial_examenes').insert({
-          user_id: userData.user.id,
+      try {
+        const saved = await saveExamHistory({
+          historyId,
+          accessToken,
+          xpGrant: typeof data.xpGrant === 'string' ? data.xpGrant : null,
+          payload: {
           asignatura: 'historia_filosofia',
           tipo: `${ccaa} · ${titleCase(convocatoria)}${variantLabel ? ` · ${variantLabel}` : ''}`,
           año: selectedExam.anio,
           bloque: contextLabel,
-          opcion: ccaa === 'Madrid' ? textOption : selectedExercise?.opciones ? exerciseOption : 'Única',
+          opcion: option,
           nota: scoreFromCorrection(normalized, maxScore),
           nota_maxima: maxScore,
           enunciado: selectedQuestion.enunciado.substring(0, 2000),
           respuesta: mode === 'image' ? 'Respuesta manuscrita adjunta como imagen.' : answer.substring(0, 4000),
           // Do not truncate full correction: History modal needs complete feedback.
           correccion: storedCorrection
+          },
         })
+        if (saved.xpPending) setError('La corrección se ha guardado, pero el XP queda pendiente de confirmar.')
+      } catch (saveError) {
+        setError(saveError instanceof Error ? saveError.message : 'La corrección está lista, pero no se ha podido guardar en Historial.')
       }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'No se pudo corregir la respuesta.')
     } finally {
+      correctionInFlightRef.current = false
       setLoading(false)
     }
   }

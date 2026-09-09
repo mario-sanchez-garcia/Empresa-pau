@@ -46,6 +46,9 @@ import PhotoAttachButton, { type PhotoAttachment } from '@/components/shared/Pho
 import { normalizeSubjectSlug } from './lib/camino/caminoCurriculumPlan'
 import { AYUDA_FAQS } from './lib/ayudaFaqs'
 import { DEFAULT_GRADE_THRESHOLD_CONFIG, resolveGradeThreshold, shouldSuggestRepeat, type GradeThresholdConfig } from './lib/camino/gradeThreshold'
+import { saveExamHistory } from './lib/examHistoryClient'
+import { examTextDraftKey, useExamTextDraft } from './hooks/useExamTextDraft'
+import { cataloniaHistoryExamsForYear, selectCataloniaHistoryExam } from './lib/examSelection'
 import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 import {
   ArrowUpRight,
@@ -985,8 +988,10 @@ export default function Home() {
   const [imagenes, setImagenes] = useState<Array<{ data: string; type: string; preview: string }>>([])
   const [imagenError, setImagenError] = useState('')
   const [correccion, setCorreccion] = useState('')
+  const [correctionRequestError, setCorrectionRequestError] = useState('')
   const [correccionNoEvaluable, setCorreccionNoEvaluable] = useState(false)
   const [examXpResult, setExamXpResult] = useState<{ xpAwarded: number; bonusXp: number } | null>(null)
+  const [historySaveError, setHistorySaveError] = useState('')
   const [truncated, setTruncated] = useState(false)
   const [cargando, setCargando] = useState(false)
   const [modo, setModo] = useState<'texto'|'imagen'>('texto')
@@ -996,6 +1001,7 @@ export default function Home() {
   const [chatAdjuntos, setChatAdjuntos] = useState<PhotoAttachment[]>([])
   const [historial, setHistorial] = useState<any[]>([]) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
   const [cargandoHistorial, setCargandoHistorial] = useState(false)
+  const [historialError, setHistorialError] = useState('')
   const [historialTotalCount, setHistorialTotalCount] = useState<number | null>(null)
   const [historialPercentil, setHistorialPercentil] = useState<{ percentil: number | null; totalUsuarios: number } | null>(null)
   const [historialSearch, setHistorialSearch] = useState('')
@@ -1026,6 +1032,7 @@ export default function Home() {
   const chatInputRef = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const lastImageTimingRef = useRef<{ requestId: string; ms: number; chars: number } | null>(null)
+  const correctionInFlightRef = useRef(false)
   const randomEvauResolutionKeyRef = useRef('')
   // Un hilo persistente por asignatura (chat_threads/chat_messages en Supabase,
   // ver migración 20260806150000). Cache en memoria por sesión de navegador
@@ -1189,15 +1196,23 @@ export default function Home() {
     if (seccion !== 'historial') return
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Loading-state síncrono antes de llamada async — patrón estándar
     setCargandoHistorial(true)
+    setHistorialError('')
     // El conteo real va aparte de la lista: la lista se pagina con un límite
     // generoso para la vista/agrupación por mes, pero "total correcciones" no
     // puede depender de ese límite o se queda pillado en cuanto se supera.
     Promise.all([
       supabase.from('historial_examenes').select('*').order('created_at', { ascending: false }).limit(500),
       supabase.from('historial_examenes').select('*', { count: 'exact', head: true }),
-    ]).then(([{ data }, { count }]) => {
-      setHistorial(data || [])
-      setHistorialTotalCount(count ?? (data ?? []).length)
+    ]).then(([listResult, countResult]) => {
+      if (listResult.error || countResult.error) {
+        setHistorialError('No hemos podido cargar tu historial. Revisa la conexión y vuelve a intentarlo.')
+        return
+      }
+      setHistorial(listResult.data || [])
+      setHistorialTotalCount(countResult.count ?? (listResult.data ?? []).length)
+    }).catch(() => {
+      setHistorialError('No hemos podido cargar tu historial. Revisa la conexión y vuelve a intentarlo.')
+    }).finally(() => {
       setCargandoHistorial(false)
     })
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -1359,10 +1374,11 @@ const aniosDisponibles = isCatalunaMates
 const anioSeleccionado = aniosDisponibles[examenIdx] ?? aniosDisponibles[0]
 
 const examenesCatalunaDelAnio = isCatalunaHistoria
-  ? Object.values(examenesCataluna).filter((e: any) => e.anio === anioSeleccionado) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+  ? cataloniaHistoryExamsForYear(Object.values(examenesCataluna), anioSeleccionado)
   : []
 
-const examenCatalunaActivo = examenesCatalunaDelAnio[0] ?? null
+const seriesCatalunaHistoriaDisponibles = examenesCatalunaDelAnio.map((exam: any) => String(exam.serie)) // eslint-disable-line @typescript-eslint/no-explicit-any -- Dataset legado de Historia Cataluña
+const examenCatalunaActivo = selectCataloniaHistoryExam(examenesCatalunaDelAnio, diaHistoriaIdx)
 const ejerciciosCatalunaHistoria = (examenCatalunaActivo?.ejercicios ?? []).filter(isAvailableOfficialExercise)
 const ejercicioCatalunaHistoriaActivo =
   ejerciciosCatalunaHistoria[catHistoriaEjercicioIdx] ?? ejerciciosCatalunaHistoria[0] ?? null
@@ -1764,6 +1780,7 @@ const preguntaActivaStorageId = [
 
 const enunciadoStorageKey = `principal:${preguntaActivaStorageId}:enunciado`
 const fuenteStorageKey = `principal:${preguntaActivaStorageId}:fuente`
+useExamTextDraft(preguntaActiva && usuario?.id ? examTextDraftKey(['principal', usuario.id, preguntaActivaStorageId]) : null, respuesta, setRespuesta)
 
 // La corrección se guarda como JSON (esquema normalizado, ver app/api/exam/correct)
 // desde este cambio; el regex sobre Markdown solo cubre historial antiguo guardado
@@ -2024,6 +2041,11 @@ function formatChatTimestamp(ts: number) {
 
 function reset() {
   setCorreccion(''); setTruncated(false)
+  setCorrectionRequestError('')
+  setCorreccionNoEvaluable(false)
+  setExamXpResult(null)
+  setHistorySaveError('')
+  setImagenError('')
   setRespuesta('')
   setImagenes(current => {
     current.forEach(img => URL.revokeObjectURL(img.preview))
@@ -2275,19 +2297,22 @@ function cambiarTipo(t: Tipo) {
   async function corregir() {
     if (modo === 'texto' && !respuesta.trim()) return
     if (modo === 'imagen' && imagenes.length === 0) return
+    if (correctionInFlightRef.current) return
+    correctionInFlightRef.current = true
     const totalStart = performance.now()
-    setCargando(true); setCorreccion(''); setTruncated(false); setExamXpResult(null); setCorreccionNoEvaluable(false)
+    setCargando(true); setCorreccion(''); setCorrectionRequestError(''); setTruncated(false); setExamXpResult(null); setCorreccionNoEvaluable(false); setHistorySaveError('')
     try {
       const authStart = performance.now()
       const accessToken = await getChatAccessToken()
       logCorrectionTiming('exam-correction:client', 'auth_ms', authStart)
       if (!accessToken) {
-        setCorreccion('Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.')
+        setCorrectionRequestError('Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.')
         return
       }
       const p = preguntaActiva as any // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
       const puntuacionMax = officialScore(p?.puntuacion ?? p?.puntos ?? p?.pts, puntuacionPreguntaActiva)
       const correctionSessionId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+      const historyId = crypto.randomUUID()
       const correctionCreditKey = `exam:${ccaa}:${asignatura}:${examenActivo?.año ?? anioSeleccionado}:${tipo}:${opcionMostrada}:${p?.id ?? preguntaActivaStorageId ?? bloqueActivoLabel ?? 'sin-id'}`
       if (modo === 'imagen' && lastImageTimingRef.current) {
         console.info('[correction-timing] image_prepare_ms', {
@@ -2321,7 +2346,8 @@ function cambiarTipo(t: Tipo) {
           imagen: modo === 'imagen' ? imagenes[0]?.data ?? null : null,
           imagenTipo: modo === 'imagen' ? imagenes[0]?.type ?? null : null,
           imagenes: modo === 'imagen' ? imagenes.slice(1).map(img => ({ data: img.data, mediaType: img.type })) : undefined,
-          creditKey: correctionCreditKey
+          creditKey: correctionCreditKey,
+          historyId,
         })
       })
       if (!res.ok) {
@@ -2333,7 +2359,7 @@ function cambiarTipo(t: Tipo) {
       logCorrectionTiming(correctionSessionId, 'llm_total_ms', llmStart, { truncated: isTruncated })
       const correccionJson = data.correction
       if (!correccionJson) {
-        setCorreccion('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
+        setCorrectionRequestError('No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
         return
       }
       // Fallo técnico (imagen no legible, respuesta vacía, JSON sin
@@ -2362,7 +2388,7 @@ function cambiarTipo(t: Tipo) {
       if (!isTruncated) {
         const saveStart = performance.now()
         const historyPayload = {
-          user_id: usuario.id, asignatura, tipo, año: examenActivo?.año,
+          asignatura, tipo, año: examenActivo?.año,
           bloque: bloqueActivoLabel || '',
           opcion: asignatura === 'lengua' || asignatura === 'ingles' ? opcionMostrada : opcion === 0 ? 'A' : 'B', nota, nota_maxima: notaMax,
           enunciado: enunciadoActivo?.substring(0, 6000),
@@ -2380,53 +2406,33 @@ function cambiarTipo(t: Tipo) {
           detected_concepts: whyContext?.detectedConcepts ?? [],
           curriculum_source_ids: whyContext?.sourceIds ?? []
         }
-        supabase.from('historial_examenes').insert(historyPayload).select('id').single().then(async ({ data, error }) => {
-          let insertedId = data?.id ?? null
-          if (error) {
-            const legacyPayload = {
-              user_id: historyPayload.user_id,
-              asignatura: historyPayload.asignatura,
-              tipo: historyPayload.tipo,
-              año: historyPayload.año,
-              bloque: historyPayload.bloque,
-              opcion: historyPayload.opcion,
-              nota: historyPayload.nota,
-              nota_maxima: historyPayload.nota_maxima,
-              enunciado: historyPayload.enunciado,
-              respuesta: historyPayload.respuesta,
-              correccion: historyPayload.correccion
-            }
-            const legacyResult = await supabase.from('historial_examenes').insert(legacyPayload).select('id').single()
-            insertedId = legacyResult.data?.id ?? null
-          }
-          logCorrectionTiming(correctionSessionId, 'save_ms', saveStart, {
-            success: Boolean(insertedId),
-            usedLegacyPayload: Boolean(error)
+        try {
+          const saveResult = await saveExamHistory({
+            historyId,
+            accessToken,
+            xpGrant: typeof data.xpGrant === 'string' ? data.xpGrant : null,
+            payload: historyPayload,
           })
-          // XP solo si hay nota evaluable — el servidor también lo comprueba,
-          // pero evitamos la llamada de red cuando ya sabemos que no aplica.
-          if (insertedId && nota != null) {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (session) {
-              fetch('/api/camino/award-exam-xp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-                body: JSON.stringify({ historialExamenId: insertedId })
-              }).then(async (res) => {
-                const json = await res.json().catch(() => null)
-                if (json?.success && typeof json.xpAwarded === 'number') {
-                  setExamXpResult({ xpAwarded: json.xpAwarded, bonusXp: json.bonusXp ?? 0 })
-                }
-              }).catch(() => {})
-            }
+          logCorrectionTiming(correctionSessionId, 'save_ms', saveStart, {
+            success: true,
+            xpPending: saveResult.xpPending,
+          })
+          if (saveResult.xp) {
+            setExamXpResult({ xpAwarded: saveResult.xp.xpAwarded, bonusXp: saveResult.xp.bonusXp })
+          } else if (saveResult.xpPending) {
+            setHistorySaveError('La corrección se ha guardado, pero el XP queda pendiente de confirmar.')
           }
-        })
+        } catch (saveError) {
+          logCorrectionTiming(correctionSessionId, 'save_ms', saveStart, { success: false })
+          setHistorySaveError(saveError instanceof Error ? saveError.message : 'La corrección está lista, pero no se ha podido guardar en Historial.')
+        }
       }
       logCorrectionTiming(correctionSessionId, 'total_ms', totalStart, { truncated: isTruncated })
     } catch (error) {
       setTruncated(false)
-      setCorreccion(error instanceof Error ? error.message : 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
+      setCorrectionRequestError(error instanceof Error ? error.message : 'No hemos podido corregir ahora mismo. Inténtalo de nuevo en unos minutos.')
     } finally {
+      correctionInFlightRef.current = false
       setCargando(false)
     }
   }
@@ -2780,7 +2786,7 @@ function cambiarTipo(t: Tipo) {
     URL.revokeObjectURL(url)
   }
   const versionesExamenDisponibles = asignatura === 'historia'
-    ? diasHistoriaDisponibles
+    ? isCatalunaHistoria ? seriesCatalunaHistoriaDisponibles : diasHistoriaDisponibles
     : asignatura === 'lengua'
       ? versionesLenguaDisponibles
       : asignatura === 'ingles'
@@ -2789,7 +2795,7 @@ function cambiarTipo(t: Tipo) {
           ? seriesBiologiaDisponibles
         : []
   const versionExamenSeleccionada = asignatura === 'historia'
-    ? diaHistoriaSeleccionado
+    ? isCatalunaHistoria ? examenCatalunaActivo?.serie ?? null : diaHistoriaSeleccionado
     : asignatura === 'lengua'
       ? versionLenguaSeleccionada
       : asignatura === 'ingles'
@@ -3125,6 +3131,7 @@ function cambiarTipo(t: Tipo) {
     if (isCatalunaHistoria) {
       return Object.values(examenesCataluna).flatMap((exam: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
         const years = Object.values(examenesCataluna).map((e: any) => e.anio).filter((value, index, values) => values.indexOf(value) === index).sort((a: any, b: any) => Number(b) - Number(a)) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
+        const sessionsOfYear = Object.values(examenesCataluna).filter((candidate: any) => candidate.anio === exam.anio) // eslint-disable-line @typescript-eslint/no-explicit-any -- Dataset legado de Historia Cataluña
         return (exam.ejercicios ?? []).filter(isAvailableOfficialExercise).map((exercise: any, exerciseIndex: number) => withSearchText({ // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
           id: `cat-historia-${exam.id}-${exercise.numero}`,
           year: String(exam.anio),
@@ -3133,14 +3140,13 @@ function cambiarTipo(t: Tipo) {
           subtitle: exercise.fuente?.titulo ?? exercise.tipo ?? 'Historia Cataluña',
           points: '2.5 pts',
           onSelect: () => {
-            setTipo('Ordinaria')
             setExamenIdx(Math.max(0, years.findIndex((year: any) => year === exam.anio))) // eslint-disable-line @typescript-eslint/no-explicit-any -- Datos de examen: shape heterogéneo por asignatura — interfaz Pregunta unificada introduce riesgo de regresión
             setCatHistoriaEjercicioIdx(exerciseIndex)
             setCatEjercicioIdx(0)
             setCatFisicaEjercicioIdx(0)
             setCatAsignaturaEjercicioIdx(0)
             setBloqueIdx(0)
-            setDiaHistoriaIdx(0)
+            setDiaHistoriaIdx(Math.max(0, sessionsOfYear.findIndex((candidate: any) => candidate.id === exam.id))) // eslint-disable-line @typescript-eslint/no-explicit-any -- Dataset legado de Historia Cataluña
             setOpcion(0)
             setSearchQuery('')
             setSearchFocused(false)
@@ -6094,12 +6100,16 @@ function cambiarTipo(t: Tipo) {
                   value={String(anioSeleccionado ?? aniosDisponibles[examenIdx] ?? 'Año')}
                   options={yearFilterOptions}
                 />
-                <div className="exams-filter-divider" />
-                <FilterDropdown
-                  label="Convocatoria"
-                  value={tipo}
-                  options={convocatoriaFilterOptions}
-                />
+                {!isCatalunaHistoria && (
+                  <>
+                    <div className="exams-filter-divider" />
+                    <FilterDropdown
+                      label="Convocatoria"
+                      value={tipo}
+                      options={convocatoriaFilterOptions}
+                    />
+                  </>
+                )}
                 {versionFilterOptions.length > 1 && (
                   <>
                     <div className="exams-filter-divider" />
@@ -6299,7 +6309,7 @@ function cambiarTipo(t: Tipo) {
             <div className="exams-workspace pau-reveal pau-reveal-delay-3">
               <div className="exams-main-column">
 
-            {isPhilosophy && <PhilosophyExamWorkspace ccaa={ccaa} />}
+            {isPhilosophy && <PhilosophyExamWorkspace ccaa={ccaa} draftOwnerId={usuario?.id} />}
 
             {(isCatalunaQuimica || isCatalunaLengua) && (
               <div className="mb-6 grid gap-5">
@@ -6315,6 +6325,7 @@ function cambiarTipo(t: Tipo) {
                       asignaturaLabel={isCatalunaQuimica ? 'Química PAU Cataluña' : 'Lengua Castellana PAU Cataluña'}
                       examen={(examenQuimicaCatalunaActivo ?? examenLenguaCatalunaActivo)!}
                       ejercicio={ejercicioAsignaturaCatalunaActivo}
+                      draftOwnerId={usuario?.id}
                       colorScheme={{ color: cfg.color, accent: cfg.accent, light: cfg.light, border: cfg.soft }}
                     />
                   </>
@@ -6336,6 +6347,7 @@ function cambiarTipo(t: Tipo) {
                       key={`${examenFisicaCatalunaActivo.id}-${ejercicioFisicaCatalunaActivo.numero}`}
                       examen={examenFisicaCatalunaActivo}
                       ejercicio={ejercicioFisicaCatalunaActivo}
+                      draftOwnerId={usuario?.id}
                     />
                   </>
                 ) : (
@@ -6357,6 +6369,7 @@ function cambiarTipo(t: Tipo) {
                         key={ejercicioCatalunaHistoriaActivo.numero}
                         ejercicio={ejercicioCatalunaHistoriaActivo}
                         contexto={`PAU Cataluña Historia ${examenCatalunaActivo.anio} - ${examenCatalunaActivo.serie}`}
+                        draftOwnerId={usuario?.id}
                       />
                     ) : (
                       <EmptyQuestionsState subject="historia" />
@@ -6370,7 +6383,7 @@ function cambiarTipo(t: Tipo) {
 
             {isCatalunaMates && (
               <div className="mb-6 grid gap-5">
-                {preguntaCatActiva && <CatPreguntaCard key={preguntaCatActiva.id} pregunta={preguntaCatActiva} />}
+                {preguntaCatActiva && <CatPreguntaCard key={preguntaCatActiva.id} pregunta={preguntaCatActiva} draftOwnerId={usuario?.id} />}
                 {!preguntaCatActiva && (
                   <EmptyQuestionsState subject="mates" />
                 )}
@@ -6560,14 +6573,25 @@ function cambiarTipo(t: Tipo) {
               </div>
             </div>}
 
-            {!isCatalunaExam && (correccion || cargando || correccionNoEvaluable) && (
+            {!isCatalunaExam && (correccion || cargando || correccionNoEvaluable || correctionRequestError) && (
               <div className="pau-reveal" style={{ borderRadius: 'var(--r-2xl)', overflow: 'hidden', background: '#ffffff', boxShadow: 'var(--shadow-sm)' }}>
                 <div style={{ padding: '15px 22px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid #f1f5f9' }}>
                   <div style={{ width: '30px', height: '30px', borderRadius: '9px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', flexShrink: 0 }}><WandSparkles size={15} /></div>
                   <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '14px', letterSpacing: '-0.01em' }}>Corrección de Kairo</span>
                 </div>
                 <div style={{ padding: '24px', fontSize: '0.925rem', lineHeight: '1.75' }}>
-                  {correccionNoEvaluable ? (
+                  {correctionRequestError ? (
+                    <div role="alert" style={{ padding: '14px 16px', borderRadius: 12, background: '#fef2f2', border: '1.5px solid #fecaca', color: '#991b1b' }}>
+                      <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>{correctionRequestError}</p>
+                      <p style={{ margin: '4px 0 8px', fontSize: 12.5, color: '#b91c1c', lineHeight: 1.4 }}>Tu respuesta sigue guardada en esta pantalla y este fallo no cuenta como intento.</p>
+                      <button
+                        onClick={corregir}
+                        style={{ fontSize: 12.5, fontWeight: 700, color: '#991b1b', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: 8, padding: '5px 12px', cursor: 'pointer' }}
+                      >
+                        Reintentar corrección
+                      </button>
+                    </div>
+                  ) : correccionNoEvaluable ? (
                     <div style={{ padding: '14px 16px', borderRadius: 12, background: '#fef2f2', border: '1.5px solid #fecaca', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                       <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
                       <div>
@@ -6625,6 +6649,11 @@ function cambiarTipo(t: Tipo) {
                           Reintentar corrección
                         </button>
                       </div>
+                    </div>
+                  )}
+                  {historySaveError && !truncated && (
+                    <div role="alert" style={{ marginTop: 16, padding: '12px 16px', borderRadius: 12, background: '#fff7ed', border: '1.5px solid #fdba74', color: '#9a3412', fontSize: 12.5, fontWeight: 700, lineHeight: 1.45 }}>
+                      {historySaveError}
                     </div>
                   )}
                 </div>
@@ -7045,6 +7074,13 @@ function cambiarTipo(t: Tipo) {
               <div className="history-card history-empty">
                 <KairoLoadingDot />
                 <p>Cargando historial...</p>
+              </div>
+            ) : historialError ? (
+              <div className="history-card history-empty" role="alert">
+                <div className="history-empty-icon"><BarChart3 size={28} /></div>
+                <h2>No se pudo cargar el historial</h2>
+                <p>{historialError}</p>
+                <button type="button" className="history-button history-button-primary" onClick={() => { setCargandoHistorial(true); setHistorialError(''); navegarASeccion('examenes'); window.setTimeout(() => navegarASeccion('historial'), 0) }}>Reintentar</button>
               </div>
             ) : historial.length === 0 ? (
               <div className="history-card history-empty">

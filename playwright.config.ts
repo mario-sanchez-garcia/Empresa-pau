@@ -1,8 +1,9 @@
 import path from 'node:path'
 import { defineConfig, devices } from '@playwright/test'
 
-const baseURL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:3000'
+const baseURL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:3100'
 const localServer = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(baseURL)
+const localPort = localServer ? new URL(baseURL).port || '3000' : ''
 const authState = path.join(process.cwd(), 'playwright', '.auth', 'user.json')
 
 export default defineConfig({
@@ -22,7 +23,7 @@ export default defineConfig({
     video: 'off',
   },
   webServer: localServer ? {
-    command: 'npm run dev -- --hostname 127.0.0.1',
+    command: `npm run dev -- --hostname 127.0.0.1 --port ${localPort}`,
     url: baseURL,
     reuseExistingServer: true,
     timeout: 120_000,
@@ -57,6 +58,11 @@ export default defineConfig({
       name: 'pricing-public',
       testMatch: /(^|[\\/])pricing\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+    },
+    {
+      name: 'examenes',
+      testMatch: /(^|[\\/])examenes\.spec\.ts$/,
+      use: { ...devices['Desktop Chrome'], channel: 'chrome', storageState: authState },
     },
   ],
 })

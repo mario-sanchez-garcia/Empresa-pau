@@ -55,6 +55,154 @@ function enunciadoFisica(pregunta: PreguntaFisica) {
 
 export const examenesF: PreguntaFisica[] = [
   // ══════════════════════════════════════════════
+  // JUNIO 2026 — Ordinaria oficial (curso 2025-2026)
+  // Formato nuevo: 4 preguntas de 2,5 puntos, una por bloque.
+  // La Pregunta 1 (campo electromagnético) no tiene opcionalidad;
+  // en las demás se elige entre A y B.
+  // ══════════════════════════════════════════════
+  {
+    id: "f-2026-jun-1",
+    topicSlugs: ["potencial-electrico", "intensidad-del-campo-electrico", "movimiento-de-cargas-en-campos-uniformes", "trabajo-y-caracter-conservativo-del-campo-electrico"],
+    año: 2026, convocatoria: "Ordinaria", opcion: "A",
+    tipo: "Electricidad", numero: "1",
+    enunciado: `Se han colocado dos placas paralelas perpendiculares a la dirección $x$. Una de ellas se ha
+cargado con carga positiva y la otra con igual carga, pero de signo negativo. Mediante una sonda se ha
+medido el potencial electrostático en la región entre las placas $0 \\le x \\le 10$ m. Los valores del potencial
+se representan en la figura. A partir de ella se ha determinado que el potencial electrostático en el
+intervalo $0 \\le x \\le 10$ m viene dado por la expresión
+$$V(x) = -3x$$
+donde $x$ está expresado en metros y $V$ en voltios. La intensidad del campo eléctrico está relacionada
+con el potencial, para el caso unidimensional, mediante la expresión
+$$E(x) = -\\dfrac{dV}{dx}$$
+
+a) (1 punto) Calcule el campo eléctrico en el intervalo $0 \\le x \\le 10$ m.
+
+b) (0,5 puntos) Determine la aceleración que tendría una carga de 10 nC y masa $6 \\cdot 10^{-10}$ kg que se
+situara en el punto $x = 5$ m.
+
+c) (1 punto) Si la carga de 10 nC y masa $6 \\cdot 10^{-10}$ kg se deja en reposo en el origen de coordenadas,
+determine su velocidad en el punto $x = 5$ m.
+
+![Potencial electrostático medido entre las placas en función de x](/fisica-imgs/madrid/2026/ordinaria/fisica-2026-ordinaria-1.png)`,
+    apartados: [],
+    puntos: 2.5,
+  },
+  {
+    id: "f-2026-jun-2A",
+    topicSlugs: ["energia-mecanica-en-el-campo-gravitatorio", "velocidad-orbital", "velocidad-de-escape", "leyes-de-kepler"],
+    año: 2026, convocatoria: "Ordinaria", opcion: "A",
+    tipo: "Gravitacion", numero: "2.A",
+    enunciado: `Se ha situado un satélite de comunicaciones de masa 1500 kg en una órbita circular alrededor
+de la Tierra. La energía mecánica del satélite en su órbita es $-4{,}51 \\cdot 10^{10}$ J.
+
+a) (1 punto) Calcule el radio de la órbita y la velocidad del satélite en ella.
+
+b) (0,8 puntos) ¿Cuántas vueltas alrededor de la Tierra da el satélite en un día?
+
+c) (0,7 puntos) Determine la velocidad de escape del satélite desde su órbita.
+
+Datos: Constante de la Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\\ \\text{N m}^2\\ \\text{kg}^{-2}$; Masa de la Tierra, $M_T = 5{,}97 \\cdot 10^{24}\\ \\text{kg}$.`,
+    apartados: [],
+    puntos: 2.5,
+  },
+  {
+    id: "f-2026-jun-2B",
+    topicSlugs: ["intensidad-del-campo-gravitatorio", "ley-de-gravitacion-universal"],
+    año: 2026, convocatoria: "Ordinaria", opcion: "B",
+    tipo: "Gravitacion", numero: "2.B",
+    enunciado: `Dos masas puntuales, $m_1 = 2$ kg y $m_2 = 4$ kg, están situadas en el origen de coordenadas y
+en el punto $(4, 0)$ m del plano $xy$, respectivamente. Calcule:
+
+a) (1,5 puntos) El punto del eje $x$ entre ambas masas en el que el campo gravitatorio creado por las
+dos masas es nulo.
+
+b) (1 punto) El campo gravitatorio total debido a ambas masas en el punto $(0, 2)$ m.
+
+Dato: Constante de la Gravitación Universal, $G = 6{,}67 \\cdot 10^{-11}\\ \\text{N m}^2\\ \\text{kg}^{-2}$.`,
+    apartados: [],
+    puntos: 2.5,
+  },
+  {
+    id: "f-2026-jun-3A",
+    topicSlugs: ["ecuacion-de-una-onda-armonica", "ondas-definicion-y-tipos", "velocidad-y-aceleracion-en-el-mas"],
+    año: 2026, convocatoria: "Ordinaria", opcion: "A",
+    tipo: "Ondas", numero: "3.A",
+    enunciado: `La ecuación de una onda transversal que se propaga a lo largo de la dirección positiva del
+eje $x$ viene dada por la expresión $y(x, t) = A \\operatorname{sen}(\\omega t - kx + \\phi)$. En la figura (a) se representa el
+desplazamiento de los diferentes puntos del medio en el instante $t = 0$. En la figura (b) se representa la
+velocidad de oscilación del punto $x = 0$ del medio en función del tiempo. Determine:
+
+a) (1 punto) La amplitud de la onda $A$ y el número de ondas $k$.
+
+b) (1 punto) La fase de la onda $\\phi$ y el valor máximo de la velocidad de oscilación.
+
+c) (0,5 puntos) La velocidad de propagación de la onda.
+
+![Figura (a): desplazamiento y(x,0) frente a x. Figura (b): velocidad de oscilación en x=0 frente al tiempo](/fisica-imgs/madrid/2026/ordinaria/fisica-2026-ordinaria-3a.png)`,
+    apartados: [],
+    puntos: 2.5,
+  },
+  {
+    id: "f-2026-jun-3B",
+    topicSlugs: ["refraccion-y-ley-de-snell", "indice-de-refraccion"],
+    año: 2026, convocatoria: "Ordinaria", opcion: "B",
+    tipo: "Optica", numero: "3.B",
+    enunciado: `Un rayo de luz incide desde el aire sobre una lámina de espesor $e = 3$ cm, con un ángulo de
+incidencia de $48^\\circ$. El índice de refracción de la lámina es $n = 1{,}7$. El rayo, tras sufrir refracción en la
+cara superior, se refleja en la cara inferior de la lámina y vuelve a salir al aire, tal y como se muestra en
+la figura. Determine:
+
+a) (0,5 puntos) El ángulo de refracción en la cara superior.
+
+b) (1 punto) El tiempo que tarda el rayo refractado en llegar a la cara inferior de la lámina.
+
+c) (1 punto) La separación $x$ entre los rayos (1) y (2).
+
+Datos: Velocidad de la luz en el vacío, $c = 3 \\cdot 10^{8}\\ \\text{m s}^{-1}$; Índice de refracción del aire, $n = 1$.
+
+![Trayectoria del rayo al atravesar la lámina y separación x entre los rayos (1) y (2)](/fisica-imgs/madrid/2026/ordinaria/fisica-2026-ordinaria-3b.png)`,
+    apartados: [],
+    puntos: 2.5,
+  },
+  {
+    id: "f-2026-jun-4A",
+    topicSlugs: ["efecto-fotoelectrico", "hipotesis-de-planck-y-cuantizacion-de-la-energia"],
+    año: 2026, convocatoria: "Ordinaria", opcion: "A",
+    tipo: "RadioactividadModerna", numero: "4.A",
+    enunciado: `Cuando una lámina de plata se ilumina con luz de 150 nm se necesita un potencial de
+3,55 V para frenar los electrones emitidos. Sin embargo, si se usa una luz de 200 nm, el potencial para
+frenar los electrones es de 1,48 V. A partir de estos datos, determine:
+
+a) (1,5 puntos) El valor de la constante de Planck.
+
+b) (1 punto) El trabajo de extracción de los electrones de la lámina de plata en eV.
+
+Datos: Velocidad de la luz en el vacío, $c = 3 \\cdot 10^{8}\\ \\text{m s}^{-1}$; Valor absoluto de la carga del electrón, $e = 1{,}6 \\cdot 10^{-19}\\ \\text{C}$.`,
+    apartados: [],
+    puntos: 2.5,
+  },
+  {
+    id: "f-2026-jun-4B",
+    topicSlugs: ["ley-de-desintegracion-radiactiva", "radiactividad-desintegracion-alfa-beta-y-gamma"],
+    año: 2026, convocatoria: "Ordinaria", opcion: "B",
+    tipo: "RadioactividadModerna", numero: "4.B",
+    enunciado: `En el primer paso del proceso de desintegración, cada núcleo del isótopo $^{228}\\text{Ra}$ se transmuta
+en un núcleo del isótopo $^{228}\\text{Ac}$ y se emite una partícula $\\beta^-$. Si se tiene una muestra de 30 g de
+$^{228}\\text{Ra}$ cuya actividad inicial es de $3{,}03 \\cdot 10^{14}$ Bq, determine:
+
+a) (0,5 puntos) El número de partículas $\\beta^-$ por segundo que emite inicialmente la muestra de $^{228}\\text{Ra}$.
+
+b) (1 punto) La constante de desintegración y el periodo de semidesintegración.
+
+c) (1 punto) La masa del isótopo $^{228}\\text{Ra}$ que se habrá transformado en $^{228}\\text{Ac}$ cuando hayan
+transcurrido 10 años.
+
+Datos: Número de Avogadro, $N_A = 6{,}02 \\cdot 10^{23}\\ \\text{mol}^{-1}$; Masa atómica del isótopo $^{228}\\text{Ra}$, $M = 228$ u.`,
+    apartados: [],
+    puntos: 2.5,
+  },
+
+  // ══════════════════════════════════════════════
   // JUNIO 2025-2019 — Ordinaria oficial desde PDFs
   // ══════════════════════════════════════════════
 

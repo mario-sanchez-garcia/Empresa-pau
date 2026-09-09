@@ -653,6 +653,64 @@ c) (1 punto) Sabiendo que el segundo ha sido de fresa, calcular la probabilidad 
 
 export const examenes: Examen[] = [
   ...examenesModeloMates,
+  // Ordinaria 2026 (curso 2025-2026), primera con el formato nuevo: cinco
+  // preguntas de 2 puntos — 1, 2 y 3 obligatorias; en la 4 y la 5 se elige
+  // entre dos opciones. Por eso usa el mismo bloque "Pregunta N" que el
+  // Modelo 2026 y no los bloques temáticos (Algebra/Analisis/...) de las
+  // convocatorias hasta 2025, que tenían otra estructura.
+  {
+    id: 26, año: 2026, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
+    preguntas: [
+      preguntaModelo("2026-J-1", ["rango-de-una-matriz-metodo-de-gauss","determinantes-de-orden-2-y-3-regla-de-sarrus","despejar-en-ecuaciones-matriciales","calculo-de-la-inversa-por-adjuntos"], "Pregunta 1", "A", `Dada la matriz real
+
+$$A=\\begin{pmatrix}
+1 & \\lambda-2 & \\lambda\\\\
+0 & 1 & \\lambda-1\\\\
+1 & 0 & 1
+\\end{pmatrix}$$
+
+se pide:
+
+a) (1 punto) Discutir el rango de $A$ en función del parámetro $\\lambda$.
+
+b) (1 punto) Para el caso $\\lambda=2$, resolver la ecuación matricial $A^2-AX=I$, donde $I$ es la matriz identidad de orden $3$.`, 2),
+      preguntaModelo("2026-J-2", ["informacion-extraida-de-la-1-y-2-derivada","calculo-de-derivadas-y-regla-de-la-cadena"], "Pregunta 2", "A", `(2 puntos) Se quiere enlosar un jardín con forma de triángulo rectángulo de catetos $42$ m y $56$ m. Dentro del jardín se va a diferenciar un espacio rectangular techado de forma que dos de sus lados sean paralelos a los catetos del triángulo, un vértice coincida con el vértice del ángulo recto del triángulo y el vértice opuesto esté sobre su hipotenusa.
+
+Alicatar la parte cubierta cuesta $30$ €/m² y la parte no techada, $50$ €/m², pues las baldosas llevan un tratamiento especial resistente al agua. Calcule las dimensiones de la parte techada que hacen que el coste de instalar el suelo en el jardín sea mínimo.`, 2),
+      preguntaModelo("2026-J-3", ["proyecciones-ortogonales-y-puntos-simetricos","el-plano-en-el-espacio","la-recta-en-el-espacio-ecuaciones","distancias-en-el-espacio"], "Pregunta 3", "A", `Dados el plano $\\pi: 2x+2y-z=13$ y la recta
+
+$$r\\equiv\\dfrac{x-2}{1}=\\dfrac{y}{1}=\\dfrac{z}{4}$$
+
+a) (1 punto) Halle el punto simétrico del punto $P(2,0,0)$ respecto al plano $\\pi$.
+
+b) (1 punto) Responda solo a uno de los dos apartados siguientes:
+
+b1) Halle la distancia entre el plano $\\pi$ y la recta $r$.
+
+b2) Halle una ecuación del plano que contiene a la recta $r$ y es ortogonal al plano $\\pi$.`, 2),
+      preguntaModelo("2026-J-41", ["distribucion-normal-y-tipificacion","distribucion-binomial-variable-discreta"], "Pregunta 4", "A", `El proveedor de una fábrica de móviles proporciona baterías cuya duración sigue una distribución normal con media $\\mu=24$ horas y desviación típica $\\sigma=3$ horas. A efectos de control de calidad, se considera que una batería es defectuosa si su duración es inferior a $21$ horas.
+
+a) (1 punto) Se elige un teléfono al azar de la línea de producción. Calcule la probabilidad de que su batería sea considerada defectuosa.
+
+b) (1 punto) Un distribuidor recibe un lote de $10$ teléfonos. Suponiendo independencia entre ellos, ¿cuál es la probabilidad de que en ese lote haya al menos $9$ teléfonos con la batería no defectuosa?`, 2),
+      preguntaModelo("2026-J-42", ["algebra-de-sucesos-y-tipos-de-experimentos","definicion-axiomatica-de-probabilidad-kolmogorov"], "Pregunta 4", "B", `Sabiendo que $P(B)=0{,}4$, $P(\\overline{A\\cup B})=0{,}4$ y $P(B|A)=0{,}2$, calcule las siguientes probabilidades:
+
+a) (1 punto) $P(A)$ y $P(A\\cap B)$.
+
+b) (1 punto) $P((A\\cap B)|(A\\cup B))$.`, 2),
+      preguntaModelo("2026-J-51", ["la-integral-definida-regla-de-barrow-y-areas","metodos-de-integracion"], "Pregunta 5", "A", `(2 puntos) Sea $f(x)=\\ln(x)$. Halle el área de la región acotada por la gráfica de $f(x)$, el eje de abscisas y la recta $x=e$.`, 2),
+      preguntaModelo("2026-J-52", ["continuidad-y-tipos-de-discontinuidad","concepto-de-derivada-e-interpretacion-geometrica","calculo-de-derivadas-y-regla-de-la-cadena"], "Pregunta 5", "B", `Sea la función
+
+$$f(x)=\\begin{cases}
+3x^2-\\operatorname{sen}(ax)+b & \\text{si } x<0\\\\[4pt]
+\\dfrac{2e^x}{1+x^2} & \\text{si } x\\geq 0
+\\end{cases}$$
+
+a) (1 punto) Calcule los valores de $a$ y $b$ para que la función sea continua y derivable en $x=0$.
+
+b) (1 punto) Halle la ecuación de la recta tangente a la gráfica de la función en el punto de abscisa $x=2$.`, 2)
+    ]
+  },
   {
     id: 2, año: 2025, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [

@@ -7,6 +7,7 @@ import { missionsPerDayForMinutes } from '@/app/lib/camino/dailyTimeCapacity'
 import { injectAllPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { cleanStudentExams, type StudentExam } from '@/app/lib/camino/cleanStudentExams'
 import { getMadridToday, getStudyDays } from '@/app/lib/camino/studyDays'
+import { rotateSubjectForDay } from '@/app/lib/camino/subjectRotation'
 import { hasCompletedOnboarding } from '@/app/lib/onboarding/hasCompletedOnboarding'
 import { sendWelcomeEmail } from '@/app/lib/email/sendWelcomeEmail'
 import { generateUnsubscribeToken } from '@/app/lib/unsubscribeToken'
@@ -23,13 +24,19 @@ export type StartMode = typeof VALID_START_MODES[number]
 // Private beta scope: Camino PAU is active only for these core PAU subjects.
 export const ALLOWED_GENERATE_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana', 'fisica', 'quimica', 'ingles', 'historia_filosofia', 'economia'])
 
-function subjectForDay(dateStr: string, subjects: string[]): string | null {
-  if (subjects.length === 1) return subjects[0]
-  const ordered = ['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana', 'fisica', 'quimica', 'ingles', 'historia_filosofia', 'economia']
-    .filter(subject => subjects.includes(subject))
-  const dow = new Date(dateStr + 'T12:00:00Z').getUTCDay()
-  if (dow === 0 || dow === 6) return null
-  return ordered[(dow - 1) % ordered.length] ?? subjects[0]
+// El orden fijo por defecto solo decide QUIÉN empieza la rotación, no cuántos
+// días recibe cada una: rotateSubjectForDay usa un índice continuo entre
+// semanas (ver subjectRotation.ts), así que todas las asignaturas entran en el
+// reparto por igual — incluida la 6ª y siguientes, que con el `(dow - 1) % n`
+// anterior nunca llegaban a salir.
+const DEFAULT_SUBJECT_ORDER = ['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana', 'fisica', 'quimica', 'ingles', 'historia_filosofia', 'economia']
+
+function subjectForDay(dateStr: string, subjects: string[], hasWork?: (subject: string) => boolean): string | null {
+  const ordered = DEFAULT_SUBJECT_ORDER.filter(subject => subjects.includes(subject))
+  // Una asignatura fuera del orden por defecto (no debería pasar, pero no se
+  // puede perder silenciosamente) se añade al final conservando su posición.
+  for (const subject of subjects) if (!ordered.includes(subject)) ordered.push(subject)
+  return rotateSubjectForDay(dateStr, ordered, { hasWork })
 }
 
 type QueueSourceItem = {
@@ -314,7 +321,13 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
     for (const dateStr of studyDays) {
       if (lockedDates.has(dateStr) || takenDates.has(dateStr)) continue
 
-      const subject = subjectForDay(dateStr, scheduleSubjects)
+      // hasWork evita que un día lectivo se pierda porque a la asignatura que
+      // le tocaba ya no le queda cola: la rotación cede el turno a la
+      // siguiente asignatura que sí tenga temario pendiente.
+      const subject = subjectForDay(dateStr, scheduleSubjects, s => {
+        const queue = subjectQueues[s] ?? []
+        return (cursors[s] ?? 0) < queue.length
+      })
       if (!subject) continue
 
       for (let slot = 0; slot < slotsPerDay; slot++) {

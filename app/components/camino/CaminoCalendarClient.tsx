@@ -25,8 +25,8 @@ import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type 
 import { estimatedMinutesForSlot, missionsPerDayForMinutes } from '@/app/lib/camino/dailyTimeCapacity'
 import { DIVISIONS, divisionFor } from '@/app/lib/camino/leagues'
 import { MAX_LIGAS_PER_USER } from '@/app/lib/camino/leagueRounds'
-import { deletePartialExamMissions, injectAllPartialExamMissions, weekdaysBefore } from '@/app/lib/camino/injectPartialExamMissions'
-import { computeExamTimeNeed, getBlockPerformance } from '@/app/lib/camino/examTimeNeed'
+import { deletePartialExamMissions, injectAllPartialExamMissions, summarizePersistedExamMissions, weekdaysBefore } from '@/app/lib/camino/injectPartialExamMissions'
+import { buildRecalcMessage, computeExamTimeNeed, getBlockPerformance } from '@/app/lib/camino/examTimeNeed'
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
@@ -2161,7 +2161,12 @@ export default function CaminoCalendarClient() {
       const calDays = await fetchCaminoCalendar(userId)
       if (calDays) { setCalendar(calDays); saveCalendarWeeksToCache(calDays) }
 
-      setRecalcResult({ examId: exam.id, message: need.summary })
+      // El mensaje se construye a partir de lo que hay REALMENTE en el
+      // calendario, no de need.recommendedSessions: la recomendación puede
+      // pedir hasta 12 sesiones, pero la secuencia persistida son 2 misiones
+      // como mucho y las puertas de cobertura/fecha pueden dejarlo en menos.
+      const persisted = await summarizePersistedExamMissions(userId, supabase, exam.id)
+      setRecalcResult({ examId: exam.id, message: buildRecalcMessage(need, persisted) })
     } catch {
       setToast('No se pudo recalcular tu Camino. Inténtalo de nuevo.')
     } finally {

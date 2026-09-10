@@ -34,8 +34,23 @@ export type ExamCoverage = {
   inactiveQueueIdsToReactivate: string[]
   /** Weekdays strictly before the exam date, counting from today (same helper injectPartialExamMissions.ts already uses). */
   weekdaysUntilExam: string[]
-  /** Coverage % achievable if every one of weekdaysUntilExam is spent entirely on this exam's pending topics, at the student's max declared daily mission count. The ceiling used to decide the Simulacro's fate (100 / 80-99 / <80, see injectPartialExamMissions.ts). */
+  /**
+   * Techo de cobertura alcanzable con la capacidad que este examen puede
+   * reclamar DE VERDAD.
+   *
+   * Antes se calculaba como "todos los días hábiles restantes × capacidad
+   * diaria", sin descontar los demás exámenes activos: tres exámenes con 10
+   * temas pendientes cada uno y hueco para 10 sesiones daban 100% los tres a
+   * la vez. Ahora, cuando quien llama pasa `budgetSessions` (el reparto
+   * compartido de studyCapacity.allocateExamBudgets), el techo se calcula
+   * contra la parte que le corresponde a este examen.
+   *
+   * Sigue siendo un MÁXIMO TEÓRICO, no una garantía de preparación: dice
+   * cuánto cabría, no cuánto se domina.
+   */
   maxProjectedCoveragePct: number
+  /** Temas de este examen que no caben en el presupuesto compartido. 0 cuando no se pasó `budgetSessions`. */
+  uncoveredCount: number
   /** missionPlanForMinutes(dailyMinutes).count — how many Curso lessons/day compression can realistically add, at this student's declared pace. Exposed so callers can project coverage at a specific EARLIER checkpoint (e.g. "3 weekdays before the exam"), not just at the exam date itself — see injectPartialExamMissions.ts's final_mini_mock placement. */
   maxPerDayCapacity: number
 }
@@ -66,6 +81,7 @@ const NOT_COMPUTABLE: ExamCoverage = {
   inactiveQueueIdsToReactivate: [],
   weekdaysUntilExam: [],
   maxProjectedCoveragePct: 100,
+  uncoveredCount: 0,
   maxPerDayCapacity: 1,
 }
 
@@ -112,6 +128,7 @@ export async function computeExamCoverage(
   subjectSlug: string,
   examDate: string,
   today: string,
+  options: { budgetSessions?: number } = {},
 ): Promise<ExamCoverage> {
   const { data: examTopicRows } = await db.from('exam_topics').select('topic_id').eq('exam_id', examId)
   const topicIds = (examTopicRows ?? []).map(r => r.topic_id as string).filter(Boolean)
@@ -160,10 +177,15 @@ export async function computeExamCoverage(
 
   const dailyMinutes = await getDeclaredDailyMinutes(db, userId)
   const maxPerDay = missionPlanForMinutes(dailyMinutes).count
-  const maxAdditionalCoverable = Math.min(pendingSortOrders.length, maxPerDay * weekdaysUntilExam.length)
+  // Sin `budgetSessions` se mantiene el comportamiento anterior (capacidad
+  // completa del calendario para este examen). Con él, el techo es la parte
+  // que le corresponde una vez repartida entre todos los exámenes activos.
+  const availableSessions = options.budgetSessions ?? maxPerDay * weekdaysUntilExam.length
+  const maxAdditionalCoverable = Math.min(pendingSortOrders.length, Math.max(0, availableSessions))
   const maxProjectedCoveragePct = totalCount > 0
     ? Math.min(100, ((completedCount + maxAdditionalCoverable) / totalCount) * 100)
     : 100
+  const uncoveredCount = Math.max(0, pendingSortOrders.length - maxAdditionalCoverable)
 
   return {
     computable: true,
@@ -173,6 +195,7 @@ export async function computeExamCoverage(
     inactiveQueueIdsToReactivate,
     weekdaysUntilExam,
     maxProjectedCoveragePct,
+    uncoveredCount,
     maxPerDayCapacity: maxPerDay,
   }
 }

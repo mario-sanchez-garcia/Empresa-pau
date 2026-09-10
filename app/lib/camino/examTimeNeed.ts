@@ -30,7 +30,6 @@ export type ExamTimeNeedResult = {
   maxSessionsPerDay: number
   exceedsOnboardingDaily: boolean
   reasoning: string[]
-  summary: string
 }
 
 function worse(a: ExamNeedLevel, b: ExamNeedLevel): ExamNeedLevel {
@@ -104,14 +103,47 @@ export function computeExamTimeNeed(input: ExamTimeNeedInput): ExamTimeNeedResul
     ? worstDayMinutes > dailyMinutesOnboarding
     : worstDaySessions > 1
 
-  const marginLabel = Math.round(marginPct * 100)
-  const totalMinutes = recommendedSessions * PARCIAL_MINUTES
-  const reasonText = reasoning.length ? ` (${reasoning.join(', ')})` : ''
-  const summary = exceedsOnboardingDaily
-    ? `Hemos ajustado tu Camino: necesitas más tiempo del habitual para llegar bien preparado a este examen${reasonText}. Programamos ${recommendedSessions} sesiones de repaso (~${totalMinutes} min en total) con un ${marginLabel}% de margen extra sobre el mínimo estimado, aumentando el número de sesiones en los días previos al examen por encima de tu ritmo diario habitual.`
-    : `Camino recalculado para este examen${reasonText}: ${recommendedSessions} sesiones de repaso (~${totalMinutes} min en total) con un ${marginLabel}% de margen extra sobre el mínimo estimado, para llegar con margen de sobra.`
+  return { needLevel, marginPct, baseSessions, recommendedSessions, maxSessionsPerDay, exceedsOnboardingDaily, reasoning }
+}
 
-  return { needLevel, marginPct, baseSessions, recommendedSessions, maxSessionsPerDay, exceedsOnboardingDaily, reasoning, summary }
+export type PersistedExamMissions = {
+  count: number
+  minutes: number
+  hasSimulacro: boolean
+  hasPractice: boolean
+}
+
+/**
+ * Mensaje de "Recalcular mi Camino". Describe las misiones que se han
+ * ESCRITO de verdad en el calendario, no `recommendedSessions`.
+ *
+ * Antes se mostraba `need.summary`, que anunciaba hasta 12 sesiones / 540 min
+ * a partir de la recomendación teórica. La realidad es que `sessionOverride`
+ * ya no se consume en injectPartialExamMissions y la secuencia son 2 misiones
+ * fijas (práctica + Simulacro, 135 min como mucho), y ni siquiera esas dos
+ * están garantizadas: las puertas de cobertura, fecha y límites de plan
+ * pueden dejar una o ninguna. Prometer 12 sesiones y persistir 2 es la clase
+ * de desajuste que hace que el alumno deje de fiarse del plan.
+ */
+export function buildRecalcMessage(need: ExamTimeNeedResult, persisted: PersistedExamMissions): string {
+  const reasonText = need.reasoning.length ? ` (${need.reasoning.join(', ')})` : ''
+
+  if (persisted.count === 0) {
+    return `Hemos revisado este examen${reasonText}, pero no hemos podido añadir misiones de preparación nuevas: puede que ya las tengas programadas, que no queden días libres antes del examen o que aún te falte temario de Curso por cubrir. Revisa tu Camino en los días previos al examen.`
+  }
+
+  const piezas: string[] = []
+  if (persisted.hasPractice) piezas.push('una práctica de ejercicios')
+  if (persisted.hasSimulacro) piezas.push('un simulacro completo')
+  const detalle = piezas.length > 0 ? ` (${piezas.join(' y ')})` : ''
+  const plural = persisted.count === 1 ? 'misión' : 'misiones'
+
+  const base = `Camino recalculado para este examen${reasonText}: ${persisted.count} ${plural} de preparación${detalle}, ~${persisted.minutes} min en total, en los días previos al examen.`
+
+  if (need.exceedsOnboardingDaily) {
+    return `${base} Algún día superarás tu ritmo diario habitual para llegar a tiempo.`
+  }
+  return base
 }
 
 /**

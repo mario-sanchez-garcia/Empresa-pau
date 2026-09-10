@@ -3,6 +3,8 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 import { getCaminoPlanLimits } from './caminoPlanLimits'
 import { computeExamCoverage, decideAutomaticExamMissionFate, type ExamCoverage } from './examCoverage'
 import { EXAM_SUBJECT_SLUG, SIMULACRO_SUBJECT } from './partialExamSubjects'
+import { SPAIN_HOLIDAYS } from './spainHolidays'
+import { allocateExamBudgets } from './studyCapacity.ts'
 import { createDayScheduler, estimatedMinutesForMissionType } from './scheduleTimeSlot'
 import { SIMULACRO_MINUTES } from './xpMap'
 import type { ExamConfidence, ExamPriority, ExamScope, StudentExam } from './cleanStudentExams'
@@ -48,6 +50,13 @@ export type PartialExamInput = {
   customInstructions?: string
   /** 'parcial' (default) or 'global' — needed so the final_mini_mock mission's Simulacro link carries the same examScope PartialExamBanner already sends. */
   examScope?: ExamScope
+  /**
+   * Sesiones que este examen puede reclamar sin pisar a los demás exámenes
+   * activos (reparto de studyCapacity.allocateExamBudgets, calculado en
+   * injectAllPartialExamMissions). Sin esto cada examen calculaba su
+   * cobertura como si tuviera el calendario entero para él solo.
+   */
+  budgetSessions?: number
 }
 
 export function madridToday(): string {
@@ -313,7 +322,7 @@ export async function resolveFinalMockSlot(
   if (daysUntilExam === 0 || daysUntilExam > 10 || missionSequence(daysUntilExam).length === 0) return null
 
   const subjectSlug = EXAM_SUBJECT_SLUG[partialExam.subject] ?? partialExam.subject
-  const coverage = await computeExamCoverage(supabase, userId, partialExam.id, subjectSlug, partialExam.date, today)
+  const coverage = await computeExamCoverage(supabase, userId, partialExam.id, subjectSlug, partialExam.date, today, { budgetSessions: partialExam.budgetSessions })
 
   return findFinalMockSlotInWindow(allSlots, otherExamDates, coverage)
 }
@@ -409,7 +418,7 @@ export async function injectPartialExamMissions(
   // todavía, o examen sin exam_topics) deja coverageDecision en null, así que
   // la práctica dirigida puede generarse, pero el Simulacro exige evidencia
   // medible y al menos un tema completado (decideMissionFate).
-  const coverage = await computeExamCoverage(supabase, userId, partialExam.id, subjectSlug, partialExam.date, today)
+  const coverage = await computeExamCoverage(supabase, userId, partialExam.id, subjectSlug, partialExam.date, today, { budgetSessions: partialExam.budgetSessions })
   const coverageDecision: 'full' | 'partial' | 'cancelled' | null = !coverage.computable
     ? null
     : coverage.maxProjectedCoveragePct >= 100
@@ -574,6 +583,44 @@ export async function injectPartialExamMissions(
   return { claimedDates }
 }
 
+/**
+ * Qué misiones de preparación existen REALMENTE en el calendario para este
+ * examen, después de inyectar.
+ *
+ * Hace falta porque el número que calcula computeExamTimeNeed
+ * (recommendedSessions, hasta 12) NO es el número que se llega a persistir:
+ * `sessionOverride` dejó de consumirse y missionSequence genera como mucho 2
+ * misiones (exercise_practice + final_mini_mock), y encima cualquiera de las
+ * dos puede caerse por las puertas de cobertura, fecha o límites de plan. El
+ * mensaje de "Recalcular mi Camino" debe describir esto, no la recomendación
+ * teórica.
+ */
+export async function summarizePersistedExamMissions(
+  userId: string,
+  supabase: SupabaseClient,
+  examId: string,
+): Promise<{ count: number; minutes: number; hasSimulacro: boolean; hasPractice: boolean }> {
+  const { data } = await supabase
+    .from('camino_calendar')
+    .select('mission_type, metadata')
+    .eq('user_id', userId)
+    .eq('source', 'partial')
+    .in('status', ['pending', 'postponed'])
+    .filter('metadata->>partial_exam_id', 'eq', examId)
+
+  const rows = (data ?? []) as { mission_type: string | null }[]
+  let minutes = 0
+  let hasSimulacro = false
+  let hasPractice = false
+  for (const row of rows) {
+    const type = row.mission_type ?? ''
+    minutes += estimatedMinutesForMissionType(type)
+    if (type === 'pau_practice') hasSimulacro = true
+    else hasPractice = true
+  }
+  return { count: rows.length, minutes, hasSimulacro, hasPractice }
+}
+
 export async function deletePartialExamMissions(
   userId: string,
   supabase: SupabaseClient,
@@ -604,6 +651,20 @@ export async function deletePartialExamMissions(
  * — de cualquier examen, no solo el suyo — para que una práctica de
  * ejercicios no aterrice el mismo día que un Simulacro ajeno.
  */
+/** Minutos diarios declarados en onboarding — misma fuente que usan examCoverage y ensureCaminoCalendar. */
+async function getDeclaredDailyMinutesForBudget(db: SupabaseClient, userId: string): Promise<number | null> {
+  const { data } = await db
+    .from('billing_events')
+    .select('payload')
+    .eq('user_id', userId)
+    .eq('event_type', 'onboarding_completed')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const minutes = (data?.payload as Record<string, unknown> | null | undefined)?.daily_minutes
+  return typeof minutes === 'number' ? minutes : null
+}
+
 export async function injectAllPartialExamMissions(
   userId: string,
   supabase: SupabaseClient,
@@ -636,11 +697,37 @@ export async function injectAllPartialExamMissions(
   // coincidir entre sí en la misma fecha (ver comentario de la función).
   const examDates = new Set(upcoming.map(exam => exam.date))
 
+  // PASADA 0 — Presupuesto compartido.
+  //
+  // Cada examen calculaba su cobertura como si dispusiera de TODOS los días
+  // hábiles restantes. Con tres exámenes a la vez eso daba tres "100%"
+  // simultáneos sobre la misma capacidad. Aquí se mide primero cuánto temario
+  // pendiente tiene cada uno y se reparten los días entre todos: el examen
+  // más próximo se sirve primero, y los que vienen después conservan los días
+  // que aquél no podía usar de todos modos.
+  const dailyMinutes = await getDeclaredDailyMinutesForBudget(supabase, userId)
+  const pendingByExamId = new Map<string, number>()
+  for (const exam of upcoming) {
+    const subjectSlug = EXAM_SUBJECT_SLUG[exam.subject] ?? exam.subject
+    const coverage = await computeExamCoverage(supabase, userId, exam.id, subjectSlug, exam.date, today)
+    pendingByExamId.set(exam.id, coverage.computable ? coverage.pendingSortOrders.length : 0)
+  }
+  const budgets = allocateExamBudgets(
+    today,
+    upcoming.map(exam => ({ id: exam.id, date: exam.date, pendingCount: pendingByExamId.get(exam.id) ?? 0 })),
+    { dailyMinutes, holidays: SPAIN_HOLIDAYS },
+  )
+  const withBudget = (exam: StudentExam & { sessionOverride?: number; maxSessionsPerDay?: number }) => ({
+    ...exam,
+    customInstructions,
+    budgetSessions: budgets.get(exam.id)?.allocatedSessions,
+  })
+
   // PASADA 1
   const mockSlotByExamId = new Map<string, string | null>()
   for (const exam of upcoming) {
     const force = options.forceExamId != null && exam.id === options.forceExamId
-    const slot = await resolveFinalMockSlot(userId, supabase, { ...exam, customInstructions }, examDates, force)
+    const slot = await resolveFinalMockSlot(userId, supabase, withBudget(exam), examDates, force)
     mockSlotByExamId.set(exam.id, slot)
   }
 
@@ -662,7 +749,7 @@ export async function injectAllPartialExamMissions(
       ? new Set([...reservedDates].filter(d => d !== ownMockSlot))
       : reservedDates
     const { claimedDates } = await injectPartialExamMissions(
-      userId, supabase, { ...exam, customInstructions },
+      userId, supabase, withBudget(exam),
       { reservedDates: reservedForThisExam, force, finalMockSlot: ownMockSlot },
     )
     for (const d of claimedDates) reservedDates.add(d)

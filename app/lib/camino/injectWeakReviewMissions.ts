@@ -12,6 +12,17 @@ const WEAK_REVIEW_VERSION = 'weak_review_v1'
 const HORIZON_DAYS = 14
 const MAX_REVIEW_MISSIONS = 2
 const REVIEW_RATIO = 5
+// Días que deben pasar desde que se completó un tema antes de que pueda
+// volver a entrar como repaso.
+//
+// Antes, completar un tema lo excluía PARA SIEMPRE del repaso automático,
+// aunque siguiera perteneciendo a un área débil: si el alumno hacía la
+// lección y después suspendía ese bloque, el Camino no volvía a tocarlo
+// nunca. Pero "completado" no es "dominado" — complete-mission marca la cola
+// como completada sin ningún umbral de dominio. Un tema completado hace
+// tiempo que sigue puntuando como área débil es exactamente el que hay que
+// repasar; lo que había que evitar era repetir hoy lo que se hizo ayer.
+const COMPLETED_REVIEW_COOLDOWN_DAYS = 21
 
 type CalendarRow = {
   id: string
@@ -42,28 +53,55 @@ function weakBlockMatches(area: WeakArea, blockSlug: string, blockTitle: string)
   )
 }
 
-function findReviewTopic(area: WeakArea, futureTopicKeys: Set<string>, existingReviewKeys: Set<string>, completedTopicKeys: Set<string>) {
+function findReviewTopic(
+  area: WeakArea,
+  futureTopicKeys: Set<string>,
+  existingReviewKeys: Set<string>,
+  /** topicKey → fecha de la última finalización (YYYY-MM-DD). */
+  completedTopicDates: Map<string, string>,
+  cooldownCutoff: string,
+) {
   const subject = normalizeSubjectSlug(area.subjectKey)
   const matchingTopics = CAMINO_CURRICULUM_TOPICS
     .filter(topic => topic.subject === subject)
     .filter(topic => weakBlockMatches(area, topic.blockSlug, topic.blockTitle))
     .sort((a, b) => (a.v2SortOrder ?? a.orderIndex) - (b.v2SortOrder ?? b.orderIndex))
 
-  if (matchingTopics.length === 0) return { topic: null, mappingMissed: true }
+  if (matchingTopics.length === 0) return { topic: null, isRetry: false, mappingMissed: true }
 
-  const topic = matchingTopics.find(candidate => {
+  const available = (candidate: typeof matchingTopics[number]) => {
     const sortOrder = candidate.v2SortOrder ?? candidate.orderIndex
     const topicKey = `${subject}:${sortOrder}`
     const key = reviewKey(subject, candidate.blockSlug, sortOrder)
-    // completedTopicKeys: este tema concreto ya se dio como misión normal
-    // (en cualquier día, pasado o de hoy) — repasarlo vía "review" duplicaría
-    // esa misión como si nunca se hubiera hecho. El único camino para
-    // repasar contenido ya completado es a través de los cursos en La Zona,
-    // no repitiendo la misión diaria.
-    return !futureTopicKeys.has(topicKey) && !existingReviewKeys.has(key) && !completedTopicKeys.has(topicKey)
-  })
+    // Nunca se duplica algo ya programado por delante ni un repaso que ya existe.
+    return !futureTopicKeys.has(topicKey) && !existingReviewKeys.has(key)
+  }
 
-  return { topic: topic ?? null, mappingMissed: false }
+  // 1ª vuelta: temas del área débil que aún no se han dado. Siguen teniendo
+  // prioridad — contenido nunca visto pesa más que reforzar lo ya visto.
+  const fresh = matchingTopics.find(candidate => {
+    const sortOrder = candidate.v2SortOrder ?? candidate.orderIndex
+    return available(candidate) && !completedTopicDates.has(`${subject}:${sortOrder}`)
+  })
+  if (fresh) return { topic: fresh, isRetry: false, mappingMissed: false }
+
+  // 2ª vuelta: temas YA completados del área débil, siempre que la
+  // finalización sea lo bastante antigua. Se prioriza el completado hace más
+  // tiempo, que es el que más probablemente se ha olvidado.
+  const stale = matchingTopics
+    .filter(candidate => {
+      const sortOrder = candidate.v2SortOrder ?? candidate.orderIndex
+      const completedOn = completedTopicDates.get(`${subject}:${sortOrder}`)
+      return available(candidate) && completedOn != null && completedOn <= cooldownCutoff
+    })
+    .sort((a, b) => {
+      const da = completedTopicDates.get(`${subject}:${a.v2SortOrder ?? a.orderIndex}`) ?? ''
+      const db = completedTopicDates.get(`${subject}:${b.v2SortOrder ?? b.orderIndex}`) ?? ''
+      return da.localeCompare(db)
+    })[0]
+
+  if (stale) return { topic: stale, isRetry: true, mappingMissed: false }
+  return { topic: null, isRetry: false, mappingMissed: false }
 }
 
 function pickDateForReview(candidateDates: string[], countByDate: Map<string, number>) {
@@ -113,22 +151,29 @@ export async function injectWeakReviewMissions(
         .map(row => `${normalizeSubjectSlug(row.subject)}:${row.v2_sort_order}`),
     )
 
-    // Un tema ya completado (cualquier fecha, pasada o de hoy) nunca debe
-    // volver a programarse como misión de repaso — solo se consulta para las
-    // asignaturas con áreas débiles, así el read se queda acotado.
+    // Historial de finalización de los temas de las asignaturas con áreas
+    // débiles. Se conserva la FECHA, no solo el hecho de haberlo completado:
+    // es lo que permite volver a repasar un tema olvidado pasado el cooldown
+    // en vez de excluirlo para siempre.
     const weakSubjects = [...new Set(weakAreas.map(area => normalizeSubjectSlug(area.subjectKey)))]
     const { data: completedRows, error: completedError } = await supabase
       .from('camino_calendar')
-      .select('subject, v2_sort_order')
+      .select('subject, v2_sort_order, scheduled_date')
       .eq('user_id', userId)
       .eq('status', 'completed')
       .in('subject', weakSubjects)
       .not('v2_sort_order', 'is', null)
       .limit(1000)
     if (completedError) throw new Error(`Calendar weak review completed-read error: ${completedError.message}`)
-    const completedTopicKeys = new Set(
-      (completedRows ?? []).map(row => `${normalizeSubjectSlug(row.subject as string)}:${row.v2_sort_order}`),
-    )
+    const completedTopicDates = new Map<string, string>()
+    for (const row of completedRows ?? []) {
+      const key = `${normalizeSubjectSlug(row.subject as string)}:${row.v2_sort_order}`
+      const date = row.scheduled_date as string
+      const previous = completedTopicDates.get(key)
+      // La finalización MÁS RECIENTE es la que manda para el cooldown.
+      if (!previous || date > previous) completedTopicDates.set(key, date)
+    }
+    const cooldownCutoff = addDays(today, -COMPLETED_REVIEW_COOLDOWN_DAYS)
     const existingReviewKeys = new Set(
       existingReviewRows
         .map(row => metadataObject(row.metadata).weak_review_key)
@@ -157,7 +202,7 @@ export async function injectWeakReviewMissions(
 
     for (const area of weakAreas) {
       if (rowsToInsert.length >= remainingSlots) break
-      const { topic, mappingMissed } = findReviewTopic(area, futureTopicKeys, existingReviewKeys, completedTopicKeys)
+      const { topic, isRetry, mappingMissed } = findReviewTopic(area, futureTopicKeys, existingReviewKeys, completedTopicDates, cooldownCutoff)
       if (mappingMissed) {
         mappingMisses += 1
         await recordBetaMetric(supabase, userId, 'weak_review_mapping_missed', {
@@ -203,7 +248,12 @@ export async function injectWeakReviewMissions(
         scheduled_date: scheduledDate,
         subject,
         v2_sort_order: sortOrder,
-        title: `Repaso: ${sanitizeLessonTitle(topic.title)}`,
+        // Un reintento tiene identidad propia en el título: el alumno debe ver
+        // que no es la misma lección otra vez, sino una vuelta deliberada
+        // sobre algo que las notas dicen que no quedó asentado.
+        title: isRetry
+          ? `Vuelta a repasar: ${sanitizeLessonTitle(topic.title)}`
+          : `Repaso: ${sanitizeLessonTitle(topic.title)}`,
         block_key: topic.blockTitle,
         block_slug: topic.blockSlug,
         mission_type: 'review',
@@ -223,7 +273,11 @@ export async function injectWeakReviewMissions(
           weak_area_avg_score: area.avgScore,
           weak_area_attempts: area.attempts,
           weak_review_version: WEAK_REVIEW_VERSION,
-          reason: `Repaso recomendado porque tu media reciente en ${area.label} está en ${area.avgScore}%.`,
+          /** true = el tema ya se había completado y vuelve por bajo rendimiento posterior (ver COMPLETED_REVIEW_COOLDOWN_DAYS). */
+          weak_review_retry: isRetry,
+          reason: isRetry
+            ? `Ya diste este tema, pero tu media reciente en ${area.label} sigue en ${area.avgScore}%. Volvemos sobre él.`
+            : `Repaso recomendado porque tu media reciente en ${area.label} está en ${area.avgScore}%.`,
         },
       })
     }

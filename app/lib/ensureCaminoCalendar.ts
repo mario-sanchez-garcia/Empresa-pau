@@ -4,16 +4,25 @@ import { getAvailabilityForDate, type LocalBusyRange } from './calendar/availabi
 import { PRIVATE_BETA_SUBJECTS, isPrivateBetaSubject } from './camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from './camino/caminoCurriculumPlan'
 import { cleanStudentExams } from './camino/cleanStudentExams'
-import { estimatedMinutesForSlot, missionsPerDayForMinutes } from './camino/dailyTimeCapacity'
+import { estimatedMinutesForSlot } from './camino/dailyTimeCapacity'
 import { EXAM_SUBJECT_SLUG } from './camino/partialExamSubjects'
 import { computeExamCoverage, reactivateAllInactiveQueueItems, reactivateQueueItems } from './camino/examCoverage'
 import { FINAL_MOCK_WINDOW_DAYS, injectAllPartialExamMissions, resolveFinalMockSlot } from './camino/injectPartialExamMissions'
 import { resolveTopicIdentitiesBatch } from './camino/resolveTopicIdentity'
 import { createDayScheduler, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
+import { FINAL_REVIEW_RESERVED_STUDY_DAYS, resolveTargetExamDate } from './camino/examDate'
+import { computeStudyCapacity, planningCutoffDate } from './camino/studyCapacity'
+import { rotateSubjectForDay } from './camino/subjectRotation'
 import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
-import { addDays, countWorkingDays, getMadridToday, getStudyDays } from './camino/studyDays'
+import { addDays, getMadridToday, getStudyDays } from './camino/studyDays'
 
-const EXAM_DATE = '2027-06-07'
+// La fecha objetivo ya no es una constante congelada — se deriva del curso
+// académico en marcha (ver camino/examDate.ts), para que el plan no se quede
+// nunca apuntando a una convocatoria ya pasada. El override por alumno
+// (convocatoria/comunidad) se conectará aquí cuando exista en el modelo.
+function targetExamDateFor(today: string): string {
+  return resolveTargetExamDate(today)
+}
 // Cuántos días futuros (con misión pendiente/postpuesta) mantiene
 // sembrados ensureCaminoCalendar en camino_calendar — todo lo que cae
 // dentro de este horizonte es 100% servidor, idéntico en cualquier
@@ -46,22 +55,25 @@ async function createAvailabilityAwareScheduler(
 // subjectsByBacklog más abajo) en vez de usar la posición fija de una
 // asignatura en PRIVATE_BETA_SUBJECTS, que no tenía relación alguna con
 // cuánto temario le quedaba a cada una.
-function subjectForDay(dateStr: string, subjects: string[], orderedSubjects: string[], examSubjectsToday?: string[]): string | null {
+// A subject with an exam today takes priority over the plain rotation —
+// otherwise the round-robin can land on an unrelated subject while a
+// different subject's exam that same day goes completely unaddressed.
+//
+// El índice de rotación lo calcula rotateSubjectForDay a partir de un contador
+// de días lectivos CONTINUO entre semanas (ver subjectRotation.ts). El
+// `(dow - 1) % ordered.length` que había aquí solo podía producir 5 índices
+// distintos, así que con 6+ asignaturas la última nunca recibía un solo día.
+function subjectForDay(
+  dateStr: string,
+  subjects: string[],
+  orderedSubjects: string[],
+  examSubjectsToday?: string[],
+  hasWork?: (subject: string) => boolean,
+): string | null {
   if (subjects.length === 0) return null
-  const dow = new Date(dateStr + 'T12:00:00Z').getUTCDay()
-  if (dow === 0 || dow === 6) return null
-  // A subject with an exam today takes priority over the plain weekday
-  // rotation — otherwise the round-robin can land on an unrelated subject
-  // (or even the subject that just had ITS OWN exam, per the day-of-week
-  // rotation math) while a different subject's exam that same day goes
-  // completely unaddressed.
-  if (examSubjectsToday && examSubjectsToday.length > 0) {
-    const examSubject = examSubjectsToday.find(s => subjects.includes(s))
-    if (examSubject) return examSubject
-  }
-  if (subjects.length === 1) return subjects[0]
   const ordered = orderedSubjects.filter(subject => subjects.includes(subject))
-  return ordered[(dow - 1) % ordered.length] ?? subjects[0]
+  for (const subject of subjects) if (!ordered.includes(subject)) ordered.push(subject)
+  return rotateSubjectForDay(dateStr, ordered, { priority: examSubjectsToday, hasWork })
 }
 
 
@@ -231,6 +243,7 @@ export async function ensureCaminoCalendar(
   supabase: SupabaseClient,
 ): Promise<void> {
   const today = getMadridToday()
+  const examDate = targetExamDateFor(today)
   const externalBusyByDate = new Map<string, LocalBusyRange[]>()
 
   // PASO 1 — Marcar misiones pasadas pendientes (no bonus) como missed
@@ -321,8 +334,16 @@ export async function ensureCaminoCalendar(
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
-  const declaredDailyMinutes = (prefsRow?.payload as Record<string, unknown> | null | undefined)?.daily_minutes
+  const prefsPayload = prefsRow?.payload as Record<string, unknown> | null | undefined
+  const declaredDailyMinutes = prefsPayload?.daily_minutes
   const dailyMinutesForSlots = typeof declaredDailyMinutes === 'number' ? declaredDailyMinutes : null
+  // Días de estudio a la semana que el alumno eligió. Sin esto, el cálculo de
+  // "¿me da tiempo?" asumía siempre L-V, así que a un alumno de 2 días/semana
+  // se le atribuía 2,5 veces la capacidad que tiene de verdad.
+  const rawWeeklyStudyDays = prefsPayload?.weekly_study_days_value
+  const declaredWeeklyStudyDays = typeof rawWeeklyStudyDays === 'number' && rawWeeklyStudyDays > 0
+    ? rawWeeklyStudyDays
+    : null
 
   // PASO 2.5 — Parciales: procesar TODOS los exámenes activos juntos (fechas +
   // asignaturas), no uno a uno, para que dos exámenes próximos no se pisen
@@ -658,18 +679,31 @@ export async function ensureCaminoCalendar(
     .eq('user_id', userId)
     .eq('queue_status', 'pending')
 
-  const workingDaysUntilExam = countWorkingDays(today, EXAM_DATE)
-  const ratio = workingDaysUntilExam > 0 ? (remainingQueue ?? 0) / workingDaysUntilExam : 0
-  const rescueMode = ratio > 2
-  // itemsPerDay toma el MAYOR de dos señales independientes: el ritmo que
-  // pide el backlog frente al examen (rescueMode/ratio) y el ritmo que el
-  // propio alumno declaró en onboarding (declaredDailyMinutes, ya calculado
-  // arriba, antes de PASO 2.5, para reutilizarlo también en PASO 2.6) — así
-  // un backlog pesado puede empujar más items incluso con poco tiempo
-  // diario declarado, pero el tiempo declarado por el alumno siempre se
-  // respeta como mínimo.
-  const ratioItemsPerDay = rescueMode || ratio > 1.5 ? 2 : 1
-  const itemsPerDay = Math.max(ratioItemsPerDay, missionsPerDayForMinutes(typeof declaredDailyMinutes === 'number' ? declaredDailyMinutes : null))
+  // Presupuesto REAL hasta el examen: días de estudio que el alumno tiene de
+  // verdad (su patrón semanal, descontando festivos) por las misiones que
+  // caben en cada uno según los minutos que declaró.
+  //
+  // Antes la señal era `pendientes / díasHábilesHastaExamen > 2`, que no
+  // distingue entre 30 y 180 minutos al día ni sabe cuántos días a la semana
+  // estudia el alumno. Con 500 temas, 184 días y 180 min/día el rescate se
+  // disparaba y recortaba la cola pese a haber sitio para 736 sesiones.
+  const capacity = computeStudyCapacity(today, examDate, {
+    dailyMinutes: dailyMinutesForSlots,
+    weeklyStudyDays: declaredWeeklyStudyDays,
+    holidays: SPAIN_HOLIDAYS,
+  })
+  const pendingTotal = remainingQueue ?? 0
+  // >1 significa literalmente "no cabe": hay más temas pendientes que sesiones
+  // disponibles antes del examen.
+  const pressure = capacity.sessions > 0 ? pendingTotal / capacity.sessions : 0
+  const rescueMode = pressure > 1
+  // itemsPerDay toma el MAYOR de dos señales independientes: la presión real
+  // del backlog frente a la capacidad y el ritmo que el propio alumno declaró
+  // en onboarding — así un backlog pesado puede empujar más items incluso con
+  // poco tiempo diario declarado, pero el tiempo declarado siempre se respeta
+  // como mínimo.
+  const pressureItemsPerDay = pressure > 1.5 ? 2 : 1
+  const itemsPerDay = Math.max(pressureItemsPerDay, capacity.sessionsPerDay)
 
   // Obtener items pendientes de la cola ordenados por posición
   // queue_status='pending' excluye automáticamente postponed/scheduled/completed
@@ -688,11 +722,21 @@ export async function ensureCaminoCalendar(
     subjectQueues[item.subject].push(item)
   }
 
-  // Rescue mode: re-sort by PAU priority and mark overflow items inactive
+  // Modo rescate: REORDENAR por prioridad PAU, nunca recortar.
+  //
+  // Antes esto marcaba como 'inactive' todo lo que pasara de
+  // `ceil(CALENDAR_HORIZON * 2 / nºasignaturas)` items por asignatura — 15
+  // con cuatro asignaturas. Ese recorte no aportaba nada a la programación
+  // (el bucle de abajo solo puede colocar `emptyDays × itemsPerDay` misiones
+  // de todos modos, así que nunca llegaba tan lejos en la cola) y en cambio
+  // sí rompía dos cosas: cambiaba el temario pendiente que ve el alumno y
+  // falseaba el propio `pendingTotal` de la siguiente ejecución, que es la
+  // entrada del cálculo de urgencia. Un alumno agobiado veía desaparecer
+  // temario y, además, el sistema se convencía a sí mismo de que ya cabía.
+  //
+  // El denominador curricular se conserva íntegro: si el temario no cabe, eso
+  // debe verse como temario que no cabe, no como temario que no existe.
   if (rescueMode) {
-    const inactiveIds: string[] = []
-    const perSubjectCap = Math.ceil((CALENDAR_HORIZON * 2) / subjects.length)
-
     for (const subj of subjects) {
       const queue = subjectQueues[subj] ?? []
       queue.sort((a, b) => {
@@ -700,32 +744,17 @@ export async function ensureCaminoCalendar(
         const pb = rescuePriority(b.subject, b.v2_sort_order)
         return pa !== pb ? pa - pb : a.v2_sort_order - b.v2_sort_order
       })
-      if (queue.length > perSubjectCap) {
-        for (const item of queue.slice(perSubjectCap)) inactiveIds.push(item.id)
-        subjectQueues[subj] = queue.slice(0, perSubjectCap)
-      } else {
-        subjectQueues[subj] = queue
-      }
+      subjectQueues[subj] = queue
     }
-
-    if (inactiveIds.length > 0) {
-      await supabase
-        .from('user_learning_queue')
-        .update({ queue_status: 'inactive' })
-        .in('id', inactiveIds)
-        .eq('user_id', userId)
-    }
-  } else {
-    // rescueMode no está activo este run — si el alumno había recuperado el
-    // ritmo (el ratio bajó del umbral que lo dispara), cualquier tema que
-    // quedó 'inactive' por un recorte de rescueMode anterior debe volver a
-    // 'pending': ya no hay overflow real que justifique mantenerlo oculto.
-    // Igual que con el reordenamiento de prioridad de examen (comentario de
-    // abajo), lo reactivado aquí no entra en subjectQueues de ESTE run (ya se
-    // calculó arriba) — queda disponible para el próximo, mismo patrón ya
-    // aceptado en el resto de este archivo.
-    await reactivateAllInactiveQueueItems(supabase, userId)
   }
+
+  // Cualquier fila que quedara 'inactive' por un recorte de una versión
+  // anterior de este archivo vuelve a 'pending' — ya no se genera ninguna
+  // nueva, así que esto solo limpia el estado heredado. Lo reactivado aquí no
+  // entra en subjectQueues de ESTE run (ya se calculó arriba): queda
+  // disponible para el próximo, mismo patrón ya aceptado en el resto del
+  // archivo.
+  await reactivateAllInactiveQueueItems(supabase, userId)
 
   // Prioridad absoluta de los temas de examen sobre el orden lineal de su
   // asignatura — se aplica DESPUÉS de rescueMode a propósito: si rescueMode
@@ -749,9 +778,20 @@ export async function ensureCaminoCalendar(
 
   const cursors: Record<string, number> = Object.fromEntries(subjects.map(s => [s, 0]))
 
-  // Días hábiles vacíos que necesitan misión (ventana amplia para cubrir gaps)
+  // Días hábiles vacíos que necesitan misión (ventana amplia para cubrir gaps).
+  //
+  // El horizonte se CORTA en seco antes del examen: `getStudyDays(today, 120)`
+  // no sabía nada de la fecha objetivo, así que a dos semanas de la EVAU
+  // seguía proponiendo 30 fechas y la mitad caían DESPUÉS del examen. Además
+  // se reservan los últimos días de estudio para práctica y repaso final, en
+  // vez de sembrar temario nuevo hasta la víspera.
+  const planningCutoff = planningCutoffDate(today, examDate, FINAL_REVIEW_RESERVED_STUDY_DAYS, {
+    weeklyStudyDays: declaredWeeklyStudyDays,
+    holidays: SPAIN_HOLIDAYS,
+  })
   const candidateDays = getStudyDays(today, CALENDAR_HORIZON * 4)
   const emptyDays = candidateDays
+    .filter(d => d < planningCutoff)
     .filter(d => !futureDaySet.has(d))
     .slice(0, CALENDAR_HORIZON - futureDaySet.size)
 
@@ -774,7 +814,13 @@ export async function ensureCaminoCalendar(
   )
 
   for (const dateStr of emptyDays) {
-    const subject = subjectForDay(dateStr, subjects, subjectsByBacklog, examSubjectsByDate.get(dateStr))
+    // hasWork: si a la asignatura que le tocaba ya no le queda cola, el día
+    // lectivo se perdía entero. La rotación cede el turno a la siguiente
+    // asignatura que sí tenga temario pendiente.
+    const subject = subjectForDay(dateStr, subjects, subjectsByBacklog, examSubjectsByDate.get(dateStr), s => {
+      const queue = subjectQueues[s] ?? []
+      return (cursors[s] ?? 0) < queue.length
+    })
     if (!subject) continue
 
     const queue = subjectQueues[subject] ?? []

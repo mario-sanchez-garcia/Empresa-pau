@@ -12,6 +12,7 @@ function coverage(patch: Partial<ExamCoverage> = {}): ExamCoverage {
     inactiveQueueIdsToReactivate: [],
     weekdaysUntilExam: [],
     maxProjectedCoveragePct: 100,
+    uncoveredCount: 0,
     maxPerDayCapacity: 1,
     ...patch,
   }

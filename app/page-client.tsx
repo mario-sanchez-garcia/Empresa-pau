@@ -1146,12 +1146,14 @@ export default function Home() {
         loadChatThread(targetSubject)
       }
     } else if (urlSection === 'chat') {
-      // Entrada normal al chat (sin contexto de Camino sembrado arriba):
-      // carga el hilo real guardado de la asignatura inicial, si existe.
-      // `asignatura` sigue en su valor por defecto ('mates') si no había
-      // subject en la URL ni preferencia guardada — mismo valor que ya usa
-      // el resto del efecto en ese caso.
-      loadChatThread(initialSubject ?? asignatura)
+      // Entrada normal al chat (sin contexto de Camino sembrado arriba): si
+      // no hay subject explícito en la URL ni preferencia guardada, el chat
+      // abre en "general" — `asignatura` no debe heredar aquí su valor por
+      // defecto ('mates'), que es el default de Exámenes, no del chat. Si
+      // initialSubject sí venía informado, ya se aplicó arriba vía
+      // cambiarAsignatura(initialSubject) y aquí solo hace falta cargar su hilo.
+      if (!initialSubject) cambiarAsignatura('general')
+      loadChatThread(initialSubject ?? 'general')
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

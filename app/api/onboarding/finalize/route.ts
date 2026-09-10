@@ -17,6 +17,7 @@ export const maxDuration = 300
 
 const FLOW_VERSION = 'current_v1'
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const PROCESSING_LEASE_MS = 3 * 60 * 1000
 
 // Reemplaza, para el flujo Fase 2 (signup al final), la cadena client-side
 // setup → generate → ensure calendar. El cliente NUNCA ejecuta esas tres
@@ -72,32 +73,44 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ status: 'completed', reward, completed_at: claim.draft.completed_at })
   }
 
-  if (claim.draft.status === 'processing') {
-    return NextResponse.json({ status: 'processing', processing_stage: claim.draft.processing_stage })
+  const processingToken = crypto.randomUUID()
+  const { data: acquisitionData, error: acquisitionError } = await db.rpc('acquire_onboarding_processing', {
+    p_draft_id: draftId,
+    p_user_id: user.id,
+    p_token: processingToken,
+    p_stale_before: new Date(Date.now() - PROCESSING_LEASE_MS).toISOString(),
+  })
+  if (acquisitionError) {
+    return NextResponse.json({ status: 'failed', error_code: 'internal_error' }, { status: 500 })
+  }
+  const acquisition = (Array.isArray(acquisitionData) ? acquisitionData[0] : acquisitionData) as { result_code?: string; draft?: OnboardingDraftRow } | null
+  const acquiredDraft = acquisition?.draft
+  if (acquisition?.result_code === 'completed' && acquiredDraft) {
+    const reward = await rewardFromCompleted(acquiredDraft)
+    return NextResponse.json({ status: 'completed', reward, completed_at: acquiredDraft.completed_at })
+  }
+  if (acquisition?.result_code === 'already_onboarded') {
+    const reward = await rewardFromCompleted(claim.draft)
+    return NextResponse.json({ status: 'completed', reward, already_onboarded: true })
+  }
+  if (acquisition?.result_code === 'processing') {
+    return NextResponse.json({ status: 'processing', processing_stage: acquiredDraft?.processing_stage ?? null })
+  }
+  if (acquisition?.result_code !== 'acquired' || !acquiredDraft) {
+    const code = acquisition?.result_code ?? 'internal_error'
+    const status = code === 'draft_expired' ? 410 : code === 'draft_claim_conflict' ? 409 : 400
+    return NextResponse.json({ status: 'failed', error_code: code }, { status })
   }
 
-  // Transición atómica: solo una request concurrente puede pasar de
-  // claimed/failed a processing — ver comentario en claimOnboardingDraft.
-  const { data: locked } = await db
-    .from('onboarding_drafts')
-    .update({ status: 'processing', processing_stage: 'validating', last_error_code: null, updated_at: new Date().toISOString() })
-    .eq('id', draftId)
-    .in('status', ['claimed', 'failed'])
-    .select('*')
-    .maybeSingle()
-
-  if (!locked) {
-    const { data: current } = await db.from('onboarding_drafts').select('*').eq('id', draftId).maybeSingle()
-    const row = current as OnboardingDraftRow | null
-    if (row?.status === 'completed') {
-      const reward = await rewardFromCompleted(row)
-      return NextResponse.json({ status: 'completed', reward, completed_at: row.completed_at })
-    }
-    return NextResponse.json({ status: 'processing', processing_stage: row?.processing_stage ?? null })
-  }
-
-  const draft = locked as OnboardingDraftRow
+  const draft = acquiredDraft
   const payload = draft.payload as Record<string, unknown>
+
+  async function setStage(processingStage: string) {
+    const { data, error } = await db.from('onboarding_drafts').update({ processing_stage: processingStage, updated_at: new Date().toISOString() })
+      .eq('id', draftId).eq('claimed_by', user.id).eq('status', 'processing').eq('processing_token', processingToken)
+      .select('id').maybeSingle()
+    return Boolean(data) && !error
+  }
 
   async function fail(errorCode: string) {
     await db.from('onboarding_drafts').update({
@@ -105,7 +118,7 @@ export async function POST(request: NextRequest) {
       processing_stage: 'failed',
       last_error_code: errorCode,
       updated_at: new Date().toISOString(),
-    }).eq('id', draftId)
+    }).eq('id', draftId).eq('claimed_by', user.id).eq('status', 'processing').eq('processing_token', processingToken)
     logOnboardingStage({ traceId: draft.trace_id, requestId, endpoint: 'finalize', result: 'failed', errorCode, durationMs: Date.now() - startedAt })
     return NextResponse.json({ status: 'failed', error_code: errorCode })
   }
@@ -157,7 +170,7 @@ export async function POST(request: NextRequest) {
   }
 
   // ── saving_profile ──────────────────────────────────────────────────────
-  await db.from('onboarding_drafts').update({ processing_stage: 'saving_profile', updated_at: new Date().toISOString() }).eq('id', draftId)
+  if (!(await setStage('saving_profile'))) return NextResponse.json({ status: 'processing' })
 
   const saveResult = await saveOnboardingProfile(user.id, db, rawBodyForSave, cleaned)
   if (!saveResult.ok) {
@@ -166,7 +179,7 @@ export async function POST(request: NextRequest) {
   }
 
   // ── building_queue / generating_calendar ────────────────────────────────
-  await db.from('onboarding_drafts').update({ processing_stage: 'building_queue', updated_at: new Date().toISOString() }).eq('id', draftId)
+  if (!(await setStage('building_queue'))) return NextResponse.json({ status: 'processing' })
 
   const generationStartedAt = Date.now()
   await recordBetaMetric(db, user.id, 'onboarding_generation_started', {
@@ -237,7 +250,7 @@ export async function POST(request: NextRequest) {
   })
 
   // ── verifying_calendar ───────────────────────────────────────────────────
-  await db.from('onboarding_drafts').update({ processing_stage: 'verifying_calendar', updated_at: new Date().toISOString() }).eq('id', draftId)
+  if (!(await setStage('verifying_calendar'))) return NextResponse.json({ status: 'processing' })
 
   const missions = await loadRewardMissions(db, user.id)
   if (missions.length === 0) {
@@ -262,10 +275,7 @@ export async function POST(request: NextRequest) {
   // verificar que el Camino existe de verdad (ver auditoría del blocker de
   // Fase 1: declarar completed antes de tiempo deja cuentas "completadas"
   // sin Camino real).
-  const { error: completedError } = await db.from('billing_events').insert({
-    user_id: user.id,
-    event_type: 'onboarding_completed',
-    payload: {
+  const completionPayload = {
       community: cleaned.community,
       school_name: cleaned.schoolName,
       school_source: cleaned.schoolSource,
@@ -284,18 +294,16 @@ export async function POST(request: NextRequest) {
       pain_type: cleaned.painType,
       draft_id: draftId,
       beta_private: true,
-    },
+  }
+  const { data: completionCommitted, error: completedError } = await db.rpc('complete_onboarding_processing', {
+    p_draft_id: draftId,
+    p_user_id: user.id,
+    p_token: processingToken,
+    p_payload: completionPayload,
   })
-  if (completedError) return fail('internal_error')
+  if (completedError || completionCommitted !== true) return fail('internal_error')
 
   const completedAt = new Date().toISOString()
-  await db.from('onboarding_drafts').update({
-    status: 'completed',
-    processing_stage: 'completed',
-    completed_at: completedAt,
-    last_error_code: null,
-    updated_at: completedAt,
-  }).eq('id', draftId)
 
   logOnboardingStage({ traceId: draft.trace_id, requestId, endpoint: 'finalize', result: 'success', durationMs: Date.now() - startedAt })
 

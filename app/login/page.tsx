@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { supabase } from '../lib/supabase'
@@ -8,6 +8,8 @@ import { PLATFORM_STRUCTURED_EXERCISES_LABEL, PLATFORM_STRUCTURED_EXERCISES_TEXT
 import { clearOnboarding } from '@/app/lib/onboarding/onboardingStorage'
 import { resolveOnboardingDestination } from '@/app/lib/onboarding/resolveOnboardingDestination'
 import { SUPPORT_EMAIL } from '@/app/lib/support'
+import { safeLocalRedirect } from '@/app/lib/auth/safeRedirect'
+import { signOutLocally } from '@/app/lib/auth/signOutLocally'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
@@ -15,7 +17,10 @@ const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 export default function Login() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const returnTo = searchParams.get('returnTo') ?? '/camino'
+  const returnTo = safeLocalRedirect(searchParams.get('returnTo'), '/camino')
+  const authLockRef = useRef(false)
+  const recoveryLockRef = useRef(false)
+  const startFreshLockRef = useRef(false)
   const [startingFresh, setStartingFresh] = useState(false)
 
   // Dispositivo compartido: si ya hay una sesión activa (ej. un hermano que
@@ -24,8 +29,10 @@ export default function Login() {
   // /camino de esa cuenta. Se cierra sesión y se limpia cualquier borrador
   // local antes de entrar, para garantizar un onboarding realmente nuevo.
   const handleStartFresh = async () => {
+    if (startFreshLockRef.current) return
+    startFreshLockRef.current = true
     setStartingFresh(true)
-    await supabase.auth.signOut()
+    await signOutLocally()
     clearOnboarding()
     router.push('/onboarding')
   }
@@ -44,27 +51,39 @@ export default function Login() {
   const [recuperacionOk, setRecuperacionOk] = useState(false)
 
   const handleForgotPassword = async () => {
-    if (enviandoRecuperacion) return
+    if (recoveryLockRef.current) return
     const correo = email.trim()
     if (!correo) {
       setRecuperacionOk(false)
       setMensajeRecuperacion('Escribe tu email arriba y vuelve a pulsar "¿La olvidaste?".')
       return
     }
+    recoveryLockRef.current = true
     setEnviandoRecuperacion(true)
     setMensajeRecuperacion('')
-    const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin
-    const { error } = await supabase.auth.resetPasswordForEmail(correo, {
-      redirectTo: `${base}/login/reset-password`,
-    })
+    let response: Response
+    try {
+      response = await fetch('/api/auth/request-password-reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: correo }),
+      })
+    } catch {
+      recoveryLockRef.current = false
+      setEnviandoRecuperacion(false)
+      setRecuperacionOk(false)
+      setMensajeRecuperacion('Parece que no tienes conexión. Comprueba tu red e inténtalo de nuevo.')
+      return
+    }
+    recoveryLockRef.current = false
     setEnviandoRecuperacion(false)
-    if (error) {
+    if (!response.ok) {
       setRecuperacionOk(false)
       setMensajeRecuperacion('No se pudo enviar el correo de recuperación. Inténtalo de nuevo en un momento.')
       return
     }
     setRecuperacionOk(true)
-    setMensajeRecuperacion(`Te hemos enviado un enlace a ${correo} para restablecer tu contraseña.`)
+    setMensajeRecuperacion('Solicitud aceptada. Si existe una cuenta con ese email y el proveedor entrega el mensaje, recibirás un enlace para restablecer la contraseña.')
   }
 
   // ── UI state ─────────────────────────────────────────────────────────────────
@@ -76,7 +95,8 @@ export default function Login() {
 
   // ── Google OAuth ──────────────────────────────────────────────────────────────
   const handleGoogleLogin = async () => {
-    if (cargando) return
+    if (authLockRef.current) return
+    authLockRef.current = true
     setCargando(true)
     const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin
     const callbackUrl = returnTo !== '/camino'
@@ -89,6 +109,7 @@ export default function Login() {
     if (error) {
       setMensaje('No se pudo iniciar sesión con Google. Inténtalo de nuevo.')
       setCargando(false)
+      authLockRef.current = false
     }
   }
 
@@ -96,16 +117,17 @@ export default function Login() {
 
   // ── Email/password handler (login únicamente — /login ya no crea cuentas) ────
   async function handleSubmit() {
-    if (cargando) return
-    if (!email && !password) {
+    if (authLockRef.current) return
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail && !password) {
       setMensaje('Escribe tu email y tu contraseña.')
       return
     }
-    if (!email) {
+    if (!normalizedEmail) {
       setMensaje('Escribe tu email.')
       return
     }
-    if (!EMAIL_RE.test(email)) {
+    if (!EMAIL_RE.test(normalizedEmail)) {
       setMensaje('Ese email no parece válido. Revísalo y vuelve a intentarlo.')
       return
     }
@@ -113,9 +135,10 @@ export default function Login() {
       setMensaje('Escribe tu contraseña.')
       return
     }
+    authLockRef.current = true
     setCargando(true)
     setMensaje('')
-    const { error, data } = await supabase.auth.signInWithPassword({ email, password })
+    const { error, data } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
     if (error) {
       setMensaje(mensajeAuthLegible(error.message))
     } else {
@@ -145,6 +168,7 @@ export default function Login() {
       window.location.assign(dest)
     }
     setCargando(false)
+    authLockRef.current = false
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {

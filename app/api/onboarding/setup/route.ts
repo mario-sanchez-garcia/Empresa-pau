@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
     try { return createServiceClient() } catch { return null }
   })()
 
-  if (!serviceDb && cleaned.username) {
-    return respond({ error: 'No se pudo guardar el nombre de usuario' }, 500, 'no_service_db')
+  if (!serviceDb) {
+    return respond({ error: 'No se pudo guardar tu onboarding' }, 500, 'no_service_db')
   }
 
   if (serviceDb) {
@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
         username_check_failed: 'No se pudo verificar el nombre de usuario',
         username_taken: 'Ese nombre de usuario ya está en uso',
         username_save_failed: 'No se pudo guardar el nombre de usuario',
+        profile_save_failed: 'No se pudo guardar tu perfil',
       }
       const status = saveResult.errorCode === 'username_taken' ? 409 : 500
       return respond({ error: messages[saveResult.errorCode] }, status, saveResult.errorCode)

@@ -21,6 +21,8 @@ export interface OnboardingDraftRow {
   updated_at: string
   completed_at: string | null
   last_error_code: string | null
+  processing_token: string | null
+  processing_started_at: string | null
 }
 
 export type ClaimOnboardingDraftResult =
@@ -72,7 +74,7 @@ export async function claimOnboardingDraft(
     .select('*')
     .maybeSingle()
 
-  if (claimError) return { ok: false, errorCode: 'invalid_draft' }
+  if (claimError) return { ok: false, errorCode: claimError.code === '23505' ? 'draft_claim_conflict' : 'invalid_draft' }
 
   if (claimed) return { ok: true, draft: claimed as OnboardingDraftRow, justClaimed: true }
 

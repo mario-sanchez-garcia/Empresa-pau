@@ -16,6 +16,7 @@ import { examenesIngles } from './data/ingles'
 import { BIOLOGIA_TOPICS, examenesBiologia } from './data/biologia'
 import { examenesMatematicasCCSSMadrid, MATEMATICAS_CCSS_LABEL } from './data/matematicas_ccss_madrid'
 import { supabase } from './lib/supabase'
+import { signOutLocally } from '@/app/lib/auth/signOutLocally'
 import { correctionJsonToMarkdownWithOptions, scoreFromCorrection } from './lib/correctionPrompt'
 import { correctionPayloadToMarkdown, parseCorrectionPayload } from './lib/correctionParsing'
 import { sanitizeCorrectionListItem } from './lib/correctionBlockValidation'
@@ -2225,7 +2226,7 @@ function cambiarTipo(t: Tipo) {
   setOpcion(0)
   reset()
 }
-  async function cerrarSesion() { await supabase.auth.signOut(); window.location.href = '/login' }
+  async function cerrarSesion() { await signOutLocally(); window.location.href = '/login' }
 
   async function getChatAccessToken() {
     const { data, error } = await supabase.auth.getSession()

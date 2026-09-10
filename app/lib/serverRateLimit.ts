@@ -50,7 +50,7 @@ export function checkServerRateLimit(args: ServerRateLimitArgs): ServerRateLimit
 
 export function getClientIp(headers: Headers) {
   const forwardedFor = headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-  return forwardedFor || headers.get('x-real-ip') || 'unknown'
+  return headers.get('x-real-ip') || forwardedFor || 'unknown'
 }
 
 function getStore(): Map<string, RateLimitEntry> {

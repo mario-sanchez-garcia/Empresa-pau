@@ -136,9 +136,12 @@ test('el reenvío reutiliza el endpoint con rate limit, no llama a Supabase dire
 
 test('el endpoint de reenvío conserva su límite y expone el tiempo de espera', () => {
   const route = stripComments(read('app', 'api', 'auth', 'resend-confirmation', 'route.ts')).replace(/\s+/g, ' ')
-  assert.ok(route.includes('const RESEND_COOLDOWN_SECONDS = 60'), 'ha cambiado el cooldown por email')
-  assert.ok(route.includes('const RESEND_IP_HOURLY_LIMIT = 12'), 'ha cambiado el límite por IP')
-  assert.ok(route.includes('retryAfterSeconds: RESEND_COOLDOWN_SECONDS'), 'el 429 no dice cuánto hay que esperar')
+  const limiter = stripComments(read('app', 'lib', 'auth', 'durableRateLimit.ts')).replace(/\s+/g, ' ')
+  assert.ok(route.includes('reserveAuthEmailAttempt('), 'el reenvío no reserva el intento de forma atómica')
+  assert.ok(limiter.includes('p_email_window_seconds: 60'), 'ha cambiado el cooldown por email')
+  assert.ok(limiter.includes('p_ip_window_seconds: 3600'), 'ha cambiado la ventana por IP')
+  assert.ok(limiter.includes('p_ip_limit: 12'), 'ha cambiado el límite por IP')
+  assert.ok(route.includes('retryAfterSeconds: reservation.retryAfterSeconds'), 'el 429 no dice cuánto hay que esperar')
 })
 
 // ── Telemetría sin PII ──────────────────────────────────────────────────

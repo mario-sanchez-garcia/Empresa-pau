@@ -149,11 +149,19 @@ test('las dos rutas de onboarding pasan los días semanales declarados', () => {
 test('el evento de onboarding completado sigue escribiéndose al final', () => {
   // La solución NO puede ser adelantar el evento: significaría "completado"
   // antes de que exista el Camino.
-  const code = readFileSync(join(ROOT, '../api/onboarding/finalize/route.ts'), 'utf8')
-  const verifyAt = code.indexOf('loadRewardMissions(db, user.id)\n  if (missions.length === 0)')
-  const eventAt = code.indexOf("event_type: 'onboarding_completed'")
-  assert.ok(verifyAt > 0 && eventAt > 0)
-  assert.ok(eventAt > verifyAt, 'el evento de completado se ha adelantado a la verificación del calendario')
+  const route = readFileSync(join(ROOT, '../api/onboarding/finalize/route.ts'), 'utf8').replace(/\s+/g, ' ')
+  const migration = readFileSync(
+    join(ROOT, '../../supabase/migrations/20260917120000_harden_auth_onboarding_integrity.sql'),
+    'utf8',
+  ).replace(/\s+/g, ' ')
+  const verifyAt = route.indexOf('loadRewardMissions(db, user.id) if (missions.length === 0)')
+  const commitAt = route.indexOf("db.rpc('complete_onboarding_processing'")
+  const functionAt = migration.indexOf('create or replace function public.complete_onboarding_processing')
+  const eventAt = migration.indexOf("values (p_user_id, 'onboarding_completed', p_payload)", functionAt)
+  const draftAt = migration.indexOf("status='completed'", functionAt)
+  assert.ok(verifyAt > 0 && commitAt > 0 && functionAt > 0 && eventAt > 0 && draftAt > 0)
+  assert.ok(commitAt > verifyAt, 'el commit de completado se ha adelantado a la verificación del calendario')
+  assert.ok(eventAt < draftAt, 'la transacción no registra el evento antes de cerrar el draft')
 })
 
 // ── Entrada muy tardía: siempre hay una primera acción ───────────────────

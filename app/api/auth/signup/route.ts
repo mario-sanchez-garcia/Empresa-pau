@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { safeLocalRedirect } from '@/app/lib/auth/safeRedirect'
+import { reserveSignupAttempt } from '@/app/lib/auth/durableRateLimit'
+import { isPasswordLongEnough, MIN_PASSWORD_LENGTH } from '@/app/lib/auth/passwordPolicy'
 
 // When Supabase email confirmation is DISABLED (current default):
 //   admin.createUser({ email_confirm: true }) → session returned immediately.
@@ -51,11 +54,14 @@ export async function POST(req: NextRequest) {
   // enlace de confirmación debe volver a /onboarding/finalizando con el
   // draft_id — no al /onboarding genérico. Con next/draft_id ausentes se
   // conserva el comportamiento anterior exacto (login clásico).
-  const nextPath = typeof body.next === 'string' && body.next.startsWith('/') ? body.next : '/onboarding'
+  const nextPath = safeLocalRedirect(body.next, '/onboarding')
   const draftId = typeof body.draft_id === 'string' && UUID_RE.test(body.draft_id) ? body.draft_id : null
 
   if (!normalizedEmail || !normalizedPassword) {
     return NextResponse.json({ error: 'Email y contraseña requeridos' }, { status: 400 })
+  }
+  if (!isPasswordLongEnough(normalizedPassword)) {
+    return NextResponse.json({ error: `La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.` }, { status: 400 })
   }
 
   const adminSupabase = createClient(
@@ -66,129 +72,75 @@ export async function POST(req: NextRequest) {
 
   // Durable signup rate limit: 10 attempts per IP/hour and 5 per email/hour.
   const ip = getSignupIp(req.headers)
-  const since = new Date(Date.now() - SIGNUP_WINDOW_SECONDS * 1000).toISOString()
+  const reservation = await reserveSignupAttempt(adminSupabase, {
+    email: normalizedEmail,
+    ip,
+    emailLimit: SIGNUP_EMAIL_RATE_LIMIT,
+    ipLimit: SIGNUP_IP_RATE_LIMIT,
+    windowSeconds: SIGNUP_WINDOW_SECONDS,
+  })
+  if (!reservation.ok) {
+    return NextResponse.json({ error: 'El registro no está disponible ahora mismo. Inténtalo más tarde.' }, { status: 503 })
+  }
+  if (!reservation.allowed) {
+    return NextResponse.json(
+      { error: 'Demasiados intentos. Prueba de nuevo más tarde.' },
+      { status: 429, headers: { 'Retry-After': String(reservation.retryAfterSeconds) } },
+    )
+  }
 
-  try {
-    const [ipLimit, emailLimit] = await Promise.all([
-      adminSupabase
-        .from('signup_attempts')
-        .select('id', { count: 'exact', head: true })
-        .eq('ip', ip)
-        .gte('created_at', since),
-      adminSupabase
-        .from('signup_attempts')
-        .select('id', { count: 'exact', head: true })
-        .eq('email', normalizedEmail)
-        .gte('created_at', since)
-    ])
+  const termsVersion = typeof body.terms_version === 'string' ? body.terms_version : null
+  const privacyVersion = typeof body.privacy_version === 'string' ? body.privacy_version : null
 
-    if (
-      (!ipLimit.error && (ipLimit.count ?? 0) >= SIGNUP_IP_RATE_LIMIT) ||
-      (!emailLimit.error && (emailLimit.count ?? 0) >= SIGNUP_EMAIL_RATE_LIMIT)
-    ) {
-      return NextResponse.json(
-        { error: 'Demasiados intentos. Prueba de nuevo más tarde.' },
-        {
-          status: 429,
-          headers: { 'Retry-After': String(SIGNUP_WINDOW_SECONDS) },
-        }
-      )
-    }
-
-    const termsVersion = typeof body.terms_version === 'string' ? body.terms_version : null
-    const privacyVersion = typeof body.privacy_version === 'string' ? body.privacy_version : null
-
-    if (EMAIL_CONFIRMATION_ENABLED) {
-      // ── Confirmation flow: signUp via anon client, Supabase sends the email ──
-      const anonSupabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        { auth: { autoRefreshToken: false, persistSession: false } }
-      )
+  if (EMAIL_CONFIRMATION_ENABLED) {
+    // ── Confirmation flow: signUp via anon client, Supabase sends the email ──
+    const anonSupabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
       // Send the user straight into onboarding after they click the email link.
       // /auth/callback already parses the hash tokens Supabase appends and then
       // forwards to `next`, so confirmation lands in the product, not the landing.
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
-      const redirectQuery = new URLSearchParams({ next: nextPath })
-      if (draftId) {
-        redirectQuery.set('draft', draftId)
-        redirectQuery.set('method', 'email')
-      }
-      const { data, error: signUpError } = await anonSupabase.auth.signUp({
-        email: normalizedEmail,
-        password: normalizedPassword,
-        options: {
-          emailRedirectTo: `${appUrl}/auth/callback?${redirectQuery.toString()}`,
-        },
-      })
-
-      if (signUpError) {
-        if (isAlreadyRegisteredError(signUpError)) {
-          return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 409 })
-        }
-        return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 400 })
-      }
-
-      // identities === [] means the email is already registered (Supabase anti-enumeration quirk)
-      if (!data.session && data.user?.identities?.length === 0) {
-        return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 409 })
-      }
-
-      // Supabase accepted the request. Actual delivery is owned by the
-      // configured SMTP provider and must not be claimed as confirmed here.
-      const userId = data.user?.id
-      if (userId && draftId) {
-        void adminSupabase.from('billing_events').insert({
-          user_id: userId,
-          event_type: 'email_confirmation_sent',
-          payload: { draft_id: draftId, beta_private: true },
-        }).then(({ error: eErr }) => {
-          if (eErr) console.error('[auth/signup] email_confirmation_sent record failed:', eErr.message)
-        })
-      }
-      if (userId && termsVersion && privacyVersion) {
-        void adminSupabase.from('billing_events').insert({
-          user_id: userId,
-          event_type: 'consent_accepted',
-          payload: { terms_version: termsVersion, privacy_version: privacyVersion, source: 'email_signup', ip },
-        }).then(({ error: cErr }) => {
-          if (cErr) console.error('[auth/signup] consent record failed:', cErr.message)
-        })
-      }
-
-      // Se devuelve el email YA NORMALIZADO (trim + minúsculas) porque es el
-      // que Supabase ha registrado, y es exactamente el que `verifyOtp` tiene
-      // que recibir después. Que el cliente lo re-derive por su cuenta es
-      // pedirle que adivine nuestra normalización.
-      return NextResponse.json({ needsConfirmation: true, delivery: 'requested', email: normalizedEmail })
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
+    const redirectQuery = new URLSearchParams({ next: nextPath })
+    if (draftId) {
+      redirectQuery.set('draft', draftId)
+      redirectQuery.set('method', 'email')
     }
-
-    // ── Immediate session flow (EMAIL_CONFIRMATION_ENABLED = false) ───────────
-    const { error: createError } = await adminSupabase.auth.admin.createUser({
+    const { data, error: signUpError } = await anonSupabase.auth.signUp({
       email: normalizedEmail,
       password: normalizedPassword,
-      email_confirm: true,
+      options: {
+        emailRedirectTo: `${appUrl}/auth/callback?${redirectQuery.toString()}`,
+      },
     })
 
-    if (createError) {
-      if (isAlreadyRegisteredError(createError)) {
-        return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 409 })
+    if (signUpError) {
+      if (isAlreadyRegisteredError(signUpError)) {
+        return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 400 })
       }
       return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 400 })
     }
 
-    const { data: signInData, error: signInError } = await adminSupabase.auth.signInWithPassword({
-      email: normalizedEmail,
-      password: normalizedPassword,
-    })
-
-    if (signInError || !signInData.session) {
-      return NextResponse.json({ error: 'Cuenta creada pero no se pudo iniciar sesión. Inténtalo manualmente.' }, { status: 500 })
+      // identities === [] means the email is already registered (Supabase anti-enumeration quirk)
+    if (!data.session && data.user?.identities?.length === 0) {
+      return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 400 })
     }
 
-    // Record RGPD consent proof — non-blocking
-    const userId = signInData.session.user.id
-    if (termsVersion && privacyVersion) {
+      // Supabase accepted the request. Actual delivery is owned by the
+      // configured SMTP provider and must not be claimed as confirmed here.
+    const userId = data.user?.id
+    if (userId && draftId) {
+      void adminSupabase.from('billing_events').insert({
+        user_id: userId,
+        event_type: 'email_confirmation_sent',
+        payload: { draft_id: draftId, beta_private: true },
+      }).then(({ error: eErr }) => {
+        if (eErr) console.error('[auth/signup] email_confirmation_sent record failed:', eErr.message)
+      })
+    }
+    if (userId && termsVersion && privacyVersion) {
       void adminSupabase.from('billing_events').insert({
         user_id: userId,
         event_type: 'consent_accepted',
@@ -198,9 +150,47 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    return NextResponse.json({ session: signInData.session })
-  } finally {
-    const { error } = await adminSupabase.from('signup_attempts').insert({ ip, email: normalizedEmail })
-    if (error) console.error('[auth/signup] failed to record signup attempt:', error.message)
+      // Se devuelve el email YA NORMALIZADO (trim + minúsculas) porque es el
+      // que Supabase ha registrado, y es exactamente el que `verifyOtp` tiene
+      // que recibir después. Que el cliente lo re-derive por su cuenta es
+      // pedirle que adivine nuestra normalización.
+    return NextResponse.json({ needsConfirmation: true, delivery: 'requested', email: normalizedEmail })
   }
+
+  // ── Immediate session flow (EMAIL_CONFIRMATION_ENABLED = false) ───────────
+  const { error: createError } = await adminSupabase.auth.admin.createUser({
+    email: normalizedEmail,
+    password: normalizedPassword,
+    email_confirm: true,
+  })
+
+  if (createError) {
+    if (isAlreadyRegisteredError(createError)) {
+      return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 400 })
+    }
+    return NextResponse.json({ error: SIGNUP_FAILED_ERROR }, { status: 400 })
+  }
+
+  const { data: signInData, error: signInError } = await adminSupabase.auth.signInWithPassword({
+    email: normalizedEmail,
+    password: normalizedPassword,
+  })
+
+  if (signInError || !signInData.session) {
+    return NextResponse.json({ error: 'Cuenta creada pero no se pudo iniciar sesión. Inténtalo manualmente.' }, { status: 500 })
+  }
+
+  // Record RGPD consent proof — non-blocking
+  const userId = signInData.session.user.id
+  if (termsVersion && privacyVersion) {
+    void adminSupabase.from('billing_events').insert({
+      user_id: userId,
+      event_type: 'consent_accepted',
+      payload: { terms_version: termsVersion, privacy_version: privacyVersion, source: 'email_signup', ip },
+    }).then(({ error: cErr }) => {
+      if (cErr) console.error('[auth/signup] consent record failed:', cErr.message)
+    })
+  }
+
+  return NextResponse.json({ session: signInData.session })
 }

@@ -233,7 +233,7 @@ function ConfirmarEmailContent() {
               maxWidth: 420,
               margin: '-10px 0 24px',
             }}>
-              Tu enlace anterior ha caducado o ya se ha usado. Te enviaremos uno nuevo para terminar la cuenta.
+              Tu enlace anterior ha caducado o ya se ha usado. Puedes solicitar uno nuevo para terminar la cuenta.
             </p>
           )}
 

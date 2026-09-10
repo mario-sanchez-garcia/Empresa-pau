@@ -7,7 +7,8 @@ import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Check, Eye, EyeOff, Lock, Plus, Search, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
-import { validateUsername, normalizeUsername } from '@/app/lib/username'
+import { validateUsername } from '@/app/lib/username'
+import { isPasswordLongEnough, MIN_PASSWORD_LENGTH } from '@/app/lib/auth/passwordPolicy'
 import { CENTROS_MADRID } from '@/app/data/centros_madrid'
 import { CENTROS_CATALUNA } from '@/app/data/centros_cataluna'
 import { normalizeInstituteName } from '@/app/lib/camino/instituteNormalize'
@@ -22,7 +23,6 @@ import {
   clearOnboarding,
   ensureOnboardingTraceId,
   loadOnboarding,
-  markOnboardingComplete,
   restoreOnboardingFromServer,
   saveOnboarding,
   syncOnboardingCommunity,
@@ -218,6 +218,13 @@ const signupDmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 const SIGNUP_FONT_DISPLAY = signupBebas.style.fontFamily
 const SIGNUP_FONT_MONO = signupDmMono.style.fontFamily
 
+function loadInitialStep(): Step {
+  const saved = loadOnboarding().lastStep as Step | null
+  if (saved === 'welcome') return 'pain'
+  if (saved && (STEPS.includes(saved) || saved === 'preview' || saved === 'signup')) return saved
+  return 'pain'
+}
+
 const BASE_CSS = `
 *{box-sizing:border-box}
 .onb-input{width:100%;border:none;background:transparent;padding:0;font-size:13px;font-weight:700;color:#0f172a;font-family:'Inter',system-ui,sans-serif;outline:none}
@@ -250,7 +257,10 @@ export default function OnboardingFlow() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const isPreview = searchParams.get('preview') === '1'
-  const [step, setStep] = useState<Step>('pain')
+  // Read before the first render. An effect-based default briefly writes
+  // `pain` back to localStorage and, under StrictMode, can win the race with
+  // async session restoration, erasing the interrupted step on F5.
+  const [step, setStep] = useState<Step>(loadInitialStep)
   const [data, setData] = useState<OnboardingData>(() => loadOnboarding())
   // Fase 2 (signup al final): error de la pantalla de preview/signup —
   // draft server-side, Google OAuth o signup por email. Ya no existe un
@@ -259,6 +269,7 @@ export default function OnboardingFlow() {
   const [authError, setAuthError] = useState('')
   const [signupOptionsReady, setSignupOptionsReady] = useState(false)
   const [signupBusy, setSignupBusy] = useState<'google' | 'email' | null>(null)
+  const signupLockRef = useRef(false)
   const [signupEmail, setSignupEmail] = useState('')
   const [signupPassword, setSignupPassword] = useState('')
   const [signupTerms, setSignupTerms] = useState(false)
@@ -354,7 +365,7 @@ export default function OnboardingFlow() {
   // onboarding — `kairo_onboarding_v1` no está vinculado al usuario, así que
   // en un navegador compartido entre cuentas puede traer un `completedAt` de
   // otra cuenta. Por eso se consulta el servidor primero y solo se usa la
-  // copia local como fallback si la consulta falla (offline).
+  // copia local solo para reanudar preguntas, nunca como prueba de completitud.
   useEffect(() => {
     let cancelled = false
     async function restore() {
@@ -377,11 +388,6 @@ export default function OnboardingFlow() {
             // Copia local "completada" que no pertenece a esta cuenta.
             clearOnboarding()
             saved = loadOnboarding()
-          } else if (result.status === 'error' && saved.completedAt && !isPreview) {
-            // No se pudo consultar el servidor; si ya había onboarding local
-            // (offline / fallo puntual) se respeta como antes.
-            router.replace('/camino')
-            return
           }
         }
       } catch { /* local resume still works */ }
@@ -699,13 +705,13 @@ export default function OnboardingFlow() {
   }
 
   function goToFinalizing(draftId: string) {
-    markOnboardingComplete()
     syncOnboardingCommunity(data)
     router.push(`/onboarding/finalizando?draft=${encodeURIComponent(draftId)}`)
   }
 
   async function handleGoogleSignup() {
-    if (signupBusy) return
+    if (signupLockRef.current) return
+    signupLockRef.current = true
     setSignupBusy('google')
     setAuthError('')
     void sendOnboardingEvent(traceIdRef.current, 'onboarding_signup_method_selected', { method: 'google' })
@@ -713,6 +719,7 @@ export default function OnboardingFlow() {
     if (!draftId) {
       setAuthError('No se pudo preparar tu cuenta. Inténtalo de nuevo.')
       setSignupBusy(null)
+      signupLockRef.current = false
       return
     }
     void sendOnboardingEvent(traceIdRef.current, 'onboarding_signup_started', { method: 'google' })
@@ -725,11 +732,17 @@ export default function OnboardingFlow() {
     if (error) {
       setAuthError('No se pudo iniciar sesión con Google. Inténtalo de nuevo.')
       setSignupBusy(null)
+      signupLockRef.current = false
     }
   }
 
   async function handleEmailSignup(email: string, password: string) {
-    if (signupBusy) return
+    if (signupLockRef.current) return
+    if (!isPasswordLongEnough(password)) {
+      setAuthError(`La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`)
+      return
+    }
+    signupLockRef.current = true
     setSignupBusy('email')
     setAuthError('')
     void sendOnboardingEvent(traceIdRef.current, 'onboarding_signup_method_selected', { method: 'email' })
@@ -737,6 +750,7 @@ export default function OnboardingFlow() {
     if (!draftId) {
       setAuthError('No se pudo preparar tu cuenta. Inténtalo de nuevo.')
       setSignupBusy(null)
+      signupLockRef.current = false
       return
     }
     void sendOnboardingEvent(traceIdRef.current, 'onboarding_signup_started', { method: 'email' })
@@ -757,6 +771,7 @@ export default function OnboardingFlow() {
       if (!res.ok) {
         setAuthError(mensajeAuthLegible(result.error))
         setSignupBusy(null)
+        signupLockRef.current = false
         return
       }
       if (result.needsConfirmation) {
@@ -779,6 +794,7 @@ export default function OnboardingFlow() {
     } catch {
       setAuthError('Error de conexión. Inténtalo de nuevo.')
       setSignupBusy(null)
+      signupLockRef.current = false
     }
   }
 
@@ -1265,6 +1281,7 @@ export default function OnboardingFlow() {
                         onChange={e => setSignupPassword(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter' && email && password && terms) void handleEmailSignup(email, password) }}
                         autoComplete="new-password"
+                        minLength={MIN_PASSWORD_LENGTH}
                         aria-required="true"
                       />
                       <button

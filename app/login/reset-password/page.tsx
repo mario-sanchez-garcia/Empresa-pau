@@ -8,11 +8,12 @@
 // nueva antes de continuar — un login normal tras el enlace de
 // recuperación no cambia la contraseña por sí solo.
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
+import { isPasswordLongEnough, MIN_PASSWORD_LENGTH } from '@/app/lib/auth/passwordPolicy'
 
 function mensajeErrorLegible(error?: string) {
   const text = error?.toLowerCase() ?? ''
@@ -35,46 +36,66 @@ function ResetPasswordHandler() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [saved, setSaved] = useState(false)
+  const savingRef = useRef(false)
+
+  const RECOVERY_MARKER = 'kairo_password_recovery_authorized'
 
   useEffect(() => {
+    let cancelled = false
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        sessionStorage.setItem(RECOVERY_MARKER, '1')
+        if (!cancelled) setLinkStatus('ready')
+      }
+    })
     const code = searchParams.get('code')
     const errorParam = searchParams.get('error')
     if (errorParam) {
       queueMicrotask(() => setLinkStatus('expired'))
-      return
+      return () => { cancelled = true; subscription.unsubscribe() }
     }
     if (code) {
       supabase.auth.exchangeCodeForSession(code).then(({ error: exchangeError }) => {
-        setLinkStatus(exchangeError ? 'expired' : 'ready')
+        if (cancelled) return
+        if (exchangeError) {
+          setLinkStatus('expired')
+        } else {
+          sessionStorage.setItem(RECOVERY_MARKER, '1')
+          setLinkStatus('ready')
+        }
       })
-      return
+      return () => { cancelled = true; subscription.unsubscribe() }
     }
     // Enlace ya consumido en esta pestaña (recarga) — si ya hay sesión de
     // recuperación activa, se puede seguir igualmente.
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setLinkStatus(session ? 'ready' : 'expired')
+      if (!cancelled) setLinkStatus(session && sessionStorage.getItem(RECOVERY_MARKER) === '1' ? 'ready' : 'expired')
     })
+    return () => { cancelled = true; subscription.unsubscribe() }
   }, [searchParams])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (saving) return
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.')
+    if (savingRef.current) return
+    if (!isPasswordLongEnough(password)) {
+      setError(`La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres.`)
       return
     }
     if (password !== confirmPassword) {
       setError('Las dos contraseñas no coinciden.')
       return
     }
+    savingRef.current = true
     setSaving(true)
     setError('')
     const { error: updateError } = await supabase.auth.updateUser({ password })
     setSaving(false)
+    savingRef.current = false
     if (updateError) {
       setError(mensajeErrorLegible(updateError.message))
       return
     }
+    sessionStorage.removeItem(RECOVERY_MARKER)
     setSaved(true)
     setTimeout(() => router.replace('/camino'), 1500)
   }
@@ -127,6 +148,7 @@ function ResetPasswordHandler() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               autoComplete="new-password"
+              minLength={MIN_PASSWORD_LENGTH}
               style={{ width: '100%', padding: '10px 40px 10px 12px', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 8, color: '#fff', fontSize: 14 }}
             />
             <button

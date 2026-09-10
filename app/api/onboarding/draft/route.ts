@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/app/lib/billing/supabase'
-import { checkServerRateLimit, getClientIp } from '@/app/lib/serverRateLimit'
+import { getClientIp } from '@/app/lib/serverRateLimit'
+import { reserveApiAttempt } from '@/app/lib/auth/durableRateLimit'
 import { validateUsername } from '@/app/lib/username'
 import {
   cleanGradeThresholdMode,
   cleanGradeThreshold,
   cleanSubjectGradeThresholds,
   cleanString,
-  cleanStringArray,
   cleanPainType,
   VALID_COMMUNITIES,
   VALID_DAILY_MINUTES,
   VALID_WEEKLY_DAYS,
   VALID_SCHOOL_SOURCES,
 } from '@/app/lib/onboarding/saveOnboardingProfile'
-import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
+import { cleanStudentExamsForSubjects, cleanSupportedSubjects } from '@/app/lib/onboarding/onboardingValidation'
 import { normalizeStartMode } from '@/app/lib/camino/startingPoint'
 import { extractTraceHeaders, logOnboardingStage } from '@/app/lib/onboarding/onboardingServerLog'
 
@@ -66,9 +66,13 @@ export async function POST(request: NextRequest) {
   const { requestId } = extractTraceHeaders(request)
 
   const ip = getClientIp(request.headers)
-  const rateLimit = checkServerRateLimit({ key: `onboarding_draft:${ip}`, limit: DRAFT_RATE_LIMIT, windowSeconds: DRAFT_WINDOW_SECONDS })
+  const db = createServiceClient()
+  const rateLimit = await reserveApiAttempt(db, { key: ip, action: 'onboarding_draft', limit: DRAFT_RATE_LIMIT, windowSeconds: DRAFT_WINDOW_SECONDS })
+  if (!rateLimit.ok) {
+    return NextResponse.json({ error: 'rate_limit_unavailable' }, { status: 503 })
+  }
   if (!rateLimit.allowed) {
-    return NextResponse.json({ error: 'rate_limited' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds ?? DRAFT_WINDOW_SECONDS) } })
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } })
   }
 
   let body: Record<string, unknown> = {}
@@ -87,7 +91,7 @@ export async function POST(request: NextRequest) {
   // No se filtra aquí por ALLOWED_SUBJECTS (beta): el draft solo guarda la
   // respuesta tal cual; generateCaminoPlan ya aplica ese filtro real al
   // generar el Camino, y usarlo aquí también solo duplicaría esa lista.
-  const subjects = cleanStringArray(rawPayload.subjects)
+  const subjects = cleanSupportedSubjects(rawPayload.subjects)
   const payload = {
     pain_type: cleanPainType(rawPayload.painType),
     username: cleanUsername(rawPayload.username),
@@ -95,7 +99,7 @@ export async function POST(request: NextRequest) {
     school_name: cleanString(rawPayload.schoolName),
     school_source: VALID_SCHOOL_SOURCES.includes(rawPayload.schoolSource as typeof VALID_SCHOOL_SOURCES[number]) ? rawPayload.schoolSource : null,
     subjects,
-    upcoming_exams: cleanStudentExams(rawPayload.upcomingExams),
+    upcoming_exams: cleanStudentExamsForSubjects(rawPayload.upcomingExams, subjects),
     preparation_feeling: cleanString(rawPayload.preparationLevel),
     daily_minutes: VALID_DAILY_MINUTES.includes(rawPayload.minutesPerSession as typeof VALID_DAILY_MINUTES[number]) ? rawPayload.minutesPerSession : null,
     weekly_study_days_value: VALID_WEEKLY_DAYS.includes(rawPayload.studyDays as typeof VALID_WEEKLY_DAYS[number]) ? rawPayload.studyDays : null,
@@ -107,7 +111,6 @@ export async function POST(request: NextRequest) {
     starting_points: cleanStartingPoints(rawPayload.startingPoints, subjects),
   }
 
-  const db = createServiceClient()
   const expiresAt = new Date(Date.now() + DRAFT_EXPIRY_MS).toISOString()
 
   const existingDraftId = typeof body.draft_id === 'string' && UUID_RE.test(body.draft_id) ? body.draft_id : null

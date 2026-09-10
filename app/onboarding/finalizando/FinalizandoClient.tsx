@@ -66,6 +66,9 @@ function FinalizandoContent() {
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const finalizeEventFiredRef = useRef(false)
+  const finalizeLockRef = useRef(false)
+  const usernameLockRef = useRef(false)
+  const pollTicksRef = useRef(0)
 
   const localDraft = typeof window !== 'undefined' ? loadLocalDraft() : null
   const loadingMessages = buildPersonalizedLoadingMessages({
@@ -115,8 +118,10 @@ function FinalizandoContent() {
 
   async function runFinalize() {
     if (!draftId) { setPhase('no_draft'); return }
+    if (finalizeLockRef.current) return
+    finalizeLockRef.current = true
     const token = await getToken()
-    if (!token) { setPhase('no_session'); return }
+    if (!token) { finalizeLockRef.current = false; setPhase('no_session'); return }
 
     if (!finalizeEventFiredRef.current) {
       finalizeEventFiredRef.current = true
@@ -135,22 +140,36 @@ function FinalizandoContent() {
       } else if (json.status === 'processing') {
         setStage(json.processing_stage ?? null)
         setPhase('processing')
-        startPolling(token)
+        startPolling()
       } else {
         onFailed(json.error_code ?? 'internal_error')
       }
     } catch {
       onFailed('internal_error')
+    } finally {
+      finalizeLockRef.current = false
     }
   }
 
-  function startPolling(token: string) {
+  function startPolling() {
     if (pollRef.current) return
+    pollTicksRef.current = 0
     pollRef.current = setInterval(async () => {
       try {
+        const token = await getToken()
+        if (!token) {
+          stopPolling()
+          setPhase('no_session')
+          return
+        }
         const res = await fetch(`/api/onboarding/status?draft=${encodeURIComponent(draftId ?? '')}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
+        if (res.status === 401) {
+          stopPolling()
+          setPhase('no_session')
+          return
+        }
         const json = await res.json()
         if (json.status === 'completed') {
           onCompleted(json.reward)
@@ -158,6 +177,13 @@ function FinalizandoContent() {
           onFailed(json.last_error_code ?? 'internal_error')
         } else {
           setStage(json.processing_stage ?? null)
+          pollTicksRef.current += 1
+          // A worker interrupted by a deploy/timeout leaves a recoverable
+          // three-minute lease. Re-enter finalize once the lease can expire.
+          if (pollTicksRef.current >= 120) {
+            stopPolling()
+            void runFinalize()
+          }
         }
       } catch {
         // Red caída durante el polling: se reintenta en el siguiente tick,
@@ -184,13 +210,15 @@ function FinalizandoContent() {
   }
 
   async function handleUsernameRetry() {
+    if (usernameLockRef.current) return
     setUsernameError('')
     const validation = validateUsername(usernameInput.trim())
     if (validation) { setUsernameError(validation); return }
+    usernameLockRef.current = true
     setUsernameSaving(true)
     try {
       const token = await getToken()
-      if (!token || !draftId) { setUsernameError('No se pudo confirmar tu sesión.'); setUsernameSaving(false); return }
+      if (!token || !draftId) { setUsernameError('No se pudo confirmar tu sesión.'); setUsernameSaving(false); usernameLockRef.current = false; return }
       const res = await fetch('/api/onboarding/draft/username', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -200,15 +228,18 @@ function FinalizandoContent() {
       if (!res.ok) {
         setUsernameError(json.error ?? 'No se pudo actualizar tu nombre de usuario.')
         setUsernameSaving(false)
+        usernameLockRef.current = false
         return
       }
       setUsernameSaving(false)
+      usernameLockRef.current = false
       setPhase('checking')
       void sendOnboardingEvent(localDraft?.traceId ?? null, 'onboarding_finalize_resumed', {})
       await runFinalize()
     } catch {
       setUsernameError('Error de conexión. Inténtalo de nuevo.')
       setUsernameSaving(false)
+      usernameLockRef.current = false
     }
   }
 
@@ -221,8 +252,8 @@ function FinalizandoContent() {
             ? 'Nos falta información de tu preparación.'
             : 'No hemos podido confirmar tu sesión.'}
         </p>
-        <button onClick={() => router.push('/onboarding')} style={primaryBtnStyle}>
-          Volver al onboarding
+        <button onClick={() => router.push(phase === 'no_session' ? `/login?returnTo=${encodeURIComponent(`/onboarding/finalizando?draft=${draftId ?? ''}`)}` : '/onboarding')} style={primaryBtnStyle}>
+          {phase === 'no_session' ? 'Volver a iniciar sesión' : 'Volver al onboarding'}
         </button>
       </Screen>
     )

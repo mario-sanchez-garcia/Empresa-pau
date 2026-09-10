@@ -5,6 +5,7 @@ import { Camera, CreditCard, LogOut, Save, Trash2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { CCAA_OPTIONS, useCCAA, type CCAA } from '@/app/hooks/useCCAA'
 import { supabase } from '@/app/lib/supabase'
+import { signOutLocally } from '@/app/lib/auth/signOutLocally'
 import { loadOnboarding, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 import { validateUsername, normalizeUsername } from '@/app/lib/username'
 import { loadProfilePreferences, saveProfilePreferences } from '@/app/lib/profilePreferences'
@@ -482,7 +483,7 @@ export default function SettingsPage() {
         headers: { Authorization: `Bearer ${token}` },
       })
       if (res.ok) {
-        await supabase.auth.signOut()
+        await signOutLocally()
         router.push('/login')
       } else {
         const json = await res.json().catch(() => null) as { error?: string } | null
@@ -502,7 +503,7 @@ export default function SettingsPage() {
   }
 
   async function logout() {
-    await supabase.auth.signOut()
+    await signOutLocally()
     router.push('/login')
   }
 

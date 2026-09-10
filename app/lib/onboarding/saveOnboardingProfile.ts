@@ -4,6 +4,7 @@ import { ensureUserInstituteMembership } from '@/app/lib/camino/institutePace'
 import { normalizeUsername, validateUsername } from '@/app/lib/username'
 import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
 import { MAX_GRADE_THRESHOLD, MIN_GRADE_THRESHOLD, type GradeThresholdMode } from '@/app/lib/camino/gradeThreshold'
+import { cleanStudentExamsForSubjects, cleanSupportedSubjects } from '@/app/lib/onboarding/onboardingValidation'
 
 // Validación/limpieza + escritura de los campos de perfil del onboarding,
 // compartida entre /api/onboarding/setup (flujo legacy — también lo llama
@@ -82,11 +83,11 @@ export function cleanOnboardingProfileBody(body: Record<string, unknown>): Clean
     schoolSource: VALID_SCHOOL_SOURCES.includes(body.schoolSource as typeof VALID_SCHOOL_SOURCES[number]) ? (body.schoolSource as string) : null,
     username: typeof body.username === 'string' ? body.username.trim().slice(0, 20) || null : null,
     schoolName: cleanString(body.schoolName),
-    subjects: cleanStringArray(body.subjects),
+    subjects: cleanSupportedSubjects(body.subjects),
     preparationFeeling: cleanString(body.preparationFeeling),
     dailyStudyTime: cleanString(body.dailyStudyTime),
     weeklyStudyDays: cleanString(body.weeklyStudyDays),
-    studentExams: cleanStudentExams(body.studentExams),
+    studentExams: cleanStudentExamsForSubjects(body.studentExams, cleanSupportedSubjects(body.subjects)),
     gradeThresholdMode: cleanGradeThresholdMode(body.gradeThresholdMode),
     gradeThreshold: body.gradeThreshold !== undefined ? cleanGradeThreshold(body.gradeThreshold) : null,
     subjectGradeThresholds: cleanSubjectGradeThresholds(body.subjectGradeThresholds),
@@ -97,7 +98,7 @@ export function cleanOnboardingProfileBody(body: Record<string, unknown>): Clean
 export type SaveOnboardingProfileResult =
   | { ok: true }
   | { ok: false; errorCode: 'invalid_username'; message: string }
-  | { ok: false; errorCode: 'username_check_failed' | 'username_taken' | 'username_save_failed' }
+  | { ok: false; errorCode: 'username_check_failed' | 'username_taken' | 'username_save_failed' | 'profile_save_failed' }
 
 // `body` es el body crudo (para conservar la semántica exacta de "solo
 // escribe la columna si la clave vino en la petición", de la que depende
@@ -125,56 +126,37 @@ export async function saveOnboardingProfile(
     })
   } catch { /* institute membership is non-critical during rollout */ }
 
-  if (Array.isArray(body.studentExams)) {
-    try {
-      await db.from('perfiles').upsert({ id: userId, student_exams: cleaned.studentExams }, { onConflict: 'id' })
-    } catch { /* optional upcoming exams must not block onboarding */ }
-  }
-
-  try {
-    await db.from('perfiles').upsert({ id: userId, comunidad: cleaned.community }, { onConflict: 'id' })
-  } catch { /* non-critical */ }
-
-  if (cleaned.gradeThresholdMode || body.gradeThreshold !== undefined || body.subjectGradeThresholds !== undefined) {
-    try {
-      await db.from('perfiles').upsert({
-        id: userId,
-        ...(cleaned.gradeThresholdMode ? { grade_threshold_mode: cleaned.gradeThresholdMode } : {}),
-        ...(body.gradeThreshold !== undefined ? { grade_threshold: cleaned.gradeThreshold } : {}),
-        ...(body.subjectGradeThresholds !== undefined ? { subject_grade_thresholds: cleaned.subjectGradeThresholds } : {}),
-      }, { onConflict: 'id' })
-    } catch { /* non-critical: el alumno puede ajustarlo luego en Ajustes */ }
-  }
-
-  if (cleaned.painType) {
-    try {
-      await db.from('perfiles').upsert({ id: userId, pain_type: cleaned.painType }, { onConflict: 'id' })
-    } catch { /* non-critical: no bloquea el onboarding */ }
-  }
-
+  let normalizedUsername: string | null = null
   if (cleaned.username) {
-    const normalized = normalizeUsername(cleaned.username)
+    normalizedUsername = normalizeUsername(cleaned.username)
     const { data: existing, error: existingError } = await db
       .from('perfiles')
       .select('id')
-      .eq('username_normalized', normalized)
+      .eq('username_normalized', normalizedUsername)
       .neq('id', userId)
       .maybeSingle()
 
     if (existingError) return { ok: false, errorCode: 'username_check_failed' }
     if (existing) return { ok: false, errorCode: 'username_taken' }
 
-    const { error: usernameError } = await db.from('perfiles').upsert(
-      { id: userId, username: cleaned.username, username_normalized: normalized },
-      { onConflict: 'id' }
-    )
-    if (usernameError) return { ok: false, errorCode: 'username_save_failed' }
   }
 
-  if (Array.isArray(body.subjects)) {
-    try {
-      await db.from('perfiles').upsert({ id: userId, subjects: cleaned.subjects }, { onConflict: 'id' })
-    } catch { /* non-critical: el snapshot de billing_events sigue funcionando como fallback */ }
+  const profile: Record<string, unknown> = { id: userId, comunidad: cleaned.community }
+  if (Array.isArray(body.studentExams)) profile.student_exams = cleaned.studentExams
+  if (cleaned.gradeThresholdMode) profile.grade_threshold_mode = cleaned.gradeThresholdMode
+  if (body.gradeThreshold !== undefined) profile.grade_threshold = cleaned.gradeThreshold
+  if (body.subjectGradeThresholds !== undefined) profile.subject_grade_thresholds = cleaned.subjectGradeThresholds
+  if (cleaned.painType) profile.pain_type = cleaned.painType
+  if (cleaned.username) {
+    profile.username = cleaned.username
+    profile.username_normalized = normalizedUsername
+  }
+  if (Array.isArray(body.subjects)) profile.subjects = cleaned.subjects
+
+  const { error: profileError } = await db.from('perfiles').upsert(profile, { onConflict: 'id' })
+  if (profileError) {
+    if (profileError.code === '23505' && cleaned.username) return { ok: false, errorCode: 'username_taken' }
+    return { ok: false, errorCode: cleaned.username ? 'username_save_failed' : 'profile_save_failed' }
   }
 
   return { ok: true }

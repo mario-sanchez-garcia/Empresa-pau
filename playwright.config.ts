@@ -25,7 +25,9 @@ export default defineConfig({
   webServer: localServer ? {
     command: `npm run dev -- --hostname 127.0.0.1 --port ${localPort}`,
     url: baseURL,
-    reuseExistingServer: true,
+    // Never attach audit runs to an unrelated/stale process that happens to own
+    // the configured port. A clean server is part of the test boundary.
+    reuseExistingServer: false,
     timeout: 120_000,
   } : undefined,
   projects: [
@@ -33,6 +35,16 @@ export default defineConfig({
       name: 'auth',
       testMatch: /auth\.setup\.ts/,
       use: { ...devices['Desktop Chrome'], channel: 'chrome', headless: false },
+    },
+    {
+      name: 'auth-public-audit',
+      testMatch: /(^|[\\/])auth-public\.spec\.ts$/,
+      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+    },
+    {
+      name: 'auth-onboarding-audit',
+      testMatch: /(^|[\\/])auth-(onboarding|logout)\.spec\.ts$/,
+      use: { ...devices['Desktop Chrome'], channel: 'chrome', storageState: authState },
     },
     {
       name: 'orientation',

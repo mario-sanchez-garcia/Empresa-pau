@@ -14,6 +14,7 @@ import { resolvePostAuthDestination } from '@/app/lib/onboarding/postAuthDestina
 import { loadLocalDraft, setLocalDraftId } from '@/app/lib/onboarding/onboardingDraftStorage'
 import { sendOnboardingEvent, flushQueuedOnboardingEvents } from '@/app/lib/onboarding/onboardingEvents'
 import { SUPPORT_EMAIL } from '@/app/lib/support'
+import { safeLocalRedirect } from '@/app/lib/auth/safeRedirect'
 
 function CallbackHandler() {
   const router = useRouter()
@@ -29,7 +30,7 @@ function CallbackHandler() {
     const errorParam = searchParams.get('error') ?? hashParams.get('error')
     const errorCode = searchParams.get('error_code') ?? hashParams.get('error_code')
     const errorDescription = searchParams.get('error_description') ?? hashParams.get('error_description')
-    const next = searchParams.get('next') ?? '/camino'
+    const next = safeLocalRedirect(searchParams.get('next'), '/camino')
     // Fase 2 (signup al final): presencia de `draft` = este login viene del
     // onboarding anónimo (Google o email) y debe reclamar el server draft
     // antes de seguir — ver POST /api/onboarding/draft/claim.
@@ -130,17 +131,21 @@ function CallbackHandler() {
       go(destination, Boolean(draftId) && !draftClaimed)
     }
 
+    let cancelled = false
+    let timeout: ReturnType<typeof setTimeout> | null = null
+    let unsubscribe: (() => void) | null = null
+
     if (code) {
       // PKCE flow: exchange code for session
       supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
         if (error) {
-          console.error('[auth/callback] exchangeCodeForSession:', error.message)
-          setErrorMsg(error.message)
+          console.error('[auth/callback] exchangeCodeForSession failed', { status: error.status ?? null, code: error.code ?? null })
+          if (!cancelled) setErrorMsg('No se pudo validar el enlace. Puede haber caducado o haberse usado ya.')
         } else {
-          redirectNext()
+          if (!cancelled) void redirectNext()
         }
       })
-      return
+      return () => { cancelled = true }
     }
 
     // Implicit flow: supabase-js auto-parses hash tokens before React hydrates.
@@ -154,21 +159,23 @@ function CallbackHandler() {
       // Session not yet set — subscribe to auth state change as fallback
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sess) => {
         if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && sess) {
+          if (timeout) clearTimeout(timeout)
           subscription.unsubscribe()
-          redirectNext()
+          if (!cancelled) void redirectNext()
         }
       })
+      unsubscribe = () => subscription.unsubscribe()
 
-      const timeout = setTimeout(() => {
+      timeout = setTimeout(() => {
         subscription.unsubscribe()
-        setErrorMsg('No se pudo completar el inicio de sesión. Vuelve a intentarlo.')
+        if (!cancelled) setErrorMsg('No se pudo completar el inicio de sesión. Vuelve a intentarlo.')
       }, 5000)
-
-      return () => {
-        clearTimeout(timeout)
-        subscription.unsubscribe()
-      }
     })
+    return () => {
+      cancelled = true
+      if (timeout) clearTimeout(timeout)
+      unsubscribe?.()
+    }
   }, [router, searchParams])
 
   if (errorMsg) {

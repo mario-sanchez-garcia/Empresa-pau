@@ -12,12 +12,13 @@ import { awardXp, awardRepeatImprovementXp } from '@/app/lib/camino/awardXp'
 import { markCalendarMissionCompleted } from '@/app/lib/camino/markCalendarMissionCompleted'
 import { applyDiagnosticOutcome, diagnosticContextForMission } from '@/app/lib/camino/applyDiagnosticOutcome'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
-import { PARCIAL_COMPLETION_XP, SIMULACRO_COMPLETION_XP } from '@/app/lib/camino/xpMap'
+import { PARCIAL_COMPLETION_XP, PARCIAL_MINUTES, SIMULACRO_COMPLETION_XP, SIMULACRO_MINUTES } from '@/app/lib/camino/xpMap'
 import { countRepeatDepth } from '@/app/lib/camino/repeatImprovement'
 import { closeSegment, isValidSegments, totalElapsedSeconds } from '@/app/lib/simulacros/timeSegments'
 import { getMadridDate, getMadridToday } from '@/app/lib/camino/studyDays'
 import { validateCorrectionImagePayload } from '@/app/lib/imagePayloadLimits'
 import { validateCorrectionTextPayload } from '@/app/lib/correctionRequestValidation'
+import { correctionOutcome, isFreshCorrectionClaim, normalizeCompletedIndexes } from '@/app/lib/simulacros/lifecycle'
 
 // 50s SDK timeout leaves ~10s for the function to return a clean JSON error
 // before Vercel's 60s maxDuration kills the process and returns an HTML 504.
@@ -80,6 +81,10 @@ export async function POST(request: NextRequest) {
   let capturedElapsed = 0
   let capturedReservationId: string | undefined
   let capturedAccessToken: string | undefined
+  let capturedClaimed = false
+  let capturedClaimStartedAt: string | undefined
+  let capturedSessionMetadata: Record<string, unknown> = {}
+  let capturedPreviousCorrection: Record<string, unknown> = {}
 
   try {
     const authContext = await getAuthContext(request)
@@ -117,7 +122,7 @@ export async function POST(request: NextRequest) {
 
     const { data: simulacroRecord, error: simulacroError } = await authContext.supabase
       .from('historial_simulacros')
-      .select('id,user_id,estado,respuestas_parciales,resultado_json,asignatura,opcion,bloques,created_at,repeated_from_id,dificultad')
+      .select('id,user_id,estado,correction_status,correction_started_at,respuestas_parciales,resultado_json,asignatura,opcion,bloques,created_at,repeated_from_id,dificultad')
       .eq('id', simulacro_id)
       .eq('user_id', authContext.user.id)
       .maybeSingle()
@@ -139,12 +144,36 @@ export async function POST(request: NextRequest) {
       }), { status: 404 })
     }
 
+    if (simulacroRecord.estado === 'completado' || simulacroRecord.correction_status === 'completed') {
+      const completedResult = isPlainRecord(simulacroRecord.resultado_json) ? simulacroRecord.resultado_json : null
+      if (!completedResult || completedResult.correction_error) {
+        return NextResponse.json(createCorrectionError({ simulacroId: simulacro_id, message: 'Este simulacro figura como terminado, pero no tiene una corrección válida.' }), { status: 409 })
+      }
+      return NextResponse.json({ ...completedResult, idempotentReplay: true })
+    }
+
+    if (simulacroRecord.correction_status === 'processing') {
+      if (isFreshCorrectionClaim(simulacroRecord.correction_status, simulacroRecord.correction_started_at)) {
+        return NextResponse.json({
+          correction_error: true,
+          estado_correccion: 'procesando',
+          mensaje_usuario: 'Este simulacro ya se está corrigiendo en otra pestaña. Espera unos segundos.',
+        }, { status: 409 })
+      }
+    }
+
     const blocks = Array.isArray(simulacroRecord.bloques) ? simulacroRecord.bloques : Array.isArray(bloques) ? bloques : []
     const storedAnswers = isPlainRecord(simulacroRecord.respuestas_parciales) ? simulacroRecord.respuestas_parciales : {}
     // practica-parcial marca sus sesiones con __practice_session al crearlas — así
     // distinguimos una práctica parcial de un simulacro completo para aplicar la
     // cuota mensual correcta (partialsPerMonth vs fullMocksPerMonth) por separado.
     const isPracticeSession = isPlainRecord(simulacroRecord.resultado_json) && simulacroRecord.resultado_json.__practice_session === true
+    const previousCorrection = isPlainRecord(simulacroRecord.resultado_json) ? simulacroRecord.resultado_json : {}
+    capturedPreviousCorrection = previousCorrection
+    const previousCompletedIndexes = new Set(normalizeCompletedIndexes(previousCorrection.completed_block_indexes, blocks.length))
+    const previousDetails = Array.isArray(previousCorrection.desglose_bloques) ? previousCorrection.desglose_bloques : []
+    const sessionMetadata = preserveSessionMetadata(previousCorrection)
+    capturedSessionMetadata = sessionMetadata
     // Guardado por /api/practica-parcial al crear la sesión, si vino de una
     // misión del calendario de Camino — se lee AQUÍ, antes de que
     // updateSimulacro() sustituya resultado_json entero por el resultado de
@@ -174,7 +203,7 @@ export async function POST(request: NextRequest) {
     const storedSegments = isPlainRecord(simulacroRecord.resultado_json) ? simulacroRecord.resultado_json.time_segments : undefined
     if (isValidSegments(storedSegments) && storedSegments.length > 0) {
       const closedAtSubmit = closeSegment(storedSegments)
-      elapsed = Math.round(totalElapsedSeconds(closedAtSubmit) / 60)
+      elapsed = Math.min(isPracticeSession ? PARCIAL_MINUTES : SIMULACRO_MINUTES, Math.round(totalElapsedSeconds(closedAtSubmit) / 60))
       capturedElapsed = elapsed
     }
     const correctionAction: RateLimitAction = isPracticeSession ? 'parcial_correction' : 'simulacro_correction'
@@ -221,7 +250,7 @@ export async function POST(request: NextRequest) {
         subject,
         message: 'La corrección IA no está configurada en el servidor.'
       })
-      await updateSimulacroError(authContext.supabase, simulacro_id, authContext.user.id, errorResult, elapsed)
+      await updateSimulacroError(authContext.supabase, simulacro_id, authContext.user.id, { ...previousCorrection, ...sessionMetadata, ...errorResult }, elapsed, String(simulacroRecord.correction_status ?? 'idle'), simulacroRecord.correction_started_at)
       return NextResponse.json(errorResult, { status: 500 })
     }
 
@@ -255,7 +284,11 @@ export async function POST(request: NextRequest) {
         userId: authContext.user.id,
         route: '/api/simulacro',
         action: correctionAction,
-        limit: isRepeat || startedBeforeWindow ? 1_000_000 : 1,
+        // A retry of a saved partial correction is the same paid session:
+        // the monthly counter dedupes by simulacro_id and only failed blocks
+        // are called again below. It must not be blocked by the one-new-
+        // session-per-day pacing limit.
+        limit: isRepeat || startedBeforeWindow || previousCompletedIndexes.size > 0 ? 1_000_000 : 1,
         windowSeconds: RATE_LIMIT_WINDOW_SECONDS,
         monthlyLimit,
         creditKey: String(simulacro_id),
@@ -300,7 +333,7 @@ export async function POST(request: NextRequest) {
     if (!aggregateImageValidation.valid) {
       if (capturedReservationId) await finalizeAiUsageReservation(capturedReservationId, 'error', authContext.accessToken)
       const errorResult = createCorrectionError({ simulacroId: simulacro_id, subject, message: aggregateImageValidation.error })
-      await updateSimulacroError(authContext.supabase, simulacro_id, authContext.user.id, errorResult, elapsed)
+      await updateSimulacroError(authContext.supabase, simulacro_id, authContext.user.id, { ...previousCorrection, ...sessionMetadata, ...errorResult }, elapsed, String(simulacroRecord.correction_status ?? 'idle'), simulacroRecord.correction_started_at)
       return NextResponse.json(errorResult, { status: aggregateImageValidation.status })
     }
     const usageMetadata = {
@@ -315,6 +348,26 @@ export async function POST(request: NextRequest) {
       imagePayloadChars
     }
 
+    const claimStartedAt = new Date().toISOString()
+    const claimed = await claimCorrection(
+      authContext.supabase,
+      String(simulacro_id),
+      authContext.user.id,
+      typeof simulacroRecord.correction_status === 'string' ? simulacroRecord.correction_status : 'idle',
+      typeof simulacroRecord.correction_started_at === 'string' ? simulacroRecord.correction_started_at : null,
+      claimStartedAt,
+    )
+    if (!claimed) {
+      if (capturedReservationId) await finalizeAiUsageReservation(capturedReservationId, 'error', authContext.accessToken)
+      return NextResponse.json({
+        correction_error: true,
+        estado_correccion: 'procesando',
+        mensaje_usuario: 'Este simulacro ya se está corrigiendo en otra pestaña. Espera unos segundos.',
+      }, { status: 409 })
+    }
+    capturedClaimed = true
+    capturedClaimStartedAt = claimStartedAt
+
     console.info('[simulacro] start', { simulacroId: simulacro_id, subject, blocksCount: blocks.length })
 
     // Correct each block with its own focused AI call; run all in parallel.
@@ -322,6 +375,9 @@ export async function POST(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const blockResults: (any | null)[] = await Promise.all(
       blocks.map(async (block: SimulacroBlock, index: number) => {
+        if (previousCompletedIndexes.has(index) && previousDetails[index] && blockHasGenuineContent(previousDetails[index])) {
+          return previousDetails[index]
+        }
         const answer = storedAnswers?.[block.id]
         const rawBlockImages = imagesForAnswer(answer)
         const blockImageValidation = validateCorrectionImagePayload(rawBlockImages)
@@ -473,7 +529,7 @@ export async function POST(request: NextRequest) {
         subject,
         message: 'No hemos podido corregir ningún bloque del simulacro. Tus respuestas están guardadas.'
       })
-      await updateSimulacroError(authContext.supabase, simulacro_id, authContext.user.id, errorResult, elapsed)
+      await updateSimulacroError(authContext.supabase, simulacro_id, authContext.user.id, { ...previousCorrection, ...sessionMetadata, ...errorResult }, elapsed, 'processing', claimStartedAt)
       return NextResponse.json(errorResult, { status: 502 })
     }
 
@@ -540,9 +596,39 @@ export async function POST(request: NextRequest) {
       blocks
     })
 
+    const outcome = correctionOutcome(blockGenuine)
+    const completedBlockIndexes = outcome.completedIndexes
+    if (outcome.status === 'partial') {
+      const partialResult = {
+        ...sessionMetadata,
+        ...result,
+        correction_error: true,
+        estado_correccion: 'parcial',
+        nota_final: null,
+        nota_sobre_14: null,
+        completed_block_indexes: completedBlockIndexes,
+        failed_block_indexes: outcome.failedIndexes,
+        mensaje_usuario: `La corrección quedó parcial: ${blocks.length - failedCount} de ${blocks.length} bloques listos. Reintenta para corregir solo los pendientes; no se ha concedido XP.`,
+      }
+      const savedPartial = await updateSimulacroPartial(authContext.supabase, String(simulacro_id), authContext.user.id, partialResult, elapsed, claimStartedAt)
+      if (capturedReservationId) await finalizeAiUsageReservation(capturedReservationId, savedPartial ? 'success' : 'error', authContext.accessToken)
+      capturedClaimed = false
+      if (!savedPartial) {
+        return NextResponse.json(createCorrectionError({ simulacroId: simulacro_id, subject, message: 'No hemos podido guardar la corrección parcial.' }), { status: 500 })
+      }
+      return NextResponse.json(partialResult, { status: 502 })
+    }
+
+    const completedResult = {
+      ...sessionMetadata,
+      ...result,
+      completed_block_indexes: completedBlockIndexes,
+      failed_block_indexes: [],
+    }
+
     console.info('[simulacro] saving_result')
 
-    const updated = await updateSimulacro(authContext.supabase, simulacro_id, authContext.user.id, result, elapsed)
+    const updated = await updateSimulacro(authContext.supabase, simulacro_id, authContext.user.id, completedResult, elapsed, claimStartedAt)
     if (!updated) {
       if (capturedReservationId) await finalizeAiUsageReservation(capturedReservationId, 'error', authContext.accessToken)
       return NextResponse.json(createCorrectionError({
@@ -551,6 +637,7 @@ export async function POST(request: NextRequest) {
         message: 'No hemos podido guardar la corrección del simulacro.'
       }), { status: 500 })
     }
+    capturedClaimed = false
 
     // XP best-effort: si falla, la corrección ya está guardada y devuelta al
     // alumno — no tiene sentido convertir esto en un error 500 de la petición.
@@ -592,7 +679,7 @@ export async function POST(request: NextRequest) {
           effortXp,
           difficultyLabel,
           previousScoreOnTen: previous?.nota_final ?? null,
-          newScoreOnTen: result.nota_final,
+          newScoreOnTen: completedResult.nota_final,
           repeatGeneration,
           sourceId: simulacro_id,
           subject: caminoSubjectFromSimulacro(String(simulacroRecord.asignatura)),
@@ -608,7 +695,7 @@ export async function POST(request: NextRequest) {
           sourceId: simulacro_id,
           subject: caminoSubjectFromSimulacro(String(simulacroRecord.asignatura)),
           missionDate,
-          scoreOnTen: result.nota_final
+          scoreOnTen: completedResult.nota_final
         })
       }
     } catch (xpError) {
@@ -655,7 +742,7 @@ export async function POST(request: NextRequest) {
     console.info('[simulacro] done', { totalMs: Date.now() - t0, failedBlocks: failedCount })
     if (capturedReservationId) await finalizeAiUsageReservation(capturedReservationId, 'success', authContext.accessToken)
     return NextResponse.json({
-      ...result,
+      ...completedResult,
       xpAwarded: xpResult?.xpAwarded ?? 0,
       bonusXp: xpResult?.bonusXp ?? 0,
       totalXp: xpResult?.totalXp ?? null,
@@ -686,8 +773,8 @@ export async function POST(request: NextRequest) {
       simulacroId: capturedSimulacroId,
       message: 'No hemos podido corregir este simulacro ahora mismo. Tus respuestas siguen guardadas.'
     })
-    if (capturedSimulacroId && capturedSupabase && capturedUserId) {
-      await updateSimulacroError(capturedSupabase, capturedSimulacroId, capturedUserId, errorResult, capturedElapsed)
+    if (capturedClaimed && capturedClaimStartedAt && capturedSimulacroId && capturedSupabase && capturedUserId) {
+      await updateSimulacroError(capturedSupabase, capturedSimulacroId, capturedUserId, { ...capturedPreviousCorrection, ...capturedSessionMetadata, ...errorResult }, capturedElapsed, 'processing', capturedClaimStartedAt)
     }
     return NextResponse.json(errorResult, { status: 500 })
   }
@@ -744,45 +831,109 @@ function rateLimitResponse(action: RateLimitAction, result: { limit: number; cou
   )
 }
 
-async function updateSimulacro(supabase: SupabaseClient, id: string, userId: string, result: unknown, tiempo: number) {
-  // No .select().maybeSingle(): Boolean(data) would return false on 0 rows even on success
-  // (e.g. when service role is absent and RLS SELECT returns empty after UPDATE).
-  // Trust the error check instead.
-  const { error } = await supabase
+async function updateSimulacro(supabase: SupabaseClient, id: string, userId: string, result: unknown, tiempo: number, claimStartedAt: string) {
+  const { data, error } = await supabase
     .from('historial_simulacros')
     .update({
       nota_final: (result as Record<string, unknown>)?.nota_final ?? null,
       resultado_json: result,
       estado: 'completado',
+      correction_status: 'completed',
+      correction_started_at: null,
       tiempo_empleado: tiempo,
       updated_at: new Date().toISOString()
     })
     .eq('id', id)
     .eq('user_id', userId)
+    .eq('correction_status', 'processing')
+    .eq('correction_started_at', claimStartedAt)
+    .select('id')
+    .maybeSingle()
   if (error) {
     console.error('SIMULACRO_UPDATE_ERROR', { simulacroId: id, code: error.code, message: error.message })
     return false
   }
-  return true
+  return Boolean(data)
 }
 
-async function updateSimulacroError(supabase: SupabaseClient, id: string, userId: string, result: unknown, tiempo: number) {
+async function updateSimulacroError(
+  supabase: SupabaseClient,
+  id: string,
+  userId: string,
+  result: unknown,
+  tiempo: number,
+  expectedStatus: string,
+  expectedStartedAt: string | null,
+) {
   if (!id) return false
-  const { error } = await supabase
+  let query = supabase
     .from('historial_simulacros')
     .update({
       resultado_json: result,
-      estado: 'completado',
+      estado: 'en_progreso',
+      correction_status: 'failed',
+      correction_started_at: null,
       tiempo_empleado: tiempo > 0 ? tiempo : undefined,
       updated_at: new Date().toISOString()
     })
     .eq('id', id)
     .eq('user_id', userId)
+    .eq('correction_status', expectedStatus)
+  query = expectedStartedAt ? query.eq('correction_started_at', expectedStartedAt) : query.is('correction_started_at', null)
+  const { data, error } = await query.select('id').maybeSingle()
   if (error) {
     console.error('SIMULACRO_ERROR_UPDATE_ERROR', { simulacroId: id, code: error.code, message: error.message })
     return false
   }
-  return true
+  return Boolean(data)
+}
+
+async function updateSimulacroPartial(supabase: SupabaseClient, id: string, userId: string, result: unknown, tiempo: number, claimStartedAt: string) {
+  const { data, error } = await supabase
+    .from('historial_simulacros')
+    .update({
+      resultado_json: result,
+      nota_final: null,
+      estado: 'en_progreso',
+      correction_status: 'partial',
+      correction_started_at: null,
+      tiempo_empleado: tiempo,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .eq('user_id', userId)
+    .eq('correction_status', 'processing')
+    .eq('correction_started_at', claimStartedAt)
+    .select('id')
+    .maybeSingle()
+  if (error) console.error('SIMULACRO_PARTIAL_UPDATE_ERROR', { simulacroId: id, code: error.code, message: error.message })
+  return Boolean(data) && !error
+}
+
+async function claimCorrection(
+  supabase: SupabaseClient,
+  id: string,
+  userId: string,
+  currentStatus: string,
+  currentStartedAt: string | null,
+  claimStartedAt: string,
+) {
+  let query = supabase
+    .from('historial_simulacros')
+    .update({ correction_status: 'processing', correction_started_at: claimStartedAt, updated_at: claimStartedAt })
+    .eq('id', id)
+    .eq('user_id', userId)
+    .eq('estado', 'en_progreso')
+    .eq('correction_status', currentStatus)
+  if (currentStatus === 'processing') {
+    query = currentStartedAt ? query.eq('correction_started_at', currentStartedAt) : query.is('correction_started_at', null)
+  }
+  const { data, error } = await query.select('id').maybeSingle()
+  if (error) {
+    console.error('SIMULACRO_CLAIM_ERROR', { simulacroId: id, code: error.code, message: error.message })
+    return false
+  }
+  return Boolean(data)
 }
 
 function createCorrectionError({ simulacroId, subject, message, raw }: { simulacroId?: string; subject?: string; message: string; raw?: string }) {
@@ -797,6 +948,11 @@ function createCorrectionError({ simulacroId, subject, message, raw }: { simulac
     mensaje_usuario: 'No hemos podido corregir este simulacro. Inténtalo de nuevo desde el examen; tus respuestas están guardadas.',
     raw: raw ?? null
   }
+}
+
+function preserveSessionMetadata(source: Record<string, unknown>) {
+  const keys = ['__practice_session', 'block', 'subject', 'comunidad', 'source', 'week_start', 'mission_id', 'exam_id', 'time_segments'] as const
+  return Object.fromEntries(keys.flatMap(key => source[key] === undefined ? [] : [[key, source[key]]]))
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

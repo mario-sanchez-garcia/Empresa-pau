@@ -6,7 +6,7 @@ import { CheckCircle2, Eye, EyeOff, PlayCircle, RotateCcw, Trash2 } from 'lucide
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
-import { SUBJECTS, generateSimulacro } from '@/components/simulacros/data'
+import { SUBJECTS, generateSimulacro, isSubjectAvailableForCommunity } from '@/components/simulacros/data'
 import type { SimulacroBlock, SimulacroDifficulty, SimulacroOption, SimulacroRecord, SimulacroSubject } from '@/components/simulacros/types'
 import { useCCAA } from '@/app/hooks/useCCAA'
 import KairoLoadingDot from '@/components/shared/KairoLoadingDot'
@@ -70,6 +70,9 @@ function SimulacrosPage() {
   const missionIdParam = searchParams.get('missionId')
   const autoTriggeredRef = useRef(false)
   const examSimulacroAutoTriggeredRef = useRef(false)
+  const createInFlightRef = useRef(false)
+  const repeatInFlightRef = useRef(false)
+  const deleteInFlightRef = useRef(false)
 
   const [userId, setUserId] = useState('')
   const caminoSubjectParam = searchParams.get('subject') as SimulacroSubject | null
@@ -110,16 +113,22 @@ function SimulacrosPage() {
     setOptionChoice('mixed')
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setErrorMessage('')
+    setSubject(current => isSubjectAvailableForCommunity(current, ccaa) ? current : 'fisica')
   }, [ccaa])
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) router.push('/login')
-      else {
-        setUserId(data.user.id)
-        void loadHistory(data.user.id)
+    supabase.auth.getSession().then(({ data, error }) => {
+      const sessionUser = data.session?.user
+      if (error) {
+        setErrorMessage('No hemos podido comprobar tu sesión. Recarga para volver a intentarlo.')
+        return
       }
-    })
+      if (!sessionUser) router.push('/login')
+      else {
+        setUserId(sessionUser.id)
+        void loadHistory(sessionUser.id)
+      }
+    }).catch(() => setErrorMessage('No hemos podido comprobar tu sesión. Recarga para volver a intentarlo.'))
   }, [router])
 
   useEffect(() => {
@@ -192,12 +201,13 @@ function SimulacrosPage() {
   }
 
   async function createSimulacro() {
-    if (loading) return
+    if (loading || createInFlightRef.current) return
+    createInFlightRef.current = true
     setLoading(true)
     setErrorMessage('')
 
     try {
-      if (!SUBJECTS[subject].available) {
+      if (!isSubjectAvailableForCommunity(subject, ccaa)) {
         setErrorMessage(`${SUBJECTS[subject].label} estará disponible en simulacros cuando carguemos suficientes ejercicios oficiales.`)
         setLoading(false)
         return
@@ -315,26 +325,30 @@ function SimulacrosPage() {
       const configLabel = isCaminoPartial && caminoBlock
         ? `Parcial · ${caminoBlock}`
         : buildConfigLabel(mode, effectiveYearChoice, optionSelection)
-      const now = new Date().toISOString()
-      const row = {
-        id: generatedId,
-        user_id: currentUserId,
-        asignatura: subject,
-        opcion: storedOption,
-        dificultad: technicalDifficulty,
-        dificultad_real: configLabel,
-        bloques: finalBlocks,
-        respuestas_parciales: {},
-        estado: 'en_progreso',
-        created_at: now,
-        updated_at: now,
-        ...(missionIdParam ? { resultado_json: { mission_id: missionIdParam } } : {}),
+      const startResponse = await fetch('/api/simulacro/session', {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          action: 'start',
+          attemptId: generatedId,
+          subject,
+          option: storedOption,
+          difficulty: technicalDifficulty,
+          difficultyLabel: configLabel,
+          community: ccaa,
+          blocks: finalBlocks,
+          missionId: missionIdParam,
+          examId: examIdParam,
+        }),
+      })
+      const startPayload = await startResponse.json().catch(() => ({})) as { id?: string; error?: string }
+      if (!startResponse.ok) {
+        setErrorMessage(startPayload.error || 'No se pudo crear el simulacro. Inténtalo de nuevo en unos segundos.')
+        return
       }
-      const { error } = await supabase.from('historial_simulacros').insert(row)
-      if (error) {
-        console.error('SIMULACRO_INSERT_ERROR', error)
-        setErrorMessage('No se pudo crear el simulacro. Revisa la conexión o la tabla historial_simulacros en Supabase.')
-        setLoading(false)
+      const attemptId = startPayload.id
+      if (!attemptId) {
+        setErrorMessage('No se pudo confirmar el intento creado. Inténtalo de nuevo en unos segundos.')
         return
       }
       // Cache miss only — a hit already came from exam_simulacro, re-saving
@@ -348,10 +362,12 @@ function SimulacrosPage() {
           body: JSON.stringify({ examId: examIdParam, simulacroData: { blocks: finalBlocks } }),
         }).catch(() => undefined)
       }
-      router.push(`/simulacros/${generatedId}`)
+      router.push(`/simulacros/${attemptId}`)
     } catch (error) {
       console.error('SIMULACRO_CREATE_ERROR', error)
       setErrorMessage('No se pudo crear el simulacro ahora mismo. Inténtalo de nuevo en unos segundos.')
+    } finally {
+      createInFlightRef.current = false
       setLoading(false)
     }
   }
@@ -362,13 +378,14 @@ function SimulacrosPage() {
   // /api/simulacro compara la nota nueva contra la de este intento y solo
   // otorga XP reducido si de verdad mejora (ver repeatImprovement.ts).
   async function repeatSimulacro(recordId: string) {
-    if (repeatingId) return
+    if (repeatingId || repeatInFlightRef.current) return
+    repeatInFlightRef.current = true
     setRepeatingId(recordId)
     setErrorMessage('')
     try {
       const { data: sessionData } = await supabase.auth.getSession()
-      const currentUserId = sessionData.session?.user?.id
-      if (!currentUserId) { router.push('/login'); return }
+      const accessToken = sessionData.session?.access_token
+      if (!accessToken) { router.push('/login'); return }
 
       const original = history.find(item => item.id === recordId)
       if (!original) { setErrorMessage('No hemos encontrado ese simulacro para repetirlo.'); return }
@@ -378,68 +395,50 @@ function SimulacrosPage() {
       // de 45 min y mismo bloque, no el simulacro completo de 90 min. Sin
       // conservar el flag aquí, repetir una práctica parcial la convertía en
       // un "simulacro" de 90 min con solo sus 3 preguntas originales.
-      const originalResultado = original.resultado_json && typeof original.resultado_json === 'object' ? original.resultado_json : {}
-      const isPracticeSession = Boolean(originalResultado.__practice_session)
-
       const newId = crypto.randomUUID()
-      const now = new Date().toISOString()
-      const { error } = await supabase.from('historial_simulacros').insert({
-        id: newId,
-        user_id: currentUserId,
-        asignatura: original.asignatura,
-        opcion: original.opcion,
-        dificultad: original.dificultad,
-        dificultad_real: original.dificultad_real,
-        bloques: original.bloques,
-        respuestas_parciales: {},
-        estado: 'en_progreso',
-        repeated_from_id: recordId,
-        created_at: now,
-        updated_at: now,
-        ...(isPracticeSession
-          ? { resultado_json: { __practice_session: true, block: originalResultado.block, subject: originalResultado.subject, comunidad: originalResultado.comunidad } }
-          : {}),
+      const response = await fetch('/api/simulacro/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({ action: 'repeat', attemptId: newId, sourceId: recordId }),
       })
-      if (error) {
-        console.error('SIMULACRO_REPEAT_ERROR', error)
-        setErrorMessage('No se pudo preparar la repetición. Inténtalo de nuevo en unos segundos.')
+      const payload = await response.json().catch(() => ({})) as { error?: string; practice?: boolean }
+      if (!response.ok) {
+        setErrorMessage(payload.error || 'No se pudo preparar la repetición. Inténtalo de nuevo en unos segundos.')
         return
       }
-      router.push(isPracticeSession ? `/simulacros/practica/${newId}` : `/simulacros/${newId}`)
+      router.push(payload.practice ? `/simulacros/practica/${newId}` : `/simulacros/${newId}`)
     } finally {
+      repeatInFlightRef.current = false
       setRepeatingId(null)
     }
   }
 
-  // Borrar un intento que se quedó "en progreso" y no se va a terminar —
-  // solo intentos sin corregir: uno ya completado es historial real (nota,
-  // corrección) y nunca se ofrece borrar aquí. RLS ya protege esto (policy
-  // "Users can manage their own simulacros", solo el dueño), así que es un
-  // delete directo desde el cliente, mismo patrón que el resto de esta
-  // página (insert de createSimulacro/repeatSimulacro).
+  // Los intentos completados forman parte del historial y nunca se ofrecen
+  // para borrar aquí. El borrado de borradores pasa por la frontera servidor.
   async function deleteSimulacro(recordId: string) {
-    if (deletingId) return
+    if (deletingId || deleteInFlightRef.current) return
     if (!window.confirm('¿Borrar este intento sin terminar? No se puede deshacer.')) return
+    deleteInFlightRef.current = true
     setDeletingId(recordId)
     setErrorMessage('')
     try {
       const { data: sessionData } = await supabase.auth.getSession()
-      const currentUserId = sessionData.session?.user?.id
-      if (!currentUserId) { router.push('/login'); return }
+      const accessToken = sessionData.session?.access_token
+      if (!accessToken) { router.push('/login'); return }
 
-      const { error } = await supabase
-        .from('historial_simulacros')
-        .delete()
-        .eq('id', recordId)
-        .eq('user_id', currentUserId)
-        .neq('estado', 'completado')
-      if (error) {
-        console.error('SIMULACRO_DELETE_ERROR', error)
-        setErrorMessage('No se pudo borrar. Inténtalo de nuevo en unos segundos.')
+      const response = await fetch('/api/simulacro/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({ action: 'delete', attemptId: recordId }),
+      })
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({})) as { error?: string }
+        setErrorMessage(payload.error || 'No se pudo borrar. Inténtalo de nuevo en unos segundos.')
         return
       }
       setHistory(current => current.filter(item => item.id !== recordId))
     } finally {
+      deleteInFlightRef.current = false
       setDeletingId(null)
     }
   }
@@ -663,17 +662,18 @@ function SimulacrosPage() {
           <div className="sim-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
             {(Object.keys(SUBJECTS) as SimulacroSubject[]).map(key => {
               const s = SUBJECTS[key]
+              const available = isSubjectAvailableForCommunity(key, ccaa)
               const isActive = subject === key
               return (
                 <button
                   key={key}
-                  disabled={!s.available}
-                  onClick={() => s.available && setSubject(key)}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, cursor: s.available ? 'pointer' : 'not-allowed', opacity: s.available ? 1 : 0.45, transition: 'all .12s', position: 'relative', textAlign: 'center', border: `2px solid ${isActive ? (clayDark ? 'var(--clay-accent)' : s.color) : 'var(--clay-border)'}`, background: isActive ? (clayDark ? 'var(--clay-accent-soft)' : s.light) : 'var(--clay-surface)' }}
+                  disabled={!available}
+                  onClick={() => available && setSubject(key)}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '14px 10px', borderRadius: 12, cursor: available ? 'pointer' : 'not-allowed', opacity: available ? 1 : 0.45, transition: 'all .12s', position: 'relative', textAlign: 'center', border: `2px solid ${isActive ? (clayDark ? 'var(--clay-accent)' : s.color) : 'var(--clay-border)'}`, background: isActive ? (clayDark ? 'var(--clay-accent-soft)' : s.light) : 'var(--clay-surface)' }}
                 >
                   <div style={{ width: 12, height: 12, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
                   <div style={{ fontSize: 11, fontWeight: 800, color: isActive ? (clayDark ? 'var(--clay-accent-text)' : s.color) : 'var(--clay-text)', lineHeight: 1.3 }}>{s.label}</div>
-                  {!s.available && <span style={{ position: 'absolute', top: 4, right: 4, fontSize: 8, fontWeight: 900, padding: '1px 4px', borderRadius: 999, ...(clayDark ? { background: 'rgba(52,211,153,0.14)', color: '#34d399' } : { background: '#f0fdf4', color: '#15803d' }) }}>Pronto</span>}
+                  {!available && <span style={{ position: 'absolute', top: 4, right: 4, fontSize: 8, fontWeight: 900, padding: '1px 4px', borderRadius: 999, ...(clayDark ? { background: 'rgba(52,211,153,0.14)', color: '#34d399' } : { background: '#f0fdf4', color: '#15803d' }) }}>Pronto</span>}
                 </button>
               )
             })}
@@ -794,13 +794,13 @@ function SimulacrosPage() {
           </div>
           <button
             onClick={createSimulacro}
-            disabled={loading || !userId || !SUBJECTS[subject].available}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 15, fontWeight: 900, padding: '16px', borderRadius: 12, background: loading || !userId || !SUBJECTS[subject].available ? 'var(--clay-text-muted)' : 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', border: 'none', boxShadow: loading || !userId || !SUBJECTS[subject].available ? 'none' : '0 4px 20px rgba(37,99,235,.32)', cursor: loading || !userId || !SUBJECTS[subject].available ? 'not-allowed' : 'pointer', transition: 'background .15s' }}
+            disabled={loading || !userId || !isSubjectAvailableForCommunity(subject, ccaa)}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 15, fontWeight: 900, padding: '16px', borderRadius: 12, background: loading || !userId || !isSubjectAvailableForCommunity(subject, ccaa) ? 'var(--clay-text-muted)' : 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', border: 'none', boxShadow: loading || !userId || !isSubjectAvailableForCommunity(subject, ccaa) ? 'none' : '0 4px 20px rgba(37,99,235,.32)', cursor: loading || !userId || !isSubjectAvailableForCommunity(subject, ccaa) ? 'not-allowed' : 'pointer', transition: 'background .15s' }}
           >
             {loading ? <KairoLoadingDot /> : <PlayCircle size={18} />}
             {loading
               ? 'Generando simulacro...'
-              : !SUBJECTS[subject].available
+               : !isSubjectAvailableForCommunity(subject, ccaa)
               ? `Simulacros de ${SUBJECTS[subject].short} próximamente`
               : userId
               ? ctaLabel(mode, cfg.short)

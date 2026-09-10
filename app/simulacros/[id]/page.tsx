@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { AlertTriangle, Camera, CheckCircle2, Flag, Pause, Send, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroAnswer, SimulacroRecord } from '@/components/simulacros/types'
-import { getApiErrorMessage, RATE_LIMIT_CODE, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
+import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import ExamStatement from '@/components/shared/ExamStatement'
@@ -62,6 +62,43 @@ export default function SimulacroActivoPage() {
   const answerTextareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({})
   const savedSnapshotRef = useRef('{}')
   const dirtyRef = useRef(false)
+  const answersRevisionRef = useRef(0)
+  const saveQueueRef = useRef<Promise<unknown>>(Promise.resolve())
+  const timerActionInFlightRef = useRef(false)
+
+  const getAccessToken = useCallback(async () => {
+    const { data } = await supabase.auth.getSession()
+    return data.session?.access_token ?? null
+  }, [])
+
+  const autosave = useCallback(async (nextAnswers: Record<string, SimulacroAnswer>) => {
+    if (!record || (!dirtyRef.current && JSON.stringify(nextAnswers) === savedSnapshotRef.current)) return true
+    const snapshot = JSON.stringify(nextAnswers)
+    const operation = saveQueueRef.current.then(async () => {
+      if (snapshot === savedSnapshotRef.current) return true
+      setSaveStatus('saving')
+      const token = await getAccessToken()
+      if (!token) { setSaveStatus('error'); return false }
+      const response = await fetch('/api/simulacro/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: 'save', attemptId: record.id, expectedRevision: answersRevisionRef.current, answers: nextAnswers }),
+      })
+      const payload = await response.json().catch(() => ({})) as { revision?: number; conflict?: boolean; error?: string }
+      if (!response.ok || typeof payload.revision !== 'number') {
+        if (payload.conflict) setSubmitError(payload.error ?? 'El intento cambió en otra pestaña.')
+        setSaveStatus('error')
+        return false
+      }
+      answersRevisionRef.current = payload.revision
+      savedSnapshotRef.current = snapshot
+      dirtyRef.current = JSON.stringify(answersRef.current) !== snapshot
+      setSaveStatus(dirtyRef.current ? 'dirty' : 'saved')
+      return true
+    })
+    saveQueueRef.current = operation.catch(() => undefined)
+    return operation
+  }, [getAccessToken, record])
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -87,11 +124,14 @@ export default function SimulacroActivoPage() {
         const storedActive = readActive(next.id)
         const durationSeconds = getDurationSeconds(next)
         answersRef.current = storedAnswers
+        answersRevisionRef.current = Number(next.answers_revision ?? 0)
         savedSnapshotRef.current = JSON.stringify(storedAnswers)
         setAnswers(storedAnswers)
         setReviewMarked(storedReview)
         if (storedActive !== null && storedActive < next.bloques.length) setActive(storedActive)
         setRecord(next)
+        if (next.correction_status === 'partial') setSubmitError('La corrección anterior quedó parcial. Reintenta para corregir solo los bloques pendientes; tus respuestas siguen guardadas.')
+        else if (next.correction_status === 'failed') setSubmitError('La corrección anterior no terminó. Tus respuestas siguen guardadas y puedes reintentar.')
 
         // time_segments (pausar y continuar): un tramo con endedAt=null
         // sigue abierto ahora mismo (sesión activa); si todos están cerrados
@@ -162,7 +202,7 @@ export default function SimulacroActivoPage() {
     setSaveStatus('dirty')
     const timer = window.setTimeout(() => void autosave(answers), 2000)
     return () => window.clearTimeout(timer)
-  }, [record, answers]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [record, answers, autosave])
 
   useEffect(() => {
     function protectPendingChanges(event: BeforeUnloadEvent) {
@@ -190,29 +230,10 @@ export default function SimulacroActivoPage() {
   // y de "activo" (examStarted=true && startedAtMs set).
   const isPaused = examStarted && !startedAtMs
 
-  async function autosave(nextAnswers = answers) {
-    if (!record || (!dirtyRef.current && JSON.stringify(nextAnswers) === savedSnapshotRef.current)) return true
-    setSaveStatus('saving')
-    const { error } = await supabase.from('historial_simulacros').update({ respuestas_parciales: nextAnswers, updated_at: new Date().toISOString() }).eq('id', record.id)
-    if (error) {
-      setSaveStatus('error')
-      return false
-    }
-    savedSnapshotRef.current = JSON.stringify(nextAnswers)
-    dirtyRef.current = false
-    setSaveStatus('saved')
-    return true
-  }
-
   async function changeActive(index: number) {
     if (dirtyRef.current) await autosave(answersRef.current)
     setActive(index)
     if (record) writeActive(record.id, index)
-  }
-
-  async function getAccessToken() {
-    const { data } = await supabase.auth.getSession()
-    return data.session?.access_token ?? null
   }
 
   // Empezar por primera vez y reanudar desde pausa son la misma acción en
@@ -222,7 +243,8 @@ export default function SimulacroActivoPage() {
   // app/lib/simulacros/timeSegments.ts), devuelve 410 con un mensaje claro
   // en vez de dejar continuar silenciosamente.
   async function startExam() {
-    if (!record || resuming) return
+    if (!record || resuming || timerActionInFlightRef.current) return
+    timerActionInFlightRef.current = true
     setResuming(true)
     setResumeError('')
     try {
@@ -244,6 +266,7 @@ export default function SimulacroActivoPage() {
     } catch {
       setResumeError('Error de conexión. Inténtalo de nuevo.')
     } finally {
+      timerActionInFlightRef.current = false
       setResuming(false)
     }
   }
@@ -252,10 +275,15 @@ export default function SimulacroActivoPage() {
   // se guarda en closedElapsedSeconds y deja de sumar) sin tocar las
   // respuestas — se guardan aparte, como siempre, vía autosave.
   async function pauseExam() {
-    if (!record || !startedAtMs || pausing) return
+    if (!record || !startedAtMs || pausing || timerActionInFlightRef.current) return
+    timerActionInFlightRef.current = true
     setPausing(true)
     try {
-      await autosave(answersRef.current)
+      const saved = await autosave(answersRef.current)
+      if (!saved) {
+        setSubmitError('No se pudo guardar la última respuesta. Reintenta antes de pausar para no perder cambios.')
+        return
+      }
       const token = await getAccessToken()
       if (!token) return
       const res = await fetch('/api/simulacro/timer', {
@@ -272,6 +300,7 @@ export default function SimulacroActivoPage() {
         setStartedAtMs(null)
       }
     } finally {
+      timerActionInFlightRef.current = false
       setPausing(false)
     }
   }
@@ -363,24 +392,6 @@ export default function SimulacroActivoPage() {
       const result = await safeJson(res)
 
       if (!res.ok || result?.correction_error) {
-        const noResultSave = result?.code === RATE_LIMIT_CODE || result?.code === BILLING_BLOCK_CODE
-        const updatePayload = noResultSave
-          ? {
-              tiempo_empleado: elapsedMinutes,
-              respuestas_parciales: answersSnapshot,
-              updated_at: new Date().toISOString()
-            }
-          : {
-          resultado_json: result ?? {
-            correction_error: true,
-            estado_correccion: 'error',
-            feedback_general: 'No hemos podido corregir este simulacro ahora mismo.'
-          },
-          tiempo_empleado: elapsedMinutes,
-          respuestas_parciales: answersSnapshot,
-          updated_at: new Date().toISOString()
-        }
-        await supabase.from('historial_simulacros').update(updatePayload).eq('id', record.id)
         setSubmitError(getApiErrorMessage(result, result?.mensaje_usuario ?? result?.feedback_general ?? 'No hemos podido corregir este simulacro. Inténtalo de nuevo; tus respuestas están guardadas.'))
         setSubmitting(false)
         return
@@ -392,27 +403,10 @@ export default function SimulacroActivoPage() {
       // lo trae de vuelta. Se prefiere sobre elapsedMinutes (el del propio
       // reloj del cliente) para no pisar ese valor más preciso con este
       // update, redundante pero ya existente.
-      const authoritativeElapsed = typeof result?.tiempo_empleado_minutos === 'number' ? result.tiempo_empleado_minutos : elapsedMinutes
-      await supabase.from('historial_simulacros').update({
-        resultado_json: result,
-        nota_final: result?.nota_final ?? null,
-        estado: 'completado',
-        tiempo_empleado: authoritativeElapsed,
-        respuestas_parciales: answersSnapshot,
-        updated_at: new Date().toISOString()
-      }).eq('id', record.id)
       setSubmitStage('Resultados listos')
       router.push(`/simulacros/${record.id}/results`)
     } catch (error) {
       console.error('SIMULACRO_SUBMIT_ERROR', error)
-      try {
-        await supabase.from('historial_simulacros').update({
-          respuestas_parciales: answersSnapshot,
-          updated_at: new Date().toISOString()
-        }).eq('id', record.id)
-      } catch {
-        // Best-effort save — ignore if it also fails
-      }
       setSubmitError('No hemos podido entregar la corrección. Tus respuestas están guardadas y puedes volver a intentarlo.')
       setSubmitStage('')
       setSubmitting(false)
@@ -961,14 +955,14 @@ export default function SimulacroActivoPage() {
             )}
 
             <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => { setConfirmOpen(false); setTimeUp(false) }}
+              {!timeUp && <button
+                onClick={() => setConfirmOpen(false)}
                 disabled={submitting}
                 className="pau-button-secondary"
                 style={{ padding: '10px 20px' }}
               >
                 Seguir revisando
-              </button>
+              </button>}
               <button
                 onClick={submitExam}
                 disabled={submitting}

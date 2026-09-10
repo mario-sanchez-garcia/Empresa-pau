@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuthContext, createUserSupabase } from '@/app/lib/camino/caminoProgressServer'
+import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
+import { createServiceClient } from '@/app/lib/billing/supabase'
 import { closeSegment, openSegment, totalElapsedSeconds, isValidSegments, isResumeExpired, type TimeSegment } from '@/app/lib/simulacros/timeSegments'
 
 export const dynamic = 'force-dynamic'
@@ -12,7 +13,7 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: NextRequest) {
   const authContext = await getAuthContext(request)
   if ('response' in authContext) return authContext.response
-  const { user, accessToken } = authContext
+  const { user } = authContext
 
   let body: Record<string, unknown> = {}
   try { body = await request.json() } catch { /* ok */ }
@@ -22,31 +23,31 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'simulacroId y action (pause|resume) son obligatorios' }, { status: 400 })
   }
 
-  const db = createUserSupabase(accessToken)
-  const { data: record, error: fetchError } = await db
-    .from('historial_simulacros')
-    .select('id, user_id, estado, resultado_json, created_at')
-    .eq('id', simulacroId)
-    .eq('user_id', user.id)
-    .maybeSingle()
+  const db = createServiceClient()
 
-  if (fetchError) {
-    console.error('[simulacro/timer] fetch_failed', fetchError)
-    return NextResponse.json({ error: 'No hemos podido comprobar esta sesión ahora mismo.' }, { status: 500 })
-  }
-  if (!record) {
-    return NextResponse.json({ error: 'No hemos encontrado esta sesión para tu cuenta.' }, { status: 404 })
-  }
-  if (record.estado !== 'en_progreso') {
-    return NextResponse.json({ error: 'Esta sesión ya está corregida y no se puede pausar ni reanudar.' }, { status: 409 })
-  }
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { data: record, error: fetchError } = await db
+      .from('historial_simulacros')
+      .select('id, user_id, estado, correction_status, resultado_json, created_at, timer_revision')
+      .eq('id', simulacroId)
+      .eq('user_id', user.id)
+      .maybeSingle()
 
-  const resultadoJson = (record.resultado_json && typeof record.resultado_json === 'object' && !Array.isArray(record.resultado_json))
-    ? record.resultado_json as Record<string, unknown>
-    : {}
-  const existingSegments = isValidSegments(resultadoJson.time_segments) ? resultadoJson.time_segments : []
+    if (fetchError) {
+      console.error('[simulacro/timer] fetch_failed', fetchError)
+      return NextResponse.json({ error: 'No hemos podido comprobar esta sesión ahora mismo.' }, { status: 500 })
+    }
+    if (!record) return NextResponse.json({ error: 'No hemos encontrado esta sesión para tu cuenta.' }, { status: 404 })
+    if (record.estado !== 'en_progreso' || record.correction_status === 'processing') {
+      return NextResponse.json({ error: 'Esta sesión ya se está corrigiendo o está terminada.' }, { status: 409 })
+    }
 
-  if (action === 'resume') {
+    const resultadoJson = (record.resultado_json && typeof record.resultado_json === 'object' && !Array.isArray(record.resultado_json))
+      ? record.resultado_json as Record<string, unknown>
+      : {}
+    const existingSegments = isValidSegments(resultadoJson.time_segments) ? resultadoJson.time_segments : []
+
+    if (action === 'resume') {
     // Una práctica de parcial ligada a un examen real conocido (mission_id
     // -> camino_calendar.metadata.partial_exam_date) no debería poder
     // "reanudarse" después de la fecha del propio examen — ver
@@ -64,38 +65,47 @@ export async function POST(request: NextRequest) {
       if (metadata && typeof metadata.partial_exam_date === 'string') examDateISO = metadata.partial_exam_date
     }
 
-    if (isResumeExpired(record.created_at, new Date(), examDateISO)) {
-      return NextResponse.json({
-        error: 'expired',
-        message: examDateISO
-          ? 'Esta práctica ya no se puede continuar: ya ha pasado la fecha del parcial. Empieza una nueva si quieres seguir practicando.'
-          : 'Esta sesión lleva pausada demasiado tiempo y ya no se puede continuar. Empieza una nueva.',
-      }, { status: 410 })
+      if (isResumeExpired(record.created_at, new Date(), examDateISO)) {
+        return NextResponse.json({
+          error: 'expired',
+          message: examDateISO
+            ? 'Esta práctica ya no se puede continuar: ya ha pasado la fecha del parcial. Empieza una nueva si quieres seguir practicando.'
+            : 'Esta sesión lleva pausada demasiado tiempo y ya no se puede continuar. Empieza una nueva.',
+        }, { status: 410 })
+      }
     }
-  }
 
-  const nextSegments: TimeSegment[] = action === 'pause'
-    ? closeSegment(existingSegments)
-    : openSegment(existingSegments)
+    const nextSegments: TimeSegment[] = action === 'pause'
+      ? closeSegment(existingSegments)
+      : openSegment(existingSegments)
+    const revision = Number(record.timer_revision ?? 0)
+    const { data: updated, error: updateError } = await db
+      .from('historial_simulacros')
+      .update({
+        resultado_json: { ...resultadoJson, time_segments: nextSegments },
+        timer_revision: revision + 1,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', simulacroId)
+      .eq('user_id', user.id)
+      .eq('estado', 'en_progreso')
+      .eq('timer_revision', revision)
+      .select('id')
+      .maybeSingle()
 
-  const { error: updateError } = await db
-    .from('historial_simulacros')
-    .update({
-      resultado_json: { ...resultadoJson, time_segments: nextSegments },
-      updated_at: new Date().toISOString(),
+    if (updateError) {
+      console.error('[simulacro/timer] update_failed', updateError)
+      return NextResponse.json({ error: 'No hemos podido guardar el cambio. Inténtalo de nuevo.' }, { status: 500 })
+    }
+    if (!updated) continue
+
+    return NextResponse.json({
+      action,
+      segments: nextSegments,
+      elapsedSeconds: totalElapsedSeconds(nextSegments),
+      isPaused: action === 'pause',
     })
-    .eq('id', simulacroId)
-    .eq('user_id', user.id)
-
-  if (updateError) {
-    console.error('[simulacro/timer] update_failed', updateError)
-    return NextResponse.json({ error: 'No hemos podido guardar el cambio. Inténtalo de nuevo.' }, { status: 500 })
   }
 
-  return NextResponse.json({
-    action,
-    segments: nextSegments,
-    elapsedSeconds: totalElapsedSeconds(nextSegments),
-    isPaused: action === 'pause',
-  })
+  return NextResponse.json({ error: 'La sesión cambió en otra pestaña. Vuelve a intentarlo.' }, { status: 409 })
 }

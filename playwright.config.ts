@@ -64,5 +64,10 @@ export default defineConfig({
       testMatch: /(^|[\\/])examenes\.spec\.ts$/,
       use: { ...devices['Desktop Chrome'], channel: 'chrome', storageState: authState },
     },
+    {
+      name: 'simulacros',
+      testMatch: /(^|[\\/])simulacros\.spec\.ts$/,
+      use: { ...devices['Desktop Chrome'], channel: 'chrome', storageState: authState },
+    },
   ],
 })

@@ -7,7 +7,7 @@ import { supabase } from '@/app/lib/supabase'
 import SimulacroShell from '@/components/simulacros/SimulacroShell'
 import { SUBJECTS } from '@/components/simulacros/data'
 import type { SimulacroAnswer, SimulacroRecord } from '@/components/simulacros/types'
-import { getApiErrorMessage, RATE_LIMIT_CODE, BILLING_BLOCK_CODE } from '@/app/lib/rateLimitMessages'
+import { getApiErrorMessage } from '@/app/lib/rateLimitMessages'
 import { compressImageToBase64 } from '@/app/lib/clientImageCompression'
 import { isIncompleteOfficialExercise } from '@/app/lib/contentQuality'
 import ExamStatement from '@/components/shared/ExamStatement'
@@ -76,6 +76,10 @@ function PracticaPageInner() {
   const savedSnapshotRef = useRef('{}')
   const dirtyRef = useRef(false)
   const sessionCreatedRef = useRef(false)
+  const createRequestIdRef = useRef<string | null>(null)
+  const answersRevisionRef = useRef(0)
+  const saveQueueRef = useRef<Promise<unknown>>(Promise.resolve())
+  const timerActionInFlightRef = useRef(false)
 
   useEffect(() => {
     if (params.id === 'nueva') {
@@ -99,10 +103,11 @@ function PracticaPageInner() {
         if (!token) { router.push('/login'); return }
 
         try {
+          createRequestIdRef.current ??= crypto.randomUUID()
           const res = await fetch('/api/practica-parcial', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ subject, block, missionId, examId, source }),
+            body: JSON.stringify({ subject, block, missionId, examId, source, requestId: createRequestIdRef.current }),
           })
           if (res.ok) {
             const json = await res.json() as { id: string; alreadyCompleted?: boolean }
@@ -155,10 +160,13 @@ function PracticaPageInner() {
       const storedAnswers = next.respuestas_parciales ?? {}
       const storedActive = readActive(next.id)
       answersRef.current = storedAnswers
+      answersRevisionRef.current = Number(next.answers_revision ?? 0)
       savedSnapshotRef.current = JSON.stringify(storedAnswers)
       setAnswers(storedAnswers)
       if (storedActive !== null && storedActive < next.bloques.length) setActive(storedActive)
       setRecord(next)
+      if (next.correction_status === 'partial') setSubmitError('La corrección anterior quedó parcial. Reintenta para corregir solo las preguntas pendientes; tus respuestas siguen guardadas.')
+      else if (next.correction_status === 'failed') setSubmitError('La corrección anterior no terminó. Tus respuestas siguen guardadas y puedes reintentar.')
 
       // time_segments (pausar y continuar): mismo modelo que
       // app/simulacros/[id]/page.tsx. La práctica parcial no tiene pantalla
@@ -206,13 +214,12 @@ function PracticaPageInner() {
           setSecondsLeft(Math.max(0, TOTAL_SECONDS - Math.floor((Date.now() - openStart) / 1000)))
           return
         }
-      } catch { /* fallback below */ }
+      } catch { /* handled below */ }
 
-      // Fallback si el servidor falla: reloj local desde created_at, como
-      // antes de "pausar y continuar", para no bloquear la práctica.
-      const fallbackStart = new Date(next.created_at ?? Date.now()).getTime()
-      setStartedAtMs(fallbackStart)
-      setSecondsLeft(Math.max(0, TOTAL_SECONDS - Math.floor((Date.now() - fallbackStart) / 1000)))
+      // El servidor es la única autoridad del tiempo. Un reloj local de
+      // respaldo permitiría ganar tiempo cambiando el reloj o recargando.
+      setStartedAtMs(null)
+      setResumeError('No hemos podido iniciar el temporizador. Reintenta para empezar sin perder tiempo.')
     })
   }, [params.id, router, searchParams])
 
@@ -275,10 +282,15 @@ function PracticaPageInner() {
   // se guarda en closedElapsedSeconds y deja de sumar) sin tocar las
   // respuestas — se guardan aparte, como siempre, vía autosave.
   async function pauseExam() {
-    if (!record || !startedAtMs || pausing) return
+    if (!record || !startedAtMs || pausing || timerActionInFlightRef.current) return
+    timerActionInFlightRef.current = true
     setPausing(true)
     try {
-      await autosave(answersRef.current)
+      const saved = await autosave(answersRef.current)
+      if (!saved) {
+        setSubmitError('No se pudo guardar la última respuesta. Reintenta antes de pausar para no perder cambios.')
+        return
+      }
       const token = await getAccessToken()
       if (!token) return
       const res = await fetch('/api/simulacro/timer', {
@@ -295,6 +307,7 @@ function PracticaPageInner() {
         setStartedAtMs(null)
       }
     } finally {
+      timerActionInFlightRef.current = false
       setPausing(false)
     }
   }
@@ -304,7 +317,8 @@ function PracticaPageInner() {
   // el servidor devuelve 410 con un mensaje claro en vez de dejar continuar
   // silenciosamente.
   async function resumePractice() {
-    if (!record || resuming) return
+    if (!record || resuming || timerActionInFlightRef.current) return
+    timerActionInFlightRef.current = true
     setResuming(true)
     setResumeError('')
     try {
@@ -325,22 +339,38 @@ function PracticaPageInner() {
     } catch {
       setResumeError('Error de conexión. Inténtalo de nuevo.')
     } finally {
+      timerActionInFlightRef.current = false
       setResuming(false)
     }
   }
 
   async function autosave(nextAnswers = answers) {
     if (!record || (!dirtyRef.current && JSON.stringify(nextAnswers) === savedSnapshotRef.current)) return true
-    setSaveStatus('saving')
-    const { error } = await supabase
-      .from('historial_simulacros')
-      .update({ respuestas_parciales: nextAnswers, updated_at: new Date().toISOString() })
-      .eq('id', record.id)
-    if (error) { setSaveStatus('error'); return false }
-    savedSnapshotRef.current = JSON.stringify(nextAnswers)
-    dirtyRef.current = false
-    setSaveStatus('saved')
-    return true
+    const snapshot = JSON.stringify(nextAnswers)
+    const operation = saveQueueRef.current.then(async () => {
+      if (snapshot === savedSnapshotRef.current) return true
+      setSaveStatus('saving')
+      const token = await getAccessToken()
+      if (!token) { setSaveStatus('error'); return false }
+      const response = await fetch('/api/simulacro/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: 'save', attemptId: record.id, expectedRevision: answersRevisionRef.current, answers: nextAnswers }),
+      })
+      const payload = await safeJson(response)
+      if (!response.ok || typeof payload?.revision !== 'number') {
+        if (payload?.conflict) setSubmitError(payload.error)
+        setSaveStatus('error')
+        return false
+      }
+      answersRevisionRef.current = payload.revision
+      savedSnapshotRef.current = snapshot
+      dirtyRef.current = JSON.stringify(answersRef.current) !== snapshot
+      setSaveStatus(dirtyRef.current ? 'dirty' : 'saved')
+      return true
+    })
+    saveQueueRef.current = operation.catch(() => undefined)
+    return operation
   }
 
   async function changeActive(index: number) {
@@ -436,16 +466,6 @@ function PracticaPageInner() {
       const result = await safeJson(res)
 
       if (!res.ok || result?.correction_error) {
-        const noResultSave = result?.code === RATE_LIMIT_CODE || result?.code === BILLING_BLOCK_CODE
-        const updatePayload = noResultSave
-          ? { tiempo_empleado: elapsedMinutes, respuestas_parciales: answersSnapshot, updated_at: new Date().toISOString() }
-          : {
-              resultado_json: { ...(result ?? {}), __practice_session: true },
-              tiempo_empleado: elapsedMinutes,
-              respuestas_parciales: answersSnapshot,
-              updated_at: new Date().toISOString(),
-            }
-        await supabase.from('historial_simulacros').update(updatePayload).eq('id', record.id)
         setSubmitError(getApiErrorMessage(result, result?.mensaje_usuario ?? 'No hemos podido corregir. Inténtalo de nuevo; tus respuestas están guardadas.'))
         setSubmitting(false)
         return
@@ -455,24 +475,10 @@ function PracticaPageInner() {
       // resultado_json.time_segments (suma real de los tramos trabajados,
       // sin contar las pausas) — se prefiere ese valor sobre elapsedMinutes
       // (reloj local) para que esta escritura redundante no lo pise.
-      const authoritativeElapsed = typeof result?.tiempo_empleado_minutos === 'number' ? result.tiempo_empleado_minutos : elapsedMinutes
-
-      await supabase.from('historial_simulacros').update({
-        resultado_json: { ...result, __practice_session: true },
-        nota_final: result?.nota_final ?? null,
-        estado: 'completado',
-        tiempo_empleado: authoritativeElapsed,
-        respuestas_parciales: answersSnapshot,
-        updated_at: new Date().toISOString(),
-      }).eq('id', record.id)
-
       setSubmitStage('Resultados listos')
       router.push(`/simulacros/${record.id}/results`)
     } catch (err) {
       console.error('PRACTICA_SUBMIT_ERROR', err)
-      try {
-        await supabase.from('historial_simulacros').update({ respuestas_parciales: answersSnapshot, updated_at: new Date().toISOString() }).eq('id', record.id)
-      } catch { /* best-effort */ }
       setSubmitError('No hemos podido entregar la corrección. Tus respuestas están guardadas.')
       setSubmitStage('')
       setSubmitting(false)
@@ -937,14 +943,14 @@ function PracticaPageInner() {
               </div>
             )}
             <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => { setConfirmOpen(false); setTimeUp(false) }}
+              {!timeUp && <button
+                onClick={() => setConfirmOpen(false)}
                 disabled={submitting}
                 className="pau-button-secondary"
                 style={{ padding: '10px 20px' }}
               >
                 Seguir revisando
-              </button>
+              </button>}
               <button onClick={submitSession} disabled={submitting} className="campus-primary" style={{ padding: '10px 20px', borderRadius: 12 }}>
                 Entregar y corregir
               </button>

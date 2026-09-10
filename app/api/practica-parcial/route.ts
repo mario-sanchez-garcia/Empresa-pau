@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createHash } from 'node:crypto'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { generatePracticeSession } from '@/components/simulacros/data'
 import type { SimulacroSubject } from '@/components/simulacros/types'
@@ -15,8 +16,10 @@ import { resolveExamHistoriaTopics } from '@/app/lib/camino/resolveExamHistoriaT
 import { filterObraLeidaExercisesForStudent } from '@/app/lib/camino/filterObraLeidaExercises'
 import type { ObraLeidaDeclarada } from '@/app/components/camino/LenguaObrasLeidasSelector'
 import { examenesLengua } from '@/app/data/lengua'
+import { getMadridToday } from '@/app/lib/camino/studyDays'
 
 const LENGUA_OBRA_LEIDA_BLOCK = 'Educación literaria — Obra leída'
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 export const dynamic = 'force-dynamic'
 
@@ -54,6 +57,7 @@ export async function POST(request: NextRequest) {
   const source = typeof body.source === 'string' ? body.source.slice(0, 64) : null
   const weekStart = typeof body.weekStart === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.weekStart) ? body.weekStart : null
   const examId = typeof body.examId === 'string' && body.examId.trim() ? body.examId.trim() : null
+  const requestId = typeof body.requestId === 'string' && UUID.test(body.requestId) ? body.requestId : null
 
   // ¿Es de verdad un microdiagnóstico?
   //
@@ -376,11 +380,19 @@ export async function POST(request: NextRequest) {
 
   const avgYear = session.questions.reduce((sum, q) => sum + q.year, 0) / Math.max(1, session.questions.length)
   const dificultadReal = avgYear >= 2023 ? 'Difícil' : avgYear >= 2019 ? 'Media' : 'Fácil'
+  const deterministicSeed = missionId
+    ? `mission:${user.id}:${missionId}`
+    : examId && examOwned
+      ? `exam-day:${user.id}:${examId}:${getMadridToday()}`
+      : source && weekStart
+        ? `source-week:${user.id}:${source}:${weekStart}:${subject}:${block}`
+        : null
+  const sessionId = deterministicSeed ? deterministicUuid(deterministicSeed) : requestId ?? session.id
 
   const { data: inserted, error: insertError } = await db
     .from('historial_simulacros')
     .insert({
-      id: session.id,
+      id: sessionId,
       user_id: user.id,
       asignatura: subject,
       opcion: 'A',
@@ -407,6 +419,10 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (insertError || !inserted) {
+    if (insertError?.code === '23505') {
+      const { data: raced } = await db.from('historial_simulacros').select('id,estado').eq('id', sessionId).eq('user_id', user.id).maybeSingle()
+      if (raced) return NextResponse.json({ id: raced.id as string, alreadyCompleted: raced.estado === 'completado' })
+    }
     return NextResponse.json({ error: insertError?.message ?? 'Error al crear la sesión' }, { status: 500 })
   }
 
@@ -421,4 +437,12 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ id: inserted.id as string })
+}
+
+function deterministicUuid(seed: string) {
+  const hex = createHash('sha256').update(seed).digest('hex').slice(0, 32).split('')
+  hex[12] = '4'
+  hex[16] = ['8', '9', 'a', 'b'][Number.parseInt(hex[16], 16) % 4]
+  const value = hex.join('')
+  return `${value.slice(0, 8)}-${value.slice(8, 12)}-${value.slice(12, 16)}-${value.slice(16, 20)}-${value.slice(20)}`
 }

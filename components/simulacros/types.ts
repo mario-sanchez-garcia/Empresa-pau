@@ -2,6 +2,7 @@ export type SimulacroSubject = 'mates' | 'matematicas_ccss' | 'fisica' | 'quimic
 export type SimulacroDifficulty = 'Fácil' | 'Media' | 'Difícil'
 export type SimulacroOption = 'A' | 'B'
 export type SimulacroStatus = 'en_progreso' | 'completado'
+export type SimulacroCorrectionStatus = 'idle' | 'processing' | 'partial' | 'failed' | 'completed'
 
 export interface SimulacroBlock {
   id: string
@@ -64,6 +65,10 @@ export interface SimulacroRecord {
   submitted_at?: string | null
   created_at?: string
   updated_at?: string
+  answers_revision?: number
+  timer_revision?: number
+  correction_status?: SimulacroCorrectionStatus
+  correction_started_at?: string | null
   // Presente cuando este intento es "Repetir para mejorar" de otro anterior
   // — ver app/lib/camino/repeatImprovement.ts para el cálculo de XP reducido.
   repeated_from_id?: string | null

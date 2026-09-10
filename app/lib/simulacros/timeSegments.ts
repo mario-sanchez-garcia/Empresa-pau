@@ -17,11 +17,25 @@
 export type TimeSegment = { startedAt: string; endedAt: string | null }
 
 export function isValidSegments(value: unknown): value is TimeSegment[] {
-  return Array.isArray(value) && value.every(
-    (s) => s && typeof s === 'object'
-      && typeof (s as TimeSegment).startedAt === 'string'
-      && ((s as TimeSegment).endedAt === null || typeof (s as TimeSegment).endedAt === 'string')
-  )
+  if (!Array.isArray(value) || value.length > 100) return false
+  let previousEnd = -Infinity
+  let openSeen = false
+  for (let index = 0; index < value.length; index += 1) {
+    const segment = value[index] as TimeSegment
+    if (!segment || typeof segment !== 'object' || typeof segment.startedAt !== 'string') return false
+    if (segment.endedAt !== null && typeof segment.endedAt !== 'string') return false
+    const start = Date.parse(segment.startedAt)
+    const end = segment.endedAt === null ? null : Date.parse(segment.endedAt)
+    if (!Number.isFinite(start) || (end !== null && (!Number.isFinite(end) || end < start))) return false
+    if (start < previousEnd || openSeen) return false
+    if (end === null) {
+      if (index !== value.length - 1) return false
+      openSeen = true
+    } else {
+      previousEnd = end
+    }
+  }
+  return true
 }
 
 export function hasOpenSegment(segments: TimeSegment[]): boolean {

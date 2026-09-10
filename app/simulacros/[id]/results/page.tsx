@@ -56,7 +56,7 @@ export default function SimulacroResultsPage() {
   // Use resultado_json.nota_final as the authoritative grade source.
   // Falling back to the DB column risks showing 0 (DB default) before correction runs.
   const nota = safeNumber(result.nota_final ?? record?.nota_final, 0)
-  const hasGrade = Boolean(record) && !correctionFailed && isFiniteNumber(result.nota_final) && (result.nota_final as number) > 0
+  const hasGrade = Boolean(record) && !correctionFailed && isFiniteNumber(result.nota_final) && (result.nota_final as number) >= 0
   const cfg = record ? SUBJECTS[record.asignatura] : SUBJECTS.mates
   // Esta página de resultados es compartida por el simulacro completo (90
   // min) y la práctica parcial (45 min, __practice_session) — sin esto, una

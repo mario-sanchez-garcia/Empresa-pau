@@ -41,6 +41,12 @@ export const SUBJECTS = {
   historia: { label: 'Historia de España', short: 'Historia', color: '#2f6f4e', light: '#f0fdf4', icon: Landmark, available: true }
 } as const
 
+const CATALUNYA_SIMULACRO_SUBJECTS = new Set<SimulacroSubject>(['fisica', 'quimica', 'lengua', 'historia'])
+
+export function isSubjectAvailableForCommunity(subject: SimulacroSubject, comunidad: string) {
+  return SUBJECTS[subject].available && (comunidad !== 'Cataluña' || CATALUNYA_SIMULACRO_SUBJECTS.has(subject))
+}
+
 export const DIFFICULTIES: Array<{ id: SimulacroDifficulty; label: SimulacroDifficulty; description: string; years: number[] }> = [
   { id: 'Fácil', label: 'Fácil', description: 'Años 2015-2018, preguntas más directas', years: [2015, 2016, 2017, 2018] },
   { id: 'Media', label: 'Media', description: 'Años 2019-2022, dificultad estándar', years: [2019, 2020, 2021, 2022] },
@@ -214,6 +220,45 @@ function normalizeQuestions(subject: SimulacroSubject, comunidad: string) {
   if (subject === 'lengua') return examenesLengua.filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.bloque)))
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (examenesHistoria as any[]).filter(byComunidad).flatMap(exam => (exam.preguntas as any[]).map(p => toItem(subject, exam, p, p.tipo)))
+}
+
+/**
+ * Resolve a block supplied by the browser back to the immutable official
+ * dataset.  Session creation uses this on the server so a modified client
+ * cannot replace an official exercise with an easier prompt and then obtain
+ * a fabricated grade/XP. `numero` is presentation-only and is assigned by
+ * the session route after canonicalisation.
+ */
+export function canonicalizeOfficialSimulacroBlock(
+  subject: SimulacroSubject,
+  comunidad: string,
+  supplied: SimulacroBlock,
+): SimulacroBlock | null {
+  const candidates = normalizeQuestions(subject, comunidad).map(item => item.block)
+
+  // Catalan Lengua is normalised per complete exam/option instead of through
+  // normalizeQuestions(), so include both official option projections.
+  if (subject === 'lengua' && comunidad === 'Cataluña') {
+    for (const exam of examenesLenguaCataluna) {
+      candidates.push(...normalizeLenguaCatalunaExam(exam, 'A'))
+      candidates.push(...normalizeLenguaCatalunaExam(exam, 'B'))
+    }
+  }
+
+  const match = candidates.find(candidate => sameAcademicBlock(candidate, supplied))
+  if (!match) return null
+  return { ...match, numero: supplied.numero, comunidad }
+}
+
+function sameAcademicBlock(a: SimulacroBlock, b: SimulacroBlock) {
+  return a.id === b.id
+    && Number(a.year) === Number(b.year)
+    && a.convocatoria === b.convocatoria
+    && a.option === b.option
+    && Number(a.puntuacion) === Number(b.puntuacion)
+    && a.enunciado === b.enunciado
+    && (a.criterios ?? '') === (b.criterios ?? '')
+    && (a.textoFuente ?? '') === (b.textoFuente ?? '')
 }
 
 // ─── Cataluña: Física ────────────────────────────────────────────────────────

@@ -5,7 +5,7 @@ import { computeExamCoverage, decideAutomaticExamMissionFate, type ExamCoverage 
 import { EXAM_SUBJECT_SLUG, SIMULACRO_SUBJECT } from './partialExamSubjects'
 import { SPAIN_HOLIDAYS } from './spainHolidays'
 import { allocateExamBudgets } from './studyCapacity.ts'
-import { createDayScheduler, estimatedMinutesForMissionType } from './scheduleTimeSlot'
+import { createDayScheduler, estimatedMinutesForMission, estimatedMinutesForMissionType, type MissionDurationRow } from './scheduleTimeSlot'
 import { SIMULACRO_MINUTES } from './xpMap'
 import type { ExamConfidence, ExamPriority, ExamScope, StudentExam } from './cleanStudentExams'
 
@@ -602,19 +602,24 @@ export async function summarizePersistedExamMissions(
 ): Promise<{ count: number; minutes: number; hasSimulacro: boolean; hasPractice: boolean }> {
   const { data } = await supabase
     .from('camino_calendar')
-    .select('mission_type, metadata')
+    .select('mission_type, metadata, start_time, end_time')
     .eq('user_id', userId)
     .eq('source', 'partial')
     .in('status', ['pending', 'postponed'])
     .filter('metadata->>partial_exam_id', 'eq', examId)
 
-  const rows = (data ?? []) as { mission_type: string | null }[]
+  const rows = (data ?? []) as MissionDurationRow[]
   let minutes = 0
   let hasSimulacro = false
   let hasPractice = false
   for (const row of rows) {
     const type = row.mission_type ?? ''
-    minutes += estimatedMinutesForMissionType(type)
+    // Por fila, no por tipo: el enlace al Simulacro real se persiste como
+    // `pau_practice` y dura SIMULACRO_MINUTES, no los 25 de la mision de
+    // referencia. Estimarlo por tipo era lo que hacia que el mensaje de
+    // "Recalcular mi Camino" prometiera casi la mitad de los minutos que el
+    // calendario ya tenia reservados.
+    minutes += estimatedMinutesForMission(row)
     if (type === 'pau_practice') hasSimulacro = true
     else hasPractice = true
   }

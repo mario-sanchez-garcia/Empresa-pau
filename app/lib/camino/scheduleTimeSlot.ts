@@ -1,6 +1,6 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 
-import { PARCIAL_MINUTES, REFERENCE_MISSION_MINUTES } from './xpMap'
+import { normalizeTime, toMinutes } from './missionDuration.ts'
 import { mondayBasedDayIndex } from './studyDays'
 import { loadSchedulingBehaviorProfile } from './schedulingBehaviorProfile'
 import { findBestScoredSlot, getSlotScoringDebug, scoreDateSlot, type MissionSlotScoringContext, type SchedulingBehaviorProfile } from './slotScoring'
@@ -21,38 +21,21 @@ export function studyWindowFor(dateStr: string): TimeRange {
   return dow === 0 || dow === 6 ? WEEKEND_STUDY_WINDOW : WEEKDAY_STUDY_WINDOW
 }
 
-// Duración estimada por mission_type para los tipos que no pasan por el
-// cálculo por-slot de dailyTimeCapacity.ts (ese cubre las misiones
-// principales concept/pau_practice/etc. según los minutos diarios
-// declarados). Reutiliza las constantes ya existentes en xpMap.ts donde las
-// hay (PARCIAL_MINUTES, REFERENCE_MISSION_MINUTES) para no duplicar la
-// fuente de verdad de "cuánto dura de verdad" cada tipo de contenido.
-const MISSION_TYPE_MINUTES: Record<string, number> = {
-  review: 20,
-  comment_text: 40,
-  partial_practice: PARCIAL_MINUTES,
-}
-
-export function estimatedMinutesForMissionType(missionType: string): number {
-  return MISSION_TYPE_MINUTES[missionType] ?? REFERENCE_MISSION_MINUTES
-}
-
-function toMinutes(hhmm: string): number {
-  const [h, m] = hhmm.split(':').map(Number)
-  return h * 60 + (m || 0)
-}
+// La duración de una misión vive en missionDuration.ts (puro, testeable sin
+// Supabase). Se reexporta aquí porque este módulo es la puerta de entrada
+// histórica de los llamadores del scheduler.
+export {
+  estimatedMinutesForMissionType,
+  estimatedMinutesForMission,
+  minutesBetweenTimes,
+  type MissionDurationRow,
+} from './missionDuration.ts'
 
 function toHHMM(minutes: number): string {
   const clamped = Math.max(0, Math.min(23 * 60 + 59, minutes))
   const h = Math.floor(clamped / 60).toString().padStart(2, '0')
   const m = (clamped % 60).toString().padStart(2, '0')
   return `${h}:${m}`
-}
-
-// Postgres/PostgREST devuelve `time` como "HH:MM:SS" — el resto de la app
-// (inputs <input type="time">, comparaciones) trabaja en "HH:MM".
-function normalizeTime(value: string): string {
-  return value.slice(0, 5)
 }
 
 // Busca el primer hueco >= durationMinutes dentro de `window`, evitando los

@@ -96,3 +96,27 @@ test('el ajuste de cola va siempre filtrado por usuario y por estado pending', (
   assert.ok(code.includes(".eq('user_id', userId)"), 'falta el filtro por usuario')
   assert.ok(code.includes(".eq('queue_status', 'pending')"), 'falta el filtro por queue_status pending')
 })
+
+test('la ruta de práctica nunca persiste el origen reservado sin verificarlo', () => {
+  // El origen `camino_diagnostic` exime de la cuota mensual del plan (ver
+  // diagnosticLimits.ts), así que solo puede escribirlo el servidor cuando ha
+  // comprobado la misión real. La rama de fallback del insert guardaba el
+  // `source` recibido tal cual: bastaba con mandar esa etiqueta a mano para
+  // no gastar cuota. Ahora se descarta antes (persistedSource).
+  const route = stripComments(
+    readFileSync(join(process.cwd(), 'app', 'api', 'practica-parcial', 'route.ts'), 'utf8'),
+  ).replace(/\s+/g, ' ')
+
+  assert.ok(
+    route.includes('const persistedSource = source === DIAGNOSTIC_SOURCE && !isDiagnostic ? null : source'),
+    'falta el descarte del origen reservado cuando la verificación no pasa',
+  )
+  assert.ok(
+    !/\(source \? \{ source \} : \{\}\)/.test(route),
+    'el insert vuelve a guardar el `source` recibido sin filtrar el origen reservado',
+  )
+  assert.ok(
+    route.includes('(persistedSource ? { source: persistedSource } : {})'),
+    'el insert debe guardar persistedSource, no el `source` crudo del cliente',
+  )
+})

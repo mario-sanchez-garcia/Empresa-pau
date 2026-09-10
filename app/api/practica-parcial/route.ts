@@ -82,6 +82,11 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // El origen que se llega a persistir cuando NO es un microdiagnóstico
+  // verificado: DIAGNOSTIC_SOURCE está reservado al servidor, así que se
+  // descarta en vez de guardarse tal cual (ver el insert más abajo).
+  const persistedSource = source === DIAGNOSTIC_SOURCE && !isDiagnostic ? null : source
+
   // examId ties this request to a real Parcial (student_exams.id) — same
   // ownership check as /api/parciales/exam-topics and /api/parciales/exam-
   // simulacro, since exam_id is free text (student_exams is a jsonb array,
@@ -197,7 +202,10 @@ export async function POST(request: NextRequest) {
   // futuras reentradas por ese mismo id ya encuentren coincidencia directa.
   if (block) {
     const containsFilter: Record<string, unknown> = { __practice_session: true, block }
-    if (source) containsFilter.source = source
+    // persistedSource, no `source`: se busca por el origen que de verdad se
+    // guarda, para que un camino_diagnostic no verificado no busque sesiones
+    // con una etiqueta que esta ruta nunca llega a escribir.
+    if (persistedSource) containsFilter.source = persistedSource
     // sunday_mock reutiliza subject+block cada semana — sin esto, la sesión
     // abandonada de la semana pasada se reutilizaría en vez de crear la de
     // esta semana.
@@ -407,11 +415,15 @@ export async function POST(request: NextRequest) {
       // exam_id: enlaza con el Parcial real (student_exams.id) — esta misma
       // ruta lo usa arriba para el reuso "misma práctica hoy para este
       // examen" sin depender de que el missionId coincida exacto.
-      // `source` se guarda SIEMPRE que venga, pero solo vale como
-      // camino_diagnostic si `isDiagnostic` lo verificó contra la misión real
-      // — el conteo mensual filtra por este campo, así que aquí no puede
-      // colarse un origen inventado por el cliente.
-      resultado_json: { __practice_session: true, block, subject, comunidad, ...(isDiagnostic ? { source: DIAGNOSTIC_SOURCE, diagnostic_block: diagnosticBlockSlug } : (source ? { source } : {})), ...(weekStart ? { week_start: weekStart } : {}), ...(missionId ? { mission_id: missionId } : {}), ...(examId && examOwned ? { exam_id: examId } : {}) },
+      // `source` se guarda cuando venga, PERO camino_diagnostic es un origen
+      // reservado: solo se persiste si `isDiagnostic` lo verificó contra la
+      // misión real (ver arriba). Guardar el valor recibido tal cual cuando
+      // la verificación falla sería la puerta trasera que esa comprobación
+      // intenta cerrar — el conteo mensual filtra por este campo, así que una
+      // sesión con ese origen no gasta cuota del plan. Si la verificación no
+      // pasa, la sesión se guarda SIN origen y cuenta como una práctica
+      // normal, que es lo que es.
+      resultado_json: { __practice_session: true, block, subject, comunidad, ...(isDiagnostic ? { source: DIAGNOSTIC_SOURCE, diagnostic_block: diagnosticBlockSlug } : (persistedSource ? { source: persistedSource } : {})), ...(weekStart ? { week_start: weekStart } : {}), ...(missionId ? { mission_id: missionId } : {}), ...(examId && examOwned ? { exam_id: examId } : {}) },
       created_at: session.created_at,
       updated_at: session.created_at,
     })

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, type FormEvent } from 'react'
+import ReturnToApp from './ReturnToApp'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -59,6 +60,7 @@ export default function ContactForm({ M }: { M: string }) {
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', margin: 0, lineHeight: 1.6 }}>
           Te responderemos a tu email en 1–2 días laborables.
         </p>
+        <ReturnToApp variant="inline" />
       </div>
     )
   }

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { Bug, CreditCard, FlaskConical, Mail, Shield, type LucideIcon } from 'lucide-react'
 import ContactForm from './ContactForm'
+import ReturnToApp from './ReturnToApp'
 import { SUPPORT_EMAIL } from '@/app/lib/support'
 
 export const metadata: Metadata = {
@@ -28,6 +29,7 @@ export default function ContactoPage() {
 
       <main style={{ maxWidth: 760, margin: '0 auto', padding: '0 24px 100px' }}>
         <div style={{ paddingTop: 96, paddingBottom: 56, borderBottom: '1px solid rgba(255,255,255,.07)' }}>
+          <ReturnToApp />
           <p style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.2em', textTransform: 'uppercase', marginBottom: 16 }}>
             Beta privada · Respondemos en 1–2 días laborables
           </p>

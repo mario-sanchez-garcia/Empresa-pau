@@ -2665,10 +2665,20 @@ export default function CaminoCalendarClient() {
             </div>
           )}
 
+          {/* La misión de hoy se pintaba con DOS contenedores distintos según su
+              tipo: la lección de Curso como tarjeta flotante (caja blanca,
+              esquinas redondeadas, sombra de estante y márgenes laterales) y el
+              Reto exprés como fila plana a sangre. No dependía de la cuenta
+              sino de qué te tocara ese día, así que el MISMO alumno veía una
+              cosa hoy y otra mañana. Ahora comparten contenedor: gana la fila
+              plana, que es la que no rompe la continuidad con "Próximas
+              misiones" ni con el resto del panel. Lo que cambia es el marco;
+              cada misión sigue enseñando lo suyo (duración, progreso, razones,
+              posponer). */}
           {/* ── MISSION 01 — PRINCIPAL ── */}
           {mainMission ? (
-            <div className="camino-mission-card" data-testid="camino-main-mission" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, margin: '16px 20px', padding: '20px', borderRadius: 16, background: 'var(--clay-surface)', boxShadow: '0 10px 0 var(--clay-shadow-shelf), 0 16px 28px var(--clay-shadow-elevate)', borderLeft: '3px solid var(--clay-accent)', cursor: 'default' }}>
-              <div className="camino-mission-number" style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: 'var(--clay-accent-soft)', flexShrink: 0, width: 48, paddingTop: 2, fontVariantNumeric: 'tabular-nums' }}>01</div>
+            <div className="camino-mission-card" data-testid="camino-main-mission" style={{ ...missionRowStyle, cursor: 'default' }}>
+              <div className="camino-mission-number" style={missionNumberStyle}>01</div>
               <div className="camino-main-body" data-testid="camino-main-body" style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6, alignItems: 'center' }}>
                   <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--clay-accent-text)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{mainMission.subject}</span>
@@ -2720,15 +2730,15 @@ export default function CaminoCalendarClient() {
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)', color: clayHubTheme === 'dark' ? '#4ade80' : '#065f46' }}>✓ Hecha</span>
                   )
                 ) : mainTarget?.href ? (
-                  <ClayLinkButton href={mainTarget.href} variant="primary" style={{ width: 'auto', padding: '10px 18px', fontSize: 12, borderRadius: 12 }}>Empezar misión →</ClayLinkButton>
+                  <ClayLinkButton href={mainTarget.href} variant="primary" style={{ width: 'auto', padding: '10px 18px', fontSize: 12, borderRadius: 12 }}>Empezar →</ClayLinkButton>
                 ) : (
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 800, padding: '8px 16px', borderRadius: 10, background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)', color: 'var(--clay-text-muted)' }}>En preparación</span>
                 )}
               </div>
             </div>
           ) : microMission ? (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid var(--clay-border)', background: 'var(--clay-accent-soft)', borderLeft: '3px solid var(--clay-accent)' }}>
-              <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: 'var(--clay-accent)', flexShrink: 0, width: 48 }}>01</div>
+            <div className="camino-mission-card" style={missionRowStyle}>
+              <div className="camino-mission-number" style={missionNumberStyle}>01</div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
                   <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--clay-accent-text)', textTransform: 'uppercase' }}>{microMission.subject}</span>
@@ -2742,8 +2752,8 @@ export default function CaminoCalendarClient() {
               </div>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '18px 20px', borderBottom: '1px solid var(--clay-border)' }}>
-              <div style={{ fontSize: 32, fontWeight: 900, lineHeight: 1, color: 'var(--clay-border)', flexShrink: 0, width: 48 }}>01</div>
+            <div className="camino-mission-card" style={{ ...missionRowStyle, background: 'transparent', borderLeftColor: 'var(--clay-border)' }}>
+              <div className="camino-mission-number" style={{ ...missionNumberStyle, color: 'var(--clay-border)' }}>01</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--clay-text-muted)' }}>Completa tu perfil para empezar</div>
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--clay-text-muted)', marginTop: 4 }}>Configura tu perfil y construiremos tu Camino PAU.</div>
@@ -3317,7 +3327,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         }
 
         @media (max-width: 420px) {
-          .camino-mission-card { margin-left: 12px !important; margin-right: 12px !important; gap: 12px !important; }
+          .camino-mission-card { gap: 12px !important; }
           .camino-main-body { flex-basis: calc(100% - 48px) !important; }
           .camino-main-action { width: calc(100% - 48px) !important; margin-left: 48px !important; }
         }
@@ -4431,6 +4441,32 @@ function heroReason(mission: Mission, blockCompleted: number, nextMissionTitle?:
     return `Empezamos por ${blockName}. Completar esta misión desbloquea las siguientes.`
   }
   return `Sigues avanzando en ${blockName}. Llevas ${blockCompleted} misión${blockCompleted !== 1 ? 'es' : ''} completada${blockCompleted !== 1 ? 's' : ''} en este bloque.`
+}
+
+// Contenedor ÚNICO de la misión de hoy, sea del tipo que sea. Antes había dos
+// (tarjeta flotante para la lección de Curso, fila plana para el Reto exprés) y
+// el alumno veía uno u otro según lo que le tocara ese día — no según su
+// cuenta. Gana la fila plana: encaja con "Próximas misiones", que ya era plana,
+// y no parte el panel en dos lenguajes visuales.
+const missionRowStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: 16,
+  padding: '18px 20px',
+  borderBottom: '1px solid var(--clay-border)',
+  background: 'var(--clay-accent-soft)',
+  borderLeft: '3px solid var(--clay-accent)',
+}
+
+const missionNumberStyle: React.CSSProperties = {
+  fontSize: 32,
+  fontWeight: 900,
+  lineHeight: 1,
+  color: 'var(--clay-accent)',
+  flexShrink: 0,
+  width: 48,
+  paddingTop: 2,
+  fontVariantNumeric: 'tabular-nums',
 }
 
 function HeroMissionCard({ mission, blockCompleted, streak, completedThisWeek, totalThisWeek, weeklyXP, onPostpone, onMarkNotSeen, hasOnboardingSubjects, nextMissionTitle, microMission }: {

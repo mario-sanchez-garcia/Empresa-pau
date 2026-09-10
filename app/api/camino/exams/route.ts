@@ -1,3 +1,4 @@
+import { checkedDb } from '@/app/lib/camino/checkedDb'
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
     }
     if (!topic) return NextResponse.json({ error: 'exam_topic_required' }, { status: 400 })
 
-    const db = createServiceClient()
+    const db = checkedDb(createServiceClient())
     const { data: profile, error: profileError } = await db
       .from('perfiles')
       .select('subjects, student_exams')

@@ -194,7 +194,9 @@ test('la disponibilidad excepcional es del alumno, no de un paso', () => {
 test('el tope comercial de días forma parte de la disponibilidad efectiva', () => {
   const loader = stripComments(read('camino/studentPlanContext.ts')).replace(/\s+/g, ' ')
   assert.ok(loader.includes('getCaminoPlanLimits('), 'el contexto ignora el tope del plan comercial')
-  assert.ok(loader.includes('Math.min(requestedWeekly, maxWeeklyDays)'), 'el tope no se aplica al patrón semanal')
+  // Se comprueba que el tope SE APLICA, no cómo se escribe: el valor por
+  // defecto cuando el alumno no declara nada es una decisión aparte.
+  assert.ok(/Math\.min\(requestedWeekly[^)]*, maxWeeklyDays\)/.test(loader), 'el tope no se aplica al patrón semanal')
 })
 
 test('"no cabe" significa que se agotaron los días, no que falló el primero', () => {
@@ -211,9 +213,15 @@ test('"no cabe" significa que se agotaron los días, no que falló el primero', 
 
 test('subir el algoritmo de colocación invalida la personalización anterior', () => {
   const code = read('camino/applyCalendarPersonalization.ts')
+  // No se fija una versión CONCRETA —sube cada vez que cambia el algoritmo—
+  // sino que exista y entre en el hash, que es lo que invalida lo aplicado.
+  const version = code.match(/const PERSONALIZATION_VERSION = 'calendar_personalization_v(\d+)'/)
+  assert.ok(version, 'no hay versión de personalización')
+  assert.ok(Number(version[1]) >= 4, `la versión no ha subido tras cambiar el algoritmo (v${version[1]})`)
   assert.ok(
-    code.includes("const PERSONALIZATION_VERSION = 'calendar_personalization_v3'"),
-    'la versión no ha subido: las filas con el hash antiguo salen por already_current',
+    code.replace(/\s+/g, ' ').includes('stableHash( `${PERSONALIZATION_VERSION}')
+      || code.includes('stableHash(`${PERSONALIZATION_VERSION}'),
+    'la versión no entra en el hash: las filas antiguas saldrían por already_current',
   )
 })
 
@@ -237,9 +245,18 @@ test('lo que no cabe queda en un estado explícito y vuelve a la cola', () => {
   assert.ok(code.includes('unscheduled_reason: unscheduledReasonFor('), 'no se registra por qué no cabe')
   assert.ok(code.includes('unscheduledRows: unplaced.length'), 'no se informa de cuántas quedan fuera')
   assert.ok(!/\.delete\(/.test(code), 'la personalización borra trabajo del alumno')
+  // La vuelta a la cola ya NO la hace la personalización con un UPDATE suelto:
+  // va dentro de camino_apply_placements, que en la MISMA transacción coloca
+  // las filas y reconcilia user_learning_queue. Un fallo a mitad ya no puede
+  // dejar calendario y cola en desacuerdo.
+  assert.ok(code.includes("supabase.rpc('camino_apply_placements'"), 'la escritura ya no es transaccional')
+  const migration = readFileSync(
+    join(process.cwd(), 'supabase', 'migrations', '20260919100000_camino_reliability.sql'), 'utf8',
+  )
+  assert.ok(migration.includes('camino_reconcile_work'), 'no existe la reconciliación cola-calendario')
   assert.ok(
-    /user_learning_queue[\s\S]*queue_status: 'pending'/.test(code),
-    'el trabajo sin sitio no vuelve a la cola para replanificarse',
+    /update user_learning_queue q set queue_status='pending'/.test(migration),
+    'la reconciliación no devuelve a pending el trabajo sin colocación viva',
   )
 })
 
@@ -281,19 +298,28 @@ test('una ejecución degradada NO marca el día como hecho', () => {
 })
 
 test('el trabajo sin fecha se le muestra al alumno', () => {
-  const banner = readFileSync(
-    join(process.cwd(), 'app', 'components', 'camino', 'UnscheduledWorkBanner.tsx'),
-    'utf8',
+  // El recuento ya no lo hace el navegador: vive en /api/camino/plan-status,
+  // que puede descontar el trabajo que la cola ya ha resuelto — algo que el
+  // cliente no sabe. La regla pura está en unscheduledWork.ts, con tests.
+  const route = readFileSync(
+    join(process.cwd(), 'app', 'api', 'camino', 'plan-status', 'route.ts'), 'utf8',
   )
-  assert.ok(banner.includes("eq('status', 'unscheduled')"), 'el aviso no lee el trabajo sin fecha')
-  // Temas ÚNICOS: una tarea reprogramada varias veces no puede inflar el número.
-  assert.ok(banner.includes('const seen = new Set<string>()'), 'el aviso cuenta filas en vez de temas únicos')
-  for (const reason of ['after_exam', 'final_review_window', 'no_capacity']) {
-    assert.ok(banner.includes(reason), `el aviso no explica el motivo ${reason}`)
-  }
+  assert.ok(route.includes("eq('status', 'unscheduled')"), 'el estado no lee el trabajo sin fecha')
+  assert.ok(route.includes('summarizeUnscheduled('), 'el estado no resume el trabajo sin fecha')
+
+  const summary = readFileSync(
+    join(process.cwd(), 'app', 'lib', 'camino', 'unscheduledWork.ts'), 'utf8',
+  )
+  // Temas ÚNICOS: una tarea recolocada varias veces no puede inflar el número.
+  assert.ok(summary.includes('const seen = new Set<string>()'), 'se cuentan filas en vez de temas únicos')
+  assert.ok(summary.includes('resolvedQueueIds.has(row.queue_id)'), 'se cuenta trabajo que la cola ya resolvió')
+
+  const banner = readFileSync(
+    join(process.cwd(), 'app', 'components', 'camino', 'UnscheduledWorkBanner.tsx'), 'utf8',
+  )
+  assert.ok(banner.includes('/api/camino/plan-status'), 'el aviso no consulta el estado del plan')
   const client = readFileSync(
-    join(process.cwd(), 'app', 'components', 'camino', 'CaminoCalendarClient.tsx'),
-    'utf8',
+    join(process.cwd(), 'app', 'components', 'camino', 'CaminoCalendarClient.tsx'), 'utf8',
   )
   assert.ok(client.includes('<UnscheduledWorkBanner />'), 'el aviso no está montado en Camino')
 })

@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
 import WeeklyCheckinBanner from '@/app/components/camino/WeeklyCheckinBanner'
 import ExamCoverageBanner from '@/app/components/camino/ExamCoverageBanner'
+import { ensureServerCalendar } from '@/app/lib/camino/ensureCalendarClient'
 import UnscheduledWorkBanner from '@/app/components/camino/UnscheduledWorkBanner'
 import HistoriaTopicChips from '@/app/components/camino/HistoriaTopicChips'
 import GoogleCalendarConnection from '@/app/components/camino/GoogleCalendarConnection'
@@ -26,7 +27,7 @@ import { getCaminoPlanLimits, monthlyToWeeklyLimit, normalizeCaminoPlanId, type 
 import { estimatedMinutesForSlot, missionsPerDayForMinutes } from '@/app/lib/camino/dailyTimeCapacity'
 import { DIVISIONS, divisionFor } from '@/app/lib/camino/leagues'
 import { MAX_LIGAS_PER_USER } from '@/app/lib/camino/leagueRounds'
-import { deletePartialExamMissions, injectAllPartialExamMissions, summarizePersistedExamMissions, weekdaysBefore } from '@/app/lib/camino/injectPartialExamMissions'
+import { summarizePersistedExamMissions, weekdaysBefore } from '@/app/lib/camino/injectPartialExamMissions'
 import { buildRecalcMessage, computeExamTimeNeed, getBlockPerformance } from '@/app/lib/camino/examTimeNeed'
 import { FINAL_REVIEW_RESERVED_STUDY_DAYS, resolveTargetExamDate } from '@/app/lib/camino/examDate'
 import { PLAN_ENGINE_VERSION, buildPlanDays, type PlanDay } from '@/app/lib/camino/planEngine'
@@ -484,14 +485,6 @@ async function fetchLeaderboard(token: string, community: string) {
 // usuario acaba de provocar un cambio y espera verlo ya (crear el Camino,
 // cambiar preferencias). En las cargas normales se deja en false: el servidor
 // responde { skipped: 'already_ensured_today' } sin tocar camino_calendar.
-async function ensureServerCalendar(token: string, force = false) {
-  const res = await fetch('/api/camino/ensure-calendar', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ force }),
-  })
-  return res.ok
-}
 
 type CaminoCalRow = {
   id: string
@@ -1356,6 +1349,7 @@ export default function CaminoCalendarClient() {
       setFreeActivitySubjectsToday([...freeSubjects])
       if (calDays && calDays.length > 0) {
         setCalendar(calDays)
+        window.dispatchEvent(new Event('camino:updated'))
         saveCalendarWeeksToCache(calDays)
         setSupabaseCalLoaded(true)
         setCaminoReadyStatus('ready')
@@ -1411,13 +1405,14 @@ export default function CaminoCalendarClient() {
       if (cancelled) return
       if (calDays && calDays.length > 0) {
         setCalendar(calDays)
+        window.dispatchEvent(new Event('camino:updated'))
         saveCalendarWeeksToCache(calDays)
         setSupabaseCalLoaded(true)
         setCaminoReadyStatus('ready')
         recordCalendarSource('server', 'initial_load', { weekStart: currentWeekStartISO(), missionCount: missionCount(calDays), reason: 'retry_after_empty' })
       } else {
         recordCalendarSource('server_empty', 'initial_load', { weekStart: currentWeekStartISO(), missionCount: 0, reason: 'retry_still_empty' })
-        setCaminoReadyStatus('no_queue')
+        setCaminoReadyStatus('no_future')
       }
     }, 2000)
     return () => { cancelled = true; clearTimeout(timer) }
@@ -1904,6 +1899,7 @@ export default function CaminoCalendarClient() {
         const calDays = await fetchCaminoCalendar(session.user.id)
         if (calDays && calDays.length > 0) {
           setCalendar(calDays)
+        window.dispatchEvent(new Event('camino:updated'))
           saveCalendarWeeksToCache(calDays)
           setSupabaseCalLoaded(true)
           setCaminoReadyStatus('ready')
@@ -1925,13 +1921,13 @@ export default function CaminoCalendarClient() {
     // writing it out of order would make a fresh exam's chips fail with 403.
     return supabase.auth.getSession().then(({ data: sessionData }) => {
       const token = sessionData.session?.access_token
-      if (!token) return
+      if (!token) throw new Error('session_required')
       return fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ student_exams: nextExams }),
-      }).catch(() => undefined)
-    }, () => undefined)
+      }).then(response => { if (!response.ok) throw new Error('profile_save_failed'); return response })
+    })
   }
   function resolveWeek(weekStartISO: string, nextExams = exams, planId = caminoPlanId): { days: DayPlan[]; source: CalendarSource; reason: string; shouldCache: boolean; shouldMerge: boolean } {
     if (!onboarding) return { days: [], source: 'client', reason: 'missing_onboarding', shouldCache: false, shouldMerge: false }
@@ -1990,6 +1986,7 @@ export default function CaminoCalendarClient() {
       const calDays = await fetchCaminoCalendar(userId)
       if (calDays) {
         setCalendar(calDays)
+        window.dispatchEvent(new Event('camino:updated'))
         saveCalendarWeeksToCache(calDays)
         setSupabaseCalLoaded(true)
       }
@@ -2007,6 +2004,20 @@ export default function CaminoCalendarClient() {
       setCalendarReorganizeStatus('error')
       setToast('No se pudieron reorganizar las misiones afectadas.')
     }
+  }
+  async function replanExams(token: string, forceExamId?: string) {
+    const response = await fetch('/api/camino/replan-exams', {
+      method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ forceExamId }),
+    })
+    if (!response.ok) throw new Error('exam_replan_failed')
+    if (!(await ensureServerCalendar(token, true))) throw new Error('calendar_incomplete')
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
+      const days = await fetchCaminoCalendar(session.user.id)
+      if (days) { setCalendar(days); saveCalendarWeeksToCache(days) }
+    }
+    window.dispatchEvent(new Event('camino:updated'))
   }
   function regenerate(nextExams = exams) {
     if (!onboarding) return
@@ -2056,6 +2067,7 @@ export default function CaminoCalendarClient() {
       const calDays = await fetchCaminoCalendar(session.user.id)
       if (calDays) {
         setCalendar(calDays)
+        window.dispatchEvent(new Event('camino:updated'))
         saveCalendarWeeksToCache(calDays)
         setSupabaseCalLoaded(true)
       } else {
@@ -2190,23 +2202,21 @@ export default function CaminoCalendarClient() {
           }).catch(() => undefined)
         }, () => undefined)
       }
-      supabase.auth.getSession().then(({ data }) => {
-        const userId = data.session?.user.id
-        if (!userId) return
-        injectAllPartialExamMissions(userId, supabase, nextExams)
-      }, () => undefined)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) await replanExams(session.access_token)
+    } catch {
+      setToast('El examen no se pudo actualizar por completo. Reintenta para recuperar su planificación.')
+
     } finally {
       setSavingExam(false)
     }
   }
-  function deleteExam(id: string) {
-    const remaining = exams.filter(exam => exam.id !== id)
-    regenerate(remaining)
-    supabase.auth.getSession().then(({ data }) => {
-      const userId = data.session?.user.id
-      if (!userId) return
-      deletePartialExamMissions(userId, supabase, id).then(() => injectAllPartialExamMissions(userId, supabase, remaining))
-    }, () => undefined)
+  async function deleteExam(id: string) {
+    try {
+      await regenerate(exams.filter(exam => exam.id !== id))
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) await replanExams(session.access_token)
+    } catch { setToast('No se pudo actualizar el examen. Inténtalo de nuevo.') }
   }
   // Recálculo explícito del Camino para UN examen: a diferencia del sizing
   // automático de saveExam() (que solo pide a la IA cuántas sesiones caben
@@ -2239,10 +2249,7 @@ export default function CaminoCalendarClient() {
         dailyMinutesOnboarding: onboarding?.dailyMinutes ?? null,
       })
 
-      const nextExams = exams.map(e => e.id === exam.id
-        ? { ...e, sessionOverride: need.recommendedSessions, maxSessionsPerDay: need.maxSessionsPerDay }
-        : e)
-      await injectAllPartialExamMissions(userId, supabase, nextExams, { forceExamId: exam.id })
+      await replanExams(data.session!.access_token, exam.id)
 
       // Refresca el calendario visible con las misiones recién escritas —
       // mismo patrón que addSubject() usa tras inyectar contenido nuevo.
@@ -2333,6 +2340,7 @@ export default function CaminoCalendarClient() {
       const calDays = await fetchCaminoCalendar(session.user.id)
       if (calDays) {
         setCalendar(calDays)
+        window.dispatchEvent(new Event('camino:updated'))
         saveCalendarWeeksToCache(calDays)
         setSupabaseCalLoaded(true)
       } else {

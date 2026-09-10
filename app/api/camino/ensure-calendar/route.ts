@@ -1,4 +1,6 @@
+import { checkedDb } from '@/app/lib/camino/checkedDb'
 import { NextRequest, NextResponse } from 'next/server'
+import { withPlanLock, PlanBusyError, reconcilePlanWork } from '@/app/lib/camino/planPersistence'
 
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
@@ -10,6 +12,7 @@ import { injectWeakReviewMissions } from '@/app/lib/camino/injectWeakReviewMissi
 import { injectDiagnosticMissions } from '@/app/lib/camino/injectDiagnosticMissions'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 300
 
 /**
  * Prepara el Camino del usuario. Encadena tres operaciones de escritura, así
@@ -35,27 +38,30 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const db = createServiceClient()
+    const db = checkedDb(createServiceClient())
+    return await withPlanLock(db, user.id, async () => {
     const today = getMadridToday()
 
     if (!force) {
-      const { data: log } = await db
+      const { data: log, error: logReadError } = await db
         .from('camino_ensure_log')
         .select('last_ensured_day')
         .eq('user_id', user.id)
         .maybeSingle()
 
+      if (logReadError) throw logReadError
       if (log?.last_ensured_day === today) {
         return NextResponse.json({ ok: true, skipped: 'already_ensured_today' })
       }
     }
 
+    await reconcilePlanWork(db, user.id)
     const ensure = await ensureCaminoCalendar(user.id, db)
     const weakReviews = await injectWeakReviewMissions(user.id, db)
     // Microdiagnóstico: como mucho uno, y solo si el alumno ya tiene ritmo
     // (ver camino/knowledgeState.ts). Nunca bloquea el resto del Camino.
     const diagnostics = await injectDiagnosticMissions(user.id, db)
-    const personalization = await applyCalendarPersonalization(user.id, db)
+    const personalization = await applyCalendarPersonalization(user.id, db, { force })
     await syncKairoMissionsToGoogle(user.id, db).catch(error => {
       console.warn('[camino/ensure-calendar] calendar sync skipped:', error)
     })
@@ -71,6 +77,8 @@ export async function POST(request: NextRequest) {
     // día: el siguiente intento reintenta.
     const degraded = [
       ...ensure.degraded,
+      ...(weakReviews.reason === 'error' ? ['weak_reviews'] : []),
+      ...(diagnostics.reason === 'error' ? ['diagnostics'] : []),
       ...(personalization.reason === 'error' ? ['personalization'] : []),
     ]
     if (degraded.length === 0) {
@@ -80,7 +88,7 @@ export async function POST(request: NextRequest) {
           { user_id: user.id, last_ensured_at: new Date().toISOString(), last_ensured_day: today },
           { onConflict: 'user_id' },
         )
-      if (logError) console.error('[camino/ensure-calendar] log upsert failed:', logError.message)
+      if (logError) degraded.push('ensure_log')
     } else {
       console.error('[camino/ensure-calendar] degraded run, day not marked:', degraded.join(', '))
     }
@@ -91,8 +99,11 @@ export async function POST(request: NextRequest) {
       personalization,
       weakReviews,
       diagnostics,
+      retryable: degraded.length > 0,
+    }, { status: degraded.length > 0 ? 503 : 200 })
     })
   } catch (error) {
+    if (error instanceof PlanBusyError) return NextResponse.json({ ok: false, retryable: true, error: 'plan_busy' }, { status: 409, headers: { 'Retry-After': '2' } })
     console.error('[camino/ensure-calendar]', error)
     return NextResponse.json({ error: 'No se pudo preparar tu Camino' }, { status: 500 })
   }

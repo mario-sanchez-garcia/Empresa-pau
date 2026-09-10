@@ -1,4 +1,6 @@
 import 'server-only'
+import { checkedDb } from '@/app/lib/camino/checkedDb'
+import { withPlanLock } from '@/app/lib/camino/planPersistence'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, getTopic, getTopicByV2SortOrder, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
@@ -135,6 +137,15 @@ export type GenerateCaminoPlanResult =
   | { success: false; errorCode: 'queue_insert_failed' | 'calendar_insert_failed' | 'queue_update_failed' | 'already_onboarded' | 'internal_error' }
 
 export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Promise<GenerateCaminoPlanResult> {
+  try {
+    return await withPlanLock(params.db, params.userId, () => generateCaminoPlanLocked({ ...params, db: checkedDb(params.db) }))
+  } catch (error) {
+    console.error('[camino/generate] unavailable:', error)
+    return { success: false, errorCode: 'internal_error' }
+  }
+}
+
+async function generateCaminoPlanLocked(params: GenerateCaminoPlanParams): Promise<GenerateCaminoPlanResult> {
   const { userId, db, startMode, dailyMinutes } = params
   const declaredAvailability = { weeklyStudyDays: params.weeklyStudyDays ?? null, dailyMinutes }
   const subjects = [...new Set(params.subjects.map(s => normalizeSubjectSlug(s)).filter(s => ALLOWED_GENERATE_SUBJECTS.has(s)))]
@@ -183,10 +194,14 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
     // vieron) podía caer a 0% de golpe tras un reset aunque el alumno
     // hubiera completado lecciones reales.
     const resetToday = getMadridToday()
-    await Promise.all([
+    const resetResults = await Promise.all([
       db.from('user_learning_queue').delete().eq('user_id', userId).neq('queue_status', 'completed'),
       db.from('camino_calendar').delete().eq('user_id', userId).neq('status', 'completed').gte('scheduled_date', resetToday),
     ])
+
+    for (const result of resetResults) {
+      if (result.error) throw new Error(`Queue reset error: ${result.error.message}`)
+    }
 
     // ── PASO 2: user_learning_queue ─────────────────────────────────────────
     const { data: existingQueueCheck } = await db
@@ -394,12 +409,7 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
     const scheduleSubjects = subjects.filter(s => (subjectQueues[s]?.length ?? 0) > 0)
     const cursors: Record<string, number> = Object.fromEntries(scheduleSubjects.map(s => [s, 0]))
 
-    // Un alumno en modo repaso avanza más rápido por día: las sesiones de
-    // repaso son más cortas que ver el tema por primera vez. Basta con que UNA
-    // asignatura esté en repaso para justificar el ritmo extra.
-    const anySubjectInReview = Object.values(resolveStartModes(subjects, params.startModeBySubject, startMode))
-      .some(mode => mode === 'review')
-    const slotsPerDay = Math.max(anySubjectInReview ? 2 : 1, missionsPerDayForMinutes(dailyMinutes))
+    const slotsPerDay = missionsPerDayForMinutes(planContext.dailyMinutes)
 
     const calRows: object[] = []
     const scheduledQueueIds: string[] = []
@@ -442,7 +452,7 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
           ? { express: true, topic_slug: topicMeta.topicSlug }
           : { topic_slug: topicMeta.topicSlug }
         const calMetadata = finalSprint
-          ? { ...baseMetadata, plan_mode: 'final_sprint', final_review_window: true }
+          ? { ...baseMetadata, plan_mode: 'final_sprint', final_review_window: true, knowledge_verified: false }
           : baseMetadata
 
         calRows.push({
@@ -451,7 +461,7 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
           subject: item.subject,
           v2_sort_order: item.v2_sort_order,
           title: finalSprint
-            ? `Repaso: ${sanitizeLessonTitle(item.title)}`
+            ? `Práctica prioritaria: ${sanitizeLessonTitle(item.title)}`
             : sanitizeLessonTitle(item.title),
           block_key: item.block_key,
           block_slug: topicMeta.blockSlug,
@@ -484,7 +494,8 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
     await injectOnboardingPartials(planContext)
     // La personalización recibe el MISMO contexto: sin él reubicaba las filas
     // por patrón semanal sin saber que había una fecha de examen delante.
-    await applyCalendarPersonalization(userId, db, { planContext, declared: declaredAvailability })
+    const personalization = await applyCalendarPersonalization(userId, db, { planContext, declared: declaredAvailability })
+    if (personalization.reason === 'error') throw new Error('Calendar insert error: personalization failed')
 
     // ── PASO 4: leer el calendario REAL server-side ─────────────────────────
     // No confiar en calRows[0]: en un reintento idempotente (draft ya

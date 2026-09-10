@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { loadStudentPlanContext, planningDates } from '@/app/lib/camino/studentPlanContext'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
@@ -12,6 +13,7 @@ import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { extractTraceHeaders, logOnboardingStage } from '@/app/lib/onboarding/onboardingServerLog'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 300
 
 const FLOW_VERSION = 'current_v1'
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -239,7 +241,19 @@ export async function POST(request: NextRequest) {
 
   const missions = await loadRewardMissions(db, user.id)
   if (missions.length === 0) {
-    return fail('calendar_verification_failed')
+    const context = await loadStudentPlanContext(user.id, db, undefined, {
+      weeklyStudyDays: cleaned.weeklyStudyDaysValue, dailyMinutes: cleaned.dailyMinutes,
+    })
+    const [queue, unplaced] = await Promise.all([
+      db.from('user_learning_queue').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('queue_status', 'pending'),
+      db.from('camino_calendar').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('status', 'unscheduled'),
+    ])
+    // A valid curriculum with no available sessions is an honest plan state,
+    // not a failed registration. Never turn a database failure into success.
+    if (queue.error || unplaced.error || !queue.count ||
+      (planningDates(context, { includeFinalReviewWindow: true }).length > 0 && !unplaced.count)) {
+      return fail('calendar_verification_failed')
+    }
   }
 
   // ── completed: SOLO ahora se declara el onboarding realmente terminado ──

@@ -418,7 +418,7 @@ export async function injectPartialExamMissions(
   // fresh calculation right now, even if nothing in the exam's own fields
   // changed — e.g. new grades came in, or more days have passed and the
   // margin needs revisiting.
-  if (!options.force && existingRows && existingRows.length > 0) {
+  if (!options.force && existingRows && existingRows.length > 0 && !existingRows.some(row => row.status === 'unscheduled')) {
     const existingSignature = signatureFromMetadata(existingRows[0].metadata)
     if (existingSignature && signaturesEqual(examSignature(partialExam), existingSignature)) {
       return {
@@ -435,7 +435,7 @@ export async function injectPartialExamMissions(
     .delete()
     .eq('user_id', userId)
     .eq('source', 'partial')
-    .eq('status', 'pending')
+    .in('status', ['pending', 'unscheduled'])
     .filter('metadata->>partial_exam_id', 'eq', partialExam.id)
 
   // Include TODAY as a candidate slot (previously started from tomorrow),
@@ -550,7 +550,7 @@ export async function injectPartialExamMissions(
     // (cobertura <80% o cupo mensual agotado), esta fila se convierte en un
     // aviso claro en vez de desaparecer sin explicación.
     const isFinalSimulacroLink = mType === 'final_mini_mock' && fate === 'generate'
-    const scheduler = await createDayScheduler(userId, supabase, slot)
+    const scheduler = await createDayScheduler(userId, supabase, slot, { dailyMinutes: options.planContext?.dailyMinutes })
     const scheduledMissionType = isFinalSimulacroLink ? 'pau_practice' : 'partial_practice'
     const timeSlot = scheduler.placeBest(isFinalSimulacroLink ? SIMULACRO_MINUTES : estimatedMinutesForMissionType('partial_practice'), {
       date: slot,
@@ -589,12 +589,13 @@ export async function injectPartialExamMissions(
       mission_type: scheduledMissionType,
       is_main: true,
       is_bonus: false,
-      status: 'pending',
+      status: timeSlot ? 'pending' : 'unscheduled',
       source: 'partial',
       generated_by: 'partial_exam_v1',
       start_time: timeSlot?.start ?? null,
       end_time: timeSlot?.end ?? null,
       metadata: {
+        ...(!timeSlot ? { unscheduled_reason: 'no_capacity', unscheduled_at: now } : {}),
         partial_exam_id: partialExam.id,
         partial_exam_date: partialExam.date,
         target_block_normalized: partialExam.block,
@@ -625,7 +626,7 @@ export async function injectPartialExamMissions(
         } : {}),
       },
     })
-    claimedDates.push(slot)
+    if (timeSlot) claimedDates.push(slot)
   }
 
   return { claimedDates }

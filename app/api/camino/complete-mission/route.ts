@@ -278,7 +278,7 @@ export async function POST(request: NextRequest) {
           .eq('subject', subject)
           .eq('v2_sort_order', v2SortOrder)
           .neq('id', targetId)
-          .in('status', ['pending', 'missed', 'postponed'])
+          .in('status', ['pending', 'missed', 'postponed', 'unscheduled'])
           .in('source', ['algorithm', 'partial'])
         if (recoveryCleanupError) throw recoveryCleanupError
 
@@ -347,7 +347,7 @@ export async function POST(request: NextRequest) {
       .eq('subject', subject)
       .eq('v2_sort_order', v2SortOrder)
       .neq('id', updated[0].id)
-      .in('status', ['pending', 'missed', 'postponed'])
+      .in('status', ['pending', 'missed', 'postponed', 'unscheduled'])
       .in('source', ['algorithm', 'partial'])
     if (duplicateCleanupError) throw duplicateCleanupError
 

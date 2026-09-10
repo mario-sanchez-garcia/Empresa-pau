@@ -1,6 +1,10 @@
 import 'server-only'
 
 import { createHash } from 'crypto'
+import { readAllRows } from './readAllRows'
+import { reconcilePlanWork } from './planPersistence'
+import { getAvailabilityForDate } from '../calendar/availability'
+import { estimatedMinutesForMission } from './missionDuration'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { getMadridToday } from './studyDays'
@@ -10,12 +14,12 @@ import { createDayScheduler } from './scheduleTimeSlot'
 import { loadStudentPlanContext, planningDates, type DeclaredAvailability, type StudentPlanContext } from './studentPlanContext'
 import { eligibleDatesFor, orderRowsForPlacement, unscheduledReasonFor, type PlacementRow, type PlacementWindow } from './planPlacement'
 
-const VALID_WEEKLY_DAYS = [3, 4, 5, 6, 7] as const
+const VALID_WEEKLY_DAYS = [1, 2, 3, 4, 5, 6, 7] as const
 // v3: la colocación cambió de algoritmo (dos ventanas — temario nuevo y
 // repaso —, reintento sobre todos los días elegibles y estado explícito para
 // lo que no cabe). Sin subir la versión, las filas con el hash anterior salían
 // por `already_current` y nunca llegaban a pasar por las reglas nuevas.
-const PERSONALIZATION_VERSION = 'calendar_personalization_v3'
+const PERSONALIZATION_VERSION = 'calendar_personalization_v4'
 
 type PersonalizationPrefs = {
   weeklyStudyDaysValue: number
@@ -31,6 +35,7 @@ type CalendarRow = {
   locked: boolean | null
   metadata: Record<string, unknown> | null
   created_at: string
+  updated_at: string
   mission_type: string | null
   queue_id: string | null
 }
@@ -136,7 +141,7 @@ async function loadPreferences(
  * real, hace falta tener a dónde ir. `MAX_CANDIDATE_DAYS` la acota por
  * seguridad ante horizontes enormes.
  */
-const MAX_CANDIDATE_DAYS = 60
+const MAX_CANDIDATE_DAYS = 730
 
 function candidateDates(context: StudentPlanContext, appliedFrom: string): string[] {
   return planningDates(context, {
@@ -149,10 +154,11 @@ function candidateDates(context: StudentPlanContext, appliedFrom: string): strin
 export async function applyCalendarPersonalization(
   userId: string,
   supabase: SupabaseClient,
-  options: { planContext?: StudentPlanContext; declared?: DeclaredAvailability } = {},
+  options: { planContext?: StudentPlanContext; declared?: DeclaredAvailability; force?: boolean } = {},
 ): Promise<PersonalizationResult> {
   try {
     const { planContext, declared } = options
+    await reconcilePlanWork(supabase, userId)
     const prefs = await loadPreferences(userId, supabase, declared)
     if (!prefs) return { applied: false, reason: 'missing_preferences', updatedRows: 0 }
 
@@ -175,21 +181,17 @@ export async function applyCalendarPersonalization(
     // versión, días y minutos — mover el examen no re-disparaba nada y las
     // filas se quedaban donde las había dejado la fecha anterior.
     const preferenceHash = stableHash(
-      `${PERSONALIZATION_VERSION}:${prefs.weeklyStudyDaysValue}:${prefs.dailyMinutes}:${context.examDate}`,
+      `${PERSONALIZATION_VERSION}:${prefs.weeklyStudyDaysValue}:${prefs.dailyMinutes}:${context.examDate}:${context.today}:${context.emergencyAvailability}`,
     )
-    const { data, error } = await supabase
+    const rows = (await readAllRows<CalendarRow>((from, to) => supabase
       .from('camino_calendar')
-      .select('id, scheduled_date, subject, v2_sort_order, status, locked, metadata, created_at, mission_type, queue_id')
+      .select('id, scheduled_date, subject, v2_sort_order, status, locked, metadata, created_at, updated_at, mission_type, queue_id')
       .eq('user_id', userId)
-      .gte('scheduled_date', today)
-      .in('status', ['pending', 'postponed'])
+      .or(`scheduled_date.gte.${today},status.eq.unscheduled`)
+      .in('status', ['pending', 'postponed', 'unscheduled'])
       .eq('source', 'algorithm')
-      .order('scheduled_date', { ascending: true })
-      .order('created_at', { ascending: true })
-      .limit(80)
-
-    if (error) throw new Error(`Calendar read error: ${error.message}`)
-    const rows = ((data ?? []) as CalendarRow[]).filter(row => !row.locked)
+      .order('scheduled_date', { ascending: true }).order('id', { ascending: true })
+      .range(from, to))).filter(row => !row.locked)
     if (rows.length === 0) return { applied: false, reason: 'no_rows', updatedRows: 0, preferenceHash }
 
     const alreadyCurrent = rows.every(row => {
@@ -197,12 +199,12 @@ export async function applyCalendarPersonalization(
       const personalization = metadataObject(meta.camino_personalization as Record<string, unknown> | null)
       return personalization.preference_hash === preferenceHash
     })
-    if (alreadyCurrent) {
+    if (alreadyCurrent && !options.force && !rows.some(row => row.status === 'unscheduled')) {
       return { applied: false, reason: 'already_current', updatedRows: 0, preferenceHash }
     }
 
     const capacity = missionsPerDayForMinutes(prefs.dailyMinutes)
-    const appliedFrom = rows[0]?.scheduled_date ?? today
+    const appliedFrom = today
     const applicationHash = stableHash(`${preferenceHash}:${appliedFrom}`)
 
     // Todas las filas de `rows` se están reubicando en este mismo pase, así
@@ -215,7 +217,7 @@ export async function applyCalendarPersonalization(
     const schedulerFor = async (date: string) => {
       const existing = schedulers.get(date)
       if (existing) return existing
-      const created = await createDayScheduler(userId, supabase, date, { excludeCalendarRowIds })
+      const created = await createDayScheduler(userId, supabase, date, { excludeCalendarRowIds, dailyMinutes: prefs.dailyMinutes, externalBusy: await getAvailabilityForDate(userId, date) })
       schedulers.set(date, created)
       return created
     }
@@ -233,7 +235,7 @@ export async function applyCalendarPersonalization(
     // horario hace pasar al SIGUIENTE día elegible, nunca abandonar la misión.
     // Declarar "no cabe" tras probar una sola fecha era exactamente el fallo.
     const used = new Map<string, number>()
-    const updates: Array<PromiseLike<{ error: { message: string } | null }>> = []
+    const changes: Record<string, unknown>[] = []
     const placedIds = new Set<string>()
 
     const placementRows: Array<PlacementRow & { row: CalendarRow }> = rows.map(row => ({
@@ -251,7 +253,10 @@ export async function applyCalendarPersonalization(
         const slot = used.get(date) ?? 0
         if (slot >= capacity) continue
         const scheduler = await schedulerFor(date)
-        const timeSlot = scheduler.placeBest(estimatedMinutesForSlot(prefs.dailyMinutes, slot), {
+        const duration = candidate.missionType === 'concept' || candidate.missionType === 'review'
+          ? estimatedMinutesForSlot(prefs.dailyMinutes, slot)
+          : estimatedMinutesForMission({ mission_type: candidate.missionType, metadata: meta })
+        const timeSlot = scheduler.placeBest(duration, {
           date,
           subject: row.subject,
           missionType: candidate.missionType,
@@ -262,34 +267,20 @@ export async function applyCalendarPersonalization(
         // se prueba el siguiente, sin consumir su capacidad.
         if (!timeSlot) continue
         used.set(date, slot + 1)
-        updates.push(
-          supabase
-            .from('camino_calendar')
-            .update({
-              // El `status` NO se toca: una fila 'postponed' la apartó el
-              // alumno y sigue apartada aunque se reubique.
-              scheduled_date: date,
-              updated_at: new Date().toISOString(),
-              start_time: timeSlot.start,
-              end_time: timeSlot.end,
-              metadata: {
-                ...meta,
-                estimated_minutes: estimatedMinutesForSlot(prefs.dailyMinutes, slot),
-                camino_personalization: {
-                  version: PERSONALIZATION_VERSION,
-                  preference_hash: preferenceHash,
-                  application_hash: applicationHash,
-                  applied_from: appliedFrom,
-                  weekly_study_days_value: prefs.weeklyStudyDaysValue,
-                  daily_minutes: prefs.dailyMinutes,
-                  target_exam_date: context.examDate,
-                  emergency_availability: context.emergencyAvailability,
-                },
-              },
-            })
-            .eq('id', row.id)
-            .eq('user_id', userId),
-        )
+        const { unscheduled_reason: _reason, unscheduled_at: _at, ...resolvedMeta } = meta
+        changes.push({
+          id: row.id, expected_status: row.status, expected_updated_at: row.updated_at,
+          status: row.status === 'unscheduled' ? 'pending' : row.status,
+          scheduled_date: date, start_time: timeSlot.start, end_time: timeSlot.end,
+          metadata: { ...resolvedMeta, estimated_minutes: duration,
+            camino_personalization: {
+              version: PERSONALIZATION_VERSION, preference_hash: preferenceHash,
+              application_hash: applicationHash, applied_from: appliedFrom,
+              weekly_study_days_value: prefs.weeklyStudyDaysValue, daily_minutes: prefs.dailyMinutes,
+              target_exam_date: context.examDate, emergency_availability: context.emergencyAvailability,
+            },
+          },
+        })
         placedIds.add(row.id)
         break
       }
@@ -303,38 +294,18 @@ export async function applyCalendarPersonalization(
     const unplaced = placementRows.filter(candidate => !placedIds.has(candidate.id))
     for (const candidate of unplaced) {
       const meta = metadataObject(candidate.row.metadata)
-      updates.push(
-        supabase
-          .from('camino_calendar')
-          .update({
-            status: 'unscheduled',
-            updated_at: new Date().toISOString(),
-            metadata: {
-              ...meta,
-              unscheduled_reason: unscheduledReasonFor(candidate, window),
-              unscheduled_at: new Date().toISOString(),
-            },
-          })
-          .eq('id', candidate.id)
-          .eq('user_id', userId)
-          .eq('status', candidate.row.status),
-      )
+      changes.push({
+        id: candidate.id, expected_status: candidate.row.status, expected_updated_at: candidate.row.updated_at,
+        status: 'unscheduled', scheduled_date: candidate.row.scheduled_date,
+        start_time: null, end_time: null,
+        metadata: { ...meta, unscheduled_reason: unscheduledReasonFor(candidate, window), unscheduled_at: new Date().toISOString() },
+      })
     }
-    const queueIdsToReopen = unplaced.map(c => c.queueId).filter((id): id is string => Boolean(id))
-    if (queueIdsToReopen.length > 0) {
-      updates.push(
-        supabase
-          .from('user_learning_queue')
-          .update({ queue_status: 'pending', scheduled_at: null })
-          .in('id', queueIdsToReopen)
-          .eq('user_id', userId)
-          .eq('queue_status', 'scheduled'),
-      )
-    }
-
-    const results = await Promise.all(updates)
-    const failed = results.find(result => result.error)
-    if (failed?.error) throw new Error(`Calendar update error: ${failed.error.message}`)
+    // One transaction updates placements and reconciles user_learning_queue.
+    const { error: writeError } = await supabase.rpc('camino_apply_placements', {
+      p_user_id: userId, p_changes: changes,
+    })
+    if (writeError) throw new Error(`Calendar update error: ${writeError.message}`)
 
     return {
       applied: true,

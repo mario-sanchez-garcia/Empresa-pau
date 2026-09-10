@@ -72,6 +72,7 @@ export function estimatedMinutesForMission(row: MissionDurationRow): number {
   // El enlace al Simulacro real se persiste como `pau_practice` pero abre el
   // Simulacro de 90 min (ver injectPartialExamMissions).
   if (meta.links_to_simulacro_exam_id) return SIMULACRO_MINUTES
+  if (typeof meta.estimated_minutes === 'number' && Number.isFinite(meta.estimated_minutes) && meta.estimated_minutes > 0) return meta.estimated_minutes
   // Un microdiagnóstico (metadata.diagnostic_for) también es `pau_practice`,
   // pero son dos preguntas sueltas: se queda en la estimación de referencia,
   // que es exactamente el hueco que le reserva injectDiagnosticMissions.

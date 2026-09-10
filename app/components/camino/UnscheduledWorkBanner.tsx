@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { ensureServerCalendar } from '@/app/lib/camino/ensureCalendarClient'
 import { supabase } from '@/app/lib/supabase'
 
 // Trabajo que NO cabe en el Camino del alumno.
@@ -23,6 +24,10 @@ type UnscheduledReason = 'after_exam' | 'final_review_window' | 'no_capacity'
 
 type UnscheduledState = {
   /** Temas ÚNICOS sin encajar. Una tarea reprogramada varias veces cuenta una. */
+  needsAvailability: boolean
+  examDate: string
+  availableDays: number
+  pendingTopics: number
   topics: number
   subjects: string[]
   reasons: UnscheduledReason[]
@@ -57,47 +62,63 @@ function reasonText(reasons: UnscheduledReason[]): string {
 export default function UnscheduledWorkBanner() {
   const [state, setState] = useState<UnscheduledState | null>(null)
 
+  const [error, setError] = useState(false)
+  const [saving, setSaving] = useState(false)
   useEffect(() => {
     let cancelled = false
+    let generation = 0
     async function load() {
+      const version = ++generation
       const { data: { session } } = await supabase.auth.getSession()
-      const userId = session?.user.id
-      if (!userId) return
+      if (!session) return
       try {
-        const { data, error } = await supabase
-          .from('camino_calendar')
-          .select('subject, v2_sort_order, metadata')
-          .eq('user_id', userId)
-          .eq('status', 'unscheduled')
-          .limit(200)
-        if (cancelled || error || !data || data.length === 0) return
-
-        // Un mismo tema puede haber pasado por 'unscheduled' más de una vez
-        // (se recolocó, volvió a no caber). Contar filas inflaría el número:
-        // lo que el alumno necesita saber es cuánto TEMARIO queda sin encajar.
-        const seen = new Set<string>()
-        const subjects = new Set<string>()
-        const reasons = new Set<UnscheduledReason>()
-        for (const row of data) {
-          const meta = (row.metadata ?? {}) as Record<string, unknown>
-          const topicKey = typeof meta.topic_slug === 'string' && meta.topic_slug
-            ? `${row.subject}:${meta.topic_slug}`
-            : `${row.subject}:${row.v2_sort_order ?? 'sin-tema'}`
-          seen.add(topicKey)
-          subjects.add(String(row.subject))
-          const reason = meta.unscheduled_reason
-          if (reason === 'after_exam' || reason === 'final_review_window' || reason === 'no_capacity') {
-            reasons.add(reason)
-          }
-        }
-        if (cancelled) return
-        setState({ topics: seen.size, subjects: [...subjects], reasons: [...reasons] })
-      } catch { /* el aviso nunca bloquea la página */ }
+        const response = await fetch('/api/camino/plan-status', { headers: { Authorization: `Bearer ${session.access_token}` } })
+        if (!response.ok) throw new Error('status_unavailable')
+        const next = await response.json()
+        if (!cancelled && version === generation) { setState(next); setError(false) }
+      } catch { if (!cancelled) setError(true) }
     }
-    load()
-    return () => { cancelled = true }
+    const failed = () => setError(true)
+    void load()
+    window.addEventListener('camino:updated', load)
+    window.addEventListener('focus', load)
+    window.addEventListener('camino:plan-error', failed)
+    return () => {
+      cancelled = true
+      window.removeEventListener('camino:updated', load)
+      window.removeEventListener('focus', load)
+      window.removeEventListener('camino:plan-error', failed)
+    }
   }, [])
 
+  async function retry(acceptEmergency = false) {
+    setSaving(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('session')
+      if (acceptEmergency) {
+        const saved = await fetch('/api/camino/plan-status', {
+          method: 'POST', headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ acceptEmergency: true }),
+        })
+        if (!saved.ok) throw new Error('save')
+      }
+      if (!(await ensureServerCalendar(session.access_token, true))) throw new Error('plan')
+      window.location.reload()
+    } catch { setError(true) }
+    finally { setSaving(false) }
+  }
+
+  if (error) return <div role="status" style={{ padding: 16 }}>
+    No hemos podido actualizar todo tu Camino. Tu trabajo guardado sigue disponible.{' '}
+    <button disabled={saving} onClick={() => void retry()}>Reintentar</button>
+  </div>
+  if (state?.needsAvailability) return <div role="status" style={{ padding: 16 }}>
+    Con tu horario habitual no quedan sesiones antes del examen del {state.examDate}.{' '}
+    Puedes habilitar los días restantes, incluido el fin de semana, manteniendo tus minutos diarios.{' '}
+    <button disabled={saving} onClick={() => void retry(true)}>Puedo estudiar esos días</button>{' '}
+    <a href="/settings">Revisar mi disponibilidad</a>
+  </div>
   if (!state || state.topics === 0) return null
 
   const subjectsText = state.subjects.map(subjectLabel).join(', ')

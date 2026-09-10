@@ -75,7 +75,7 @@ async function declaredBlocks(
   db: SupabaseClient,
   userId: string,
 ): Promise<Array<{ subject: string; blockSlug: string; blockKey: string | null; mode: StartMode; position: number }>> {
-  const { data } = await db
+  const { data, error } = await db
     .from('user_learning_queue')
     .select('subject, block_slug, block_key, metadata, subject_position')
     .eq('user_id', userId)
@@ -83,6 +83,7 @@ async function declaredBlocks(
     .order('subject_position', { ascending: true })
     .limit(2000)
 
+  if (error) throw new Error(`Diagnostic queue read: ${error.message}`)
   const byBlock = new Map<string, { subject: string; blockSlug: string; blockKey: string | null; mode: StartMode; position: number }>()
   for (const row of (data ?? []) as QueueBlockRow[]) {
     const meta = metadataObject(row.metadata)
@@ -110,10 +111,11 @@ async function declaredBlocks(
 }
 
 async function loadKnowledgeRows(db: SupabaseClient, userId: string) {
-  const { data } = await db
+  const { data, error } = await db
     .from('student_block_knowledge')
     .select('subject, block_slug, state, declared_start_mode, diagnostic_mission_id, diagnostic_offered_at, diagnostic_completed_at, diagnostic_skipped_count')
     .eq('user_id', userId)
+  if (error) throw new Error(`Knowledge read: ${error.message}`)
   return (data ?? []) as Array<{
     subject: string
     block_slug: string
@@ -293,7 +295,8 @@ async function scheduleDiagnosticMission(
       },
     }).select('id').single()
 
-    if (error || !data?.id) return null
+    if (error) throw new Error(`Diagnostic insert: ${error.message}`)
+    if (!data?.id) throw new Error('Diagnostic insert returned no mission')
     return data.id as string
   }
   return null
@@ -324,7 +327,7 @@ async function reconcileSkippedDiagnostics(db: SupabaseClient, userId: string): 
     const status = statusById.get(row.diagnostic_mission_id as string)
     // 'pending' sigue viva; 'completed' la resuelve applyDiagnosticOutcome.
     // Cualquier otra cosa (missed, o la fila ya no existe) es un salto.
-    if (status === 'pending' || status === 'completed') continue
+    if (status === 'pending' || status === 'postponed' || status === 'unscheduled' || status === 'completed') continue
     await recordDiagnosticSkip(db, userId, row.subject, row.block_slug, row.diagnostic_skipped_count ?? 0)
   }
 }

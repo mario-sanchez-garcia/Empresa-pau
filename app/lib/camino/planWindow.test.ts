@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 import {
   buildStudentPlanContext,
@@ -87,24 +89,58 @@ test('`from` nunca retrocede al pasado', () => {
 
 // ── Disponibilidad excepcional: es del alumno, no de un paso ─────────────
 
-test('sin ningún día del patrón antes del examen, se abre la semana entera', () => {
+test('sin ningún día del patrón antes del examen, se PROPONE abrir la semana', () => {
   // Sábado 05/06/2027, examen el lunes 07/06, patrón L/X/V: entre hoy y la
-  // prueba no queda ni un día del patrón. O se abren los días, o no hay plan.
+  // prueba no queda ni un día del patrón.
+  //
+  // La semana NO se abre sola. Programarle el fin de semana sin preguntar es
+  // decidir por él algo que no ha aceptado: se marca la excepción como
+  // disponible y el plan se queda vacío hasta que la acepte. Un plan vacío con
+  // una explicación es más honesto que un plan que da por hecho su sábado.
   const ctx = context({ today: '2027-06-05', examDate: '2027-06-07', weeklyStudyDays: 3, holidays: NO_HOLIDAYS })
-  assert.equal(ctx.emergencyAvailability, true)
-  assert.deepEqual(ctx.studyDayIndexes, [0, 1, 2, 3, 4, 5, 6])
-  const dates = planningDates(ctx, { includeFinalReviewWindow: true })
-  assert.deepEqual(dates, ['2027-06-05', '2027-06-06'])
+  assert.equal(ctx.emergencyAvailability, true, 'no se detecta que no le quedan días')
+  assert.equal(ctx.emergencyAvailabilityAccepted, false, 'la excepción se ha aplicado sin aceptarla')
+  assert.deepEqual(ctx.studyDayIndexes, [0, 2, 4], 'se le ha cambiado el patrón declarado')
+  assert.deepEqual(planningDates(ctx, { includeFinalReviewWindow: true }), [])
 })
 
-test('la apertura excepcional NO se activa cuando el alumno sí tiene días', () => {
+test('aceptada la excepción, se abre la semana entera y hay fechas', () => {
+  const ctx = buildStudentPlanContext({
+    today: '2027-06-05', examDate: '2027-06-07', weeklyStudyDays: 3,
+    dailyMinutes: 60, holidays: NO_HOLIDAYS, emergencyAvailabilityAccepted: true,
+  })
+  assert.equal(ctx.emergencyAvailabilityAccepted, true)
+  assert.deepEqual(ctx.studyDayIndexes, [0, 1, 2, 3, 4, 5, 6])
+  assert.deepEqual(planningDates(ctx, { includeFinalReviewWindow: true }), ['2027-06-05', '2027-06-06'])
+})
+
+test('la excepción solo se ofrece si de verdad no le queda ningún día', () => {
   const ctx = context({ today: '2026-05-17', examDate: '2026-06-07', weeklyStudyDays: 2, holidays: NO_HOLIDAYS })
   assert.equal(ctx.emergencyAvailability, false)
   assert.deepEqual(ctx.studyDayIndexes, [0, 3])
 })
 
-test('con la semana abierta no entra temario nuevo: sigue siendo reserva final', () => {
-  const ctx = context({ today: '2027-06-05', examDate: '2027-06-07', weeklyStudyDays: 3, holidays: NO_HOLIDAYS })
+test('aceptar la excepción NO mete temario nuevo en la reserva final', () => {
+  const ctx = buildStudentPlanContext({
+    today: '2027-06-05', examDate: '2027-06-07', weeklyStudyDays: 3,
+    dailyMinutes: 60, holidays: NO_HOLIDAYS, emergencyAvailabilityAccepted: true,
+  })
   assert.deepEqual(planningDates(ctx), [], 'siembra temario nuevo en la víspera')
   assert.ok(planningDates(ctx, { includeFinalReviewWindow: true }).length > 0, 'y tampoco puede quedarse sin nada')
+})
+
+test('un alumno sin excepción aceptada puede terminar el onboarding igualmente', () => {
+  // La salida de emergencia no es el plan: es que el registro no se bloquee.
+  // /api/onboarding/finalize acepta el caso "temario válido, cero sesiones
+  // disponibles" como estado honesto del plan, y el aviso de Camino ofrece
+  // aceptar la excepción. Sin esto, la decisión de no imponer el fin de
+  // semana dejaría al alumno sin poder registrarse.
+  const finalize = readFileSync(join(process.cwd(), 'app', 'api', 'onboarding', 'finalize', 'route.ts'), 'utf8')
+  assert.ok(finalize.includes('planningDates(context, { includeFinalReviewWindow: true }).length > 0'),
+    'finalize no distingue "no caben sesiones" de "la generación falló"')
+  assert.ok(finalize.includes('queue.error || unplaced.error'),
+    'un fallo de base de datos podría pasar por plan vacío legítimo')
+
+  const banner = readFileSync(join(process.cwd(), 'app', 'components', 'camino', 'UnscheduledWorkBanner.tsx'), 'utf8')
+  assert.ok(banner.includes('needsAvailability'), 'el alumno no puede aceptar la excepción desde Camino')
 })

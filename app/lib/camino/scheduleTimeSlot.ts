@@ -1,5 +1,6 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 
+import { estimatedMinutesForMission } from './missionDuration'
 import { normalizeTime, toMinutes } from './missionDuration.ts'
 import { mondayBasedDayIndex } from './studyDays'
 import { loadSchedulingBehaviorProfile } from './schedulingBehaviorProfile'
@@ -113,10 +114,14 @@ export async function getBusyIntervalsForDate(
       .select('id, start_time, end_time, subject, mission_type')
       .eq('user_id', userId)
       .eq('scheduled_date', dateStr)
+      .in('status', ['pending', 'postponed', 'completed'])
       .not('start_time', 'is', null)
       .not('end_time', 'is', null),
   ])
 
+  for (const result of [oneOffRes, weeklyRes, calendarRes]) {
+    if (result.error) throw new Error(`Availability read failed: ${result.error.message}`)
+  }
   const busy: TimeRange[] = []
   for (const row of [...(oneOffRes.data ?? []), ...(weeklyRes.data ?? [])] as { start_time: string; end_time: string }[]) {
     busy.push({ start: normalizeTime(row.start_time), end: normalizeTime(row.end_time) })
@@ -135,24 +140,31 @@ export async function getBusyIntervalsForDate(
 // "sin hora asignada", nunca como error.
 export class DayScheduler {
   private busy: TimeRange[]
+  private remainingMinutes: number
   private readonly window: TimeRange
   private readonly behaviorProfile: SchedulingBehaviorProfile | null
 
-  constructor(initialBusy: TimeRange[], window: TimeRange, behaviorProfile: SchedulingBehaviorProfile | null = null) {
+  constructor(initialBusy: TimeRange[], window: TimeRange, behaviorProfile: SchedulingBehaviorProfile | null = null, remainingMinutes = Infinity) {
+    this.remainingMinutes = Math.max(0, remainingMinutes)
     this.busy = [...initialBusy]
     this.window = window
     this.behaviorProfile = behaviorProfile
   }
 
   place(durationMinutes: number): TimeRange | null {
+    if (!Number.isFinite(durationMinutes) || durationMinutes <= 0 || durationMinutes > this.remainingMinutes) return null
     const slot = findFreeSlot(durationMinutes, this.busy, this.window)
-    if (slot) this.busy.push(slot)
+    if (slot) { this.busy.push(slot); this.remainingMinutes -= durationMinutes }
     return slot
   }
 
   placeBest(durationMinutes: number, context: MissionSlotScoringContext = {}): TimeRange | null {
+    if (!Number.isFinite(durationMinutes) || durationMinutes <= 0 || durationMinutes > this.remainingMinutes) return null
     const slot = findBestScoredSlot(durationMinutes, this.busy, this.window, { behaviorProfile: this.behaviorProfile, ...context })
-    if (slot) this.busy.push({ start: slot.start, end: slot.end, subject: context.subject, missionType: context.missionType })
+    if (slot) {
+      this.busy.push({ start: slot.start, end: slot.end, subject: context.subject, missionType: context.missionType })
+      this.remainingMinutes -= durationMinutes
+    }
     return slot ? { start: slot.start, end: slot.end } : null
   }
 
@@ -165,7 +177,7 @@ export async function createDayScheduler(
   userId: string,
   supabase: SupabaseClient,
   dateStr: string,
-  options: { excludeCalendarRowIds?: Set<string>; externalBusy?: TimeRange[] | null; behaviorProfile?: SchedulingBehaviorProfile | null } = {},
+  options: { excludeCalendarRowIds?: Set<string>; externalBusy?: TimeRange[] | null; behaviorProfile?: SchedulingBehaviorProfile | null; dailyMinutes?: number | null } = {},
 ): Promise<DayScheduler> {
   const localBusy = await getBusyIntervalsForDate(userId, supabase, dateStr, options)
   const externalBusy = options.externalBusy ?? []
@@ -173,7 +185,23 @@ export async function createDayScheduler(
   const behaviorProfile = options.behaviorProfile === undefined
     ? await loadSchedulingBehaviorProfile(supabase, userId)
     : options.behaviorProfile
-  return new DayScheduler(busy, studyWindowFor(dateStr), behaviorProfile)
+  let dailyMinutes = options.dailyMinutes
+  if (dailyMinutes == null) {
+    const { data: prefs, error } = await supabase.from('billing_events').select('payload')
+      .eq('user_id', userId).eq('event_type', 'onboarding_completed')
+      .order('created_at', { ascending: false }).limit(1).maybeSingle()
+    if (error) throw new Error(`Daily budget preferences: ${error.message}`)
+    dailyMinutes = typeof prefs?.payload?.daily_minutes === 'number' ? prefs.payload.daily_minutes : 60
+  }
+  const { data: reserved, error } = await supabase.from('camino_calendar')
+    .select('id, mission_type, metadata, start_time, end_time')
+    .eq('user_id', userId).eq('scheduled_date', dateStr)
+    .in('status', ['pending', 'postponed', 'completed'])
+  if (error) throw new Error(`Daily budget read failed: ${error.message}`)
+  const used = (reserved ?? []).filter(row => !options.excludeCalendarRowIds?.has(row.id))
+    .reduce((sum, row) => sum + estimatedMinutesForMission(row), 0)
+  // All mission sources consume the same budget, including rows without hours.
+  return new DayScheduler(busy, studyWindowFor(dateStr), behaviorProfile, (dailyMinutes ?? 60) - used)
 }
 
 export async function placeBestAcrossDates(

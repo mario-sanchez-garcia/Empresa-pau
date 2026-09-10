@@ -71,9 +71,9 @@ export function buildOnboardingReward(
       : null
 
   return {
-    title: 'Tu Camino ya está preparado',
+    title: shaped.length ? 'Tu Camino ya está preparado' : 'Tu temario está listo; falta encajar las sesiones',
     missions: shaped,
-    mirrorMessage,
+    mirrorMessage: shaped.length ? mirrorMessage : 'Revisa tu disponibilidad en Camino para dar fecha a tus primeras tareas. Tu temario está guardado.',
     mirrorBadge,
   }
 }

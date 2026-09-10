@@ -36,8 +36,7 @@ export type StudentPlanContext = {
   studyDayIndexes: number[]
   holidays: ReadonlySet<string>
   /**
-   * El patrón declarado no dejaba NI UN día entre hoy y el examen, así que se
-   * ha abierto la semana entera.
+   * El patrón declarado no dejaba NI UN día entre hoy y el examen, se propone disponibilidad excepcional. Solo se abre al aceptarla.
    *
    * Vive en el contexto —y no como un apaño dentro del generador— porque si
    * un paso abre los días y el siguiente sigue con el patrón original, el
@@ -47,6 +46,7 @@ export type StudentPlanContext = {
    * ALUMNO, no de un paso.
    */
   emergencyAvailability: boolean
+  emergencyAvailabilityAccepted: boolean
 }
 
 /** Opciones de disponibilidad listas para studyCapacity/planEngine. */
@@ -108,6 +108,7 @@ export function buildStudentPlanContext(input: {
   weeklyStudyDays?: number | null
   dailyMinutes?: number | null
   holidays?: ReadonlySet<string>
+  emergencyAvailabilityAccepted?: boolean
 }): StudentPlanContext {
   const holidays = input.holidays ?? SPAIN_HOLIDAYS
   const declaredWeekly = input.weeklyStudyDays ?? null
@@ -120,8 +121,9 @@ export function buildStudentPlanContext(input: {
     weeklyStudyDays: declaredWeekly,
     holidays,
   }).length > 0
-  const emergencyAvailability = !hasOwnDays
-  const weeklyStudyDays = emergencyAvailability ? 7 : declaredWeekly
+  const emergencyAvailability = !hasOwnDays && input.today < input.examDate
+  const emergencyAvailabilityAccepted = emergencyAvailability && input.emergencyAvailabilityAccepted === true
+  const weeklyStudyDays = emergencyAvailabilityAccepted ? 7 : declaredWeekly
 
   return {
     today: input.today,
@@ -135,5 +137,6 @@ export function buildStudentPlanContext(input: {
     studyDayIndexes: studyDayIndexesFor(weeklyStudyDays),
     holidays,
     emergencyAvailability,
+    emergencyAvailabilityAccepted,
   }
 }

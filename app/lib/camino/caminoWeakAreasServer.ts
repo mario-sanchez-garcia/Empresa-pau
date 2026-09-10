@@ -24,7 +24,8 @@ const MIN_ATTEMPTS = 2
 // Returns [] on any error — never throws.
 export async function getWeakAreas(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
+  options: { strict?: boolean } = {},
 ): Promise<WeakArea[]> {
   try {
     const { data, error } = await supabase
@@ -37,7 +38,8 @@ export async function getWeakAreas(
       .order('created_at', { ascending: false })
       .limit(200)
 
-    if (error || !data) return []
+    if (error) throw error
+    if (!data) return []
 
     // Aggregate per (asignatura, bloque)
     const agg: Record<string, { subjectKey: string; label: string; sum: number; max: number; count: number; baseCount: number }> = {}
@@ -72,7 +74,8 @@ export async function getWeakAreas(
     }
 
     return weakAreas.sort((a, b) => a.avgScore - b.avgScore)
-  } catch {
+  } catch (error) {
+    if (options.strict) throw error
     return []
   }
 }

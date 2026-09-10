@@ -119,9 +119,9 @@ function pickDateForReview(candidateDates: string[], countByDate: Map<string, nu
 export async function injectWeakReviewMissions(
   userId: string,
   supabase: SupabaseClient,
-): Promise<{ inserted: number; mappingMisses: number }> {
+): Promise<{ inserted: number; mappingMisses: number; reason?: string }> {
   try {
-    const weakAreas = await getWeakAreas(supabase, userId)
+    const weakAreas = await getWeakAreas(supabase, userId, { strict: true })
     if (weakAreas.length === 0) return { inserted: 0, mappingMisses: 0 }
 
     const today = getMadridToday()
@@ -313,6 +313,6 @@ export async function injectWeakReviewMissions(
     return { inserted: rowsToInsert.length, mappingMisses }
   } catch (error) {
     console.warn('[camino/weak-review] skipped:', error)
-    return { inserted: 0, mappingMisses: 0 }
+    return { inserted: 0, mappingMisses: 0, reason: 'error' }
   }
 }

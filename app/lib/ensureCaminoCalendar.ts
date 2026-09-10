@@ -1,3 +1,4 @@
+import { reconcilePlanWork } from './camino/planPersistence'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { getAvailabilityForDate, type LocalBusyRange } from './calendar/availability'
@@ -15,7 +16,7 @@ import { FINAL_REVIEW_RESERVED_STUDY_DAYS } from './camino/examDate'
 import { buildPlanDays } from './camino/planEngine'
 import { examRotationWeights, type ExamRotationPriority, type RotationExam } from './camino/rotationWeights'
 import { rotateSubjectForDay } from './camino/subjectRotation'
-import { capacityOptionsFor, loadStudentPlanContext } from './camino/studentPlanContext'
+import { capacityOptionsFor, planningDates, loadStudentPlanContext } from './camino/studentPlanContext'
 import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
 import { addDays, getMadridToday } from './camino/studyDays'
 
@@ -194,6 +195,8 @@ async function maybeInjectCommentText(
   // hueco real en la agenda propia del alumno (cole/extraescolares) — un
   // viernes/jueves sin otra misión de Camino pero completo de eventos
   // propios no debe forzar esta misión ahí; se prueba el siguiente.
+  const context = await loadStudentPlanContext(userId, supabase, today)
+  const allowedDates = new Set(planningDates(context))
   const candidates: string[] = []
   for (let i = 0; i < 42; i++) {
     const d = addDays(today, i)
@@ -210,7 +213,7 @@ async function maybeInjectCommentText(
   let candidate: string | null = null
   let timeSlot: { start: string; end: string } | null = null
   const externalBusyByDate = new Map<string, LocalBusyRange[]>()
-  for (const d of candidates) {
+  for (const d of candidates.filter(date => allowedDates.has(date))) {
     const scheduler = await createAvailabilityAwareScheduler(userId, supabase, d, externalBusyByDate)
     const slot = scheduler.placeBest(estimatedMinutesForMissionType('comment_text'), {
       date: d,
@@ -221,7 +224,7 @@ async function maybeInjectCommentText(
   }
   if (!candidate || !timeSlot) return
 
-  await supabase.from('camino_calendar').upsert({
+  const { error: commentError } = await supabase.from('camino_calendar').upsert({
     user_id: userId,
     scheduled_date: candidate,
     subject: 'historia_espana',
@@ -236,6 +239,7 @@ async function maybeInjectCommentText(
     start_time: timeSlot.start,
     end_time: timeSlot.end,
   }, { onConflict: 'user_id,scheduled_date,subject,v2_sort_order', ignoreDuplicates: true })
+  if (commentError) throw commentError
 }
 
 /**
@@ -263,6 +267,7 @@ export async function ensureCaminoCalendar(
   // minutos diarios, festivos, corte de repaso final). Todo lo que propone
   // fechas más abajo — y todo inyector al que se le pase — trabaja sobre
   // ESTA, no sobre ventanas fijas propias.
+  await reconcilePlanWork(supabase, userId)
   const planContext = await loadStudentPlanContext(userId, supabase, today)
   const examDate = planContext.examDate
   const externalBusyByDate = new Map<string, LocalBusyRange[]>()
@@ -286,7 +291,7 @@ export async function ensureCaminoCalendar(
     const nowIso = new Date().toISOString()
     const { error: unscheduleError } = await supabase
       .from('camino_calendar')
-      .update({ status: 'unscheduled', updated_at: nowIso })
+      .update({ status: 'unscheduled', start_time: null, end_time: null, updated_at: nowIso })
       .in('id', impossibleRows.map(r => r.id as string))
       .eq('user_id', userId)
       .eq('status', 'pending')
@@ -563,7 +568,7 @@ export async function ensureCaminoCalendar(
     if (activeExams.length > 0) {
       await injectAllPartialExamMissions(userId, supabase, activeExams, { planContext })
     }
-  } catch { /* parciales scheduling is best-effort; never blocks the base calendar fill */ }
+  } catch (error) { console.error('[camino] partial planning failed', error); degraded.push('partials') }
 
   // PASO 2.6 — Días forzados por examen: para cada asignatura con fechas en
   // examForcedDatesBySubject, añade el Curso pendiente de ese examen como
@@ -686,10 +691,11 @@ export async function ensureCaminoCalendar(
         }
 
         if (forcedRows.length > 0) {
-          await supabase.from('camino_calendar').upsert(forcedRows, {
+          const { error } = await supabase.from('camino_calendar').upsert(forcedRows, {
             onConflict: 'user_id,scheduled_date,subject,v2_sort_order',
             ignoreDuplicates: true,
           })
+          if (error) throw error
         }
         if (forcedScheduledQueueIds.length > 0) {
           await supabase
@@ -699,7 +705,7 @@ export async function ensureCaminoCalendar(
             .eq('user_id', userId)
         }
       }
-    } catch { /* best-effort, igual que PASO 2.5 — nunca debe bloquear el resto del calendario */ }
+    } catch (error) { console.error('[camino] forced planning failed', error); degraded.push('forced_missions') }
   }
 
   // PASO 3 — Contar días futuros pendientes (distintos) — SOLO source='algorithm'
@@ -759,8 +765,7 @@ export async function ensureCaminoCalendar(
   // en onboarding — así un backlog pesado puede empujar más items incluso con
   // poco tiempo diario declarado, pero el tiempo declarado siempre se respeta
   // como mínimo.
-  const pressureItemsPerDay = pressure > 1.5 ? 2 : 1
-  const itemsPerDay = Math.max(pressureItemsPerDay, capacity.sessionsPerDay)
+  const itemsPerDay = capacity.sessionsPerDay
 
   // Obtener items pendientes de la cola ordenados por posición
   // queue_status='pending' excluye automáticamente postponed/scheduled/completed
@@ -873,10 +878,13 @@ export async function ensureCaminoCalendar(
   for (const day of planDays) {
     if (day.subject) plannedSubjectByDate.set(day.date, day.subject)
   }
-  const emptyDays = planDays
+  const finalSprint = planningDates(planContext).length === 0
+  const emptyDays = (finalSprint
+    ? planningDates(planContext, { includeFinalReviewWindow: true }).map(date => ({ date, subject: subjectsByBacklog[0] ?? null }))
+    : planDays)
     .filter(day => day.subject != null)
     .map(day => day.date)
-    .filter(d => d < planningCutoff)
+    .filter(d => finalSprint || d < planningCutoff)
     .filter(d => !futureDaySet.has(d))
     .slice(0, CALENDAR_HORIZON - futureDaySet.size)
 
@@ -939,13 +947,14 @@ export async function ensureCaminoCalendar(
       if (examMockBoundary && dateStr >= examMockBoundary) break
       const itemMeta = item.metadata ?? {}
       const topicMeta = queueTopicMeta(item)
-      const missionType = (itemMeta.mission_type as string) ?? 'concept'
+      const missionType = finalSprint ? 'review' : ((itemMeta.mission_type as string) ?? 'concept')
       const calMetadata: Record<string, unknown> = {}
       calMetadata.topic_slug = topicMeta.topicSlug
       const topicId = item.subject === 'historia_espana' ? historiaTopicIdBySortOrder.get(item.v2_sort_order) : null
       if (topicId) calMetadata.topic_id = topicId
       if (itemMeta.express) calMetadata.express = true
-      if (rescueMode) calMetadata.plan_mode = 'rescue'
+      if (finalSprint) { calMetadata.plan_mode = 'final_sprint'; calMetadata.final_review_window = true; calMetadata.knowledge_verified = false }
+      if (rescueMode && !finalSprint) calMetadata.plan_mode = 'rescue'
       const timeSlot = scheduler.placeBest(estimatedMinutesForSlot(dailyMinutesForSlots, slot), {
         date: dateStr,
         subject: item.subject,
@@ -966,7 +975,7 @@ export async function ensureCaminoCalendar(
         scheduled_date: dateStr,
         subject: item.subject,
         v2_sort_order: item.v2_sort_order,
-        title: sanitizeLessonTitle(item.title),
+        title: finalSprint ? `Práctica prioritaria: ${sanitizeLessonTitle(item.title)}` : sanitizeLessonTitle(item.title),
         block_key: item.block_key,
         block_slug: topicMeta.blockSlug,
         mission_type: missionType,
@@ -1026,5 +1035,6 @@ export async function ensureCaminoCalendar(
   }
 
   await maybeInjectCommentText(userId, supabase, today)
+  await reconcilePlanWork(supabase, userId)
   return { ok: degraded.length === 0, degraded }
 }

@@ -46,7 +46,7 @@ export async function loadStudentPlanContext(
   declared?: DeclaredAvailability,
 ): Promise<StudentPlanContext> {
   const nowIso = new Date().toISOString()
-  const [{ data: profile }, { data: prefsRow }, { data: entitlements }] = await Promise.all([
+  const results = await Promise.all([
     supabase.from('perfiles').select('pau_exam_date, pau_convocatoria').eq('id', userId).maybeSingle(),
     supabase
       .from('billing_events')
@@ -63,8 +63,14 @@ export async function loadStudentPlanContext(
       .eq('status', 'active')
       .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
       .limit(1),
+    supabase.from('billing_events').select('payload').eq('user_id', userId)
+      .eq('event_type', 'camino_emergency_availability').order('created_at', { ascending: false }).limit(1).maybeSingle(),
   ])
 
+  for (const result of results) {
+    if (result.error) throw new Error(`Plan context read failed: ${result.error.message}`)
+  }
+  const [{ data: profile }, { data: prefsRow }, { data: entitlements }, { data: exception }] = results
   const examDate = resolveTargetExamDate(today, {
     examDate: (profile?.pau_exam_date as string | null | undefined) ?? null,
     convocatoria: (profile?.pau_convocatoria as string | null | undefined) ?? null,
@@ -90,7 +96,8 @@ export async function loadStudentPlanContext(
   return buildStudentPlanContext({
     today,
     examDate,
-    weeklyStudyDays: requestedWeekly != null ? Math.min(requestedWeekly, maxWeeklyDays) : null,
+    emergencyAvailabilityAccepted: exception?.payload?.exam_date === examDate && exception?.payload?.accepted === true,
+    weeklyStudyDays: Math.min(requestedWeekly ?? 5, maxWeeklyDays),
     dailyMinutes: declared?.dailyMinutes ?? persistedMinutes,
   })
 }

@@ -251,6 +251,44 @@ export async function ensureCaminoCalendar(
   const examDate = planContext.examDate
   const externalBusyByDate = new Map<string, LocalBusyRange[]>()
 
+  // PASO 0 — Filas con fecha imposible: en o después de la fecha objetivo.
+  //
+  // Acotar las fechas NUEVAS no corrige el calendario que ya está escrito. Una
+  // cuenta creada antes de este corte —o cualquiera que adelante su
+  // convocatoria en Ajustes— puede tener misiones pendientes DESPUÉS de su
+  // propia PAU, y hasta ahora seguían mostrándose como trabajo programado
+  // normal. Pasan a 'unscheduled' (explícito, contado, NO borrado) y su fila
+  // de cola vuelve a 'pending' para que la planificación de más abajo, en esta
+  // misma ejecución, las recoloque donde sí caben.
+  const { data: impossibleRows } = await supabase
+    .from('camino_calendar')
+    .select('id, queue_id')
+    .eq('user_id', userId)
+    .gte('scheduled_date', examDate)
+    .eq('status', 'pending')
+  if (impossibleRows && impossibleRows.length > 0) {
+    const nowIso = new Date().toISOString()
+    const { error: unscheduleError } = await supabase
+      .from('camino_calendar')
+      .update({ status: 'unscheduled', updated_at: nowIso })
+      .in('id', impossibleRows.map(r => r.id as string))
+      .eq('user_id', userId)
+      .eq('status', 'pending')
+    if (unscheduleError) {
+      console.error('[ensureCaminoCalendar] unschedule past-exam rows failed:', unscheduleError.message)
+    } else {
+      const queueIds = impossibleRows.map(r => r.queue_id as string | null).filter((id): id is string => Boolean(id))
+      if (queueIds.length > 0) {
+        await supabase
+          .from('user_learning_queue')
+          .update({ queue_status: 'pending', scheduled_at: null })
+          .in('id', queueIds)
+          .eq('user_id', userId)
+          .eq('queue_status', 'scheduled')
+      }
+    }
+  }
+
   // PASO 1 — Marcar misiones pasadas pendientes (no bonus) como missed
   await supabase
     .from('camino_calendar')

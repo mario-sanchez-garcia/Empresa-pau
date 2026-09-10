@@ -7,7 +7,8 @@ import { addDays, getMadridToday, isPreferredStudyDay } from './studyDays'
 import { getCaminoPlanLimits } from './caminoPlanLimits'
 import { VALID_DAILY_MINUTES, missionsPerDayForMinutes, estimatedMinutesForSlot } from './dailyTimeCapacity'
 import { createDayScheduler } from './scheduleTimeSlot'
-import { loadStudentPlanContext, type StudentPlanContext } from './studentPlanContext'
+import { loadStudentPlanContext, type DeclaredAvailability, type StudentPlanContext } from './studentPlanContext'
+import { planPlacement } from './planPlacement'
 
 const VALID_WEEKLY_DAYS = [3, 4, 5, 6, 7] as const
 const PERSONALIZATION_VERSION = 'calendar_personalization_v2'
@@ -26,6 +27,14 @@ type CalendarRow = {
   locked: boolean | null
   metadata: Record<string, unknown> | null
   created_at: string
+  mission_type: string | null
+  queue_id: string | null
+}
+
+/** mission_type efectivo de la fila (columna, o metadata como respaldo). */
+function missionTypeOf(row: CalendarRow): string {
+  const meta = metadataObject(row.metadata)
+  return row.mission_type ?? (typeof meta.mission_type === 'string' ? meta.mission_type : 'concept')
 }
 
 type PersonalizationResult = {
@@ -33,6 +42,12 @@ type PersonalizationResult = {
   reason: 'missing_preferences' | 'no_rows' | 'already_current' | 'applied' | 'error'
   updatedRows: number
   preferenceHash?: string
+  /**
+   * Misiones que NO caben en el plan del alumno y han quedado marcadas
+   * 'unscheduled'. No es un fallo: es el dato honesto de cuánto trabajo se
+   * queda fuera. Cero significa que todo lo pendiente tiene fecha válida.
+   */
+  unscheduledRows?: number
 }
 
 function stableHash(value: string) {
@@ -75,7 +90,11 @@ async function loadPlanMaxWeeklyDays(userId: string, supabase: SupabaseClient): 
   return getCaminoPlanLimits(planId).maxStudyDaysPerWeek
 }
 
-async function loadPreferences(userId: string, supabase: SupabaseClient): Promise<PersonalizationPrefs | null> {
+async function loadPreferences(
+  userId: string,
+  supabase: SupabaseClient,
+  declared?: DeclaredAvailability,
+): Promise<PersonalizationPrefs | null> {
   const { data, error } = await supabase
     .from('billing_events')
     .select('payload')
@@ -87,8 +106,11 @@ async function loadPreferences(userId: string, supabase: SupabaseClient): Promis
 
   if (error) throw new Error(`Onboarding preferences error: ${error.message}`)
   const payload = data?.payload as Record<string, unknown> | null | undefined
-  const requestedWeeklyDays = cleanWeeklyDays(payload?.weekly_study_days_value)
-  const dailyMinutes = cleanDailyMinutes(payload?.daily_minutes)
+  // Lo declarado en esta petición manda: durante el onboarding el evento
+  // `onboarding_completed` todavía no existe (se escribe al final), así que
+  // sin esto el PRIMER calendario nunca llegaba a personalizarse.
+  const requestedWeeklyDays = cleanWeeklyDays(declared?.weeklyStudyDays ?? payload?.weekly_study_days_value)
+  const dailyMinutes = cleanDailyMinutes(declared?.dailyMinutes ?? payload?.daily_minutes)
   if (!requestedWeeklyDays || !dailyMinutes) return null
 
   const maxWeeklyDays = await loadPlanMaxWeeklyDays(userId, supabase)
@@ -127,10 +149,11 @@ function nextPreferredDates(
 export async function applyCalendarPersonalization(
   userId: string,
   supabase: SupabaseClient,
-  planContext?: StudentPlanContext,
+  options: { planContext?: StudentPlanContext; declared?: DeclaredAvailability } = {},
 ): Promise<PersonalizationResult> {
   try {
-    const prefs = await loadPreferences(userId, supabase)
+    const { planContext, declared } = options
+    const prefs = await loadPreferences(userId, supabase, declared)
     if (!prefs) return { applied: false, reason: 'missing_preferences', updatedRows: 0 }
 
     const today = getMadridToday()
@@ -138,7 +161,7 @@ export async function applyCalendarPersonalization(
     // quien llama ya la tiene; si no, se carga aquí — pero nunca se prescinde
     // de ella: reubicar sin conocer la fecha objetivo es lo que producía
     // fechas posteriores al examen.
-    const context = planContext ?? await loadStudentPlanContext(userId, supabase, today)
+    const context = planContext ?? await loadStudentPlanContext(userId, supabase, today, declared)
     // PERSONALIZATION_VERSION is folded into the hash (not just stored
     // alongside it) so bumping it invalidates every previously-computed
     // hash and forces re-application on the next run — needed the one time
@@ -156,7 +179,7 @@ export async function applyCalendarPersonalization(
     )
     const { data, error } = await supabase
       .from('camino_calendar')
-      .select('id, scheduled_date, subject, v2_sort_order, status, locked, metadata, created_at')
+      .select('id, scheduled_date, subject, v2_sort_order, status, locked, metadata, created_at, mission_type, queue_id')
       .eq('user_id', userId)
       .gte('scheduled_date', today)
       .in('status', ['pending', 'postponed'])
@@ -181,8 +204,26 @@ export async function applyCalendarPersonalization(
     const capacity = missionsPerDayForMinutes(prefs.dailyMinutes)
     const appliedFrom = rows[0]?.scheduled_date ?? today
     const applicationHash = stableHash(`${preferenceHash}:${appliedFrom}`)
-    const preferredDates = nextPreferredDates(appliedFrom, prefs.weeklyStudyDaysValue, rows.length, capacity, context.examDate)
-    if (preferredDates.length === 0) return { applied: false, reason: 'no_rows', updatedRows: 0, preferenceHash }
+
+    // QUÉ va a QUÉ fecha lo decide una función pura (ver planPlacement.ts),
+    // donde está fijado por tests que el temario nuevo no entra en la reserva
+    // de repaso final y que lo que no cabe se marca en vez de quedarse con una
+    // fecha imposible. Aquí solo se ejecuta la decisión.
+    const candidateDates = nextPreferredDates(appliedFrom, prefs.weeklyStudyDaysValue, rows.length, capacity, context.examDate)
+    const decision = planPlacement(
+      rows.map(row => ({
+        id: row.id,
+        scheduledDate: row.scheduled_date,
+        missionType: missionTypeOf(row),
+        queueId: row.queue_id,
+      })),
+      {
+        dates: candidateDates,
+        capacityPerDay: capacity,
+        planningCutoff: context.planningCutoff,
+        examDate: context.examDate,
+      },
+    )
 
     // Todas las filas de `rows` se están reubicando en este mismo pase, así
     // que su hora actual (si la tenían de una pasada anterior) nunca debe
@@ -190,60 +231,122 @@ export async function applyCalendarPersonalization(
     // solo importa lo que el alumno tiene fuera de Camino (camino_custom_events)
     // y lo que otras misiones YA reubicadas en este pase hayan ocupado.
     const excludeCalendarRowIds = new Set(rows.map(row => row.id))
+    const rowsById = new Map(rows.map(row => [row.id, row]))
 
-    let rowIndex = 0
+    const schedulers = new Map<string, Awaited<ReturnType<typeof createDayScheduler>>>()
+    const schedulerFor = async (date: string) => {
+      const existing = schedulers.get(date)
+      if (existing) return existing
+      const created = await createDayScheduler(userId, supabase, date, { excludeCalendarRowIds })
+      schedulers.set(date, created)
+      return created
+    }
+
     const updates: Array<PromiseLike<{ error: { message: string } | null }>> = []
-    for (const date of preferredDates) {
-      if (rowIndex >= rows.length) break
-      const scheduler = await createDayScheduler(userId, supabase, date, { excludeCalendarRowIds })
-      for (let slot = 0; slot < capacity && rowIndex < rows.length; slot += 1) {
-        const row = rows[rowIndex]
-        const meta = metadataObject(row.metadata)
-        const timeSlot = scheduler.placeBest(estimatedMinutesForSlot(prefs.dailyMinutes, slot), {
-          date,
-          subject: row.subject,
-          missionType: typeof meta.mission_type === 'string' ? meta.mission_type : null,
-          deadlineDate: typeof meta.partial_exam_date === 'string' ? meta.partial_exam_date : null,
-          priority: typeof meta.priority === 'string' ? meta.priority : null,
-        })
-        // Sin hueco libre este día (agenda propia ya lo llena) -> no se
-        // reubica esta misión aquí; se prueba en el siguiente día preferido
-        // en vez de forzarla sin hora en un día completo.
-        if (!timeSlot) break
-        updates.push(
-          supabase
-            .from('camino_calendar')
-            .update({
-              scheduled_date: date,
-              updated_at: new Date().toISOString(),
-              start_time: timeSlot.start,
-              end_time: timeSlot.end,
-              metadata: {
-                ...meta,
-                estimated_minutes: estimatedMinutesForSlot(prefs.dailyMinutes, slot),
-                camino_personalization: {
-                  version: PERSONALIZATION_VERSION,
-                  preference_hash: preferenceHash,
-                  application_hash: applicationHash,
-                  applied_from: appliedFrom,
-                  weekly_study_days_value: prefs.weeklyStudyDaysValue,
-                  daily_minutes: prefs.dailyMinutes,
-                  target_exam_date: context.examDate,
-                },
-              },
-            })
-            .eq('id', row.id)
-            .eq('user_id', userId),
-        )
-        rowIndex += 1
+    const placedIds = new Set<string>()
+    const unplaceableByTime: Array<{ id: string; queueId?: string | null }> = []
+
+    for (const placement of decision.placements) {
+      const row = rowsById.get(placement.id)
+      if (!row) continue
+      const meta = metadataObject(row.metadata)
+      const scheduler = await schedulerFor(placement.date)
+      const timeSlot = scheduler.placeBest(estimatedMinutesForSlot(prefs.dailyMinutes, placement.slot), {
+        date: placement.date,
+        subject: row.subject,
+        missionType: missionTypeOf(row),
+        deadlineDate: typeof meta.partial_exam_date === 'string' ? meta.partial_exam_date : null,
+        priority: typeof meta.priority === 'string' ? meta.priority : null,
+      })
+      // Sin hueco libre ese día (la agenda propia del alumno ya lo llena), la
+      // misión no se fuerza sin hora: cuenta como no colocada.
+      if (!timeSlot) {
+        unplaceableByTime.push({ id: row.id, queueId: row.queue_id })
+        continue
       }
+      updates.push(
+        supabase
+          .from('camino_calendar')
+          .update({
+            // El `status` NO se toca: una fila 'postponed' la apartó el alumno
+            // y sigue apartada aunque se reubique.
+            scheduled_date: placement.date,
+            updated_at: new Date().toISOString(),
+            start_time: timeSlot.start,
+            end_time: timeSlot.end,
+            metadata: {
+              ...meta,
+              estimated_minutes: estimatedMinutesForSlot(prefs.dailyMinutes, placement.slot),
+              camino_personalization: {
+                version: PERSONALIZATION_VERSION,
+                preference_hash: preferenceHash,
+                application_hash: applicationHash,
+                applied_from: appliedFrom,
+                weekly_study_days_value: prefs.weeklyStudyDaysValue,
+                daily_minutes: prefs.dailyMinutes,
+                target_exam_date: context.examDate,
+              },
+            },
+          })
+          .eq('id', row.id)
+          .eq('user_id', userId),
+      )
+      placedIds.add(row.id)
+    }
+
+    // Lo que no ha encontrado sitio NO se queda con su fecha antigua. Dejarlo
+    // ahí es lo que hacía que una misión del 08/06, con la PAU el 07/06,
+    // siguiera mostrándose como trabajo programado normal. Pasa a
+    // 'unscheduled' —explícito, contado y NO borrado— y su fila de cola vuelve
+    // a 'pending' para que la siguiente planificación la recoloque.
+    const unplaced = [
+      ...decision.unscheduled,
+      ...unplaceableByTime.map(row => ({ ...row, reason: 'no_capacity' as const })),
+    ]
+    for (const item of unplaced) {
+      const row = rowsById.get(item.id)
+      if (!row) continue
+      const meta = metadataObject(row.metadata)
+      updates.push(
+        supabase
+          .from('camino_calendar')
+          .update({
+            status: 'unscheduled',
+            updated_at: new Date().toISOString(),
+            metadata: {
+              ...meta,
+              unscheduled_reason: item.reason,
+              unscheduled_at: new Date().toISOString(),
+            },
+          })
+          .eq('id', row.id)
+          .eq('user_id', userId)
+          .eq('status', row.status),
+      )
+    }
+    const queueIdsToReopen = unplaced.map(item => item.queueId).filter((id): id is string => Boolean(id))
+    if (queueIdsToReopen.length > 0) {
+      updates.push(
+        supabase
+          .from('user_learning_queue')
+          .update({ queue_status: 'pending', scheduled_at: null })
+          .in('id', queueIdsToReopen)
+          .eq('user_id', userId)
+          .eq('queue_status', 'scheduled'),
+      )
     }
 
     const results = await Promise.all(updates)
     const failed = results.find(result => result.error)
     if (failed?.error) throw new Error(`Calendar update error: ${failed.error.message}`)
 
-    return { applied: true, reason: 'applied', updatedRows: updates.length, preferenceHash }
+    return {
+      applied: true,
+      reason: 'applied',
+      updatedRows: placedIds.size,
+      unscheduledRows: unplaced.length,
+      preferenceHash,
+    }
   } catch (error) {
     console.warn('[camino/personalization] skipped:', error)
     return { applied: false, reason: 'error', updatedRows: 0 }

@@ -11,7 +11,7 @@ import { rotateSubjectForDay } from '@/app/lib/camino/subjectRotation'
 import { buildPlanDays } from '@/app/lib/camino/planEngine'
 import { FINAL_REVIEW_RESERVED_STUDY_DAYS } from '@/app/lib/camino/examDate'
 import { SPAIN_HOLIDAYS } from '@/app/lib/camino/spainHolidays'
-import { loadStudentPlanContext, type StudentPlanContext } from '@/app/lib/camino/studentPlanContext'
+import { loadStudentPlanContext, planningDates, type StudentPlanContext } from '@/app/lib/camino/studentPlanContext'
 import { coveredBlockCount, queueMetadataFor, resolveStartModes, type StartMode } from '@/app/lib/camino/startingPoint'
 import { hasCompletedOnboarding } from '@/app/lib/onboarding/hasCompletedOnboarding'
 import { sendWelcomeEmail } from '@/app/lib/email/sendWelcomeEmail'
@@ -34,6 +34,9 @@ export const ALLOWED_GENERATE_SUBJECTS = new Set(['matematicas_ii', 'matematicas
 // semanas (ver subjectRotation.ts), así que todas las asignaturas entran en el
 // reparto por igual — incluida la 6ª y siguientes, que con el `(dow - 1) % n`
 // anterior nunca llegaban a salir.
+/** Los siete días de la semana: en el sprint final no se descarta ninguno. */
+const ALL_WEEK_DAY_INDEXES = [0, 1, 2, 3, 4, 5, 6]
+
 function addDaysIso(dateStr: string, n: number): string {
   return new Date(Date.parse(`${dateStr}T12:00:00Z`) + n * 86400000).toISOString().slice(0, 10)
 }
@@ -105,6 +108,15 @@ export interface GenerateCaminoPlanParams {
   startModeBySubject?: Record<string, string> | null
   studentExams: unknown
   dailyMinutes: number | null
+  /**
+   * Días de estudio por semana declarados en ESTA petición.
+   *
+   * Va por parámetro y no se lee de `billing_events` porque el evento
+   * `onboarding_completed` se escribe DESPUÉS de generar y verificar el
+   * calendario. Sin esto, el primer plan de una cuenta nueva se construía
+   * contra L-V aunque el alumno hubiera elegido dos días.
+   */
+  weeklyStudyDays?: number | null
   userEmail?: string | null
   userFullName?: string | null
 }
@@ -127,6 +139,7 @@ export type GenerateCaminoPlanResult =
 
 export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Promise<GenerateCaminoPlanResult> {
   const { userId, db, startMode, dailyMinutes } = params
+  const declaredAvailability = { weeklyStudyDays: params.weeklyStudyDays ?? null, dailyMinutes }
   const subjects = [...new Set(params.subjects.map(s => normalizeSubjectSlug(s)).filter(s => ALLOWED_GENERATE_SUBJECTS.has(s)))]
 
   try {
@@ -308,7 +321,7 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
     // el 07/06). Salen del mismo motor y del mismo contexto de disponibilidad
     // que usan la extensión diaria y la previsión del navegador.
     const today = getMadridToday()
-    const planContext = await loadStudentPlanContext(userId, db, today)
+    const planContext = await loadStudentPlanContext(userId, db, today, declaredAvailability)
 
     const ONBOARDING_PLAN_DAYS = 14
     const planDays = buildPlanDays({
@@ -322,15 +335,37 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
       reservedFinalStudyDays: FINAL_REVIEW_RESERVED_STUDY_DAYS,
       origin: 'server',
     })
-    const studyDays = planDays
+    const contentDays = planDays
       .filter(day => day.excludedReason == null || day.excludedReason === 'no_subject_available')
       .map(day => day.date)
       .slice(0, ONBOARDING_PLAN_DAYS)
 
-    // Un alumno que entra a pocos días de su convocatoria puede no tener NI UN
-    // día de temario nuevo por delante. No es un error: el plan se limita a lo
-    // que cabe, y las misiones de práctica/repaso las inyectan los pasos
-    // siguientes, que sí trabajan dentro de la ventana de repaso final.
+    // ENTRADA MUY TARDÍA. Un alumno que se registra dentro de la ventana de
+    // repaso final (p. ej. el 31/05 con la PAU el 07/06) no tiene NI UN día
+    // para temario nuevo: el motor devuelve cero fechas, y eso es correcto.
+    //
+    // Lo que NO puede pasar es que se quede sin plan. Sin parciales añadidos
+    // ni calendario previo, este generador no producía ninguna misión, y el
+    // finalizador rechaza ese resultado (`calendar_verification_failed`): una
+    // cuenta que entra en la última semana no llegaba a terminar el
+    // onboarding. Reservar días para repaso obliga a CREAR el repaso.
+    //
+    // La rama tardía usa los días de la propia reserva y siembra repaso en vez
+    // de lecciones completas: a una semana de la prueba, la primera acción
+    // útil es volver sobre lo que ya se dio, no empezar temario nuevo.
+    const finalSprint = contentDays.length === 0
+    let sprintDays = finalSprint
+      ? planningDates(planContext, { limit: ONBOARDING_PLAN_DAYS, includeFinalReviewWindow: true })
+      : []
+    // Último recurso: el patrón semanal declarado puede no tener NI UN día
+    // entre hoy y el examen (dos días a la semana, prueba pasado mañana). Con
+    // la prueba encima, el patrón deja de mandar: valen todos los días que
+    // quedan. Sin esto, esa cuenta seguiría sin poder terminar el onboarding.
+    if (finalSprint && sprintDays.length === 0) {
+      for (let d = today; d < planContext.examDate; d = addDaysIso(d, 1)) sprintDays.push(d)
+      sprintDays = sprintDays.slice(0, ONBOARDING_PLAN_DAYS)
+    }
+    const studyDays = finalSprint ? sprintDays : contentDays
     const { data: existingCal } = studyDays.length > 0
       ? await db
         .from('camino_calendar')
@@ -380,7 +415,10 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
       // hasWork evita que un día lectivo se pierda porque a la asignatura que
       // le tocaba ya no le queda cola: la rotación cede el turno a la
       // siguiente asignatura que sí tenga temario pendiente.
-      const subject = subjectForDay(dateStr, scheduleSubjects, planContext.studyDayIndexes, s => {
+      // En la rama de último recurso los días ya NO siguen el patrón semanal
+      // (ver arriba), así que la rotación tampoco puede filtrarlos por él.
+      const rotationPattern = finalSprint ? ALL_WEEK_DAY_INDEXES : planContext.studyDayIndexes
+      const subject = subjectForDay(dateStr, scheduleSubjects, rotationPattern, s => {
         const queue = subjectQueues[s] ?? []
         return (cursors[s] ?? 0) < queue.length
       })
@@ -403,15 +441,25 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
           subject: item.subject,
           topic_slug: typeof itemMeta.topic_slug === 'string' ? itemMeta.topic_slug : null,
         })
-        const missionType = (itemMeta.mission_type as string) ?? 'concept'
-        const calMetadata = itemMeta.express ? { express: true, topic_slug: topicMeta.topicSlug } : { topic_slug: topicMeta.topicSlug }
+        // En la rama de entrada muy tardía todo entra como REPASO: los días
+        // disponibles son los de la reserva final, y ahí no se siembra
+        // temario nuevo. El título lo dice, para que el alumno vea qué es.
+        const missionType = finalSprint ? 'review' : ((itemMeta.mission_type as string) ?? 'concept')
+        const baseMetadata = itemMeta.express
+          ? { express: true, topic_slug: topicMeta.topicSlug }
+          : { topic_slug: topicMeta.topicSlug }
+        const calMetadata = finalSprint
+          ? { ...baseMetadata, plan_mode: 'final_sprint', final_review_window: true }
+          : baseMetadata
 
         calRows.push({
           user_id: userId,
           scheduled_date: dateStr,
           subject: item.subject,
           v2_sort_order: item.v2_sort_order,
-          title: sanitizeLessonTitle(item.title),
+          title: finalSprint
+            ? `Repaso: ${sanitizeLessonTitle(item.title)}`
+            : sanitizeLessonTitle(item.title),
           block_key: item.block_key,
           block_slug: topicMeta.blockSlug,
           mission_type: missionType,
@@ -443,7 +491,7 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
     await injectOnboardingPartials(planContext)
     // La personalización recibe el MISMO contexto: sin él reubicaba las filas
     // por patrón semanal sin saber que había una fecha de examen delante.
-    await applyCalendarPersonalization(userId, db, planContext)
+    await applyCalendarPersonalization(userId, db, { planContext, declared: declaredAvailability })
 
     // ── PASO 4: leer el calendario REAL server-side ─────────────────────────
     // No confiar en calRows[0]: en un reintento idempotente (draft ya

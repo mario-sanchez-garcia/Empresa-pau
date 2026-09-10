@@ -194,6 +194,11 @@ export async function POST(request: NextRequest) {
     startModeBySubject,
     studentExams: cleaned.studentExams,
     dailyMinutes: cleaned.dailyMinutes,
+    // Va por parámetro porque el evento `onboarding_completed` — de donde se
+    // leen normalmente estas preferencias — se escribe MÁS ABAJO, después de
+    // generar y verificar el calendario. Ese orden es correcto y no se toca:
+    // el evento significa "el proceso terminó".
+    weeklyStudyDays: cleaned.weeklyStudyDaysValue,
     userEmail: user.email,
     userFullName: (user.user_metadata?.full_name as string | undefined) ?? null,
   })

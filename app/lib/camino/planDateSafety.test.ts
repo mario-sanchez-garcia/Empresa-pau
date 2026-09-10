@@ -113,3 +113,101 @@ test('la cola solo se marca como programada si el calendario se escribió', () =
     'la cola puede marcarse como programada aunque el calendario no se haya escrito',
   )
 })
+
+// ── El primer plan no puede leer preferencias que aún no existen ─────────
+
+test('el generador de onboarding recibe la disponibilidad declarada', () => {
+  // El evento `onboarding_completed` se escribe DESPUÉS de generar y verificar
+  // el calendario — y debe seguir siendo así: es el evento que significa "el
+  // proceso terminó". Por eso los días/minutos llegan por parámetro.
+  const code = stripComments(read('onboarding/generateCaminoPlan.ts')).replace(/\s+/g, ' ')
+  assert.ok(code.includes('weeklyStudyDays?: number | null'), 'el generador no acepta los días semanales declarados')
+  assert.ok(
+    code.includes('const declaredAvailability = { weeklyStudyDays: params.weeklyStudyDays ?? null, dailyMinutes }'),
+    'el generador no construye la disponibilidad declarada',
+  )
+  assert.ok(
+    code.includes('loadStudentPlanContext(userId, db, today, declaredAvailability)'),
+    'el contexto del primer plan no recibe lo declarado',
+  )
+  assert.ok(
+    /applyCalendarPersonalization\(userId, db, \{ planContext, declared: declaredAvailability \}\)/.test(code),
+    'la personalización del primer pase no recibe lo declarado',
+  )
+})
+
+test('las dos rutas de onboarding pasan los días semanales declarados', () => {
+  for (const file of ['../api/onboarding/finalize/route.ts', '../api/onboarding/generate/route.ts']) {
+    const code = stripComments(readFileSync(join(ROOT, file), 'utf8')).replace(/\s+/g, ' ')
+    assert.ok(/weeklyStudyDays[:,]/.test(code), `${file} genera el plan sin los días semanales declarados`)
+  }
+})
+
+test('el evento de onboarding completado sigue escribiéndose al final', () => {
+  // La solución NO puede ser adelantar el evento: significaría "completado"
+  // antes de que exista el Camino.
+  const code = readFileSync(join(ROOT, '../api/onboarding/finalize/route.ts'), 'utf8')
+  const verifyAt = code.indexOf('loadRewardMissions(db, user.id)\n  if (missions.length === 0)')
+  const eventAt = code.indexOf("event_type: 'onboarding_completed'")
+  assert.ok(verifyAt > 0 && eventAt > 0)
+  assert.ok(eventAt > verifyAt, 'el evento de completado se ha adelantado a la verificación del calendario')
+})
+
+// ── Entrada muy tardía: siempre hay una primera acción ───────────────────
+
+test('la entrada en la última semana tiene rama propia y salida garantizada', () => {
+  const code = stripComments(read('onboarding/generateCaminoPlan.ts')).replace(/\s+/g, ' ')
+  assert.ok(code.includes('const finalSprint = contentDays.length === 0'), 'no hay rama de entrada muy tardía')
+  assert.ok(
+    code.includes('includeFinalReviewWindow: true'),
+    'la rama tardía no usa los días de la reserva de repaso final',
+  )
+  // Último recurso: si el patrón semanal no deja ni un día, valen todos.
+  assert.ok(
+    code.includes('for (let d = today; d < planContext.examDate; d = addDaysIso(d, 1)) sprintDays.push(d)'),
+    'sin este último recurso una cuenta puede quedarse sin poder terminar el onboarding',
+  )
+  // Y lo que se siembra ahí es repaso, no temario nuevo.
+  assert.ok(code.includes("finalSprint ? 'review' :"), 'la rama tardía siembra temario nuevo dentro de la reserva')
+})
+
+// ── El calendario existente también se corrige ───────────────────────────
+
+test('la personalización delega la decisión en el módulo puro y le pasa las dos ventanas', () => {
+  // El QUÉ-va-DÓNDE se comprueba de verdad en planPlacement.test.ts, sobre
+  // datos. Aquí solo se fija que la personalización no vuelva a decidirlo por
+  // su cuenta y que le pase el corte de temario nuevo, no solo el examen.
+  const code = stripComments(read('camino/applyCalendarPersonalization.ts')).replace(/\s+/g, ' ')
+  assert.ok(code.includes('const decision = planPlacement('), 'la personalización vuelve a decidir por su cuenta')
+  assert.ok(code.includes('planningCutoff: context.planningCutoff'), 'no le pasa el corte de temario nuevo')
+  assert.ok(code.includes('examDate: context.examDate'), 'no le pasa la fecha objetivo')
+})
+
+test('lo que no cabe queda en un estado explícito y vuelve a la cola', () => {
+  const code = stripComments(read('camino/applyCalendarPersonalization.ts')).replace(/\s+/g, ' ')
+  assert.ok(code.includes("status: 'unscheduled'"), 'las filas sin sitio se quedan con su fecha imposible')
+  assert.ok(code.includes('unscheduled_reason: item.reason'), 'no se registra por qué no cabe')
+  assert.ok(code.includes('unscheduledRows: unplaced.length'), 'no se informa de cuántas quedan fuera')
+  assert.ok(!/\.delete\(/.test(code), 'la personalización borra trabajo del alumno')
+  assert.ok(
+    /user_learning_queue[\s\S]*queue_status: 'pending'/.test(code),
+    'el trabajo sin sitio no vuelve a la cola para replanificarse',
+  )
+})
+
+test('las filas ya escritas con fecha posterior al examen se corrigen', () => {
+  const code = stripComments(read('ensureCaminoCalendar.ts')).replace(/\s+/g, ' ')
+  assert.ok(code.includes(".gte('scheduled_date', examDate)"), 'no se barren las filas con fecha imposible')
+  assert.ok(code.includes("status: 'unscheduled'"), 'esas filas siguen mostrándose como trabajo programado')
+})
+
+test('la migración de estado es aditiva y conserva los estados existentes', () => {
+  const sql = readFileSync(
+    join(process.cwd(), 'supabase', 'migrations', '20260916100000_camino_calendar_unscheduled_status.sql'),
+    'utf8',
+  )
+  for (const status of ['pending', 'completed', 'missed', 'postponed', 'unscheduled']) {
+    assert.ok(sql.includes(`'${status}'`), `la migración pierde el estado ${status}`)
+  }
+  assert.ok(!/delete|drop table|update .* set/i.test(sql.replace(/drop constraint/gi, '')), 'la migración toca datos')
+})

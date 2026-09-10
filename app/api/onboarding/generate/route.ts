@@ -63,6 +63,11 @@ export async function POST(request: NextRequest) {
     const startMode: StartMode = VALID_START_MODES.includes(body.startMode as StartMode)
       ? (body.startMode as StartMode) : 'zero'
     const dailyMinutes = typeof body.dailyMinutes === 'number' ? body.dailyMinutes : null
+    // Igual que dailyMinutes: la preferencia todavía no está persistida en
+    // billing_events cuando se genera el primer plan.
+    const weeklyStudyDays = typeof body.weeklyStudyDaysValue === 'number' && body.weeklyStudyDaysValue > 0
+      ? body.weeklyStudyDaysValue
+      : null
 
     const db = createServiceClient()
     eventDb = db
@@ -84,6 +89,7 @@ export async function POST(request: NextRequest) {
       startMode,
       studentExams: body.studentExams,
       dailyMinutes,
+      weeklyStudyDays,
       userEmail: user.email,
       userFullName: (user.user_metadata?.full_name as string | undefined) ?? null,
     })

@@ -1,8 +1,9 @@
 "use client"
 
 import { useRef, useEffect, useCallback } from "react"
-import { Bold, Italic } from "lucide-react"
+import { Bold, Italic, Eye } from "lucide-react"
 import MathAnswerToolbar from "@/components/shared/MathAnswerToolbar"
+import { HAS_LATEX, renderLatexSegments } from "@/components/shared/renderLatexSegments"
 
 interface RichTextAreaProps {
   value: string
@@ -55,6 +56,14 @@ export default function RichTextArea({
     const el = editorRef.current
     if (el) onChange(el.innerText)
   }, [onChange])
+
+  // Vista previa en vivo: reutiliza tal cual la función de renderizado de
+  // MathEditor.tsx (ya en producción en Simulacros/Camino) — la caja de
+  // escritura sigue mostrando el código fuente sin cambios, esto solo añade
+  // un bloque de solo lectura debajo que muestra cómo se leería. Solo se
+  // muestra cuando hay LaTeX de verdad, igual que MathEditor decide cuándo
+  // mostrar su vista renderizada.
+  const showPreview = HAS_LATEX.test(value)
 
   const btnBase: React.CSSProperties = {
     display: "inline-flex",
@@ -184,6 +193,50 @@ export default function RichTextArea({
           e.currentTarget.style.background = "#fafafa"
         }}
       />
+
+      {showPreview && (
+        <div
+          className="pau-rich-editor-preview"
+          style={{
+            marginTop: 10,
+            borderRadius: 14,
+            border: `1.5px dashed var(--clay-border, ${borderColor})`,
+            background: "var(--clay-surface-raised, #f8fbff)",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "7px 14px",
+              borderBottom: `1px solid var(--clay-border, ${borderColor})`,
+              color: "var(--clay-accent-text, #3b82f6)",
+              fontSize: 10,
+              fontWeight: 800,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+            }}
+          >
+            <Eye size={12} strokeWidth={2.5} />
+            Vista previa
+          </div>
+          <div
+            aria-live="polite"
+            style={{
+              padding: "12px 14px",
+              fontSize: 14,
+              lineHeight: 1.85,
+              color: "var(--clay-text, #0f172a)",
+              wordBreak: "break-word",
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            {renderLatexSegments(value)}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

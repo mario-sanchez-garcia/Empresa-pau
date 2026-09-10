@@ -11,6 +11,8 @@ import { loadProfilePreferences, saveProfilePreferences } from '@/app/lib/profil
 import { VALID_DAILY_MINUTES, dailyMinutesLabel, describeDailyPlan } from '@/app/lib/camino/dailyTimeCapacity'
 import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 import { DEFAULT_GRADE_THRESHOLD, type GradeThresholdMode } from '@/app/lib/camino/gradeThreshold'
+import { defaultTargetExamDate, isConvocatoria, type Convocatoria } from '@/app/lib/camino/examDate'
+import { getMadridDate } from '@/app/lib/camino/madridDate'
 import SidebarNav from '@/app/components/SidebarNav'
 import ClayThemeSwitcher from '@/components/clay/ClayThemeSwitcher'
 import ClayThemeScope from '@/components/clay/ClayThemeScope'
@@ -110,6 +112,13 @@ export default function SettingsPage() {
   const [gradeThreshold, setGradeThreshold] = useState<number | null>(null)
   const [subjectGradeThresholds, setSubjectGradeThresholds] = useState<Record<string, number>>({})
   const [gradeThresholdLoaded, setGradeThresholdLoaded] = useState('')
+  // Convocatoria objetivo. Vive en Ajustes y no en el onboarding a propósito:
+  // la inmensa mayoría se presenta a la ordinaria (que es el valor por defecto
+  // correcto), y quien va a extraordinaria necesita poder cambiarlo sin que
+  // eso le cueste un paso más a todos los demás.
+  const [pauConvocatoria, setPauConvocatoria] = useState<Convocatoria>('ordinaria')
+  const [pauExamDate, setPauExamDate] = useState('')
+  const [pauLoaded, setPauLoaded] = useState('')
   const [recalculating, setRecalculating] = useState(false)
   const [recalculateStatus, setRecalculateStatus] = useState('')
   const [customInstructions, setCustomInstructions] = useState('')
@@ -149,6 +158,7 @@ export default function SettingsPage() {
             const json = await res.json() as {
               email_notifications: boolean; username?: string; custom_instructions?: string; subject_levels?: Record<string, string>
               grade_threshold_mode?: string; grade_threshold?: number | null; subject_grade_thresholds?: Record<string, number>
+              pau_convocatoria?: string | null; pau_exam_date?: string | null
             }
             setEmailNotifications(json.email_notifications ?? true)
             serverDisplayName = json.username ?? ''
@@ -186,6 +196,11 @@ export default function SettingsPage() {
             setGradeThreshold(loadedGeneral)
             setSubjectGradeThresholds(loadedBySubject)
             setGradeThresholdLoaded(JSON.stringify({ mode: loadedMode, general: loadedGeneral, bySubject: loadedBySubject }))
+            const loadedConvocatoria: Convocatoria = isConvocatoria(json.pau_convocatoria) ? json.pau_convocatoria : 'ordinaria'
+            const loadedExamDate = typeof json.pau_exam_date === 'string' ? json.pau_exam_date : ''
+            setPauConvocatoria(loadedConvocatoria)
+            setPauExamDate(loadedExamDate)
+            setPauLoaded(JSON.stringify({ convocatoria: loadedConvocatoria, examDate: loadedExamDate }))
           }
         } catch { /* silent */ }
         try {
@@ -333,7 +348,8 @@ export default function SettingsPage() {
       const token = session.data.session?.access_token
       const instructionsChanged = customInstructions.trim() !== customInstructionsLoaded.trim()
       const gradeThresholdChanged = JSON.stringify({ mode: gradeThresholdMode, general: gradeThreshold, bySubject: subjectGradeThresholds }) !== gradeThresholdLoaded
-      if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged)) {
+      const pauChanged = JSON.stringify({ convocatoria: pauConvocatoria, examDate: pauExamDate }) !== pauLoaded
+      if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged || pauChanged)) {
         const res = await fetch('/api/profile', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -345,11 +361,18 @@ export default function SettingsPage() {
               grade_threshold: gradeThreshold,
               subject_grade_thresholds: subjectGradeThresholds,
             } : {}),
+            ...(pauChanged ? {
+              pau_convocatoria: pauConvocatoria,
+              pau_exam_date: pauExamDate || null,
+            } : {}),
           }),
         })
         if (res.ok && instructionsChanged) setCustomInstructionsLoaded(customInstructions.trim())
         if (res.ok && gradeThresholdChanged) {
           setGradeThresholdLoaded(JSON.stringify({ mode: gradeThresholdMode, general: gradeThreshold, bySubject: subjectGradeThresholds }))
+        }
+        if (res.ok && pauChanged) {
+          setPauLoaded(JSON.stringify({ convocatoria: pauConvocatoria, examDate: pauExamDate }))
         }
       }
       if (token && onboarding?.completedAt) {
@@ -743,6 +766,32 @@ export default function SettingsPage() {
               </select>
               <Hint>Solo tus asignaturas activas de Camino PAU.</Hint>
             </Field>
+            {/* Fecha objetivo del Camino. Antes era una constante en el código
+                ('2027-06-07') igual para todo el mundo: un alumno de
+                extraordinaria planificaba contra una fecha que no era la suya, y
+                pasada esa fecha el plan se quedaba sin horizonte. */}
+            <Field label="Convocatoria">
+              <select
+                value={pauConvocatoria}
+                onChange={e => setPauConvocatoria(isConvocatoria(e.target.value) ? e.target.value : 'ordinaria')}
+                style={inputStyle}
+              >
+                <option value="ordinaria">Ordinaria (junio)</option>
+                <option value="extraordinaria">Extraordinaria (julio)</option>
+              </select>
+              <Hint>Todo tu Camino se planifica contra esta fecha.</Hint>
+            </Field>
+            <Field label="Fecha exacta de tu PAU">
+              <input
+                type="date"
+                value={pauExamDate}
+                onChange={e => setPauExamDate(e.target.value)}
+                style={inputStyle}
+              />
+              <Hint>
+                Opcional. Si la dejas vacía usamos la {pauConvocatoria === 'extraordinaria' ? 'extraordinaria' : 'ordinaria'} de tu curso: {defaultTargetExamDate(todayIso(), pauConvocatoria)}.
+              </Hint>
+            </Field>
           </div>
           {caminoPrefsStatus && (
             <div style={{ margin: '-4px 0 18px', borderRadius: 14, border: '1px solid var(--clay-border)', background: 'var(--clay-accent-soft)', padding: '10px 12px', fontSize: 11, fontWeight: 750, color: 'var(--clay-accent-text)' }}>
@@ -992,6 +1041,10 @@ export default function SettingsPage() {
 }
 
 const inputStyle: React.CSSProperties = { width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--clay-border)', fontSize: 13, fontWeight: 600, color: 'var(--clay-text)', background: 'var(--clay-surface)', outline: 'none' }
+
+function todayIso(): string {
+  return getMadridDate(new Date())
+}
 
 function Section({ label }: { label: string }) {
   return (

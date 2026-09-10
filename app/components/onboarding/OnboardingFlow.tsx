@@ -17,6 +17,7 @@ import { SUBJECT_OPTS } from '@/app/lib/subjectCatalog'
 import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 import { PRIVATE_BETA_SUBJECTS, PRIVATE_BETA_SUBJECT_LABELS } from '@/app/lib/camino/betaCurriculum'
 import { DEFAULT_GRADE_THRESHOLD } from '@/app/lib/camino/gradeThreshold'
+import { START_MODE_HINTS, START_MODE_LABELS, type StartMode } from '@/app/lib/camino/startingPoint'
 import {
   clearOnboarding,
   ensureOnboardingTraceId,
@@ -37,12 +38,12 @@ import { LEGAL_VERSIONS } from '@/app/lib/legalVersions'
 import { PLATFORM_STRUCTURED_EXERCISES_LABEL, PLATFORM_STRUCTURED_EXERCISES_TEXT } from '@/app/lib/platformStats'
 import { SUPPORT_EMAIL } from '@/app/lib/support'
 
-type Step = 'welcome' | 'pain' | 'pain-result' | 'name' | 'community' | 'school' | 'subjects' | 'upcoming-exams' | 'feeling' | 'daily-time' | 'weekly-days' | 'grade-threshold' | 'confirm' | 'preview' | 'signup'
+type Step = 'welcome' | 'pain' | 'pain-result' | 'name' | 'community' | 'school' | 'subjects' | 'starting-point' | 'upcoming-exams' | 'feeling' | 'daily-time' | 'weekly-days' | 'grade-threshold' | 'confirm' | 'preview' | 'signup'
 
 // 'pain' cuenta como pregunta real dentro del wizard (progreso, chrome
 // estándar). 'pain-result' es una pantalla de resultado sin formulario (como
 // 'welcome'/'saving'/'done') y por eso vive fuera de este array.
-const STEPS: Step[] = ['pain', 'name', 'community', 'school', 'subjects', 'upcoming-exams', 'feeling', 'daily-time', 'weekly-days', 'grade-threshold', 'confirm']
+const STEPS: Step[] = ['pain', 'name', 'community', 'school', 'subjects', 'starting-point', 'upcoming-exams', 'feeling', 'daily-time', 'weekly-days', 'grade-threshold', 'confirm']
 
 // Fase 0 de observabilidad: mapea los steps internos del wizard a step_id
 // semánticos y estables para no depender del índice numérico.
@@ -54,6 +55,7 @@ const STEP_ID_MAP: Record<Step, OnboardingStepId> = {
   community: 'community',
   school: 'school',
   subjects: 'subjects',
+  'starting-point': 'starting_point',
   'upcoming-exams': 'upcoming_exam',
   feeling: 'preparation',
   'daily-time': 'study_time',
@@ -188,6 +190,7 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   community: { title: '¿Dónde haces la PAU?', help: 'Así ajustamos la experiencia a tu comunidad autónoma.' },
   school: { title: '¿Cuál es tu centro educativo?', help: 'Si coincides con alumnos de tu mismo instituto, adaptamos el temario a vuestro ritmo real.' },
   subjects: { title: '¿Qué asignaturas quieres preparar?', help: 'Elige todas las que entran en tu PAU. Puedes cambiarlo más adelante.' },
+  'starting-point': { title: '¿Por dónde vas en cada asignatura?', help: 'Lo que marques como dado entrará como repaso rápido, no como teoría nueva — pero seguirá dentro de tu Camino. Declarar no es lo mismo que dominar.' },
   'upcoming-exams': { title: '¿Tienes algún examen pronto?', help: 'Opcional. Si tienes un parcial cerca, Kairo añadirá práctica específica antes de esa fecha.' },
   feeling: { title: '¿Cómo llevas la preparación?', help: 'No es una evaluación. Solo nos ayuda a ajustar el tono y el ritmo.' },
   'daily-time': { title: '¿Cuánto tiempo podrías estudiar al día?', help: 'Lo ajustaremos mejor más adelante según tu ritmo.' },
@@ -198,7 +201,11 @@ const STEP_LABELS: Record<Step, { title: string; help: string }> = {
   signup: { title: 'Guarda tu Camino', help: 'Crea tu cuenta para guardar tu preparación.' },
 }
 
-const SIDEBAR_STEPS = ['Dolor', 'Nombre', 'Comunidad', 'Centro', 'Asignaturas', 'Parciales', 'Preparación', 'Tiempo', 'Días', 'Umbral', 'Confirmar']
+// Orden en que se ofrecen los puntos de partida: de menos a más temario
+// declarado, con "no lo sé" al final para no invitar a elegirlo por defecto.
+const START_MODE_ORDER: StartMode[] = ['zero', 'first_block', 'mid', 'review', 'unknown']
+
+const SIDEBAR_STEPS = ['Dolor', 'Nombre', 'Comunidad', 'Centro', 'Asignaturas', 'Punto de partida', 'Parciales', 'Preparación', 'Tiempo', 'Días', 'Umbral', 'Confirmar']
 
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap');`
 
@@ -500,6 +507,14 @@ export default function OnboardingFlow() {
     if (step === 'community') return Boolean(data.community) && COMMUNITY_AVAILABLE_IDS.has(data.community as OnboardingCommunity)
     if (step === 'school') return Boolean(data.schoolName?.trim())
     if (step === 'subjects') return data.subjects.some(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
+    // Se exige una respuesta EXPLÍCITA por asignatura. Si se permitiera
+    // continuar sin contestar, el valor por defecto volvería a ser 'zero'
+    // para todos y el paso no serviría de nada — que es exactamente lo que
+    // pasaba antes con el startMode fijo del finalizador.
+    if (step === 'starting-point') {
+      const chosen = data.subjects.filter(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
+      return chosen.length > 0 && chosen.every(s => Boolean(data.startingPoints[s]))
+    }
     if (step === 'feeling') return Boolean(data.preparationFeeling)
     if (step === 'daily-time') return Boolean(data.dailyStudyTime)
     if (step === 'weekly-days') return Boolean(data.weeklyStudyDays)
@@ -669,6 +684,7 @@ export default function OnboardingFlow() {
             gradeThresholdMode: data.gradeThresholdMode,
             gradeThreshold: data.gradeThreshold,
             subjectGradeThresholds: data.subjectGradeThresholds,
+            startingPoints: data.startingPoints,
           },
         }),
       })
@@ -1588,6 +1604,58 @@ export default function OnboardingFlow() {
           {!canContinue && (
             <div style={{ marginTop: 14, border: '1px solid #fde68a', background: '#fffbeb', padding: '10px 14px', fontSize: 11, fontWeight: 600, color: '#92400e' }}>
               Selecciona al menos una asignatura disponible para construir tu Camino PAU.
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    if (step === 'starting-point') {
+      // Un alumno que se incorpora en abril con Álgebra dominada y Análisis
+      // sin empezar necesita un punto de partida DISTINTO en cada asignatura.
+      // Antes el Camino arrancaba siempre en el tema 1 de todo (el
+      // finalizador enviaba startMode 'zero' fijo).
+      const chosen = data.subjects.filter(s => PRIVATE_BETA_SUPPORTED_SUBJECTS.has(s))
+      const labelFor = (id: string) => PRIVATE_BETA_ENABLED_SUBJECTS.find(s => s.id === id)?.label ?? id
+      return (
+        <div>
+          <div style={{ border: '1px solid #bfdbfe', background: '#eff6ff', padding: '10px 14px', marginBottom: 16 }}>
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 8, letterSpacing: '.14em', textTransform: 'uppercase', color: '#2563eb', marginBottom: 3 }}>Por qué preguntamos</div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: '#1e40af', lineHeight: 1.5 }}>
+              Nada de lo que marques se da por sabido: entra como repaso rápido y lo confirmaremos con ejercicios. Así, si te incorporas a mitad de curso, no empiezas por el tema 1 de todo.
+            </div>
+          </div>
+          {chosen.map(subject => {
+            const current = data.startingPoints[subject] ?? 'zero'
+            return (
+              <div key={subject} style={{ marginBottom: 18 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#1c1c1c', marginBottom: 8 }}>{labelFor(subject)}</div>
+                <div style={{ display: 'grid', gap: 1, background: '#e0e0e0', border: '1px solid #e0e0e0' }}>
+                  {START_MODE_ORDER.map(mode => {
+                    const selected = current === mode
+                    return (
+                      <button
+                        key={mode}
+                        onClick={() => update({ startingPoints: { ...data.startingPoints, [subject]: mode } })}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '11px 14px', background: selected ? '#1c1c1c' : '#fff', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+                      >
+                        <div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: selected ? '#fff' : '#1c1c1c', lineHeight: 1.3 }}>{START_MODE_LABELS[mode]}</div>
+                          <div style={{ fontSize: 10, fontWeight: 500, color: selected ? '#cbd5e1' : '#94a3b8', marginTop: 3, lineHeight: 1.4 }}>{START_MODE_HINTS[mode]}</div>
+                        </div>
+                        <div style={{ width: 16, height: 16, borderRadius: '50%', background: selected ? '#fff' : 'transparent', border: selected ? 'none' : '1.5px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          {selected && <Check size={9} color="#1c1c1c" strokeWidth={3} />}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+          {chosen.length === 0 && (
+            <div style={{ border: '1px solid #fde68a', background: '#fffbeb', padding: '10px 14px', fontSize: 11, fontWeight: 600, color: '#92400e' }}>
+              Vuelve atrás y elige al menos una asignatura.
             </div>
           )}
         </div>

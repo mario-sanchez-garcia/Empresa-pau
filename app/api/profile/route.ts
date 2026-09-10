@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { validateUsername, normalizeUsername } from '@/app/lib/username'
 import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
+import { isConvocatoria } from '@/app/lib/camino/examDate'
 import { MAX_GRADE_THRESHOLD, MIN_GRADE_THRESHOLD, type GradeThresholdMode } from '@/app/lib/camino/gradeThreshold'
 
 export const dynamic = 'force-dynamic'
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
   const db = createServiceClient()
   let { data, error: fetchError } = await db
     .from('perfiles')
-    .select('email_notifications, student_exams, username, custom_instructions, subject_levels, last_weekly_checkin_at, grade_threshold_mode, grade_threshold, subject_grade_thresholds, target_degree, target_university, target_admission_score, target_orientation_source_type, target_orientation_updated_at, target_orientation_community')
+    .select('email_notifications, student_exams, username, custom_instructions, subject_levels, last_weekly_checkin_at, grade_threshold_mode, grade_threshold, subject_grade_thresholds, target_degree, target_university, target_admission_score, target_orientation_source_type, target_orientation_updated_at, target_orientation_community, pau_convocatoria, pau_comunidad, pau_exam_date')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -85,7 +86,7 @@ export async function GET(request: NextRequest) {
   if (isMissingTargetCommunityColumn(fetchError)) {
     const legacy = await db
       .from('perfiles')
-      .select('email_notifications, student_exams, username, custom_instructions, subject_levels, last_weekly_checkin_at, grade_threshold_mode, grade_threshold, subject_grade_thresholds, target_degree, target_university, target_admission_score, target_orientation_source_type, target_orientation_updated_at')
+      .select('email_notifications, student_exams, username, custom_instructions, subject_levels, last_weekly_checkin_at, grade_threshold_mode, grade_threshold, subject_grade_thresholds, target_degree, target_university, target_admission_score, target_orientation_source_type, target_orientation_updated_at, pau_convocatoria, pau_comunidad, pau_exam_date')
       .eq('id', user.id)
       .maybeSingle()
     data = legacy.data as typeof data
@@ -110,6 +111,9 @@ export async function GET(request: NextRequest) {
     target_orientation_source_type: data?.target_orientation_source_type ?? null,
     target_orientation_community: data?.target_orientation_community ?? null,
     target_orientation_updated_at: data?.target_orientation_updated_at ?? null,
+    pau_convocatoria: data?.pau_convocatoria ?? null,
+    pau_comunidad: data?.pau_comunidad ?? null,
+    pau_exam_date: data?.pau_exam_date ?? null,
   })
 }
 
@@ -140,6 +144,19 @@ export async function PATCH(request: NextRequest) {
     if (cleaned !== undefined) allowed.grade_threshold = cleaned
   }
   if (body.subject_grade_thresholds !== undefined) allowed.subject_grade_thresholds = cleanSubjectGradeThresholds(body.subject_grade_thresholds)
+  // Convocatoria objetivo. Gobierna la fecha contra la que planifica TODO el
+  // Camino (ver camino/examDate.ts), así que se valida en serio: un valor
+  // basura aquí desplazaría el plan entero del alumno.
+  if (body.pau_convocatoria !== undefined) {
+    allowed.pau_convocatoria = isConvocatoria(body.pau_convocatoria) ? body.pau_convocatoria : null
+  }
+  if (body.pau_exam_date !== undefined) {
+    const raw = body.pau_exam_date
+    allowed.pau_exam_date = typeof raw === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : null
+  }
+  if (body.pau_comunidad !== undefined) {
+    allowed.pau_comunidad = typeof body.pau_comunidad === 'string' ? body.pau_comunidad.trim().slice(0, 80) || null : null
+  }
 
   if (typeof body.username === 'string') {
     const u = body.username.trim()

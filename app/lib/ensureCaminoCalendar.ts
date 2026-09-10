@@ -12,16 +12,28 @@ import { resolveTopicIdentitiesBatch } from './camino/resolveTopicIdentity'
 import { createDayScheduler, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
 import { FINAL_REVIEW_RESERVED_STUDY_DAYS, resolveTargetExamDate } from './camino/examDate'
 import { computeStudyCapacity, planningCutoffDate } from './camino/studyCapacity'
+import { buildPlanDays } from './camino/planEngine'
 import { rotateSubjectForDay } from './camino/subjectRotation'
 import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
-import { addDays, getMadridToday, getStudyDays } from './camino/studyDays'
+import { addDays, getMadridToday } from './camino/studyDays'
 
-// La fecha objetivo ya no es una constante congelada — se deriva del curso
-// académico en marcha (ver camino/examDate.ts), para que el plan no se quede
-// nunca apuntando a una convocatoria ya pasada. El override por alumno
-// (convocatoria/comunidad) se conectará aquí cuando exista en el modelo.
-function targetExamDateFor(today: string): string {
-  return resolveTargetExamDate(today)
+// Fecha objetivo del alumno. Ya no es una constante congelada: sale de lo que
+// el alumno declaró (perfiles.pau_exam_date / pau_convocatoria) y, a falta de
+// eso, del curso académico en marcha — nunca de una fecha ya pasada.
+async function targetExamDateFor(
+  userId: string,
+  supabase: SupabaseClient,
+  today: string,
+): Promise<string> {
+  const { data } = await supabase
+    .from('perfiles')
+    .select('pau_exam_date, pau_convocatoria')
+    .eq('id', userId)
+    .maybeSingle()
+  return resolveTargetExamDate(today, {
+    examDate: (data?.pau_exam_date as string | null | undefined) ?? null,
+    convocatoria: (data?.pau_convocatoria as string | null | undefined) ?? null,
+  })
 }
 // Cuántos días futuros (con misión pendiente/postpuesta) mantiene
 // sembrados ensureCaminoCalendar en camino_calendar — todo lo que cae
@@ -243,7 +255,7 @@ export async function ensureCaminoCalendar(
   supabase: SupabaseClient,
 ): Promise<void> {
   const today = getMadridToday()
-  const examDate = targetExamDateFor(today)
+  const examDate = await targetExamDateFor(userId, supabase, today)
   const externalBusyByDate = new Map<string, LocalBusyRange[]>()
 
   // PASO 1 — Marcar misiones pasadas pendientes (no bonus) como missed
@@ -789,8 +801,25 @@ export async function ensureCaminoCalendar(
     weeklyStudyDays: declaredWeeklyStudyDays,
     holidays: SPAIN_HOLIDAYS,
   })
-  const candidateDays = getStudyDays(today, CALENDAR_HORIZON * 4)
-  const emptyDays = candidateDays
+  // Los días candidatos salen del MISMO motor que usa la previsión del
+  // navegador (ver camino/planEngine.ts), para que servidor y cliente no
+  // puedan discrepar sobre qué días entran en el plan.
+  const horizonEndDate = addDays(today, CALENDAR_HORIZON * 4)
+  const planDays = buildPlanDays({
+    from: today,
+    to: horizonEndDate,
+    examDate,
+    subjects: subjectsByBacklog,
+    weeklyStudyDays: declaredWeeklyStudyDays,
+    dailyMinutes: dailyMinutesForSlots,
+    holidays: SPAIN_HOLIDAYS,
+    reservedFinalStudyDays: FINAL_REVIEW_RESERVED_STUDY_DAYS,
+    examSubjectsByDate,
+    origin: 'server',
+  })
+  const emptyDays = planDays
+    .filter(day => day.subject != null)
+    .map(day => day.date)
     .filter(d => d < planningCutoff)
     .filter(d => !futureDaySet.has(d))
     .slice(0, CALENDAR_HORIZON - futureDaySet.size)

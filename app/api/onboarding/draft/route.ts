@@ -15,6 +15,7 @@ import {
   VALID_SCHOOL_SOURCES,
 } from '@/app/lib/onboarding/saveOnboardingProfile'
 import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
+import { normalizeStartMode } from '@/app/lib/camino/startingPoint'
 import { extractTraceHeaders, logOnboardingStage } from '@/app/lib/onboarding/onboardingServerLog'
 
 export const dynamic = 'force-dynamic'
@@ -42,6 +43,23 @@ function cleanUsername(value: unknown): string | null {
 
 function cleanCommunity(value: unknown): string | null {
   return VALID_COMMUNITIES.includes(value as typeof VALID_COMMUNITIES[number]) ? (value as string) : null
+}
+
+/**
+ * Punto de partida declarado por asignatura. Solo se conservan asignaturas que
+ * el alumno haya elegido de verdad y modos válidos — un valor desconocido cae
+ * a 'zero' (programarlo todo), que es la opción segura: sobra material que
+ * puede ir rápido, falta material que nunca se programó.
+ */
+function cleanStartingPoints(value: unknown, subjects: string[]): Record<string, string> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
+  const allowed = new Set(subjects)
+  const out: Record<string, string> = {}
+  for (const [subject, mode] of Object.entries(value as Record<string, unknown>)) {
+    if (!allowed.has(subject)) continue
+    out[subject] = normalizeStartMode(mode)
+  }
+  return out
 }
 
 export async function POST(request: NextRequest) {
@@ -86,6 +104,7 @@ export async function POST(request: NextRequest) {
     grade_threshold_mode: cleanGradeThresholdMode(rawPayload.gradeThresholdMode),
     grade_threshold: cleanGradeThreshold(rawPayload.gradeThreshold),
     subject_grade_thresholds: cleanSubjectGradeThresholds(rawPayload.subjectGradeThresholds),
+    starting_points: cleanStartingPoints(rawPayload.startingPoints, subjects),
   }
 
   const db = createServiceClient()

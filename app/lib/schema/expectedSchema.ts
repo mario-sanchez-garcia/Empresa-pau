@@ -82,6 +82,12 @@ export const EXPECTED_COLUMNS: ExpectedColumn[] = [
     porque: 'Distingue la ronda y semántica territorial de cada nota de referencia' },
   { table: 'orientation_subject_weightings', column: 'community',
     porque: 'Evita mezclar ponderaciones de comunidades distintas' },
+  { table: 'perfiles', column: 'pau_exam_date',
+    porque: 'Fecha objetivo del Camino por alumno; sin ella se planifica contra la ordinaria por defecto y un alumno de extraordinaria trabaja contra una fecha ajena' },
+  { table: 'perfiles', column: 'pau_convocatoria',
+    porque: 'Distingue ordinaria de extraordinaria para derivar la fecha objetivo y la transición entre convocatorias' },
+  { table: 'perfiles', column: 'pau_comunidad',
+    porque: 'Comunidad en la que se examina el alumno; necesaria para el calendario oficial por territorio' },
   { table: 'user_learning_queue', column: 'retry_not_before',
     porque: '"No lo he dado" a mitad de bloque reintenta la misma tarjeta tras unos días en vez de saltarla; sin esta columna, postpone-mission falla al escribirla y ensureCaminoCalendar no puede respetar la espera' },
 ]

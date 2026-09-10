@@ -14,11 +14,33 @@ test('la fecha objetivo sigue al curso académico, no se congela', () => {
   assert.equal(defaultTargetExamDate('2027-09-01'), '2028-06-07')
 })
 
-test('un override válido del alumno manda; uno ya pasado se ignora', () => {
-  assert.equal(resolveTargetExamDate('2026-09-10', '2027-06-03'), '2027-06-03')
-  assert.equal(resolveTargetExamDate('2026-09-10', '2020-06-03'), '2027-06-07')
-  assert.equal(resolveTargetExamDate('2026-09-10', 'no-es-fecha'), '2027-06-07')
-  assert.equal(resolveTargetExamDate('2026-09-10', null), '2027-06-07')
+test('la fecha declarada por el alumno manda; una ya pasada se ignora', () => {
+  assert.equal(resolveTargetExamDate('2026-09-10', { examDate: '2027-06-03' }), '2027-06-03')
+  assert.equal(resolveTargetExamDate('2026-09-10', { examDate: '2020-06-03' }), '2027-06-07')
+  assert.equal(resolveTargetExamDate('2026-09-10', { examDate: 'no-es-fecha' }), '2027-06-07')
+  assert.equal(resolveTargetExamDate('2026-09-10', { examDate: null }), '2027-06-07')
+  assert.equal(resolveTargetExamDate('2026-09-10'), '2027-06-07')
+})
+
+test('la convocatoria declarada cambia la fecha objetivo', () => {
+  assert.equal(resolveTargetExamDate('2026-09-10', { convocatoria: 'extraordinaria' }), '2027-07-01')
+  assert.equal(resolveTargetExamDate('2026-09-10', { convocatoria: 'ordinaria' }), '2027-06-07')
+  // Un valor que no es convocatoria válida no debe romper el plan.
+  assert.equal(resolveTargetExamDate('2026-09-10', { convocatoria: 'otra-cosa' }), '2027-06-07')
+})
+
+test('una convocatoria de este curso que ya pasó salta al curso siguiente', () => {
+  // 20 de junio de 2027: la ordinaria del 7 ya pasó.
+  assert.equal(resolveTargetExamDate('2027-06-20', { convocatoria: 'ordinaria' }), '2028-06-07')
+  // Pero la extraordinaria de ese mismo curso todavía no.
+  assert.equal(resolveTargetExamDate('2027-06-20', { convocatoria: 'extraordinaria' }), '2027-07-01')
+})
+
+test('la fecha declarada gana a la convocatoria', () => {
+  assert.equal(
+    resolveTargetExamDate('2026-09-10', { examDate: '2027-06-02', convocatoria: 'extraordinaria' }),
+    '2027-06-02',
+  )
 })
 
 test('C01: el plan no siembra temario después del examen', () => {

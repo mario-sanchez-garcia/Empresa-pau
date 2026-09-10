@@ -175,11 +175,23 @@ export async function POST(request: NextRequest) {
     subjects_count: cleaned.subjects.length,
   })
 
+  // Punto de partida declarado por el alumno en cada asignatura.
+  //
+  // Antes esto era literalmente `startMode: 'zero'` fijo: todos los alumnos,
+  // se incorporasen en septiembre o en abril, arrancaban por el tema 1 de
+  // todas sus asignaturas. Los otros cuatro modos del generador existían
+  // pero no había forma de llegar a ellos. 'zero' sigue siendo el respaldo
+  // para las asignaturas de las que no se declaró nada.
+  const startModeBySubject = (payload.starting_points && typeof payload.starting_points === 'object' && !Array.isArray(payload.starting_points))
+    ? payload.starting_points as Record<string, string>
+    : null
+
   const genResult = await generateCaminoPlan({
     userId: user.id,
     db,
     subjects: cleaned.subjects,
     startMode: 'zero',
+    startModeBySubject,
     studentExams: cleaned.studentExams,
     dailyMinutes: cleaned.dailyMinutes,
     userEmail: user.email,

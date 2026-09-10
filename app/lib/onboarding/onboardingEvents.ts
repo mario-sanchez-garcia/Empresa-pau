@@ -56,6 +56,7 @@ export type OnboardingStepId =
   | 'community'
   | 'school'
   | 'subjects'
+  | 'starting_point'
   | 'upcoming_exam'
   | 'preparation'
   | 'study_time'

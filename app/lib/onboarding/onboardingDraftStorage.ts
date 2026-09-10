@@ -43,6 +43,8 @@ export interface LocalOnboardingDraft {
   gradeThresholdMode: OnboardingGradeThresholdMode
   gradeThreshold: number | null
   subjectGradeThresholds: Record<string, number>
+  /** Punto de partida declarado por asignatura (slug → StartMode). */
+  startingPoints: Record<string, string>
   lastStep: string | null
 }
 
@@ -76,6 +78,7 @@ export function saveLocalDraft(data: OnboardingData, draftId?: string | null): L
     gradeThresholdMode: data.gradeThresholdMode,
     gradeThreshold: data.gradeThreshold,
     subjectGradeThresholds: data.subjectGradeThresholds,
+    startingPoints: data.startingPoints ?? {},
     lastStep: data.lastStep,
   }
   if (typeof window !== 'undefined') {

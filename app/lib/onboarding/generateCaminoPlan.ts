@@ -8,6 +8,7 @@ import { injectAllPartialExamMissions } from '@/app/lib/camino/injectPartialExam
 import { cleanStudentExams, type StudentExam } from '@/app/lib/camino/cleanStudentExams'
 import { getMadridToday, getStudyDays } from '@/app/lib/camino/studyDays'
 import { rotateSubjectForDay } from '@/app/lib/camino/subjectRotation'
+import { coveredBlockCount, queueMetadataFor, resolveStartModes, type StartMode } from '@/app/lib/camino/startingPoint'
 import { hasCompletedOnboarding } from '@/app/lib/onboarding/hasCompletedOnboarding'
 import { sendWelcomeEmail } from '@/app/lib/email/sendWelcomeEmail'
 import { generateUnsubscribeToken } from '@/app/lib/unsubscribeToken'
@@ -18,8 +19,8 @@ import { generateUnsubscribeToken } from '@/app/lib/unsubscribeToken'
 // (/api/onboarding/finalize). NO reescribe el algoritmo — solo lo saca de la
 // route handler para poder llamarlo desde dos sitios sin duplicar lógica.
 
-export const VALID_START_MODES = ['zero', 'first_block', 'mid', 'review', 'unknown'] as const
-export type StartMode = typeof VALID_START_MODES[number]
+export { VALID_START_MODES } from '@/app/lib/camino/startingPoint'
+export type { StartMode } from '@/app/lib/camino/startingPoint'
 
 // Private beta scope: Camino PAU is active only for these core PAU subjects.
 export const ALLOWED_GENERATE_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana', 'fisica', 'quimica', 'ingles', 'historia_filosofia', 'economia'])
@@ -85,7 +86,10 @@ export interface GenerateCaminoPlanParams {
   userId: string
   db: SupabaseClient
   subjects: string[]
+  /** Modo global de respaldo, para las asignaturas sin declaración propia. */
   startMode: StartMode
+  /** Punto de partida DECLARADO por el alumno en cada asignatura (slug → modo). */
+  startModeBySubject?: Record<string, string> | null
   studentExams: unknown
   dailyMinutes: number | null
   userEmail?: string | null
@@ -195,31 +199,32 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
         if (!bySubject[subject]?.length) bySubject[subject] = betaSequenceItems(subject)
       }
 
+      // Punto de partida declarado POR ASIGNATURA (ver camino/startingPoint.ts).
+      // Antes era un único modo para todo el Camino y, además, el finalizador
+      // enviaba siempre 'zero', así que el alumno que llegaba a mitad de curso
+      // empezaba por el tema 1 de todo.
+      const startModes = resolveStartModes(subjectsToQueue, params.startModeBySubject, startMode)
+
       const queueRowsBySubject: Record<string, object[]> = {}
       for (const subject of subjectsToQueue) {
         const items = bySubject[subject] ?? []
         const queueRows: object[] = []
         queueRowsBySubject[subject] = queueRows
 
-        let earlyBlocks = new Set<string | null>()
-        if (startMode === 'mid') {
-          const uniqueBlocks = [...new Set(items.map(i => i.block_key))]
-          earlyBlocks = new Set(uniqueBlocks.slice(0, 2))
-        }
+        const subjectMode = startModes[subject] ?? startMode
+        // Los bloques ya trabajados en clase se cuentan sobre el temario REAL
+        // de esta asignatura, no como un número fijo de bloques.
+        const uniqueBlocks = [...new Set(items.map(i => i.block_key))]
+        const coveredBlocks = new Set(uniqueBlocks.slice(0, coveredBlockCount(subjectMode, uniqueBlocks.length)))
 
         for (let i = 0; i < items.length; i++) {
           const fc = items[i]
           const topicMeta = queueTopicMeta(fc)
-          let metadata: Record<string, unknown>
-          if (startMode === 'review') {
-            metadata = { mission_type: 'review', topic_slug: topicMeta.topicSlug }
-          } else if (startMode === 'mid') {
-            metadata = earlyBlocks.has(fc.block_key)
-              ? { mission_type: 'review', express: true, topic_slug: topicMeta.topicSlug }
-              : { mission_type: 'concept', topic_slug: topicMeta.topicSlug }
-          } else {
-            metadata = { mission_type: 'concept', beta_sequence: true, topic_slug: topicMeta.topicSlug }
-          }
+          const metadata: Record<string, unknown> = queueMetadataFor(
+            subjectMode,
+            coveredBlocks.has(fc.block_key),
+            topicMeta.topicSlug,
+          )
           queueRows.push({
             user_id: userId,
             subject: fc.subject,
@@ -312,7 +317,12 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
     const scheduleSubjects = subjects.filter(s => (subjectQueues[s]?.length ?? 0) > 0)
     const cursors: Record<string, number> = Object.fromEntries(scheduleSubjects.map(s => [s, 0]))
 
-    const slotsPerDay = Math.max(startMode === 'review' ? 2 : 1, missionsPerDayForMinutes(dailyMinutes))
+    // Un alumno en modo repaso avanza más rápido por día: las sesiones de
+    // repaso son más cortas que ver el tema por primera vez. Basta con que UNA
+    // asignatura esté en repaso para justificar el ritmo extra.
+    const anySubjectInReview = Object.values(resolveStartModes(subjects, params.startModeBySubject, startMode))
+      .some(mode => mode === 'review')
+    const slotsPerDay = Math.max(anySubjectInReview ? 2 : 1, missionsPerDayForMinutes(dailyMinutes))
 
     const calRows: object[] = []
     const scheduledQueueIds: string[] = []

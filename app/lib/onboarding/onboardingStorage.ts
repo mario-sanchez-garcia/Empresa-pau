@@ -51,6 +51,10 @@ export interface OnboardingData {
   // billing_events. No es PII, se regenera solo al empezar un intento nuevo.
   traceId: string | null
   painType: PainType | null
+  // Punto de partida declarado por el alumno en cada asignatura (slug de
+  // asignatura → StartMode). Lo que aquí se declara entra como REPASO, nunca
+  // como completado: declarar no es demostrar (ver camino/startingPoint.ts).
+  startingPoints: Record<string, string>
 }
 
 const KEY = 'kairo_onboarding_v1'
@@ -160,5 +164,6 @@ function emptyOnboarding(): OnboardingData {
     subjectGradeThresholds: {},
     traceId: null,
     painType: null,
+    startingPoints: {},
   }
 }

@@ -27,6 +27,9 @@ import { DIVISIONS, divisionFor } from '@/app/lib/camino/leagues'
 import { MAX_LIGAS_PER_USER } from '@/app/lib/camino/leagueRounds'
 import { deletePartialExamMissions, injectAllPartialExamMissions, summarizePersistedExamMissions, weekdaysBefore } from '@/app/lib/camino/injectPartialExamMissions'
 import { buildRecalcMessage, computeExamTimeNeed, getBlockPerformance } from '@/app/lib/camino/examTimeNeed'
+import { FINAL_REVIEW_RESERVED_STUDY_DAYS, resolveTargetExamDate } from '@/app/lib/camino/examDate'
+import { PLAN_ENGINE_VERSION, buildPlanDays, type PlanDay } from '@/app/lib/camino/planEngine'
+import { SPAIN_HOLIDAYS } from '@/app/lib/camino/spainHolidays'
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
@@ -344,7 +347,6 @@ function missionMeta(kind: MissionKind, subject: string, topic?: string, block?:
   const target = missionTarget(kind, subject, topic, block, planTopic)
   return { href: target, target, source: 'camino_pau' as const, xpPolicy: 'after_correction' as const }
 }
-function indexesFor(count: number) { if (count <= 3) return [0, 2, 4]; if (count === 4) return [0, 1, 3, 5]; if (count === 5) return [0, 1, 2, 4, 5]; if (count === 6) return [0, 1, 2, 3, 4, 5]; return [0, 1, 2, 3, 4, 5, 6] }
 function titleFor(kind: MissionKind, subject: string, item?: CurriculumItem) { if (kind === 'concept_explanation') return `Tema de hoy: ${item?.topic ?? subject}`; if (kind === 'guided_example') return `Ejemplo guiado: ${item?.topic ?? subject}`; if (kind === 'guided_practice') return `Practica guiada: ${item?.topic ?? subject}`; if (kind === 'evau_practice') return `Ejercicio PAU de ${item?.topic ?? subject}`; if (kind === 'exam_focus') return `Parcial cerca: ${item?.topic ?? subject}`; if (kind === 'mock_exam') return `Mini simulacro de ${subject}`; return `Tarea personalizada de ${subject}` }
 function loadJson<T>(key: string, fallback: T): T { try { const raw = window.localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback } catch { return fallback } }
 function saveJson(key: string, value: unknown) { window.localStorage.setItem(key, JSON.stringify(value)) }
@@ -795,7 +797,19 @@ function buildMission(input: {
   }
 }
 
-function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curriculum: CurriculumItem[] = [], planId: CaminoPlanId = 'free', weekStartISO = currentWeekStartISO(), weekCache: CalendarWeekCache = {}, orientationContext: CaminoOrientationContext | null = null) {
+// Previsión local de una semana.
+//
+// La ESTRUCTURA (qué días entran, qué asignatura toca, cuántos huecos hay y
+// hasta dónde llega el plan) ya NO se decide aquí: sale de buildPlanDays, el
+// mismo motor que usa el servidor (ver camino/planEngine.ts). Antes esta
+// función tenía su propia rotación, su propio patrón semanal y ningún
+// conocimiento de la fecha de la PAU, así que lo que el alumno veía podía no
+// parecerse a lo que luego se persistía —y variaba entre dispositivos—.
+//
+// Lo que sigue viviendo aquí es el ENRIQUECIMIENTO: títulos, motivos, ajustes
+// de "no lo he dado en clase", refuerzo por áreas débiles y simulacros. Todo
+// ello marcado como previsión, nunca como plan confirmado.
+function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curriculum: CurriculumItem[] = [], planId: CaminoPlanId = 'free', weekStartISO = currentWeekStartISO(), weekCache: CalendarWeekCache = {}, orientationContext: CaminoOrientationContext | null = null, targetExamDate: string = resolveTargetExamDate(todayISO())) {
   const planLimits = getCaminoPlanLimits(planId)
   const start = dateFromISO(weekStartISO)
   const subjects = normalizeOnboardingSubjects(onboarding.subjects)
@@ -813,13 +827,45 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
   const weeklyPhotoBudget = monthlyToWeeklyLimit(planLimits.photosPerMonth)
   const maxCorrectableMissions = Math.max(1, Math.min(weeklyCorrectionBudget, Math.max(weeklyPhotoBudget, planLimits.caminoMode === 'limited' ? 2 : weeklyCorrectionBudget)))
   const minutes = onboarding.dailyMinutes ?? 60
-  const indexes = indexesFor(weeklyDays)
-  let subjectRotation = weekDelta * weeklyDays
   const topicRotationBySubject = new Map<string, number>(
     subjects.map(subject => [subject, weekDelta * topicStepPerWeek])
   )
   const allowedSubjectSlugs = new Set(subjects.map(subject => subjectSlug(subject)))
   const relevantExams = exams.filter(exam => allowedSubjectSlugs.has(normalizeSubjectSlug(exam.subject)))
+
+  // ── Estructura del plan: motor compartido con el servidor ──
+  // Los pesos de rotación (examen cercano, prioridad de Orientación) se pasan
+  // AL MOTOR en vez de aplicarse solo aquí. Esa era la divergencia que hacía
+  // que una recomendación de Orientación cambiase la vista previa pero no las
+  // misiones que el servidor persiste.
+  const weekEndISO = toISO(addDays(start, 6))
+  const rotationWeights: Record<string, number> = {}
+  for (const subject of subjects) {
+    rotationWeights[subject] = subjectRotationWeight(subject, weekStartISO, relevantExams)
+      + orientationRotationBonusSlots(subject, orientationContext)
+  }
+  const examSubjectsByDate = new Map<string, string[]>()
+  for (const exam of relevantExams) {
+    const list = examSubjectsByDate.get(exam.date) ?? []
+    const label = subjects.find(s => subjectSlug(s) === normalizeSubjectSlug(exam.subject))
+    if (label && !list.includes(label)) list.push(label)
+    if (list.length > 0) examSubjectsByDate.set(exam.date, list)
+  }
+  const planDays = new Map<string, PlanDay>(
+    buildPlanDays({
+      from: weekStartISO,
+      to: weekEndISO,
+      examDate: targetExamDate,
+      subjects,
+      weeklyStudyDays: weeklyDays,
+      dailyMinutes: minutes,
+      holidays: SPAIN_HOLIDAYS,
+      reservedFinalStudyDays: FINAL_REVIEW_RESERVED_STUDY_DAYS,
+      examSubjectsByDate,
+      rotationWeights,
+      origin: 'forecast',
+    }).map(day => [day.date, day]),
+  )
   const weakAreas = typeof window === 'undefined' ? [] : loadJson<Array<{ subject: string; block?: string; topic?: string; score: number }>>(WEAK_AREAS_KEY, [])
   const topicProgress = typeof window === 'undefined' ? {} : loadJson<TopicProgress>(TOPIC_PROGRESS_KEY, {})
   const schoolAdjustments = typeof window === 'undefined' ? [] : loadSchoolAdjustments()
@@ -866,7 +912,11 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
     // (concept vs practice) selection below is untouched.
     const examHasSpecificBlock = Boolean(upcoming) && !isGeneralExamBlock(upcoming?.block)
     const blockCorrelationNearby = examHasSpecificBlock && examDistance != null && examDistance <= 6
-    const studyDay = indexes.includes(index) || Boolean(sameDay)
+    // El día es de estudio si lo dice el motor compartido (patrón semanal,
+    // festivos y corte por fecha de examen incluidos). Un examen ese mismo día
+    // siempre entra, aunque no tocara.
+    const planDay = planDays.get(dateISO)
+    const studyDay = (planDay?.subject != null) || Boolean(sameDay)
     const missions: Mission[] = []
 
     if (studyDay) {
@@ -876,14 +926,14 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
       // subjects from the pool, so a high-priority exam gets more days, not all of them.
       const rawPrioritySubject = sameDay?.subject ?? (index <= 2 ? weakArea?.subject : null)
       const prioritySubject = rawPrioritySubject ? subjectLabelFromSlug(normalizeSubjectSlug(rawPrioritySubject)) : null
-      const rotationPool = subjects.flatMap(subj => Array(subjectRotationWeight(subj, dateISO, relevantExams) + orientationRotationBonusSlots(subj, orientationContext)).fill(subj) as string[])
-      const subject = prioritySubject ?? rotationPool[subjectRotation % rotationPool.length]
+      // La asignatura del día la decide el motor compartido; el refuerzo por
+      // área débil y el examen del día siguen pudiendo adelantarla.
+      const subject = prioritySubject ?? planDay?.subject ?? subjects[0]
       const examContext = sameDay ?? ((strongExamNearby || blockCorrelationNearby) ? upcoming : undefined)
       const weakItem = weakArea && normalizeSubjectSlug(weakArea.subject) === subjectSlug(subject) ? findExamCurriculumItem({ id: 'weak-area', subject, date: todayISO(), block: weakArea.block ?? '', topic: weakArea.topic ?? '', name: 'Refuerzo', priority: 'normal' }, subject, curriculum) : null
       const rawCurriculumItem = findExamCurriculumItem(examContext, subject, curriculum) ?? weakItem ?? nextCurriculumItem(subject)
       const schoolAdjusted = schoolAdjustedItem(subject, rawCurriculumItem, onboarding, curriculum, schoolAdjustments, examContext)
       const curriculumItem = schoolAdjusted.item
-      if (!prioritySubject) subjectRotation += 1
       const topicDone = topicIsCompleted(curriculumItem ?? rawCurriculumItem, topicProgress)
       const blockDone = blockIsCompleted(curriculumItem ?? rawCurriculumItem, subject, curriculum, topicProgress)
       const canUseSimulation = (examPhase === 'eve' || examPhase === 'close') && canScheduleSimulation(null, planId, dateISO, weekCache, plannedSimulationsThisRun)
@@ -922,6 +972,11 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
           minutes: estimatedMinutesForSlot(minutes, 0),
           xp: kind === 'mock_exam' ? 35 : kind === 'evau_practice' ? 25 : 15,
           metadata: {
+            // Toda misión nacida aquí es PREVISIÓN, no plan confirmado: la
+            // interfaz debe poder decirlo y nadie debe confundirla con lo que
+            // el servidor ha persistido.
+            forecast: true,
+            plan_version: planDay?.planVersion ?? PLAN_ENGINE_VERSION,
             ...(upcoming && normalizeSubjectSlug(upcoming.subject) === subjectSlug(subject) ? { partial_exam_date: upcoming.date, exam_priority: upcoming.priority } : {}),
             ...(weakItem ? { weak_review: true, weak_area_label: weakArea?.topic ?? weakArea?.block ?? subject, weak_area_avg_score: weakArea?.score } : {}),
           },
@@ -935,7 +990,7 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
       // min/day gets 3-4 main missions, not capped at 2 no matter how much
       // time they declared.
       if (planLimits.caminoMode !== 'limited' && !sameDay) {
-        const dailySlotCount = missionsPerDayForMinutes(minutes)
+        const dailySlotCount = planDay?.missionSlots ?? missionsPerDayForMinutes(minutes)
         for (let slot = 1; slot < dailySlotCount && missions.length < maxCorrectableMissions; slot++) {
           const secondItem = curriculumItem ?? rawCurriculumItem
           missions.push(buildMission({
@@ -1018,6 +1073,11 @@ export default function CaminoCalendarClient() {
   const [onboardingChecked, setOnboardingChecked] = useState(false)
   const [calendar, setCalendar] = useState<DayPlan[]>([])
   const [exams, setExams] = useState<StudentExam[]>([])
+  // Fecha objetivo de la PAU de este alumno. Arranca en el valor derivado del
+  // curso académico y se corrige con lo que tenga en su perfil en cuanto
+  // carga. Antes la previsión local no sabía nada de esta fecha, así que
+  // dibujaba semanas posteriores al examen.
+  const [targetExamDate, setTargetExamDate] = useState(() => resolveTargetExamDate(todayISO()))
   const [localOrientationContext, setLocalOrientationContext] = useState<CaminoOrientationContext | null>(null)
   const [persistedOrientationTarget, setPersistedOrientationTarget] = useState<PersistedOrientationGoal | null | undefined>(undefined)
   // ?editExam=<id> (used by the "elige tus temas" message on a Historia
@@ -1211,7 +1271,15 @@ export default function CaminoCalendarClient() {
       if (token) {
         fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
           .then(r => r.json())
-          .then((profile: { student_exams?: StudentExam[]; target_degree?: unknown; target_university?: unknown; target_admission_score?: unknown; target_orientation_source_type?: unknown; target_orientation_community?: unknown }) => {
+          .then((profile: { student_exams?: StudentExam[]; target_degree?: unknown; target_university?: unknown; target_admission_score?: unknown; target_orientation_source_type?: unknown; target_orientation_community?: unknown; pau_exam_date?: unknown; pau_convocatoria?: unknown }) => {
+            // Fecha objetivo del alumno: la previsión local tiene que
+            // conocerla o seguirá proponiendo semanas más allá de la PAU.
+            if (!cancelled) {
+              setTargetExamDate(resolveTargetExamDate(todayISO(), {
+                examDate: typeof profile.pau_exam_date === 'string' ? profile.pau_exam_date : null,
+                convocatoria: typeof profile.pau_convocatoria === 'string' ? profile.pau_convocatoria : null,
+              }))
+            }
             if (Array.isArray(profile.student_exams) && !cancelled) {
               setExams(profile.student_exams)
               saveJson(EXAMS_KEY, profile.student_exams)
@@ -1632,6 +1700,12 @@ export default function CaminoCalendarClient() {
 
   const weekEndISO = toISO(addDays(dateFromISO(selectedWeekStart), 6))
   const weekCalendar = buildWeekDays(selectedWeekStart, visibleCalendar.filter(day => day.date >= selectedWeekStart && day.date <= weekEndISO))
+  // ¿Esta semana es previsión o plan confirmado? Toda misión nacida en
+  // generateCalendar lleva `forecast: true` en metadata (ver planEngine.ts).
+  // El alumno tiene derecho a distinguir "esto es lo que vas a hacer" de
+  // "esto es lo que previsiblemente harás": antes ambas cosas se dibujaban
+  // exactamente igual, y la segunda además podía variar entre dispositivos.
+  const weekIsForecast = weekCalendar.some(day => day.missions.some(m => m.metadata?.forecast === true))
   const activeExams = exams.filter(e => e.date >= realToday)
   const pastExams = exams.filter(e => e.date < realToday)
   const upcomingPartial = (() => {
@@ -1859,7 +1933,7 @@ export default function CaminoCalendarClient() {
     }
     const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
     const weekCache = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})
-    const nextCalendar = generateCalendar(onboarding, nextExams, source, planId, weekStartISO, weekCache, orientationContext)
+    const nextCalendar = generateCalendar(onboarding, nextExams, source, planId, weekStartISO, weekCache, orientationContext, targetExamDate)
     return { days: nextCalendar, source: 'client', reason: 'no_server_or_cache_week', shouldCache: true, shouldMerge: true }
   }
   function generateWeek(weekStartISO: string, nextExams = exams, planId = caminoPlanId) {
@@ -1923,7 +1997,7 @@ export default function CaminoCalendarClient() {
   function regenerate(nextExams = exams) {
     if (!onboarding) return
     const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
-    const regenerated = generateCalendar(onboarding, nextExams, source, caminoPlanId, selectedWeekStart, {}, orientationContext)
+    const regenerated = generateCalendar(onboarding, nextExams, source, caminoPlanId, selectedWeekStart, {}, orientationContext, targetExamDate)
     recordCalendarSource('client', 'exam_change', { weekStart: selectedWeekStart, missionCount: missionCount(regenerated) })
     const saved = persist(regenerated, nextExams)
     setToast('Camino PAU actualizado')
@@ -2783,6 +2857,14 @@ export default function CaminoCalendarClient() {
             )}
             {calendarConflictStatus === 'unavailable' && (
               <div style={{ marginBottom: 12, fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)' }}>Disponibilidad externa no disponible; Camino sigue usando tu calendario Kairo.</div>
+            )}
+            {weekIsForecast && (
+              <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, borderRadius: 12, border: '1px dashed var(--clay-border)', background: 'var(--clay-surface-muted, transparent)', padding: '8px 12px' }}>
+                <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--clay-text-muted)' }}>Previsión</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--clay-text-muted)', lineHeight: 1.4 }}>
+                  Estimación de cómo quedará esta semana. Se confirmará conforme se acerque la fecha.
+                </span>
+              </div>
             )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
               {weekCalendar.map((day, i) => {

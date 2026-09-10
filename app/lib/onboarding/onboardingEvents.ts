@@ -43,6 +43,16 @@ export type OnboardingEventType =
   | 'onboarding_signup_completed'
   | 'email_confirmation_sent'
   | 'email_confirmation_completed'
+  // Confirmación por CÓDIGO dentro de la app (/verificar-email). Ocurren
+  // antes de que exista sesión —salvo 'succeeded'— así que se encolan y se
+  // envían en el flush posterior al claim del draft. Nunca llevan el email
+  // ni el código: la lista blanca de /api/onboarding/event los descartaría
+  // igualmente, pero tampoco se envían desde aquí.
+  | 'email_verification_viewed'
+  | 'email_verification_submitted'
+  | 'email_verification_succeeded'
+  | 'email_verification_failed'
+  | 'email_verification_resent'
   | 'onboarding_draft_created'
   | 'onboarding_draft_claimed'
   | 'onboarding_finalize_started'

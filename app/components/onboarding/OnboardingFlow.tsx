@@ -31,6 +31,7 @@ import {
   type OnboardingStudentExam,
   type PainType,
 } from '@/app/lib/onboarding/onboardingStorage'
+import { savePendingVerification } from '@/app/lib/auth/emailVerification'
 import { sendOnboardingEvent, ONBOARDING_FLOW_VERSION, type OnboardingStepId } from '@/app/lib/onboarding/onboardingEvents'
 import { createActiveDurationTracker } from '@/app/lib/onboarding/activeDuration'
 import { loadLocalDraft, saveLocalDraft } from '@/app/lib/onboarding/onboardingDraftStorage'
@@ -760,7 +761,17 @@ export default function OnboardingFlow() {
       }
       if (result.needsConfirmation) {
         void sendOnboardingEvent(traceIdRef.current, 'email_confirmation_sent', {})
-        router.push(`/onboarding/revisa-tu-email?email=${encodeURIComponent(email)}&draft=${encodeURIComponent(draftId)}`)
+        // El email NO viaja en la URL: se guarda en sessionStorage, atado a
+        // esta pestaña. Una URL se comparte y acaba en logs de servidor y de
+        // analítica; el id de draft sí puede ir, es opaco. La pantalla de
+        // verificación solo lo muestra enmascarado.
+        savePendingVerification({
+          email: typeof result.email === 'string' ? result.email : email.trim().toLowerCase(),
+          draftId,
+          traceId: traceIdRef.current,
+          lastSentAtMs: Date.now(),
+        })
+        router.push(`/verificar-email?draft=${encodeURIComponent(draftId)}`)
         return
       }
       await supabase.auth.setSession(result.session)

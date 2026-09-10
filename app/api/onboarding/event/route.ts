@@ -38,6 +38,14 @@ const ONBOARDING_EVENT_TYPES = new Set<string>([
   'onboarding_signup_completed',
   'email_confirmation_sent',
   'email_confirmation_completed',
+  // Verificación por código dentro de la app. El único payload que llevan es
+  // `error_code` (invalid|expired|rate_limited|unknown), ya en la lista
+  // blanca de campos — nunca el email ni el código.
+  'email_verification_viewed',
+  'email_verification_submitted',
+  'email_verification_succeeded',
+  'email_verification_failed',
+  'email_verification_resent',
   'onboarding_draft_created',
   'onboarding_draft_claimed',
   'onboarding_finalize_started',

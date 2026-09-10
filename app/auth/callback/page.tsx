@@ -10,7 +10,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import { clearOnboarding } from '@/app/lib/onboarding/onboardingStorage'
-import { resolveOnboardingDestination } from '@/app/lib/onboarding/resolveOnboardingDestination'
+import { resolvePostAuthDestination } from '@/app/lib/onboarding/postAuthDestination'
 import { loadLocalDraft, setLocalDraftId } from '@/app/lib/onboarding/onboardingDraftStorage'
 import { sendOnboardingEvent, flushQueuedOnboardingEvents } from '@/app/lib/onboarding/onboardingEvents'
 import { SUPPORT_EMAIL } from '@/app/lib/support'
@@ -55,11 +55,15 @@ function CallbackHandler() {
     // localStorage (onboarding data) is consistent across Vercel preview and prod.
     const productionBase = process.env.NEXT_PUBLIC_APP_URL
 
-    function go(target: string) {
+    // `keepLocalOnboarding` conserva las respuestas locales del alumno. Solo
+    // se usa cuando volvemos a /onboarding por un claim fallido: en ese caso
+    // son lo único que le evita repetir las once preguntas por un fallo de
+    // infraestructura que no es suyo.
+    function go(target: string, keepLocalOnboarding = false) {
       // El navegador puede tener onboarding local de otra cuenta (misma
       // máquina, distinta sesión); se descarta aquí para que la página de
       // destino reconcilie con el servidor de la cuenta que acaba de entrar.
-      clearOnboarding()
+      if (!keepLocalOnboarding) clearOnboarding()
       if (productionBase && window.location.origin !== productionBase) {
         window.location.replace(`${productionBase}${target}`)
       } else {
@@ -80,64 +84,50 @@ function CallbackHandler() {
     // y solo es legible por el service role, de ahí que haya que ir por la
     // API y no por supabase-js directamente).
     async function redirectNext() {
-      // Fase 2: si venimos del onboarding anónimo, reclamar el draft es lo
-      // primero — el destino real es siempre /onboarding/finalizando?draft=…
-      // (nunca la comprobación de "onboarding completo" de más abajo, que es
-      // para el login clásico). No genera Camino aquí: eso lo hace
-      // /api/onboarding/finalize, llamado desde esa página.
-      if (draftId) {
-        try {
-          const { data: { session } } = await supabase.auth.getSession()
-          const token = session?.access_token
-          if (token) {
-            const claimRes = await fetch('/api/onboarding/draft/claim', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-              body: JSON.stringify({ draft_id: draftId }),
-            })
-            if (claimRes.ok) {
-              setLocalDraftId(draftId)
-              const traceId = loadLocalDraft()?.traceId ?? null
-              if (signupMethod === 'email') {
-                void sendOnboardingEvent(traceId, 'email_confirmation_completed', {})
-              }
-              void sendOnboardingEvent(traceId, 'onboarding_signup_completed', signupMethod ? { method: signupMethod } : {})
-              void flushQueuedOnboardingEvents(token)
-              go(`${next}?draft=${encodeURIComponent(draftId)}`)
-              return
-            }
-          }
-        } catch {
-          // Cae al onboarding normal de abajo — el local draft sigue intacto
-          // y el propio paso 'signup' vuelve a intentar el draft server-side
-          // en cuanto detecte que ya hay sesión.
-        }
-        go('/onboarding')
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      if (!token) {
+        // Sin token no se puede reclamar nada. Con draft, el destino seguro es
+        // el onboarding —igual que antes de extraer este helper—; nunca
+        // /onboarding/finalizando, que sin draft ni sesión solo sabe enseñar
+        // su pantalla de error.
+        if (draftId) { go('/onboarding', true); return }
+        go(next)
         return
       }
 
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        const token = session?.access_token
-        if (token) {
-          const res = await fetch('/api/onboarding/me', {
-            headers: { Authorization: `Bearer ${token}` },
+      // La secuencia "reclama el draft, luego decide destino" vive en
+      // postAuthDestination.ts porque ahora hay DOS entradas a este mismo
+      // punto: este callback (Google, y el enlace de email de respaldo) y la
+      // pantalla de verificación por código. Duplicarla es la forma más
+      // directa de que una de las dos pierda el draft del alumno.
+      const { destination, draftClaimed } = await resolvePostAuthDestination(draftId, {
+        claimDraft: async id => {
+          const res = await fetch('/api/onboarding/draft/claim', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ draft_id: id }),
           })
-          if (res.ok) {
-            const { onboarding, draft } = await res.json()
-            // Mismo criterio que hasProfile en CaminoCalendarClient, más
-            // recuperación de un borrador server-side sin terminar.
-            const dest = resolveOnboardingDestination({ onboarding, draft })
-            if (dest !== '/camino') {
-              go(dest)
-              return
-            }
-          }
+          return res.ok
+        },
+        fetchOnboardingMe: async () => {
+          const res = await fetch('/api/onboarding/me', { headers: { Authorization: `Bearer ${token}` } })
+          return res.ok ? await res.json() : null
+        },
+      }, next)
+
+      if (draftClaimed && draftId) {
+        setLocalDraftId(draftId)
+        const traceId = loadLocalDraft()?.traceId ?? null
+        if (signupMethod === 'email') {
+          void sendOnboardingEvent(traceId, 'email_confirmation_completed', {})
         }
-      } catch {
-        // Nunca bloquear el login por esta comprobación.
+        void sendOnboardingEvent(traceId, 'onboarding_signup_completed', signupMethod ? { method: signupMethod } : {})
       }
-      go(next)
+      void flushQueuedOnboardingEvents(token)
+      // Mismo criterio que en /verificar-email: un claim fallido conserva las
+      // respuestas locales.
+      go(destination, Boolean(draftId) && !draftClaimed)
     }
 
     if (code) {

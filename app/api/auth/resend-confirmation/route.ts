@@ -39,8 +39,12 @@ export async function POST(req: NextRequest) {
     admin.from('auth_email_attempts').select('id', { count: 'exact', head: true }).eq('ip', ip).eq('action', 'signup_confirmation').gte('created_at', hourSince),
   ])
   if ((!recentEmail.error && (recentEmail.count ?? 0) > 0) || (!hourlyIp.error && (hourlyIp.count ?? 0) >= RESEND_IP_HOURLY_LIMIT)) {
+    // `retryAfterSeconds` en el cuerpo, además de la cabecera: la pantalla de
+    // verificación enseña una cuenta atrás y el servidor es quien tiene el
+    // registro real de envíos (auth_email_attempts). Sin esto, una pestaña
+    // recién abierta creería que puede reenviar ya.
     return NextResponse.json(
-      { error: 'Espera 1 minuto antes de volver a intentarlo.' },
+      { error: 'Espera 1 minuto antes de volver a intentarlo.', retryAfterSeconds: RESEND_COOLDOWN_SECONDS },
       { status: 429, headers: { 'Retry-After': String(RESEND_COOLDOWN_SECONDS) } }
     )
   }
@@ -54,6 +58,10 @@ export async function POST(req: NextRequest) {
   // Same emailRedirectTo as the original signUp() call — without it this
   // link falls back to the Supabase Site URL (the landing page) instead of
   // /auth/callback?next=/onboarding.
+  //
+  // Sigue enviándose aunque el flujo nuevo sea por código: durante el rollout
+  // la plantilla de Supabase lleva {{ .Token }} Y el enlace, y el mismo token
+  // sirve para las dos vías. Quitar esto rompería el enlace de respaldo.
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kairo-pau.com'
   const redirectQuery = new URLSearchParams({ next: nextPath })
   if (draftId) {

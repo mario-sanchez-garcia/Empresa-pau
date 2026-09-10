@@ -156,7 +156,11 @@ export async function POST(req: NextRequest) {
         })
       }
 
-      return NextResponse.json({ needsConfirmation: true, delivery: 'requested' })
+      // Se devuelve el email YA NORMALIZADO (trim + minúsculas) porque es el
+      // que Supabase ha registrado, y es exactamente el que `verifyOtp` tiene
+      // que recibir después. Que el cliente lo re-derive por su cuenta es
+      // pedirle que adivine nuestra normalización.
+      return NextResponse.json({ needsConfirmation: true, delivery: 'requested', email: normalizedEmail })
     }
 
     // ── Immediate session flow (EMAIL_CONFIRMATION_ENABLED = false) ───────────

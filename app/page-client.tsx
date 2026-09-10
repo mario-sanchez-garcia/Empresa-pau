@@ -5964,6 +5964,23 @@ function cambiarTipo(t: Tipo) {
           color: #eef2fb;
         }
 
+        /* Breadcrumb (Exámenes › Asignatura › Bloque): vive fuera de
+           .exams-screen y de .exams-subject-hero (es hermano de ambos, entre
+           el header oculto y el hero), así que no hereda el fondo oscuro de
+           ninguno de los dos y quedaba como una franja clara de fondo de
+           página entre el breadcrumb y la imagen. Mismo patrón de scoping
+           que el hero: atributo propio + override de los 2 colores fijos
+           (link y término actual) que quedaban ilegibles sobre fondo oscuro. */
+        [data-kairo-clay-theme="dark"].exams-breadcrumb {
+          background: #10162a;
+        }
+        [data-kairo-clay-theme="dark"] .exams-breadcrumb-link {
+          color: #9aa7c4 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-breadcrumb-current {
+          color: #eef2fb !important;
+        }
+
         /* ── Piloto clay de Exámenes — Bloque 1: hero + buscador ── El hero
            (imagen + overlay oscuro) no necesita reglas nuevas, igual que en
            Historial/Chat: ya es oscuro por diseño en los 3 temas. Solo el
@@ -6464,14 +6481,14 @@ function cambiarTipo(t: Tipo) {
           <>
             {/* Breadcrumb: Exámenes › Asignatura › Bloque — puramente informativo/navegable,
                 no toca el estado de asignatura/bloque (ver navegarAAsignatura para ese flujo). */}
-            <nav aria-label="Migas de pan" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px 0', fontSize: 12, color: '#64748b', flexWrap: 'wrap' }}>
-              <a href="/examenes" style={{ color: '#64748b', textDecoration: 'none', fontWeight: 600 }}>Exámenes</a>
+            <nav aria-label="Migas de pan" className="exams-breadcrumb" data-kairo-clay-theme={clayTheme} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 24px 0', fontSize: 12, color: '#64748b', flexWrap: 'wrap' }}>
+              <a href="/examenes" className="exams-breadcrumb-link" style={{ color: '#64748b', textDecoration: 'none', fontWeight: 600 }}>Exámenes</a>
               <span style={{ color: '#cbd5e1' }}>›</span>
-              <span style={{ color: '#334155', fontWeight: 700 }}>{cfg.label}</span>
+              <span className="exams-breadcrumb-current" style={{ color: '#334155', fontWeight: 700 }}>{cfg.label}</span>
               {bloqueActivoLabel && (
                 <>
                   <span style={{ color: '#cbd5e1' }}>›</span>
-                  <span style={{ color: '#334155', fontWeight: 700 }}>{bloqueActivoLabel}</span>
+                  <span className="exams-breadcrumb-current" style={{ color: '#334155', fontWeight: 700 }}>{bloqueActivoLabel}</span>
                 </>
               )}
             </nav>

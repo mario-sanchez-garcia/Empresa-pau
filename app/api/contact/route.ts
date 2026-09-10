@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendContactMessage } from '@/app/lib/email/sendContactMessage'
+import { createServiceClient } from '@/app/lib/billing/supabase'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,6 +63,18 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error('[contact POST] sendContactMessage failed:', err instanceof Error ? err.message : String(err))
     return NextResponse.json({ error: 'No hemos podido enviar tu mensaje. Escríbenos directamente a hola@kairo.es mientras lo arreglamos.' }, { status: 502 })
+  }
+
+  // Guardado en Supabase para el panel de admin — best-effort: el email ya
+  // salió y es el canal que de verdad llega a soporte, así que un fallo aquí
+  // no debe impedir la confirmación al alumno (mismo criterio que otras
+  // rutas del proyecto que combinan un efecto crítico con uno secundario).
+  try {
+    const db = createServiceClient()
+    const { error } = await db.from('contact_messages').insert({ name, email, subject, message })
+    if (error) console.error('[contact POST] contact_messages insert failed:', error.message)
+  } catch (err) {
+    console.error('[contact POST] contact_messages insert threw:', err instanceof Error ? err.message : String(err))
   }
 
   return NextResponse.json({ ok: true })

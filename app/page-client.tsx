@@ -6268,6 +6268,50 @@ function cambiarTipo(t: Tipo) {
           border-top-color: rgba(96,165,250,.14) !important;
         }
 
+        /* ── Piloto clay de Exámenes — RichTextArea (solo estilo externo,
+           NO se toca components/shared/RichTextArea.tsx ni
+           MathAnswerToolbar.tsx — AGENTS.md no prohíbe esto: la única
+           regla real es no tocar LÓGICA/LaTeX de esos archivos, y la
+           prohibición de "MathAnswerToolbar" en AGENTS.md es sobre un
+           archivo SIN TRACKEAR con nombre corrupto que hoy no existe, no
+           sobre el componente. Mismo patrón ya usado y probado en
+           MathAnswerToolbar por una ronda anterior via
+           [data-kairo-math-toolbar="true"] (ver globals.css) — aquí se
+           cubre lo que esa ronda dejó fuera: la barra B/I y el área de
+           texto propias de RichTextArea, que no tienen prop de tema. La
+           barra B/I no tiene className propio, se apunta por posición:
+           es el div que sigue al <style> interno del componente (ese
+           <style> SÍ es el primer hijo real — confirmado inspeccionando
+           el DOM, no asumido). */
+        [data-kairo-clay-theme="dark"] .exams-rich-text > style + div {
+          background: #1c2440 !important;
+          border-color: rgba(96,165,250,.24) !important;
+          border-bottom-color: rgba(96,165,250,.16) !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-rich-text > style + div button {
+          color: #9aa7c4 !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-rich-text .pau-rich-editor {
+          background: #171e38 !important;
+          border-color: rgba(96,165,250,.24) !important;
+          border-top-color: rgba(96,165,250,.16) !important;
+          color: #eef2fb !important;
+        }
+        [data-kairo-clay-theme="dark"] .exams-rich-text .pau-rich-editor:empty:before {
+          color: #7d879e !important;
+        }
+        /* Los chips "ƒx Símbolos" / "🧩 Plantillas" / pestañas de grupo de
+           MathAnswerToolbar usan color:accentColor (fijo por asignatura,
+           sin theming) sobre background:softColor cuando están inactivos.
+           Con el softColor oscuro de arriba (rgba(96,165,250,.16) sobre
+           fondo oscuro) ese texto azul queda en ratio 2.23 -- confirmado
+           con el barrido de contraste real, no asumido. Los botones de
+           símbolos/plantillas individuales (bg-white + text-slate-700) NO
+           se tocan aquí, ya tienen su propio override en globals.css. */
+        [data-kairo-clay-theme="dark"] [data-kairo-math-toolbar="true"] button:not(.text-slate-700) {
+          color: #eef2fb !important;
+        }
+
         /* ── Piloto clay de Exámenes — Bloque: tarjeta "Corrección de
            Kairo" ── CorrectionResultCard no se toca (componente compartido
            con Camino, Simulacros y varias asignaturas de Cataluña,
@@ -6982,9 +7026,17 @@ function cambiarTipo(t: Tipo) {
                     placeholder="Empieza a resolver el problema aquí..."
                     minHeight={asignatura === 'historia' || asignatura === 'lengua' ? 280 : 110}
                     accentColor={cfg.color}
-                    softColor={cfg.light}
-                    borderColor={cfg.soft}
+                    /* softColor/borderColor son props públicas del componente
+                       (no se toca su archivo) — en oscuro se sustituye el
+                       pastel/borde claro por su equivalente clay, igual que
+                       ya pasaba con accentColor por asignatura. Esto también
+                       corrige de paso el hover de negrita/cursiva y buena
+                       parte del borde de MathAnswerToolbar (recibe el mismo
+                       borderColor), sin duplicar lógica de tema. */
+                    softColor={clayTheme === 'dark' ? 'rgba(96,165,250,.16)' : cfg.light}
+                    borderColor={clayTheme === 'dark' ? 'rgba(96,165,250,.24)' : cfg.soft}
                     mathSubject={asignatura}
+                    className="exams-rich-text"
                   />
                 ) : (
                   <div style={{ padding: '14px 16px' }}>

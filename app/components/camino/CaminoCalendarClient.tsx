@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
 import WeeklyCheckinBanner from '@/app/components/camino/WeeklyCheckinBanner'
 import ExamCoverageBanner from '@/app/components/camino/ExamCoverageBanner'
+import UnscheduledWorkBanner from '@/app/components/camino/UnscheduledWorkBanner'
 import HistoriaTopicChips from '@/app/components/camino/HistoriaTopicChips'
 import GoogleCalendarConnection from '@/app/components/camino/GoogleCalendarConnection'
 import CaminoAssistant from '@/app/components/camino/CaminoAssistant'
@@ -2543,6 +2544,9 @@ export default function CaminoCalendarClient() {
           )}
           <WeeklyCheckinBanner />
           <div style={{ order: -2 }}><ExamCoverageBanner /></div>
+          {/* Trabajo que no cabe en el plan: sin esto, el alumno ve menos
+              misiones y ninguna explicación (ver UnscheduledWorkBanner). */}
+          <div style={{ order: -2 }}><UnscheduledWorkBanner /></div>
 
           {/* ── OBJETIVO DE ORIENTACIÓN ──
               Se quita de esta pantalla (rediseño clay, fase 1 del hub) — deja

@@ -4,6 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { resolveTargetExamDate } from './examDate'
 import { getMadridToday } from './studyDays'
+import { getCaminoPlanLimits } from './caminoPlanLimits'
 import { buildStudentPlanContext, type StudentPlanContext } from './planWindow'
 
 // Carga desde base de datos de la ventana de planificación del alumno. Las
@@ -44,7 +45,8 @@ export async function loadStudentPlanContext(
   today: string = getMadridToday(),
   declared?: DeclaredAvailability,
 ): Promise<StudentPlanContext> {
-  const [{ data: profile }, { data: prefsRow }] = await Promise.all([
+  const nowIso = new Date().toISOString()
+  const [{ data: profile }, { data: prefsRow }, { data: entitlements }] = await Promise.all([
     supabase.from('perfiles').select('pau_exam_date, pau_convocatoria').eq('id', userId).maybeSingle(),
     supabase
       .from('billing_events')
@@ -54,6 +56,13 @@ export async function loadStudentPlanContext(
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from('user_entitlements')
+      .select('plan_id')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+      .limit(1),
   ])
 
   const examDate = resolveTargetExamDate(today, {
@@ -71,10 +80,17 @@ export async function loadStudentPlanContext(
   const persistedWeekly = typeof rawWeekly === 'number' && rawWeekly > 0 ? rawWeekly : null
   const persistedMinutes = typeof rawMinutes === 'number' ? rawMinutes : null
 
+  // El tope del plan comercial forma parte de la disponibilidad EFECTIVA, no
+  // es una regla aparte. Cuando solo lo aplicaba la personalización, el motor
+  // planificaba con 7 días y la personalización reubicaba con 2: dos capas del
+  // mismo plan con disponibilidades distintas.
+  const maxWeeklyDays = getCaminoPlanLimits(entitlements?.[0]?.plan_id ?? null).maxStudyDaysPerWeek
+  const requestedWeekly = declared?.weeklyStudyDays ?? persistedWeekly
+
   return buildStudentPlanContext({
     today,
     examDate,
-    weeklyStudyDays: declared?.weeklyStudyDays ?? persistedWeekly,
+    weeklyStudyDays: requestedWeekly != null ? Math.min(requestedWeekly, maxWeeklyDays) : null,
     dailyMinutes: declared?.dailyMinutes ?? persistedMinutes,
   })
 }

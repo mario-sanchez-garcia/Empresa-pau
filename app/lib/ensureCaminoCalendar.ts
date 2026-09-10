@@ -238,10 +238,26 @@ async function maybeInjectCommentText(
   }, { onConflict: 'user_id,scheduled_date,subject,v2_sort_order', ignoreDuplicates: true })
 }
 
+/**
+ * Resultado de una ejecución.
+ *
+ * `degraded` lista los pasos que fallaron y se registraron sin abortar. NO es
+ * cosmético: quien orquesta esto debe distinguir "el Camino está al día" de
+ * "hubo escrituras que no salieron", porque marcar el día como hecho tras un
+ * fallo deja al alumno esperando hasta mañana para el siguiente intento.
+ * Ejemplo real: escribir status 'unscheduled' contra una base donde todavía no
+ * se ha aplicado su migración.
+ */
+export type EnsureCaminoCalendarResult = {
+  ok: boolean
+  degraded: string[]
+}
+
 export async function ensureCaminoCalendar(
   userId: string,
   supabase: SupabaseClient,
-): Promise<void> {
+): Promise<EnsureCaminoCalendarResult> {
+  const degraded: string[] = []
   const today = getMadridToday()
   // Fotografía ÚNICA de disponibilidad (fecha objetivo, patrón semanal,
   // minutos diarios, festivos, corte de repaso final). Todo lo que propone
@@ -276,6 +292,7 @@ export async function ensureCaminoCalendar(
       .eq('status', 'pending')
     if (unscheduleError) {
       console.error('[ensureCaminoCalendar] unschedule past-exam rows failed:', unscheduleError.message)
+      degraded.push('unschedule_past_exam_rows')
     } else {
       const queueIds = impossibleRows.map(r => r.queue_id as string | null).filter((id): id is string => Boolean(id))
       if (queueIds.length > 0) {
@@ -703,14 +720,14 @@ export async function ensureCaminoCalendar(
     .in('status', ['pending', 'postponed'])
 
   const futureDaySet = new Set((futureDayRows ?? []).map(r => r.scheduled_date as string))
-  if (futureDaySet.size >= CALENDAR_HORIZON) return
+  if (futureDaySet.size >= CALENDAR_HORIZON) return { ok: degraded.length === 0, degraded }
 
   // PASO 4+5 — Generar días hasta completar CALENDAR_HORIZON
 
   // Private beta scope: the Supabase calendar engine only schedules the
   // active core PAU subjects. `subjects` ya se calculó arriba, antes de
   // PASO 2.5, para el forzado de prioridad de examen.
-  if (subjects.length === 0) return
+  if (subjects.length === 0) return { ok: degraded.length === 0, degraded }
 
   // PASO 5 — Ratio de velocidad
   const { count: remainingQueue } = await supabase
@@ -863,7 +880,7 @@ export async function ensureCaminoCalendar(
     .filter(d => !futureDaySet.has(d))
     .slice(0, CALENDAR_HORIZON - futureDaySet.size)
 
-  if (emptyDays.length === 0) return
+  if (emptyDays.length === 0) return { ok: degraded.length === 0, degraded }
 
   const calendarRows: object[] = []
   const scheduledQueueIds: string[] = []
@@ -988,6 +1005,7 @@ export async function ensureCaminoCalendar(
     if (calendarError) {
       console.error('[ensureCaminoCalendar] calendar upsert failed:', calendarError.message)
       calendarWritten = false
+      degraded.push('calendar_upsert')
     }
   }
 
@@ -1003,8 +1021,10 @@ export async function ensureCaminoCalendar(
     // vuelve a encontrar 'pending' y el upsert idempotente no duplica nada.
     if (queueError) {
       console.error('[ensureCaminoCalendar] queue status update failed:', queueError.message)
+      degraded.push('queue_status_update')
     }
   }
 
   await maybeInjectCommentText(userId, supabase, today)
+  return { ok: degraded.length === 0, degraded }
 }

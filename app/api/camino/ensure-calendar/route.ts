@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    await ensureCaminoCalendar(user.id, db)
+    const ensure = await ensureCaminoCalendar(user.id, db)
     const weakReviews = await injectWeakReviewMissions(user.id, db)
     // Microdiagnóstico: como mucho uno, y solo si el alumno ya tiene ritmo
     // (ver camino/knowledgeState.ts). Nunca bloquea el resto del Camino.
@@ -60,18 +60,38 @@ export async function POST(request: NextRequest) {
       console.warn('[camino/ensure-calendar] calendar sync skipped:', error)
     })
 
-    // El marcador se escribe DESPUÉS de que las tres operaciones terminen: si
+    // El marcador se escribe DESPUÉS de que las operaciones terminen: si
     // alguna lanza, el día no queda marcado y el siguiente intento vuelve a
     // probar, en vez de dejar el Camino a medias hasta mañana.
-    const { error: logError } = await db
-      .from('camino_ensure_log')
-      .upsert(
-        { user_id: user.id, last_ensured_at: new Date().toISOString(), last_ensured_day: today },
-        { onConflict: 'user_id' },
-      )
-    if (logError) console.error('[camino/ensure-calendar] log upsert failed:', logError.message)
+    //
+    // Y no basta con que no lancen. Una escritura que falla y se registra
+    // —una migración todavía sin aplicar, por ejemplo— deja el Camino
+    // incompleto sin excepción ninguna; marcar el día igualmente convertía un
+    // fallo recuperable en un día perdido. Un resultado degradado NO marca el
+    // día: el siguiente intento reintenta.
+    const degraded = [
+      ...ensure.degraded,
+      ...(personalization.reason === 'error' ? ['personalization'] : []),
+    ]
+    if (degraded.length === 0) {
+      const { error: logError } = await db
+        .from('camino_ensure_log')
+        .upsert(
+          { user_id: user.id, last_ensured_at: new Date().toISOString(), last_ensured_day: today },
+          { onConflict: 'user_id' },
+        )
+      if (logError) console.error('[camino/ensure-calendar] log upsert failed:', logError.message)
+    } else {
+      console.error('[camino/ensure-calendar] degraded run, day not marked:', degraded.join(', '))
+    }
 
-    return NextResponse.json({ ok: true, personalization, weakReviews, diagnostics })
+    return NextResponse.json({
+      ok: degraded.length === 0,
+      degraded: degraded.length > 0 ? degraded : undefined,
+      personalization,
+      weakReviews,
+      diagnostics,
+    })
   } catch (error) {
     console.error('[camino/ensure-calendar]', error)
     return NextResponse.json({ error: 'No se pudo preparar tu Camino' }, { status: 500 })

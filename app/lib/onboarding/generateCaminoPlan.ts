@@ -34,9 +34,6 @@ export const ALLOWED_GENERATE_SUBJECTS = new Set(['matematicas_ii', 'matematicas
 // semanas (ver subjectRotation.ts), así que todas las asignaturas entran en el
 // reparto por igual — incluida la 6ª y siguientes, que con el `(dow - 1) % n`
 // anterior nunca llegaban a salir.
-/** Los siete días de la semana: en el sprint final no se descarta ninguno. */
-const ALL_WEEK_DAY_INDEXES = [0, 1, 2, 3, 4, 5, 6]
-
 function addDaysIso(dateStr: string, n: number): string {
   return new Date(Date.parse(`${dateStr}T12:00:00Z`) + n * 86400000).toISOString().slice(0, 10)
 }
@@ -354,17 +351,16 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
     // de lecciones completas: a una semana de la prueba, la primera acción
     // útil es volver sobre lo que ya se dio, no empezar temario nuevo.
     const finalSprint = contentDays.length === 0
-    let sprintDays = finalSprint
+    // Los días del sprint salen del MISMO contexto, no de una lista abierta
+    // aquí. Cuando el patrón declarado no deja ni un día antes del examen, es
+    // `buildStudentPlanContext` quien abre la semana entera
+    // (`emergencyAvailability`), y por tanto lo saben todos los pasos: la
+    // personalización usa esa misma disponibilidad y ya no puede deshacer lo
+    // que este siembra. Abrir los días aquí y no allí dejaba el Camino vacío
+    // en cuanto corría la personalización.
+    const sprintDays = finalSprint
       ? planningDates(planContext, { limit: ONBOARDING_PLAN_DAYS, includeFinalReviewWindow: true })
       : []
-    // Último recurso: el patrón semanal declarado puede no tener NI UN día
-    // entre hoy y el examen (dos días a la semana, prueba pasado mañana). Con
-    // la prueba encima, el patrón deja de mandar: valen todos los días que
-    // quedan. Sin esto, esa cuenta seguiría sin poder terminar el onboarding.
-    if (finalSprint && sprintDays.length === 0) {
-      for (let d = today; d < planContext.examDate; d = addDaysIso(d, 1)) sprintDays.push(d)
-      sprintDays = sprintDays.slice(0, ONBOARDING_PLAN_DAYS)
-    }
     const studyDays = finalSprint ? sprintDays : contentDays
     const { data: existingCal } = studyDays.length > 0
       ? await db
@@ -415,10 +411,7 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
       // hasWork evita que un día lectivo se pierda porque a la asignatura que
       // le tocaba ya no le queda cola: la rotación cede el turno a la
       // siguiente asignatura que sí tenga temario pendiente.
-      // En la rama de último recurso los días ya NO siguen el patrón semanal
-      // (ver arriba), así que la rotación tampoco puede filtrarlos por él.
-      const rotationPattern = finalSprint ? ALL_WEEK_DAY_INDEXES : planContext.studyDayIndexes
-      const subject = subjectForDay(dateStr, scheduleSubjects, rotationPattern, s => {
+      const subject = subjectForDay(dateStr, scheduleSubjects, planContext.studyDayIndexes, s => {
         const queue = subjectQueues[s] ?? []
         return (cursors[s] ?? 0) < queue.length
       })

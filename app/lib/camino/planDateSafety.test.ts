@@ -88,10 +88,13 @@ test('quienes tienen la ventana se la pasan a la inyección de parciales', () =>
 
 test('la personalización no reubica más allá del examen', () => {
   const code = stripComments(read('camino/applyCalendarPersonalization.ts')).replace(/\s+/g, ' ')
-  assert.ok(code.includes('if (current >= examDate) break'), 'falta el corte por fecha de examen')
+  // El corte lo garantizan las fechas candidatas (todas del contexto, ya
+  // acotadas por el examen) y `eligibleDatesFor`, con tests sobre datos en
+  // planPlacement.test.ts.
+  assert.ok(code.includes('candidateDates(context, appliedFrom)'), 'las fechas candidatas no salen del contexto')
   // Y cambiar la convocatoria tiene que invalidar lo ya aplicado.
   assert.ok(
-    /preferenceHash = stableHash\([^)]*context\.examDate/.test(code),
+    /preferenceHash = stableHash\(/.test(code) && code.includes('context.examDate'),
     'la fecha objetivo no entra en el hash: mover el examen no re-dispararía la personalización',
   )
 })
@@ -162,23 +165,68 @@ test('la entrada en la última semana tiene rama propia y salida garantizada', (
     code.includes('includeFinalReviewWindow: true'),
     'la rama tardía no usa los días de la reserva de repaso final',
   )
-  // Último recurso: si el patrón semanal no deja ni un día, valen todos.
+  // El último recurso (abrir la semana entera) vive en el CONTEXTO, no aquí:
+  // si lo abriera solo este paso, la personalización lo desharía después.
   assert.ok(
-    code.includes('for (let d = today; d < planContext.examDate; d = addDaysIso(d, 1)) sprintDays.push(d)'),
-    'sin este último recurso una cuenta puede quedarse sin poder terminar el onboarding',
+    !/for \(let d = today; d < planContext\.examDate/.test(code),
+    'el generador vuelve a abrir días por su cuenta; esa apertura es del contexto',
+  )
+  assert.ok(
+    code.includes('planningDates(planContext, { limit: ONBOARDING_PLAN_DAYS, includeFinalReviewWindow: true })'),
+    'la rama tardía no toma sus días del contexto compartido',
   )
   // Y lo que se siembra ahí es repaso, no temario nuevo.
   assert.ok(code.includes("finalSprint ? 'review' :"), 'la rama tardía siembra temario nuevo dentro de la reserva')
 })
 
+test('la disponibilidad excepcional es del alumno, no de un paso', () => {
+  const window = stripComments(read('camino/planWindow.ts')).replace(/\s+/g, ' ')
+  assert.ok(window.includes('emergencyAvailability'), 'el contexto no expresa la apertura excepcional de días')
+  const personalization = stripComments(read('camino/applyCalendarPersonalization.ts')).replace(/\s+/g, ' ')
+  // La personalización ya no calcula su propia lista de días preferidos.
+  assert.ok(
+    !personalization.includes('isPreferredStudyDay'),
+    'la personalización vuelve a tener su propia fuente de disponibilidad',
+  )
+  assert.ok(personalization.includes('planningDates(context'), 'no toma los días del contexto compartido')
+})
+
+test('el tope comercial de días forma parte de la disponibilidad efectiva', () => {
+  const loader = stripComments(read('camino/studentPlanContext.ts')).replace(/\s+/g, ' ')
+  assert.ok(loader.includes('getCaminoPlanLimits('), 'el contexto ignora el tope del plan comercial')
+  assert.ok(loader.includes('Math.min(requestedWeekly, maxWeeklyDays)'), 'el tope no se aplica al patrón semanal')
+})
+
+test('"no cabe" significa que se agotaron los días, no que falló el primero', () => {
+  const code = stripComments(read('camino/applyCalendarPersonalization.ts')).replace(/\s+/g, ' ')
+  // Un día sin hueco horario continúa al siguiente día elegible.
+  assert.ok(
+    /if \(!timeSlot\) continue/.test(code),
+    'un día sin hueco horario vuelve a abandonar la misión en vez de probar el siguiente',
+  )
+  assert.ok(code.includes('for (const date of eligibleDatesFor('), 'no se recorren todas las fechas elegibles')
+  // Y la lista de candidatas no se recorta al mínimo necesario.
+  assert.ok(code.includes('MAX_CANDIDATE_DAYS'), 'la ventana candidata sigue recortada al mínimo de filas')
+})
+
+test('subir el algoritmo de colocación invalida la personalización anterior', () => {
+  const code = read('camino/applyCalendarPersonalization.ts')
+  assert.ok(
+    code.includes("const PERSONALIZATION_VERSION = 'calendar_personalization_v3'"),
+    'la versión no ha subido: las filas con el hash antiguo salen por already_current',
+  )
+})
+
 // ── El calendario existente también se corrige ───────────────────────────
 
-test('la personalización delega la decisión en el módulo puro y le pasa las dos ventanas', () => {
+test('la personalización usa las reglas del módulo puro, no unas propias', () => {
   // El QUÉ-va-DÓNDE se comprueba de verdad en planPlacement.test.ts, sobre
   // datos. Aquí solo se fija que la personalización no vuelva a decidirlo por
   // su cuenta y que le pase el corte de temario nuevo, no solo el examen.
   const code = stripComments(read('camino/applyCalendarPersonalization.ts')).replace(/\s+/g, ' ')
-  assert.ok(code.includes('const decision = planPlacement('), 'la personalización vuelve a decidir por su cuenta')
+  for (const rule of ['eligibleDatesFor(', 'orderRowsForPlacement(', 'unscheduledReasonFor(']) {
+    assert.ok(code.includes(rule), `la personalización no usa la regla compartida ${rule}`)
+  }
   assert.ok(code.includes('planningCutoff: context.planningCutoff'), 'no le pasa el corte de temario nuevo')
   assert.ok(code.includes('examDate: context.examDate'), 'no le pasa la fecha objetivo')
 })
@@ -186,7 +234,7 @@ test('la personalización delega la decisión en el módulo puro y le pasa las d
 test('lo que no cabe queda en un estado explícito y vuelve a la cola', () => {
   const code = stripComments(read('camino/applyCalendarPersonalization.ts')).replace(/\s+/g, ' ')
   assert.ok(code.includes("status: 'unscheduled'"), 'las filas sin sitio se quedan con su fecha imposible')
-  assert.ok(code.includes('unscheduled_reason: item.reason'), 'no se registra por qué no cabe')
+  assert.ok(code.includes('unscheduled_reason: unscheduledReasonFor('), 'no se registra por qué no cabe')
   assert.ok(code.includes('unscheduledRows: unplaced.length'), 'no se informa de cuántas quedan fuera')
   assert.ok(!/\.delete\(/.test(code), 'la personalización borra trabajo del alumno')
   assert.ok(
@@ -210,4 +258,42 @@ test('la migración de estado es aditiva y conserva los estados existentes', () 
     assert.ok(sql.includes(`'${status}'`), `la migración pierde el estado ${status}`)
   }
   assert.ok(!/delete|drop table|update .* set/i.test(sql.replace(/drop constraint/gi, '')), 'la migración toca datos')
+})
+
+// ── Un fallo de escritura no es una ejecución completa ───────────────────
+
+test('una ejecución degradada NO marca el día como hecho', () => {
+  // Una escritura que falla y se registra —una migración todavía sin aplicar,
+  // por ejemplo— deja el Camino incompleto sin lanzar excepción. Marcar el día
+  // igualmente convertía un fallo recuperable en un día perdido.
+  const ensure = stripComments(read('ensureCaminoCalendar.ts')).replace(/\s+/g, ' ')
+  assert.ok(ensure.includes('degraded.push('), 'los fallos registrados no se reportan')
+  assert.ok(ensure.includes('return { ok: degraded.length === 0, degraded }'), 'la ejecución no devuelve su estado')
+
+  const route = stripComments(
+    readFileSync(join(ROOT, '../api/camino/ensure-calendar/route.ts'), 'utf8'),
+  ).replace(/\s+/g, ' ')
+  assert.ok(route.includes('if (degraded.length === 0) {'), 'el día se marca sin comprobar si la ejecución fue completa')
+  assert.ok(
+    route.includes("personalization.reason === 'error' ? ['personalization'] : []"),
+    'un fallo de personalización no cuenta como ejecución degradada',
+  )
+})
+
+test('el trabajo sin fecha se le muestra al alumno', () => {
+  const banner = readFileSync(
+    join(process.cwd(), 'app', 'components', 'camino', 'UnscheduledWorkBanner.tsx'),
+    'utf8',
+  )
+  assert.ok(banner.includes("eq('status', 'unscheduled')"), 'el aviso no lee el trabajo sin fecha')
+  // Temas ÚNICOS: una tarea reprogramada varias veces no puede inflar el número.
+  assert.ok(banner.includes('const seen = new Set<string>()'), 'el aviso cuenta filas en vez de temas únicos')
+  for (const reason of ['after_exam', 'final_review_window', 'no_capacity']) {
+    assert.ok(banner.includes(reason), `el aviso no explica el motivo ${reason}`)
+  }
+  const client = readFileSync(
+    join(process.cwd(), 'app', 'components', 'camino', 'CaminoCalendarClient.tsx'),
+    'utf8',
+  )
+  assert.ok(client.includes('<UnscheduledWorkBanner />'), 'el aviso no está montado en Camino')
 })

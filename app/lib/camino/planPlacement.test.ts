@@ -116,3 +116,39 @@ test('isNewContent: solo lección y comentario de texto son temario nuevo', () =
   assert.equal(isNewContent('pau_practice'), false)
   assert.equal(isNewContent('partial_practice'), false)
 })
+
+// ── "No cabe" solo tras agotar los días ─────────────────────────────────
+
+test('un día sin hueco horario hace pasar al siguiente, no abandonar la misión', () => {
+  // Reproducción del informe: una misión, lunes ocupado, miércoles libre
+  // antes del corte — solo se consultaba el lunes y salía 'no_capacity'.
+  const ocupado = '2026-05-25'
+  const { placements, unscheduled } = planPlacement(
+    [row('m', 'concept')],
+    WINDOW,
+    (_row, date) => date !== ocupado,
+  )
+  assert.deepEqual(unscheduled, [])
+  assert.equal(placements.length, 1)
+  assert.equal(placements[0].date, '2026-05-26')
+})
+
+test('el día rechazado no consume su capacidad: sigue libre para otra misión', () => {
+  const soloRechazaLaPrimera = (r: PlacementRow, date: string) => !(r.id === 'a' && date === '2026-05-25')
+  const { placements } = planPlacement([row('a', 'concept'), row('b', 'concept')], WINDOW, soloRechazaLaPrimera)
+  assert.equal(placements.find(p => p.id === 'a')?.date, '2026-05-26')
+  assert.equal(placements.find(p => p.id === 'b')?.date, '2026-05-25')
+})
+
+test('solo se declara sin sitio cuando TODOS sus días la rechazan', () => {
+  const { placements, unscheduled } = planPlacement([row('m', 'concept')], WINDOW, () => false)
+  assert.deepEqual(placements, [])
+  assert.deepEqual(unscheduled.map(u => u.reason), ['no_capacity'])
+})
+
+test('la agenda llena no cambia el motivo cuando el problema es la fecha', () => {
+  // Una fila posterior al examen sigue diciendo 'after_exam', no 'no_capacity'.
+  const late = row('tarde', 'review', '2026-06-20')
+  const { unscheduled } = planPlacement([late], WINDOW, () => false)
+  assert.deepEqual(unscheduled.map(u => u.reason), ['after_exam'])
+})

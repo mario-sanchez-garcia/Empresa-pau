@@ -84,3 +84,27 @@ test('`from` nunca retrocede al pasado', () => {
   const dates = planningDates(ctx, { from: '2020-01-01', includeFinalReviewWindow: true })
   assert.ok(dates.every(date => date >= ctx.today))
 })
+
+// ── Disponibilidad excepcional: es del alumno, no de un paso ─────────────
+
+test('sin ningún día del patrón antes del examen, se abre la semana entera', () => {
+  // Sábado 05/06/2027, examen el lunes 07/06, patrón L/X/V: entre hoy y la
+  // prueba no queda ni un día del patrón. O se abren los días, o no hay plan.
+  const ctx = context({ today: '2027-06-05', examDate: '2027-06-07', weeklyStudyDays: 3, holidays: NO_HOLIDAYS })
+  assert.equal(ctx.emergencyAvailability, true)
+  assert.deepEqual(ctx.studyDayIndexes, [0, 1, 2, 3, 4, 5, 6])
+  const dates = planningDates(ctx, { includeFinalReviewWindow: true })
+  assert.deepEqual(dates, ['2027-06-05', '2027-06-06'])
+})
+
+test('la apertura excepcional NO se activa cuando el alumno sí tiene días', () => {
+  const ctx = context({ today: '2026-05-17', examDate: '2026-06-07', weeklyStudyDays: 2, holidays: NO_HOLIDAYS })
+  assert.equal(ctx.emergencyAvailability, false)
+  assert.deepEqual(ctx.studyDayIndexes, [0, 3])
+})
+
+test('con la semana abierta no entra temario nuevo: sigue siendo reserva final', () => {
+  const ctx = context({ today: '2027-06-05', examDate: '2027-06-07', weeklyStudyDays: 3, holidays: NO_HOLIDAYS })
+  assert.deepEqual(planningDates(ctx), [], 'siembra temario nuevo en la víspera')
+  assert.ok(planningDates(ctx, { includeFinalReviewWindow: true }).length > 0, 'y tampoco puede quedarse sin nada')
+})

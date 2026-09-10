@@ -35,6 +35,18 @@ export type StudentPlanContext = {
   /** Patrón semanal ya resuelto: 0 = lunes … 6 = domingo. */
   studyDayIndexes: number[]
   holidays: ReadonlySet<string>
+  /**
+   * El patrón declarado no dejaba NI UN día entre hoy y el examen, así que se
+   * ha abierto la semana entera.
+   *
+   * Vive en el contexto —y no como un apaño dentro del generador— porque si
+   * un paso abre los días y el siguiente sigue con el patrón original, el
+   * segundo deshace al primero: el generador sembraba repaso en sábado y
+   * domingo y la personalización, con el patrón L/X/V, los declaraba sin
+   * sitio y dejaba el Camino vacío. La disponibilidad excepcional es del
+   * ALUMNO, no de un paso.
+   */
+  emergencyAvailability: boolean
 }
 
 /** Opciones de disponibilidad listas para studyCapacity/planEngine. */
@@ -98,7 +110,19 @@ export function buildStudentPlanContext(input: {
   holidays?: ReadonlySet<string>
 }): StudentPlanContext {
   const holidays = input.holidays ?? SPAIN_HOLIDAYS
-  const weeklyStudyDays = input.weeklyStudyDays ?? null
+  const declaredWeekly = input.weeklyStudyDays ?? null
+
+  // ¿Le queda al alumno algún día de estudio con SU patrón antes del examen?
+  // Con dos días a la semana y la prueba pasado mañana la respuesta puede ser
+  // que no: entonces el patrón deja de mandar y valen todos los días que
+  // quedan. Es esto o no darle plan ninguno.
+  const hasOwnDays = studyDatesBetween(input.today, input.examDate, {
+    weeklyStudyDays: declaredWeekly,
+    holidays,
+  }).length > 0
+  const emergencyAvailability = !hasOwnDays
+  const weeklyStudyDays = emergencyAvailability ? 7 : declaredWeekly
+
   return {
     today: input.today,
     examDate: input.examDate,
@@ -110,5 +134,6 @@ export function buildStudentPlanContext(input: {
     dailyMinutes: input.dailyMinutes ?? null,
     studyDayIndexes: studyDayIndexesFor(weeklyStudyDays),
     holidays,
+    emergencyAvailability,
   }
 }

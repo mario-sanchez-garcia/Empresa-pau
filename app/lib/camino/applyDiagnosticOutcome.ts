@@ -3,7 +3,8 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
-import { planQueueAdjustment } from './diagnosticAdjustment'
+import { ADJUSTABLE_QUEUE_STATUSES, planQueueAdjustment } from './diagnosticAdjustment'
+import { getMadridToday } from './studyDays'
 import {
   evaluateDiagnostic,
   nextAverage,
@@ -25,10 +26,11 @@ import {
 //     temario. Aprobar significa "puedes ir rápido", no "ya está hecho".
 //
 //  2. Solo toca EL BLOQUE DIAGNOSTICADO. Nada de reconstruir el Camino.
-//     El UPDATE va filtrado por (user_id, subject, block_slug) y además
-//     restringido a queue_status='pending': lo ya completado, lo que está
-//     programado en el calendario y cualquier fila que el alumno haya
-//     tocado a mano se quedan exactamente como están.
+//     El UPDATE va filtrado por (user_id, subject, block_slug) y restringido
+//     a trabajo SIN EMPEZAR ('pending' o 'scheduled'): lo ya completado, lo
+//     pospuesto y lo apartado se quedan exactamente como están. Una fila
+//     'scheduled' tiene fecha pero no la ha empezado nadie — y esa fecha no
+//     se mueve: lo que cambia es el contenido de la misión, no cuándo toca.
 //
 //  3. NUNCA promueve a 'dominado'. Esa transición vive aislada en
 //     knowledgeState.canPromoteToDominado y hoy no la invoca nadie.
@@ -91,7 +93,12 @@ export async function applyDiagnosticOutcome(
     const attempts = existing?.evidence_attempts ?? 0
     const avg = typeof existing?.evidence_avg_score === 'number' ? existing.evidence_avg_score : null
 
-    await db.from('student_block_knowledge').upsert({
+    // El estado de conocimiento es la conclusión del diagnóstico: si no se
+    // escribe, el bloque sigue en 'declarado' y volvería a ofrecerse. Antes el
+    // error del upsert no se miraba y el resto del ajuste seguía adelante,
+    // dejando cola y calendario corregidos sobre una conclusión que la base de
+    // datos nunca llegó a guardar.
+    const { error: knowledgeError } = await db.from('student_block_knowledge').upsert({
       user_id: userId,
       subject: context.subject,
       block_slug: context.blockSlug,
@@ -103,6 +110,9 @@ export async function applyDiagnosticOutcome(
       diagnostic_completed_at: now,
       updated_at: now,
     }, { onConflict: 'user_id,subject,block_slug' })
+    if (knowledgeError) {
+      throw new Error(`student_block_knowledge upsert failed: ${knowledgeError.message}`)
+    }
 
     await recordBetaMetric(db, userId, 'diagnostic_completed', {
       subject: context.subject,
@@ -139,11 +149,12 @@ export async function applyDiagnosticOutcome(
  * Devuelve las filas de cola de ESTE bloque de repaso express a lección
  * completa.
  *
- * Solo `queue_status='pending'`: una fila 'completed' es trabajo ya hecho,
- * una 'scheduled' ya tiene sitio en el calendario y una 'inactive' está
- * fuera por otro motivo. Ninguna se toca. Tampoco se borra ni se recrea
- * nada — es un UPDATE de metadata sobre las filas que aún no han entrado en
- * juego, que es exactamente "ajustar el punto de entrada futuro".
+ * Solo trabajo SIN EMPEZAR ('pending' o 'scheduled'): una fila 'completed' es
+ * trabajo ya hecho, una 'postponed' la apartó el alumno y una 'inactive' está
+ * fuera por otro motivo. Ninguna se toca. Tampoco se borra ni se recrea nada
+ * — es un UPDATE de metadata (y, para las ya programadas, del contenido de su
+ * misión futura sin empezar, conservando la fecha), que es exactamente
+ * "ajustar el punto de entrada futuro".
  */
 async function revertBlockToConcept(
   db: SupabaseClient,
@@ -156,7 +167,7 @@ async function revertBlockToConcept(
     .eq('user_id', userId)
     .eq('subject', context.subject)
     .eq('block_slug', context.blockSlug)
-    .eq('queue_status', 'pending')
+    .in('queue_status', ADJUSTABLE_QUEUE_STATUSES)
 
   const candidates = ((rows ?? []) as Array<{
     id: string
@@ -181,6 +192,7 @@ async function revertBlockToConcept(
     at: new Date().toISOString(),
   })
 
+  const today = getMadridToday()
   let adjusted = 0
   for (const adjustment of adjustments) {
     const { error } = await db
@@ -188,9 +200,58 @@ async function revertBlockToConcept(
       .update({ metadata: adjustment.metadata })
       .eq('id', adjustment.id)
       .eq('user_id', userId)
-      .eq('queue_status', 'pending')
-    if (!error) adjusted += 1
+      // Mismo filtro de estado en el UPDATE que en el SELECT: si la fila
+      // cambió de estado entre ambos (el alumno completó el tema mientras se
+      // corregía el diagnóstico), no se toca.
+      .in('queue_status', ADJUSTABLE_QUEUE_STATUSES)
+    if (error) continue
+    adjusted += 1
+    // Una fila 'scheduled' ya tiene misión en el calendario con el contenido
+    // ANTIGUO (repaso express). Corregir solo la cola dejaba al alumno viendo
+    // repasos exprés de un bloque que acaba de demostrar que no domina —
+    // justo en las misiones que tiene más cerca. Se corrige la misión futura
+    // sin empezar, conservando su fecha.
+    if (adjustment.queueStatus === 'scheduled') {
+      await revertScheduledMission(db, userId, adjustment.id, today)
+    }
   }
 
   return adjusted
+}
+
+/**
+ * Devuelve a "lección completa" la misión de calendario de una fila de cola ya
+ * programada, sin moverla de fecha.
+ *
+ * Solo misiones FUTURAS y todavía pendientes: una misión de hoy o de ayer
+ * puede estar ya empezada, y una 'completed'/'missed' es historia del alumno.
+ */
+async function revertScheduledMission(
+  db: SupabaseClient,
+  userId: string,
+  queueId: string,
+  today: string,
+): Promise<void> {
+  const { data: mission } = await db
+    .from('camino_calendar')
+    .select('id, metadata')
+    .eq('user_id', userId)
+    .eq('queue_id', queueId)
+    .eq('status', 'pending')
+    .gt('scheduled_date', today)
+    .maybeSingle()
+  if (!mission?.id) return
+
+  const meta = (mission.metadata ?? {}) as Record<string, unknown>
+  const { express: _express, ...rest } = meta
+  await db
+    .from('camino_calendar')
+    .update({
+      mission_type: 'concept',
+      metadata: { ...rest, reverted_by_diagnostic: true },
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', mission.id as string)
+    .eq('user_id', userId)
+    .eq('status', 'pending')
 }

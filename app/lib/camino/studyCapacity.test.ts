@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { allocateExamBudgets, computeStudyCapacity, studyDatesBetween } from './studyCapacity.ts'
+import { allocateExamBudgets, computeStudyCapacity, studyDatesBetween, studyDayIndexesFor } from './studyCapacity.ts'
 
 test('studyDatesBetween excluye la fecha objetivo y los fines de semana', () => {
   // 2026-09-14 lunes … 2026-09-21 lunes
@@ -88,4 +88,71 @@ test('los exámenes ya pasados no consumen presupuesto', () => {
     { dailyMinutes: 60 },
   )
   assert.equal(budgets.get('viejo')?.allocatedSessions, 0)
+})
+
+// ── Presupuesto de exámenes sobre la disponibilidad real ─────────────────
+
+test('el reparto respeta los días semanales del alumno, no L-V', () => {
+  // Reproducción del informe: una semana a 60 min/día repartía diez sesiones.
+  // Para un alumno de dos días semanales son cuatro.
+  const conLunesViernes = allocateExamBudgets(
+    '2026-09-14',
+    [{ id: 'a', date: '2026-09-21', pendingCount: 50 }],
+    { dailyMinutes: 60 },
+  )
+  assert.equal(conLunesViernes.get('a')?.allocatedSessions, 10)
+
+  const conDosDias = allocateExamBudgets(
+    '2026-09-14',
+    [{ id: 'a', date: '2026-09-21', pendingCount: 50 }],
+    { dailyMinutes: 60, weeklyStudyDays: 2 },
+  )
+  assert.equal(conDosDias.get('a')?.allocatedSessions, 4)
+})
+
+test('tres exámenes el mismo día: ninguno se queda a cero por orden de id', () => {
+  // Antes el desempate por id daba 10/0/0: dos exámenes sin una sola sesión.
+  const budgets = allocateExamBudgets(
+    '2026-09-14',
+    [
+      { id: 'a', date: '2026-09-21', pendingCount: 10 },
+      { id: 'b', date: '2026-09-21', pendingCount: 10 },
+      { id: 'c', date: '2026-09-21', pendingCount: 10 },
+    ],
+    { dailyMinutes: 60 },
+  )
+  for (const id of ['a', 'b', 'c']) {
+    assert.ok((budgets.get(id)?.allocatedSessions ?? 0) > 0, `${id} se quedó sin preparación`)
+  }
+  // Y la capacidad total sigue sin inflarse.
+  const total = ['a', 'b', 'c'].reduce((sum, id) => sum + (budgets.get(id)?.allocatedSessions ?? 0), 0)
+  assert.equal(total, 10)
+})
+
+test('el mínimo garantizado no le quita días al examen más inminente', () => {
+  // El mínimo se reserva de los días MÁS TARDÍOS, que el examen cercano no
+  // podía usar de todos modos.
+  const budgets = allocateExamBudgets(
+    '2026-09-14',
+    [
+      { id: 'lejano', date: '2026-09-25', pendingCount: 10 },
+      { id: 'proximo', date: '2026-09-16', pendingCount: 10 },
+    ],
+    { dailyMinutes: 60 },
+  )
+  assert.equal(budgets.get('proximo')?.allocatedSessions, 4, 'el examen inminente conserva todos sus días')
+  assert.ok((budgets.get('lejano')?.allocatedSessions ?? 0) > 0)
+})
+
+test('el patrón semanal es el mismo para filtrar días y para rotar', () => {
+  assert.deepEqual(studyDayIndexesFor(2), [0, 3])
+  assert.deepEqual(studyDayIndexesFor(7), [0, 1, 2, 3, 4, 5, 6])
+  // Sin declaración, L-V.
+  assert.deepEqual(studyDayIndexesFor(null), [0, 1, 2, 3, 4])
+  const dates = studyDatesBetween('2026-09-14', '2026-09-28', { weeklyStudyDays: 2 })
+  const pattern = new Set(studyDayIndexesFor(2))
+  for (const date of dates) {
+    const dow = new Date(`${date}T12:00:00Z`).getUTCDay()
+    assert.ok(pattern.has(dow === 0 ? 6 : dow - 1), `${date} no está en el patrón declarado`)
+  }
 })

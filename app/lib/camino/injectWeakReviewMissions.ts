@@ -6,7 +6,8 @@ import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, sanitizeLessonTitle } from './caminoCurriculumPlan'
 import { getWeakAreas, type WeakArea } from './caminoWeakAreasServer'
 import { createDayScheduler, estimatedMinutesForMissionType, DayScheduler } from './scheduleTimeSlot'
-import { addDays, getMadridToday, getStudyDays } from './studyDays'
+import { addDays, getMadridToday } from './studyDays'
+import { loadStudentPlanContext, planningDates } from './studentPlanContext'
 
 const WEAK_REVIEW_VERSION = 'weak_review_v1'
 const HORIZON_DAYS = 14
@@ -185,7 +186,18 @@ export async function injectWeakReviewMissions(
       countByDate.set(row.scheduled_date, (countByDate.get(row.scheduled_date) ?? 0) + 1)
     }
 
-    const candidateDates = getStudyDays(today, HORIZON_DAYS * 2)
+    // Días candidatos DEL ALUMNO: su patrón semanal, sus festivos y nunca
+    // después de su fecha objetivo. `getStudyDays(today, HORIZON_DAYS * 2)`
+    // devolvía días laborables sin más — a un alumno de dos días por semana le
+    // proponía repasos los martes, y a dos semanas de la PAU seguía
+    // proponiendo fechas posteriores al examen. Un repaso SÍ puede caer dentro
+    // de la ventana de repaso final: es exactamente lo que va ahí.
+    const planContext = await loadStudentPlanContext(userId, supabase, today)
+    const candidateDates = planningDates(planContext, {
+      limit: HORIZON_DAYS * 2,
+      includeFinalReviewWindow: true,
+    })
+    if (candidateDates.length === 0) return { inserted: 0, mappingMisses: 0 }
     const rowsToInsert: object[] = []
     let mappingMisses = 0
     // Un scheduler por fecha candidata, creado bajo demanda y reutilizado si

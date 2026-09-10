@@ -10,31 +10,15 @@ import { computeExamCoverage, reactivateAllInactiveQueueItems, reactivateQueueIt
 import { FINAL_MOCK_WINDOW_DAYS, injectAllPartialExamMissions, resolveFinalMockSlot } from './camino/injectPartialExamMissions'
 import { resolveTopicIdentitiesBatch } from './camino/resolveTopicIdentity'
 import { createDayScheduler, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
-import { FINAL_REVIEW_RESERVED_STUDY_DAYS, resolveTargetExamDate } from './camino/examDate'
-import { computeStudyCapacity, planningCutoffDate } from './camino/studyCapacity'
+import { computeStudyCapacity } from './camino/studyCapacity'
+import { FINAL_REVIEW_RESERVED_STUDY_DAYS } from './camino/examDate'
 import { buildPlanDays } from './camino/planEngine'
+import { examRotationWeights, type ExamRotationPriority, type RotationExam } from './camino/rotationWeights'
 import { rotateSubjectForDay } from './camino/subjectRotation'
+import { capacityOptionsFor, loadStudentPlanContext } from './camino/studentPlanContext'
 import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
 import { addDays, getMadridToday } from './camino/studyDays'
 
-// Fecha objetivo del alumno. Ya no es una constante congelada: sale de lo que
-// el alumno declaró (perfiles.pau_exam_date / pau_convocatoria) y, a falta de
-// eso, del curso académico en marcha — nunca de una fecha ya pasada.
-async function targetExamDateFor(
-  userId: string,
-  supabase: SupabaseClient,
-  today: string,
-): Promise<string> {
-  const { data } = await supabase
-    .from('perfiles')
-    .select('pau_exam_date, pau_convocatoria')
-    .eq('id', userId)
-    .maybeSingle()
-  return resolveTargetExamDate(today, {
-    examDate: (data?.pau_exam_date as string | null | undefined) ?? null,
-    convocatoria: (data?.pau_convocatoria as string | null | undefined) ?? null,
-  })
-}
 // Cuántos días futuros (con misión pendiente/postpuesta) mantiene
 // sembrados ensureCaminoCalendar en camino_calendar — todo lo que cae
 // dentro de este horizonte es 100% servidor, idéntico en cualquier
@@ -79,13 +63,17 @@ function subjectForDay(
   dateStr: string,
   subjects: string[],
   orderedSubjects: string[],
+  studyDayIndexes: readonly number[],
   examSubjectsToday?: string[],
   hasWork?: (subject: string) => boolean,
 ): string | null {
   if (subjects.length === 0) return null
   const ordered = orderedSubjects.filter(subject => subjects.includes(subject))
   for (const subject of subjects) if (!ordered.includes(subject)) ordered.push(subject)
-  return rotateSubjectForDay(dateStr, ordered, { priority: examSubjectsToday, hasWork })
+  // El patrón semanal del alumno viaja SIEMPRE: es lo que hace que el turno
+  // de rotación se cuente sobre los días que estudia de verdad y no sobre
+  // días laborables transcurridos (ver subjectRotation.ts).
+  return rotateSubjectForDay(dateStr, ordered, { priority: examSubjectsToday, hasWork, studyDayIndexes })
 }
 
 
@@ -255,7 +243,12 @@ export async function ensureCaminoCalendar(
   supabase: SupabaseClient,
 ): Promise<void> {
   const today = getMadridToday()
-  const examDate = await targetExamDateFor(userId, supabase, today)
+  // Fotografía ÚNICA de disponibilidad (fecha objetivo, patrón semanal,
+  // minutos diarios, festivos, corte de repaso final). Todo lo que propone
+  // fechas más abajo — y todo inyector al que se le pase — trabaja sobre
+  // ESTA, no sobre ventanas fijas propias.
+  const planContext = await loadStudentPlanContext(userId, supabase, today)
+  const examDate = planContext.examDate
   const externalBusyByDate = new Map<string, LocalBusyRange[]>()
 
   // PASO 1 — Marcar misiones pasadas pendientes (no bonus) como missed
@@ -334,28 +327,12 @@ export async function ensureCaminoCalendar(
     return (PRIVATE_BETA_SUBJECTS as readonly string[]).indexOf(a) - (PRIVATE_BETA_SUBJECTS as readonly string[]).indexOf(b)
   })
 
-  // Minutos diarios declarados en onboarding — se calcula aquí (antes de
-  // PASO 2.5) porque PASO 2.6, más abajo, ya necesita estimar duración de
-  // misión al colocar días forzados por examen; PASO 5 reutiliza el mismo
-  // valor más tarde en vez de repetir la consulta.
-  const { data: prefsRow } = await supabase
-    .from('billing_events')
-    .select('payload')
-    .eq('user_id', userId)
-    .eq('event_type', 'onboarding_completed')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  const prefsPayload = prefsRow?.payload as Record<string, unknown> | null | undefined
-  const declaredDailyMinutes = prefsPayload?.daily_minutes
-  const dailyMinutesForSlots = typeof declaredDailyMinutes === 'number' ? declaredDailyMinutes : null
-  // Días de estudio a la semana que el alumno eligió. Sin esto, el cálculo de
-  // "¿me da tiempo?" asumía siempre L-V, así que a un alumno de 2 días/semana
-  // se le atribuía 2,5 veces la capacidad que tiene de verdad.
-  const rawWeeklyStudyDays = prefsPayload?.weekly_study_days_value
-  const declaredWeeklyStudyDays = typeof rawWeeklyStudyDays === 'number' && rawWeeklyStudyDays > 0
-    ? rawWeeklyStudyDays
-    : null
+  // Minutos diarios y días semanales declarados: salen de planContext, la
+  // misma lectura que usan el corte por fecha y la rotación. Antes esta
+  // función releía la preferencia por su cuenta, así que dos capas del mismo
+  // plan podían razonar sobre disponibilidades distintas.
+  const dailyMinutesForSlots = planContext.dailyMinutes
+  const declaredWeeklyStudyDays = planContext.weeklyStudyDays
 
   // PASO 2.5 — Parciales: procesar TODOS los exámenes activos juntos (fechas +
   // asignaturas), no uno a uno, para que dos exámenes próximos no se pisen
@@ -367,6 +344,12 @@ export async function ensureCaminoCalendar(
   // cambió de verdad.
   const horizonEnd = addDays(today, CALENDAR_HORIZON)
   const examSubjectsByDate = new Map<string, string[]>()
+  // Exámenes en el formato que entiende el módulo de pesos compartido. Se
+  // rellena en PASO 2.5 y se le pasa al motor abajo: hasta ahora los pesos de
+  // rotación por examen cercano SOLO los aplicaba la vista previa del
+  // navegador, así que el servidor persistía un reparto distinto del que el
+  // alumno acababa de ver.
+  const rotationExams: RotationExam[] = []
   // Temas de examen que deben ganar prioridad absoluta sobre el orden lineal
   // de su propia asignatura: un examen con Curso pendiente pausa
   // temporalmente el tema que tocaría por defecto. Se aplica SIEMPRE que
@@ -402,6 +385,13 @@ export async function ensureCaminoCalendar(
       .eq('id', userId)
       .maybeSingle()
     const activeExams = cleanStudentExams(profileForExams?.student_exams)
+    for (const exam of activeExams) {
+      rotationExams.push({
+        subjectSlug: EXAM_SUBJECT_SLUG[exam.subject] ?? exam.subject,
+        date: exam.date,
+        priority: (exam.priority ?? 'normal') as ExamRotationPriority,
+      })
+    }
     // customInstructions se lee aquí (una sola vez, junto a student_exams) en
     // vez de que resolveFinalMockSlot invente su propio valor: tiene que ser
     // EXACTAMENTE el mismo que injectAllPartialExamMissions usará más abajo
@@ -460,7 +450,7 @@ export async function ensureCaminoCalendar(
       // cuanto el examen entre en su ventana de ≤10 días — así ninguna
       // lección de HOY (forzada o de turno normal) queda plantada justo
       // donde el Simulacro aterrizará más adelante.
-      const mockSlot = await resolveFinalMockSlot(userId, supabase, { ...exam, customInstructions }, otherExamDates)
+      const mockSlot = await resolveFinalMockSlot(userId, supabase, { ...exam, customInstructions }, otherExamDates, false, planContext)
       const mockDateBoundary = mockSlot
         ?? coverage.weekdaysUntilExam[Math.max(0, coverage.weekdaysUntilExam.length - FINAL_MOCK_WINDOW_DAYS)]
         ?? null
@@ -494,7 +484,7 @@ export async function ensureCaminoCalendar(
       // que, cuando le toque su turno, la asignatura empiece por los temas
       // del examen.
       const normalRotationDays = coverage.weekdaysUntilExam.filter(
-        dateStr => subjectForDay(dateStr, subjects, subjectsByBacklog) === slug,
+        dateStr => subjectForDay(dateStr, subjects, subjectsByBacklog, planContext.studyDayIndexes) === slug,
       ).length
       const needsCompression = normalRotationDays < coverage.pendingSortOrders.length
       if (needsCompression) {
@@ -516,7 +506,7 @@ export async function ensureCaminoCalendar(
       }
     }
     if (activeExams.length > 0) {
-      await injectAllPartialExamMissions(userId, supabase, activeExams)
+      await injectAllPartialExamMissions(userId, supabase, activeExams, { planContext })
     }
   } catch { /* parciales scheduling is best-effort; never blocks the base calendar fill */ }
 
@@ -699,11 +689,11 @@ export async function ensureCaminoCalendar(
   // distingue entre 30 y 180 minutos al día ni sabe cuántos días a la semana
   // estudia el alumno. Con 500 temas, 184 días y 180 min/día el rescate se
   // disparaba y recortaba la cola pese a haber sitio para 736 sesiones.
-  const capacity = computeStudyCapacity(today, examDate, {
-    dailyMinutes: dailyMinutesForSlots,
-    weeklyStudyDays: declaredWeeklyStudyDays,
-    holidays: SPAIN_HOLIDAYS,
-  })
+  // Hasta planningCutoff, NO hasta el examen: los últimos días de estudio
+  // están reservados a práctica y repaso final, así que no son capacidad
+  // disponible para temario nuevo. Contarlos inflaba la capacidad y hacía que
+  // el rescate no se activara en casos en los que de verdad no cabe.
+  const capacity = computeStudyCapacity(today, planContext.planningCutoff, capacityOptionsFor(planContext))
   const pendingTotal = remainingQueue ?? 0
   // >1 significa literalmente "no cabe": hay más temas pendientes que sesiones
   // disponibles antes del examen.
@@ -797,13 +787,14 @@ export async function ensureCaminoCalendar(
   // seguía proponiendo 30 fechas y la mitad caían DESPUÉS del examen. Además
   // se reservan los últimos días de estudio para práctica y repaso final, en
   // vez de sembrar temario nuevo hasta la víspera.
-  const planningCutoff = planningCutoffDate(today, examDate, FINAL_REVIEW_RESERVED_STUDY_DAYS, {
-    weeklyStudyDays: declaredWeeklyStudyDays,
-    holidays: SPAIN_HOLIDAYS,
-  })
-  // Los días candidatos salen del MISMO motor que usa la previsión del
-  // navegador (ver camino/planEngine.ts), para que servidor y cliente no
-  // puedan discrepar sobre qué días entran en el plan.
+  const planningCutoff = planContext.planningCutoff
+  // Día Y ASIGNATURA salen del MISMO motor que usa la previsión del navegador
+  // (ver camino/planEngine.ts). Antes se le pedían solo las FECHAS y luego se
+  // volvía a elegir la asignatura aquí con `subjectForDay`: dos rotaciones
+  // distintas sobre las mismas fechas, así que "motor único" solo cubría la
+  // mitad de la decisión. Ahora se consume su salida completa, y la elección
+  // local solo actúa como respaldo cuando a la asignatura que el motor eligió
+  // ya no le queda cola (dato que el motor no tiene hasta este punto).
   const horizonEndDate = addDays(today, CALENDAR_HORIZON * 4)
   const planDays = buildPlanDays({
     from: today,
@@ -815,8 +806,18 @@ export async function ensureCaminoCalendar(
     holidays: SPAIN_HOLIDAYS,
     reservedFinalStudyDays: FINAL_REVIEW_RESERVED_STUDY_DAYS,
     examSubjectsByDate,
+    // Mismos pesos que la vista previa del navegador (ver rotationWeights.ts).
+    // El bonus de Orientación sigue siendo solo del cliente: su contexto
+    // completo (ponderaciones, gap) no está persistido, así que el servidor no
+    // puede reconstruirlo — por eso la previsión va etiquetada como tal.
+    rotationWeights: examRotationWeights(subjectsByBacklog, today, rotationExams),
+    hasWork: subject => (subjectQueues[subject]?.length ?? 0) > 0,
     origin: 'server',
   })
+  const plannedSubjectByDate = new Map<string, string>()
+  for (const day of planDays) {
+    if (day.subject) plannedSubjectByDate.set(day.date, day.subject)
+  }
   const emptyDays = planDays
     .filter(day => day.subject != null)
     .map(day => day.date)
@@ -842,14 +843,16 @@ export async function ensureCaminoCalendar(
     (subjectQueues['historia_espana'] ?? []).map(item => item.v2_sort_order),
   )
 
+  const hasQueueLeft = (s: string) => (cursors[s] ?? 0) < (subjectQueues[s]?.length ?? 0)
+
   for (const dateStr of emptyDays) {
-    // hasWork: si a la asignatura que le tocaba ya no le queda cola, el día
-    // lectivo se perdía entero. La rotación cede el turno a la siguiente
-    // asignatura que sí tenga temario pendiente.
-    const subject = subjectForDay(dateStr, subjects, subjectsByBacklog, examSubjectsByDate.get(dateStr), s => {
-      const queue = subjectQueues[s] ?? []
-      return (cursors[s] ?? 0) < queue.length
-    })
+    // La asignatura la decidió ya el motor. Solo se vuelve a rotar si a esa
+    // asignatura se le agotó la cola MIENTRAS corría este bucle (el motor no
+    // conoce los cursores): sin ese respaldo el día lectivo se perdía entero.
+    const planned = plannedSubjectByDate.get(dateStr)
+    const subject = planned && hasQueueLeft(planned)
+      ? planned
+      : subjectForDay(dateStr, subjects, subjectsByBacklog, planContext.studyDayIndexes, examSubjectsByDate.get(dateStr), hasQueueLeft)
     if (!subject) continue
 
     const queue = subjectQueues[subject] ?? []
@@ -928,19 +931,41 @@ export async function ensureCaminoCalendar(
     cursors[subject] = cursor
   }
 
+  // Calendario y cola son DOS tablas que tienen que quedar de acuerdo: una
+  // fila de cola en 'scheduled' significa "ya tiene sitio en el calendario".
+  // Antes el upsert no se comprobaba y la cola se marcaba igualmente: si el
+  // upsert fallaba, esos temas quedaban marcados como programados sin misión
+  // ninguna — invisibles para el alumno y para la siguiente ejecución, que ya
+  // no los ve como 'pending'. Sin transacción entre ambas tablas, el orden
+  // correcto es escribir primero el calendario, comprobar, y solo entonces
+  // marcar la cola; si el calendario falla no se toca la cola y el trabajo se
+  // reintenta entero en la siguiente ejecución (el upsert es idempotente por
+  // su clave de conflicto).
+  let calendarWritten = true
   if (calendarRows.length > 0) {
-    await supabase.from('camino_calendar').upsert(calendarRows, {
+    const { error: calendarError } = await supabase.from('camino_calendar').upsert(calendarRows, {
       onConflict: 'user_id,scheduled_date,subject,v2_sort_order',
       ignoreDuplicates: true,
     })
+    if (calendarError) {
+      console.error('[ensureCaminoCalendar] calendar upsert failed:', calendarError.message)
+      calendarWritten = false
+    }
   }
 
-  if (scheduledQueueIds.length > 0) {
-    await supabase
+  // Sin calendario escrito no hay nada que marcar como programado.
+  if (calendarWritten && scheduledQueueIds.length > 0) {
+    const { error: queueError } = await supabase
       .from('user_learning_queue')
       .update({ queue_status: 'scheduled', scheduled_at: now })
       .in('id', scheduledQueueIds)
       .eq('user_id', userId)
+    // La cola es recuperable en el otro sentido: las misiones existen y el
+    // alumno las ve; lo que queda es la marca. La siguiente ejecución las
+    // vuelve a encontrar 'pending' y el upsert idempotente no duplica nada.
+    if (queueError) {
+      console.error('[ensureCaminoCalendar] queue status update failed:', queueError.message)
+    }
   }
 
   await maybeInjectCommentText(userId, supabase, today)

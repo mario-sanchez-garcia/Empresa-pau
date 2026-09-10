@@ -43,14 +43,33 @@ test('refutado solo modifica el bloque correspondiente', () => {
 })
 
 // ── Nunca destruye trabajo del alumno ────────────────────────────────────
-test('no toca trabajo completado, programado ni apartado', () => {
+test('no toca trabajo completado, pospuesto ni apartado', () => {
   const rows = [
     declaredReview({ id: 'completado', queueStatus: 'completed' }),
-    declaredReview({ id: 'programado', queueStatus: 'scheduled' }),
     declaredReview({ id: 'pospuesto', queueStatus: 'postponed' }),
     declaredReview({ id: 'inactivo', queueStatus: 'inactive' }),
   ]
   assert.deepEqual(planQueueAdjustment(rows, CONTEXT), [])
+})
+
+test('una fila YA PROGRAMADA pero sin empezar sí se corrige', () => {
+  // El calendario siembra 30 días por delante, así que al diagnosticar un
+  // bloque la mayoría de sus temas ya están 'scheduled' sin empezar. Dejarlos
+  // como repaso express era ignorar el resultado del diagnóstico justo en las
+  // misiones que el alumno va a ver primero.
+  const rows = [declaredReview({ id: 'programado', queueStatus: 'scheduled' })]
+  const result = planQueueAdjustment(rows, CONTEXT)
+  assert.deepEqual(result.map(r => r.id), ['programado'])
+  assert.equal(result[0].metadata.mission_type, 'concept')
+  assert.equal(result[0].queueStatus, 'scheduled')
+})
+
+test('el ajuste es idempotente: aplicarlo dos veces no cambia nada la segunda', () => {
+  const row = declaredReview({ id: 'x', queueStatus: 'scheduled' })
+  const first = planQueueAdjustment([row], CONTEXT)
+  assert.equal(first.length, 1)
+  const afterFirst = { ...row, metadata: first[0].metadata }
+  assert.deepEqual(planQueueAdjustment([afterFirst], CONTEXT), [])
 })
 
 test('un repaso que NO viene de la declaración se respeta', () => {
@@ -83,9 +102,11 @@ test('ninguna ruta de diagnóstico puede marcar currículo como completed', () =
   }
 })
 
-test('el ajuste solo devuelve id y metadata: no puede borrar ni recrear filas', () => {
+test('el ajuste solo devuelve id, metadata y estado: no puede borrar ni recrear filas', () => {
+  // `queueStatus` viaja para que el llamador sepa si además hay una misión de
+  // calendario que corregir. Es de LECTURA: nunca se escribe de vuelta.
   const result = planQueueAdjustment([declaredReview()], CONTEXT)
-  assert.deepEqual(Object.keys(result[0]).sort(), ['id', 'metadata'])
+  assert.deepEqual(Object.keys(result[0]).sort(), ['id', 'metadata', 'queueStatus'])
 })
 
 test('sin filas candidatas no se ajusta nada', () => {

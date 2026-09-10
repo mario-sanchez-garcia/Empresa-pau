@@ -7,6 +7,7 @@ import { addDays, getMadridToday, isPreferredStudyDay } from './studyDays'
 import { getCaminoPlanLimits } from './caminoPlanLimits'
 import { VALID_DAILY_MINUTES, missionsPerDayForMinutes, estimatedMinutesForSlot } from './dailyTimeCapacity'
 import { createDayScheduler } from './scheduleTimeSlot'
+import { loadStudentPlanContext, type StudentPlanContext } from './studentPlanContext'
 
 const VALID_WEEKLY_DAYS = [3, 4, 5, 6, 7] as const
 const PERSONALIZATION_VERSION = 'calendar_personalization_v2'
@@ -95,11 +96,28 @@ async function loadPreferences(userId: string, supabase: SupabaseClient): Promis
   return { weeklyStudyDaysValue, dailyMinutes }
 }
 
-function nextPreferredDates(startDate: string, weeklyStudyDaysValue: number, neededRows: number, capacity: number) {
+/**
+ * Fechas preferidas disponibles, SIN cruzar la fecha objetivo del alumno.
+ *
+ * `examDate` no es opcional por comodidad: sin él, esta función reubicaba
+ * filas hasta donde hiciera falta para colocarlas todas. Reproducido: 30
+ * filas, dos sesiones al día y dos días semanales desde el 17/05 aterrizaban
+ * hasta el 08/07 — un mes después de la PAU del 07/06. Las filas que no caben
+ * antes del examen no se reubican (se quedan donde estaban); moverlas a una
+ * fecha imposible no es planificar, es esconder el problema.
+ */
+function nextPreferredDates(
+  startDate: string,
+  weeklyStudyDaysValue: number,
+  neededRows: number,
+  capacity: number,
+  examDate: string,
+) {
   const dates: string[] = []
   let current = startDate
   const maxIterations = Math.max(neededRows * 14, 120)
   for (let i = 0; dates.length * capacity < neededRows && i < maxIterations; i += 1) {
+    if (current >= examDate) break
     if (isPreferredStudyDay(current, weeklyStudyDaysValue)) dates.push(current)
     current = addDays(current, 1)
   }
@@ -109,12 +127,18 @@ function nextPreferredDates(startDate: string, weeklyStudyDaysValue: number, nee
 export async function applyCalendarPersonalization(
   userId: string,
   supabase: SupabaseClient,
+  planContext?: StudentPlanContext,
 ): Promise<PersonalizationResult> {
   try {
     const prefs = await loadPreferences(userId, supabase)
     if (!prefs) return { applied: false, reason: 'missing_preferences', updatedRows: 0 }
 
     const today = getMadridToday()
+    // La misma fotografía de disponibilidad que usa el motor. Se recibe si
+    // quien llama ya la tiene; si no, se carga aquí — pero nunca se prescinde
+    // de ella: reubicar sin conocer la fecha objetivo es lo que producía
+    // fechas posteriores al examen.
+    const context = planContext ?? await loadStudentPlanContext(userId, supabase, today)
     // PERSONALIZATION_VERSION is folded into the hash (not just stored
     // alongside it) so bumping it invalidates every previously-computed
     // hash and forces re-application on the next run — needed the one time
@@ -122,7 +146,14 @@ export async function applyCalendarPersonalization(
     // scaling fix), otherwise a student whose weeklyStudyDaysValue/
     // dailyMinutes never changed would stay stuck on whatever the old
     // formula produced forever.
-    const preferenceHash = stableHash(`${PERSONALIZATION_VERSION}:${prefs.weeklyStudyDaysValue}:${prefs.dailyMinutes}`)
+    // La fecha objetivo entra en el hash: cambiar la convocatoria en Ajustes
+    // cambia hasta dónde puede llegar el calendario, así que tiene que
+    // invalidar la personalización ya aplicada. Antes el hash solo miraba
+    // versión, días y minutos — mover el examen no re-disparaba nada y las
+    // filas se quedaban donde las había dejado la fecha anterior.
+    const preferenceHash = stableHash(
+      `${PERSONALIZATION_VERSION}:${prefs.weeklyStudyDaysValue}:${prefs.dailyMinutes}:${context.examDate}`,
+    )
     const { data, error } = await supabase
       .from('camino_calendar')
       .select('id, scheduled_date, subject, v2_sort_order, status, locked, metadata, created_at')
@@ -150,8 +181,8 @@ export async function applyCalendarPersonalization(
     const capacity = missionsPerDayForMinutes(prefs.dailyMinutes)
     const appliedFrom = rows[0]?.scheduled_date ?? today
     const applicationHash = stableHash(`${preferenceHash}:${appliedFrom}`)
-    const preferredDates = nextPreferredDates(appliedFrom, prefs.weeklyStudyDaysValue, rows.length, capacity)
-    if (preferredDates.length === 0) return { applied: false, reason: 'error', updatedRows: 0, preferenceHash }
+    const preferredDates = nextPreferredDates(appliedFrom, prefs.weeklyStudyDaysValue, rows.length, capacity, context.examDate)
+    if (preferredDates.length === 0) return { applied: false, reason: 'no_rows', updatedRows: 0, preferenceHash }
 
     // Todas las filas de `rows` se están reubicando en este mismo pase, así
     // que su hora actual (si la tenían de una pasada anterior) nunca debe
@@ -197,6 +228,7 @@ export async function applyCalendarPersonalization(
                   applied_from: appliedFrom,
                   weekly_study_days_value: prefs.weeklyStudyDaysValue,
                   daily_minutes: prefs.dailyMinutes,
+                  target_exam_date: context.examDate,
                 },
               },
             })

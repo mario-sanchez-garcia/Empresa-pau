@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { readFileSync } from 'node:fs'
+import { ADJUSTABLE_QUEUE_STATUSES } from './diagnosticAdjustment.ts'
 import { join } from 'node:path'
 
 // Invariante de toda la función, comprobada sobre el código fuente.
@@ -91,10 +92,30 @@ test('el diagnóstico nunca borra filas de la cola ni del calendario', () => {
   }
 })
 
-test('el ajuste de cola va siempre filtrado por usuario y por estado pending', () => {
+test('el ajuste de cola va siempre filtrado por usuario y por trabajo sin empezar', () => {
   const code = stripComments(read('applyDiagnosticOutcome.ts')).replace(/\s+/g, ' ')
   assert.ok(code.includes(".eq('user_id', userId)"), 'falta el filtro por usuario')
-  assert.ok(code.includes(".eq('queue_status', 'pending')"), 'falta el filtro por queue_status pending')
+  // 'pending' y 'scheduled' son trabajo que el alumno todavía no ha empezado.
+  // Lo completado, lo pospuesto y lo apartado quedan fuera por construcción:
+  // la lista blanca vive en diagnosticAdjustment.ADJUSTABLE_QUEUE_STATUSES y
+  // se aplica igual en el SELECT y en el UPDATE.
+  assert.equal(
+    (code.match(/\.in\('queue_status', ADJUSTABLE_QUEUE_STATUSES\)/g) ?? []).length,
+    2,
+    'el filtro de estados sin empezar debe aplicarse tanto al SELECT como al UPDATE',
+  )
+  assert.deepEqual([...ADJUSTABLE_QUEUE_STATUSES].sort(), ['pending', 'scheduled'])
+})
+
+test('corregir una misión ya programada nunca le cambia la fecha', () => {
+  // El diagnóstico ajusta el CONTENIDO de una misión futura sin empezar, no
+  // cuándo toca: mover fechas sería replanificar, que es justo lo que este
+  // módulo no puede hacer.
+  const code = stripComments(read('applyDiagnosticOutcome.ts')).replace(/\s+/g, ' ')
+  assert.ok(!/scheduled_date\s*:/.test(code), 'el ajuste escribe scheduled_date')
+  // Y solo alcanza a misiones futuras que siguen pendientes.
+  assert.ok(code.includes(".gt('scheduled_date', today)"), 'falta el corte a misiones futuras')
+  assert.ok(code.includes(".eq('status', 'pending')"), 'falta el filtro de misión aún pendiente')
 })
 
 test('la ruta de práctica nunca persiste el origen reservado sin verificarlo', () => {

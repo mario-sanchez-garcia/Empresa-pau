@@ -2,7 +2,9 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
 import {
+  DEFAULT_DIAGNOSTIC_PACING,
   DIAGNOSTIC_QUESTION_COUNT,
+  diagnosticPacingFor,
   MAX_DIAGNOSTICS_PER_MONTH,
   MAX_DIAGNOSTIC_SKIPS,
   MIN_COMPLETED_MISSIONS_BEFORE_DIAGNOSTIC,
@@ -177,4 +179,75 @@ test('la media acumulada se calcula bien desde cero', () => {
   assert.equal(nextAverage(null, 0, 7), 7)
   assert.equal(nextAverage(7, 1, 9), 8)
   assert.equal(nextAverage(8, 2, 5), 7)
+})
+
+// ── Ritmo adaptado a la entrada tardía ───────────────────────────────────
+
+test('con tiempo de sobra, el goteo suave de siempre', () => {
+  assert.deepEqual(diagnosticPacingFor(180), DEFAULT_DIAGNOSTIC_PACING)
+  assert.deepEqual(diagnosticPacingFor(null), DEFAULT_DIAGNOSTIC_PACING)
+})
+
+test('el ritmo nunca se endurece por encima del ritmo por defecto', () => {
+  for (const remaining of [200, 100, 46, 45, 21, 20, 5, 0]) {
+    const pacing = diagnosticPacingFor(remaining)
+    assert.ok(pacing.minCompletedMissions <= DEFAULT_DIAGNOSTIC_PACING.minCompletedMissions)
+    assert.ok(pacing.cooldownDays <= DEFAULT_DIAGNOSTIC_PACING.cooldownDays)
+    assert.ok(pacing.monthlyCap >= DEFAULT_DIAGNOSTIC_PACING.monthlyCap)
+  }
+})
+
+test('quien entra a pocas semanas puede diagnosticar desde la primera misión', () => {
+  const pacing = diagnosticPacingFor(10)
+  assert.equal(pacing.minCompletedMissions, 0)
+  assert.ok(pacing.cooldownDays < DEFAULT_DIAGNOSTIC_PACING.cooldownDays)
+})
+
+test('el ritmo tardío desbloquea al alumno que el goteo de septiembre frenaba', () => {
+  const row = {
+    subject: 'mates',
+    blockSlug: 'limites',
+    state: 'declarado' as const,
+    declaredStartMode: 'review' as const,
+    diagnosticMissionId: null,
+    diagnosticOfferedAt: null,
+    diagnosticSkippedCount: 0,
+  }
+  const input = {
+    row,
+    completedMissions: 0,
+    liveDiagnostics: 0,
+    diagnosticsThisMonth: 0,
+    lastOfferedAt: null,
+    today: '2027-05-20',
+  }
+  // Con el ritmo por defecto se le frena por no haber cogido hábito...
+  assert.deepEqual(checkDiagnosticEligibility(input), { eligible: false, reason: 'too_few_missions' })
+  // ...pero a dos semanas de la prueba el hábito ya no va a formarse.
+  assert.deepEqual(
+    checkDiagnosticEligibility({ ...input, pacing: diagnosticPacingFor(10) }),
+    { eligible: true },
+  )
+})
+
+test('el ritmo no cambia lo que un diagnóstico PUEDE hacer', () => {
+  // Un bloque ya resuelto no se rediagnostica por mucha prisa que haya.
+  const resolved = {
+    row: {
+      subject: 'mates',
+      blockSlug: 'limites',
+      state: 'con_evidencia' as const,
+      declaredStartMode: 'review' as const,
+      diagnosticMissionId: null,
+      diagnosticOfferedAt: null,
+      diagnosticSkippedCount: 0,
+    },
+    completedMissions: 0,
+    liveDiagnostics: 0,
+    diagnosticsThisMonth: 0,
+    lastOfferedAt: null,
+    today: '2027-05-20',
+    pacing: diagnosticPacingFor(3),
+  }
+  assert.deepEqual(checkDiagnosticEligibility(resolved), { eligible: false, reason: 'already_resolved' })
 })

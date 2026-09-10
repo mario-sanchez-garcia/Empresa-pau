@@ -43,6 +43,54 @@ export const MAX_DIAGNOSTICS_PER_MONTH = 3
 /** Marca de origen. Viaja en resultado_json y es lo que excluye del límite normal. */
 export const DIAGNOSTIC_SOURCE = 'camino_diagnostic'
 
+// ── Ritmo adaptado al tiempo que le queda al alumno ─────────────────────
+//
+// El goteo de arriba está pensado para quien empieza en septiembre: primero
+// hábito, luego diagnóstico, y sin agobiar. Para quien entra en mayo es
+// demasiado lento — esperar tres misiones y cinco días entre diagnósticos, con
+// tope de tres al mes, significa llegar a la PAU sin haber contrastado casi
+// ninguna de sus declaraciones, y planificando sobre ellas.
+//
+// El ritmo no cambia LO QUE UN DIAGNÓSTICO PUEDE HACER (sigue sin conceder
+// dominio ni completar temario): solo cada cuánto se ofrece.
+
+/** Días de estudio por debajo de los cuales se considera una entrada tardía. */
+export const LATE_ENTRY_STUDY_DAYS = 45
+/** Y por debajo de esto, entrada muy tardía: quedan semanas, no meses. */
+export const VERY_LATE_ENTRY_STUDY_DAYS = 20
+
+export type DiagnosticPacing = {
+  minCompletedMissions: number
+  cooldownDays: number
+  monthlyCap: number
+}
+
+export const DEFAULT_DIAGNOSTIC_PACING: DiagnosticPacing = {
+  minCompletedMissions: MIN_COMPLETED_MISSIONS_BEFORE_DIAGNOSTIC,
+  cooldownDays: DIAGNOSTIC_COOLDOWN_DAYS,
+  monthlyCap: MAX_DIAGNOSTICS_PER_MONTH,
+}
+
+/**
+ * El ritmo de diagnóstico según los días de estudio que le quedan al alumno
+ * antes de su fecha objetivo.
+ *
+ * Nunca se endurece por encima del ritmo por defecto: con tiempo de sobra,
+ * el goteo suave de siempre.
+ */
+export function diagnosticPacingFor(studyDaysRemaining: number | null | undefined): DiagnosticPacing {
+  if (studyDaysRemaining == null) return DEFAULT_DIAGNOSTIC_PACING
+  if (studyDaysRemaining <= VERY_LATE_ENTRY_STUDY_DAYS) {
+    // Quedan semanas: el punto de partida hay que comprobarlo YA, y sin
+    // esperar a que coja hábito — el hábito ya no da tiempo a formarse.
+    return { minCompletedMissions: 0, cooldownDays: 1, monthlyCap: 10 }
+  }
+  if (studyDaysRemaining <= LATE_ENTRY_STUDY_DAYS) {
+    return { minCompletedMissions: 1, cooldownDays: 2, monthlyCap: 6 }
+  }
+  return DEFAULT_DIAGNOSTIC_PACING
+}
+
 /** Nota sobre 10 a partir de la cual la declaración queda confirmada. Mismo listón que el 60% de áreas débiles. */
 export const DIAGNOSTIC_PASS_SCORE = 6
 
@@ -79,6 +127,13 @@ export type DiagnosticEligibilityInput = {
   lastOfferedAt: string | null
   /** Hoy, YYYY-MM-DD. */
   today: string
+  /**
+   * Ritmo aplicable. Por defecto, el goteo suave. Quien tenga el contexto del
+   * alumno debe pasar `diagnosticPacingFor(díasDeEstudioRestantes)`: a pocas
+   * semanas de la prueba, el goteo de septiembre deja sin contrastar casi
+   * todas las declaraciones sobre las que se está planificando.
+   */
+  pacing?: DiagnosticPacing
 }
 
 export type DiagnosticEligibility =
@@ -106,7 +161,10 @@ function daysBetween(from: string, to: string): number {
  * luego lo temporal (todavía no toca).
  */
 export function checkDiagnosticEligibility(input: DiagnosticEligibilityInput): DiagnosticEligibility {
-  const { row, completedMissions, liveDiagnostics, diagnosticsThisMonth, lastOfferedAt, today } = input
+  const {
+    row, completedMissions, liveDiagnostics, diagnosticsThisMonth, lastOfferedAt, today,
+    pacing = DEFAULT_DIAGNOSTIC_PACING,
+  } = input
 
   if (!row.declaredStartMode || !isDiagnosableMode(row.declaredStartMode)) {
     return { eligible: false, reason: 'not_declared' }
@@ -119,18 +177,18 @@ export function checkDiagnosticEligibility(input: DiagnosticEligibilityInput): D
   if (row.diagnosticSkippedCount >= MAX_DIAGNOSTIC_SKIPS) {
     return { eligible: false, reason: 'skipped_enough' }
   }
-  if (completedMissions < MIN_COMPLETED_MISSIONS_BEFORE_DIAGNOSTIC) {
+  if (completedMissions < pacing.minCompletedMissions) {
     return { eligible: false, reason: 'too_few_missions' }
   }
   if (liveDiagnostics >= MAX_LIVE_DIAGNOSTICS) {
     return { eligible: false, reason: 'already_live' }
   }
-  if (diagnosticsThisMonth >= MAX_DIAGNOSTICS_PER_MONTH) {
+  if (diagnosticsThisMonth >= pacing.monthlyCap) {
     return { eligible: false, reason: 'monthly_cap' }
   }
   if (lastOfferedAt) {
     const since = daysBetween(lastOfferedAt.slice(0, 10), today)
-    if (since < DIAGNOSTIC_COOLDOWN_DAYS) return { eligible: false, reason: 'cooldown' }
+    if (since < pacing.cooldownDays) return { eligible: false, reason: 'cooldown' }
   }
   return { eligible: true }
 }

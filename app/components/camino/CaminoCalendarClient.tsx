@@ -29,6 +29,7 @@ import { deletePartialExamMissions, injectAllPartialExamMissions, summarizePersi
 import { buildRecalcMessage, computeExamTimeNeed, getBlockPerformance } from '@/app/lib/camino/examTimeNeed'
 import { FINAL_REVIEW_RESERVED_STUDY_DAYS, resolveTargetExamDate } from '@/app/lib/camino/examDate'
 import { PLAN_ENGINE_VERSION, buildPlanDays, type PlanDay } from '@/app/lib/camino/planEngine'
+import { examRotationWeight, priorityWeight, type ExamRotationPriority } from '@/app/lib/camino/rotationWeights'
 import { SPAIN_HOLIDAYS } from '@/app/lib/camino/spainHolidays'
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
@@ -366,22 +367,20 @@ function generateExamId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return `exam-${crypto.randomUUID()}`
   return `exam-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
 }
-function priorityWeight(priority: ExamPriority) { if (priority === 'muy_alta') return 4; if (priority === 'alta') return 3; if (priority === 'normal') return 2; return 1 }
 function priorityLabel(priority: ExamPriority) { return priority === 'muy_alta' ? 'Muy alta' : priority.charAt(0).toUpperCase() + priority.slice(1) }
-// Extra rotation slots a subject earns for a given day based on how close/how prioritized its nearest exam is.
-// Capped so a subject never claims the whole rotation pool — every other active subject keeps at least its base slot.
+// Los turnos extra por examen cercano los calcula ahora el módulo compartido
+// camino/rotationWeights.ts, para que el servidor pueda alimentar el motor con
+// EXACTAMENTE los mismos pesos que la vista previa.
 function subjectRotationWeight(subject: string, dateISO: string, relevantExams: StudentExam[]): number {
-  const subjSlug = subjectSlug(subject)
-  let extra = 0
-  for (const exam of relevantExams) {
-    if (normalizeSubjectSlug(exam.subject) !== subjSlug) continue
-    const distance = daysBetween(dateISO, exam.date)
-    if (distance < 0 || distance > 21) continue
-    const weight = priorityWeight(exam.priority)
-    if (distance <= 6) extra = Math.max(extra, weight - 1) // baja:+0, normal:+1, alta:+2, muy_alta:+3
-    else if (distance <= 14 && weight >= 3) extra = Math.max(extra, 1)
-  }
-  return 1 + extra
+  return examRotationWeight(
+    subjectSlug(subject),
+    dateISO,
+    relevantExams.map(exam => ({
+      subjectSlug: normalizeSubjectSlug(exam.subject),
+      date: exam.date,
+      priority: exam.priority as ExamRotationPriority,
+    })),
+  )
 }
 function formatDate(dateISO: string) { return new Date(dateISO).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) }
 type MissionHrefResult = { href: string; fallback: string }

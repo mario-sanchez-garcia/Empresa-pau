@@ -6,9 +6,21 @@
 //
 // Invariantes que los tests fijan:
 //   · solo el bloque diagnosticado
-//   · solo filas que aún no han entrado en juego (queue_status 'pending')
+//   · solo trabajo que AÚN NO HA EMPEZADO ('pending' o 'scheduled')
 //   · solo lo que entró como repaso POR LA DECLARACIÓN
 //   · NUNCA se escribe queue_status: ni 'completed' ni ningún otro
+//   · idempotente: aplicarlo dos veces no cambia nada la segunda
+//
+// Sobre 'scheduled': antes solo se ajustaban las filas 'pending', con el
+// argumento de que una fila programada "ya está en juego". No lo está. El
+// calendario siembra 30 días por delante, así que en un bloque recién
+// diagnosticado la mayoría de sus temas ya estaban PROGRAMADOS pero sin
+// empezar — y se quedaban como repaso express justo después de que el alumno
+// demostrara que no domina el bloque (reproducido: una fila programada
+// devolvía cero cambios). Lo que de verdad no se puede tocar es el trabajo
+// EMPEZADO o HECHO, y eso lo marcan 'completed' y la fila de calendario, no
+// 'scheduled'. Las fechas no se mueven: cambia el contenido de la misión, no
+// cuándo toca.
 
 export type QueueRowForAdjustment = {
   id: string
@@ -21,7 +33,12 @@ export type QueueRowForAdjustment = {
 export type QueueAdjustment = {
   id: string
   metadata: Record<string, unknown>
+  /** El estado de cola de la fila. NO se escribe: sirve para saber si además hay misión de calendario que corregir. */
+  queueStatus: string
 }
+
+/** Estados de cola cuyo trabajo todavía no ha empezado. */
+export const ADJUSTABLE_QUEUE_STATUSES: readonly string[] = ['pending', 'scheduled']
 
 function metadataObject(value: Record<string, unknown> | null | undefined) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : {}
@@ -42,9 +59,10 @@ export function planQueueAdjustment(
   for (const row of rows) {
     if (row.subject !== context.subject) continue
     if (row.blockSlug !== context.blockSlug) continue
-    // Trabajo ya hecho, ya programado en el calendario o fuera por otro
-    // motivo: intocable. Solo se ajusta lo que todavía no ha empezado.
-    if (row.queueStatus !== 'pending') continue
+    // Trabajo ya hecho, o fuera del plan por otro motivo ('completed',
+    // 'inactive'…): intocable. 'scheduled' SÍ entra: tiene fecha, pero el
+    // alumno no la ha empezado, y esa fecha no se toca.
+    if (!ADJUSTABLE_QUEUE_STATUSES.includes(row.queueStatus)) continue
 
     const meta = metadataObject(row.metadata)
     // Un repaso nacido de otra vía (área débil, por ejemplo) no es asunto de
@@ -56,6 +74,7 @@ export function planQueueAdjustment(
     const { express: _express, ...rest } = meta
     out.push({
       id: row.id,
+      queueStatus: row.queueStatus,
       metadata: {
         ...rest,
         mission_type: 'concept',

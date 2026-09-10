@@ -120,3 +120,55 @@ test('los minutos declarados deciden los huecos por día', () => {
   assert.equal(base({ dailyMinutes: 30 })[0].missionSlots, 1)
   assert.equal(base({ dailyMinutes: 180 })[0].missionSlots, 4)
 })
+
+// ── Disponibilidad efectiva: filtro de días y rotación, una sola lista ───
+
+test('con 2 días semanales el plan reparte entre TODAS las asignaturas', () => {
+  // Reproducción del informe: 5 materias, 2 días semanales, 8 semanas →
+  // A: 8, B: 0, C: 0, D: 8, E: 0.
+  const days = buildPlanDays({
+    from: '2026-09-14',
+    to: '2026-11-08',
+    examDate: '2027-06-07',
+    subjects: ['A', 'B', 'C', 'D', 'E'],
+    weeklyStudyDays: 2,
+    dailyMinutes: 60,
+    origin: 'server',
+  })
+  const counts: Record<string, number> = {}
+  for (const day of days) if (day.subject) counts[day.subject] = (counts[day.subject] ?? 0) + 1
+  for (const subject of ['A', 'B', 'C', 'D', 'E']) {
+    assert.ok((counts[subject] ?? 0) > 0, `${subject} sin turnos: ${JSON.stringify(counts)}`)
+  }
+})
+
+test('con 7 días semanales no se tira ni un día del fin de semana', () => {
+  const days = buildPlanDays({
+    from: '2026-09-14',
+    to: '2026-09-27',
+    examDate: '2027-06-07',
+    subjects: ['A', 'B', 'C'],
+    weeklyStudyDays: 7,
+    dailyMinutes: 60,
+    origin: 'server',
+  })
+  assert.equal(days.filter(day => day.subject).length, 14)
+})
+
+test('el plan nunca propone nada en la fecha del examen ni después', () => {
+  const days = buildPlanDays({
+    from: '2026-05-25',
+    to: '2026-07-08',
+    examDate: '2026-06-07',
+    subjects: ['A', 'B'],
+    weeklyStudyDays: 5,
+    dailyMinutes: 60,
+    origin: 'server',
+  })
+  for (const day of days) {
+    if (day.date >= '2026-06-07') {
+      assert.equal(day.subject, null, `${day.date} propone materia en o después del examen`)
+      assert.equal(day.excludedReason, 'after_exam')
+    }
+  }
+})

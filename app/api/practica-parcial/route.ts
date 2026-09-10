@@ -7,7 +7,8 @@ import type { SimulacroSubject } from '@/components/simulacros/types'
 import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
-import { DIAGNOSTIC_QUESTION_COUNT, DIAGNOSTIC_SOURCE, MAX_DIAGNOSTICS_PER_MONTH } from '@/app/lib/camino/knowledgeState'
+import { DIAGNOSTIC_QUESTION_COUNT, DIAGNOSTIC_SOURCE, diagnosticPacingFor } from '@/app/lib/camino/knowledgeState'
+import { loadStudentPlanContext, studyDaysRemaining } from '@/app/lib/camino/studentPlanContext'
 import { countDiagnosticSessions, countPartialLimitSessions, type PracticeSessionRow } from '@/app/lib/camino/diagnosticLimits'
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { BILLING_BLOCK_CODE, monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
@@ -274,11 +275,18 @@ export async function POST(request: NextRequest) {
       // por nuestra propia comprobación. Va fuera del límite del plan, pero
       // con tope propio para que el origen no sea una puerta trasera.
       const monthlyDiagnostics = countDiagnosticSessions(monthSessions)
-      if (monthlyDiagnostics >= MAX_DIAGNOSTICS_PER_MONTH) {
+      // El tope se lee del MISMO ritmo que usa el inyector para ofrecerlos
+      // (ver knowledgeState.diagnosticPacingFor). Si aquí se quedara fijo en
+      // el tope de septiembre, a un alumno que entra tarde el Camino le
+      // ofrecería comprobaciones que esta ruta le negaría acto seguido.
+      const monthlyDiagnosticCap = diagnosticPacingFor(
+        studyDaysRemaining(await loadStudentPlanContext(user.id, db)),
+      ).monthlyCap
+      if (monthlyDiagnostics >= monthlyDiagnosticCap) {
         return NextResponse.json(
           {
             error: 'diagnostic_limit_reached',
-            message: `Ya has hecho las ${MAX_DIAGNOSTICS_PER_MONTH} comprobaciones rápidas de este mes. ${monthlyLimitResetNotice()}`,
+            message: `Ya has hecho las ${monthlyDiagnosticCap} comprobaciones rápidas de este mes. ${monthlyLimitResetNotice()}`,
             code: BILLING_BLOCK_CODE
           },
           { status: 429 }

@@ -26,7 +26,7 @@
 
 import { missionPlanForMinutes } from './dailyTimeCapacity.ts'
 import { rotateSubjectForDay } from './subjectRotation.ts'
-import { planningCutoffDate, studyDatesBetween } from './studyCapacity.ts'
+import { planningCutoffDate, studyDatesBetween, studyDayIndexesFor } from './studyCapacity.ts'
 
 /**
  * Versión del motor. Va estampada en cada día que produce, para que una
@@ -126,6 +126,11 @@ export function buildPlanDays(request: PlanRequest): PlanDay[] {
   const studyDates = new Set(studyDatesBetween(from, windowEnd, { weeklyStudyDays, holidays }))
 
   const rotationOrder = weightedRotationOrder(subjects, rotationWeights)
+  // El MISMO patrón semanal con el que se filtran los días alimenta la
+  // rotación. Cuando eran dos listas distintas, un alumno de 2 días/semana
+  // pasaba el filtro los lunes y jueves pero la rotación los indexaba como
+  // días laborables 0 y 3 — con 5 asignaturas, tres no salían nunca.
+  const studyDayIndexes = studyDayIndexesFor(weeklyStudyDays)
 
   const days: PlanDay[] = []
   for (let date = from; date <= to; date = addDays(date, 1)) {
@@ -151,6 +156,7 @@ export function buildPlanDays(request: PlanRequest): PlanDay[] {
     const subject = rotateSubjectForDay(date, rotationOrder, {
       priority: examSubjectsByDate?.get(date),
       hasWork,
+      studyDayIndexes,
     })
     if (!subject) {
       days.push({ ...base, subject: null, excludedReason: 'no_subject_available' })

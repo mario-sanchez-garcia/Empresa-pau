@@ -5,6 +5,17 @@ import { computeExamCoverage, decideAutomaticExamMissionFate, type ExamCoverage 
 import { EXAM_SUBJECT_SLUG, SIMULACRO_SUBJECT } from './partialExamSubjects'
 import { SPAIN_HOLIDAYS } from './spainHolidays'
 import { allocateExamBudgets } from './studyCapacity.ts'
+import type { StudentPlanContext } from './planWindow'
+
+/** Traduce la ventana de planificación a las opciones de hueco de preparación. */
+function prepSlotOptions(context?: StudentPlanContext) {
+  if (!context) return {}
+  return {
+    studyDayIndexes: context.studyDayIndexes,
+    holidays: context.holidays,
+    notAfter: context.examDate,
+  }
+}
 import { createDayScheduler, estimatedMinutesForMission, estimatedMinutesForMissionType, type MissionDurationRow } from './scheduleTimeSlot'
 import { SIMULACRO_MINUTES } from './xpMap'
 import type { ExamConfidence, ExamPriority, ExamScope, StudentExam } from './cleanStudentExams'
@@ -74,11 +85,41 @@ function isWeekday(dateStr: string): boolean {
   return dow !== 0 && dow !== 6
 }
 
-export function weekdaysBefore(examDate: string, fromDate: string): string[] {
+export type PrepSlotOptions = {
+  /**
+   * Días de la semana que el alumno estudia de verdad (0 = lunes … 6 = domingo).
+   * Sin esto, la preparación de un parcial aterrizaba en días laborables sin
+   * más — martes y miércoles para quien solo estudia lunes y jueves.
+   */
+  studyDayIndexes?: readonly number[]
+  /** Festivos, que no son días de estudio. */
+  holidays?: ReadonlySet<string>
+  /**
+   * Tope duro adicional: la fecha objetivo de la PAU. Un parcial mal tecleado
+   * con fecha posterior a la convocatoria no puede generar preparación en
+   * fechas que ya no existen para el alumno.
+   */
+  notAfter?: string
+}
+
+/**
+ * Días de preparación disponibles antes de `examDate`.
+ *
+ * Con `options`, son los turnos REALES del alumno; sin ellas, los días
+ * laborables de siempre (los llamadores que aún no tienen su disponibilidad a
+ * mano, como el resumen del cliente).
+ */
+export function weekdaysBefore(examDate: string, fromDate: string, options: PrepSlotOptions = {}): string[] {
+  const { studyDayIndexes, holidays, notAfter } = options
+  const limit = notAfter && notAfter < examDate ? notAfter : examDate
+  const pattern = studyDayIndexes && studyDayIndexes.length > 0 ? new Set(studyDayIndexes) : null
   const days: string[] = []
   let cur = fromDate
-  while (cur < examDate) {
-    if (isWeekday(cur)) days.push(cur)
+  while (cur < limit) {
+    const dow = new Date(cur + 'T12:00:00Z').getUTCDay()
+    const mondayIdx = dow === 0 ? 6 : dow - 1
+    const isStudyDay = pattern ? pattern.has(mondayIdx) : isWeekday(cur)
+    if (isStudyDay && !(holidays?.has(cur) ?? false)) days.push(cur)
     cur = shiftDate(cur, 1)
   }
   return days
@@ -284,6 +325,7 @@ export async function resolveFinalMockSlot(
   partialExam: PartialExamInput,
   otherExamDates: Set<string>,
   force = false,
+  planContext?: StudentPlanContext,
 ): Promise<string | null> {
   const today = madridToday()
   if (partialExam.date <= today) return null
@@ -311,7 +353,7 @@ export async function resolveFinalMockSlot(
     }
   }
 
-  const allSlots = weekdaysBefore(partialExam.date, today)
+  const allSlots = weekdaysBefore(partialExam.date, today, prepSlotOptions(planContext))
   const daysUntilExam = allSlots.length
   // Mismo corte que injectPartialExamMissions (> 10 días hábiles: todavía no
   // toca inyectar nada de este examen) — sin esto, un examen lejano
@@ -342,7 +384,13 @@ export async function injectPartialExamMissions(
   userId: string,
   supabase: SupabaseClient,
   partialExam: PartialExamInput,
-  options: { reservedDates?: Set<string>; force?: boolean; finalMockSlot?: string | null } = {},
+  options: {
+    reservedDates?: Set<string>
+    force?: boolean
+    finalMockSlot?: string | null
+    /** Disponibilidad efectiva del alumno (ver planWindow.ts). */
+    planContext?: StudentPlanContext
+  } = {},
 ): Promise<{ claimedDates: string[] }> {
   const today = madridToday()
   if (partialExam.date <= today) return { claimedDates: [] }
@@ -393,7 +441,7 @@ export async function injectPartialExamMissions(
   // Include TODAY as a candidate slot (previously started from tomorrow),
   // otherwise an exam added during onboarding never got a mission scheduled
   // for the student's very first day in Camino.
-  const allSlots = weekdaysBefore(partialExam.date, today)
+  const allSlots = weekdaysBefore(partialExam.date, today, prepSlotOptions(options.planContext))
   const daysUntilExam = allSlots.length
   if (daysUntilExam === 0 || daysUntilExam > 10) return { claimedDates: [] } // > 10 weekdays out: nothing to inject yet
 
@@ -656,8 +704,21 @@ export async function deletePartialExamMissions(
  * — de cualquier examen, no solo el suyo — para que una práctica de
  * ejercicios no aterrice el mismo día que un Simulacro ajeno.
  */
-/** Minutos diarios declarados en onboarding — misma fuente que usan examCoverage y ensureCaminoCalendar. */
-async function getDeclaredDailyMinutesForBudget(db: SupabaseClient, userId: string): Promise<number | null> {
+/**
+ * Disponibilidad declarada en onboarding — misma fuente que usan examCoverage,
+ * ensureCaminoCalendar y planWindow.
+ *
+ * Devuelve los DOS datos, no solo los minutos: el reparto entre exámenes
+ * suponía L-V porque los días semanales nunca llegaban hasta aquí, así que a
+ * un alumno de dos días por semana se le asignaban diez sesiones donde caben
+ * cuatro. (Se lee aquí en vez de a través de studentPlanContext porque este
+ * módulo lo importa también el componente de calendario, y esa carga es
+ * `server-only`.)
+ */
+async function getDeclaredAvailabilityForBudget(
+  db: SupabaseClient,
+  userId: string,
+): Promise<{ dailyMinutes: number | null; weeklyStudyDays: number | null }> {
   const { data } = await db
     .from('billing_events')
     .select('payload')
@@ -666,15 +727,20 @@ async function getDeclaredDailyMinutesForBudget(db: SupabaseClient, userId: stri
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
-  const minutes = (data?.payload as Record<string, unknown> | null | undefined)?.daily_minutes
-  return typeof minutes === 'number' ? minutes : null
+  const payload = data?.payload as Record<string, unknown> | null | undefined
+  const minutes = payload?.daily_minutes
+  const weekly = payload?.weekly_study_days_value
+  return {
+    dailyMinutes: typeof minutes === 'number' ? minutes : null,
+    weeklyStudyDays: typeof weekly === 'number' && weekly > 0 ? weekly : null,
+  }
 }
 
 export async function injectAllPartialExamMissions(
   userId: string,
   supabase: SupabaseClient,
   exams: (StudentExam & { sessionOverride?: number; maxSessionsPerDay?: number })[],
-  options: { forceExamId?: string } = {},
+  options: { forceExamId?: string; planContext?: StudentPlanContext } = {},
 ): Promise<void> {
   const today = madridToday()
   const upcoming = exams
@@ -710,7 +776,13 @@ export async function injectAllPartialExamMissions(
   // pendiente tiene cada uno y se reparten los días entre todos: el examen
   // más próximo se sirve primero, y los que vienen después conservan los días
   // que aquél no podía usar de todos modos.
-  const dailyMinutes = await getDeclaredDailyMinutesForBudget(supabase, userId)
+  // Disponibilidad EFECTIVA del alumno: minutos diarios Y días semanales. Si
+  // quien llama ya tiene la ventana de planificación cargada, se usa esa —
+  // una sola fotografía por ejecución.
+  const planContext = options.planContext
+  const { dailyMinutes, weeklyStudyDays } = planContext
+    ? { dailyMinutes: planContext.dailyMinutes, weeklyStudyDays: planContext.weeklyStudyDays }
+    : await getDeclaredAvailabilityForBudget(supabase, userId)
   const pendingByExamId = new Map<string, number>()
   for (const exam of upcoming) {
     const subjectSlug = EXAM_SUBJECT_SLUG[exam.subject] ?? exam.subject
@@ -720,7 +792,11 @@ export async function injectAllPartialExamMissions(
   const budgets = allocateExamBudgets(
     today,
     upcoming.map(exam => ({ id: exam.id, date: exam.date, pendingCount: pendingByExamId.get(exam.id) ?? 0 })),
-    { dailyMinutes, holidays: SPAIN_HOLIDAYS },
+    {
+      dailyMinutes,
+      holidays: SPAIN_HOLIDAYS,
+      weeklyStudyDays,
+    },
   )
   const withBudget = (exam: StudentExam & { sessionOverride?: number; maxSessionsPerDay?: number }) => ({
     ...exam,
@@ -732,7 +808,7 @@ export async function injectAllPartialExamMissions(
   const mockSlotByExamId = new Map<string, string | null>()
   for (const exam of upcoming) {
     const force = options.forceExamId != null && exam.id === options.forceExamId
-    const slot = await resolveFinalMockSlot(userId, supabase, withBudget(exam), examDates, force)
+    const slot = await resolveFinalMockSlot(userId, supabase, withBudget(exam), examDates, force, planContext)
     mockSlotByExamId.set(exam.id, slot)
   }
 
@@ -755,7 +831,7 @@ export async function injectAllPartialExamMissions(
       : reservedDates
     const { claimedDates } = await injectPartialExamMissions(
       userId, supabase, withBudget(exam),
-      { reservedDates: reservedForThisExam, force, finalMockSlot: ownMockSlot },
+      { reservedDates: reservedForThisExam, force, finalMockSlot: ownMockSlot, planContext },
     )
     for (const d of claimedDates) reservedDates.add(d)
   }

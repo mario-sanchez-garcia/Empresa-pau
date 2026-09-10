@@ -22,6 +22,9 @@ import { missionPlanForMinutes } from './dailyTimeCapacity.ts'
 
 const MS_PER_DAY = 86400000
 
+/** Sesiones mínimas que se le reservan a cada examen cuando hay más de uno. */
+export const DEFAULT_MIN_SESSIONS_PER_EXAM = 1
+
 function utcNoon(dateStr: string): number {
   return Date.parse(`${dateStr}T12:00:00Z`)
 }
@@ -36,16 +39,36 @@ function mondayIndex(dateStr: string): number {
   return dow === 0 ? 6 : dow - 1
 }
 
-// Mismo reparto semanal que studyDays.studyDayIndexesFor — duplicado aquí a
-// propósito para que este módulo no arrastre el calendario laboral y siga
-// siendo comprobable en aislamiento. Los festivos entran por parámetro.
-function weekdayIndexesFor(weeklyStudyDays: number): number[] {
+/**
+ * Reparto semanal: qué días de la semana (0 = lunes … 6 = domingo) estudia un
+ * alumno que ha declarado `weeklyStudyDays` días.
+ *
+ * FUENTE ÚNICA de la disponibilidad efectiva. Vive aquí, y no en studyDays.ts,
+ * porque este módulo no arrastra el calendario laboral (los festivos entran
+ * por parámetro) y por tanto se puede comprobar en aislamiento — studyDays.ts
+ * delega en esta. Todo lo que decide fechas (filtrado de días, rotación,
+ * presupuesto de exámenes, personalización) tiene que leer el patrón de aquí:
+ * cuando cada capa tenía el suyo, el filtro de días y la rotación operaban
+ * sobre listas distintas.
+ */
+export function weekdayIndexesFor(weeklyStudyDays: number): number[] {
   if (weeklyStudyDays <= 2) return [0, 3]
   if (weeklyStudyDays === 3) return [0, 2, 4]
   if (weeklyStudyDays === 4) return [0, 1, 3, 5]
   if (weeklyStudyDays === 5) return [0, 1, 2, 4, 5]
   if (weeklyStudyDays === 6) return [0, 1, 2, 3, 4, 5]
   return [0, 1, 2, 3, 4, 5, 6]
+}
+
+/**
+ * El patrón semanal efectivo, ya resuelto: lo que el alumno declaró, o L-V
+ * cuando no ha declarado nada. Es LA lista sobre la que tienen que operar por
+ * igual el filtrado de días y la rotación de asignaturas.
+ */
+export function studyDayIndexesFor(weeklyStudyDays?: number | null): number[] {
+  return weeklyStudyDays != null && weeklyStudyDays > 0
+    ? weekdayIndexesFor(weeklyStudyDays)
+    : [0, 1, 2, 3, 4]
 }
 
 export type StudyDatesOptions = {
@@ -66,9 +89,7 @@ export function studyDatesBetween(from: string, to: string, options: StudyDatesO
   const { weeklyStudyDays = null, holidays, maxDays = 1000 } = options
   if (!(from < to)) return []
 
-  const allowed = weeklyStudyDays != null
-    ? new Set(weekdayIndexesFor(weeklyStudyDays))
-    : new Set([0, 1, 2, 3, 4])
+  const allowed = new Set(studyDayIndexesFor(weeklyStudyDays))
 
   const dates: string[] = []
   let current = from
@@ -94,6 +115,19 @@ export type StudyCapacity = {
 export type CapacityOptions = StudyDatesOptions & {
   /** Minutos diarios declarados en onboarding. */
   dailyMinutes?: number | null
+}
+
+export type ExamBudgetOptions = CapacityOptions & {
+  /**
+   * Sesiones que se le reservan a CADA examen antes del reparto por
+   * proximidad. Sin esto, tres exámenes el mismo día con más temario que
+   * capacidad daban 10/0/0: el desempate era el orden de id, así que dos
+   * exámenes se quedaban literalmente sin una sola sesión de preparación.
+   * Repartir un mínimo primero no arregla que no quepa todo — eso lo dice
+   * `uncoveredCount` —, pero evita que la falta de sitio caiga entera sobre
+   * un examen elegido por orden alfabético.
+   */
+  minSessionsPerExam?: number
 }
 
 /**
@@ -143,7 +177,7 @@ export type ExamBudget = {
 export function allocateExamBudgets(
   today: string,
   exams: ExamBudgetInput[],
-  options: CapacityOptions = {},
+  options: ExamBudgetOptions = {},
 ): Map<string, ExamBudget> {
   const result = new Map<string, ExamBudget>()
   const upcoming = exams
@@ -162,20 +196,46 @@ export function allocateExamBudgets(
   // Capacidad restante de cada día, consumible una sola vez.
   const remaining = new Map<string, number>(dates.map(date => [date, sessionsPerDay]))
 
-  for (const exam of upcoming) {
-    let needed = Math.max(0, exam.pendingCount)
-    let allocated = 0
-    for (const date of dates) {
-      if (needed <= 0) break
+  const needed = new Map<string, number>(upcoming.map(exam => [exam.id, Math.max(0, exam.pendingCount)]))
+  const allocated = new Map<string, number>(upcoming.map(exam => [exam.id, 0]))
+
+  /**
+   * Consume hasta `limit` sesiones de los días anteriores a `exam.date`.
+   * `fromEnd` recorre esos días del último al primero: es lo que usa la
+   * pasada del mínimo garantizado, para que reservarle algo a un examen
+   * lejano no le quite al inminente los pocos días que este SÍ puede usar.
+   */
+  const claim = (exam: ExamBudgetInput, limit: number, fromEnd = false) => {
+    let left = Math.min(limit, needed.get(exam.id) ?? 0)
+    for (const date of (fromEnd ? [...dates].reverse() : dates)) {
+      if (left <= 0) break
       if (date >= exam.date) break
       const free = remaining.get(date) ?? 0
       if (free <= 0) continue
-      const take = Math.min(free, needed)
+      const take = Math.min(free, left)
       remaining.set(date, free - take)
-      allocated += take
-      needed -= take
+      allocated.set(exam.id, (allocated.get(exam.id) ?? 0) + take)
+      needed.set(exam.id, (needed.get(exam.id) ?? 0) - take)
+      left -= take
     }
-    result.set(exam.id, { allocatedSessions: allocated, uncoveredCount: needed })
+  }
+
+  // PASADA 1 — mínimo garantizado por examen, en orden de proximidad.
+  const minPerExam = Math.max(0, Math.floor(options.minSessionsPerExam ?? DEFAULT_MIN_SESSIONS_PER_EXAM))
+  if (minPerExam > 0 && upcoming.length > 1) {
+    for (const exam of upcoming) claim(exam, minPerExam, true)
+  }
+
+  // PASADA 2 — el resto, por proximidad: el examen más cercano se sirve
+  // primero y consume los días más tempranos, que son los únicos que un
+  // examen posterior no podía usar de todos modos.
+  for (const exam of upcoming) claim(exam, Number.MAX_SAFE_INTEGER)
+
+  for (const exam of upcoming) {
+    result.set(exam.id, {
+      allocatedSessions: allocated.get(exam.id) ?? 0,
+      uncoveredCount: Math.max(0, needed.get(exam.id) ?? 0),
+    })
   }
 
   return result

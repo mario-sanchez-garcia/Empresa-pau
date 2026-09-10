@@ -4,7 +4,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { getAvailabilityForDate } from '@/app/lib/calendar/availability'
 import { SIMULACRO_SUBJECT } from './partialExamSubjects'
 import { createDayScheduler, estimatedMinutesForMissionType } from './scheduleTimeSlot'
-import { getMadridToday, getStudyDays } from './studyDays'
+import { getMadridToday } from './studyDays'
+import { loadStudentPlanContext, planningDates } from './studentPlanContext'
 
 // Cuando el alumno completa el ÚLTIMO tema fino de Curso de un bloque de
 // cualquier asignatura (todas sus lecciones en 'completed'), genera
@@ -89,7 +90,10 @@ export async function maybeGenerateBlockPracticeMission(
   if (topicSlugs.length === 0) return
 
   const today = getMadridToday()
-  const candidateDays = getStudyDays(today, 14)
+  // Días reales del alumno, cortados por su fecha objetivo. La práctica de
+  // bloque sí cabe dentro de la ventana de repaso final.
+  const planContext = await loadStudentPlanContext(userId, db, today)
+  const candidateDays = planningDates(planContext, { limit: 14, includeFinalReviewWindow: true })
   for (const dateStr of candidateDays) {
     const scheduler = await createDayScheduler(userId, db, dateStr, {
       externalBusy: await getAvailabilityForDate(userId, dateStr),

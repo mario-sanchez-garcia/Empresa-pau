@@ -10,6 +10,7 @@ import {
   DIAGNOSTIC_SOURCE,
   MAX_DIAGNOSTIC_SKIPS,
   checkDiagnosticEligibility,
+  diagnosticPacingFor,
   isDiagnosableMode,
   type BlockKnowledgeRow,
   type KnowledgeState,
@@ -17,7 +18,8 @@ import {
 import { SIMULACRO_SUBJECT } from './partialExamSubjects'
 import { createDayScheduler, estimatedMinutesForMissionType } from './scheduleTimeSlot'
 import { normalizeStartMode, type StartMode } from './startingPoint'
-import { getMadridToday, getStudyDays } from './studyDays'
+import { getMadridToday } from './studyDays'
+import { loadStudentPlanContext, planningDates, studyDaysRemaining } from './studentPlanContext'
 
 // Microdiagnóstico: la segunda mitad de la confirmación del punto de partida.
 //
@@ -158,6 +160,12 @@ export async function injectDiagnosticMissions(
     const monthStart = startOfMonthISO()
     const diagnosticsThisMonth = knowledgeRows.filter(r => r.diagnostic_offered_at && r.diagnostic_offered_at >= monthStart).length
 
+    // Ritmo según el tiempo REAL que le queda: el goteo de septiembre (tres
+    // misiones de espera, cinco días entre diagnósticos, tres al mes) deja a
+    // un alumno que entra en mayo planificando sobre declaraciones que nunca
+    // llegan a contrastarse.
+    const pacing = diagnosticPacingFor(studyDaysRemaining(await loadStudentPlanContext(userId, db, today)))
+
     const lastOfferedAt = knowledgeRows
       .map(r => r.diagnostic_offered_at)
       .filter((v): v is string => typeof v === 'string')
@@ -187,6 +195,7 @@ export async function injectDiagnosticMissions(
         diagnosticsThisMonth,
         lastOfferedAt,
         today,
+        pacing,
       })
       if (!eligibility.eligible) {
         lastReason = eligibility.reason
@@ -236,7 +245,16 @@ async function scheduleDiagnosticMission(
   candidate: { subject: string; blockSlug: string; blockKey: string | null },
 ): Promise<string | null> {
   const today = getMadridToday()
-  for (const dateStr of getStudyDays(today, SCHEDULING_WINDOW_DAYS)) {
+  // Mismo criterio que el resto del plan: días que el alumno estudia de
+  // verdad y nunca después de su fecha objetivo. Un diagnóstico sí puede caer
+  // en la ventana de repaso final — comprobar el punto de partida es
+  // exactamente lo que hay que hacer si queda poco.
+  const planContext = await loadStudentPlanContext(userId, db, today)
+  const candidateDates = planningDates(planContext, {
+    limit: SCHEDULING_WINDOW_DAYS,
+    includeFinalReviewWindow: true,
+  })
+  for (const dateStr of candidateDates) {
     const scheduler = await createDayScheduler(userId, db, dateStr, {
       externalBusy: await getAvailabilityForDate(userId, dateStr),
     })

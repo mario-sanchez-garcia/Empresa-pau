@@ -425,6 +425,20 @@ function hrefForMission(mission: Mission): MissionHrefResult {
         ? { href: `/simulacros/${resultId}/results`, fallback: '' }
         : { href: '', fallback: 'Práctica completada.' }
     }
+    // Microdiagnóstico (ver camino/injectDiagnosticMissions.ts): mismo flujo
+    // de práctica que los ejercicios de bloque, pero con source propio — es
+    // lo que /api/practica-parcial verifica contra la misión para sacarlo del
+    // límite mensual del plan y aplicarle su propio tope.
+    const diagnosticFor = typeof mission.metadata?.diagnostic_for === 'string' ? mission.metadata.diagnostic_for : ''
+    if (diagnosticFor) {
+      const simSubject = String(mission.metadata?.simulacro_subject ?? '')
+      if (simSubject) {
+        return {
+          href: `/simulacros/practica/nueva?subject=${encodeURIComponent(simSubject)}&block=${encodeURIComponent(diagnosticFor)}&source=camino_diagnostic&missionId=${encodeURIComponent(mission.id)}`,
+          fallback: '',
+        }
+      }
+    }
     const blockPracticeFor = typeof mission.metadata?.block_practice_for === 'string' ? mission.metadata.block_practice_for : ''
     const simSubject = String(mission.metadata?.simulacro_subject ?? '')
     if (blockPracticeFor && simSubject) {

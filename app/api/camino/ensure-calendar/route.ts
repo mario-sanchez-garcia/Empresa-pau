@@ -7,6 +7,7 @@ import { syncKairoMissionsToGoogle } from '@/app/lib/calendar/sync'
 import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
 import { getMadridToday } from '@/app/lib/camino/studyDays'
 import { injectWeakReviewMissions } from '@/app/lib/camino/injectWeakReviewMissions'
+import { injectDiagnosticMissions } from '@/app/lib/camino/injectDiagnosticMissions'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,6 +52,9 @@ export async function POST(request: NextRequest) {
 
     await ensureCaminoCalendar(user.id, db)
     const weakReviews = await injectWeakReviewMissions(user.id, db)
+    // Microdiagnóstico: como mucho uno, y solo si el alumno ya tiene ritmo
+    // (ver camino/knowledgeState.ts). Nunca bloquea el resto del Camino.
+    const diagnostics = await injectDiagnosticMissions(user.id, db)
     const personalization = await applyCalendarPersonalization(user.id, db)
     await syncKairoMissionsToGoogle(user.id, db).catch(error => {
       console.warn('[camino/ensure-calendar] calendar sync skipped:', error)
@@ -67,7 +71,7 @@ export async function POST(request: NextRequest) {
       )
     if (logError) console.error('[camino/ensure-calendar] log upsert failed:', logError.message)
 
-    return NextResponse.json({ ok: true, personalization, weakReviews })
+    return NextResponse.json({ ok: true, personalization, weakReviews, diagnostics })
   } catch (error) {
     console.error('[camino/ensure-calendar]', error)
     return NextResponse.json({ error: 'No se pudo preparar tu Camino' }, { status: 500 })

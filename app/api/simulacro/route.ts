@@ -10,6 +10,7 @@ import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
 import { awardXp, awardRepeatImprovementXp } from '@/app/lib/camino/awardXp'
 import { markCalendarMissionCompleted } from '@/app/lib/camino/markCalendarMissionCompleted'
+import { applyDiagnosticOutcome, diagnosticContextForMission } from '@/app/lib/camino/applyDiagnosticOutcome'
 import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
 import { PARCIAL_COMPLETION_XP, SIMULACRO_COMPLETION_XP } from '@/app/lib/camino/xpMap'
 import { countRepeatDepth } from '@/app/lib/camino/repeatImprovement'
@@ -625,6 +626,19 @@ export async function POST(request: NextRequest) {
       } catch (calendarError) {
         calendarMissionCompletionPending = true
         console.error('[simulacro] calendar_mission_completion_failed', { missionId, message: (calendarError as Error)?.message?.slice(0, 200) })
+      }
+      // Si esta misión era un microdiagnóstico, su nota decide si la
+      // declaración inicial del alumno se confirma o se refuta — y, si se
+      // refuta, ese bloque (solo ese) recupera la lección completa. Nunca
+      // marca temario como completado. Best-effort: la corrección del alumno
+      // ya está guardada pase lo que pase aquí.
+      try {
+        const diagnosticContext = await diagnosticContextForMission(authContext.supabase, authContext.user.id, missionId)
+        if (diagnosticContext && typeof result.nota_final === 'number') {
+          await applyDiagnosticOutcome(authContext.supabase, authContext.user.id, diagnosticContext, result.nota_final)
+        }
+      } catch (diagnosticError) {
+        console.error('[simulacro] diagnostic_outcome_failed', { missionId, message: (diagnosticError as Error)?.message?.slice(0, 200) })
       }
     }
     // Misma idea, rama aparte: Simulacro completo (90 min) entrado desde la

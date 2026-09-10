@@ -6,6 +6,9 @@ import type { SimulacroSubject } from '@/components/simulacros/types'
 import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
 import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
+import { DIAGNOSTIC_QUESTION_COUNT, DIAGNOSTIC_SOURCE, MAX_DIAGNOSTICS_PER_MONTH } from '@/app/lib/camino/knowledgeState'
+import { countDiagnosticSessions, countPartialLimitSessions, type PracticeSessionRow } from '@/app/lib/camino/diagnosticLimits'
+import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { BILLING_BLOCK_CODE, monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
 import { isInternalUser } from '@/app/lib/internalUsers'
 import { resolveExamHistoriaTopics } from '@/app/lib/camino/resolveExamHistoriaTopics'
@@ -51,6 +54,29 @@ export async function POST(request: NextRequest) {
   const source = typeof body.source === 'string' ? body.source.slice(0, 64) : null
   const weekStart = typeof body.weekStart === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(body.weekStart) ? body.weekStart : null
   const examId = typeof body.examId === 'string' && body.examId.trim() ? body.examId.trim() : null
+
+  // ¿Es de verdad un microdiagnóstico?
+  //
+  // NO basta con que el cliente mande source=camino_diagnostic: eso sería una
+  // puerta trasera al límite mensual de prácticas del plan (basta con
+  // renombrar el origen). Tiene que existir la misión, ser de este alumno y
+  // llevar la marca `diagnostic_for` que solo escribe
+  // injectDiagnosticMissions.ts en servidor.
+  let isDiagnostic = false
+  let diagnosticBlockSlug: string | null = null
+  if (source === DIAGNOSTIC_SOURCE && missionId) {
+    const { data: diagnosticRow } = await db
+      .from('camino_calendar')
+      .select('metadata')
+      .eq('id', missionId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    const meta = (diagnosticRow?.metadata ?? {}) as Record<string, unknown>
+    if (typeof meta.diagnostic_for === 'string') {
+      isDiagnostic = true
+      diagnosticBlockSlug = meta.diagnostic_for
+    }
+  }
 
   // examId ties this request to a real Parcial (student_exams.id) — same
   // ownership check as /api/parciales/exam-topics and /api/parciales/exam-
@@ -215,26 +241,58 @@ export async function POST(request: NextRequest) {
     // prácticas parciales como quisiera y solo se topaba con el límite al
     // intentar corregir la segunda.
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
-    const { count: monthlyParciales } = await db
+
+    // Sesiones de práctica de este mes. El reparto entre "gasta cuota del
+    // plan" y "es un microdiagnóstico" se decide en JS con las reglas de
+    // camino/diagnosticLimits.ts, no con un filtro SQL: la comparación
+    // `source <> 'camino_diagnostic'` en Postgres descarta las filas con
+    // source NULL (NULL <> 'x' es NULL), o sea casi todas las prácticas.
+    const { data: monthSessionRows } = await db
       .from('historial_simulacros')
-      .select('*', { count: 'exact', head: true })
+      .select('resultado_json')
       .eq('user_id', user.id)
       .gte('created_at', startOfMonth)
       .contains('resultado_json', { __practice_session: true })
-    if ((monthlyParciales ?? 0) >= planLimits.partialsPerMonth) {
-      return NextResponse.json(
-        {
-          error: 'parcial_limit_reached',
-          message: `Has alcanzado el límite de ${planLimits.partialsPerMonth} práctica${planLimits.partialsPerMonth !== 1 ? 's' : ''} parcial${planLimits.partialsPerMonth !== 1 ? 'es' : ''} este mes. ${monthlyLimitResetNotice()}`,
-          code: BILLING_BLOCK_CODE
-        },
-        { status: 429 }
-      )
+      .limit(500)
+    const monthSessions = (monthSessionRows ?? []) as PracticeSessionRow[]
+
+    if (isDiagnostic) {
+      // Un microdiagnóstico lo pide Kairo, no el alumno: gastarle su cuota
+      // mensual de prácticas por hacer lo que le hemos pedido sería cobrarle
+      // por nuestra propia comprobación. Va fuera del límite del plan, pero
+      // con tope propio para que el origen no sea una puerta trasera.
+      const monthlyDiagnostics = countDiagnosticSessions(monthSessions)
+      if (monthlyDiagnostics >= MAX_DIAGNOSTICS_PER_MONTH) {
+        return NextResponse.json(
+          {
+            error: 'diagnostic_limit_reached',
+            message: `Ya has hecho las ${MAX_DIAGNOSTICS_PER_MONTH} comprobaciones rápidas de este mes. ${monthlyLimitResetNotice()}`,
+            code: BILLING_BLOCK_CODE
+          },
+          { status: 429 }
+        )
+      }
+    } else {
+      const monthlyParciales = countPartialLimitSessions(monthSessions)
+      if (monthlyParciales >= planLimits.partialsPerMonth) {
+        return NextResponse.json(
+          {
+            error: 'parcial_limit_reached',
+            message: `Has alcanzado el límite de ${planLimits.partialsPerMonth} práctica${planLimits.partialsPerMonth !== 1 ? 's' : ''} parcial${planLimits.partialsPerMonth !== 1 ? 'es' : ''} este mes. ${monthlyLimitResetNotice()}`,
+            code: BILLING_BLOCK_CODE
+          },
+          { status: 429 }
+        )
+      }
     }
   }
 
   const comunidad = String(body.comunidad ?? 'Madrid')
-  const numQuestions = typeof body.numQuestions === 'number' ? body.numQuestions : 3
+  // El diagnóstico es una MUESTRA mínima: confirma o refuta una declaración,
+  // no examina. El número lo fija el servidor, no el cliente.
+  const numQuestions = isDiagnostic
+    ? DIAGNOSTIC_QUESTION_COUNT
+    : (typeof body.numQuestions === 'number' ? body.numQuestions : 3)
 
   if (!VALID_SUBJECTS.has(subject)) {
     return NextResponse.json({ error: 'Asignatura no válida' }, { status: 400 })
@@ -337,7 +395,11 @@ export async function POST(request: NextRequest) {
       // exam_id: enlaza con el Parcial real (student_exams.id) — esta misma
       // ruta lo usa arriba para el reuso "misma práctica hoy para este
       // examen" sin depender de que el missionId coincida exacto.
-      resultado_json: { __practice_session: true, block, subject, comunidad, ...(source ? { source } : {}), ...(weekStart ? { week_start: weekStart } : {}), ...(missionId ? { mission_id: missionId } : {}), ...(examId && examOwned ? { exam_id: examId } : {}) },
+      // `source` se guarda SIEMPRE que venga, pero solo vale como
+      // camino_diagnostic si `isDiagnostic` lo verificó contra la misión real
+      // — el conteo mensual filtra por este campo, así que aquí no puede
+      // colarse un origen inventado por el cliente.
+      resultado_json: { __practice_session: true, block, subject, comunidad, ...(isDiagnostic ? { source: DIAGNOSTIC_SOURCE, diagnostic_block: diagnosticBlockSlug } : (source ? { source } : {})), ...(weekStart ? { week_start: weekStart } : {}), ...(missionId ? { mission_id: missionId } : {}), ...(examId && examOwned ? { exam_id: examId } : {}) },
       created_at: session.created_at,
       updated_at: session.created_at,
     })
@@ -346,6 +408,16 @@ export async function POST(request: NextRequest) {
 
   if (insertError || !inserted) {
     return NextResponse.json({ error: insertError?.message ?? 'Error al crear la sesión' }, { status: 500 })
+  }
+
+  if (isDiagnostic) {
+    // Embudo del microdiagnóstico: ofrecido → INICIADO → completado →
+    // aprobado/refutado. Sin PII: asignatura, bloque y nada más.
+    await recordBetaMetric(db, user.id, 'diagnostic_started', {
+      subject,
+      block_slug: diagnosticBlockSlug,
+      question_count: numQuestions,
+    })
   }
 
   return NextResponse.json({ id: inserted.id as string })

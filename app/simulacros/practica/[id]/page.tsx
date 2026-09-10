@@ -87,6 +87,12 @@ function PracticaPageInner() {
       const block = searchParams.get('block') ?? ''
       const missionId = searchParams.get('missionId') ?? undefined
       const examId = searchParams.get('examId') ?? undefined
+      // `source` identifica de dónde viene la práctica. Importa para el
+      // microdiagnóstico (source=camino_diagnostic): el servidor lo verifica
+      // contra la propia misión antes de sacarlo del límite mensual del plan,
+      // así que mandarlo no da acceso a nada por sí solo — pero sin mandarlo
+      // el diagnóstico se contaría como una práctica normal del alumno.
+      const source = searchParams.get('source') ?? undefined
 
       supabase.auth.getSession().then(async ({ data }) => {
         const token = data.session?.access_token
@@ -96,7 +102,7 @@ function PracticaPageInner() {
           const res = await fetch('/api/practica-parcial', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ subject, block, missionId, examId }),
+            body: JSON.stringify({ subject, block, missionId, examId, source }),
           })
           if (res.ok) {
             const json = await res.json() as { id: string; alreadyCompleted?: boolean }

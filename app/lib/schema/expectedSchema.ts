@@ -33,6 +33,7 @@ export const EXPECTED_TABLES: Array<{ name: string; rls: boolean; porque: string
   { name: 'email_events',             rls: true, porque: 'Deduplicación de envíos y reanudación de crons' },
   { name: 'ai_usage_events',          rls: true, porque: 'Control de cuota y coste de IA' },
   { name: 'topic_why_cache',          rls: true, porque: 'Cache de "¿Por qué es así?" por tema — sin ella, cada corrección la regenera' },
+  { name: 'student_block_knowledge',  rls: true, porque: 'Separa conocimiento declarado, con evidencia y dominado por bloque — sin ella el microdiagnóstico no puede confirmar ni refutar lo que el alumno declaró en onboarding' },
   { name: 'flashcard_decks',          rls: true, porque: 'Mazos de La Zona: tamaño, publicación pública' },
   { name: 'flashcard_deck_attempts',  rls: true, porque: 'Historial de intentos por mazo — estadísticas y ranking' },
   { name: 'chat_threads',             rls: true, porque: 'Hilo fijo por asignatura del Chat con Kairo' },

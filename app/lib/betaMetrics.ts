@@ -54,6 +54,18 @@ export const BETA_METRIC_EVENTS = [
   'camino_calendar_source_selected',
   'weak_review_injected',
   'weak_review_mapping_missed',
+  // Microdiagnóstico: confirmación progresiva de lo que el alumno declaró
+  // haber dado en clase (ver camino/knowledgeState.ts). El embudo completo,
+  // para poder medir cuántos se ofrecen, cuántos se hacen y en cuántos casos
+  // la declaración inicial era incorrecta. Sin PII: solo asignatura, bloque y
+  // magnitudes.
+  'diagnostic_offered',
+  'diagnostic_skipped',
+  'diagnostic_started',
+  'diagnostic_completed',
+  'diagnostic_passed',
+  'diagnostic_refuted',
+  'diagnostic_camino_adjusted',
   'correction_score_unparseable',
 ] as const
 

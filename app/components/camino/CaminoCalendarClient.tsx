@@ -33,10 +33,8 @@ import { FINAL_REVIEW_RESERVED_STUDY_DAYS, resolveTargetExamDate } from '@/app/l
 import { PLAN_ENGINE_VERSION, buildPlanDays, type PlanDay } from '@/app/lib/camino/planEngine'
 import { examRotationWeight, priorityWeight, type ExamRotationPriority } from '@/app/lib/camino/rotationWeights'
 import { SPAIN_HOLIDAYS } from '@/app/lib/camino/spainHolidays'
-import { calcularRacha } from '@/app/lib/calcularRacha'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
-import { caminoSubjectFromSimulacro } from '@/app/lib/camino/partialExamSubjects'
 import { monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
 import { DEFAULT_MISSION_DURATION_MINUTES } from '@/app/lib/camino/calendarEditorConfig'
 import { CONTENT_TYPE_COLORS } from '@/app/lib/camino/contentTypeColors'
@@ -584,6 +582,36 @@ function calRowToMission(row: CaminoCalRow): Mission {
     missionType: row.mission_type,
     startTime: row.start_time,
     endTime: row.end_time,
+  }
+}
+
+type CaminoBootstrap = {
+  streak?: number
+  subjectProgress?: Record<string, number>
+  xpTotal?: number
+  weeklyXP?: number
+  queueCount?: number
+  weeklySimsCompleted?: number
+  monthlySimsUsed?: number
+  weeklyExamsCompleted?: number
+  freeActivitySubjectsToday?: string[]
+  proyeccion?: { projections?: Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null; bloques: Array<{ bloque: string; nota_proyectada: number; num_entries: number; avg_max_pts: number | null }> }> } | null
+  pulso?: { enoughData?: boolean; centroDisplay?: string; subject?: string; topicName?: string; position?: 'ahead' | 'same' | 'behind'; delta?: number; peers?: number } | null
+  ligas?: { ligas?: LigaInfo[] } | null
+  ligasGlobal?: { entries?: GlobalTopEntry[]; nextTarget?: { name: string; xpNeeded: number } | null; myRank?: number } | null
+}
+
+// Un fallo aquí no puede dejar el hub en blanco: el calendario se pinta igual y
+// cada widget se queda con su valor por defecto, que es justo lo que pasaba
+// cuando cada uno iba por su cuenta y se tragaba su propio error.
+async function fetchCaminoBootstrap(token: string | undefined, weekStart: string, weekEnd: string): Promise<CaminoBootstrap | null> {
+  if (!token) return null
+  try {
+    const res = await fetch(`/api/camino/bootstrap?weekStart=${weekStart}&weekEnd=${weekEnd}`, { headers: { Authorization: `Bearer ${token}` } })
+    if (!res.ok) return null
+    return await res.json() as CaminoBootstrap
+  } catch {
+    return null
   }
 }
 
@@ -1365,42 +1393,28 @@ export default function CaminoCalendarClient() {
       const ensurePromise = token ? ensureServerCalendar(token) : Promise.resolve(false)
       const weekStart = currentWeekStartISO()
       const weekEnd = toISO(addDays(dateFromISO(weekStart), 6))
-      const now = new Date()
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-      const todayStr = todayMadrid()
-      const [calDays, rachaValue, matCount, ccssCount, lenguaCount, historiaCount, fisicaCount, quimicaCount, progressRow, weeklyXpRows, queueResult, simsWeekResult, monthlySimsResult, examsWeekResult, freeExamsToday, freeSimsToday] = await Promise.all([
+      // Aquí había catorce consultas sueltas a Supabase más, en sus propios
+      // efectos, cuatro fetch de widget: dieciocho idas y vueltas desde el
+      // dispositivo del alumno para pintar un hub. Ahora las hace
+      // /api/camino/bootstrap del tirón y al lado de la base de datos.
+      const [calDays, boot] = await Promise.all([
         fetchCaminoCalendar(userId),
-        calcularRacha(userId, supabase),
-        supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'matematicas_ii'),
-        supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'matematicas_ccss'),
-        supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'lengua'),
-        supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'historia_espana'),
-        supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'fisica'),
-        supabase.from('camino_calendar').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'completed').eq('subject', 'quimica'),
-        supabase.from('camino_user_progress').select('xp_total').eq('user_id', userId).maybeSingle(),
-        supabase.from('camino_xp_events').select('xp_amount').eq('user_id', userId).gte('created_at', weekStart + 'T00:00:00Z'),
-        supabase.from('user_learning_queue').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-        supabase.from('historial_simulacros').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('estado', 'completado').gte('created_at', weekStart + 'T00:00:00Z').lte('created_at', weekEnd + 'T23:59:59Z'),
-        supabase.from('historial_simulacros').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('estado', 'completado').gte('created_at', startOfMonth),
-        // historial_examenes no tiene columna 'estado' — nota != null es la
-        // misma condición que usa award-exam-xp/route.ts para considerar una
-        // corrección real (no evaluable = no cuenta).
-        supabase.from('historial_examenes').select('*', { count: 'exact', head: true }).eq('user_id', userId).not('nota', 'is', null).gte('created_at', weekStart + 'T00:00:00Z').lte('created_at', weekEnd + 'T23:59:59Z'),
-        // Práctica libre de hoy fuera de Camino (Exámenes/Simulacros directos)
-        // — sin v2_sort_order/tema exacto enlazable, así que solo se agrega a
-        // nivel de asignatura para el indicador "también trabajaste hoy".
-        supabase.from('historial_examenes').select('asignatura').eq('user_id', userId).neq('tipo', 'Camino PAU').not('nota', 'is', null).gte('created_at', todayStr + 'T00:00:00Z').lte('created_at', todayStr + 'T23:59:59Z'),
-        supabase.from('historial_simulacros').select('asignatura').eq('user_id', userId).eq('estado', 'completado').gte('created_at', todayStr + 'T00:00:00Z').lte('created_at', todayStr + 'T23:59:59Z'),
+        fetchCaminoBootstrap(token, weekStart, weekEnd),
       ])
       if (cancelled) return
-      const freeSubjects = new Set<string>()
-      for (const row of (freeExamsToday.data ?? []) as Array<{ asignatura: string }>) {
-        freeSubjects.add(subjectLabelFromSlug(caminoSubjectFromSimulacro(row.asignatura)))
+      if (boot) {
+        setFreeActivitySubjectsToday(boot.freeActivitySubjectsToday ?? [])
+        setProjection(boot.proyeccion?.projections ?? [])
+        const pulso = boot.pulso
+        if (pulso?.enoughData && pulso.centroDisplay && pulso.subject && pulso.topicName && pulso.position !== undefined && pulso.delta !== undefined && pulso.peers !== undefined) {
+          setCentroPulso({ enoughData: true, centroDisplay: pulso.centroDisplay, subject: pulso.subject, topicName: pulso.topicName, position: pulso.position, delta: pulso.delta, peers: pulso.peers })
+        }
+        setLigas(boot.ligas?.ligas ?? [])
+        setGlobalTop((boot.ligasGlobal?.entries ?? []).slice(0, 5))
+        setGlobalNextTarget(boot.ligasGlobal?.nextTarget ?? null)
+        setGlobalMyRank(typeof boot.ligasGlobal?.myRank === 'number' ? boot.ligasGlobal.myRank : null)
       }
-      for (const row of (freeSimsToday.data ?? []) as Array<{ asignatura: string }>) {
-        freeSubjects.add(subjectLabelFromSlug(caminoSubjectFromSimulacro(row.asignatura)))
-      }
-      setFreeActivitySubjectsToday([...freeSubjects])
+      setLigaLoading(false)
       const applyServerCalendar = (days: DayPlan[], context: CalendarSourceContext) => {
         setCalendar(days)
         window.dispatchEvent(new Event('camino:updated'))
@@ -1443,25 +1457,20 @@ export default function CaminoCalendarClient() {
         if (seeded && seeded.length > 0) {
           applyServerCalendar(seeded, 'initial_load')
         } else {
-          const qCount = (queueResult as { count: number | null }).count ?? 0
+          const qCount = boot?.queueCount ?? 0
           recordCalendarSource('server_empty', 'initial_load', { weekStart, missionCount: 0, reason: qCount > 0 ? 'queue_without_future_calendar' : 'empty_queue' })
           setCaminoReadyStatus(qCount > 0 ? 'no_future' : 'no_queue')
         }
       }
-      setStreak(rachaValue)
-      setSubjectProgress({
-        matematicas_ii: matCount.count ?? 0,
-        matematicas_ccss: ccssCount.count ?? 0,
-        lengua: lenguaCount.count ?? 0,
-        historia_espana: historiaCount.count ?? 0,
-        fisica: fisicaCount.count ?? 0,
-        quimica: quimicaCount.count ?? 0,
-      })
-      setXpTotal(Number(progressRow.data?.xp_total) || 0)
-      setWeeklyXP(((weeklyXpRows.data ?? []) as Array<{ xp_amount: number }>).reduce((sum, r) => sum + (Number(r.xp_amount) || 0), 0))
-      setWeeklySimsCompleted((simsWeekResult as { count: number | null }).count ?? 0)
-      setMonthlySimsUsed((monthlySimsResult as { count: number | null }).count ?? 0)
-      setWeeklyExamsCompleted((examsWeekResult as { count: number | null }).count ?? 0)
+      if (boot) {
+        setStreak(boot.streak ?? 0)
+        if (boot.subjectProgress) setSubjectProgress(boot.subjectProgress)
+        setXpTotal(boot.xpTotal ?? 0)
+        setWeeklyXP(boot.weeklyXP ?? 0)
+        setWeeklySimsCompleted(boot.weeklySimsCompleted ?? 0)
+        setMonthlySimsUsed(boot.monthlySimsUsed ?? 0)
+        setWeeklyExamsCompleted(boot.weeklyExamsCompleted ?? 0)
+      }
     }).catch(() => {
       recordCalendarSource('server_error', 'initial_load', { weekStart: currentWeekStartISO(), reason: 'initial_load_failed' })
       // Sin esto el estado se quedaba en 'checking' para siempre y el alumno
@@ -1469,7 +1478,7 @@ export default function CaminoCalendarClient() {
       if (!cancelled) setCaminoReadyStatus(previo => (previo === 'checking' ? 'load_error' : previo))
     })
     return () => { cancelled = true }
-  }, [reloadEpoch])
+  }, [reloadEpoch]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // supabase restaura el token desde localStorage de forma asíncrona, así que
   // getSession() puede resolver con session:null en una pestaña recién abierta
@@ -1583,38 +1592,6 @@ export default function CaminoCalendarClient() {
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-    supabase.auth.getSession().then(async ({ data }) => {
-      const token = data.session?.access_token ?? null
-      if (!token || cancelled) return
-      try {
-        const res = await fetch('/api/proyeccion', { headers: { Authorization: `Bearer ${token}` } })
-        if (!res.ok || cancelled) return
-        const json = await res.json() as { projections?: Array<{ asignatura: string; nota_proyectada: number | null; num_entries: number; recent_entries: number; confidence: 'low' | 'medium' | 'high'; trend_7d: number | null; bloques: Array<{ bloque: string; nota_proyectada: number; num_entries: number; avg_max_pts: number | null }> }> }
-        if (!cancelled) setProjection(json.projections ?? [])
-      } catch { /* silently ignore */ }
-    }).catch(() => undefined)
-    return () => { cancelled = true }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    let cancelled = false
-    supabase.auth.getSession().then(async ({ data }) => {
-      const token = data.session?.access_token ?? null
-      if (!token || cancelled) return
-      try {
-        const res = await fetch('/api/centro/pulso', { headers: { Authorization: `Bearer ${token}` } })
-        if (!res.ok || cancelled) return
-        const json = await res.json() as { enoughData: boolean; centroDisplay?: string; subject?: string; topicName?: string; position?: 'ahead' | 'same' | 'behind'; delta?: number; peers?: number }
-        if (!cancelled && json.enoughData && json.centroDisplay && json.subject && json.topicName && json.position !== undefined && json.delta !== undefined && json.peers !== undefined) {
-          setCentroPulso({ enoughData: true, centroDisplay: json.centroDisplay, subject: json.subject, topicName: json.topicName, position: json.position, delta: json.delta, peers: json.peers })
-        }
-      } catch { /* silently ignore */ }
-    }).catch(() => undefined)
-    return () => { cancelled = true }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
     if (!isSunday) { setSundayMockSession(null); return }
     const weekStart = currentWeekStartISO()
     let cancelled = false
@@ -1631,7 +1608,7 @@ export default function CaminoCalendarClient() {
       setSundayMockSession(done ? { id: String(done.id), nota_final: done.nota_final != null ? Number(done.nota_final) : null } : null)
     }).catch(() => undefined)
     return () => { cancelled = true }
-  }, [isSunday]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isSunday])
 
   useEffect(() => {
     if (!onboarding?.completedAt) return
@@ -1646,37 +1623,7 @@ export default function CaminoCalendarClient() {
       if (!cancelled) setCaminoPlanId(planId)
     }).catch(() => undefined)
     return () => { cancelled = true }
-  }, [onboarding?.completedAt]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    let cancelled = false
-    supabase.auth.getSession().then(async ({ data }) => {
-      const token = data.session?.access_token ?? null
-      if (!token || cancelled) { if (!cancelled) setLigaLoading(false); return }
-      const res = await fetch('/api/ligas', { headers: { Authorization: `Bearer ${token}` } })
-      if (!cancelled && res.ok) { const d = await res.json(); setLigas(d.ligas ?? []) }
-      if (!cancelled) setLigaLoading(false)
-    }).catch(() => { if (!cancelled) setLigaLoading(false) })
-    return () => { cancelled = true }
-  }, [])
-
-  // Top 5 Global junto a Mi liga — mismo endpoint/campos que la pestaña
-  // Global del modal completo, sin lógica de XP propia.
-  useEffect(() => {
-    let cancelled = false
-    supabase.auth.getSession().then(async ({ data }) => {
-      const token = data.session?.access_token ?? null
-      if (!token || cancelled) return
-      const res = await fetch('/api/ligas/global?period=total', { headers: { Authorization: `Bearer ${token}` } })
-      if (!cancelled && res.ok) {
-        const d = await res.json() as { entries?: GlobalTopEntry[]; nextTarget?: { name: string; xpNeeded: number } | null; myRank?: number }
-        setGlobalTop((d.entries ?? []).slice(0, 5))
-        setGlobalNextTarget(d.nextTarget ?? null)
-        setGlobalMyRank(typeof d.myRank === 'number' ? d.myRank : null)
-      }
-    }).catch(() => undefined)
-    return () => { cancelled = true }
-  }, [])
+  }, [onboarding?.completedAt])
 
   const hasProfile = Boolean(onboarding?.completedAt && onboarding.community && onboarding.subjects.length)
 

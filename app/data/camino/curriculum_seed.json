@@ -1537,28 +1537,6 @@
     ]
   },
   {
-    "subject": "biologia",
-    "blockSlug": "genetica",
-    "blockTitle": "Genética",
-    "topicSlug": "mendel-replicacion-traduccion",
-    "title": "Mendel, ADN y expresión génica",
-    "orderIndex": 1,
-    "contentStatus": "itinerary_only",
-    "explanation": "",
-    "guidedExample": "",
-    "practicePrompt": "",
-    "rawLatex": "",
-    "evauPracticeQuery": {
-      "subject": "biologia",
-      "block": "genetica",
-      "topic": "mendel-adn"
-    },
-    "source": "contenidos_2_bach",
-    "compatibleSubjects": [
-      "biologia"
-    ]
-  },
-  {
     "subject": "historia",
     "blockSlug": "segunda-republica-guerra-civil",
     "blockTitle": "Segunda República y Guerra Civil",
@@ -11651,5 +11629,1454 @@
       "economia"
     ],
     "v2SortOrder": 50
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biomoleculas",
+    "blockTitle": "Las biomoléculas",
+    "topicSlug": "biomoleculas-organicas-e-inorganicas",
+    "title": "Biomoléculas orgánicas e inorgánicas",
+    "orderIndex": 1,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biomoleculas",
+      "topic": "biomoleculas-organicas-e-inorganicas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 1
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biomoleculas",
+    "blockTitle": "Las biomoléculas",
+    "topicSlug": "enlaces-quimicos-en-biologia",
+    "title": "Los enlaces químicos en biología",
+    "orderIndex": 2,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biomoleculas",
+      "topic": "enlaces-quimicos-en-biologia"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 2
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biomoleculas",
+    "blockTitle": "Las biomoléculas",
+    "topicSlug": "el-agua-estructura-y-funciones",
+    "title": "El agua: estructura y funciones biológicas",
+    "orderIndex": 3,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biomoleculas",
+      "topic": "el-agua-estructura-y-funciones"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 3
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biomoleculas",
+    "blockTitle": "Las biomoléculas",
+    "topicSlug": "las-sales-minerales",
+    "title": "Las sales minerales",
+    "orderIndex": 4,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biomoleculas",
+      "topic": "las-sales-minerales"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 4
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biomoleculas",
+    "blockTitle": "Las biomoléculas",
+    "topicSlug": "monosacaridos",
+    "title": "Monosacáridos: estructura, isomería y ciclación",
+    "orderIndex": 5,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biomoleculas",
+      "topic": "monosacaridos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 5
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biomoleculas",
+    "blockTitle": "Las biomoléculas",
+    "topicSlug": "disacaridos-y-enlace-o-glucosidico",
+    "title": "Disacáridos y enlace O-glucosídico",
+    "orderIndex": 6,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biomoleculas",
+      "topic": "disacaridos-y-enlace-o-glucosidico"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 6
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biomoleculas",
+    "blockTitle": "Las biomoléculas",
+    "topicSlug": "polisacaridos",
+    "title": "Polisacáridos de reserva y estructurales",
+    "orderIndex": 7,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biomoleculas",
+      "topic": "polisacaridos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 7
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biomoleculas",
+    "blockTitle": "Las biomoléculas",
+    "topicSlug": "lipidos-saponificables",
+    "title": "Lípidos saponificables",
+    "orderIndex": 8,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biomoleculas",
+      "topic": "lipidos-saponificables"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 8
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biomoleculas",
+    "blockTitle": "Las biomoléculas",
+    "topicSlug": "lipidos-insaponificables",
+    "title": "Lípidos insaponificables",
+    "orderIndex": 9,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biomoleculas",
+      "topic": "lipidos-insaponificables"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 9
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biomoleculas",
+    "blockTitle": "Las biomoléculas",
+    "topicSlug": "aminoacidos-y-enlace-peptidico",
+    "title": "Aminoácidos y enlace peptídico",
+    "orderIndex": 10,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biomoleculas",
+      "topic": "aminoacidos-y-enlace-peptidico"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 10
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biomoleculas",
+    "blockTitle": "Las biomoléculas",
+    "topicSlug": "estructura-y-funciones-de-las-proteinas",
+    "title": "Estructura y funciones de las proteínas",
+    "orderIndex": 11,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biomoleculas",
+      "topic": "estructura-y-funciones-de-las-proteinas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 11
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biomoleculas",
+    "blockTitle": "Las biomoléculas",
+    "topicSlug": "vitaminas-y-cofactores",
+    "title": "Vitaminas y cofactores enzimáticos",
+    "orderIndex": 12,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biomoleculas",
+      "topic": "vitaminas-y-cofactores"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 12
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biomoleculas",
+    "blockTitle": "Las biomoléculas",
+    "topicSlug": "acidos-nucleicos-adn-y-arn",
+    "title": "Ácidos nucleicos: ADN y ARN",
+    "orderIndex": 13,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biomoleculas",
+      "topic": "acidos-nucleicos-adn-y-arn"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 13
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "el-adn-como-portador-concepto-de-gen",
+    "title": "El ADN como portador de la información. Concepto de gen",
+    "orderIndex": 14,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "el-adn-como-portador-concepto-de-gen"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 14
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "replicacion-del-adn-en-procariotas",
+    "title": "Replicación del ADN en procariotas",
+    "orderIndex": 15,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "replicacion-del-adn-en-procariotas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 15
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "replicacion-en-eucariotas-diferencias",
+    "title": "Replicación en eucariotas: diferencias con procariotas",
+    "orderIndex": 16,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "replicacion-en-eucariotas-diferencias"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 16
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "tipos-y-funciones-del-arn",
+    "title": "Tipos y funciones del ARN",
+    "orderIndex": 17,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "tipos-y-funciones-del-arn"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 17
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "transcripcion",
+    "title": "La transcripción",
+    "orderIndex": 18,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "transcripcion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 18
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "maduracion-del-arnm-y-splicing",
+    "title": "Maduración del ARNm y splicing",
+    "orderIndex": 19,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "maduracion-del-arnm-y-splicing"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 19
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "el-codigo-genetico",
+    "title": "El código genético",
+    "orderIndex": 20,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "el-codigo-genetico"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 20
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "la-traduccion",
+    "title": "La traducción",
+    "orderIndex": 21,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "la-traduccion"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 21
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "regulacion-de-la-expresion-genica",
+    "title": "Regulación de la expresión génica y diferenciación celular",
+    "orderIndex": 22,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "regulacion-de-la-expresion-genica"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 22
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "tipos-de-mutaciones",
+    "title": "Tipos de mutaciones",
+    "orderIndex": 23,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "tipos-de-mutaciones"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 23
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "agentes-mutagenicos-evolucion-y-biodiversidad",
+    "title": "Agentes mutagénicos, evolución y biodiversidad",
+    "orderIndex": 24,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "agentes-mutagenicos-evolucion-y-biodiversidad"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 24
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "genomas-procariota-y-eucariota",
+    "title": "Genomas procariota y eucariota",
+    "orderIndex": 25,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "genomas-procariota-y-eucariota"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 25
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "leyes-de-mendel",
+    "title": "Las leyes de Mendel",
+    "orderIndex": 26,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "leyes-de-mendel"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 26
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "genetica-molecular",
+    "blockTitle": "Genética molecular y herencia",
+    "topicSlug": "herencia-ligada-al-sexo",
+    "title": "Herencia ligada al sexo y genealogías",
+    "orderIndex": 27,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "genetica-molecular",
+      "topic": "herencia-ligada-al-sexo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 27
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biologia-celular",
+    "blockTitle": "Biología celular",
+    "topicSlug": "la-teoria-celular",
+    "title": "La teoría celular",
+    "orderIndex": 28,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biologia-celular",
+      "topic": "la-teoria-celular"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 28
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biologia-celular",
+    "blockTitle": "Biología celular",
+    "topicSlug": "microscopia-optica-y-electronica",
+    "title": "Microscopía óptica y electrónica",
+    "orderIndex": 29,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biologia-celular",
+      "topic": "microscopia-optica-y-electronica"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 29
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biologia-celular",
+    "blockTitle": "Biología celular",
+    "topicSlug": "la-membrana-plasmatica",
+    "title": "La membrana plasmática",
+    "orderIndex": 30,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biologia-celular",
+      "topic": "la-membrana-plasmatica"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 30
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biologia-celular",
+    "blockTitle": "Biología celular",
+    "topicSlug": "la-osmosis",
+    "title": "La ósmosis y sus efectos sobre la célula",
+    "orderIndex": 31,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biologia-celular",
+      "topic": "la-osmosis"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 31
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biologia-celular",
+    "blockTitle": "Biología celular",
+    "topicSlug": "transporte-a-traves-de-la-membrana",
+    "title": "Transporte a través de la membrana",
+    "orderIndex": 32,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biologia-celular",
+      "topic": "transporte-a-traves-de-la-membrana"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 32
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biologia-celular",
+    "blockTitle": "Biología celular",
+    "topicSlug": "organulos-celulares-eucariotas",
+    "title": "Los orgánulos celulares eucariotas",
+    "orderIndex": 33,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biologia-celular",
+      "topic": "organulos-celulares-eucariotas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 33
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biologia-celular",
+    "blockTitle": "Biología celular",
+    "topicSlug": "celula-procariota-y-eucariota",
+    "title": "Célula procariota y eucariota. Animal y vegetal",
+    "orderIndex": 34,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biologia-celular",
+      "topic": "celula-procariota-y-eucariota"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 34
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biologia-celular",
+    "blockTitle": "Biología celular",
+    "topicSlug": "el-ciclo-celular",
+    "title": "El ciclo celular y su regulación",
+    "orderIndex": 35,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biologia-celular",
+      "topic": "el-ciclo-celular"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 35
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biologia-celular",
+    "blockTitle": "Biología celular",
+    "topicSlug": "la-mitosis",
+    "title": "La mitosis: fases y función biológica",
+    "orderIndex": 36,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biologia-celular",
+      "topic": "la-mitosis"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 36
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biologia-celular",
+    "blockTitle": "Biología celular",
+    "topicSlug": "la-meiosis",
+    "title": "La meiosis: fases e importancia biológica",
+    "orderIndex": 37,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biologia-celular",
+      "topic": "la-meiosis"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 37
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biologia-celular",
+    "blockTitle": "Biología celular",
+    "topicSlug": "el-cancer-y-el-ciclo-celular",
+    "title": "El cáncer: mutaciones y alteración del ciclo celular",
+    "orderIndex": 38,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biologia-celular",
+      "topic": "el-cancer-y-el-ciclo-celular"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 38
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "metabolismo",
+    "blockTitle": "Metabolismo",
+    "topicSlug": "concepto-de-metabolismo",
+    "title": "Concepto de metabolismo",
+    "orderIndex": 39,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "metabolismo",
+      "topic": "concepto-de-metabolismo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 39
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "metabolismo",
+    "blockTitle": "Metabolismo",
+    "topicSlug": "las-enzimas",
+    "title": "Las enzimas: concepto y función",
+    "orderIndex": 40,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "metabolismo",
+      "topic": "las-enzimas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 40
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "metabolismo",
+    "blockTitle": "Metabolismo",
+    "topicSlug": "la-glucolisis",
+    "title": "La glucólisis",
+    "orderIndex": 41,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "metabolismo",
+      "topic": "la-glucolisis"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 41
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "metabolismo",
+    "blockTitle": "Metabolismo",
+    "topicSlug": "las-fermentaciones",
+    "title": "Las fermentaciones",
+    "orderIndex": 42,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "metabolismo",
+      "topic": "las-fermentaciones"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 42
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "metabolismo",
+    "blockTitle": "Metabolismo",
+    "topicSlug": "ciclo-de-krebs",
+    "title": "Descarboxilación del piruvato y ciclo de Krebs",
+    "orderIndex": 43,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "metabolismo",
+      "topic": "ciclo-de-krebs"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 43
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "metabolismo",
+    "blockTitle": "Metabolismo",
+    "topicSlug": "cadena-transportadora-y-fosforilacion-oxidativa",
+    "title": "Cadena transportadora de electrones y fosforilación oxidativa",
+    "orderIndex": 44,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "metabolismo",
+      "topic": "cadena-transportadora-y-fosforilacion-oxidativa"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 44
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "metabolismo",
+    "blockTitle": "Metabolismo",
+    "topicSlug": "beta-oxidacion-de-los-acidos-grasos",
+    "title": "β-oxidación de los ácidos grasos",
+    "orderIndex": 45,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "metabolismo",
+      "topic": "beta-oxidacion-de-los-acidos-grasos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 45
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "metabolismo",
+    "blockTitle": "Metabolismo",
+    "topicSlug": "rendimiento-energetico-aerobio-y-anaerobio",
+    "title": "Rendimiento energético: comparación aerobio y anaerobio",
+    "orderIndex": 46,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "metabolismo",
+      "topic": "rendimiento-energetico-aerobio-y-anaerobio"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 46
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "metabolismo",
+    "blockTitle": "Metabolismo",
+    "topicSlug": "fotosintesis-fase-luminosa",
+    "title": "Fotosíntesis: fase luminosa",
+    "orderIndex": 47,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "metabolismo",
+      "topic": "fotosintesis-fase-luminosa"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 47
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "metabolismo",
+    "blockTitle": "Metabolismo",
+    "topicSlug": "fotosintesis-ciclo-de-calvin",
+    "title": "Fotosíntesis: ciclo de Calvin",
+    "orderIndex": 48,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "metabolismo",
+      "topic": "fotosintesis-ciclo-de-calvin"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 48
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "metabolismo",
+    "blockTitle": "Metabolismo",
+    "topicSlug": "quimiosintesis-y-anabolismo-heterotrofo",
+    "title": "Quimiosíntesis y anabolismo heterótrofo",
+    "orderIndex": 49,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "metabolismo",
+      "topic": "quimiosintesis-y-anabolismo-heterotrofo"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 49
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biotecnologia",
+    "blockTitle": "Biotecnología",
+    "topicSlug": "concepto-de-biotecnologia",
+    "title": "Concepto de biotecnología",
+    "orderIndex": 50,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biotecnologia",
+      "topic": "concepto-de-biotecnologia"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 50
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biotecnologia",
+    "blockTitle": "Biotecnología",
+    "topicSlug": "enzimas-de-restriccion-y-clonacion-molecular",
+    "title": "Enzimas de restricción y clonación molecular",
+    "orderIndex": 51,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biotecnologia",
+      "topic": "enzimas-de-restriccion-y-clonacion-molecular"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 51
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biotecnologia",
+    "blockTitle": "Biotecnología",
+    "topicSlug": "la-pcr",
+    "title": "La PCR: reacción en cadena de la polimerasa",
+    "orderIndex": 52,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biotecnologia",
+      "topic": "la-pcr"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 52
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biotecnologia",
+    "blockTitle": "Biotecnología",
+    "topicSlug": "omg-y-crispr-cas9",
+    "title": "Organismos modificados genéticamente y CRISPR-Cas9",
+    "orderIndex": 53,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biotecnologia",
+      "topic": "omg-y-crispr-cas9"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 53
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biotecnologia",
+    "blockTitle": "Biotecnología",
+    "topicSlug": "aplicaciones-de-la-biotecnologia",
+    "title": "Aplicaciones de la biotecnología y papel de los microorganismos",
+    "orderIndex": 54,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biotecnologia",
+      "topic": "aplicaciones-de-la-biotecnologia"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 54
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "biotecnologia",
+    "blockTitle": "Biotecnología",
+    "topicSlug": "virus-fisiologia-y-morfologia",
+    "title": "Los virus: morfología y fisiología",
+    "orderIndex": 55,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "biotecnologia",
+      "topic": "virus-fisiologia-y-morfologia"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 55
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "inmunologia",
+    "blockTitle": "Inmunología",
+    "topicSlug": "concepto-de-inmunidad",
+    "title": "Concepto de inmunidad",
+    "orderIndex": 56,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "inmunologia",
+      "topic": "concepto-de-inmunidad"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 56
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "inmunologia",
+    "blockTitle": "Inmunología",
+    "topicSlug": "las-barreras-externas",
+    "title": "Las barreras externas",
+    "orderIndex": 57,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "inmunologia",
+      "topic": "las-barreras-externas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 57
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "inmunologia",
+    "blockTitle": "Inmunología",
+    "topicSlug": "inmunidad-innata-y-especifica",
+    "title": "Inmunidad innata y específica: diferencias",
+    "orderIndex": 58,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "inmunologia",
+      "topic": "inmunidad-innata-y-especifica"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 58
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "inmunologia",
+    "blockTitle": "Inmunología",
+    "topicSlug": "antigenos-y-anticuerpos",
+    "title": "Antígenos y anticuerpos",
+    "orderIndex": 59,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "inmunologia",
+      "topic": "antigenos-y-anticuerpos"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 59
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "inmunologia",
+    "blockTitle": "Inmunología",
+    "topicSlug": "inmunidad-humoral-y-celular",
+    "title": "Inmunidad humoral y celular: mecanismos de acción",
+    "orderIndex": 60,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "inmunologia",
+      "topic": "inmunidad-humoral-y-celular"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 60
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "inmunologia",
+    "blockTitle": "Inmunología",
+    "topicSlug": "inmunidad-natural-artificial-pasiva-activa",
+    "title": "Inmunidad natural y artificial, pasiva y activa",
+    "orderIndex": 61,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "inmunologia",
+      "topic": "inmunidad-natural-artificial-pasiva-activa"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 61
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "inmunologia",
+    "blockTitle": "Inmunología",
+    "topicSlug": "enfermedades-infecciosas",
+    "title": "Enfermedades infecciosas: fases, prevención y tratamiento",
+    "orderIndex": 62,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "inmunologia",
+      "topic": "enfermedades-infecciosas"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 62
+  },
+  {
+    "subject": "biologia",
+    "blockSlug": "inmunologia",
+    "blockTitle": "Inmunología",
+    "topicSlug": "patologias-del-sistema-inmunitario",
+    "title": "Patologías del sistema inmunitario",
+    "orderIndex": 63,
+    "contentStatus": "flashcard_v2",
+    "explanation": "",
+    "guidedExample": "",
+    "practicePrompt": "",
+    "rawLatex": "",
+    "evauPracticeQuery": {
+      "subject": "biologia",
+      "block": "inmunologia",
+      "topic": "patologias-del-sistema-inmunitario"
+    },
+    "source": "curriculum_content_v2",
+    "compatibleSubjects": [
+      "biologia"
+    ],
+    "v2SortOrder": 63
   }
 ]

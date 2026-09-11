@@ -18,6 +18,7 @@ import {
   subjectLabelFromSlug,
   type CaminoCurriculumTopic,
 } from '@/app/lib/camino/caminoCurriculumPlan'
+import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
 import { DEFAULT_GRADE_THRESHOLD_CONFIG, resolveGradeThreshold, shouldSuggestRepeat, type GradeThresholdConfig } from '@/app/lib/camino/gradeThreshold'
 import ClayThemeScope from '@/components/clay/ClayThemeScope'
 import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
@@ -42,7 +43,21 @@ function accentFor(subject: string) {
   return SUBJECT_ACCENT[subject] ?? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }
 }
 
-const HIDDEN_COURSE_SUBJECTS = new Set(['matematicas_ccss'])
+// "Mis Cursos" enseña TODO el temario disponible, no solo las asignaturas que
+// el alumno eligió en el onboarding: antes se construía únicamente desde
+// user_learning_queue y por eso alguien con tres asignaturas matriculadas veía
+// tres cursos, aunque hubiera diez publicados. El catálogo manda; la cola solo
+// aporta el progreso.
+//
+// Matemáticas CCSS estaba además oculta a mano porque su contenido seguía en
+// borrador. Ya está publicado (igual que el resto), así que esa excepción se ha
+// quitado: el filtro real es "asignatura ofrecida + contenido publicado".
+type CatalogRow = {
+  subject: string
+  block_key: string | null
+  sort_order: number
+  title: string
+}
 
 type QueueStatus = 'pending' | 'scheduled' | 'completed' | 'postponed' | 'inactive'
 type QueueRow = {
@@ -105,7 +120,7 @@ function formatGrade(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')
 }
 
-function buildSubjectGroups(queueRows: QueueRow[], calendarRows: CalendarRow[], gradeRows: HistorialGradeRow[]): SubjectGroup[] {
+function buildSubjectGroups(catalogRows: CatalogRow[], queueRows: QueueRow[], calendarRows: CalendarRow[], gradeRows: HistorialGradeRow[]): SubjectGroup[] {
   // Every topic that already has curriculum content is open to everyone right
   // away (no scheduling wait) — only completion is tracked from camino_calendar.
   const completedByKey = new Map<string, CalendarRow>()
@@ -127,48 +142,56 @@ function buildSubjectGroups(queueRows: QueueRow[], calendarRows: CalendarRow[], 
     if (!latestGradeByKey.has(key)) latestGradeByKey.set(key, row)
   }
 
+  // La cola solo dice qué ha completado el alumno; qué temas existen lo dice el
+  // catálogo.
+  const queueByKey = new Map<string, QueueRow>()
+  for (const q of queueRows) queueByKey.set(`${q.subject}:${q.v2_sort_order}`, q)
+
   const subjects = new Map<string, Map<string, BlockGroup>>()
   const totals = new Map<string, { total: number; completed: number }>()
 
-  for (const q of queueRows) {
-    if (HIDDEN_COURSE_SUBJECTS.has(q.subject)) continue
-
-    const key = `${q.subject}:${q.v2_sort_order}`
-    const topic = findTopic(q.subject, q.v2_sort_order)
+  for (const c of catalogRows) {
+    const key = `${c.subject}:${c.sort_order}`
+    const topic = findTopic(c.subject, c.sort_order)
+    // Sin tema en el itinerario no hay página a la que enlazar, así que la
+    // fila sería un título muerto. Pasa con contenido huérfano en la tabla
+    // (p. ej. 'filosofia', que no es una asignatura que ofrezcamos).
+    if (!topic) continue
+    const queueRow = queueByKey.get(key)
     const completedRow = completedByKey.get(key)
     const gradeRow = latestGradeByKey.get(key)
 
     let status: CourseStatus = 'today'
     let completedAt: string | undefined
-    if (q.queue_status === 'completed' || completedRow) {
+    if (queueRow?.queue_status === 'completed' || completedRow) {
       status = 'completed'
       completedAt = completedRow?.completed_at ?? undefined
     }
 
-    const blockTitle = sanitizeLessonTitle(topic?.blockTitle ?? q.block_key ?? 'General')
+    const blockTitle = sanitizeLessonTitle(topic.blockTitle || c.block_key || 'General')
     const entry: CourseEntry = {
       key,
-      title: sanitizeLessonTitle(topic?.title ?? q.title),
-      orderIndex: topic?.orderIndex ?? q.subject_position ?? 0,
+      title: sanitizeLessonTitle(topic.title || c.title),
+      orderIndex: topic.orderIndex ?? c.sort_order,
       status,
       completedAt,
-      href: topic ? buildTopicHref(topic) : null,
+      href: buildTopicHref(topic),
       nota: gradeRow?.nota ?? null,
       notaMaxima: gradeRow?.nota_maxima ?? null,
       latestHistorialId: gradeRow?.id ?? null,
     }
 
-    if (!subjects.has(q.subject)) subjects.set(q.subject, new Map())
-    const blocks = subjects.get(q.subject)!
+    if (!subjects.has(c.subject)) subjects.set(c.subject, new Map())
+    const blocks = subjects.get(c.subject)!
     if (!blocks.has(blockTitle)) blocks.set(blockTitle, { blockTitle, orderIndex: entry.orderIndex, items: [] })
     const block = blocks.get(blockTitle)!
     block.items.push(entry)
     block.orderIndex = Math.min(block.orderIndex, entry.orderIndex)
 
-    const t = totals.get(q.subject) ?? { total: 0, completed: 0 }
+    const t = totals.get(c.subject) ?? { total: 0, completed: 0 }
     t.total += 1
     if (status === 'completed') t.completed += 1
-    totals.set(q.subject, t)
+    totals.set(c.subject, t)
   }
 
   return [...subjects.entries()]
@@ -216,7 +239,15 @@ export default function ZonaCursosPage() {
       }
       setUser({ id: data.user.id, email: data.user.email })
 
-      const [{ data: queueRows }, { data: calendarRows }, { data: gradeRows }] = await Promise.all([
+      const [{ data: catalogRows }, { data: queueRows }, { data: calendarRows }, { data: gradeRows }] = await Promise.all([
+        // Todo el temario publicado, no solo lo matriculado. El .in() deja
+        // fuera contenido huérfano de asignaturas que no ofrecemos.
+        supabase
+          .from('curriculum_content_v2')
+          .select('subject, block_key, sort_order, title')
+          .eq('review_status', 'published')
+          .in('subject', [...PRIVATE_BETA_SUBJECTS])
+          .order('sort_order', { ascending: true }),
         supabase
           .from('user_learning_queue')
           .select('subject, block_key, block_slug, v2_sort_order, title, subject_position, queue_status')
@@ -236,7 +267,7 @@ export default function ZonaCursosPage() {
           .limit(500),
       ])
 
-      const built = buildSubjectGroups((queueRows ?? []) as QueueRow[], (calendarRows ?? []) as CalendarRow[], (gradeRows ?? []) as HistorialGradeRow[])
+      const built = buildSubjectGroups((catalogRows ?? []) as CatalogRow[], (queueRows ?? []) as QueueRow[], (calendarRows ?? []) as CalendarRow[], (gradeRows ?? []) as HistorialGradeRow[])
       setGroups(built)
       setSelectedSubject(prev => {
         if (prev && built.some(g => g.subject === prev)) return prev

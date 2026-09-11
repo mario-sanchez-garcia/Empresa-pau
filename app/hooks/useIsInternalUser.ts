@@ -15,11 +15,27 @@ export function useIsInternalUser(): InternalUserStatus {
 
   useEffect(() => {
     let cancelled = false
+    // supabase restaura el token desde localStorage de forma asíncrona, así que
+    // en una pestaña recién abierta getSession() puede devolver null aunque la
+    // sesión sea válida. Sin esto se resolvía a isInternalUser:false de forma
+    // definitiva y el panel interno respondía "Acceso denegado" a alguien del
+    // equipo hasta que recargaba. Mientras no haya sesión seguimos esperándola.
+    let unsubscribe: (() => void) | null = null
+    function esperarSesion() {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session?.access_token && !cancelled) { subscription.unsubscribe(); unsubscribe = null; void run() }
+      })
+      unsubscribe = () => subscription.unsubscribe()
+    }
     async function run() {
       try {
         const { data: { session } } = await supabase.auth.getSession()
         if (!session?.access_token) {
+          // Se resuelve a "no" para que quien de verdad no ha entrado vea
+          // "Inicia sesión" y no un spinner eterno, pero seguimos escuchando:
+          // si la sesión llega tarde, se recalcula sola.
           if (!cancelled) setStatus({ loading: false, isInternalUser: false })
+          if (!cancelled && !unsubscribe) esperarSesion()
           return
         }
         const res = await fetch('/api/admin/me', {
@@ -32,7 +48,7 @@ export function useIsInternalUser(): InternalUserStatus {
       }
     }
     void run()
-    return () => { cancelled = true }
+    return () => { cancelled = true; unsubscribe?.() }
   }, [])
 
   return status

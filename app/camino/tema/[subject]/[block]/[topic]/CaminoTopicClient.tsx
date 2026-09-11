@@ -385,6 +385,8 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const [liga, setLiga] = useState<LigaInfo | null>(null)
   const [ligaLoading, setLigaLoading] = useState(true)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  // Ver el efecto de "sesión tardía" más abajo.
+  const [sessionEpoch, setSessionEpoch] = useState(0)
   const [daysSinceRegistration, setDaysSinceRegistration] = useState<number | null>(null)
   const [showPaywall, setShowPaywall] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
@@ -773,7 +775,24 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
       if (!cancelled) setMissionXpStatus(missionId ? 'pending' : 'free_practice')
     })
     return () => { cancelled = true }
-  }, [topic, v2Cards, activeV2Index, missionId])
+  }, [topic, v2Cards, activeV2Index, missionId, sessionEpoch])
+
+  // supabase restaura el token desde localStorage de forma asíncrona, así que
+  // getSession() puede devolver null en una pestaña recién abierta aunque el
+  // alumno esté logueado. Los efectos de arriba ya habrían decidido sin sesión
+  // y, lo importante, el tema quedaría marcado como 'free_practice': el alumno
+  // hace el ejercicio, se corrige, y no cuenta para la misión de su Camino ni
+  // da XP. Al aparecer la sesión se vuelven a calcular.
+  useEffect(() => {
+    if (currentUserId) return
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user?.id) {
+        setCurrentUserId(session.user.id)
+        setSessionEpoch(n => n + 1)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [currentUserId])
 
   // Un tema puede tener varias mini-lecciones (v2Cards); al cambiar de una
   // ya confirmada a otra sin confirmar, el aviso debe volver a aparecer en

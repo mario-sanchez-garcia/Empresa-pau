@@ -117,7 +117,7 @@ type LegacySchoolFeedback = { schoolName: string | null; community: string | nul
 type CalendarWeekCache = Record<string, DayPlan[]>
 type TopicProgress = Record<string, { explanation?: boolean; guided?: boolean; evau?: boolean; xp: number; score?: number }>
 type CalendarSource = 'server' | 'client' | 'cache' | 'server_empty' | 'server_error'
-type CalendarSourceContext = 'initial_load' | 'week_navigation' | 'exam_change' | 'postpone'
+type CalendarSourceContext = 'initial_load' | 'post_ensure_refresh' | 'week_navigation' | 'exam_change' | 'postpone'
 type CalendarConflict = { missionId: string; date: string; title: string | null; start: string; end: string; busyStart: string; busyEnd: string }
 type ExternalBusySlot = { start: string; end: string }
 type ExternalBusyByDate = Record<string, ExternalBusySlot[]>
@@ -127,6 +127,10 @@ const WEAK_AREAS_KEY = 'kairo_camino_weak_areas_v1'
 const TOPIC_PROGRESS_KEY = 'kairo_camino_topic_progress_v1'
 const CALENDAR_VISIBILITY_KEY = 'kairo_camino_calendar_expanded_v1'
 const CALENDAR_WEEK_CACHE_KEY = 'kairo_camino_week_cache_v2'
+// Semanas de CALENDAR_WEEK_CACHE_KEY que vienen de una lectura del servidor y
+// por tanto se pueden pintar antes de que responda la red (ver
+// saveCalendarWeeksToCache y loadCalendarWeeksFromCache).
+const SERVER_WEEKS_KEY = 'kairo_camino_server_weeks_v1'
 const SCHOOL_FEEDBACK_KEY = 'kairo_school_topic_feedback_v1'
 const SCHOOL_ADJUSTMENTS_KEY = 'kairo_camino_school_adjustments_v1'
 const BETA_FEEDBACK_URL = process.env.NEXT_PUBLIC_BETA_FEEDBACK_URL
@@ -300,6 +304,31 @@ function saveCalendarWeeksToCache(days: DayPlan[]) {
     next[weekStart] = buildWeekDays(weekStart, weekDays)
   }
   saveJson(CALENDAR_WEEK_CACHE_KEY, next)
+  // La cache de semanas NO es toda del servidor: applyWeekNavigation tambien
+  // guarda ahi las semanas que genera el cliente cuando no hay plan para esa
+  // fecha (resolveWeek, source 'client'). Esas no pueden pintarse como plan
+  // real. Esta llave anota que semanas vienen de una lectura del servidor —
+  // que es justo quien llama a esta funcion— y es la unica que hidrata el
+  // primer render.
+  const marked = new Set(loadJson<string[]>(SERVER_WEEKS_KEY, []))
+  for (const weekStart of grouped.keys()) marked.add(weekStart)
+  saveJson(SERVER_WEEKS_KEY, [...marked])
+}
+// El reverso de saveCalendarWeeksToCache(). La cache se escribia en catorce
+// sitios y no se leia en NINGUNO al montar: el alumno tenia su semana en
+// localStorage y aun asi esperaba a la red para verla. Devuelve solo las
+// semanas de la actual en adelante (las pasadas ya no se pintan) y recalcula
+// label/isToday, que se guardaron con la fecha del dia en que se cacheo.
+function loadCalendarWeeksFromCache(): DayPlan[] {
+  const cache = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})
+  const serverWeeks = new Set(loadJson<string[]>(SERVER_WEEKS_KEY, []))
+  const weekStart = currentWeekStartISO()
+  const today = todayMadrid()
+  return Object.entries(cache)
+    .filter(([cachedWeekStart]) => cachedWeekStart >= weekStart && serverWeeks.has(cachedWeekStart))
+    .flatMap(([, days]) => days)
+    .map(day => ({ ...day, label: calendarDayLabel(day.date), isToday: day.date === today }))
+    .sort((a, b) => a.date.localeCompare(b.date))
 }
 function getSimulationLimitForPlan(planId: CaminoPlanId) {
   return getCaminoPlanLimits(planId).fullMocksPerMonth
@@ -1265,6 +1294,20 @@ export default function CaminoCalendarClient() {
     return () => { cancelled = true }
   }, [])
 
+  // Pintado optimista: la semana cacheada sale en el primer render, sin esperar
+  // a la sesion ni a la red. El efecto de abajo la sustituye por la del
+  // servidor en cuanto llega. No pinta un Camino inventado: solo hidrata las
+  // semanas anotadas en SERVER_WEEKS_KEY, que son las que vinieron del
+  // servidor. Si no hay ninguna se queda en 'checking' y sigue saliendo el
+  // esqueleto, como hasta ahora.
+  useEffect(() => {
+    const cached = loadCalendarWeeksFromCache()
+    if (missionCount(cached) === 0) return
+    setCalendar(cached)
+    setCaminoReadyStatus(previo => (previo === 'checking' ? 'ready' : previo))
+    recordCalendarSource('cache', 'initial_load', { missionCount: missionCount(cached), reason: 'cached_first_paint' })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     let cancelled = false
     supabase.auth.getSession().then(async ({ data }) => {
@@ -1311,8 +1354,15 @@ export default function CaminoCalendarClient() {
         const days = Math.floor((Date.now() - new Date(created).getTime()) / 86400000)
         if (!cancelled) setDaysSinceReg(days)
       }
-      if (token) await ensureServerCalendar(token)
-      if (cancelled) return
+      // ensure-calendar NO es una lectura: encadena reconcile + siembra +
+      // repasos + diagnostico + personalizacion + sync con Google, y su propio
+      // comentario dice que no debe correr en cada carga (esta throttled a una
+      // vez al dia). Antes se esperaba aqui, ANTES de leer nada, asi que el
+      // alumno miraba el esqueleto durante toda esa cadena de escrituras —y en
+      // el resto de cargas del dia, durante el cold start + lock + log que
+      // cuesta contestar "skipped". Ahora arranca en paralelo y solo se espera
+      // si resulta que no hay nada que pintar (ver mas abajo).
+      const ensurePromise = token ? ensureServerCalendar(token) : Promise.resolve(false)
       const weekStart = currentWeekStartISO()
       const weekEnd = toISO(addDays(dateFromISO(weekStart), 6))
       const now = new Date()
@@ -1351,15 +1401,15 @@ export default function CaminoCalendarClient() {
         freeSubjects.add(subjectLabelFromSlug(caminoSubjectFromSimulacro(row.asignatura)))
       }
       setFreeActivitySubjectsToday([...freeSubjects])
-      if (calDays && calDays.length > 0) {
-        setCalendar(calDays)
+      const applyServerCalendar = (days: DayPlan[], context: CalendarSourceContext) => {
+        setCalendar(days)
         window.dispatchEvent(new Event('camino:updated'))
-        saveCalendarWeeksToCache(calDays)
+        saveCalendarWeeksToCache(days)
         setSupabaseCalLoaded(true)
         setCaminoReadyStatus('ready')
-        recordCalendarSource('server', 'initial_load', { weekStart, missionCount: missionCount(calDays) })
+        recordCalendarSource('server', context, { weekStart, missionCount: missionCount(days) })
         const realTodayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
-        const todayDay = calDays.find(d => d.date === realTodayStr)
+        const todayDay = days.find(d => d.date === realTodayStr)
         const heroMission = todayDay?.missions.find(m => m.role === 'main')
         if (heroMission?.blockKey) {
           supabase
@@ -1370,10 +1420,33 @@ export default function CaminoCalendarClient() {
             .eq('status', 'completed')
             .then(({ count }) => { if (!cancelled) setBlockCompletedCount(count ?? 0) })
         }
+      }
+
+      if (calDays && calDays.length > 0) {
+        // Hay plan que enseñar: se pinta YA y el ensure sigue por detras. Las
+        // misiones que siembre (repasos, diagnostico, dias nuevos) entran con
+        // el refresco de abajo, sin que el alumno espere a nada.
+        applyServerCalendar(calDays, 'initial_load')
+        ensurePromise.then(async ok => {
+          if (!ok || cancelled) return
+          const refreshed = await fetchCaminoCalendar(userId)
+          if (cancelled || !refreshed || refreshed.length === 0) return
+          applyServerCalendar(refreshed, 'post_ensure_refresh')
+        }).catch(() => undefined)
       } else {
-        const qCount = (queueResult as { count: number | null }).count ?? 0
-        recordCalendarSource('server_empty', 'initial_load', { weekStart, missionCount: 0, reason: qCount > 0 ? 'queue_without_future_calendar' : 'empty_queue' })
-        if (!cancelled) setCaminoReadyStatus(qCount > 0 ? 'no_future' : 'no_queue')
+        // Sin nada que pintar (Camino recien creado, o el ensure de hoy aun no
+        // habia sembrado) SI merece la pena esperar: mostrar "no tienes plan"
+        // para corregirlo un segundo despues seria peor que el esqueleto.
+        const ensured = await ensurePromise
+        const seeded = ensured && !cancelled ? await fetchCaminoCalendar(userId) : null
+        if (cancelled) return
+        if (seeded && seeded.length > 0) {
+          applyServerCalendar(seeded, 'initial_load')
+        } else {
+          const qCount = (queueResult as { count: number | null }).count ?? 0
+          recordCalendarSource('server_empty', 'initial_load', { weekStart, missionCount: 0, reason: qCount > 0 ? 'queue_without_future_calendar' : 'empty_queue' })
+          setCaminoReadyStatus(qCount > 0 ? 'no_future' : 'no_queue')
+        }
       }
       setStreak(rachaValue)
       setSubjectProgress({

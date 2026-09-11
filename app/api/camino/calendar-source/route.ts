@@ -6,7 +6,7 @@ import { recordBetaMetric } from '@/app/lib/betaMetrics'
 export const dynamic = 'force-dynamic'
 
 const SOURCES = new Set(['server', 'client', 'cache', 'server_empty', 'server_error'])
-const CONTEXTS = new Set(['initial_load', 'week_navigation', 'exam_change', 'postpone'])
+const CONTEXTS = new Set(['initial_load', 'post_ensure_refresh', 'week_navigation', 'exam_change', 'postpone'])
 
 export async function POST(request: NextRequest) {
   try {

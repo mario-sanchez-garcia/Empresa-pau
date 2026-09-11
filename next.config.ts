@@ -11,7 +11,10 @@ const cspReportOnly = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com",
+  // *.ingest.de.sentry.io: destino de los eventos de Sentry. Hoy la CSP va en
+  // Report-Only, asi que su ausencia solo ensuciaba el informe; el dia que se
+  // pase a modo estricto, sin esto Sentry dejaria de enviar nada.
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.ingest.de.sentry.io",
   "frame-src 'self' https://checkout.stripe.com https://js.stripe.com https://www.youtube.com https://www.youtube-nocookie.com",
   "media-src 'self' data: blob:",
   "worker-src 'self' blob:",

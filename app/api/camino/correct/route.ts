@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs'
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAiRateLimit, extractAnthropicTokenUsage, getAiErrorCode, logAiUsageEvent, logAiUsageEventForPhotos } from '@/app/lib/aiUsage'
@@ -57,6 +58,7 @@ type CurriculumV2Row = {
 export async function POST(request: NextRequest) {
   const authContext = await getAuthContext(request)
   if ('response' in authContext) return authContext.response
+  Sentry.setUser({ id: authContext.user.id, email: authContext.user.email ?? undefined })
 
   let body: CaminoCorrectBody
   try {
@@ -309,6 +311,7 @@ export async function POST(request: NextRequest) {
       errorCode: getAiErrorCode(error),
       status: typeof error === 'object' && error && 'status' in error ? (error as { status?: unknown }).status : undefined,
     })
+    Sentry.captureException(error, { tags: { route: 'camino/correct', errorCode: getAiErrorCode(error) } })
     return correctionUnavailableResponse()
   }
 

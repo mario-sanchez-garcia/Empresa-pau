@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -72,6 +73,7 @@ export async function POST(request: NextRequest) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       message: (error as any)?.message?.slice(0, 200)
     })
+    Sentry.captureException(error, { tags: { route: 'exam/correct', errorCode, errorName } })
     return NextResponse.json(
       { error: 'No hemos podido corregir este ejercicio ahora mismo. Inténtalo de nuevo en unos minutos.' },
       { status: 500 }
@@ -83,6 +85,7 @@ async function handlePost(request: NextRequest) {
   const totalStart = Date.now()
   const authContext = await getAuthContext(request)
   if ('response' in authContext) return authContext.response
+  Sentry.setUser({ id: authContext.user.id, email: authContext.user.email ?? undefined })
 
   let body: ExamCorrectBody
   try {

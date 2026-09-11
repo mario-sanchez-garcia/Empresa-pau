@@ -27,6 +27,7 @@ export type CaminoContentV2Row = {
   concept_markdown: string | null
   worked_example_markdown: string | null
   practice_prompt: string | null
+  alert_markdown: string | null
 }
 
 export async function GET(request: NextRequest) {
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
   const db = createServiceClient()
   const { data, error } = await db
     .from('curriculum_content_v2')
-    .select('sort_order, title, block_key, block_slug, subject, video_id, concept_markdown, worked_example_markdown, practice_prompt')
+    .select('sort_order, title, block_key, block_slug, subject, video_id, concept_markdown, worked_example_markdown, practice_prompt, alert_markdown')
     .eq('subject', subject)
     .order('sort_order', { ascending: true })
 

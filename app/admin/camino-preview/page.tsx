@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
 import { useIsInternalUser } from '@/app/hooks/useIsInternalUser'
@@ -7,6 +7,7 @@ import { buildTopicHref, getTopicByV2SortOrder, normalizeCaminoSlug, resolveTopi
 import type { CaminoContentV2Row } from '@/app/api/admin/camino-content-v2/route'
 import ClayThemeScope from '@/components/clay/ClayThemeScope'
 import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
+import MathMarkdown from '@/components/shared/MathMarkdown'
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
 // Mismo patron que app/admin/page.tsx y camino-status: C.bg es texto legible
@@ -26,7 +27,7 @@ const C = {
 // ─── Types ───────────────────────────────────────────────────────────────────
 type V2Row = CaminoContentV2Row
 
-type SubjectKey = 'matematicas_ii' | 'lengua' | 'historia_espana' | 'fisica' | 'quimica' | 'economia' | 'matematicas_ccss' | 'ingles' | 'historia_filosofia'
+type SubjectKey = 'matematicas_ii' | 'lengua' | 'historia_espana' | 'fisica' | 'quimica' | 'biologia' | 'economia' | 'matematicas_ccss' | 'ingles' | 'historia_filosofia'
 
 type LoadState =
   | { status: 'idle' }
@@ -54,6 +55,31 @@ function Indicator({ ok, label }: { ok: boolean; label: string }) {
   )
 }
 
+// ─── Contenido desplegable ───────────────────────────────────────────────────
+// Revisar una asignatura entera abriendo una pestaña por tema no es viable (63
+// en Biología), así que el texto real se lee aquí mismo. Se renderiza con
+// format="raw" igual que CaminoTopicClient: es exactamente lo que ve el alumno,
+// y evita la normalización que corrompe entornos LaTeX como \begin{array}{ccc|c}.
+function LessonSection({ title, text, accent }: { title: string; text?: string | null; accent?: boolean }) {
+  if (!text?.trim()) return null
+  return (
+    <section style={{ marginTop: 14 }}>
+      <h4 style={{
+        fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.09em',
+        color: C.muted, margin: '0 0 6px',
+      }}>{title}</h4>
+      <div style={{
+        fontSize: 13, lineHeight: 1.65, color: C.ink,
+        background: accent ? 'var(--clay-accent-soft)' : 'var(--clay-surface-raised)',
+        border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px',
+        overflowX: 'auto',
+      }}>
+        <MathMarkdown text={text} format="raw" />
+      </div>
+    </section>
+  )
+}
+
 // ─── Preview Table ────────────────────────────────────────────────────────────
 function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
   rows: V2Row[]
@@ -66,6 +92,12 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
   // tema, así que necesita su propia versión clara para oscuro.
   const { theme } = useClayThemePreference()
   const blockCoverageColor = theme === 'dark' ? '#4ade80' : '#15803d'
+  const [abiertos, setAbiertos] = useState<ReadonlySet<string>>(new Set())
+  const alternar = (id: string) => setAbiertos(previo => {
+    const siguiente = new Set(previo)
+    if (!siguiente.delete(id)) siguiente.add(id)
+    return siguiente
+  })
   const byBlock: Record<string, V2Row[]> = {}
   for (const row of rows) {
     if (!byBlock[row.block_key]) byBlock[row.block_key] = []
@@ -102,6 +134,20 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
                 <h2 style={{ fontSize: 14, fontWeight: 800, color: C.ink, margin: 0 }}>{blockKey}</h2>
               </div>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                <button type="button"
+                  onClick={() => setAbiertos(previo => {
+                    const ids = blockRows.map(r => `${r.subject}-${r.sort_order}`)
+                    const siguiente = new Set(previo)
+                    if (ids.every(id => previo.has(id))) for (const id of ids) siguiente.delete(id)
+                    else for (const id of ids) siguiente.add(id)
+                    return siguiente
+                  })}
+                  style={{
+                    fontSize: 11, fontWeight: 700, color: C.bg, background: 'none',
+                    border: `1px solid ${C.border}`, borderRadius: 6, padding: '3px 9px', cursor: 'pointer',
+                  }}>
+                  {blockRows.every(r => abiertos.has(`${r.subject}-${r.sort_order}`)) ? 'Plegar todo' : 'Desplegar todo'}
+                </button>
                 <span style={{ fontSize: 11, color: C.muted, fontWeight: 600 }}>{blockRows.length} misiones</span>
                 <span style={{ fontSize: 11, color: blockCoverageColor, fontWeight: 700 }}>🎥 {conVideo}</span>
                 <span style={{ fontSize: 11, color: blockCoverageColor, fontWeight: 700 }}>📝 {conConcepto}/{blockRows.length} concepto</span>
@@ -137,16 +183,29 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
                     const trustedLinkedTopic = linkedTopic?.contentStatus === 'flashcard_v2' ? linkedTopic : null
                     const topicSlug = resolveTopicSlugAlias(row.subject, row.block_slug, textSlug(sanitizeLessonTitle(row.title)))
                     const href = trustedLinkedTopic ? buildTopicHref(trustedLinkedTopic) : `/camino-pau/curso/${row.subject}/${row.block_slug}/${topicSlug}`
+                    // sort_order es único por subject en los datos actuales, pero
+                    // no hay una restricción UNIQUE que lo garantice en el esquema
+                    // — se combina con subject por si acaso, en vez de asumirlo.
+                    const id = `${row.subject}-${row.sort_order}`
+                    const abierto = abiertos.has(id)
                     return (
-                      // sort_order es único por subject en los datos actuales, pero
-                      // no hay una restricción UNIQUE que lo garantice en el esquema
-                      // — se combina con subject por si acaso, en vez de asumirlo.
-                      <tr key={`${row.subject}-${row.sort_order}`} style={{ background: i % 2 === 0 ? C.surface : 'var(--clay-surface-raised)' }}>
+                      <Fragment key={id}>
+                      <tr style={{ background: i % 2 === 0 ? C.surface : 'var(--clay-surface-raised)' }}>
                         <td style={{ padding: '9px 14px', color: C.muted, fontWeight: 700, fontSize: 11, borderBottom: `1px solid ${C.border}`, whiteSpace: 'nowrap' }}>
                           {row.sort_order}
                         </td>
-                        <td style={{ padding: '9px 14px', color: C.ink, fontWeight: 600, fontSize: 12, borderBottom: `1px solid ${C.border}`, minWidth: 220 }}>
-                          {sanitizeLessonTitle(row.title)}
+                        <td style={{ padding: '9px 14px', borderBottom: `1px solid ${C.border}`, minWidth: 220 }}>
+                          <button type="button" onClick={() => alternar(id)}
+                            aria-expanded={abierto}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 7, width: '100%',
+                              background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                              textAlign: 'left', font: 'inherit',
+                              color: C.ink, fontWeight: 600, fontSize: 12,
+                            }}>
+                            <span aria-hidden style={{ color: C.muted, fontSize: 10, flexShrink: 0, transform: abierto ? 'rotate(90deg)' : 'none', transition: 'transform 120ms' }}>▶</span>
+                            {sanitizeLessonTitle(row.title)}
+                          </button>
                         </td>
                         <td style={{ padding: '9px 14px', borderBottom: `1px solid ${C.border}` }}>
                           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
@@ -172,6 +231,22 @@ function V2PreviewTable({ rows, subjectLabel, blockOrder = [] }: {
                           </Link>
                         </td>
                       </tr>
+                      {abierto && (
+                        <tr style={{ background: i % 2 === 0 ? C.surface : 'var(--clay-surface-raised)' }}>
+                          <td colSpan={4} style={{ padding: '4px 14px 20px 34px', borderBottom: `1px solid ${C.border}` }}>
+                            <LessonSection title="Concepto" text={row.concept_markdown} />
+                            <LessonSection title="Ojo en PAU" text={row.alert_markdown} accent />
+                            <LessonSection title="Ejemplo resuelto" text={row.worked_example_markdown} />
+                            <LessonSection title="Ejercicio de práctica" text={row.practice_prompt} />
+                            {!row.concept_markdown?.trim() && !row.worked_example_markdown?.trim() && !row.practice_prompt?.trim() && (
+                              <p style={{ margin: '12px 0 0', fontSize: 12, color: C.muted, fontStyle: 'italic' }}>
+                                Este tema todavía no tiene contenido.
+                              </p>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+                      </Fragment>
                     )
                   })}
                 </tbody>
@@ -194,6 +269,8 @@ const SUBJECTS: { key: SubjectKey; label: string; blockOrder?: string[] }[] = [
   { key: 'historia_espana', label: 'Historia de España' },
   { key: 'fisica', label: 'Física', blockOrder: ['Campo Gravitatorio', 'Campo Electromagnético', 'Vibraciones y Ondas', 'Óptica Geométrica', 'Física del Siglo XX'] },
   { key: 'quimica', label: 'Química', blockOrder: ['Estequiometría', 'Estructura Atómica y Clasificación Periódica', 'Enlace Químico y Propiedades de las Sustancias', 'Termoquímica', 'Equilibrio Químico y Cinética', 'Ácido-Base', 'Electroquímica', 'Química Orgánica'] },
+  // Bloques A-F del Decreto 64/2022 (BOCM 26-07-2022), en el orden del currículo.
+  { key: 'biologia', label: 'Biología', blockOrder: ['Las biomoléculas', 'Genética molecular y herencia', 'Biología celular', 'Metabolismo', 'Biotecnología', 'Inmunología'] },
   { key: 'economia', label: 'Economía de la Empresa', blockOrder: ['La Empresa y su Entorno', 'Desarrollo y Crecimiento de la Empresa', 'Organización y Dirección de la Empresa', 'La Función Productiva', 'La Función Comercial: El Marketing', 'La Información en la Empresa: Contabilidad y Fiscalidad', 'La Función Financiera'] },
   // Sin blockOrder: las destrezas (comprensión, vocabulario, gramática, redacción)
   // viven en un único block_key ('Destrezas PAU') en curriculum_content_v2 — no hay

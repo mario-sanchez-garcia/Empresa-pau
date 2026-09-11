@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
   const targetDegree = cleanText(body.target_degree, 180)
   const targetUniversity = cleanText(body.target_university, 220)
   const targetAdmissionScore = Number(body.target_admission_score)
-  const sourceType = body.source_type === 'official' ? 'official' : body.source_type === 'fixture' ? 'fixture' : null
+  const sourceType = body.source_type === 'official' ? 'official' : null
   if (!targetDegree || !targetUniversity || !Number.isFinite(targetAdmissionScore) || targetAdmissionScore < 5 || targetAdmissionScore > 14 || !sourceType) {
     return NextResponse.json({ error: 'Objetivo incompleto o no válido.' }, { status: 400 })
   }
@@ -210,4 +210,32 @@ export async function POST(request: NextRequest) {
   }
   if (error) return NextResponse.json({ error: 'No se pudo guardar el objetivo. Inténtalo de nuevo.' }, { status: 500 })
   return NextResponse.json({ ok: true, updatedAt: now })
+}
+
+export async function DELETE(request: NextRequest) {
+  const token = bearer(request)
+  if (!token) return NextResponse.json({ error: 'Inicia sesión para quitar tu objetivo.' }, { status: 401 })
+  const auth = await getAuthUser(token)
+  const user = auth?.data.user
+  if (!user) return NextResponse.json({ error: 'Sesión no válida.' }, { status: 401 })
+
+  const db = createServiceClient()
+  const cleared = {
+    target_degree_id: null,
+    target_university_id: null,
+    target_degree: null,
+    target_university: null,
+    target_admission_score: null,
+    target_orientation_source_type: null,
+    target_orientation_community: null,
+    target_orientation_updated_at: new Date().toISOString(),
+  }
+  let { error } = await db.from('perfiles').update(cleared).eq('id', user.id)
+  if (error && isMissingCommunityColumn(error) && /target_orientation_community/i.test(error.message)) {
+    const legacyCleared = { ...cleared } as Partial<typeof cleared>
+    delete legacyCleared.target_orientation_community
+    ;({ error } = await db.from('perfiles').update(legacyCleared).eq('id', user.id))
+  }
+  if (error) return NextResponse.json({ error: 'No se pudo quitar el objetivo. Inténtalo de nuevo.' }, { status: 500 })
+  return NextResponse.json({ ok: true })
 }

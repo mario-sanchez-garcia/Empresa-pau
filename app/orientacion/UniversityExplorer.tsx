@@ -18,7 +18,7 @@ const situationMeta = {
   improve: { label: 'Por debajo de la referencia', icon: TrendingUp },
 }
 
-export default function UniversityExplorer({ targets, estimatedScore, loadState, onRetry }: { targets: OrientationTarget[]; estimatedScore: number | null; loadState: 'loading' | 'ready' | 'error'; onRetry: () => void }) {
+export default function UniversityExplorer({ targets, selectedId, estimatedScore, loadState, onRetry, onSelect }: { targets: OrientationTarget[]; selectedId: string; estimatedScore: number | null; loadState: 'loading' | 'ready' | 'error'; onRetry: () => void; onSelect: (id: string) => void }) {
   const [search, setSearch] = useState('')
   const [universityId, setUniversityId] = useState('')
   const [referenceBand, setReferenceBand] = useState<ReferenceBand>('all')
@@ -65,7 +65,7 @@ export default function UniversityExplorer({ targets, estimatedScore, loadState,
             const importantSubjects = item.subjects.filter(subject => subject.weighting === 0.2).slice(0, 4)
             const expanded = expandedId === item.id
             return (
-              <article className={`${styles.degreeCard} ${category ? styles[`degree_${category}`] : ''}`} key={item.id}>
+              <article className={`${styles.degreeCard} ${category ? styles[`degree_${category}`] : ''}`} data-selected={selectedId === item.id ? 'true' : undefined} key={item.id}>
                 <div className={styles.degreeTop}><div className={styles.degreeIcon}><GraduationCap size={17} /></div>{meta && Icon && <span className={styles.situationBadge}><Icon size={11} /> {meta.label}</span>}</div>
                 <h3>{item.degree}</h3><p>{item.universityAcronym ? `${item.universityAcronym} · ` : ''}{item.university}</p>
                 <div className={styles.degreeScores}><div><span>Nota referencia</span><b>{formatReference(item.referenceScore)}</b></div><div><span>Tu escenario</span><b>{estimatedScore === null ? '—' : formatGrade(estimatedScore)}</b></div></div>
@@ -73,6 +73,7 @@ export default function UniversityExplorer({ targets, estimatedScore, loadState,
                 {importantSubjects.length > 0 && <div className={styles.weightingPreview}>{importantSubjects.slice(0, 2).map(subject => <span key={subject.id}>{subject.name} · 0,2</span>)}</div>}
                 <button type="button" className={styles.detailsButton} aria-expanded={expanded} onClick={() => setExpandedId(expanded ? '' : item.id)}>Ver detalles <ChevronDown size={14} /></button>
                 {expanded && <div className={styles.degreeDetails}><span>Ponderaciones 0,2</span>{importantSubjects.length ? <ul>{importantSubjects.map(subject => <li key={subject.id}>{subject.name}</li>)}</ul> : <p>Sin materias a 0,2 verificadas.</p>}<a href={item.source.url!} target="_blank" rel="noreferrer">Ver fuente oficial <ExternalLink size={12} /></a></div>}
+                <button type="button" className={styles.selectTargetButton} aria-pressed={selectedId === item.id} onClick={() => onSelect(item.id)}>{selectedId === item.id ? <><Check size={14} /> Objetivo seleccionado</> : <><Target size={14} /> Elegir como objetivo</>}</button>
               </article>
             )
           })}

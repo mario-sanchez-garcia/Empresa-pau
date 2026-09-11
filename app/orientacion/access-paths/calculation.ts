@@ -18,9 +18,15 @@ function clamp(value: number, minimum: number, maximum: number) {
 }
 
 export function calculateWeightedAdmissionPoints(subjects: AdmissionSubject[]) {
-  return subjects
-    .filter(subject => subject.enabled && clamp(subject.defaultGrade, 0, 10) >= ACCESS_CALCULATION_RULES.minimumWeightedSubjectGrade)
-    .map(subject => clamp(subject.defaultGrade, 0, 10) * subject.weighting)
+  const bestContributionBySubject = new Map<string, number>()
+  for (const subject of subjects) {
+    const grade = clamp(subject.defaultGrade, 0, 10)
+    if (!subject.enabled || grade < ACCESS_CALCULATION_RULES.minimumWeightedSubjectGrade) continue
+    const key = subject.subjectCode.trim().toLocaleLowerCase('es') || subject.id
+    const contribution = grade * subject.weighting
+    bestContributionBySubject.set(key, Math.max(bestContributionBySubject.get(key) ?? 0, contribution))
+  }
+  return [...bestContributionBySubject.values()]
     .sort((a, b) => b - a)
     .slice(0, ACCESS_CALCULATION_RULES.maxWeightedSubjects)
     .reduce((total, contribution) => total + contribution, 0)
@@ -59,7 +65,8 @@ export function calculateAccessPathScore(scenario: AccessScenario, subjects: Adm
     case 'spanish_bachillerato': {
       const base = clamp(scenario.bachillerato, 0, 10) * ACCESS_CALCULATION_RULES.spanish.bachilleratoWeight
         + clamp(scenario.accessPhase, 0, 10) * ACCESS_CALCULATION_RULES.spanish.pauWeight
-      return baseResult(scenario.pathId, base, subjects, true, null, [
+      const complete = scenario.accessPhase >= 4 && base >= 5
+      return baseResult(scenario.pathId, base, complete ? subjects : [], complete, complete ? null : 'La fase de acceso debe tener al menos un 4 y la nota de acceso final debe alcanzar un 5.', [
         { value: '60%', label: 'Bachillerato' }, { value: '40%', label: 'Fase de acceso' }, { value: 'Hasta 4', label: 'Dos mejores ponderadas' },
       ])
     }
@@ -67,7 +74,8 @@ export function calculateAccessPathScore(scenario: AccessScenario, subjects: Adm
       if (scenario.route === 'spanish_pau') {
         const base = clamp(scenario.bachillerato, 0, 10) * ACCESS_CALCULATION_RULES.spanish.bachilleratoWeight
           + clamp(scenario.accessPhase, 0, 10) * ACCESS_CALCULATION_RULES.spanish.pauWeight
-        return baseResult(scenario.pathId, base, subjects, true, null, [
+        const complete = scenario.accessPhase >= 4 && base >= 5
+        return baseResult(scenario.pathId, base, complete ? subjects : [], complete, complete ? null : 'La fase de acceso debe tener al menos un 4 y la nota de acceso final debe alcanzar un 5.', [
           { value: '60%', label: 'Bachillerato' }, { value: '40%', label: 'PAU' }, { value: 'Hasta 4', label: 'Dos mejores ponderadas' },
         ])
       }

@@ -30,6 +30,21 @@ export async function persistOrientationTarget(
   }
 }
 
+export async function clearOrientationTarget(
+  accessToken: string,
+  request: typeof fetch = fetch,
+) {
+  try {
+    const response = await request('/api/orientation', {
+      method: 'DELETE',
+      headers: { Authorization: 'Bearer ' + accessToken },
+    })
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
 export async function loadOrientationState(
   accessToken: string | null,
   request: typeof fetch = fetch,
@@ -49,17 +64,26 @@ export async function loadOrientationState(
 export async function persistOrientationState(
   accessToken: string | null,
   state: OrientationStateV1,
+  expectedUpdatedAt: string | null,
   request: typeof fetch = fetch,
 ): Promise<OrientationStateV1 | null> {
   if (!accessToken) return null
   const response = await request('/api/orientation/state', {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + accessToken },
-    body: JSON.stringify({ state }),
+    body: JSON.stringify({ state, expectedUpdatedAt }),
   })
+  if (response.status === 409) throw new OrientationStateConflictError()
   if (!response.ok) throw new Error('orientation-state-save')
   const body = await response.json() as { state?: unknown }
   const saved = parseOrientationState(body.state)
   if (!saved) throw new Error('orientation-state-invalid')
   return saved
+}
+
+export class OrientationStateConflictError extends Error {
+  constructor() {
+    super('orientation-state-conflict')
+    this.name = 'OrientationStateConflictError'
+  }
 }

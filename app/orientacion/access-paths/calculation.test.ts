@@ -13,6 +13,15 @@ test('Bachillerato español conserva la regresión 60/40', () => {
   assert.equal(result.finalScore, 7.6)
 })
 
+test('Bachillerato español no calcula admisión si no supera los mínimos de acceso', () => {
+  const failedPhase = calculateAccessPathScore({ pathId: 'spanish_bachillerato', bachillerato: 10, accessPhase: 3.9 }, [subject('math', 10, 0.2)])
+  const failedTotal = calculateAccessPathScore({ pathId: 'spanish_bachillerato', bachillerato: 5, accessPhase: 4 }, [subject('math', 10, 0.2)])
+  assert.equal(failedPhase.complete, false)
+  assert.equal(failedPhase.weightedPoints, 0)
+  assert.equal(failedTotal.complete, false)
+  assert.match(failedPhase.incompleteReason ?? '', /fase de acceso/i)
+})
+
 test('Bachibac diplôme aplica 70/30 en mínimo, caso típico y máximo', () => {
   assert.equal(calculateAccessPathScore({ pathId: 'bachibac', route: 'french_diploma', bachillerato: 5, externalTest: 5, accessPhase: 0 }, []).baseScore, 5)
   assert.equal(calculateAccessPathScore({ pathId: 'bachibac', route: 'french_diploma', bachillerato: 8, externalTest: 7, accessPhase: 0 }, []).baseScore, 7.699999999999999)
@@ -22,6 +31,12 @@ test('Bachibac diplôme aplica 70/30 en mínimo, caso típico y máximo', () => 
 test('Bachibac por título español conserva 60/40 y aísla la prueba externa', () => {
   const result = calculateAccessPathScore({ pathId: 'bachibac', route: 'spanish_pau', bachillerato: 8, externalTest: 1, accessPhase: 7 }, [])
   assert.equal(result.baseScore, 7.6)
+})
+
+test('Bachibac por título español exige los mismos mínimos de acceso', () => {
+  const result = calculateAccessPathScore({ pathId: 'bachibac', route: 'spanish_pau', bachillerato: 10, externalTest: 10, accessPhase: 3.9 }, [subject('math', 10, 0.2)])
+  assert.equal(result.complete, false)
+  assert.equal(result.weightedPoints, 0)
 })
 
 test('Bachibac exige superar la prueba externa al usar el diplôme', () => {
@@ -85,6 +100,16 @@ test('internacional no inventa una nota cuando falta la acreditación o la homol
   const homologation = calculateAccessPathScore({ pathId: 'international', route: 'homologation_pce', accreditedCau: null, homologatedAverage: null, pceGrades: [7, 7, 7, null] }, [])
   assert.equal(direct.complete, false)
   assert.equal(homologation.complete, false)
+})
+
+test('una misma asignatura no puede ponderar dos veces aunque llegue duplicada', () => {
+  const duplicated = [
+    subject('math-low', 7, 0.1),
+    { ...subject('math-high', 9, 0.2), subjectCode: 'math-low' },
+    subject('physics', 8, 0.2),
+  ]
+  const result = calculateAccessPathScore({ pathId: 'spanish_bachillerato', bachillerato: 10, accessPhase: 10 }, duplicated)
+  assert.ok(Math.abs(result.weightedPoints - 3.4) < 1e-10)
 })
 
 test('Cataluña calcula la vía homologada con 60/40 y no con la fórmula de Madrid', () => {

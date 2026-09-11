@@ -11,15 +11,15 @@ import { calculateAccessPathScore } from './access-paths/calculation'
 import AccessPathInputs from './access-paths/AccessPathInputs'
 import AccessPathSelector from './access-paths/AccessPathSelector'
 import { ACCESS_PATH_IDS, createDefaultAccessScenarios, createEmptyStoredSubjectInputs, getAccessPath } from './access-paths/model'
-import { ACCESS_PATH_STORAGE_KEY, applyStoredSubjectInputs, parseAccessPathStorage, subjectInputsFromScenarios } from './access-paths/storage'
+import { ACCESS_PATH_STORAGE_KEY, CAMINO_ORIENTATION_CONTEXT_KEY, applyStoredSubjectInputs, createCaminoOrientationContext, parseAccessPathStorage, subjectInputsFromScenarios } from './access-paths/storage'
 import type { AccessPathId, StoredSubjectInputs } from './access-paths/types'
 import { LatestStateAutosave, type AutosaveStatus } from './autosave'
-import { availableCatalogTargets, findSavedTarget, groupOrientationTargets } from './catalog'
+import { availableCatalogTargets, findSavedTarget, groupOrientationTargets, mergeSubjectInputs } from './catalog'
 import { ORIENTATION_COMMUNITIES, ORIENTATION_COMMUNITY_STORAGE_KEY, communitySlug, normalizeOrientationCommunity, type OrientationCommunity } from './community'
 import CorrectionGuide from './CorrectionGuide'
 import { ORIENTATION_FIXTURES, type AdmissionSubject, type OfficialCriterion, type OrientationTarget, type SavedOrientationTarget } from './data'
 import GradeControl from './GradeControl'
-import { loadOrientationState, persistOrientationState } from './persistence'
+import { clearOrientationTarget, loadOrientationState, OrientationStateConflictError, persistOrientationState, persistOrientationTarget } from './persistence'
 import { createOrientationState, mergeStoredSubjectInputs, orientationStateContentKey, ORIENTATION_STATE_STORAGE_KEY, parseOrientationState, reconcileOrientationStates, toAccessPathStorage, type FreeElective, type OrientationExploration, type OrientationMode, type OrientationStateV1 } from './state'
 import UniversityExplorer from './UniversityExplorer'
 import styles from './orientation.module.css'
@@ -40,6 +40,7 @@ function createEmptySubjectsByPath(): SubjectsByPath {
 export default function OrientationSimulator() {
   const [officialTargets, setOfficialTargets] = useState<OrientationTarget[]>([])
   const [criteria, setCriteria] = useState<OfficialCriterion[]>([])
+  const [savedTarget, setSavedTarget] = useState<SavedOrientationTarget | null>(null)
   const [orientationMode, setOrientationMode] = useState<OrientationMode>('free')
   const [community, setCommunity] = useState<OrientationCommunity>('Madrid')
   const [selectedDegreeKey, setSelectedDegreeKey] = useState('')
@@ -51,21 +52,27 @@ export default function OrientationSimulator() {
   const [stateReady, setStateReady] = useState(false)
   const [stateUpdatedAt, setStateUpdatedAt] = useState('1970-01-01T00:00:00.000Z')
   const [authenticated, setAuthenticated] = useState(false)
-  const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle')
+  const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus | 'conflict'>('idle')
   const storedSubjectInputs = useRef<StoredSubjectInputs>(createEmptyStoredSubjectInputs())
   const accessTokenRef = useRef<string | null>(null)
   const autosaveRef = useRef<LatestStateAutosave<OrientationStateV1> | null>(null)
   const queuedContentRef = useRef('')
   const currentContentRef = useRef('')
+  const serverUpdatedAtRef = useRef<string | null>(null)
+  const stateConflictRef = useRef(false)
   const loadSequenceRef = useRef(0)
+  const pageRef = useRef<HTMLElement | null>(null)
   const [showMethod, setShowMethod] = useState(false)
   const [activeTab, setActiveTab] = useState<'objetivo' | 'universidades' | 'correccion'>('universidades')
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading')
   const [catalogAvailable, setCatalogAvailable] = useState<boolean | null>(null)
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [clearState, setClearState] = useState<'idle' | 'clearing' | 'error'>('idle')
   const { theme: clayTheme } = useClayThemePreference()
 
   const targets = useMemo(() => availableCatalogTargets(officialTargets, ORIENTATION_FIXTURES, catalogAvailable === true), [officialTargets, catalogAvailable])
   const target = targets.find(item => item.id === targetId) ?? null
+  const subjects = subjectsByPath[accessPath]
   const freeSubjects = useMemo<AdmissionSubject[]>(() => freeElectives.map(elective => ({
     id: elective.id,
     subjectCode: elective.subject,
@@ -77,17 +84,32 @@ export default function OrientationSimulator() {
   })), [freeElectives])
   const scenario = scenarios[accessPath]
   const pathDefinition = getAccessPath(accessPath, community)
-  // "Nota estimada" ya no depende de haber elegido un grado: se calcula
-  // siempre a partir de las optativas libres del alumno, nunca de
-  // subjectsByPath (que solo existe para restaurar un objetivo guardado
-  // previamente — ver loadOrientation/applyState más abajo).
-  const calculation = useMemo(() => calculateAccessPathScore(scenario, freeSubjects, community), [community, freeSubjects, scenario])
+  const calculation = useMemo(() => calculateAccessPathScore(scenario, orientationMode === 'target' ? subjects : freeSubjects, community), [community, freeSubjects, orientationMode, scenario, subjects])
   const score = calculation.finalScore
+  const difference = target && calculation.complete ? score - target.referenceScore : null
   const degreeGroups = useMemo(() => groupOrientationTargets(targets), [targets])
   const selectedDegree = degreeGroups.find(group => group.key === selectedDegreeKey) ?? null
 
   function markStateChanged() {
     setStateUpdatedAt(new Date().toISOString())
+  }
+
+  function selectTarget(id: string) {
+    const nextTarget = targets.find(item => item.id === id && item.source.type === 'official')
+    if (!nextTarget) return
+    const group = degreeGroups.find(item => item.offerings.some(offering => offering.id === nextTarget.id))
+    setSelectedDegreeKey(group?.key ?? '')
+    setTargetId(nextTarget.id)
+    setSubjectsByPath(current => Object.fromEntries(ACCESS_PATH_IDS.map(pathId => {
+      const merged = mergeSubjectInputs(nextTarget.subjects, current[pathId])
+      return [pathId, current[pathId].length ? merged : applyStoredSubjectInputs(merged, storedSubjectInputs.current[pathId])]
+    })) as SubjectsByPath)
+    setOrientationMode('target')
+    setSaveState('idle')
+    setClearState('idle')
+    setActiveTab('objetivo')
+    markStateChanged()
+    window.requestAnimationFrame(() => pageRef.current?.scrollTo({ top: 0, behavior: 'auto' }))
   }
 
   const loadOrientation = useCallback(async (requestedCommunity: OrientationCommunity, exploration: OrientationExploration | null, accessToken: string | null) => {
@@ -103,6 +125,7 @@ export default function OrientationSimulator() {
       const allTargets = availableCatalogTargets(realTargets, ORIENTATION_FIXTURES, payload.catalogAvailable !== false)
       setOfficialTargets(realTargets)
       setCriteria(payload.criteria ?? [])
+      setSavedTarget(payload.savedTarget ?? null)
       setCatalogAvailable(payload.catalogAvailable ?? true)
       if (payload.community) setCommunity(payload.community)
       const activeCommunity = payload.community ?? requestedCommunity
@@ -184,6 +207,7 @@ export default function OrientationSimulator() {
         }
       }
       if (cancelled) return
+      serverUpdatedAtRef.current = serverState?.updatedAt ?? null
       const chosen = reconcileOrientationStates(localState, serverState) ?? localState
       applyState(chosen)
       if (serverState && orientationStateContentKey(chosen) === orientationStateContentKey(serverState)) {
@@ -198,12 +222,19 @@ export default function OrientationSimulator() {
 
   useEffect(() => {
     const autosave = new LatestStateAutosave<OrientationStateV1>(async state => {
-      const saved = await persistOrientationState(accessTokenRef.current, state)
-      if (!saved) return
-      if (currentContentRef.current === orientationStateContentKey(saved)) {
-        window.localStorage.setItem(ORIENTATION_STATE_STORAGE_KEY, JSON.stringify(saved))
+      stateConflictRef.current = false
+      try {
+        const saved = await persistOrientationState(accessTokenRef.current, state, serverUpdatedAtRef.current)
+        if (!saved) return
+        serverUpdatedAtRef.current = saved.updatedAt
+        if (currentContentRef.current === orientationStateContentKey(saved)) {
+          window.localStorage.setItem(ORIENTATION_STATE_STORAGE_KEY, JSON.stringify(saved))
+        }
+      } catch (error) {
+        if (error instanceof OrientationStateConflictError) stateConflictRef.current = true
+        throw error
       }
-    }, setAutosaveStatus, 750)
+    }, status => setAutosaveStatus(status === 'error' && stateConflictRef.current ? 'conflict' : status), 750)
     autosaveRef.current = autosave
     return () => { autosave.dispose(); autosaveRef.current = null }
   }, [])
@@ -275,6 +306,13 @@ export default function OrientationSimulator() {
     void loadOrientation(nextCommunity, null, accessTokenRef.current)
   }
 
+  function chooseMode(mode: OrientationMode) {
+    if (mode === orientationMode) return
+    setOrientationMode(mode)
+    setSaveState('idle')
+    markStateChanged()
+  }
+
   function addFreeElective() {
     if (freeElectives.length >= 8) return
     const unused = ELECTIVE_OPTIONS.find(option => !freeElectives.some(item => item.subject === option.label)) ?? ELECTIVE_OPTIONS[0]
@@ -293,13 +331,95 @@ export default function OrientationSimulator() {
     markStateChanged()
   }
 
-  function updateScenario(nextScenario: typeof scenario) {
-    setScenarios(current => ({ ...current, [accessPath]: nextScenario }))
+  function updateSubject(id: string, patch: Partial<AdmissionSubject>) {
+    setSubjectsByPath(current => ({
+      ...current,
+      [accessPath]: current[accessPath].map(subject => subject.id === id ? { ...subject, ...patch } : subject),
+    }))
+    setSaveState('idle')
     markStateChanged()
   }
 
+  async function saveAndOpenCamino() {
+    if (!target || target.source.type !== 'official') return
+    setSaveState('saving')
+    try {
+      await autosaveRef.current?.flush()
+      const { data } = await supabase.auth.getSession()
+      if (!data.session || !await persistOrientationTarget(data.session.access_token, target)) {
+        setSaveState('error')
+        return
+      }
+      const now = new Date()
+      setSavedTarget({
+        degreeId: target.degreeId,
+        universityId: target.universityId,
+        degree: target.degree,
+        university: target.university,
+        community: target.community,
+        admissionScore: target.referenceScore,
+        sourceType: 'official',
+        updatedAt: now.toISOString(),
+      })
+      const context = createCaminoOrientationContext(accessPath, target, calculation.complete ? score : null, difference, subjects, scenario, calculation.complete, now)
+      window.localStorage.setItem(CAMINO_ORIENTATION_CONTEXT_KEY, JSON.stringify(context))
+      setSaveState('saved')
+      window.location.assign('/camino')
+    } catch {
+      setSaveState('error')
+    }
+  }
+
+  async function removeSavedTarget() {
+    setClearState('clearing')
+    const { data } = await supabase.auth.getSession()
+    if (!data.session || !await clearOrientationTarget(data.session.access_token)) {
+      setClearState('error')
+      return
+    }
+    window.localStorage.removeItem(CAMINO_ORIENTATION_CONTEXT_KEY)
+    setSavedTarget(null)
+    setTargetId('')
+    setSelectedDegreeKey('')
+    setSubjectsByPath(createEmptySubjectsByPath())
+    setOrientationMode('free')
+    setClearState('idle')
+    markStateChanged()
+  }
+
+  function updateScenario(nextScenario: typeof scenario) {
+    setScenarios(current => ({ ...current, [accessPath]: nextScenario }))
+    setSaveState('idle')
+    markStateChanged()
+  }
+
+  function renderOfficialSubject(subject: AdmissionSubject) {
+    return <div className={`${styles.subjectRow} ${!subject.enabled ? styles.disabledSubject : ''}`} key={subject.id}>
+      <div className={styles.subjectMeta}>
+        <button type="button" role="switch" aria-checked={subject.enabled} aria-label={`${subject.enabled ? 'Desactivar' : 'Activar'} ${subject.name}`} className={styles.toggle} onClick={() => updateSubject(subject.id, { enabled: !subject.enabled })}><span><Check size={14} /></span></button>
+        <div><b>{subject.name}</b><span>Pondera ×{subject.weighting.toLocaleString('es-ES')}{subject.ruleNote ? ` · ${subject.ruleNote}` : ''}</span></div>
+      </div>
+      <GradeControl id={`subject-${subject.id}`} label={`Nota de ${subject.name}`} value={subject.defaultGrade} disabled={!subject.enabled} onChange={value => updateSubject(subject.id, { defaultGrade: value })} />
+    </div>
+  }
+
+  const autosaveFeedback = !authenticated
+    ? 'Guardado en este dispositivo'
+    : autosaveStatus === 'saving'
+      ? 'Guardando cambios…'
+      : autosaveStatus === 'conflict'
+        ? <><span>Hay cambios más recientes en otra pestaña</span><button type="button" onClick={() => window.location.reload()}><RefreshCw size={14} /> Recargar</button></>
+        : autosaveStatus === 'error'
+          ? <><span>Cambios pendientes</span><button type="button" onClick={() => autosaveRef.current?.retry()}><RefreshCw size={14} /> Reintentar</button></>
+          : autosaveStatus === 'saved'
+            ? <><Check size={14} /> Guardado</>
+            : 'Sin cambios pendientes'
+  const selectedTargetIsSaved = Boolean(savedTarget && target
+    && savedTarget.degreeId === target.degreeId
+    && savedTarget.universityId === target.universityId)
+
   const headings = {
-    objetivo: ['Nota estimada', 'Ajusta tus notas y descubre tu nota de acceso — sin comparar con ninguna meta.'],
+    objetivo: ['Mi objetivo', 'Calcula libremente o conecta un grado oficial con tu plan de Camino.'],
     universidades: ['Explorar grados', 'Filtra el catálogo oficial según lo que buscas y tu escenario.'],
     correccion: ['Cómo se corrige', 'Baremos oficiales explicados sin mezclar fuente e interpretación.'],
   } as const
@@ -311,7 +431,7 @@ export default function OrientationSimulator() {
 
   const TABS = [
     { id: 'universidades', label: 'Explorar grados', Icon: GraduationCap },
-    { id: 'objetivo', label: 'Nota estimada', Icon: Target },
+    { id: 'objetivo', label: 'Mi objetivo', Icon: Target },
     { id: 'correccion', label: 'Cómo se corrige', Icon: BookOpen },
   ] as const
 
@@ -335,7 +455,7 @@ export default function OrientationSimulator() {
           {activeTab === 'objetivo' && <button className={styles.methodButton} onClick={() => setShowMethod(true)}><Info size={14} /> ¿Cómo se calcula?</button>}
         </nav>
 
-      <main className={styles.page}>
+      <main ref={pageRef} className={styles.page}>
         <section className={styles.communityBar} aria-label="Comunidad del catálogo">
           <div><b>Consulta el sistema que te corresponde</b></div>
           <div className={styles.communitySwitch} role="group" aria-label="Selecciona comunidad">
@@ -345,12 +465,23 @@ export default function OrientationSimulator() {
         </section>
         {community === 'Cataluña' && <p className={styles.communityNote}><Info size={14} /> La nota de referencia es la del último estudiante que obtuvo plaza en la 1.ª asignación de junio de 2026; orienta, pero no garantiza admisión.</p>}
 
-        {activeTab === 'universidades' ? <UniversityExplorer targets={officialTargets} estimatedScore={calculation.complete ? score : null} loadState={loadState} onRetry={retryLoad} /> : activeTab === 'correccion' ? <CorrectionGuide community={community} databaseCriteria={criteria} /> : (
+        {activeTab === 'universidades' ? <UniversityExplorer targets={officialTargets} selectedId={targetId} estimatedScore={calculation.complete ? score : null} loadState={loadState} onRetry={retryLoad} onSelect={selectTarget} /> : activeTab === 'correccion' ? <CorrectionGuide community={community} databaseCriteria={criteria} /> : (
           <>
-            <section className={styles.freeStart} aria-label="Nota estimada">
+            <section className={styles.modeChooser} aria-labelledby="orientation-mode-title">
+              <div><h2 id="orientation-mode-title">¿Cómo quieres calcular?</h2><p>El simulador libre no cambia tu objetivo. El modo objetivo usa únicamente ponderaciones oficiales del grado elegido.</p></div>
+              <div className={styles.modeOptions} role="radiogroup" aria-label="Modo de Orientación">
+                <button type="button" role="radio" aria-checked={orientationMode === 'free'} onClick={() => chooseMode('free')}><span><b>Solo calcular mi nota</b><small>Escenario independiente</small></span></button>
+                <button type="button" role="radio" aria-checked={orientationMode === 'target'} onClick={() => chooseMode('target')}><Target size={16} /><span><b>Tengo un objetivo</b><small>Grado y universidad</small></span></button>
+              </div>
+            </section>
+            {savedTarget && !selectedTargetIsSaved && <aside className={styles.savedTargetNotice} aria-label="Objetivo guardado">
+              <Check size={16} /><div><b>Objetivo guardado: {savedTarget.degree}</b><span>{savedTarget.university}{savedTarget.community ? ` · ${normalizeOrientationCommunity(savedTarget.community) ?? savedTarget.community}` : ''}. Este escenario no lo sustituirá hasta que pulses guardar.</span></div>
+            </aside>}
+
+            {orientationMode === 'free' ? <section className={styles.freeStart} aria-label="Simulador sin objetivo">
               <div className={styles.freeStartHeading}>
                 <div><div><h2 id="free-simulator-title">Nota estimada</h2><p>Ajusta tu vía de acceso y tus asignaturas optativas para ver tu nota — sin objetivos ni comparaciones.</p></div></div>
-                {stateReady && <div className={styles.autosaveIndicator} data-state={authenticated ? autosaveStatus : 'local'} aria-live="polite">{!authenticated ? 'Guardado en este dispositivo' : autosaveStatus === 'saving' ? 'Guardando cambios…' : autosaveStatus === 'error' ? <><span>Cambios pendientes</span><button type="button" onClick={() => autosaveRef.current?.retry()}><RefreshCw size={14} /> Reintentar</button></> : autosaveStatus === 'saved' ? <><Check size={14} /> Guardado</> : 'Sin cambios pendientes'}</div>}
+                {stateReady && <div className={styles.autosaveIndicator} data-state={authenticated ? autosaveStatus : 'local'} aria-live="polite">{autosaveFeedback}</div>}
               </div>
               <AccessPathSelector value={accessPath} onChange={pathId => { setAccessPath(pathId); markStateChanged() }} />
               <AccessPathInputs community={community} scenario={scenario} onChange={updateScenario} />
@@ -361,7 +492,7 @@ export default function OrientationSimulator() {
               {freeElectives.length === 0 ? <p className={styles.freeElectivesEmpty}>Añade una asignatura optativa para ver cuánto sube tu nota.</p> : (
                 <div className={styles.freeElectives}>
                   {freeElectives.map(elective => <div className={styles.freeElectiveRow} key={elective.id}>
-                    <label><span>Asignatura</span><select aria-label={`Asignatura optativa ${elective.subject}`} value={elective.subject} onChange={event => updateFreeElective(elective.id, { subject: event.target.value })}>{ELECTIVE_OPTIONS.map(option => <option key={option.id} value={option.label}>{option.label}</option>)}</select></label>
+                    <label><span>Asignatura</span><select aria-label={`Asignatura optativa ${elective.subject}`} value={elective.subject} onChange={event => updateFreeElective(elective.id, { subject: event.target.value })}>{ELECTIVE_OPTIONS.map(option => <option key={option.id} value={option.label} disabled={option.label !== elective.subject && freeElectives.some(item => item.subject === option.label)}>{option.label}</option>)}</select></label>
                     <GradeControl id={`free-elective-${elective.id}`} label={`Nota de ${elective.subject}`} value={elective.grade} onChange={grade => updateFreeElective(elective.id, { grade })} />
                     <fieldset><legend>Ponderación</legend><button type="button" aria-pressed={elective.weighting === 0.1} onClick={() => updateFreeElective(elective.id, { weighting: 0.1 })}>0,1</button><button type="button" aria-pressed={elective.weighting === 0.2} onClick={() => updateFreeElective(elective.id, { weighting: 0.2 })}>0,2</button></fieldset>
                     <button type="button" className={styles.removeElective} aria-label={`Eliminar ${elective.subject}`} onClick={() => removeFreeElective(elective.id)}><Trash2 size={15} /></button>
@@ -370,10 +501,38 @@ export default function OrientationSimulator() {
               )}
               {calculation.complete && <div className={styles.freeResultBreakdown} aria-label="Desglose de nota"><div><span>Base</span><b>{formatGrade(calculation.baseScore)}</b></div><strong>+</strong><div><span>Optativas</span><b>{formatGrade(calculation.weightedPoints)}</b></div><strong>=</strong><div><span>Total</span><b>{formatGrade(score)}</b></div></div>}
               {calculation.complete && freePotentialGain > 0 && <p className={styles.freeGain}>Puedes mejorar hasta +{formatGrade(freePotentialGain)} con estas optativas.</p>}
+              {!calculation.complete && <p className={styles.calculationPending}>{calculation.incompleteReason}</p>}
               <details className={styles.freeMethod}><summary>¿Cómo se calcula?</summary><p>La nota base depende de tu vía de acceso. Para admisión solo cuentan las dos mejores optativas aprobadas. Aquí eliges la ponderación para simular; comprueba el valor oficial al elegir un grado en el explorador.</p></details>
-            </section>
+            </section> : target ? (
+              <section className={styles.targetWorkspace} aria-label="Objetivo oficial" data-selected-id={target.id}>
+                <div className={styles.targetSummary}>
+                  <div><span className={styles.sectionKicker}>Objetivo oficial</span><h2>{target.degree}</h2><p>{target.universityAcronym ? `${target.universityAcronym} · ` : ''}{target.university}</p></div>
+                  <div><span>Nota de referencia</span><b>{target.referenceScore.toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}</b><small>{target.referenceLabel}</small></div>
+                </div>
+                {stateReady && <div className={styles.autosaveIndicator} data-state={authenticated ? autosaveStatus : 'local'} aria-live="polite">{autosaveFeedback}</div>}
+                <AccessPathSelector value={accessPath} onChange={pathId => { setAccessPath(pathId); setSaveState('idle'); markStateChanged() }} />
+                <AccessPathInputs community={community} scenario={scenario} onChange={updateScenario} />
+                <div className={styles.officialSubjectsHeading}><b>Materias que ponderan para este grado</b><span>Solo suman las dos mejores aprobadas. Los valores 0,1 y 0,2 proceden del catálogo oficial.</span></div>
+                {subjects.length ? <div className={styles.officialSubjects}>{subjects.map(renderOfficialSubject)}</div> : <p className={styles.calculationPending}>No hay ponderaciones verificadas para esta oferta. No añadiremos ninguna manualmente.</p>}
+                {calculation.complete ? <div className={styles.targetResult} aria-live="polite">
+                  <div><span>Tu nota estimada</span><b>{formatGrade(score)} <small>/ 14</small></b><small>{formatGrade(calculation.baseScore)} base + {formatGrade(calculation.weightedPoints)} ponderadas</small></div>
+                  <div data-status={difference !== null && difference >= 0 ? 'above' : 'below'}><span>Frente a la referencia</span><b>{difference !== null && difference >= 0 ? '+' : '−'}{formatGrade(Math.abs(difference ?? 0))}</b><small>{difference !== null && difference >= 0 ? 'Por encima de la referencia histórica' : 'Puntos por mejorar'}</small></div>
+                </div> : <p className={styles.calculationPending}>{calculation.incompleteReason}</p>}
+                <div className={styles.targetActions}>
+                  <button type="button" className={styles.primaryTargetAction} onClick={saveAndOpenCamino} disabled={saveState === 'saving'}>{saveState === 'saving' ? 'Guardando…' : savedTarget?.degreeId === target.degreeId && savedTarget?.universityId === target.universityId ? 'Actualizar objetivo en Camino' : 'Guardar y usar en Camino'} <ArrowRight size={14} /></button>
+                  <button type="button" onClick={() => setActiveTab('universidades')}>Cambiar grado</button>
+                  {savedTarget && <button type="button" className={styles.removeTargetAction} onClick={removeSavedTarget} disabled={clearState === 'clearing'}>{clearState === 'clearing' ? 'Quitando…' : 'Quitar objetivo guardado'}</button>}
+                </div>
+                {saveState === 'error' && <p className={styles.saveError} role="alert">No se pudo guardar el objetivo. Comprueba tu sesión y vuelve a intentarlo.</p>}
+                {clearState === 'error' && <p className={styles.saveError} role="alert">No se pudo quitar el objetivo. Vuelve a intentarlo.</p>}
+              </section>
+            ) : (
+              <section className={styles.targetEmpty} aria-label="Objetivo sin seleccionar">
+                <Target size={25} /><h2>Elige un grado y una universidad</h2><p>La selección se hace en el catálogo oficial para evitar ponderaciones o referencias inventadas.</p><button type="button" onClick={() => setActiveTab('universidades')}>Explorar grados <ArrowRight size={14} /></button>
+              </section>
+            )}
 
-            {calculation.complete && (
+            {orientationMode === 'free' && calculation.complete && (
               <section className={styles.searchDegreesCta} aria-label="Buscar carreras con esta nota">
                 <div><Search size={20} /><div><b>Buscar carreras con esta nota</b><span>Filtra el catálogo oficial con tu nota estimada, {formatGrade(score)} / 14, sin volver a escribirla.</span></div></div>
                 <button type="button" onClick={() => setActiveTab('universidades')}>Explorar grados <ArrowRight size={14} /></button>

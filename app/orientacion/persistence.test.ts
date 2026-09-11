@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { loadOrientationState, persistOrientationState, persistOrientationTarget } from './persistence.ts'
+import { clearOrientationTarget, loadOrientationState, OrientationStateConflictError, persistOrientationState, persistOrientationTarget } from './persistence.ts'
 import { createOrientationState } from './state.ts'
 import type { OrientationTarget } from './data.ts'
 
@@ -43,6 +43,17 @@ test('un fallo de red devuelve error controlado y permite reintentar', async () 
   assert.equal(saved, false)
 })
 
+test('quitar el objetivo usa DELETE autenticado y no envía identidad ni secretos', async () => {
+  const cleared = await clearOrientationTarget('valid-token', async (input, init) => {
+    assert.equal(input, '/api/orientation')
+    assert.equal(init?.method, 'DELETE')
+    assert.equal(new Headers(init?.headers).get('Authorization'), 'Bearer valid-token')
+    assert.equal(init?.body, undefined)
+    return new Response(null, { status: 200 })
+  })
+  assert.equal(cleared, true)
+})
+
 test('carga el estado autenticado sin enviar identidad controlada por el cliente', async () => {
   const state = createOrientationState('Madrid', null, '2026-09-03T10:00:00.000Z')
   const loaded = await loadOrientationState('valid-token', async (_input, init) => {
@@ -54,12 +65,13 @@ test('carga el estado autenticado sin enviar identidad controlada por el cliente
 
 test('guarda el documento completo con PATCH y sin user_id', async () => {
   const state = createOrientationState('Madrid', null, '2026-09-03T10:00:00.000Z')
-  const saved = await persistOrientationState('valid-token', state, async (input, init) => {
+  const saved = await persistOrientationState('valid-token', state, '2026-09-03T09:00:00.000Z', async (input, init) => {
     assert.equal(input, '/api/orientation/state')
     assert.equal(init?.method, 'PATCH')
     assert.equal(new Headers(init?.headers).get('Authorization'), 'Bearer valid-token')
     const body = JSON.parse(String(init?.body)) as Record<string, unknown>
     assert.deepEqual(body.state, state)
+    assert.equal(body.expectedUpdatedAt, '2026-09-03T09:00:00.000Z')
     assert.equal('user_id' in body, false)
     return Response.json({ state })
   })
@@ -70,11 +82,18 @@ test('el usuario anónimo permanece local y no hace requests de estado', async (
   let calls = 0
   const request = async () => { calls += 1; return Response.json({}) }
   assert.equal(await loadOrientationState(null, request), null)
-  assert.equal(await persistOrientationState(null, createOrientationState('Madrid'), request), null)
+  assert.equal(await persistOrientationState(null, createOrientationState('Madrid'), null, request), null)
   assert.equal(calls, 0)
 })
 
 test('rechaza respuestas de servidor corruptas y propaga fallos de red al autosave', async () => {
   await assert.rejects(() => loadOrientationState('token', async () => Response.json({ state: { version: 99 } })), /orientation-state-invalid/)
-  await assert.rejects(() => persistOrientationState('token', createOrientationState('Madrid'), async () => { throw new TypeError('offline') }), /offline/)
+  await assert.rejects(() => persistOrientationState('token', createOrientationState('Madrid'), null, async () => { throw new TypeError('offline') }), /offline/)
+})
+
+test('un conflicto entre pestañas no sobrescribe y se distingue de un fallo de red', async () => {
+  await assert.rejects(
+    () => persistOrientationState('token', createOrientationState('Madrid'), null, async () => Response.json({ error: 'orientation-state-conflict' }, { status: 409 })),
+    OrientationStateConflictError,
+  )
 })

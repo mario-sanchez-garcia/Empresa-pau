@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "app/components/camino/CaminoSkeleton.tsx"
+        ],
+        "createdAt": "2026-09-07T18:22:44.357Z",
+        "reason": "Skeleton de Camino: replica el borderLeft 3px de las tarjetas reales (CaminoCalendarClient.tsx:2425,4446,4458). Sin esa barra el contenido salta 3px al cargar, que es justo lo que el skeleton evita. Patron preexistente, no introducido aqui. Movido desde app/camino/loading.tsx, que ahora solo reexporta el componente."
+      }
+    ]
+  }
+}

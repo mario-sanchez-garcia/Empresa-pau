@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import SidebarNav from '@/app/components/SidebarNav'
 import XpExplainerDrawer from '@/components/ayuda/XpExplainerDrawer'
+import ContactanosWidget from '@/app/ayuda/ContactanosWidget'
 import { AYUDA_FAQS, type AyudaFaq } from '@/app/lib/ayudaFaqs'
 
 const SECTIONS = [
@@ -149,6 +150,12 @@ export default function AyudaPage() {
               </div>
             ))}
           </div>
+
+          {/* Contáctanos */}
+          <h2 id="contactanos" style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: 16, marginTop: 48 }}>
+            Contáctanos
+          </h2>
+          <ContactanosWidget />
 
           <div style={{ marginTop: 24, textAlign: 'center', padding: '20px', background: 'white', borderRadius: 10, border: '1px solid #e2e8f0' }}>
             <p style={{ fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 12 }}>

@@ -25,6 +25,9 @@ type ContactMessage = {
   message: string
   created_at: string
   is_read: boolean
+  respuesta: string | null
+  respuesta_at: string | null
+  respondido_por: string | null
 }
 
 type PageState =
@@ -64,6 +67,9 @@ export default function ContactMessagesPage() {
   const [state, setState] = useState<PageState>({ status: 'loading' })
   const [pendingId, setPendingId] = useState<number | null>(null)
   const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({})
+  const [replyPendingId, setReplyPendingId] = useState<number | null>(null)
+  const [replyErrors, setReplyErrors] = useState<Record<number, string>>({})
 
   async function load() {
     const { data: { session } } = await supabase.auth.getSession()
@@ -99,6 +105,39 @@ export default function ContactMessagesPage() {
         : current)
     } finally {
       setPendingId(null)
+    }
+  }
+
+  async function sendReply(id: number) {
+    const respuesta = (replyDrafts[id] ?? '').trim()
+    if (respuesta.length < 3) {
+      setReplyErrors(cur => ({ ...cur, [id]: 'Escribe una respuesta.' }))
+      return
+    }
+    setReplyPendingId(id)
+    setReplyErrors(cur => { const next = { ...cur }; delete next[id]; return next })
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) { setState({ status: 'unauthenticated' }); return }
+      const res = await fetch('/api/admin/contact-messages', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ id, respuesta }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setReplyErrors(cur => ({ ...cur, [id]: json.error || 'No se pudo guardar la respuesta.' }))
+        return
+      }
+      const nowIso = new Date().toISOString()
+      setState(current => current.status === 'loaded'
+        ? { ...current, messages: current.messages.map(m => m.id === id
+            ? { ...m, respuesta, respuesta_at: nowIso, respondido_por: session.user.email ?? null }
+            : m) }
+        : current)
+      setReplyDrafts(cur => { const next = { ...cur }; delete next[id]; return next })
+    } finally {
+      setReplyPendingId(null)
     }
   }
 
@@ -236,6 +275,45 @@ export default function ContactMessagesPage() {
                               </button>
                             )}
                           </div>
+
+                          {m.respuesta ? (
+                            <div style={{ background: 'var(--clay-accent-soft)', border: '1px solid var(--clay-border)', borderRadius: 10, padding: '12px 14px' }}>
+                              <p style={{ margin: '0 0 6px', fontSize: 10, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: C.muted }}>
+                                Respuesta{m.respondido_por ? ` de ${m.respondido_por}` : ''}{m.respuesta_at ? ` · ${fmtDate(m.respuesta_at)}` : ''}
+                              </p>
+                              <p style={{ margin: 0, fontSize: 13, color: C.ink, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                                {m.respuesta}
+                              </p>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                              <textarea
+                                value={replyDrafts[m.id] ?? ''}
+                                onChange={(e) => setReplyDrafts(cur => ({ ...cur, [m.id]: e.target.value }))}
+                                rows={3}
+                                placeholder="Escribe la respuesta para el alumno…"
+                                style={{
+                                  width: '100%', resize: 'vertical', fontSize: 13, color: C.ink, fontFamily: 'inherit',
+                                  background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: '10px 12px',
+                                }}
+                              />
+                              {replyErrors[m.id] && (
+                                <p style={{ margin: 0, fontSize: 12, color: '#dc2626' }}>{replyErrors[m.id]}</p>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => sendReply(m.id)}
+                                disabled={replyPendingId === m.id}
+                                style={{
+                                  alignSelf: 'flex-start', background: 'var(--clay-accent-deep)', border: 0, color: '#fff',
+                                  borderRadius: 8, padding: '7px 16px', fontSize: 12, fontWeight: 700,
+                                  cursor: replyPendingId === m.id ? 'default' : 'pointer', opacity: replyPendingId === m.id ? 0.6 : 1,
+                                }}
+                              >
+                                {replyPendingId === m.id ? 'Enviando…' : 'Responder'}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

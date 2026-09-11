@@ -47,21 +47,33 @@ export function isSubjectAvailableForCommunity(subject: SimulacroSubject, comuni
   return SUBJECTS[subject].available && (comunidad !== 'Cataluña' || CATALUNYA_SIMULACRO_SUBJECTS.has(subject))
 }
 
-export const DIFFICULTIES: Array<{ id: SimulacroDifficulty; label: SimulacroDifficulty; description: string; years: number[] }> = [
-  { id: 'Fácil', label: 'Fácil', description: 'Años 2015-2018, preguntas más directas', years: [2015, 2016, 2017, 2018] },
-  { id: 'Media', label: 'Media', description: 'Años 2019-2022, dificultad estándar', years: [2019, 2020, 2021, 2022] },
-  { id: 'Difícil', label: 'Difícil', description: 'Años 2023-2025, máxima exigencia', years: [2023, 2024, 2025] }
+export const DIFFICULTIES: Array<{ id: SimulacroDifficulty; label: SimulacroDifficulty; description: string }> = [
+  { id: 'Fácil', label: 'Fácil', description: 'Convocatorias más antiguas, preguntas más directas' },
+  { id: 'Media', label: 'Media', description: 'Convocatorias intermedias, dificultad estándar' },
+  { id: 'Difícil', label: 'Difícil', description: 'Convocatorias más recientes, máxima exigencia' }
 ]
 
+// Todos los bloques que existen de verdad en cada asignatura, en el orden en
+// que se presentan al alumno. Varias asignaturas tienen 5 bloques (como el
+// examen oficial) y el simulacro elige 4, así que esta lista NO es "los 4 que
+// entran": ver la selección aleatoria en generateSimulacro. Faltaban aquí
+// bloques enteros con material real —Física 'RadioactividadModerna' (51
+// ejercicios), Química 'Pregunta5' (46), Inglés 'Q3'/Vocabulary (65)— que por
+// eso no aparecían nunca en un simulacro, pese a estar ya reconocidos en
+// app/lib/simulacros/blockNormalization.ts y usarse en la práctica de Camino.
+// Matemáticas CCSS listaba temas ('Algebra', 'Analisis'…) que su dataset no
+// usa: sus bloques son posicionales ('Ejercicio 1'…'Ejercicio 5').
 const THEME_ORDER: Record<SimulacroSubject, string[]> = {
   mates: ['Algebra', 'Analisis', 'Geometria', 'Probabilidad'],
-  matematicas_ccss: ['Algebra', 'Analisis', 'Probabilidad', 'Estadistica'],
-  fisica: ['Gravitacion', 'Ondas', 'Electricidad', 'Optica'],
-  quimica: ['Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4'],
+  matematicas_ccss: ['Ejercicio 1', 'Ejercicio 2', 'Ejercicio 3', 'Ejercicio 4', 'Ejercicio 5'],
+  fisica: ['Gravitacion', 'Ondas', 'Electricidad', 'Optica', 'RadioactividadModerna'],
+  quimica: ['Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4', 'Pregunta5'],
   biologia: ['Pregunta1', 'Pregunta2', 'Pregunta3', 'Pregunta4', 'Pregunta5'],
-  ingles: ['Q1', 'Q2', 'Q4', 'Q5'],
+  ingles: ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'],
   lengua: ['Comunicacion', 'ReflexionLengua', 'EducacionLiteraria'],
-  historia: ['cuestiones', 'fuente1', 'fuente2', 'tema', 'texto', 'fuente']
+  // 'fuente' no va en la lista: normalizeTheme() lo colapsa en 'fuente1', así
+  // que como entrada propia nunca casaba con nada.
+  historia: ['cuestiones', 'fuente1', 'fuente2', 'tema', 'texto']
 }
 
 export function generateSimulacro(
@@ -78,16 +90,14 @@ export function generateSimulacro(
   // tier entirely rather than intersecting with it, so a Parcial covering
   // e.g. Prehistoria isn't starved down to whatever few exercises from that
   // topic also happen to fall in one arbitrary year range.
-  const years = hasHistoriaTopicFilter ? null : yearSelection === 'all' ? null : yearsForSubject(subject, yearSelection)
+  const years = hasHistoriaTopicFilter ? null : yearSelection === 'all' ? null : yearsForSubject(subject, yearSelection, comunidad)
 
   if (subject === 'lengua') {
-    const lenguaYears = yearSelection === 'all'
-      ? null
-      : yearSelection === 'Fácil'
-      ? [2019, 2020]
-      : yearSelection === 'Media'
-      ? [2021, 2022]
-      : [2023, 2024]
+    // Lengua tenía su propio rango fijo (Fácil 2019-2020, Media 2021-2022,
+    // Difícil 2023-2024), aún más estrecho que el general: dejaba fuera de
+    // cualquier tramo 2018, 2025 y 2026. Usa ya los mismos tramos derivados
+    // del dataset que el resto de asignaturas.
+    const lenguaYears = yearSelection === 'all' ? null : yearsForSubject('lengua', yearSelection, comunidad)
     const selectedOption = optionSelection === 'mixed' ? randomOption() : optionSelection
 
     if (comunidad === 'Cataluña') {
@@ -151,7 +161,19 @@ export function generateSimulacro(
       }
     }
   } else {
-    for (const theme of THEME_ORDER[subject]) {
+    // Antes se recorría THEME_ORDER en orden y se cortaba al llegar a 4
+    // bloques, así que en una asignatura de 5 bloques el quinto no salía
+    // JAMÁS (Biología 'Pregunta5', y lo mismo le pasaba a Historia con
+    // 'texto': 38 ejercicios inalcanzables, mientras 'fuente2' —que tiene uno
+    // solo— entraba en todos los simulacros por estar antes en la lista). Se
+    // sortean los bloques con material y se toman 4; el orden de
+    // presentación sigue siendo el canónico de THEME_ORDER.
+    const themeOrder = THEME_ORDER[subject] ?? []
+    const themesWithContent = themeOrder.filter(theme => questions.some(item => normalizeTheme(subject, item.rawTheme) === theme))
+    const chosenThemes = shuffle(themesWithContent)
+      .slice(0, 4)
+      .sort((a, b) => themeOrder.indexOf(a) - themeOrder.indexOf(b))
+    for (const theme of chosenThemes) {
       const sameTheme = shuffle(questions.filter(item => normalizeTheme(subject, item.rawTheme) === theme))
       const preferred = sameTheme.find(item => !usedYears.has(item.year)) ?? sameTheme[0]
       if (!preferred) continue
@@ -182,13 +204,60 @@ function withCommunity(blocks: SimulacroBlock[], comunidad: string) {
   return blocks.map(block => ({ ...block, comunidad }))
 }
 
-function yearsForSubject(subject: SimulacroSubject, difficulty: SimulacroDifficulty) {
-  if (subject === 'biologia') {
-    if (difficulty === 'Fácil') return [2020, 2021]
-    if (difficulty === 'Media') return [2022, 2023]
-    return [2024, 2025]
+// Los tres tramos de años ('Años clásicos'/'intermedios'/'recientes' en la
+// UI, ver YEAR_CHOICES en app/simulacros/page.tsx) se calculan del propio
+// dataset en lugar de ser listas fijas. Antes estaban escritos a mano
+// (Fácil 2015-2018, Media 2019-2022, Difícil 2023-2025) y cada convocatoria
+// nueva que se subía quedaba fuera del tramo "recientes" hasta que alguien
+// se acordaba de tocar esta constante: las de 2026 de Mates, Física,
+// Química, Lengua, Historia, Inglés y Mates CCSS eran inalcanzables salvo
+// con "Todos los años". Al derivarlos de los años que existen de verdad,
+// subir un examen nuevo basta para que entre, y desaparecen también los
+// tramos vacíos o casi vacíos que el rango fijo provocaba (Física "Fácil"
+// solo tenía 2018 real de los cuatro años que prometía).
+const yearTiersCache = new Map<string, Record<SimulacroDifficulty, number[]>>()
+
+function splitYearsIntoTiers(years: number[]): Record<SimulacroDifficulty, number[]> {
+  const sorted = [...new Set(years)].sort((a, b) => a - b)
+  // Con menos de 3 convocatorias no hay tramos que repartir: cualquier
+  // elección usa todo el material disponible en vez de quedarse a cero.
+  if (sorted.length < 3) return { 'Fácil': sorted, 'Media': sorted, 'Difícil': sorted }
+  const recent = Math.ceil(sorted.length / 3)
+  const classic = Math.floor(sorted.length / 3)
+  return {
+    'Fácil': sorted.slice(0, classic),
+    'Media': sorted.slice(classic, sorted.length - recent),
+    'Difícil': sorted.slice(sorted.length - recent),
   }
-  return DIFFICULTIES.find(item => item.id === difficulty)?.years ?? DIFFICULTIES[1].years
+}
+
+// Años con al menos un ejercicio realmente utilizable: se descartan aquí los
+// mismos ejercicios incompletos que descarta generateSimulacro, para que un
+// año presente en el fichero pero sin contenido usable no cree un tramo que
+// luego no genera nada.
+function availableYears(subject: SimulacroSubject, comunidad: string): number[] {
+  if (subject === 'lengua') {
+    return comunidad === 'Cataluña'
+      ? examenesLenguaCataluna.map(exam => exam.anio)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      : examenesLengua.filter((exam: any) => (exam.comunidad ?? 'Madrid') === comunidad).map((exam: any) => exam.año)
+  }
+  return normalizeQuestions(subject, comunidad)
+    .filter(item => !isIncompleteOfficialExercise(item.block))
+    .map(item => item.year)
+}
+
+function yearsForSubject(subject: SimulacroSubject, difficulty: SimulacroDifficulty, comunidad: string) {
+  const key = `${subject}|${comunidad}`
+  let tiers = yearTiersCache.get(key)
+  if (!tiers) {
+    tiers = splitYearsIntoTiers(availableYears(subject, comunidad))
+    yearTiersCache.set(key, tiers)
+  }
+  const tier = tiers[difficulty]
+  // null = sin restricción de año. Un tramo vacío (asignatura con muy pocas
+  // convocatorias) nunca debe traducirse en "cero preguntas".
+  return tier.length ? tier : null
 }
 
 function randomOption(): SimulacroOption {
@@ -548,6 +617,7 @@ function labelFor(subject: SimulacroSubject, theme: string) {
     Pregunta2: 'Pregunta 2',
     Pregunta3: 'Pregunta 3',
     Pregunta4: 'Pregunta 4',
+    Pregunta5: 'Pregunta 5',
     Q1: 'Reading: True / False',
     Q2: 'Reading comprehension',
     Q3: 'Vocabulary',

@@ -43,7 +43,7 @@ const examenesModeloMates: Examen[] = [
   {
     id: 101, año: 2026, tipo: "Modelo", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      preguntaModelo("M2026-P1A", ["el-plano-en-el-espacio","distancias-en-el-espacio","la-recta-en-el-espacio-ecuaciones","angulos-en-el-espacio"], "Pregunta 1", "A", `Un equipo de ingenieros está trabajando en un nuevo modelo de dron para tomar fotografías del estado del tráfico. Elegido un sistema de coordenadas, el dron tiene $A(1,0,2)$ como punto de partida y un cierto tramo de autopista está contenido en el plano $\\pi: x+y+2z+1=0$. Las fotografías se deben tomar perpendicularmente al plano $\\pi$. Se toma el punto $C(0,-3,1)$ de $\\pi$ para calibrar el dron.
+      preguntaModelo("M2026-P1A", ["el-plano-en-el-espacio","distancias-en-el-espacio","la-recta-en-el-espacio-ecuaciones","angulos-en-el-espacio"], "Geometria", "A", `Un equipo de ingenieros está trabajando en un nuevo modelo de dron para tomar fotografías del estado del tráfico. Elegido un sistema de coordenadas, el dron tiene $A(1,0,2)$ como punto de partida y un cierto tramo de autopista está contenido en el plano $\\pi: x+y+2z+1=0$. Las fotografías se deben tomar perpendicularmente al plano $\\pi$. Se toma el punto $C(0,-3,1)$ de $\\pi$ para calibrar el dron.
 
 a) (1 punto) Determine la distancia del dron en el punto de partida $A$ al plano $\\pi$ y halle una ecuación del plano en el que el dron vuela manteniendo en todo momento la misma distancia al plano $\\pi$. Este plano recibe el nombre de plano de vuelo.
 
@@ -52,22 +52,22 @@ b) (1 punto) Responda solo a uno de los dos apartados siguientes:
 b1) El dron se mueve en línea recta en el plano de vuelo desde el punto de partida $A$ al punto más cercano a $C$. Halle una ecuación de la recta que contiene la trayectoria lineal que recorre el dron para fotografiar $C$.
 
 b2) La fotografía obtenida de $C$ a esa distancia no tiene buena definición. Se decide acercar el dron desde el punto de partida $A$ descendiendo perpendicularmente al plano $\\pi$ para situarse en $A'$, a la mitad de la distancia original. Calcule el ángulo formado por el plano $\\pi$ y la recta que pasa por $C$ y $A'$.`, 2),
-      preguntaModelo("M2026-P2A", ["informacion-extraida-de-la-propia-funcion","informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], "Pregunta 2", "A", `Dada $f(x)=\\dfrac{x^2+1}{|x|+1}$, se pide:
+      preguntaModelo("M2026-P2A", ["informacion-extraida-de-la-propia-funcion","informacion-extraida-de-la-1-y-2-derivada","la-integral-definida-regla-de-barrow-y-areas"], "Analisis", "A", `Dada $f(x)=\\dfrac{x^2+1}{|x|+1}$, se pide:
 
 a) (1 punto) Analizar la paridad y los extremos relativos de $f(x)$.
 
 b) (1 punto) Hallar $\\displaystyle\\int_{-1}^{0} f(x)\\,dx$.`, 2),
-      preguntaModelo("M2026-P3A", ["distribucion-binomial-variable-discreta","aproximacion-de-la-binomial-a-la-normal-moivre-gauss"], "Pregunta 3", "A", `Una envasadora de aceitunas comercializa bolsas con 12 aceitunas. La cosecha de este año ha sido atacada por el hongo *Sphaeropsis dalmatica* y una de cada veinte aceitunas presenta la enfermedad escudete. Se pide:
+      preguntaModelo("M2026-P3A", ["distribucion-binomial-variable-discreta","aproximacion-de-la-binomial-a-la-normal-moivre-gauss"], "Probabilidad", "A", `Una envasadora de aceitunas comercializa bolsas con 12 aceitunas. La cosecha de este año ha sido atacada por el hongo *Sphaeropsis dalmatica* y una de cada veinte aceitunas presenta la enfermedad escudete. Se pide:
 
 a) (1 punto) Calcular la probabilidad de que una bolsa no tenga aceitunas con la enfermedad.
 
 b) (1 punto) Los controles sanitarios han fallado y se han distribuido 100 bolsas de aceitunas de esta cosecha. Calcular, aproximando por una distribución normal adecuada, la probabilidad de que al menos el 60% de las bolsas distribuidas tenga alguna aceituna con escudete.`, 2),
-      preguntaModelo("M2026-P4A", ["propiedades-de-la-matriz-traspuesta-a-t","multiplicacion-de-matrices-a-b","potencias-de-matrices-a-n"], "Pregunta 4", "A", `Sean $a\\in\\mathbb{R}$, $A=\\begin{pmatrix}2a&-2\\\\a&1\\end{pmatrix}$ y $B=\\begin{pmatrix}1&2\\\\-1&2\\end{pmatrix}$. Se pide:
+      preguntaModelo("M2026-P4A", ["propiedades-de-la-matriz-traspuesta-a-t","multiplicacion-de-matrices-a-b","potencias-de-matrices-a-n"], "Algebra", "A", `Sean $a\\in\\mathbb{R}$, $A=\\begin{pmatrix}2a&-2\\\\a&1\\end{pmatrix}$ y $B=\\begin{pmatrix}1&2\\\\-1&2\\end{pmatrix}$. Se pide:
 
 a) (1 punto) Calcular, si existen, los valores de $a$ tales que la matriz $AA^t$ sea una matriz diagonal.
 
 b) (1 punto) Calcular, si existen, los valores de $a$ tales que $(A-B)(A+B)=A^2-B^2$.`, 2),
-      preguntaModelo("M2026-P4B", ["teorema-de-rouche-frobenius-discusion","analisis-de-sistemas-por-el-metodo-de-gauss"], "Pregunta 4", "B", `Sea el sistema de ecuaciones
+      preguntaModelo("M2026-P4B", ["teorema-de-rouche-frobenius-discusion","analisis-de-sistemas-por-el-metodo-de-gauss"], "Algebra", "B", `Sea el sistema de ecuaciones
 
 $$\\begin{cases}
 x+2y-z=2\\\\
@@ -78,7 +78,7 @@ x+2y+\\lambda z=2
 a) (1 punto) Discutir el sistema en función del parámetro real $\\lambda$.
 
 b) (1 punto) Resolver el sistema si $\\lambda=-1$.`, 2),
-      preguntaModelo("M2026-P5A", ["continuidad-y-tipos-de-discontinuidad"], "Pregunta 5", "A", `Sea la función
+      preguntaModelo("M2026-P5A", ["continuidad-y-tipos-de-discontinuidad"], "Analisis", "A", `Sea la función
 
 $$f(x)=\\begin{cases}
 \\dfrac{1}{2}(-8+\\cos x), & 0\\leq x<\\dfrac{\\pi}{2}\\\\
@@ -89,7 +89,7 @@ a\\,\\sin(x)+4, & \\dfrac{\\pi}{2}\\leq x<\\pi\\\\
 a) (1 punto) Halle los valores de $a$ y $b$ para que se verifiquen las hipótesis del Teorema de Bolzano en $[0,2\\pi]$.
 
 b) (1 punto) Justifique razonadamente que la función $f(x)$ tiene una única raíz en el intervalo $(0,2\\pi)$ y calcule dicha raíz.`, 2),
-      preguntaModelo("M2026-P5B", ["continuidad-y-tipos-de-discontinuidad","concepto-de-derivada-e-interpretacion-geometrica"], "Pregunta 5", "B", `Se considera la función
+      preguntaModelo("M2026-P5B", ["continuidad-y-tipos-de-discontinuidad","concepto-de-derivada-e-interpretacion-geometrica"], "Analisis", "B", `Se considera la función
 
 $$f(x)=\\begin{cases}
 \\dfrac{\\ln(x^2+1)}{x}, & x\\neq 0\\\\
@@ -661,7 +661,7 @@ export const examenes: Examen[] = [
   {
     id: 26, año: 2026, tipo: "Ordinaria", asignatura: "Matemáticas II", comunidad: "Madrid",
     preguntas: [
-      preguntaModelo("2026-J-1", ["rango-de-una-matriz-metodo-de-gauss","determinantes-de-orden-2-y-3-regla-de-sarrus","despejar-en-ecuaciones-matriciales","calculo-de-la-inversa-por-adjuntos"], "Pregunta 1", "A", `Dada la matriz real
+      preguntaModelo("2026-J-1", ["rango-de-una-matriz-metodo-de-gauss","determinantes-de-orden-2-y-3-regla-de-sarrus","despejar-en-ecuaciones-matriciales","calculo-de-la-inversa-por-adjuntos"], "Algebra", "A", `Dada la matriz real
 
 $$A=\\begin{pmatrix}
 1 & \\lambda-2 & \\lambda\\\\
@@ -674,10 +674,10 @@ se pide:
 a) (1 punto) Discutir el rango de $A$ en función del parámetro $\\lambda$.
 
 b) (1 punto) Para el caso $\\lambda=2$, resolver la ecuación matricial $A^2-AX=I$, donde $I$ es la matriz identidad de orden $3$.`, 2),
-      preguntaModelo("2026-J-2", ["informacion-extraida-de-la-1-y-2-derivada","calculo-de-derivadas-y-regla-de-la-cadena"], "Pregunta 2", "A", `(2 puntos) Se quiere enlosar un jardín con forma de triángulo rectángulo de catetos $42$ m y $56$ m. Dentro del jardín se va a diferenciar un espacio rectangular techado de forma que dos de sus lados sean paralelos a los catetos del triángulo, un vértice coincida con el vértice del ángulo recto del triángulo y el vértice opuesto esté sobre su hipotenusa.
+      preguntaModelo("2026-J-2", ["informacion-extraida-de-la-1-y-2-derivada","calculo-de-derivadas-y-regla-de-la-cadena"], "Analisis", "A", `(2 puntos) Se quiere enlosar un jardín con forma de triángulo rectángulo de catetos $42$ m y $56$ m. Dentro del jardín se va a diferenciar un espacio rectangular techado de forma que dos de sus lados sean paralelos a los catetos del triángulo, un vértice coincida con el vértice del ángulo recto del triángulo y el vértice opuesto esté sobre su hipotenusa.
 
 Alicatar la parte cubierta cuesta $30$ €/m² y la parte no techada, $50$ €/m², pues las baldosas llevan un tratamiento especial resistente al agua. Calcule las dimensiones de la parte techada que hacen que el coste de instalar el suelo en el jardín sea mínimo.`, 2),
-      preguntaModelo("2026-J-3", ["proyecciones-ortogonales-y-puntos-simetricos","el-plano-en-el-espacio","la-recta-en-el-espacio-ecuaciones","distancias-en-el-espacio"], "Pregunta 3", "A", `Dados el plano $\\pi: 2x+2y-z=13$ y la recta
+      preguntaModelo("2026-J-3", ["proyecciones-ortogonales-y-puntos-simetricos","el-plano-en-el-espacio","la-recta-en-el-espacio-ecuaciones","distancias-en-el-espacio"], "Geometria", "A", `Dados el plano $\\pi: 2x+2y-z=13$ y la recta
 
 $$r\\equiv\\dfrac{x-2}{1}=\\dfrac{y}{1}=\\dfrac{z}{4}$$
 
@@ -688,18 +688,18 @@ b) (1 punto) Responda solo a uno de los dos apartados siguientes:
 b1) Halle la distancia entre el plano $\\pi$ y la recta $r$.
 
 b2) Halle una ecuación del plano que contiene a la recta $r$ y es ortogonal al plano $\\pi$.`, 2),
-      preguntaModelo("2026-J-41", ["distribucion-normal-y-tipificacion","distribucion-binomial-variable-discreta"], "Pregunta 4", "A", `El proveedor de una fábrica de móviles proporciona baterías cuya duración sigue una distribución normal con media $\\mu=24$ horas y desviación típica $\\sigma=3$ horas. A efectos de control de calidad, se considera que una batería es defectuosa si su duración es inferior a $21$ horas.
+      preguntaModelo("2026-J-41", ["distribucion-normal-y-tipificacion","distribucion-binomial-variable-discreta"], "Probabilidad", "A", `El proveedor de una fábrica de móviles proporciona baterías cuya duración sigue una distribución normal con media $\\mu=24$ horas y desviación típica $\\sigma=3$ horas. A efectos de control de calidad, se considera que una batería es defectuosa si su duración es inferior a $21$ horas.
 
 a) (1 punto) Se elige un teléfono al azar de la línea de producción. Calcule la probabilidad de que su batería sea considerada defectuosa.
 
 b) (1 punto) Un distribuidor recibe un lote de $10$ teléfonos. Suponiendo independencia entre ellos, ¿cuál es la probabilidad de que en ese lote haya al menos $9$ teléfonos con la batería no defectuosa?`, 2),
-      preguntaModelo("2026-J-42", ["algebra-de-sucesos-y-tipos-de-experimentos","definicion-axiomatica-de-probabilidad-kolmogorov"], "Pregunta 4", "B", `Sabiendo que $P(B)=0{,}4$, $P(\\overline{A\\cup B})=0{,}4$ y $P(B|A)=0{,}2$, calcule las siguientes probabilidades:
+      preguntaModelo("2026-J-42", ["algebra-de-sucesos-y-tipos-de-experimentos","definicion-axiomatica-de-probabilidad-kolmogorov"], "Probabilidad", "B", `Sabiendo que $P(B)=0{,}4$, $P(\\overline{A\\cup B})=0{,}4$ y $P(B|A)=0{,}2$, calcule las siguientes probabilidades:
 
 a) (1 punto) $P(A)$ y $P(A\\cap B)$.
 
 b) (1 punto) $P((A\\cap B)|(A\\cup B))$.`, 2),
-      preguntaModelo("2026-J-51", ["la-integral-definida-regla-de-barrow-y-areas","metodos-de-integracion"], "Pregunta 5", "A", `(2 puntos) Sea $f(x)=\\ln(x)$. Halle el área de la región acotada por la gráfica de $f(x)$, el eje de abscisas y la recta $x=e$.`, 2),
-      preguntaModelo("2026-J-52", ["continuidad-y-tipos-de-discontinuidad","concepto-de-derivada-e-interpretacion-geometrica","calculo-de-derivadas-y-regla-de-la-cadena"], "Pregunta 5", "B", `Sea la función
+      preguntaModelo("2026-J-51", ["la-integral-definida-regla-de-barrow-y-areas","metodos-de-integracion"], "Analisis", "A", `(2 puntos) Sea $f(x)=\\ln(x)$. Halle el área de la región acotada por la gráfica de $f(x)$, el eje de abscisas y la recta $x=e$.`, 2),
+      preguntaModelo("2026-J-52", ["continuidad-y-tipos-de-discontinuidad","concepto-de-derivada-e-interpretacion-geometrica","calculo-de-derivadas-y-regla-de-la-cadena"], "Analisis", "B", `Sea la función
 
 $$f(x)=\\begin{cases}
 3x^2-\\operatorname{sen}(ax)+b & \\text{si } x<0\\\\[4pt]

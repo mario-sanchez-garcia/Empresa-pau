@@ -1141,7 +1141,11 @@ export default function CaminoCalendarClient() {
   const [subjectProgress, setSubjectProgress] = useState<Record<string, number>>({})
   const [blockCompletedCount, setBlockCompletedCount] = useState(0)
   const [daysSinceReg, setDaysSinceReg] = useState<number | null>(null)
-  const [caminoReadyStatus, setCaminoReadyStatus] = useState<'checking' | 'no_queue' | 'no_future' | 'ready'>('checking')
+  const [caminoReadyStatus, setCaminoReadyStatus] = useState<'checking' | 'no_queue' | 'no_future' | 'ready' | 'load_error'>('checking')
+  // Se incrementa para releer el Camino sin recargar la página: cuando la
+  // sesión llega tarde (ver el efecto de carga inicial) y cuando el alumno
+  // pulsa "Reintentar" tras un fallo de red.
+  const [reloadEpoch, setReloadEpoch] = useState(0)
   const [isGenerating, setIsGenerating] = useState(false)
   const [showNotSeenConfirm, setShowNotSeenConfirm] = useState(false)
   const [markNotSeenBusy, setMarkNotSeenBusy] = useState(false)
@@ -1387,9 +1391,29 @@ export default function CaminoCalendarClient() {
       setWeeklyExamsCompleted((examsWeekResult as { count: number | null }).count ?? 0)
     }).catch(() => {
       recordCalendarSource('server_error', 'initial_load', { weekStart: currentWeekStartISO(), reason: 'initial_load_failed' })
+      // Sin esto el estado se quedaba en 'checking' para siempre y el alumno
+      // veía el hub vacío sin saber que había fallado nada.
+      if (!cancelled) setCaminoReadyStatus(previo => (previo === 'checking' ? 'load_error' : previo))
     })
     return () => { cancelled = true }
-  }, [])
+  }, [reloadEpoch])
+
+  // supabase restaura el token desde localStorage de forma asíncrona, así que
+  // getSession() puede resolver con session:null en una pestaña recién abierta
+  // aunque el alumno esté perfectamente logueado. El efecto de arriba salía en
+  // ese caso por `if (!userId) return` y, al tener dependencias vacías, no se
+  // volvía a ejecutar nunca: caminoReadyStatus se quedaba en 'checking', el
+  // calendario vacío, y el hub se pintaba como si no hubiera Camino
+  // ("Completa tu perfil para empezar" y "Repaso libre" los siete días) hasta
+  // que el alumno recargaba a mano una o varias veces. Aquí esperamos a que la
+  // sesión aparezca y releemos solo, sin recargar la página.
+  useEffect(() => {
+    if (caminoReadyStatus !== 'checking') return
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user?.id) setReloadEpoch(n => n + 1)
+    })
+    return () => subscription.unsubscribe()
+  }, [caminoReadyStatus])
 
   useEffect(() => {
     if (caminoReadyStatus !== 'no_future') return
@@ -2380,6 +2404,33 @@ export default function CaminoCalendarClient() {
   if (onboarding === null || !hasProfile) return onboardingChecked ? null : <CaminoSkeleton />
 
   const HF_LIBRARY = 'https://d8j0ntlcm91z4.cloudfront.net/user_3FE1qfsmGuEldtlzta7SsGkWNIV/hf_20260727_125452_25c3d09d-ecc3-4e9b-8a16-773cfeb46a83.png'
+
+  // Mientras no sabemos si hay Camino, esqueleto. Antes 'checking' no tenía
+  // guarda y caía al render completo del hub con el calendario todavía vacío,
+  // que es exactamente el estado terminal de "no hay nada": misión 01
+  // "Completa tu perfil para empezar" y los siete días en "Repaso libre". Un
+  // alumno con 1795 XP y su plan hecho veía eso y recargaba hasta que colaba.
+  if (caminoReadyStatus === 'checking') return <CaminoSkeleton />
+
+  if (caminoReadyStatus === 'load_error') return (
+    <Shell>
+      <main style={{ position: 'relative', height: '100vh', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <img src={HF_LIBRARY} alt="" loading="eager" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 35%' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(5,12,26,0.92) 0%, rgba(5,12,26,0.68) 50%, rgba(5,12,26,0.88) 100%)' }} />
+        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '48px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <p style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.22em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: 20 }}>Camino PAU · Kairo</p>
+          <h1 style={{ fontSize: 52, fontWeight: 900, color: '#fff', letterSpacing: '-.04em', lineHeight: .88, marginBottom: 18 }}>No hemos<br/>podido cargar<br/>tu Camino.</h1>
+          <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,.5)', lineHeight: 1.6, maxWidth: 360, marginBottom: 32 }}>Tu plan y tu progreso están a salvo: solo ha fallado la conexión al cargarlos.</p>
+          <button
+            onClick={() => { setCaminoReadyStatus('checking'); setReloadEpoch(n => n + 1) }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#2563eb', color: '#fff', border: 'none', borderRadius: 10, padding: '14px 26px', fontSize: 13, fontWeight: 900, cursor: 'pointer', boxShadow: '0 12px 32px rgba(37,99,235,.4)', letterSpacing: '-.01em' }}
+          >
+            Reintentar <ArrowRight size={16} />
+          </button>
+        </div>
+      </main>
+    </Shell>
+  )
 
   if (caminoReadyStatus === 'no_queue' && onboardingChecked && !hasProfile) {
     router.push('/onboarding')

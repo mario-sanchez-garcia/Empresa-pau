@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser, createServiceClient } from '@/app/lib/billing/supabase'
 import { grantCourtesyAccessIfEligible } from '@/app/lib/billing/betaCourtesyAccess'
+import { grantAutoAccessIfEligible } from '@/app/lib/billing/autoTrialAccess'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,6 +35,10 @@ export async function GET(request: NextRequest) {
   let active = entitlements ?? []
   if (active.length === 0) {
     const granted = await grantCourtesyAccessIfEligible(db, userId, data.user.email)
+    if (granted) active = [granted]
+  }
+  if (active.length === 0) {
+    const granted = await grantAutoAccessIfEligible(db, userId)
     if (granted) active = [granted]
   }
 

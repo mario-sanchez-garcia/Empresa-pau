@@ -201,10 +201,18 @@ test('la disponibilidad excepcional es del alumno, no de un paso', () => {
 
 test('el tope comercial de días forma parte de la disponibilidad efectiva', () => {
   const loader = stripComments(read('camino/studentPlanContext.ts')).replace(/\s+/g, ' ')
-  assert.ok(loader.includes('getCaminoPlanLimits('), 'el contexto ignora el tope del plan comercial')
-  // Se comprueba que el tope SE APLICA, no cómo se escribe: el valor por
-  // defecto cuando el alumno no declara nada es una decisión aparte.
-  assert.ok(/Math\.min\(requestedWeekly[^)]*, maxWeeklyDays\)/.test(loader), 'el tope no se aplica al patrón semanal')
+  assert.ok(loader.includes('loadStudyAccess('), 'el contexto ignora el acceso comercial del alumno')
+  // El tope SE APLICA (el plan nunca usa más días de los que da el acceso)…
+  assert.ok(
+    /weeklyStudyDays: effectiveWeekly/.test(loader) && /access\.maxStudyDaysPerWeek/.test(loader),
+    'el tope no se aplica al patrón semanal',
+  )
+  // …pero NO en silencio: lo pedido viaja para poder decírselo al alumno.
+  assert.ok(loader.includes('availabilityExceedsAccess'), 'el recorte vuelve a ser invisible para el alumno')
+  // Y NUNCA lanzando: esta es una lectura, y la llaman ensureCaminoCalendar,
+  // los inyectores y la personalización. Un alumno free con 5 días guardados
+  // del selector antiguo se quedaba sin Camino ninguno.
+  assert.ok(!/if \(invalid\) throw/.test(loader), 'la carga del contexto vuelve a lanzar por disponibilidad guardada')
 })
 
 test('"no cabe" significa que se agotaron los días, no que falló el primero', () => {
@@ -214,7 +222,7 @@ test('"no cabe" significa que se agotaron los días, no que falló el primero', 
     /if \(!timeSlot\) continue/.test(code),
     'un día sin hueco horario vuelve a abandonar la misión en vez de probar el siguiente',
   )
-  assert.ok(code.includes('for (const date of eligibleDatesFor('), 'no se recorren todas las fechas elegibles')
+  assert.ok(code.includes('for (const date of preferredDatesFor('), 'no se recorren todas las fechas elegibles')
   // Y la lista de candidatas no se recorta al mínimo necesario.
   assert.ok(code.includes('MAX_CANDIDATE_DAYS'), 'la ventana candidata sigue recortada al mínimo de filas')
 })
@@ -240,7 +248,7 @@ test('la personalización usa las reglas del módulo puro, no unas propias', () 
   // datos. Aquí solo se fija que la personalización no vuelva a decidirlo por
   // su cuenta y que le pase el corte de temario nuevo, no solo el examen.
   const code = stripComments(read('camino/applyCalendarPersonalization.ts')).replace(/\s+/g, ' ')
-  for (const rule of ['eligibleDatesFor(', 'orderRowsForPlacement(', 'unscheduledReasonFor(']) {
+  for (const rule of ['preferredDatesFor(', 'orderRowsForPlacement(', 'unscheduledReasonFor(']) {
     assert.ok(code.includes(rule), `la personalización no usa la regla compartida ${rule}`)
   }
   assert.ok(code.includes('planningCutoff: context.planningCutoff'), 'no le pasa el corte de temario nuevo')

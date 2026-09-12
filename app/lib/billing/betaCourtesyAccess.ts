@@ -35,6 +35,7 @@ export interface CourtesyEntitlement {
   started_at: string
   expires_at: string | null
   source: string
+  metadata: Record<string, unknown> | null
 }
 
 // Call only when the caller has already confirmed there is no active
@@ -57,9 +58,12 @@ export async function grantCourtesyAccessIfEligible(
       status: 'active',
       started_at: BETA_COURTESY_STARTED_AT,
       expires_at: BETA_COURTESY_EXPIRES_AT,
-      metadata: { note: 'Cortesía beta 5 personas — concedido automáticamente en el primer login' },
+      // beta_cohort es lo que lee resolveStudyAccess para etiquetar el acceso
+      // como beta en la interfaz. Sin él, un acceso de cortesía se presentaba
+      // al alumno como si fuera un plan comprado.
+      metadata: { beta_cohort: true, note: 'Cortesía beta 5 personas — concedido automáticamente en el primer login' },
     })
-    .select('id, plan_id, status, started_at, expires_at, source')
+    .select('id, plan_id, status, started_at, expires_at, source, metadata')
     .single()
 
   if (error) {

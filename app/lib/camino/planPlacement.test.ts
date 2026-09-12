@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { isNewContent, planPlacement, type PlacementRow, type PlacementWindow } from './planPlacement.ts'
+import { isNewContent, orderRowsForPlacement, planPlacement, type PlacementRow, type PlacementWindow } from './planPlacement.ts'
 
 const row = (id: string, missionType: string, scheduledDate = '2026-05-20'): PlacementRow =>
   ({ id, missionType, scheduledDate, queueId: `q-${id}` })
@@ -151,4 +151,70 @@ test('la agenda llena no cambia el motivo cuando el problema es la fecha', () =>
   const late = row('tarde', 'review', '2026-06-20')
   const { unscheduled } = planPlacement([late], WINDOW, () => false)
   assert.deepEqual(unscheduled.map(u => u.reason), ['after_exam'])
+})
+
+// ── Parciales: plazo propio y presupuesto compartido ───────────────────────
+//
+// Reproducción del caso que motivó este bloque: el alumno tiene la
+// preparación de un parcial el MARTES y cambia su disponibilidad a lunes y
+// jueves. El martes deja de existir como día de estudio, así que esa misión
+// no puede seguir ahí — o se recoloca en un día válido anterior al examen, o
+// se dice que no cabe. Lo que no vale es dejarla donde estaba.
+
+const partial = (id: string, deadlineDate: string, scheduledDate: string): PlacementRow =>
+  ({ id, missionType: 'exercise_practice', scheduledDate, source: 'partial', deadlineDate, queueId: null })
+
+/** Ventana de quien estudia LUNES y JUEVES. El martes no aparece. */
+const LUN_JUE: PlacementWindow = {
+  dates: ['2026-05-11', '2026-05-14', '2026-05-18', '2026-05-21'],
+  capacityPerDay: 2,
+  planningCutoff: '2026-06-01',
+  examDate: '2026-06-07',
+}
+
+test('el parcial del martes se recoloca cuando el alumno pasa a lunes y jueves', () => {
+  // Examen el viernes 15: el lunes 11 y el jueves 14 siguen sirviendo.
+  const row = partial('p1', '2026-05-15', '2026-05-12')
+  const { placements, unscheduled } = planPlacement([row], LUN_JUE)
+  assert.equal(unscheduled.length, 0)
+  assert.equal(placements.length, 1)
+  assert.notEqual(placements[0].date, '2026-05-12', 'sigue en el martes, que ya no es día de estudio')
+  assert.ok(LUN_JUE.dates.includes(placements[0].date), 'aterriza en un día que el alumno no estudia')
+  assert.ok(placements[0].date < '2026-05-15', 'colocado después de su propio examen')
+})
+
+test('un parcial ya colocado en un día válido no se mueve', () => {
+  // Estabilidad: cambiar de días no debe bailar lo que seguía bien puesto.
+  const row = partial('p2', '2026-05-15', '2026-05-14')
+  const { placements } = planPlacement([row], LUN_JUE)
+  assert.equal(placements[0].date, '2026-05-14')
+})
+
+test('si su examen ya no alcanza ningún día de estudio, se dice con su propio motivo', () => {
+  // Examen el martes 12: con lunes/jueves solo quedaría el lunes 11… que sí
+  // vale. Se usa un examen anterior al primer día disponible.
+  const row = partial('p3', '2026-05-11', '2026-05-12')
+  const { placements, unscheduled } = planPlacement([row], LUN_JUE)
+  assert.equal(placements.length, 0)
+  assert.equal(unscheduled[0].reason, 'partial_deadline',
+    'un parcial vencido no puede justificarse como "no hay hueco" ni como "después de la PAU"')
+})
+
+test('el parcial compite por el MISMO presupuesto diario que el temario', () => {
+  // El alumno declaró 1 misión al día. Ese día hay un parcial y una lección:
+  // no pueden caber los dos, o le estamos inventando tiempo que no tiene.
+  const onePerDay: PlacementWindow = { ...LUN_JUE, capacityPerDay: 1 }
+  const rows = [partial('p4', '2026-05-15', '2026-05-11'), row('c1', 'concept', '2026-05-11')]
+  const { placements } = planPlacement(rows, onePerDay)
+  const lunes = placements.filter(p => p.date === '2026-05-11')
+  assert.equal(lunes.length, 1, 'dos misiones en un día de capacidad 1')
+  assert.equal(lunes[0].id, 'p4', 'el parcial, con plazo más corto, es el que se queda')
+  // La lección NO desaparece ni se vuelve opcional: se va a otro día.
+  const leccion = placements.find(p => p.id === 'c1')
+  assert.ok(leccion && leccion.date !== '2026-05-11', 'la lección se perdió en vez de desplazarse')
+})
+
+test('el parcial se sirve antes que el temario nuevo aunque llegue después en la lista', () => {
+  const rows = [row('c2', 'concept', '2026-05-11'), partial('p5', '2026-05-15', '2026-05-11')]
+  assert.equal(orderRowsForPlacement(rows)[0].id, 'p5')
 })

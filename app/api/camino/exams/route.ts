@@ -7,6 +7,10 @@ import { normalizeSubjectSlug, subjectLabelFromSlug } from '@/app/lib/camino/cam
 import { injectAllPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { syncKairoMissionsToGoogle } from '@/app/lib/calendar/sync'
 
+import { loadStudentPlanContext } from '@/app/lib/camino/studentPlanContext'
+import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
+import { withPlanLock, PlanBusyError } from '@/app/lib/camino/planPersistence'
+
 export const dynamic = 'force-dynamic'
 
 function cleanString(value: unknown, max = 160) {
@@ -28,6 +32,7 @@ export async function POST(request: NextRequest) {
     if (!topic) return NextResponse.json({ error: 'exam_topic_required' }, { status: 400 })
 
     const db = checkedDb(createServiceClient())
+    return await withPlanLock(db, auth.user.id, async () => {
     const { data: profile, error: profileError } = await db
       .from('perfiles')
       .select('subjects, student_exams')
@@ -63,7 +68,10 @@ export async function POST(request: NextRequest) {
     if (updateError) throw updateError
 
     try {
-      await injectAllPartialExamMissions(auth.user.id, db, next)
+      const planContext = await loadStudentPlanContext(auth.user.id, db)
+      await injectAllPartialExamMissions(auth.user.id, db, next, { planContext })
+      const personalized = await applyCalendarPersonalization(auth.user.id, db, { planContext, force: true })
+      if (personalized.reason === 'error') throw new Error('partial_personalization_failed')
     } catch (error) {
       await db.from('perfiles').update({ student_exams: previous }).eq('id', auth.user.id)
       throw error
@@ -81,8 +89,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, persisted: true, exam, calendarSync, error: 'google_sync_failed' }, { status: 502 })
     }
     return NextResponse.json({ ok: true, persisted: true, exam, calendarSync })
+    })
   } catch (error) {
     console.error('[camino/exams]', error)
-    return NextResponse.json({ error: 'No se pudo añadir el examen. Reintentar.' }, { status: 500 })
+    return NextResponse.json({ error: 'No se pudo añadir el examen. Reintentar.' }, { status: error instanceof PlanBusyError ? 409 : 503 })
   }
 }

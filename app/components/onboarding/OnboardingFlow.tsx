@@ -7,6 +7,8 @@ import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Check, Eye, EyeOff, Lock, Plus, Search, Trash2 } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
+import { useStudyAccess } from '@/app/hooks/useStudyAccess'
+import { availabilityError, studyDayOptions } from '@/app/lib/camino/studyAccess'
 import { validateUsername } from '@/app/lib/username'
 import { isPasswordLongEnough, MIN_PASSWORD_LENGTH } from '@/app/lib/auth/passwordPolicy'
 import { CENTROS_MADRID } from '@/app/data/centros_madrid'
@@ -169,16 +171,6 @@ const TIME_OPTS = [
   { label: DAILY_MINUTES_LABELS[90], minutes: 90 },
   { label: DAILY_MINUTES_LABELS[150], minutes: 150 },
   { label: DAILY_MINUTES_LABELS[180], minutes: 180 },
-  { label: 'Depende del día', minutes: null },
-]
-
-const WEEKLY_DAY_OPTS = [
-  { label: '2-3 días', value: 3 },
-  { label: '3-4 días', value: 4 },
-  { label: '4-5 días', value: 5 },
-  { label: '5-6 días', value: 6 },
-  { label: 'Todos los días', value: 7 },
-  { label: 'Depende de la semana', value: null },
 ]
 
 const GRADE_THRESHOLD_OPTS = [4, 5, 6, 7, 8]
@@ -254,6 +246,7 @@ const BASE_CSS = `
 `
 
 export default function OnboardingFlow() {
+  const { access: studyAccess, error: studyAccessError } = useStudyAccess()
   const router = useRouter()
   const searchParams = useSearchParams()
   const isPreview = searchParams.get('preview') === '1'
@@ -524,7 +517,7 @@ export default function OnboardingFlow() {
     }
     if (step === 'feeling') return Boolean(data.preparationFeeling)
     if (step === 'daily-time') return Boolean(data.dailyStudyTime)
-    if (step === 'weekly-days') return Boolean(data.weeklyStudyDays)
+    if (step === 'weekly-days') return Boolean(studyAccess && !availabilityError(data.weeklyStudyDaysValue, data.dailyMinutes, studyAccess))
     return true
   })()
 
@@ -1829,8 +1822,9 @@ export default function OnboardingFlow() {
     if (step === 'weekly-days') {
       return (
         <EditorialGrid cols={2}>
-          {WEEKLY_DAY_OPTS.map(opt => (
-            <EditorialChoice key={opt.label} title={opt.label} selected={data.weeklyStudyDays === opt.label} onClick={() => update({ weeklyStudyDays: opt.label, weeklyStudyDaysValue: opt.value })} />
+          <p>{studyAccessError || (studyAccess ? `${studyAccess.beta ? 'Beta · ' : ''}${studyAccess.label}: hasta ${studyAccess.maxStudyDaysPerWeek} días por semana. El número elegido será el que use tu Camino.` : 'Verificando tu acceso…')}</p>
+          {studyDayOptions(studyAccess?.maxStudyDaysPerWeek ?? 0).map(days => (
+            <EditorialChoice key={days} title={`${days} ${days === 1 ? 'día' : 'días'} por semana`} selected={data.weeklyStudyDaysValue === days} onClick={() => update({ weeklyStudyDays: `${days} días por semana`, weeklyStudyDaysValue: days })} />
           ))}
         </EditorialGrid>
       )

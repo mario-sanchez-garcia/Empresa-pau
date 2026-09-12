@@ -47,6 +47,15 @@ export type StudentPlanContext = {
    */
   emergencyAvailability: boolean
   emergencyAvailabilityAccepted: boolean
+  /**
+   * Días que el alumno pidió, cuando su acceso comercial no da para tantos.
+   * El plan se calcula con el tope del acceso (`weeklyStudyDays`), pero lo
+   * pedido viaja para poder DECIRLO en vez de recortar en silencio.
+   */
+  requestedWeeklyStudyDays?: number | null
+  availabilityExceedsAccess?: boolean
+  accessMaxStudyDaysPerWeek?: number
+  accessLabel?: string
 }
 
 /** Opciones de disponibilidad listas para studyCapacity/planEngine. */

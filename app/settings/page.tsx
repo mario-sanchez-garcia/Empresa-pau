@@ -1,5 +1,7 @@
 'use client'
 
+import { useStudyAccess } from '@/app/hooks/useStudyAccess'
+import { availabilityError, studyDayOptions } from '@/app/lib/camino/studyAccess'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Camera, CreditCard, LogOut, Save, Trash2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -84,7 +86,7 @@ const EDUC_LABELS: Record<string, string> = {
 }
 
 const DAILY_MINUTES_OPTIONS = VALID_DAILY_MINUTES
-const WEEKLY_DAYS_OPTIONS = [3, 4, 5, 6, 7]
+
 
 function weeklyDaysLabel(days: number | null) {
   if (!days) return null
@@ -93,6 +95,7 @@ function weeklyDaysLabel(days: number | null) {
 
 
 export default function SettingsPage() {
+  const { access: studyAccess, error: studyAccessError } = useStudyAccess()
   const router = useRouter()
   const { theme } = useClayThemePreference()
   const dark = theme === 'dark'
@@ -389,8 +392,6 @@ export default function SettingsPage() {
           weeklyStudyDays: weeklyDaysLabel(caminoWeeklyDays),
           weeklyStudyDaysValue: caminoWeeklyDays,
         }
-        saveOnboarding(nextOnboarding)
-        setOnboarding(nextOnboarding)
 
         const setupRes = await fetch('/api/onboarding/setup', {
           method: 'POST',
@@ -409,7 +410,10 @@ export default function SettingsPage() {
             onboardingCompleted: true,
           }),
         })
-        if (!setupRes.ok) throw new Error('onboarding_setup_failed')
+        const setupResult = await setupRes.json()
+        if (!setupRes.ok) throw new Error(setupResult.error ?? 'No se pudo guardar tu disponibilidad.')
+        saveOnboarding(nextOnboarding)
+        setOnboarding(nextOnboarding)
 
         // force: el usuario acaba de cambiar días/minutos (o sus instrucciones
         // personalizadas) y espera que sus próximas misiones se reajusten
@@ -429,9 +433,9 @@ export default function SettingsPage() {
           body: JSON.stringify({ force: true }),
         }).catch(() => undefined)
       }
-    } catch {
+    } catch (error) {
       setSaved(false)
-      setSaveError('No se han podido guardar todos los cambios. Revisa la conexión y vuelve a intentarlo.')
+      setSaveError(error instanceof Error ? error.message : 'No se han podido guardar todos los cambios. Revisa la conexión y vuelve a intentarlo.')
     }
   }
 
@@ -750,10 +754,11 @@ export default function SettingsPage() {
               este, y no quedaba claro cuál mandaba de verdad. */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
             <Field label="Días de Camino">
-              <select value={caminoWeeklyDays} onChange={e => setCaminoWeeklyDays(Number(e.target.value))} style={inputStyle}>
-                {WEEKLY_DAYS_OPTIONS.map(days => <option key={days} value={days}>{days} días por semana</option>)}
+              <select disabled={!studyAccess} value={caminoWeeklyDays} onChange={e => setCaminoWeeklyDays(Number(e.target.value))} style={inputStyle}>
+                {(!studyAccess || caminoWeeklyDays > studyAccess.maxStudyDaysPerWeek) && <option value={caminoWeeklyDays}>{caminoWeeklyDays} días guardados · elige un valor permitido</option>}
+                {studyDayOptions(studyAccess?.maxStudyDaysPerWeek ?? 0).map(days => <option key={days} value={days}>{days} días por semana</option>)}
               </select>
-              <Hint>Se aplica a tus próximas misiones. Lo completado no cambia.</Hint>
+              <Hint>{studyAccessError || (studyAccess ? `${studyAccess.beta ? 'Beta · ' : ''}${studyAccess.label}: hasta ${studyAccess.maxStudyDaysPerWeek} días por semana. ${availabilityError(caminoWeeklyDays, caminoDailyMinutes, studyAccess) ?? 'Se aplica a tus próximas misiones.'}` : 'Verificando tu acceso…')}</Hint>
             </Field>
             <Field label="Tiempo disponible al día">
               <select value={caminoDailyMinutes} onChange={e => setCaminoDailyMinutes(Number(e.target.value))} style={inputStyle}>

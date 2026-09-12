@@ -12,6 +12,8 @@ import { buildOnboardingReward, type RewardMissionRow } from '@/app/lib/onboardi
 import { recordBetaMetric } from '@/app/lib/betaMetrics'
 import { extractTraceHeaders, logOnboardingStage } from '@/app/lib/onboarding/onboardingServerLog'
 
+import { loadStudyAccess, availabilityError } from '@/app/lib/camino/studyAccess'
+
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
 
@@ -168,6 +170,11 @@ export async function POST(request: NextRequest) {
     gradeThreshold: cleaned.gradeThreshold,
     subjectGradeThresholds: cleaned.subjectGradeThresholds,
   }
+
+  try {
+    const access = await loadStudyAccess(user.id, db)
+    if (availabilityError(cleaned.weeklyStudyDaysValue, cleaned.dailyMinutes, access)) return fail('invalid_availability')
+  } catch { return fail('study_access_unavailable') }
 
   // ── saving_profile ──────────────────────────────────────────────────────
   if (!(await setStage('saving_profile'))) return NextResponse.json({ status: 'processing' })

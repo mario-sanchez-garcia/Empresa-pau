@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { resolveTargetExamDate } from './examDate'
 import { getMadridToday } from './studyDays'
-import { getCaminoPlanLimits } from './caminoPlanLimits'
+import { loadStudyAccess } from './studyAccess'
 import { buildStudentPlanContext, type StudentPlanContext } from './planWindow'
 
 // Carga desde base de datos de la ventana de planificación del alumno. Las
@@ -45,7 +45,6 @@ export async function loadStudentPlanContext(
   today: string = getMadridToday(),
   declared?: DeclaredAvailability,
 ): Promise<StudentPlanContext> {
-  const nowIso = new Date().toISOString()
   const results = await Promise.all([
     supabase.from('perfiles').select('pau_exam_date, pau_convocatoria').eq('id', userId).maybeSingle(),
     supabase
@@ -56,13 +55,6 @@ export async function loadStudentPlanContext(
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
-    supabase
-      .from('user_entitlements')
-      .select('plan_id')
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
-      .limit(1),
     supabase.from('billing_events').select('payload').eq('user_id', userId)
       .eq('event_type', 'camino_emergency_availability').order('created_at', { ascending: false }).limit(1).maybeSingle(),
   ])
@@ -70,7 +62,7 @@ export async function loadStudentPlanContext(
   for (const result of results) {
     if (result.error) throw new Error(`Plan context read failed: ${result.error.message}`)
   }
-  const [{ data: profile }, { data: prefsRow }, { data: entitlements }, { data: exception }] = results
+  const [{ data: profile }, { data: prefsRow }, { data: exception }] = results
   const examDate = resolveTargetExamDate(today, {
     examDate: (profile?.pau_exam_date as string | null | undefined) ?? null,
     convocatoria: (profile?.pau_convocatoria as string | null | undefined) ?? null,
@@ -86,18 +78,36 @@ export async function loadStudentPlanContext(
   const persistedWeekly = typeof rawWeekly === 'number' && rawWeekly > 0 ? rawWeekly : null
   const persistedMinutes = typeof rawMinutes === 'number' ? rawMinutes : null
 
-  // El tope del plan comercial forma parte de la disponibilidad EFECTIVA, no
-  // es una regla aparte. Cuando solo lo aplicaba la personalización, el motor
-  // planificaba con 7 días y la personalización reubicaba con 2: dos capas del
-  // mismo plan con disponibilidades distintas.
-  const maxWeeklyDays = getCaminoPlanLimits(entitlements?.[0]?.plan_id ?? null).maxStudyDaysPerWeek
-  const requestedWeekly = declared?.weeklyStudyDays ?? persistedWeekly
+  const access = await loadStudyAccess(userId, supabase)
+  const requestedWeekly = declared?.weeklyStudyDays ?? persistedWeekly ?? access.maxStudyDaysPerWeek
+  const dailyMinutes = declared?.dailyMinutes ?? persistedMinutes ?? 60
 
-  return buildStudentPlanContext({
-    today,
-    examDate,
-    emergencyAvailabilityAccepted: exception?.payload?.exam_date === examDate && exception?.payload?.accepted === true,
-    weeklyStudyDays: Math.min(requestedWeekly ?? 5, maxWeeklyDays),
-    dailyMinutes: declared?.dailyMinutes ?? persistedMinutes,
-  })
+  // Esta función es de LECTURA, y la llaman ensureCaminoCalendar, los
+  // inyectores de repaso y diagnóstico, la práctica de bloque y la
+  // repersonalización. Lanzar aquí porque lo guardado no encaja con el acceso
+  // actual deja al alumno SIN Camino ninguno, y la población afectada no es
+  // marginal: todo alumno free que eligió 3-7 días con el selector antiguo
+  // (free permite 2), y cualquiera cuyo acceso caduque o se degrade.
+  //
+  // Así que aquí se acota, pero NO en silencio: el contexto viaja diciendo
+  // qué pidió el alumno y que su acceso no da para tanto, y quien pinta
+  // interfaz lo dice con esas palabras. El rechazo vive en los caminos de
+  // ESCRITURA (onboarding/setup y finalize), que es donde el alumno todavía
+  // puede elegir otra cosa.
+  const exceedsAccess = typeof requestedWeekly === 'number' && requestedWeekly > access.maxStudyDaysPerWeek
+  const effectiveWeekly = exceedsAccess ? access.maxStudyDaysPerWeek : requestedWeekly
+
+  return {
+    ...buildStudentPlanContext({
+      today,
+      examDate,
+      emergencyAvailabilityAccepted: exception?.payload?.exam_date === examDate && exception?.payload?.accepted === true,
+      weeklyStudyDays: effectiveWeekly,
+      dailyMinutes,
+    }),
+    requestedWeeklyStudyDays: typeof requestedWeekly === 'number' ? requestedWeekly : null,
+    availabilityExceedsAccess: exceedsAccess,
+    accessMaxStudyDaysPerWeek: access.maxStudyDaysPerWeek,
+    accessLabel: access.label,
+  }
 }

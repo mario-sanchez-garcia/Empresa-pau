@@ -8,18 +8,18 @@ import { estimatedMinutesForMission } from './missionDuration'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { getMadridToday } from './studyDays'
-import { getCaminoPlanLimits } from './caminoPlanLimits'
+import { canRepositionAutomatically } from './automaticPlacement'
 import { VALID_DAILY_MINUTES, missionsPerDayForMinutes, estimatedMinutesForSlot } from './dailyTimeCapacity'
 import { createDayScheduler } from './scheduleTimeSlot'
 import { loadStudentPlanContext, planningDates, type DeclaredAvailability, type StudentPlanContext } from './studentPlanContext'
-import { eligibleDatesFor, orderRowsForPlacement, unscheduledReasonFor, type PlacementRow, type PlacementWindow } from './planPlacement'
+import { orderRowsForPlacement, preferredDatesFor, unscheduledReasonFor, type PlacementRow, type PlacementWindow } from './planPlacement'
 
 const VALID_WEEKLY_DAYS = [1, 2, 3, 4, 5, 6, 7] as const
 // v3: la colocación cambió de algoritmo (dos ventanas — temario nuevo y
 // repaso —, reintento sobre todos los días elegibles y estado explícito para
 // lo que no cabe). Sin subir la versión, las filas con el hash anterior salían
 // por `already_current` y nunca llegaban a pasar por las reglas nuevas.
-const PERSONALIZATION_VERSION = 'calendar_personalization_v4'
+const PERSONALIZATION_VERSION = 'calendar_personalization_v5'
 
 type PersonalizationPrefs = {
   weeklyStudyDaysValue: number
@@ -28,6 +28,9 @@ type PersonalizationPrefs = {
 
 type CalendarRow = {
   id: string
+  source: string
+  start_time: string | null
+  end_time: string | null
   scheduled_date: string
   subject: string
   v2_sort_order: number | null
@@ -79,26 +82,6 @@ function metadataObject(value: Record<string, unknown> | null | undefined) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : {}
 }
 
-// El plan gratuito anuncia "solo 2 días de estudio por semana" pero nada
-// comprobaba esto server-side: un alumno free podía elegir "7 días" en el
-// onboarding (una opción válida del formulario) y el generador se lo
-// respetaba igual que a un alumno de pago. Aquí es donde se aplica el tope
-// real de cada plan, el mismo maxStudyDaysPerWeek que ya usa el cliente en
-// CaminoCalendarClient.tsx — para que el límite exista de verdad, no solo
-// en la vista previa local.
-async function loadPlanMaxWeeklyDays(userId: string, supabase: SupabaseClient): Promise<number> {
-  const now = new Date().toISOString()
-  const { data } = await supabase
-    .from('user_entitlements')
-    .select('plan_id')
-    .eq('user_id', userId)
-    .eq('status', 'active')
-    .or(`expires_at.is.null,expires_at.gt.${now}`)
-    .limit(1)
-  const planId = data?.[0]?.plan_id ?? null
-  return getCaminoPlanLimits(planId).maxStudyDaysPerWeek
-}
-
 async function loadPreferences(
   userId: string,
   supabase: SupabaseClient,
@@ -122,8 +105,7 @@ async function loadPreferences(
   const dailyMinutes = cleanDailyMinutes(declared?.dailyMinutes ?? payload?.daily_minutes)
   if (!requestedWeeklyDays || !dailyMinutes) return null
 
-  const maxWeeklyDays = await loadPlanMaxWeeklyDays(userId, supabase)
-  const weeklyStudyDaysValue = Math.min(requestedWeeklyDays, maxWeeklyDays)
+  const weeklyStudyDaysValue = requestedWeeklyDays
   return { weeklyStudyDaysValue, dailyMinutes }
 }
 
@@ -185,13 +167,13 @@ export async function applyCalendarPersonalization(
     )
     const rows = (await readAllRows<CalendarRow>((from, to) => supabase
       .from('camino_calendar')
-      .select('id, scheduled_date, subject, v2_sort_order, status, locked, metadata, created_at, updated_at, mission_type, queue_id')
+      .select('id, source, start_time, end_time, scheduled_date, subject, v2_sort_order, status, locked, metadata, created_at, updated_at, mission_type, queue_id')
       .eq('user_id', userId)
       .or(`scheduled_date.gte.${today},status.eq.unscheduled`)
       .in('status', ['pending', 'postponed', 'unscheduled'])
-      .eq('source', 'algorithm')
+      .in('source', ['algorithm', 'partial'])
       .order('scheduled_date', { ascending: true }).order('id', { ascending: true })
-      .range(from, to))).filter(row => !row.locked)
+      .range(from, to))).filter(canRepositionAutomatically)
     if (rows.length === 0) return { applied: false, reason: 'no_rows', updatedRows: 0, preferenceHash }
 
     const alreadyCurrent = rows.every(row => {
@@ -243,14 +225,23 @@ export async function applyCalendarPersonalization(
       scheduledDate: row.scheduled_date,
       missionType: missionTypeOf(row),
       queueId: row.queue_id,
+      source: row.source,
+      deadlineDate: typeof metadataObject(row.metadata).partial_exam_date === 'string'
+        ? String(metadataObject(row.metadata).partial_exam_date) : null,
       row,
     }))
 
+    // El ORDEN y las FECHAS ELEGIBLES de cada fila —parciales incluidos— los
+    // decide planPlacement.ts, puro y con tests. Aquí solo se ejecuta contra
+    // el scheduler real.
     for (const candidate of orderRowsForPlacement(placementRows)) {
       const row = candidate.row
       const meta = metadataObject(row.metadata)
-      for (const date of eligibleDatesFor(candidate.missionType, window)) {
+      for (const date of preferredDatesFor(candidate, window)) {
         const slot = used.get(date) ?? 0
+        // Los parciales cuentan igual que todo lo demás. Eximirlos del
+        // contador es crear tiempo que el alumno no tiene: declaró 60 minutos
+        // y acababa con la lección del día MÁS la preparación del examen.
         if (slot >= capacity) continue
         const scheduler = await schedulerFor(date)
         const duration = candidate.missionType === 'concept' || candidate.missionType === 'review'
@@ -260,7 +251,7 @@ export async function applyCalendarPersonalization(
           date,
           subject: row.subject,
           missionType: candidate.missionType,
-          deadlineDate: typeof meta.partial_exam_date === 'string' ? meta.partial_exam_date : null,
+          deadlineDate: candidate.deadlineDate,
           priority: typeof meta.priority === 'string' ? meta.priority : null,
         })
         // La agenda propia del alumno (clase, extraescolares) llena este día:

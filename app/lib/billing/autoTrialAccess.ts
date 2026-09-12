@@ -33,6 +33,7 @@ export interface AutoGrantedEntitlement {
   started_at: string
   expires_at: string | null
   source: string
+  metadata: Record<string, unknown>
 }
 
 // Llamar solo cuando el caller ya confirmó que no hay entitlement activa
@@ -55,7 +56,7 @@ export async function grantAutoAccessIfEligible(
         expires_at: getPremiumFreeBetaDeadline().toISOString(),
         metadata: { note: 'Premium gratis durante la beta pública (promo con fecha límite, sin Stripe)' },
       })
-      .select('id, plan_id, status, started_at, expires_at, source')
+      .select('id, plan_id, status, started_at, expires_at, source, metadata')
       .single()
     if (error) {
       console.error('[autoTrialAccess] promo grant failed:', error.message)
@@ -96,7 +97,7 @@ export async function grantAutoAccessIfEligible(
       expires_at: trialExpiresAt.toISOString(),
       metadata: { note: 'Prueba gratuita de 7 días de Premium tras el registro (sin Stripe)' },
     })
-    .select('id, plan_id, status, started_at, expires_at, source')
+    .select('id, plan_id, status, started_at, expires_at, source, metadata')
     .single()
   if (error) {
     console.error('[autoTrialAccess] trial grant failed:', error.message)

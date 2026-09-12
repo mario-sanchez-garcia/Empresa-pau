@@ -3,6 +3,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { canRepositionAutomatically } from './automaticPlacement.ts'
 import { planningDates } from './planWindow.ts'
 import { loadStudentPlanContext } from './studentPlanContext.ts'
+import { readAllRows } from './readAllRows'
+import { eligibleDatesForRow } from './planPlacement'
 import { getMadridToday } from './studyDays.ts'
 
 // El estado del plan que hay que CONTARLE al alumno, calculado aparte de quien
@@ -46,6 +48,7 @@ type NoticeRow = {
   id: string
   scheduled_date: string | null
   status: string
+  mission_type: string | null
   source: string | null
   locked: boolean | null
   metadata: Record<string, unknown> | null
@@ -58,16 +61,13 @@ export async function collectPlanNotices(
 ): Promise<PlanNotices> {
   const context = await loadStudentPlanContext(userId, db, today)
 
-  const { data, error } = await db
+  const rows = await readAllRows<NoticeRow>((from, to) => db
     .from('camino_calendar')
-    .select('id, scheduled_date, status, source, locked, metadata')
-    .eq('user_id', userId)
-    .in('status', ['pending', 'postponed'])
-    .gte('scheduled_date', today)
-  if (error) throw new Error(`Plan notices read: ${error.message}`)
-
-  const rows = (data ?? []) as NoticeRow[]
-  const validDates = new Set(planningDates(context, { includeFinalReviewWindow: true, limit: 730 }))
+    .select('id, scheduled_date, status, source, locked, metadata, mission_type')
+    .eq('user_id', userId).in('status', ['pending', 'postponed'])
+    .gte('scheduled_date', today).order('id').range(from, to))
+  const window = { dates: planningDates(context, { includeFinalReviewWindow: true, limit: 730 }),
+    examDate: context.examDate, planningCutoff: context.planningCutoff, capacityPerDay: 0 }
 
   const protectedConflicts: string[] = []
   const misplaced: string[] = []
@@ -84,7 +84,10 @@ export async function collectPlanNotices(
     }
     // Dentro de plazo pero en un día que su patrón actual no incluye: pasa
     // cuando el acceso se degrada después de haber planificado.
-    if (repositionable && !validDates.has(row.scheduled_date)) misplaced.push(row.id)
+    if (repositionable && !eligibleDatesForRow({ id: row.id, scheduledDate: row.scheduled_date,
+      missionType: row.mission_type ?? 'concept', source: row.source,
+      deadlineDate: typeof row.metadata?.partial_exam_date === 'string' ? row.metadata.partial_exam_date : null,
+    }, window).includes(row.scheduled_date)) misplaced.push(row.id)
   }
 
   return {

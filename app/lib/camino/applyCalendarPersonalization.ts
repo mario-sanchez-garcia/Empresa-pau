@@ -12,7 +12,7 @@ import { canRepositionAutomatically } from './automaticPlacement'
 import { VALID_DAILY_MINUTES, missionsPerDayForMinutes, estimatedMinutesForSlot } from './dailyTimeCapacity'
 import { createDayScheduler } from './scheduleTimeSlot'
 import { loadStudentPlanContext, planningDates, type DeclaredAvailability, type StudentPlanContext } from './studentPlanContext'
-import { orderRowsForPlacement, preferredDatesFor, unscheduledReasonFor, type PlacementRow, type PlacementWindow } from './planPlacement'
+import { orderRowsForPlacement, preferredDatesFor, eligibleDatesForRow, unscheduledReasonFor, type PlacementRow, type PlacementWindow } from './planPlacement'
 
 const VALID_WEEKLY_DAYS = [1, 2, 3, 4, 5, 6, 7] as const
 // v3: la colocación cambió de algoritmo (dos ventanas — temario nuevo y
@@ -196,12 +196,15 @@ export async function applyCalendarPersonalization(
     // la que no se arreglarían nunca. Así que antes de cortocircuitar se
     // comprueba lo único que importa de verdad: que cada fila activa esté en
     // una fecha que el alumno puede usar HOY, con su acceso de hoy.
-    const validDates = new Set(candidateDates(context, today))
-    const misplacedRows = rows.filter(row =>
-      row.status !== 'unscheduled'
-      && typeof row.scheduled_date === 'string'
-      && row.scheduled_date >= today
-      && !validDates.has(row.scheduled_date))
+    const validationWindow: PlacementWindow = {
+      dates: candidateDates(context, today), capacityPerDay: missionsPerDayForMinutes(prefs.dailyMinutes),
+      planningCutoff: context.planningCutoff, examDate: context.examDate,
+    }
+    const misplacedRows = rows.filter(row => row.status !== 'unscheduled'
+      && !eligibleDatesForRow({ id: row.id, scheduledDate: row.scheduled_date,
+        missionType: missionTypeOf(row), source: row.source,
+        deadlineDate: typeof row.metadata?.partial_exam_date === 'string' ? row.metadata.partial_exam_date : null,
+      }, validationWindow).includes(row.scheduled_date))
 
     if (alreadyCurrent && !options.force
       && !rows.some(row => row.status === 'unscheduled')

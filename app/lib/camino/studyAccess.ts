@@ -22,7 +22,7 @@ export function resolveStudyAccess(rows: readonly StudyEntitlement[], now = Date
     planId: limits.id, label: limits.label, limits,
     maxStudyDaysPerWeek: limits.maxStudyDaysPerWeek,
     // La etiqueta beta requiere un acceso concedido, nunca un flag del navegador.
-    beta: active.some(row => Boolean(row.metadata?.beta_cohort)),
+    beta: active.some(row => Boolean(row.metadata?.beta_cohort) || row.source === 'auto_promo_beta'),
     source: selected?.row.source ?? null,
     expiresAt: selected?.row.expires_at ?? null,
   }

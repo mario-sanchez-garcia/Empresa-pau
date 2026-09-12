@@ -10,6 +10,7 @@ import NextTopLoader from 'nextjs-toploader'
 import { HintsProvider } from '@/app/lib/onboarding/HintsContext';
 import { CookieConsentProvider } from '@/app/lib/analytics/CookieConsentContext';
 import BackToTop from '@/app/components/ui/BackToTop';
+import BugReportWidget from '@/components/shared/BugReportWidget';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -117,6 +118,7 @@ export default function RootLayout({
           </HintsProvider>
         </CookieConsentProvider>
         <BackToTop />
+        <BugReportWidget />
       </body>
     </html>
   );

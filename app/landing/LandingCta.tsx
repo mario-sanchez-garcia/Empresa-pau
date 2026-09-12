@@ -6,12 +6,26 @@ import { Bebas_Neue, DM_Mono } from 'next/font/google'
 import { useLandingAuth } from './LandingAuthState'
 import { useCookieConsent } from '@/app/lib/analytics/CookieConsentContext'
 import { posthog } from '@/app/lib/analytics/posthog'
-import type { CommercialPlanId } from '@/app/lib/pricing'
+import { isPremiumFreeBetaPeriod, getPremiumFreeBetaDeadlineLabel, type CommercialPlanId } from '@/app/lib/pricing'
 
 const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'] })
 const dmMono = DM_Mono({ weight: ['400', '500'], subsets: ['latin'] })
 const B = bebas.style.fontFamily
 const M = dmMono.style.fontFamily
+
+// Copy de la entrada gratuita para un visitante anónimo. Mientras dure la
+// promo de la beta pública, Premium es gratis hasta la fecha límite (sin
+// tarjeta, entitlement directa — ver app/lib/billing/autoTrialAccess.ts);
+// pasada esa fecha, todo alumno nuevo recibe en su lugar una prueba de 7
+// días del mismo plan, también sin tarjeta. "Free" ya no se ofrece en
+// ningún sitio público (ver PUBLIC_PLAN_IDS en app/lib/pricing.ts).
+function getFreeEntryCopy() {
+  if (isPremiumFreeBetaPeriod()) {
+    const deadline = getPremiumFreeBetaDeadlineLabel()
+    return { big1: 'Premium', big2: 'gratis', caption: `hasta el ${deadline}`, inline: `Premium gratis hasta el ${deadline}` }
+  }
+  return { big1: 'Prueba', big2: 'gratis', caption: '7 días · sin tarjeta', inline: 'Prueba Premium gratis 7 días · sin tarjeta' }
+}
 
 // CTAs de la landing sensibles a sesión/onboarding (ver LandingAuthState).
 // Cada una conserva exactamente el markup/estilo original de app/landing/page.tsx,
@@ -42,7 +56,7 @@ export function HeroFreeLink() {
       href={href}
       style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.55)', letterSpacing: '.12em', textTransform: 'uppercase', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,.25)', paddingBottom: 2, display: 'inline-block' }}
     >
-      O empieza gratis · sin tarjeta →
+      O {getFreeEntryCopy().inline} →
     </Link>
   )
 }
@@ -73,6 +87,7 @@ export function BottomCta() {
   const { status, href, label } = useLandingAuth()
   const isAuthed = status === 'authed'
   const isLoading = status === 'loading'
+  const freeCopy = getFreeEntryCopy()
   return (
     <Link
       href={isLoading ? '#' : href}
@@ -82,10 +97,10 @@ export function BottomCta() {
       style={{ opacity: isLoading ? 0.6 : 1, cursor: isLoading ? 'default' : 'pointer' }}
     >
       <span style={{ fontFamily: B, fontSize: 16, letterSpacing: '.06em', color: '#fff', textAlign: 'center', lineHeight: 1.1, fontWeight: isAuthed ? 700 : undefined }}>
-        {isAuthed ? label : <>Empieza<br />gratis</>}
+        {isAuthed ? label : <>{freeCopy.big1}<br />{freeCopy.big2}</>}
       </span>
       {!isAuthed && (
-        <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.35)', letterSpacing: '.1em', textTransform: 'uppercase' }}>sin tarjeta</span>
+        <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.35)', letterSpacing: '.1em', textTransform: 'uppercase' }}>{freeCopy.caption}</span>
       )}
     </Link>
   )
@@ -98,6 +113,7 @@ export function StickyMobileCta() {
   const { status, href, label } = useLandingAuth()
   const isAuthed = status === 'authed'
   const isLoading = status === 'loading'
+  const freeCopy = getFreeEntryCopy()
   return (
     <div className="v4c-sticky-cta">
       <Link
@@ -111,10 +127,10 @@ export function StickyMobileCta() {
         }}
       >
         <span style={{ fontFamily: B, fontSize: 15, letterSpacing: '.04em', color: '#111', fontWeight: isAuthed ? 700 : undefined }}>
-          {isAuthed ? label : 'Empieza gratis'}
+          {isAuthed ? label : `${freeCopy.big1} ${freeCopy.big2}`}
         </span>
         {!isAuthed && (
-          <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(0,0,0,.45)', letterSpacing: '.08em', textTransform: 'uppercase' }}>sin tarjeta</span>
+          <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(0,0,0,.45)', letterSpacing: '.08em', textTransform: 'uppercase' }}>{freeCopy.caption}</span>
         )}
       </Link>
     </div>

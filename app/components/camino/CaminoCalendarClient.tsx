@@ -10,6 +10,7 @@ import WeeklyCheckinBanner from '@/app/components/camino/WeeklyCheckinBanner'
 import ExamCoverageBanner from '@/app/components/camino/ExamCoverageBanner'
 import { ensureServerCalendar } from '@/app/lib/camino/ensureCalendarClient'
 import UnscheduledWorkBanner from '@/app/components/camino/UnscheduledWorkBanner'
+import PlanNoticeBanner from '@/app/components/camino/PlanNoticeBanner'
 import HistoriaTopicChips from '@/app/components/camino/HistoriaTopicChips'
 import GoogleCalendarConnection from '@/app/components/camino/GoogleCalendarConnection'
 import CaminoAssistant from '@/app/components/camino/CaminoAssistant'
@@ -2627,6 +2628,9 @@ export default function CaminoCalendarClient() {
           {/* Trabajo que no cabe en el plan: sin esto, el alumno ve menos
               misiones y ninguna explicación (ver UnscheduledWorkBanner). */}
           <div style={{ order: -2 }}><UnscheduledWorkBanner /></div>
+          {/* Recorte de disponibilidad por acceso y conflictos protegidos: el
+              servidor ya los calculaba, faltaba decirlos. */}
+          <div style={{ order: -2 }}><PlanNoticeBanner /></div>
 
           {/* ── OBJETIVO DE ORIENTACIÓN ──
               Se quita de esta pantalla (rediseño clay, fase 1 del hub) — deja

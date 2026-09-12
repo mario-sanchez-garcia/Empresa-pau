@@ -301,7 +301,11 @@ test('una ejecución degradada NO marca el día como hecho', () => {
   // igualmente convertía un fallo recuperable en un día perdido.
   const ensure = stripComments(read('ensureCaminoCalendar.ts')).replace(/\s+/g, ' ')
   assert.ok(ensure.includes('degraded.push('), 'los fallos registrados no se reportan')
-  assert.ok(ensure.includes('return { ok: degraded.length === 0, degraded }'), 'la ejecución no devuelve su estado')
+  // Se comprueba que `ok` se DERIVA de degraded, no la lista literal de
+  // campos: el resultado puede crecer (p. ej. `protectedConflicts`, las
+  // misiones que el alumno fijó y quedaron en fecha imposible) sin que eso
+  // afecte a lo que esta prueba defiende.
+  assert.ok(/return \{ ok: degraded\.length === 0, degraded[,}]/.test(ensure), 'la ejecución no devuelve su estado')
 
   const route = stripComments(
     readFileSync(join(ROOT, '../api/camino/ensure-calendar/route.ts'), 'utf8'),

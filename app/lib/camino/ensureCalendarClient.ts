@@ -1,3 +1,38 @@
+export type PlanNoticeState = {
+  availability: {
+    requestedWeeklyStudyDays: number | null
+    effectiveWeeklyStudyDays: number | null
+    accessMaxStudyDaysPerWeek?: number
+    accessLabel?: string
+  } | null
+  protectedConflicts: string[]
+}
+
+// Último estado conocido de los avisos del plan.
+//
+// El banner se monta antes de que la petición conteste, así que sin esto
+// dependería de estar escuchando en el instante exacto del evento. Guardarlo
+// aquí le permite arrancar con lo que ya se sabe y no quedarse en blanco tras
+// una recarga.
+let lastNotices: PlanNoticeState | null = null
+
+export function getLastPlanNotices(): PlanNoticeState | null {
+  return lastNotices
+}
+
+function publishNotices(body: Record<string, unknown>) {
+  // Se emite SIEMPRE, también cuando no hay nada. Antes solo se avisaba de la
+  // aparición del problema y nunca de su desaparición, así que un aviso
+  // resuelto —el alumno renueva, o mueve la misión que estorbaba— se quedaba
+  // encendido hasta recargar. Un aviso que miente es peor que ninguno.
+  const availability = (body.availability ?? null) as PlanNoticeState['availability']
+  const protectedConflicts = Array.isArray(body.protectedConflicts)
+    ? body.protectedConflicts as string[]
+    : []
+  lastNotices = { availability, protectedConflicts }
+  window.dispatchEvent(new CustomEvent<PlanNoticeState>('camino:plan-notices', { detail: lastNotices }))
+}
+
 /** A successful HTTP response alone does not mean the planning run succeeded. */
 export async function ensureServerCalendar(token: string, force = false): Promise<boolean> {
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -9,6 +44,9 @@ export async function ensureServerCalendar(token: string, force = false): Promis
       })
       const body = await response.json().catch(() => null)
       if (response.ok && body?.ok === true) {
+        // También en la respuesta corta (`skipped: already_ensured_today`): el
+        // servidor devuelve el estado vigente aunque hoy no haya generado nada.
+        publishNotices(body as Record<string, unknown>)
         window.dispatchEvent(new Event('camino:updated'))
         return true
       }

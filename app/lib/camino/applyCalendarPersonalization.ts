@@ -162,8 +162,16 @@ export async function applyCalendarPersonalization(
     // invalidar la personalización ya aplicada. Antes el hash solo miraba
     // versión, días y minutos — mover el examen no re-disparaba nada y las
     // filas se quedaban donde las había dejado la fecha anterior.
+    // Los días entran por su valor EFECTIVO (context.weeklyStudyDays), no por
+    // el pedido (prefs.weeklyStudyDaysValue). No es un matiz: cuando el acceso
+    // caduca o se degrada, lo que el alumno tiene guardado no cambia — cambia
+    // lo que su plan puede usar. Con el valor pedido en la identidad, perder
+    // Superpremium dejaba el hash idéntico, la personalización respondía
+    // `already_current` y las misiones se quedaban en martes y viernes: días
+    // que ese alumno ya no tiene. El corte de planificación entra por lo
+    // mismo, porque acota hasta dónde puede colocarse temario nuevo.
     const preferenceHash = stableHash(
-      `${PERSONALIZATION_VERSION}:${prefs.weeklyStudyDaysValue}:${prefs.dailyMinutes}:${context.examDate}:${context.today}:${context.emergencyAvailability}`,
+      `${PERSONALIZATION_VERSION}:${context.weeklyStudyDays}:${prefs.dailyMinutes}:${context.examDate}:${context.planningCutoff}:${context.today}:${context.emergencyAvailability}`,
     )
     const rows = (await readAllRows<CalendarRow>((from, to) => supabase
       .from('camino_calendar')
@@ -181,7 +189,23 @@ export async function applyCalendarPersonalization(
       const personalization = metadataObject(meta.camino_personalization as Record<string, unknown> | null)
       return personalization.preference_hash === preferenceHash
     })
-    if (alreadyCurrent && !options.force && !rows.some(row => row.status === 'unscheduled')) {
+
+    // El hash dice "nada ha cambiado desde la última vez". No dice que el
+    // calendario esté BIEN. Una versión anterior del hash pudo dejar filas en
+    // días que hoy no valen, y entonces coincidir con él es justo la razón por
+    // la que no se arreglarían nunca. Así que antes de cortocircuitar se
+    // comprueba lo único que importa de verdad: que cada fila activa esté en
+    // una fecha que el alumno puede usar HOY, con su acceso de hoy.
+    const validDates = new Set(candidateDates(context, today))
+    const misplacedRows = rows.filter(row =>
+      row.status !== 'unscheduled'
+      && typeof row.scheduled_date === 'string'
+      && row.scheduled_date >= today
+      && !validDates.has(row.scheduled_date))
+
+    if (alreadyCurrent && !options.force
+      && !rows.some(row => row.status === 'unscheduled')
+      && misplacedRows.length === 0) {
       return { applied: false, reason: 'already_current', updatedRows: 0, preferenceHash }
     }
 

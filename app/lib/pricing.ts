@@ -260,6 +260,33 @@ export function getPriceLockDeadlineLabel(): string {
   })
 }
 
+// Promo de beta pública: Premium gratis (sin pasar por Stripe, ver
+// app/lib/billing/autoTrialAccess.ts) para cualquiera que se registre hasta
+// esta fecha inclusive. Mismo patrón que FOUNDING_DEADLINE_DATE arriba —
+// vive aquí (client-safe) en vez de en el módulo server-only de billing para
+// que el copy de las CTAs (landing) y la concesión real de la entitlement
+// lean siempre la misma fecha, sin poder desincronizarse.
+export function getPremiumFreeBetaDeadline(): Date {
+  const raw = process.env.PREMIUM_FREE_BETA_DEADLINE_DATE ?? '2026-10-12'
+  // "Inclusive" = fin del día en Madrid (CEST, +02:00 en octubre), no
+  // medianoche UTC como el deadline de fundador — aquí importa que un alumno
+  // que se registra el 12 de octubre por la tarde (hora española) siga
+  // entrando en la promo.
+  return raw.includes('T') ? new Date(raw) : new Date(`${raw}T23:59:59+02:00`)
+}
+
+export function isPremiumFreeBetaPeriod(now: Date = new Date()): boolean {
+  return now.getTime() <= getPremiumFreeBetaDeadline().getTime()
+}
+
+export function getPremiumFreeBetaDeadlineLabel(): string {
+  return getPremiumFreeBetaDeadline().toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'Europe/Madrid',
+  })
+}
+
 export function getPlanDefinition(id: CommercialPlanId): PlanDefinition {
   return PLAN_DEFINITIONS[id]
 }

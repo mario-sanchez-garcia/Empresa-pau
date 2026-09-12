@@ -7,7 +7,13 @@ import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { getTopicByV2SortOrder, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 import { resolveTopicIdentity } from '@/app/lib/camino/resolveTopicIdentity'
 import { maybeGenerateBlockPracticeMission } from '@/app/lib/camino/generateBlockPracticeMission'
-import { completionDelayMinutes, minutesBetweenIso, recordMissionBehaviorEvent } from '@/app/lib/camino/missionBehavior'
+import { completionDelayMinutes, recordMissionBehaviorEvent } from '@/app/lib/camino/missionBehavior'
+import {
+  SEGMENT_CLOSED,
+  SEGMENT_OPENED,
+  deriveMissionDuration,
+  durationForStorage,
+} from '@/app/lib/camino/activitySegments'
 import { getMadridToday } from '@/app/lib/camino/studyDays'
 
 export const dynamic = 'force-dynamic'
@@ -191,7 +197,7 @@ export async function POST(request: NextRequest) {
     let telemetryAvailable = true
     let { data: targetRow, error: targetRowError } = await db
       .from('camino_calendar')
-      .select('id, started_at, scheduled_date, end_time, status')
+      .select('id, started_at, scheduled_date, end_time, status, metadata')
       .eq('id', targetId)
       .eq('user_id', user.id)
       .eq('subject', subject)
@@ -213,12 +219,37 @@ export async function POST(request: NextRequest) {
     }
     if (targetRowError) throw targetRowError
 
+    // La duración la decide el SERVIDOR, nunca el cliente, y solo a partir de
+    // los tramos de actividad observados. Antes se escribía aquí
+    // `completed_at - started_at`, que es reloj de pared: una pestaña abierta y
+    // olvidada contaba como estudio. Ahora se deriva de la evidencia, y si la
+    // evidencia no da para sostener una cifra limpia la columna se queda en
+    // NULL — que pasa a significar una sola cosa: no hay duración apta para
+    // que un modelo aprenda de ella. Nunca cero para desconocido.
+    let observedDuration: number | null = null
+    let observedQuality = 'unobserved'
+    if (telemetryAvailable && targetId) {
+      const { data: segmentRows, error: segmentError } = await db
+        .from('camino_mission_events')
+        .select('event_type, occurred_at, created_at, metadata')
+        .eq('user_id', user.id)
+        .eq('mission_id', targetId)
+        .in('event_type', [SEGMENT_OPENED, SEGMENT_CLOSED])
+      if (segmentError && !isMissingTelemetrySchema(segmentError)) throw segmentError
+      const plannedMinutes = typeof (targetRow?.metadata as Record<string, unknown> | null)?.estimated_minutes === 'number'
+        ? (targetRow!.metadata as Record<string, number>).estimated_minutes
+        : null
+      const derived = deriveMissionDuration(segmentRows ?? [], { plannedMinutes })
+      observedDuration = durationForStorage(derived)
+      observedQuality = derived.quality
+    }
+
     const completionPayload: Record<string, unknown> = telemetryAvailable
       ? {
           status: 'completed',
           completed_at: now,
           xp_awarded: xp,
-          actual_duration_minutes: minutesBetweenIso(targetRow?.started_at, now),
+          actual_duration_minutes: observedDuration,
           completion_delay_minutes: completionDelayMinutes(targetRow?.scheduled_date, targetRow?.end_time, now),
           updated_at: now,
         }
@@ -305,6 +336,9 @@ export async function POST(request: NextRequest) {
         v2_sort_order: v2SortOrder,
         mission_type: missionType,
         had_started_at: Boolean(targetRow?.started_at),
+        // Se guarda la calidad aunque la columna se quede en NULL: así se puede
+        // auditar por qué no hubo cifra sin volver a derivar nada.
+        duration_quality: observedQuality,
       }).catch(err => {
         console.warn('[camino/complete-mission] mission behavior event skipped', err)
       })

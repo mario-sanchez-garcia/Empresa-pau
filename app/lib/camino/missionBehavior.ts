@@ -10,6 +10,8 @@ export type MissionBehaviorEventType =
   | 'postponed_manual'
   | 'rescheduled_manual'
   | 'rescheduled_conflict'
+  | 'activity_segment_opened'
+  | 'activity_segment_closed'
 
 export function minutesBetweenIso(startIso: string | null | undefined, endIso: string | null | undefined) {
   if (!startIso || !endIso) return null
@@ -52,6 +54,12 @@ export async function recordMissionBehaviorEvent(
   eventType: MissionBehaviorEventType,
   idempotencyKey: string,
   metadata: Record<string, unknown> = {},
+  // Los tramos de actividad ocurren antes de llegar aquí —el clic que abrió la
+  // misión, un cierre que esperó a reconectar— así que su hora real la aporta
+  // quien la observó. Sin este parámetro, occurred_at sería la hora de llegada
+  // al servidor y la medición volvería a ser reloj de pared. El resto de
+  // eventos lo omite y conserva el default now() de Postgres.
+  occurredAt?: string,
 ) {
   const { error } = await db.from('camino_mission_events').insert({
     user_id: userId,
@@ -59,6 +67,7 @@ export async function recordMissionBehaviorEvent(
     event_type: eventType,
     idempotency_key: idempotencyKey,
     metadata,
+    ...(occurredAt ? { occurred_at: occurredAt } : {}),
   })
   if (!error || error.code === '23505') return
   if (error.code === '42703' || error.code === '42P01') return

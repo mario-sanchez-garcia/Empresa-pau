@@ -8,7 +8,7 @@ const PRESS_OFFSET = 4
 // Mismo relieve que ClayButton pero para navegación (next/link) en vez de
 // una acción — botones como "Practicar PAU" o "Abrir Chat con Kairo" son
 // enlaces reales, no <button>, así que no pueden reutilizar ClayButton.
-export default function ClayLinkButton({ href, children, variant = 'primary', style }: { href: string; children: ReactNode; variant?: 'primary' | 'secondary'; style?: CSSProperties }) {
+export default function ClayLinkButton({ href, children, variant = 'primary', style, onClick }: { href: string; children: ReactNode; variant?: 'primary' | 'secondary'; style?: CSSProperties; onClick?: () => void }) {
   const isPrimary = variant === 'primary'
   const edgeColor = isPrimary ? 'var(--clay-accent-deep)' : 'var(--clay-surface-deep)'
   const restShadow = `0 ${PRESS_OFFSET}px 0 0 ${edgeColor}`
@@ -16,6 +16,7 @@ export default function ClayLinkButton({ href, children, variant = 'primary', st
   return (
     <Link
       href={href}
+      onClick={onClick}
       style={{
         display: 'flex',
         alignItems: 'center',

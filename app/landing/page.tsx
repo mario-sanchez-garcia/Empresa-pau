@@ -12,6 +12,7 @@ import { ClayHeroCta, ClayHeroMiniCards } from './LandingClayPilotHero'
 import RevealOnScroll from '@/app/components/ui/RevealOnScroll'
 import { SUBJECT_OPTS } from '@/app/lib/subjectCatalog'
 import TeacherTestimonials from './TeacherTestimonials'
+import LandingFounders from './LandingFounders'
 import LandingNavThemeObserver from './LandingNavThemeObserver'
 
 const bebas  = Bebas_Neue({ weight: '400', subsets: ['latin'] })
@@ -616,6 +617,11 @@ export default function LandingPage() {
           <BottomCta />
         </div>
       </div>
+      </RevealOnScroll>
+
+      {/* ── Quiénes somos (piloto clay) ───────────────────────────────────────── */}
+      <RevealOnScroll as="div">
+      <LandingFounders headingFont={B} />
       </RevealOnScroll>
 
       {/* ── Footer ───────────────────────────────────────────────────────────── */}

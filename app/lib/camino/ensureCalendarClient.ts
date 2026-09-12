@@ -9,6 +9,8 @@ export async function ensureServerCalendar(token: string, force = false): Promis
       })
       const body = await response.json().catch(() => null)
       if (response.ok && body?.ok === true) {
+        // También en la respuesta corta (`skipped: already_ensured_today`): el
+        // servidor devuelve el estado vigente aunque hoy no haya generado nada.
         window.dispatchEvent(new Event('camino:updated'))
         return true
       }

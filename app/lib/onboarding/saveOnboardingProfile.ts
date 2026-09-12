@@ -19,7 +19,7 @@ import { cleanStudentExamsForSubjects, cleanSupportedSubjects } from '@/app/lib/
 
 export const VALID_COMMUNITIES = ['Madrid', 'Cataluña', 'Andalucía', 'Otra'] as const
 export const VALID_DAILY_MINUTES = [30, 45, 60, 90, 150, 180] as const
-export const VALID_WEEKLY_DAYS = [3, 4, 5, 6, 7] as const
+export const VALID_WEEKLY_DAYS = [1, 2, 3, 4, 5, 6, 7] as const
 export const VALID_SCHOOL_SOURCES = ['dataset', 'manual'] as const
 export const VALID_GRADE_THRESHOLD_MODES = ['general', 'per_subject'] as const
 export const VALID_PAIN_TYPES = ['daily_plan', 'correction_confidence', 'procrastination', 'improve_grade'] as const

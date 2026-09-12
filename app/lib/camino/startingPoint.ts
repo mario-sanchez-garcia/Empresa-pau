@@ -1,3 +1,5 @@
+import { normalizeSubjectSlug } from './subjectSlug.ts'
+
 // Punto de partida del alumno EN CADA ASIGNATURA.
 //
 // El generador siempre tuvo cinco modos (`zero`, `first_block`, `mid`,
@@ -98,10 +100,30 @@ export function resolveStartModes(
   declared: Record<string, unknown> | null | undefined,
   fallback: StartMode = 'zero',
 ): Record<string, StartMode> {
+  // Los dos lados se normalizan antes de cruzarse. Es la corrección de un
+  // fallo que no daba error y por eso duró: el onboarding guarda lo declarado
+  // con etiquetas humanas ("Física") y generateCaminoPlan pide los modos con
+  // slugs ("fisica"), así que la búsqueda devolvía undefined y TODAS las
+  // asignaturas caían al fallback 'zero'. El alumno que declaraba "lo he dado
+  // casi todo" acababa planificado desde el tema 1, sin rastro de
+  // `declared_start_mode` en la cola — y sin eso, declaredBlocks() nunca
+  // encuentra candidatos y student_block_knowledge no llega a existir.
+  //
+  // Normalizar aquí, y no en quien llama, evita que la próxima entrada con
+  // nombres humanos vuelva a romperlo en silencio: da igual en qué forma
+  // lleguen las claves, porque normalizeSubjectSlug es idempotente.
+  const bySlug = new Map<string, StartMode>()
+  for (const [key, value] of Object.entries(declared ?? {})) {
+    // Un valor que no es un modo válido se ignora aquí en vez de guardarse:
+    // así nunca puede pisar a una declaración buena de la misma asignatura
+    // (dos etiquetas distintas pueden normalizar al mismo slug).
+    if (!isStartMode(value)) continue
+    bySlug.set(normalizeSubjectSlug(key), value)
+  }
+
   const result: Record<string, StartMode> = {}
   for (const subject of subjects) {
-    const raw = declared?.[subject]
-    result[subject] = isStartMode(raw) ? raw : fallback
+    result[subject] = bySlug.get(normalizeSubjectSlug(subject)) ?? fallback
   }
   return result
 }

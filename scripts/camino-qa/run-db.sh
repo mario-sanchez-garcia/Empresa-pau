@@ -19,8 +19,11 @@ for sql in \
   supabase/migrations/20260701120000_create_camino_tables.sql \
   supabase/migrations/20260717120000_camino_calendar_unique_constraint.sql \
   supabase/migrations/20260806160100_add_time_slots_to_camino_calendar.sql \
+  supabase/migrations/20260828173000_add_camino_mission_behavior_telemetry.sql \
+  supabase/migrations/20260913100000_add_activity_segment_event_types.sql \
   supabase/migrations/20260919100000_camino_reliability.sql \
-  scripts/camino-qa/reliability.sql
+  scripts/camino-qa/reliability.sql \
+  scripts/camino-qa/activity-telemetry.sql
 do
   docker exec -i "$container" psql -U postgres -v ON_ERROR_STOP=1 < "$sql" >/dev/null
 done

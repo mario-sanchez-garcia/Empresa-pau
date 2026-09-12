@@ -22,6 +22,8 @@ const STAGE_LABELS: Record<string, string> = {
 }
 
 const ERROR_MESSAGES: Record<string, string> = {
+  invalid_availability: 'Tus días o minutos no coinciden con tu acceso actual. Vuelve a la preparación y elige una disponibilidad válida; no hemos recortado tu selección.',
+  study_access_unavailable: 'No hemos podido verificar tu acceso. Reintenta en unos segundos.',
   invalid_draft: 'No hemos encontrado tu preparación. Vuelve a completarla — no debería llevarte más de un minuto.',
   draft_expired: 'Tu preparación caducó. Vuelve a completar el onboarding para generar tu Camino.',
   draft_claim_conflict: 'Este enlace ya se usó desde otra cuenta. Inicia sesión con la cuenta correcta.',

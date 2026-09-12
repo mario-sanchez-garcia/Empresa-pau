@@ -10,6 +10,7 @@ import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
 import { getMadridToday } from '@/app/lib/camino/studyDays'
 import { injectWeakReviewMissions } from '@/app/lib/camino/injectWeakReviewMissions'
 import { injectDiagnosticMissions } from '@/app/lib/camino/injectDiagnosticMissions'
+import { collectPlanNotices } from '@/app/lib/camino/planNotices'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -51,7 +52,25 @@ export async function POST(request: NextRequest) {
 
       if (logReadError) throw logReadError
       if (log?.last_ensured_day === today) {
-        return NextResponse.json({ ok: true, skipped: 'already_ensured_today' })
+        // Saltarse el día no puede significar saltarse la realidad. Dos cosas
+        // pasan aquí que antes no:
+        //
+        //  1. Los avisos vigentes se devuelven igual. Si no, recargar la
+        //     página después de la primera ejecución del día borraba un aviso
+        //     cuyo problema seguía ahí.
+        //  2. Si hay misiones en fechas que el alumno ya no puede usar, el día
+        //     NO se da por hecho. Un acceso que caduca por la tarde dejaba el
+        //     calendario en días perdidos hasta el día siguiente, porque este
+        //     retorno esquivaba la replanificación entera.
+        const notices = await collectPlanNotices(user.id, db, today)
+        if (notices.misplaced.length === 0) {
+          return NextResponse.json({
+            ok: true,
+            skipped: 'already_ensured_today',
+            availability: notices.availability,
+            protectedConflicts: notices.protectedConflicts,
+          })
+        }
       }
     }
 
@@ -62,6 +81,10 @@ export async function POST(request: NextRequest) {
     // (ver camino/knowledgeState.ts). Nunca bloquea el resto del Camino.
     const diagnostics = await injectDiagnosticMissions(user.id, db)
     const personalization = await applyCalendarPersonalization(user.id, db, { force })
+    // Se lee DESPUÉS de personalizar: es el estado con el que el alumno se va
+    // a encontrar, no el de antes de recolocar. Misma fuente que el camino
+    // corto de arriba, para que ambos digan exactamente lo mismo.
+    const notices = await collectPlanNotices(user.id, db, today)
     await syncKairoMissionsToGoogle(user.id, db).catch(error => {
       console.warn('[camino/ensure-calendar] calendar sync skipped:', error)
     })
@@ -99,6 +122,11 @@ export async function POST(request: NextRequest) {
       personalization,
       weakReviews,
       diagnostics,
+      // Ambos viajan SIEMPRE, también vacíos: es lo que permite retirar un
+      // aviso cuando el problema se resuelve. Omitirlos dejaba el banner
+      // encendido para siempre.
+      protectedConflicts: notices.protectedConflicts,
+      availability: notices.availability,
       retryable: degraded.length > 0,
     }, { status: degraded.length > 0 ? 503 : 200 })
     })

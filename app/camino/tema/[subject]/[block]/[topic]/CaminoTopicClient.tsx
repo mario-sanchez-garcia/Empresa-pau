@@ -17,6 +17,7 @@ import { fetchCorrection } from '@/app/lib/correctionFetch'
 import { calcularRacha } from '@/app/lib/calcularRacha'
 import { DIVISIONS } from '@/app/lib/camino/leagues'
 import { useBillingStatus } from '@/app/hooks/useBillingStatus'
+import { useMissionActivity } from '@/app/hooks/useMissionActivity'
 import MathMarkdown from '@/components/shared/MathMarkdown'
 import { annotateGlossarySymbols, decodeGlossaryPayload, type GlossaryEntry } from '@/app/lib/camino/glossaryAnnotate'
 import CorrectionResultCard from '@/components/shared/CorrectionResultCard'
@@ -360,7 +361,6 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   const entryConfirmed = params.get('confirmed') === '1'
   const exerciseRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
-  const startedMissionRef = useRef<string | null>(null)
   const [toast, setToast] = useState('')
   const [progress, setProgress] = useState<TopicProgress>(() => loadJson<TopicProgress>(TOPIC_PROGRESS_KEY, {}))
   const [answerMode, setAnswerMode] = useState<'texto' | 'imagen'>('texto')
@@ -404,6 +404,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   // la intención explícita de repetir.
   const [repeatConfirmed, setRepeatConfirmed] = useState(false)
   const billing = useBillingStatus()
+  // Medición de tiempo real de estudio. La misión observable es la fila de
+  // calendario: la que trae la URL desde Camino, o la que se resuelve después
+  // cuando se entra sin contexto de día (ver pendingCalendarRowId).
+  const { markEngagement, closeForCompletion } = useMissionActivity(pendingCalendarRowId ?? missionId)
   // Glosario interactivo de fórmulas (piloto Física): mapa topic_id -> símbolo -> significado,
   // cargado una vez se conocen los topic_id de las fichas mostradas (v2Cards). Vacío para
   // asignaturas sin entradas en formula_glossary — no rompe nada, simplemente no anota nada.
@@ -419,40 +423,6 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   useEffect(() => {
     if (shouldStartExercise) exerciseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [shouldStartExercise])
-
-  async function recordMissionStart(accessToken: string) {
-    const calendarMissionId = pendingCalendarRowId ?? missionId
-    if (!calendarMissionId || startedMissionRef.current === calendarMissionId) return
-    startedMissionRef.current = calendarMissionId
-    try {
-      const response = await fetch('/api/camino/start-mission', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ missionId: calendarMissionId }),
-      })
-      if (!response.ok) {
-        console.warn('[camino/topic] start mission telemetry skipped', { status: response.status })
-      }
-    } catch (error) {
-      console.warn('[camino/topic] start mission telemetry skipped', error)
-    }
-  }
-
-  useEffect(() => {
-    if (!missionId || !shouldStartExercise || startedMissionRef.current === missionId) return
-    startedMissionRef.current = missionId
-    let cancelled = false
-    supabase.auth.getSession().then(async ({ data }) => {
-      const token = data.session?.access_token
-      if (!token || cancelled) return
-      await fetch('/api/camino/start-mission', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ missionId }),
-      }).catch(() => undefined)
-    }).catch(() => undefined)
-    return () => { cancelled = true }
-  }, [missionId, shouldStartExercise])
 
   useEffect(() => {
     if (!isFirstSession || score === null || !correction || mockCorrection || firstSessionMarkedRef.current) return
@@ -645,6 +615,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   }
 
   function showGlossaryTooltip(label: string, rect: DOMRect) {
+    markEngagement('glossary')
     setGlossaryTooltip({ label, ...computeGlossaryTooltipPosition(rect) })
     if (glossaryTooltipTimer.current) clearTimeout(glossaryTooltipTimer.current)
     glossaryTooltipTimer.current = setTimeout(() => setGlossaryTooltip(null), 3000)
@@ -829,6 +800,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
   function selectV2Card(index: number, mode: 'push' | 'replace' = 'push') {
     if (!v2Cards.length) return
     const safeIndex = Math.min(Math.max(index, 0), v2Cards.length - 1)
+    markEngagement('card_nav')
     setActiveV2Index(safeIndex)
     if (typeof window === 'undefined') return
 
@@ -979,7 +951,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
     })))
     const succeeded = results.filter((r): r is PromiseFulfilledResult<UploadedImage> => r.status === 'fulfilled').map(r => r.value)
     const failedCount = results.length - succeeded.length
-    if (succeeded.length) setImages(current => [...current, ...succeeded])
+    if (succeeded.length) {
+      markEngagement('answer_input')
+      setImages(current => [...current, ...succeeded])
+    }
     if (failedCount > 0) {
       console.error('[camino] image_compression_failed', { failedCount })
       setImageError(`No hemos podido leer ${failedCount === 1 ? 'una foto' : `${failedCount} fotos`} (formato no compatible, p. ej. HEIC de iPhone). Prueba con la cámara del navegador o convierte a JPG/PNG.`)
@@ -1059,7 +1034,6 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         setCorrection('Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.')
         return
       }
-      void recordMissionStart(accessToken)
       const statement = selectedV2Card?.practice_prompt ?? currentTopic.practicePrompt ?? currentTopic.guidedExample ?? ('Ejercicio de ' + selectedMissionTitle)
       const correctionHistoryId = crypto.randomUUID()
       const response = await fetchCorrection('/api/camino/correct', {
@@ -1192,6 +1166,10 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
         let toastText = `Corrección guardada · nota ${rawScore}/10`
         if (selectedSortOrder != null) {
           try {
+            // Antes de completar: el servidor deriva la duración al recibir
+            // esto, y un cierre que llegara después dejaría el tramo
+            // descabalado y degradaría a `partial` una medición limpia.
+            await closeForCompletion()
             const cmRes = await fetch('/api/camino/complete-mission', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
@@ -1455,7 +1433,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 )}
                 {videoId && (
                   <LearningCard title="Vídeo explicativo" dark={isClayPilotDark}>
-                    <button onClick={() => setVideoOpen(v => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: isClayPilotDark ? 'var(--clay-text-muted)' : '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                    <button onClick={() => { markEngagement('video_open'); setVideoOpen(v => !v) }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: isClayPilotDark ? 'var(--clay-text-muted)' : '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                       🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
                     </button>
                     {videoOpen && (
@@ -1508,7 +1486,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                 <>
                   {videoId && (
                     <LearningCard title="Vídeo explicativo">
-                      <button onClick={() => setVideoOpen(v => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                      <button onClick={() => { markEngagement('video_open'); setVideoOpen(v => !v) }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                         🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
                       </button>
                       {videoOpen && (
@@ -1557,7 +1535,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   {videoId && (
                     <div style={{ marginTop: 16 }}>
                       <p style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 6, padding: '10px 14px', fontSize: 13, fontWeight: 700, color: '#1e40af', marginBottom: 10 }}>{videoSupportCopy}</p>
-                      <button onClick={() => setVideoOpen(v => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                      <button onClick={() => { markEngagement('video_open'); setVideoOpen(v => !v) }} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                         🎥 {videoOpen ? 'Ocultar vídeo' : 'Ver vídeo de apoyo'}
                       </button>
                       {videoOpen && (
@@ -1672,7 +1650,7 @@ export default function CaminoTopicClient({ topic }: { topic: CaminoCurriculumTo
                   <MathEditor
                     subject={currentTopic.subject}
                     value={studentAnswer}
-                    onChange={setStudentAnswer}
+                    onChange={next => { markEngagement('answer_input'); setStudentAnswer(next) }}
                     placeholder="Escribe aquí tu desarrollo paso a paso..."
                     minHeight={160}
                     accentColor={isClayPilotDark ? '#60a5fa' : '#2563eb'}

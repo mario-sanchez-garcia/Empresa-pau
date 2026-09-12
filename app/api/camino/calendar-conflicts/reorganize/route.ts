@@ -1,3 +1,4 @@
+import { loadStudentPlanContext } from '@/app/lib/camino/studentPlanContext'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { createServiceClient } from '@/app/lib/billing/supabase'
@@ -72,6 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     const db = createServiceClient()
+    const planContext = await loadStudentPlanContext(auth.user.id, db)
     const { data, error } = await db
       .from('camino_calendar')
       .select(SELECT_COLUMNS)
@@ -115,6 +117,7 @@ export async function POST(request: NextRequest) {
         candidateDates.map(candidateDate => [candidateDate, busySlotsForMadridDate(busySlots, candidateDate)]),
       )
       const placed = await placeBestAcrossDates(auth.user.id, db, candidateDates, duration, {
+        planContext,
         excludeCalendarRowIds: new Set([mission.id]),
         externalBusyByDate,
         context: {

@@ -7,6 +7,8 @@ import {
 } from '@/app/lib/onboarding/saveOnboardingProfile'
 import { extractTraceHeaders, logOnboardingStage } from '@/app/lib/onboarding/onboardingServerLog'
 
+import { loadStudyAccess, availabilityError } from '@/app/lib/camino/studyAccess'
+
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
@@ -43,6 +45,12 @@ export async function POST(request: NextRequest) {
   if (!serviceDb) {
     return respond({ error: 'No se pudo guardar tu onboarding' }, 500, 'no_service_db')
   }
+
+  let access
+  try { access = await loadStudyAccess(user.id, serviceDb) }
+  catch { return respond({ error: 'No se pudo verificar tu acceso. Reintenta.' }, 503, 'study_access_unavailable') }
+  const invalid = availabilityError(body.weeklyStudyDaysValue, body.dailyMinutes, access)
+  if (invalid) return respond({ error: invalid, studyAccess: access }, 422, 'invalid_availability')
 
   if (serviceDb) {
     const saveResult = await saveOnboardingProfile(user.id, serviceDb, body, cleaned)
@@ -98,5 +106,5 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  return respond({ ok: true, routeId, entryDate })
+  return respond({ ok: true, routeId, entryDate, studyAccess: access, weeklyStudyDaysValue: cleaned.weeklyStudyDaysValue, dailyMinutes: cleaned.dailyMinutes })
 }

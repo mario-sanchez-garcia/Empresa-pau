@@ -24,6 +24,13 @@ export type PlacementRow = {
   missionType: string | null
   /** Fila de user_learning_queue que la originó, si la hay. */
   queueId?: string | null
+  /** `source` de camino_calendar: 'algorithm' | 'partial' | … */
+  source?: string | null
+  /**
+   * Fecha del examen parcial al que sirve esta fila. Es un plazo DURO: una
+   * práctica para el examen del día 12 no vale de nada el día 13.
+   */
+  deadlineDate?: string | null
 }
 
 export type PlacementWindow = {
@@ -51,6 +58,8 @@ export type UnscheduledReason =
   | 'final_review_window'
   /** No queda hueco en ningún día disponible. */
   | 'no_capacity'
+  /** Prepara un examen parcial cuyo plazo ya no alcanza ningún día de estudio. */
+  | 'partial_deadline'
 
 /**
  * Temario NUEVO. El repaso, la práctica y los simulacros no lo son: pueden —y
@@ -59,6 +68,30 @@ export type UnscheduledReason =
 export function isNewContent(missionType: string | null | undefined): boolean {
   const type = missionType ?? 'concept'
   return type === 'concept' || type === 'comment_text'
+}
+
+/**
+ * ¿Esta fila sirve a un examen parcial con fecha propia?
+ *
+ * No es lo mismo que "es práctica": lo que la distingue es tener un plazo
+ * ANTERIOR a la PAU que ninguna otra fila comparte.
+ */
+export function isDeadlineBound(row: Pick<PlacementRow, 'source' | 'deadlineDate'>): boolean {
+  return row.source === 'partial' && typeof row.deadlineDate === 'string' && row.deadlineDate.length > 0
+}
+
+/**
+ * Fechas elegibles de una FILA, plazo de parcial incluido.
+ *
+ * Las filas de parcial no miran el corte de repaso final —preparar un examen
+ * del 20 de mayo es exactamente lo que toca en esos días— pero sí un límite
+ * que las demás no tienen: su propio examen.
+ */
+export function eligibleDatesForRow(row: PlacementRow, window: PlacementWindow): string[] {
+  if (isDeadlineBound(row)) {
+    return window.dates.filter(date => date < row.deadlineDate! && date < window.examDate)
+  }
+  return eligibleDatesFor(row.missionType, window)
 }
 
 /**
@@ -78,13 +111,33 @@ export function eligibleDatesFor(
 }
 
 /**
+ * Fechas elegibles EN ORDEN DE PREFERENCIA para esta fila.
+ *
+ * Igual que `eligibleDatesForRow`, salvo que un parcial que ya está en un día
+ * que le sigue valiendo lo conserva. Cambiar la disponibilidad debe mover lo
+ * que dejó de ser válido, no rebarajar lo que estaba bien: para el alumno,
+ * ver saltar de día un examen que ya tenía colocado es ruido, no un plan.
+ */
+export function preferredDatesFor(row: PlacementRow, window: PlacementWindow): string[] {
+  const eligible = eligibleDatesForRow(row, window)
+  if (!isDeadlineBound(row) || !eligible.includes(row.scheduledDate)) return eligible
+  return [row.scheduledDate, ...eligible.filter(date => date !== row.scheduledDate)]
+}
+
+/**
  * Orden de servicio: el temario nuevo primero.
  *
  * Tiene la ventana más corta, así que servirlo después le dejaría la capacidad
  * ya gastada por repasos que sí caben más tarde.
  */
 export function orderRowsForPlacement<T extends PlacementRow>(rows: readonly T[]): T[] {
-  return [...rows.filter(row => isNewContent(row.missionType)), ...rows.filter(row => !isNewContent(row.missionType))]
+  // Los parciales van PRIMERO, y entre ellos por fecha de examen: su ventana
+  // es la más corta de todas y además vence. Servirlos después significaría
+  // gastar sus pocos días elegibles en temario que sí cabe más adelante.
+  const deadlineBound = rows.filter(isDeadlineBound)
+    .sort((a, b) => (a.deadlineDate! === b.deadlineDate! ? a.id.localeCompare(b.id) : a.deadlineDate!.localeCompare(b.deadlineDate!)))
+  const rest = rows.filter(row => !isDeadlineBound(row))
+  return [...deadlineBound, ...rest.filter(row => isNewContent(row.missionType)), ...rest.filter(row => !isNewContent(row.missionType))]
 }
 
 /**
@@ -94,6 +147,10 @@ export function orderRowsForPlacement<T extends PlacementRow>(rows: readonly T[]
  * falló el primero.
  */
 export function unscheduledReasonFor(row: PlacementRow, window: PlacementWindow): UnscheduledReason {
+  // El plazo del parcial se mira ANTES que la fecha de la PAU: a una práctica
+  // del examen del día 12 que se quedó sin sitio hay que decirle que se le
+  // pasó SU examen, no que se le pasó la selectividad.
+  if (isDeadlineBound(row) && eligibleDatesForRow(row, window).length === 0) return 'partial_deadline'
   if (row.scheduledDate >= window.examDate) return 'after_exam'
   if (isNewContent(row.missionType) && eligibleDatesFor(row.missionType, window).length === 0) {
     return 'final_review_window'
@@ -129,7 +186,7 @@ export function planPlacement(
   const placed = new Set<string>()
 
   for (const row of orderRowsForPlacement(rows)) {
-    for (const date of eligibleDatesFor(row.missionType, window)) {
+    for (const date of preferredDatesFor(row, window)) {
       const slot = used.get(date) ?? 0
       if (slot >= capacity) continue
       // Sin hueco real ese día se prueba el SIGUIENTE día elegible. La

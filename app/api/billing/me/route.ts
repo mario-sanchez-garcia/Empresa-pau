@@ -3,6 +3,8 @@ import { getAuthUser, createServiceClient } from '@/app/lib/billing/supabase'
 import { grantCourtesyAccessIfEligible } from '@/app/lib/billing/betaCourtesyAccess'
 import { grantAutoAccessIfEligible } from '@/app/lib/billing/autoTrialAccess'
 
+import { resolveStudyAccess } from '@/app/lib/camino/studyAccess'
+
 export const dynamic = 'force-dynamic'
 
 function getBearerToken(req: NextRequest): string | null {
@@ -24,14 +26,15 @@ export async function GET(request: NextRequest) {
   const now = new Date().toISOString()
 
   // Active entitlements (not expired by time)
-  const { data: entitlements } = await db
+  const { data: entitlements, error: entitlementsError } = await db
     .from('user_entitlements')
-    .select('id, plan_id, status, started_at, expires_at, source')
+    .select('id, plan_id, status, started_at, expires_at, source, metadata')
     .eq('user_id', userId)
     .eq('status', 'active')
     .or(`expires_at.is.null,expires_at.gt.${now}`)
     .order('created_at', { ascending: false })
 
+  if (entitlementsError) return NextResponse.json({ error: 'No se pudo verificar tu acceso' }, { status: 503 })
   let active = entitlements ?? []
   if (active.length === 0) {
     const granted = await grantCourtesyAccessIfEligible(db, userId, data.user.email)
@@ -54,8 +57,10 @@ export async function GET(request: NextRequest) {
 
   const pendingLink = pendingLinks?.[0] ?? null
 
+  const studyAccess = resolveStudyAccess(active)
   return NextResponse.json({
-    hasActivePack: active.length > 0,
+    studyAccess,
+    hasActivePack: studyAccess.planId !== 'free',
     activePlans: active.map(e => ({
       planId: e.plan_id,
       expiresAt: e.expires_at ?? null,

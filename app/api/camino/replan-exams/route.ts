@@ -7,6 +7,9 @@ import { loadStudentPlanContext } from '@/app/lib/camino/studentPlanContext'
 import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
 import { injectAllPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 
+import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
+import { canRepositionAutomatically } from '@/app/lib/camino/automaticPlacement'
+
 export const maxDuration = 300
 export async function POST(request: NextRequest) {
   const auth = await getAuthContext(request)
@@ -20,14 +23,16 @@ export async function POST(request: NextRequest) {
       const forceExamId = typeof body.forceExamId === 'string' ? body.forceExamId : undefined
       if (forceExamId && !exams.some(exam => exam.id === forceExamId)) return NextResponse.json({ error: 'exam_not_owned' }, { status: 404 })
       const ids = new Set(exams.map(exam => exam.id))
-      const { data: previous } = await db.from('camino_calendar').select('id, metadata')
+      const { data: previous } = await db.from('camino_calendar').select('id, source, status, locked, metadata')
         .eq('user_id', auth.user.id).eq('source', 'partial').in('status', ['pending','postponed','unscheduled'])
-      const obsolete = (previous ?? []).filter(row => !ids.has(row.metadata?.partial_exam_id)).map(row => row.id)
+      const obsolete = (previous ?? []).filter(canRepositionAutomatically).filter(row => !ids.has(row.metadata?.partial_exam_id)).map(row => row.id)
       if (obsolete.length) await db.from('camino_calendar').update({ status: 'superseded', start_time: null, end_time: null })
         .eq('user_id', auth.user.id).in('id', obsolete)
       const planContext = await loadStudentPlanContext(auth.user.id, db)
       await injectAllPartialExamMissions(auth.user.id, db, exams, { planContext, forceExamId })
-      return NextResponse.json({ ok: true })
+      const personalization = await applyCalendarPersonalization(auth.user.id, db, { planContext, force: true })
+      if (personalization.reason === 'error') throw new Error('partial_personalization_failed')
+      return NextResponse.json({ ok: true, personalization })
     })
   } catch (error) {
     console.error('[camino/replan-exams]', error)

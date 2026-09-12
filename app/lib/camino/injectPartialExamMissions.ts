@@ -1,6 +1,7 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 
-import { getCaminoPlanLimits } from './caminoPlanLimits'
+import { loadStudyAccess } from './studyAccess'
+import { canRepositionAutomatically } from './automaticPlacement'
 import { computeExamCoverage, decideAutomaticExamMissionFate, type ExamCoverage } from './examCoverage'
 import { EXAM_SUBJECT_SLUG, SIMULACRO_SUBJECT } from './partialExamSubjects'
 import { SPAIN_HOLIDAYS } from './spainHolidays'
@@ -180,16 +181,7 @@ function missionTitle(type: PartialMissionType, blockDisplay: string, topic?: st
 // falta arrastrar a un módulo de programación que también se usa desde
 // scripts de verificación).
 async function resolveFullMocksLimit(supabase: SupabaseClient, userId: string): Promise<number> {
-  const now = new Date().toISOString()
-  const { data: entitlement } = await supabase
-    .from('user_entitlements')
-    .select('plan_id')
-    .eq('user_id', userId)
-    .eq('status', 'active')
-    .or(`expires_at.is.null,expires_at.gt.${now}`)
-    .limit(1)
-    .maybeSingle()
-  const baseLimit = getCaminoPlanLimits(entitlement?.plan_id as string | null | undefined).fullMocksPerMonth
+  const baseLimit = (await loadStudyAccess(userId, supabase)).limits.fullMocksPerMonth
   const { data: override } = await supabase
     .from('user_limit_overrides')
     .select('extra_mocks_per_month')
@@ -336,7 +328,7 @@ export async function resolveFinalMockSlot(
   // con lo que injectPartialExamMissions hará después con el mismo examen.
   const { data: existingRows } = await supabase
     .from('camino_calendar')
-    .select('scheduled_date, status, metadata')
+    .select('id, source, locked, scheduled_date, status, metadata')
     .eq('user_id', userId)
     .eq('source', 'partial')
     .filter('metadata->>partial_exam_id', 'eq', partialExam.id)
@@ -407,18 +399,20 @@ export async function injectPartialExamMissions(
   // and skip the wipe/reinsert entirely if nothing that matters changed.
   const { data: existingRows } = await supabase
     .from('camino_calendar')
-    .select('scheduled_date, status, metadata')
+    .select('id, source, locked, scheduled_date, status, metadata')
     .eq('user_id', userId)
     .eq('source', 'partial')
     .filter('metadata->>partial_exam_id', 'eq', partialExam.id)
     .order('scheduled_date', { ascending: true })
 
+  // La disponibilidad se revalida en applyCalendarPersonalization para todas
+  // las filas, también las de parcial. Un cambio de capacidad no borra filas.
   // `force` (set by the explicit "Recalcular mi Camino para este examen"
   // action) skips this stability check on purpose: the student asked for a
   // fresh calculation right now, even if nothing in the exam's own fields
   // changed — e.g. new grades came in, or more days have passed and the
   // margin needs revisiting.
-  if (!options.force && existingRows && existingRows.length > 0 && !existingRows.some(row => row.status === 'unscheduled')) {
+  if (!options.force && existingRows && existingRows.length > 0) {
     const existingSignature = signatureFromMetadata(existingRows[0].metadata)
     if (existingSignature && signaturesEqual(examSignature(partialExam), existingSignature)) {
       return {
@@ -429,14 +423,13 @@ export async function injectPartialExamMissions(
     }
   }
 
-  // Idempotent: wipe any pending partial missions for this exam before re-inserting
-  await supabase
-    .from('camino_calendar')
-    .delete()
-    .eq('user_id', userId)
-    .eq('source', 'partial')
-    .in('status', ['pending', 'unscheduled'])
-    .filter('metadata->>partial_exam_id', 'eq', partialExam.id)
+  const protectedTypes = new Set((existingRows ?? [])
+    .filter(row => !canRepositionAutomatically(row))
+    .map(row => row.metadata?.partial_mission_type))
+  const replaceableIds = (existingRows ?? []).filter(canRepositionAutomatically).map(row => row.id)
+  if (replaceableIds.length) await supabase.from('camino_calendar').delete()
+    .eq('user_id', userId).in('id', replaceableIds).in('status', ['pending', 'postponed', 'unscheduled'])
+    .or('locked.is.null,locked.eq.false')
 
   // Include TODAY as a candidate slot (previously started from tomorrow),
   // otherwise an exam added during onboarding never got a mission scheduled
@@ -509,7 +502,7 @@ export async function injectPartialExamMissions(
   for (let i = 0; i < targetSequence.length; i++) {
     const slot = targetSlots[i]
     const mType = targetSequence[i]
-    if (!slot) continue
+    if (!slot || protectedTypes.has(mType)) continue
 
     const fate = decideAutomaticExamMissionFate(mType, coverage, coverageDecision, monthlyLimitReached)
     // 'delay': ni siquiera se crea un aviso — no es un "no" definitivo, solo
@@ -517,32 +510,6 @@ export async function injectPartialExamMissions(
     // una ejecución futura (misma cadencia que el resto de esta función:
     // solo se recalcula si el examen cambia o hay force, ver arriba).
     if (fate === 'delay') continue
-
-    // Skip slot if there's already a locked mission
-    const { data: locked } = await supabase
-      .from('camino_calendar')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('scheduled_date', slot)
-      .eq('locked', true)
-      .limit(1)
-    if (locked && locked.length > 0) continue
-
-    // Demote existing algorithm mission on this slot to bonus
-    const { data: existing } = await supabase
-      .from('camino_calendar')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('scheduled_date', slot)
-      .eq('source', 'algorithm')
-      .eq('status', 'pending')
-      .limit(1)
-    if (existing && existing.length > 0) {
-      await supabase
-        .from('camino_calendar')
-        .update({ is_bonus: true, updated_at: now })
-        .eq('id', existing[0].id as string)
-    }
 
     // final_mini_mock enlaza al Simulacro real de 90 min (ver más abajo), no
     // al flujo de práctica de 45 — su hueco en el día debe reservar la

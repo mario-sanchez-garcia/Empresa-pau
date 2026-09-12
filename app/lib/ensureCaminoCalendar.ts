@@ -1,4 +1,5 @@
 import { reconcilePlanWork } from './camino/planPersistence'
+import { canRepositionAutomatically } from '@/app/lib/camino/automaticPlacement'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { getAvailabilityForDate, type LocalBusyRange } from './calendar/availability'
@@ -255,6 +256,13 @@ async function maybeInjectCommentText(
 export type EnsureCaminoCalendarResult = {
   ok: boolean
   degraded: string[]
+  /**
+   * Misiones que el alumno protegió (bloqueadas, movidas a mano o colocadas
+   * por el chat) y que han quedado en una fecha imposible — en o después de su
+   * fecha objetivo. NO se han tocado: se listan para poder avisarle en vez de
+   * recolocarlas por detrás.
+   */
+  protectedConflicts: string[]
 }
 
 export async function ensureCaminoCalendar(
@@ -262,6 +270,7 @@ export async function ensureCaminoCalendar(
   supabase: SupabaseClient,
 ): Promise<EnsureCaminoCalendarResult> {
   const degraded: string[] = []
+  const protectedConflicts: string[] = []
   const today = getMadridToday()
   // Fotografía ÚNICA de disponibilidad (fecha objetivo, patrón semanal,
   // minutos diarios, festivos, corte de repaso final). Todo lo que propone
@@ -281,13 +290,27 @@ export async function ensureCaminoCalendar(
   // normal. Pasan a 'unscheduled' (explícito, contado, NO borrado) y su fila
   // de cola vuelve a 'pending' para que la planificación de más abajo, en esta
   // misma ejecución, las recoloque donde sí caben.
-  const { data: impossibleRows } = await supabase
+  //
+  // Lo que este barrido NO puede hacer es decidir por el alumno. Una misión
+  // que él bloqueó, movió a mano desde el editor o colocó por el chat expresa
+  // una decisión suya; que su fecha ya no sirva es un CONFLICTO que hay que
+  // enseñarle, no un descuido que corregir por detrás. Antes la consulta solo
+  // miraba fecha y estado, así que una fila bloqueada del 08/06 con la PAU el
+  // 07/06 pasaba a 'unscheduled' sin que nadie se lo dijera — y encima al
+  // revés de lo que hace la personalización, que sí la respeta.
+  const { data: pastExamRows } = await supabase
     .from('camino_calendar')
-    .select('id, queue_id')
+    .select('id, queue_id, source, status, locked, metadata')
     .eq('user_id', userId)
     .gte('scheduled_date', examDate)
     .eq('status', 'pending')
-  if (impossibleRows && impossibleRows.length > 0) {
+  const impossibleRows = (pastExamRows ?? []).filter(canRepositionAutomatically)
+  const protectedRows = (pastExamRows ?? []).filter(row => !canRepositionAutomatically(row))
+  if (protectedRows.length > 0) {
+    // No se toca ni una: se cuenta y se comunica hacia arriba.
+    protectedConflicts.push(...protectedRows.map(row => row.id as string))
+  }
+  if (impossibleRows.length > 0) {
     const nowIso = new Date().toISOString()
     const { error: unscheduleError } = await supabase
       .from('camino_calendar')
@@ -726,14 +749,14 @@ export async function ensureCaminoCalendar(
     .in('status', ['pending', 'postponed'])
 
   const futureDaySet = new Set((futureDayRows ?? []).map(r => r.scheduled_date as string))
-  if (futureDaySet.size >= CALENDAR_HORIZON) return { ok: degraded.length === 0, degraded }
+  if (futureDaySet.size >= CALENDAR_HORIZON) return { ok: degraded.length === 0, degraded, protectedConflicts }
 
   // PASO 4+5 — Generar días hasta completar CALENDAR_HORIZON
 
   // Private beta scope: the Supabase calendar engine only schedules the
   // active core PAU subjects. `subjects` ya se calculó arriba, antes de
   // PASO 2.5, para el forzado de prioridad de examen.
-  if (subjects.length === 0) return { ok: degraded.length === 0, degraded }
+  if (subjects.length === 0) return { ok: degraded.length === 0, degraded, protectedConflicts }
 
   // PASO 5 — Ratio de velocidad
   const { count: remainingQueue } = await supabase
@@ -888,7 +911,7 @@ export async function ensureCaminoCalendar(
     .filter(d => !futureDaySet.has(d))
     .slice(0, CALENDAR_HORIZON - futureDaySet.size)
 
-  if (emptyDays.length === 0) return { ok: degraded.length === 0, degraded }
+  if (emptyDays.length === 0) return { ok: degraded.length === 0, degraded, protectedConflicts }
 
   const calendarRows: object[] = []
   const scheduledQueueIds: string[] = []
@@ -1036,5 +1059,5 @@ export async function ensureCaminoCalendar(
 
   await maybeInjectCommentText(userId, supabase, today)
   await reconcilePlanWork(supabase, userId)
-  return { ok: degraded.length === 0, degraded }
+  return { ok: degraded.length === 0, degraded, protectedConflicts }
 }

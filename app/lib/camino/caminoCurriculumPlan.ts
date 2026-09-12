@@ -1,5 +1,6 @@
 import curriculumSeed from '@/app/data/camino/curriculum_seed.json'
 import { PRIVATE_BETA_CURRICULUM_TOPICS } from './betaCurriculum'
+import { normalizeSubjectSlug } from './subjectSlug'
 
 export type CaminoMissionType =
   | 'concept_explanation'
@@ -47,23 +48,16 @@ export interface CaminoCurriculumTopic {
   v2SortOrder?: number
 }
 
-export const SUBJECT_LABELS: Record<string, string> = {
-  matematicas_ii: 'Matemáticas II',
-  matematicas_ccss: 'Matemáticas CCSS',
-  fisica: 'Física',
-  quimica: 'Química',
-  biologia: 'Biología',
-  lengua: 'Lengua Castellana',
-  historia_espana: 'Historia de España',
-  historia: 'Historia de España',
-  historia_filosofia: 'Historia de la Filosofía',
-  ingles: 'Inglés',
-  llengua_catalana: 'Llengua Catalana',
-}
-
-export const SUBJECT_SLUG_BY_LABEL: Record<string, string> = Object.fromEntries(
-  Object.entries(SUBJECT_LABELS).map(([slug, label]) => [label, slug])
-)
+// El espacio de claves de asignaturas vive en subjectSlug.ts, sin dependencias,
+// para que los módulos puros puedan normalizar sin arrastrar el seed del
+// temario. Se re-exporta aquí para no cambiar ningún importador existente.
+export {
+  SUBJECT_LABELS,
+  SUBJECT_SLUG_BY_LABEL,
+  normalizeSubjectSlug,
+  subjectLabelFromSlug,
+  subjectSlugFromLabel,
+} from './subjectSlug'
 
 export const CAMINO_CURRICULUM_TOPICS = [
   ...(curriculumSeed as CaminoCurriculumTopic[]),
@@ -71,41 +65,6 @@ export const CAMINO_CURRICULUM_TOPICS = [
 ]
   .slice()
   .sort((a, b) => a.subject.localeCompare(b.subject) || a.orderIndex - b.orderIndex)
-
-export function subjectLabelFromSlug(subject: string) {
-  return SUBJECT_LABELS[subject] ?? subject
-}
-
-export function normalizeSubjectSlug(subject?: string | null) {
-  const slug = (subject ?? '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-
-  if (slug === 'mates' || slug === 'matematicas' || slug === 'matematicas_ii') return 'matematicas_ii'
-  if (
-    slug === 'matematicas_ccss' ||
-    slug === 'matematicas_sociales' ||
-    slug === 'matematicas_aplicadas_ccss' ||
-    slug === 'matematicas_aplicadas_a_las_ciencias_sociales'
-  ) return 'matematicas_ccss'
-  if (slug === 'fisica') return 'fisica'
-  if (slug === 'quimica') return 'quimica'
-  if (slug === 'biologia') return 'biologia'
-  if (slug === 'lengua' || slug === 'lengua_castellana' || slug === 'lengua_castellana_y_literatura' || slug === 'lengua_castellana_literatura') return 'lengua'
-  if (slug === 'historia' || slug === 'historia_de_espana' || slug === 'historia_espana') return 'historia_espana'
-  if (slug === 'filosofia' || slug === 'historia_filosofia' || slug === 'historia_de_la_filosofia') return 'historia_filosofia'
-  if (slug === 'ingles' || slug === 'english') return 'ingles'
-  if (slug === 'llengua_catalana') return 'llengua_catalana'
-
-  return SUBJECT_SLUG_BY_LABEL[subject ?? ''] ?? slug
-}
-
-export function subjectSlugFromLabel(label: string) {
-  return normalizeSubjectSlug(label)
-}
 
 export function normalizeTopicSlug(value?: string | null) {
   return (value ?? '')

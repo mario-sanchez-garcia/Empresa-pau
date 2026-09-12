@@ -1,6 +1,9 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { estimatedMinutesForMission } from './missionDuration'
+import type { StudentPlanContext } from './planWindow'
+import { planningDates } from './planWindow'
+import { eligibleDatesForRow } from './planPlacement'
 import { normalizeTime, toMinutes } from './missionDuration.ts'
 import { mondayBasedDayIndex } from './studyDays'
 import { loadSchedulingBehaviorProfile } from './schedulingBehaviorProfile'
@@ -212,6 +215,7 @@ export async function placeBestAcrossDates(
   options: {
     excludeCalendarRowIds?: Set<string>
     externalBusyByDate?: Map<string, TimeRange[]>
+    planContext?: StudentPlanContext
     context?: MissionSlotScoringContext
     behaviorProfile?: SchedulingBehaviorProfile | null
   } = {},
@@ -220,12 +224,22 @@ export async function placeBestAcrossDates(
   const behaviorProfile = options.behaviorProfile === undefined
     ? await loadSchedulingBehaviorProfile(supabase, userId)
     : options.behaviorProfile
+  const plan = options.planContext
+  const eligible = plan ? new Set(eligibleDatesForRow({ id: 'candidate', scheduledDate: plan.today,
+    missionType: options.context?.missionType ?? 'concept', source: options.context?.deadlineDate ? 'partial' : 'algorithm',
+    deadlineDate: options.context?.deadlineDate,
+  }, { dates: planningDates(plan, { includeFinalReviewWindow: true }), capacityPerDay: Infinity,
+    planningCutoff: plan.planningCutoff, examDate: plan.examDate })) : null
   for (let index = 0; index < dates.length; index += 1) {
     const date = dates[index]
+    if (eligible && !eligible.has(date)) continue
     const localBusy = await getBusyIntervalsForDate(userId, supabase, date, { excludeCalendarRowIds: options.excludeCalendarRowIds })
     const externalBusy = options.externalBusyByDate?.get(date) ?? []
     const busy = [...localBusy, ...externalBusy]
-    const slot = findBestScoredSlot(durationMinutes, busy, studyWindowFor(date), { behaviorProfile, ...(options.context ?? {}), date })
+    const scheduler = await createDayScheduler(userId, supabase, date, {
+      excludeCalendarRowIds: options.excludeCalendarRowIds, externalBusy, behaviorProfile, dailyMinutes: plan?.dailyMinutes,
+    })
+    const slot = scheduler.placeBest(durationMinutes, { ...(options.context ?? {}), date })
     if (!slot) continue
     const scored = scoreDateSlot({ date, slot, busy, context: { behaviorProfile, ...(options.context ?? {}) }, dateIndex: index })
     const candidate = { date, start: slot.start, end: slot.end, score: scored.score, reasons: [...scored.reasons, ...scored.personalReasons] }

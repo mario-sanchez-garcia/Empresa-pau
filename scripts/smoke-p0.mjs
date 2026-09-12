@@ -219,7 +219,7 @@ assert(
   'pricing and landing use the canonical honest public catalogue',
     !/ilimitad/i.test(pricing) &&
     !/ilimitad/i.test(landing) &&
-    pricing.includes("PUBLIC_PLAN_IDS = ['free', 'premium', 'curso_pau']") &&
+    pricing.includes("PUBLIC_PLAN_IDS = ['premium', 'curso_pau']") &&
     pricing.includes("ENTITLEMENT_ONLY_PLAN_IDS = ['intensivo', 'superpremium']") &&
     pricing.includes('basePriceCents: 999') &&
     pricing.includes('CURSO_PAU_STANDARD_PRICE_CENTS = 7900') &&

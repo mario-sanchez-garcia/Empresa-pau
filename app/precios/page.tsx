@@ -5,7 +5,7 @@ import PricingClient from './PricingClient'
 
 export const metadata: Metadata = {
   title: 'Precios',
-  description: 'Compara los planes reales de Kairo: Free, Premium mensual y Curso PAU hasta junio. Límites claros, Orientación incluida y checkout seguro.',
+  description: 'Compara los planes reales de Kairo: Premium mensual y Curso PAU hasta junio. Límites claros, Orientación incluida y checkout seguro.',
   alternates: { canonical: '/precios' },
 }
 

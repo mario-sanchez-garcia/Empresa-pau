@@ -28,6 +28,28 @@ type ContactMessage = {
   respuesta: string | null
   respuesta_at: string | null
   respondido_por: string | null
+  report_type: 'contact' | 'bug_report'
+  screenshot_path: string | null
+  screenshot_url: string | null
+}
+
+type ReportFilter = 'all' | 'contact' | 'bug_report'
+
+function ReportTypeBadge({ reportType }: { reportType: ContactMessage['report_type'] }) {
+  const { theme } = useClayThemePreference()
+  const dark = theme === 'dark'
+  if (reportType === 'bug_report') {
+    return (
+      <span style={{ ...(dark ? { background: 'rgba(248,113,113,0.14)', color: '#f87171', border: '1px solid rgba(248,113,113,0.35)' } : { background: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' }), borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap' }}>
+        Reporte de bug
+      </span>
+    )
+  }
+  return (
+    <span style={{ ...(dark ? { background: 'rgba(96,165,250,0.14)', color: '#60a5fa', border: '1px solid rgba(96,165,250,0.35)' } : { background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' }), borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap' }}>
+      Contacto
+    </span>
+  )
 }
 
 type PageState =
@@ -67,6 +89,7 @@ export default function ContactMessagesPage() {
   const [state, setState] = useState<PageState>({ status: 'loading' })
   const [pendingId, setPendingId] = useState<number | null>(null)
   const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [reportFilter, setReportFilter] = useState<ReportFilter>('all')
   const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({})
   const [replyPendingId, setReplyPendingId] = useState<number | null>(null)
   const [replyErrors, setReplyErrors] = useState<Record<number, string>>({})
@@ -143,6 +166,10 @@ export default function ContactMessagesPage() {
 
   const { theme } = useClayThemePreference()
   const unreadCount = state.status === 'loaded' ? state.messages.filter(m => !m.is_read).length : 0
+  const bugReportCount = state.status === 'loaded' ? state.messages.filter(m => m.report_type === 'bug_report').length : 0
+  const visibleMessages = state.status === 'loaded'
+    ? state.messages.filter(m => reportFilter === 'all' || m.report_type === reportFilter)
+    : []
 
   return (
     <ClayThemeScope theme={theme} style={{ minHeight: '100vh' }}>
@@ -169,23 +196,40 @@ export default function ContactMessagesPage() {
             {state.status === 'loaded' && (
               <p style={{ color: '#bfdbfe', fontSize: 12, margin: '3px 0 0', fontWeight: 500 }}>
                 {state.messages.length} mensaje{state.messages.length !== 1 ? 's' : ''}
-                {unreadCount > 0 ? ` · ${unreadCount} sin leer` : ''} · {fmtDate(state.generatedAt)}
+                {unreadCount > 0 ? ` · ${unreadCount} sin leer` : ''}
+                {bugReportCount > 0 ? ` · ${bugReportCount} reporte${bugReportCount !== 1 ? 's' : ''} de bug` : ''} · {fmtDate(state.generatedAt)}
               </p>
             )}
           </div>
-          <button
-            onClick={() => { setState({ status: 'loading' }); load() }}
-            disabled={state.status === 'loading'}
-            style={{
-              background: state.status === 'loading' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.15)',
-              border: '1px solid rgba(255,255,255,0.25)',
-              color: '#fff', borderRadius: 8, padding: '8px 18px',
-              fontSize: 12, fontWeight: 700, cursor: state.status === 'loading' ? 'default' : 'pointer',
-              opacity: state.status === 'loading' ? 0.6 : 1,
-            }}
-          >
-            {state.status === 'loading' ? 'Cargando…' : 'Actualizar'}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {state.status === 'loaded' && (
+              <select
+                value={reportFilter}
+                onChange={(e) => setReportFilter(e.target.value as ReportFilter)}
+                style={{
+                  background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)',
+                  color: '#fff', borderRadius: 8, padding: '8px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                }}
+              >
+                <option value="all" style={{ color: '#0f172a' }}>Todos</option>
+                <option value="contact" style={{ color: '#0f172a' }}>Contacto</option>
+                <option value="bug_report" style={{ color: '#0f172a' }}>Reporte de bug</option>
+              </select>
+            )}
+            <button
+              onClick={() => { setState({ status: 'loading' }); load() }}
+              disabled={state.status === 'loading'}
+              style={{
+                background: state.status === 'loading' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                color: '#fff', borderRadius: 8, padding: '8px 18px',
+                fontSize: 12, fontWeight: 700, cursor: state.status === 'loading' ? 'default' : 'pointer',
+                opacity: state.status === 'loading' ? 0.6 : 1,
+              }}
+            >
+              {state.status === 'loading' ? 'Cargando…' : 'Actualizar'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -223,13 +267,13 @@ export default function ContactMessagesPage() {
 
         {state.status === 'loaded' && (
           <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', boxShadow: C.shadow }}>
-            {state.messages.length === 0 ? (
+            {visibleMessages.length === 0 ? (
               <div style={{ padding: '32px', textAlign: 'center', color: C.muted, fontStyle: 'italic', fontSize: 14 }}>
-                Sin mensajes de contacto todavía.
+                {reportFilter === 'bug_report' ? 'Sin reportes de bug todavía.' : reportFilter === 'contact' ? 'Sin mensajes de contacto todavía.' : 'Sin mensajes todavía.'}
               </div>
             ) : (
               <div>
-                {state.messages.map((m, i) => {
+                {visibleMessages.map((m, i) => {
                   const expanded = expandedId === m.id
                   return (
                     <div key={m.id} style={{ background: i % 2 === 0 ? C.surface : 'var(--clay-surface-raised)', borderBottom: `1px solid ${C.border}` }}>
@@ -242,6 +286,7 @@ export default function ContactMessagesPage() {
                         }}
                       >
                         <span style={{ flex: '0 0 auto' }}><ReadBadge isRead={m.is_read} /></span>
+                        <span style={{ flex: '0 0 auto' }}><ReportTypeBadge reportType={m.report_type} /></span>
                         <span style={{ flex: '0 0 150px', fontSize: 11, color: C.muted, whiteSpace: 'nowrap' }}>{fmtDate(m.created_at)}</span>
                         <span style={{ flex: '0 0 180px', fontSize: 12, fontWeight: 700, color: C.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</span>
                         <span style={{ flex: '0 0 220px', fontSize: 12, color: C.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'var(--font-geist-mono, monospace)' }}>{m.email}</span>
@@ -253,6 +298,21 @@ export default function ContactMessagesPage() {
                           <p style={{ margin: 0, fontSize: 13, color: C.ink, lineHeight: 1.6, whiteSpace: 'pre-wrap', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
                             {m.message}
                           </p>
+                          {m.report_type === 'bug_report' && (
+                            m.screenshot_url ? (
+                              <a href={m.screenshot_url} target="_blank" rel="noopener noreferrer">
+                                <img
+                                  src={m.screenshot_url}
+                                  alt={`Captura adjunta al reporte de ${m.name}`}
+                                  style={{ maxWidth: '100%', maxHeight: 320, borderRadius: 10, border: `1px solid ${C.border}`, display: 'block' }}
+                                />
+                              </a>
+                            ) : m.screenshot_path ? (
+                              <p style={{ margin: 0, fontSize: 12, color: '#dc2626' }}>No se pudo generar el enlace a la captura.</p>
+                            ) : (
+                              <p style={{ margin: 0, fontSize: 12, color: C.muted, fontStyle: 'italic' }}>Sin captura adjunta.</p>
+                            )
+                          )}
                           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                             <a
                               href={`mailto:${m.email}?subject=${encodeURIComponent('Re: ' + m.subject)}`}

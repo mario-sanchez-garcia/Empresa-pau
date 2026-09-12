@@ -2,6 +2,7 @@
 
 import { createServiceClient } from './supabase'
 import { grantCourtesyAccessIfEligible } from './betaCourtesyAccess'
+import { grantAutoAccessIfEligible } from './autoTrialAccess'
 
 export interface UserBillingContext {
   hasActivePack: boolean
@@ -28,6 +29,9 @@ export async function getUserBillingContext(
     let entitlement = data?.[0] ?? null
     if (!entitlement) {
       entitlement = await grantCourtesyAccessIfEligible(db, userId, email)
+    }
+    if (!entitlement) {
+      entitlement = await grantAutoAccessIfEligible(db, userId)
     }
     return {
       hasActivePack: entitlement !== null,

@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
   const db = createServiceClient()
   const { data, error } = await db
     .from('contact_messages')
-    .select('id, name, email, subject, message, created_at, is_read, respuesta, respuesta_at, respondido_por')
+    .select('id, name, email, subject, message, created_at, is_read, respuesta, respuesta_at, respondido_por, report_type, screenshot_path')
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -44,7 +44,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'No se pudieron cargar los mensajes' }, { status: 500 })
   }
 
-  return NextResponse.json({ messages: data ?? [], generatedAt: new Date().toISOString() })
+  // Signed URLs generadas aquí (service role, bypassa RLS) en vez de en el
+  // cliente: el admin no tiene una sesión con acceso al bucket privado de
+  // otro alumno, así que la única forma de ver la captura es firmarla
+  // server-side, igual que hydrateImageUrls en useCanvas.ts para zona-images.
+  const messages = data ?? []
+  const withScreenshots = await Promise.all(messages.map(async (m) => {
+    if (!m.screenshot_path) return { ...m, screenshot_url: null as string | null }
+    const signed = await db.storage.from('bug-report-screenshots').createSignedUrl(m.screenshot_path, 60 * 10)
+    return { ...m, screenshot_url: signed.data?.signedUrl ?? null }
+  }))
+
+  return NextResponse.json({ messages: withScreenshots, generatedAt: new Date().toISOString() })
 }
 
 export async function PATCH(request: NextRequest) {

@@ -208,7 +208,15 @@ export const PLAN_DEFINITIONS: Record<CommercialPlanId, PlanDefinition> = {
   },
 }
 
-export const PUBLIC_PLAN_IDS = ['free', 'premium', 'curso_pau'] as const satisfies readonly CommercialPlanId[]
+// 'free' se retiró de aquí a propósito: deja de ofrecerse/mostrarse en
+// cualquier sitio público (landing, /precios, onboarding) porque los
+// registros nuevos ahora reciben Premium gratis durante la beta o una
+// prueba de 7 días (ver app/lib/billing/autoTrialAccess.ts). El plan Free
+// SIGUE existiendo tal cual en PLAN_DEFINITIONS: es la red de seguridad a
+// la que cae un alumno sin entitlement activa (trial ya consumido, sin
+// pagar) — normalizeCommercialPlanId(null) sigue resolviendo a 'free' más
+// abajo en este mismo archivo, sin ningún cambio de límites.
+export const PUBLIC_PLAN_IDS = ['premium', 'curso_pau'] as const satisfies readonly CommercialPlanId[]
 export const ENTITLEMENT_ONLY_PLAN_IDS = ['intensivo', 'superpremium'] as const satisfies readonly CommercialPlanId[]
 export const PURCHASABLE_CHECKOUT_PLAN_IDS = ['premium', 'pack_curso_pau'] as const satisfies readonly CheckoutPlanId[]
 export const DEFAULT_CHECKOUT_PLAN_ID: CheckoutPlanId = 'pack_curso_pau'
@@ -246,6 +254,33 @@ export function getCursoPauPriceCents(now: Date = new Date()): number {
 
 export function getPriceLockDeadlineLabel(): string {
   return getFoundingDeadline().toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'Europe/Madrid',
+  })
+}
+
+// Promo de beta pública: Premium gratis (sin pasar por Stripe, ver
+// app/lib/billing/autoTrialAccess.ts) para cualquiera que se registre hasta
+// esta fecha inclusive. Mismo patrón que FOUNDING_DEADLINE_DATE arriba —
+// vive aquí (client-safe) en vez de en el módulo server-only de billing para
+// que el copy de las CTAs (landing) y la concesión real de la entitlement
+// lean siempre la misma fecha, sin poder desincronizarse.
+export function getPremiumFreeBetaDeadline(): Date {
+  const raw = process.env.PREMIUM_FREE_BETA_DEADLINE_DATE ?? '2026-10-12'
+  // "Inclusive" = fin del día en Madrid (CEST, +02:00 en octubre), no
+  // medianoche UTC como el deadline de fundador — aquí importa que un alumno
+  // que se registra el 12 de octubre por la tarde (hora española) siga
+  // entrando en la promo.
+  return raw.includes('T') ? new Date(raw) : new Date(`${raw}T23:59:59+02:00`)
+}
+
+export function isPremiumFreeBetaPeriod(now: Date = new Date()): boolean {
+  return now.getTime() <= getPremiumFreeBetaDeadline().getTime()
+}
+
+export function getPremiumFreeBetaDeadlineLabel(): string {
+  return getPremiumFreeBetaDeadline().toLocaleDateString('es-ES', {
     day: 'numeric',
     month: 'long',
     timeZone: 'Europe/Madrid',

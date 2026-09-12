@@ -208,7 +208,15 @@ export const PLAN_DEFINITIONS: Record<CommercialPlanId, PlanDefinition> = {
   },
 }
 
-export const PUBLIC_PLAN_IDS = ['free', 'premium', 'curso_pau'] as const satisfies readonly CommercialPlanId[]
+// 'free' se retiró de aquí a propósito: deja de ofrecerse/mostrarse en
+// cualquier sitio público (landing, /precios, onboarding) porque los
+// registros nuevos ahora reciben Premium gratis durante la beta o una
+// prueba de 7 días (ver app/lib/billing/autoTrialAccess.ts). El plan Free
+// SIGUE existiendo tal cual en PLAN_DEFINITIONS: es la red de seguridad a
+// la que cae un alumno sin entitlement activa (trial ya consumido, sin
+// pagar) — normalizeCommercialPlanId(null) sigue resolviendo a 'free' más
+// abajo en este mismo archivo, sin ningún cambio de límites.
+export const PUBLIC_PLAN_IDS = ['premium', 'curso_pau'] as const satisfies readonly CommercialPlanId[]
 export const ENTITLEMENT_ONLY_PLAN_IDS = ['intensivo', 'superpremium'] as const satisfies readonly CommercialPlanId[]
 export const PURCHASABLE_CHECKOUT_PLAN_IDS = ['premium', 'pack_curso_pau'] as const satisfies readonly CheckoutPlanId[]
 export const DEFAULT_CHECKOUT_PLAN_ID: CheckoutPlanId = 'pack_curso_pau'

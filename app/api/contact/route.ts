@@ -102,6 +102,36 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  if (reportType === 'bug_report') {
+    // Para un reporte de bug, el panel de admin (contact_messages) es el
+    // ÚNICO sitio donde alguien lo va a ver — a diferencia del formulario de
+    // /contacto, aquí el insert es el efecto crítico y el email es el
+    // secundario. Antes esto estaba invertido (insert best-effort) y podía
+    // devolver "enviado" al alumno sin haber guardado nada si el insert
+    // fallaba por cualquier motivo — justo el síntoma reportado.
+    const db = createServiceClient()
+    const { error: insertError } = await db.from('contact_messages').insert({
+      name, email, subject, message,
+      report_type: reportType,
+      screenshot_path: screenshotPath,
+    })
+    if (insertError) {
+      console.error('[contact POST] bug_report insert failed:', insertError.message)
+      return NextResponse.json({ error: 'No se pudo guardar tu reporte. Inténtalo de nuevo en un momento.' }, { status: 500 })
+    }
+
+    // El email es un aviso adicional para el equipo, best-effort: si falla,
+    // el reporte ya está guardado y visible en el panel, así que no debe
+    // impedir la confirmación al alumno.
+    try {
+      await sendContactMessage({ name, email, subject, message })
+    } catch (err) {
+      console.error('[contact POST] bug_report sendContactMessage failed:', err instanceof Error ? err.message : String(err))
+    }
+
+    return NextResponse.json({ ok: true })
+  }
+
   try {
     await sendContactMessage({ name, email, subject, message })
   } catch (err) {

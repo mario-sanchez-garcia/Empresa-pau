@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { canRepositionAutomatically } from './automaticPlacement.ts'
 import { planningDates } from './planWindow.ts'
-import { loadStudentPlanContext } from './studentPlanContext.ts'
+import { loadStudentPlanContext, type StudentPlanContext } from './studentPlanContext.ts'
 import { readAllRows } from './readAllRows'
 import { eligibleDatesForRow } from './planPlacement'
 import { getMadridToday } from './studyDays.ts'
@@ -58,8 +58,9 @@ export async function collectPlanNotices(
   userId: string,
   db: SupabaseClient,
   today: string = getMadridToday(),
+  planContext?: StudentPlanContext,
 ): Promise<PlanNotices> {
-  const context = await loadStudentPlanContext(userId, db, today)
+  const context = planContext ?? await loadStudentPlanContext(userId, db, today)
 
   const rows = await readAllRows<NoticeRow>((from, to) => db
     .from('camino_calendar')

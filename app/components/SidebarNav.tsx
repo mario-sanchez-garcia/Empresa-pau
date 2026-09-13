@@ -70,6 +70,7 @@ function isActive(href: string, pathname: string, currentView: string | null): b
 export default function SidebarNav() {
   const [open, setOpen] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [unreadContactCount, setUnreadContactCount] = useState(0)
   const { loading: billingLoading, hasActivePack, activePlans } = useBillingStatus()
   const currentPlanLabel = activePlans[0] ? getCaminoPlanLimits(activePlans[0].planId).label : null
   const [currentView, setCurrentView] = useState<string | null>(null)
@@ -87,7 +88,17 @@ export default function SidebarNav() {
       if (!session) return
       fetch('/api/admin/me', { headers: { Authorization: `Bearer ${session.access_token}` } })
         .then(r => r.ok ? r.json() : { isAdmin: false })
-        .then((d: { isAdmin?: boolean }) => setIsAdmin(d.isAdmin === true))
+        .then((d: { isAdmin?: boolean }) => {
+          setIsAdmin(d.isAdmin === true)
+          // Badge de "Panel interno" -- solo se pide el contador si de verdad
+          // es interno, para no hacer esta llamada extra a cualquier alumno.
+          if (d.isAdmin === true) {
+            fetch('/api/admin/contact-messages/unread-count', { headers: { Authorization: `Bearer ${session.access_token}` } })
+              .then(r => r.ok ? r.json() : { unreadCount: 0 })
+              .then((c: { unreadCount?: number }) => setUnreadContactCount(c.unreadCount ?? 0))
+              .catch(() => {})
+          }
+        })
         .catch(() => {})
     })
   }, [])
@@ -196,6 +207,7 @@ export default function SidebarNav() {
                 }}
               >
                 <div style={{
+                  position: 'relative',
                   width: 40, height: 40, flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   borderRadius: 12,
@@ -206,6 +218,17 @@ export default function SidebarNav() {
                   transition: 'background 120ms, color 120ms, border-color 120ms, box-shadow 120ms',
                 }}>
                   <Icon size={18} />
+                  {href === '/admin' && unreadContactCount > 0 && (
+                    <span style={{
+                      position: 'absolute', top: -4, right: -4,
+                      minWidth: 16, height: 16, padding: '0 4px', borderRadius: 999,
+                      background: '#ef4444', color: '#fff',
+                      fontSize: 9, fontWeight: 800, lineHeight: '16px', textAlign: 'center',
+                      border: '2px solid #0f172a',
+                    }}>
+                      {unreadContactCount > 99 ? '99+' : unreadContactCount}
+                    </span>
+                  )}
                 </div>
                 <span style={{
                   fontSize: 13, fontWeight: 700,

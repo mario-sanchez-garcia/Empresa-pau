@@ -29,18 +29,28 @@ async function authorize(request: NextRequest) {
   return { ok: true as const, email: data.user.email as string }
 }
 
+const CONTACT_MESSAGES_SELECT = 'id, name, email, subject, message, created_at, is_read, respuesta, respuesta_at, respondido_por, report_type, screenshot_path'
+
 export async function GET(request: NextRequest) {
   const auth = await authorize(request)
   if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status })
 
   const db = createServiceClient()
-  const { data, error } = await db
-    .from('contact_messages')
-    .select('id, name, email, subject, message, created_at, is_read, respuesta, respuesta_at, respondido_por, report_type, screenshot_path')
-    .order('created_at', { ascending: false })
+
+  // Un blip transitorio de conexión (visto en real: 500 puntual seguido de 3
+  // intentos OK inmediatos) dejaba al admin viendo "Error: HTTP 500" sin
+  // ningún mensaje, mientras el contador de no-leídos (consulta HEAD, más
+  // ligera) seguía funcionando -- de ahí el badge en "1" con la lista vacía.
+  // Un reintento inmediato absorbe ese blip sin que el admin lo note.
+  let result = await db.from('contact_messages').select(CONTACT_MESSAGES_SELECT).order('created_at', { ascending: false })
+  if (result.error) {
+    console.error('[admin/contact-messages GET] select failed (intento 1):', result.error.message)
+    result = await db.from('contact_messages').select(CONTACT_MESSAGES_SELECT).order('created_at', { ascending: false })
+  }
+  const { data, error } = result
 
   if (error) {
-    console.error('[admin/contact-messages GET] select failed:', error.message)
+    console.error('[admin/contact-messages GET] select failed (intento 2):', error.message)
     return NextResponse.json({ error: 'No se pudieron cargar los mensajes' }, { status: 500 })
   }
 
@@ -48,11 +58,19 @@ export async function GET(request: NextRequest) {
   // cliente: el admin no tiene una sesión con acceso al bucket privado de
   // otro alumno, así que la única forma de ver la captura es firmarla
   // server-side, igual que hydrateImageUrls en useCanvas.ts para zona-images.
+  // Cada captura se firma por separado y con su propio try/catch: si UNA
+  // falla (blip de Storage), el resto de mensajes siguen siendo visibles en
+  // vez de tumbar la lista entera con un Promise.all sin capturar.
   const messages = data ?? []
   const withScreenshots = await Promise.all(messages.map(async (m) => {
     if (!m.screenshot_path) return { ...m, screenshot_url: null as string | null }
-    const signed = await db.storage.from('bug-report-screenshots').createSignedUrl(m.screenshot_path, 60 * 10)
-    return { ...m, screenshot_url: signed.data?.signedUrl ?? null }
+    try {
+      const signed = await db.storage.from('bug-report-screenshots').createSignedUrl(m.screenshot_path, 60 * 10)
+      return { ...m, screenshot_url: signed.data?.signedUrl ?? null }
+    } catch (err) {
+      console.error('[admin/contact-messages GET] createSignedUrl failed:', err instanceof Error ? err.message : String(err))
+      return { ...m, screenshot_url: null as string | null }
+    }
   }))
 
   return NextResponse.json({ messages: withScreenshots, generatedAt: new Date().toISOString() })

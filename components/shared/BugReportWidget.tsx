@@ -259,20 +259,21 @@ export default function BugReportWidget() {
             onClick={() => setOpen(true)}
             aria-label="Reportar un problema"
             style={{
-              width: 52,
-              height: 52,
-              borderRadius: '50%',
+              height: 44,
+              padding: '0 16px 0 14px',
+              borderRadius: 999,
               background: 'var(--clay-accent)',
               color: 'var(--clay-on-accent)',
               border: 0,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              gap: 7,
               cursor: 'pointer',
               boxShadow: '0 5px 0 var(--clay-accent-deep), 0 10px 20px var(--clay-shadow-elevate)',
             }}
           >
-            <Bug size={22} />
+            <Bug size={18} />
+            <span style={{ fontSize: 12, fontWeight: 800 }}>Reportar</span>
           </button>
         )}
       </ClayThemeScope>

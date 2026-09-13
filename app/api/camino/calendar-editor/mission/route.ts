@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/app/lib/billing/supabase'
+import { getUserBillingContext } from '@/app/lib/billing/serverUsage'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { normalizeSubjectSlug, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 import { getAvailabilityForDate, hasTimeConflict } from '@/app/lib/calendar/availability'
@@ -7,6 +8,10 @@ import { deleteKairoMission, syncExistingKairoMissionToGoogle, syncKairoMissions
 import { DEFAULT_MISSION_DURATION_MINUTES } from '@/app/lib/camino/calendarEditorConfig'
 import { recordMissionBehaviorEvent } from '@/app/lib/camino/missionBehavior'
 import { isValidIsoCalendarDate } from '@/app/lib/camino/madridDate'
+import { getMadridToday } from '@/app/lib/camino/studyDays'
+import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
+import { getEffectivePlanLimits } from '@/app/lib/billing/limitOverrides'
+import { isInternalUser } from '@/app/lib/internalUsers'
 
 export const dynamic = 'force-dynamic'
 
@@ -134,6 +139,34 @@ export async function POST(request: NextRequest) {
         }
       }
       return NextResponse.json({ ok: true, duplicate: true, mission: existing, calendarSync })
+    }
+
+    // Este editor no conoce el orden Curso→Ejercicios→Simulacro ni el resto
+    // de reglas del motor de misiones -- lo único que puede pasar por aquí
+    // sin pasar por ese motor es una fila con source='manual' (o
+    // generated_by='kairo_chat'/'calendar_editor'), nunca la generación
+    // automática. Si esa fila cuenta como Simulacro (mission_type
+    // 'pau_practice'), debe respetar el mismo límite mensual que
+    // /api/simulacro/route.ts -- si no, cualquier caller (o una futura IA a
+    // la que se le diera control sobre missionType/kind) podría crear
+    // Simulacros ilimitados saltándose la cuota del plan. Se cuentan solo
+    // las filas manuales de este mismo endpoint (source='manual'), nunca las
+    // que el motor real ya haya programado como is_main.
+    if (missionType === 'pau_practice' && !isInternalUser(auth.user.email)) {
+      const billing = await getUserBillingContext(auth.user.id, auth.user.created_at, auth.user.email)
+      const planLimits = await getEffectivePlanLimits(db, auth.user.id, getCaminoPlanLimits(billing.planId))
+      const monthStart = `${getMadridToday().slice(0, 7)}-01`
+      const { count: manualMocksThisMonth, error: mocksCountError } = await db
+        .from('camino_calendar')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', auth.user.id)
+        .eq('mission_type', 'pau_practice')
+        .eq('source', 'manual')
+        .gte('scheduled_date', monthStart)
+      if (mocksCountError) throw mocksCountError
+      if ((manualMocksThisMonth ?? 0) >= planLimits.fullMocksPerMonth) {
+        return NextResponse.json({ error: 'simulacro_limit_reached' }, { status: 409 })
+      }
     }
 
     const { data: sameDayRows, error: sameDayError } = requestedStartTime && requestedEndTime

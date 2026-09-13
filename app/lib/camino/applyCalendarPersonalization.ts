@@ -4,12 +4,12 @@ import { createHash } from 'crypto'
 import { readAllRows } from './readAllRows'
 import { reconcilePlanWork } from './planPersistence'
 import { getAvailabilityForDate } from '../calendar/availability'
-import { estimatedMinutesForMission } from './missionDuration'
+import { minutesForPlacement } from './placementDuration'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { getMadridToday } from './studyDays'
 import { canRepositionAutomatically } from './automaticPlacement'
-import { VALID_DAILY_MINUTES, missionsPerDayForMinutes, estimatedMinutesForSlot } from './dailyTimeCapacity'
+import { VALID_DAILY_MINUTES, missionsPerDayForMinutes } from './dailyTimeCapacity'
 import { createDayScheduler } from './scheduleTimeSlot'
 import { loadStudentPlanContext, planningDates, type DeclaredAvailability, type StudentPlanContext } from './studentPlanContext'
 import { orderRowsForPlacement, preferredDatesFor, eligibleDatesForRow, unscheduledReasonFor, type PlacementRow, type PlacementWindow } from './planPlacement'
@@ -271,9 +271,7 @@ export async function applyCalendarPersonalization(
         // y acababa con la lección del día MÁS la preparación del examen.
         if (slot >= capacity) continue
         const scheduler = await schedulerFor(date)
-        const duration = candidate.missionType === 'concept' || candidate.missionType === 'review'
-          ? estimatedMinutesForSlot(prefs.dailyMinutes, slot)
-          : estimatedMinutesForMission({ mission_type: candidate.missionType, metadata: meta })
+        const duration = minutesForPlacement(prefs.dailyMinutes, slot, candidate.missionType, meta)
         const timeSlot = scheduler.placeBest(duration, {
           date,
           subject: row.subject,

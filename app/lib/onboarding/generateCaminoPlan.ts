@@ -293,7 +293,13 @@ async function generateCaminoPlanLocked(params: GenerateCaminoPlanParams): Promi
       // descarta y el Camino se construye igualmente con el resto.
       for (const subject of subjectsToQueue) {
         const queueRows = queueRowsBySubject[subject] ?? []
-        if (queueRows.length === 0) continue
+        if (queueRows.length === 0) {
+          // Una asignatura sin contenido publicado ni respaldo no se ha
+          // generado: debe aparecer en skippedSubjects igual que un fallo
+          // de inserción, nunca darse por preparada por tener cola vacía.
+          failedSubjects.push(subject)
+          continue
+        }
 
         let insertError: string | null = null
         for (let i = 0; i < queueRows.length; i += 100) {

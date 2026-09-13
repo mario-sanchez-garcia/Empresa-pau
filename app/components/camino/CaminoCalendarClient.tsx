@@ -3235,6 +3235,13 @@ export default function CaminoCalendarClient() {
         </div>
       </div>
 
+      {/* ── CHAT DE KAIRO ── sección de ancho completo, en el flujo normal del
+          documento justo debajo del calendario semanal -- ya no vive como
+          overlay flotante (ver CaminoAssistant.tsx). */}
+      <div style={{ padding: '20px 24px 28px' }}>
+        <CaminoAssistant onChanged={refreshAfterChat} />
+      </div>
+
       {/* ── MODALS ── */}
       <AnimatePresence>
         {showNotSeenConfirm && (
@@ -3286,7 +3293,6 @@ export default function CaminoCalendarClient() {
           otro sitio. Renderizado aquí, al nivel de los demás modales, queda
           siempre disponible sin importar el ancho de pantalla. */}
       <AnimatePresence>{showFullRanking && fullRankingToken && <FullRankingModal token={fullRankingToken} onClose={() => setShowFullRanking(false)} />}</AnimatePresence>
-      <CaminoAssistant onChanged={refreshAfterChat} />
     </Shell>
   )
 }
@@ -3299,7 +3305,13 @@ function Shell({ children }: { children: React.ReactNode }) {
   // vista, así que claro/color no cambian visualmente -- solo se corrige oscuro.
   const { theme: shellTheme } = useClayThemePreference()
   return (
-    <div data-kairo-clay-theme={shellTheme} style={{ display: 'flex', minHeight: '100vh', background: 'var(--clay-bg)' }}>
+    // flexDirection explícito: hasta ahora todo lo que colgaba de este nivel
+    // aparte de la cabecera y el grid de contenido era position:fixed
+    // (modales, el chat flotante antiguo) y por eso nunca reveló si esto era
+    // fila o columna -- el nuevo chat (CaminoAssistant, ya en flujo normal
+    // bajo el calendario semanal) sí necesita que esto apile verticalmente
+    // de verdad.
+    <div data-kairo-clay-theme={shellTheme} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--clay-bg)' }}>
       <style>{`
         .camino-reason-list {
           display: flex;

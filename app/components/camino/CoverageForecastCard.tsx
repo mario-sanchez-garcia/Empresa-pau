@@ -4,10 +4,8 @@ import { useId, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import type { CoverageForecast } from '@/app/lib/camino/coverageForecast'
 
-// La previsión responde a una pregunta que el alumno ya se hace solo: si le
-// va a dar tiempo. Por eso la cabecera ES esa pregunta y, cerrada, ya lleva la
-// respuesta al lado — un acordeón que no dice nada hasta que lo abres obliga a
-// abrirlo para saber si merecía la pena.
+// La cabecera muestra el resultado incluso cerrada. Se limita al trabajo
+// registrado: caber en el calendario no acredita la preparación académica.
 //
 // Cerrada ocupa una fila. El detalle —reparto, supuestos, límites— vive
 // dentro, porque es lo que se consulta de vez en cuando y no cada día.
@@ -105,7 +103,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
   // la capacidad, la escala pasa a ser el trabajo.
   const scale = Math.max(
     forecast.totalCapacityMinutes,
-    forecast.scheduledMinutes + forecast.projectedPendingMinutes + atRisk,
+    known,
     1,
   )
 
@@ -115,7 +113,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
       ? { tone: 'neutral', text: 'Sin datos' }
       : atRisk > 0
         ? { tone: 'warn', text: `${hours(atRisk)} fuera` }
-        : { tone: 'accent', text: 'Cabe todo' }
+        : { tone: 'accent', text: 'Lo registrado cabe' }
 
   const withWork = forecast.subjects.filter(row => row.scheduledMinutes + row.pendingMinutes > 0)
 
@@ -151,7 +149,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
         }}
       >
         <span style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 800, letterSpacing: '-0.01em' }}>
-          ¿Te cabe todo antes de la PAU?
+          Tu previsión hasta la PAU
         </span>
         <AnswerChip tone={answer.tone}>{answer.text}</AnswerChip>
         <ChevronDown
@@ -187,12 +185,14 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
                     <span style={num}>{hours(known)}</span>
                   </div>
                   <div
+                    role="img"
+                    aria-label={`Reparto del trabajo registrado: ${hours(forecast.validScheduledMinutes)} programado sin conflicto, ${hours(forecast.projectedPendingMinutes)} pendiente que cabe, ${hours(atRisk)} en riesgo`}
                     style={{
                       display: 'flex', height: 10, borderRadius: 999, overflow: 'hidden',
                       background: 'var(--clay-surface-deep)',
                     }}
                   >
-                    <Segment minutes={forecast.scheduledMinutes} total={scale} tone="accent" />
+                    <Segment minutes={forecast.validScheduledMinutes} total={scale} tone="accent" />
                     <Segment minutes={forecast.projectedPendingMinutes} total={scale} tone="accent" faded />
                     <Segment minutes={atRisk} total={scale} tone="warn" />
                   </div>
@@ -204,7 +204,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
 
                 <div style={{ display: 'grid', gap: 6, fontSize: 12 }}>
                   {[
-                    { tone: 'accent' as Tone, faded: false, label: 'Ya programado', value: forecast.scheduledMinutes },
+                    { tone: 'accent' as Tone, faded: false, label: 'Programado sin conflicto', value: forecast.validScheduledMinutes },
                     { tone: 'accent' as Tone, faded: true, label: 'Pendiente que prevemos que cabe', value: forecast.projectedPendingMinutes },
                     { tone: 'warn' as Tone, faded: false, label: 'Sin hueco con tu disponibilidad', value: atRisk },
                   ].filter(row => row.value > 0).map(row => (

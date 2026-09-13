@@ -97,11 +97,25 @@ export default function ContactMessagesPage() {
   async function load() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { setState({ status: 'unauthenticated' }); return }
-    const res = await fetch('/api/admin/contact-messages', {
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    })
+
+    async function fetchOnce() {
+      return fetch('/api/admin/contact-messages', {
+        headers: { Authorization: `Bearer ${session!.access_token}` },
+      })
+    }
+
+    let res = await fetchOnce()
     if (res.status === 403) { setState({ status: 'unauthorized' }); return }
     if (res.status === 401) { setState({ status: 'unauthenticated' }); return }
+    if (!res.ok) {
+      // Un blip transitorio de conexión no debe dejar al admin viendo un
+      // error permanente sin recargar a mano -- un segundo intento tras una
+      // breve espera resuelve el caso real que motivó esto (ver
+      // GET /api/admin/contact-messages, que ya reintenta una vez del lado
+      // servidor; esto cubre además un blip de red entre el navegador y Vercel).
+      await new Promise(r => setTimeout(r, 800))
+      res = await fetchOnce()
+    }
     if (!res.ok) { setState({ status: 'error', message: `HTTP ${res.status}` }); return }
     const json = await res.json() as { messages: ContactMessage[]; generatedAt: string }
     setState({ status: 'loaded', messages: json.messages, generatedAt: json.generatedAt })

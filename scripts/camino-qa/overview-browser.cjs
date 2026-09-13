@@ -31,12 +31,16 @@ async function main(){
  const errors=[];page.on('pageerror',error=>errors.push(error.message))
  const load=runtime(),context=load('app/lib/camino/planWindow.ts').buildStudentPlanContext({today:'2027-01-11',examDate:'2027-06-07',dailyMinutes:60,weeklyStudyDays:2})
  const forecast=load('app/lib/camino/coverageForecast.ts').buildCoverageForecast(context,[],[{id:'q',subject:'fisica',queue_status:'pending',metadata:{estimated_minutes:30}}],[],['fisica'])
+ const conflictForecast=load('app/lib/camino/coverageForecast.ts').buildCoverageForecast(context,[
+  {id:'a',subject:'fisica',status:'pending',source:'algorithm',locked:true,mission_type:'concept',scheduled_date:context.today,start_time:'16:00',end_time:'17:00'},
+  {id:'b',subject:'fisica',status:'pending',source:'algorithm',locked:true,mission_type:'concept',scheduled_date:context.today,start_time:'17:00',end_time:'17:30'},
+ ],[],[],['fisica'])
  let mode='cap', delayA=false
  await page.route('**/api/camino/plan-overview',async route=>{
   const userId=route.request().headers().authorization.split(' ')[1]
   if(delayA&&userId==='a')await new Promise(resolve=>setTimeout(resolve,200))
   if(mode==='error')return route.fulfill({status:503,json:{error:'test'}})
-  await route.fulfill({json:{userId,forecast,notices:{availability:mode==='cap'&&userId==='a'?{requestedWeeklyStudyDays:7,effectiveWeeklyStudyDays:2,accessMaxStudyDaysPerWeek:2,accessLabel:'Free'}:null,protectedConflicts:mode==='conflict'?['locked']:[],misplaced:[]}}}).catch(()=>{})
+  await route.fulfill({json:{userId,forecast:mode==='forecast-conflict'?conflictForecast:forecast,notices:{availability:mode==='cap'&&userId==='a'?{requestedWeeklyStudyDays:7,effectiveWeeklyStudyDays:2,accessMaxStudyDaysPerWeek:2,accessLabel:'Free'}:null,protectedConflicts:mode==='conflict'?['locked']:[],misplaced:[]}}}).catch(()=>{})
  })
  const {expect}=require('@playwright/test')
  await page.goto(`http://127.0.0.1:${server.address().port}`)
@@ -52,13 +56,14 @@ async function main(){
  await expect(page.getByText('Tu plan usa 2 días a la semana')).toBeVisible()
  delayA=true;await page.evaluate(()=>{window.dispatchEvent(new Event('camino:updated'));window.switchAccount('b')})
  await expect(page.getByText('Tu plan usa 2 días a la semana')).toHaveCount(0)
- await expect(page.getByRole('button',{name:/¿Te cabe todo antes de la PAU\?/})).toBeVisible()
+ await expect(page.getByRole('button',{name:/Tu previsión hasta la PAU/})).toBeVisible()
  mode='error';await page.evaluate(()=>window.dispatchEvent(new Event('camino:updated')))
  await expect(page.getByRole('button',{name:'Reintentar'})).toBeVisible()
  mode='clear';await page.getByRole('button',{name:'Reintentar'}).click()
  // La previsión abre cerrada: la pregunta es el disparador y ya trae respuesta.
- const trigger=page.getByRole('button',{name:/¿Te cabe todo antes de la PAU\?/})
+ const trigger=page.getByRole('button',{name:/Tu previsión hasta la PAU/})
  await expect(trigger).toBeVisible()
+ await expect(trigger).toContainText('Lo registrado cabe')
  await expect(trigger).toHaveAttribute('aria-expanded','false')
  await expect(page.getByText('Capacidad hasta la PAU')).not.toBeVisible()
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true)
@@ -67,6 +72,24 @@ async function main(){
  await expect(page.getByText('Capacidad hasta la PAU')).toBeVisible()
  await expect(page.getByText('No predice tu nota.')).toBeVisible()
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true)
+ // Conflicting scheduled work is counted once in both the legend and bar.
+ mode='forecast-conflict';await page.evaluate(()=>window.dispatchEvent(new Event('camino:updated')))
+ await expect(trigger).toContainText('0,5 h fuera')
+ await expect(page.getByText('Programado sin conflicto',{exact:true})).toBeVisible()
+ const bar=page.getByRole('img',{name:/Reparto del trabajo registrado/})
+ await expect(bar).toHaveAttribute('aria-label','Reparto del trabajo registrado: 1 h programado sin conflicto, 0 h pendiente que cabe, 0,5 h en riesgo')
+ const widths=await bar.locator(':scope > div').evaluateAll(nodes=>nodes.map(node=>parseFloat(node.style.width)))
+ const scale=Math.max(conflictForecast.totalCapacityMinutes,90,1)
+ assert.equal(widths.length,2)
+ // CSSOM serializes percentages with limited decimal precision.
+ assert.ok(Math.abs(widths[0]-60/scale*100)<0.0001,`scheduled width ${widths[0]} must represent 60 minutes`)
+ assert.ok(Math.abs(widths[1]-30/scale*100)<0.0001,`risk width ${widths[1]} must represent 30 minutes`)
+ for(const width of [320,390]) {
+  await page.setViewportSize({width,height:844})
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true)
+ }
+ mode='clear';await page.evaluate(()=>window.dispatchEvent(new Event('camino:updated')))
+ await expect(trigger).toContainText('Lo registrado cabe')
  // Cerrada es el estado por defecto y el que mas se ve: se captura tambien.
  const shots={}
  await trigger.click();await expect(trigger).toHaveAttribute('aria-expanded','false')
@@ -79,7 +102,7 @@ async function main(){
  await page.evaluate(()=>document.documentElement.removeAttribute('data-kairo-clay-theme'))
  const screenshot=shots.expanded
  assert.deepEqual(errors,[])
- console.log(JSON.stringify({shots,passed:['reload','resolve-cap','resolve-protected-conflict','account-switch-late-response','retry','forecast-collapsed-by-default','forecast-expands','mobile-no-overflow'],screenshot}))
+ console.log(JSON.stringify({shots,passed:['reload','resolve-cap','resolve-protected-conflict','account-switch-late-response','retry','forecast-collapsed-by-default','forecast-expands','mobile-no-overflow-320-390','forecast-conflict-counted-once','registered-work-copy'],screenshot}))
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
 }
 main().catch(error=>{console.error(error);process.exitCode=1})

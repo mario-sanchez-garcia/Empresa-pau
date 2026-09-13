@@ -1,13 +1,13 @@
 import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { loadStudentPlanContext } from './studentPlanContext'
+import { loadStudentPlanContext, type StudentPlanContext } from './studentPlanContext'
 import { readAllRows } from './readAllRows'
 import { buildCoverageForecast, type ForecastCalendarRow, type ForecastQueueRow, type ForecastEvent } from './coverageForecast'
 import { normalizeSubjectSlug } from './caminoCurriculumPlan'
 
-export async function loadCoverageForecast(userId: string, db: SupabaseClient) {
+export async function loadCoverageForecast(userId: string, db: SupabaseClient, planContext?: StudentPlanContext) {
   const [context, calendar, queue, events, profile] = await Promise.all([
-    loadStudentPlanContext(userId, db),
+    planContext ?? loadStudentPlanContext(userId, db),
     readAllRows<ForecastCalendarRow>((from, to) => db.from('camino_calendar')
       .select('id, queue_id, subject, scheduled_date, status, source, locked, mission_type, start_time, end_time, metadata')
       .eq('user_id', userId).in('status', ['pending', 'postponed', 'unscheduled', 'missed', 'completed']).order('id').range(from, to)),

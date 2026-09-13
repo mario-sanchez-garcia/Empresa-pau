@@ -1,0 +1,50 @@
+{
+  "checkedAt": "2026-09-13T10:15:55.969Z",
+  "compatible": true,
+  "scope": "Read-only schema, published-content presence, RPC exposure and unauthenticated endpoint checks. Does not certify deployment version, RLS, academic completeness, real-user flows or load capacity.",
+  "checks": [
+    {
+      "name": "schema:camino_custom_events",
+      "ok": true
+    },
+    {
+      "name": "schema:user_learning_queue",
+      "ok": true
+    },
+    {
+      "name": "schema:camino_calendar",
+      "ok": true
+    },
+    {
+      "name": "published-curriculum",
+      "ok": true,
+      "counts": {
+        "matematicas_ii": 63,
+        "matematicas_ccss": 43,
+        "lengua": 60,
+        "historia_espana": 128,
+        "fisica": 57,
+        "quimica": 68,
+        "ingles": 12,
+        "historia_filosofia": 18,
+        "economia": 50
+      },
+      "missing": []
+    },
+    {
+      "name": "planning-rpc-exposure",
+      "ok": true,
+      "missing": []
+    },
+    {
+      "name": "unauthenticated:/api/camino/plan-overview",
+      "ok": true,
+      "status": 401
+    },
+    {
+      "name": "unauthenticated:/api/camino/ensure-calendar",
+      "ok": true,
+      "status": 401
+    }
+  ]
+}

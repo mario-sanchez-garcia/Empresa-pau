@@ -8,6 +8,7 @@ import { signOutLocally } from '@/app/lib/auth/signOutLocally'
 import { loadProfilePreferences } from '@/app/lib/profilePreferences'
 import { useBillingStatus } from '@/app/hooks/useBillingStatus'
 import { getCaminoPlanLimits } from '@/app/lib/camino/caminoPlanLimits'
+import { onContactUnreadChanged } from '@/app/lib/admin/contactUnreadChannel'
 
 const NAV = [
   { label: 'Camino PAU', href: '/camino',                  icon: LayoutGrid },
@@ -84,6 +85,14 @@ export default function SidebarNav() {
   }, [pathname])
 
   useEffect(() => {
+    async function refreshUnreadCount() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      const res = await fetch('/api/admin/contact-messages/unread-count', { headers: { Authorization: `Bearer ${session.access_token}` } })
+      const json = await res.json().catch(() => ({ unreadCount: 0 })) as { unreadCount?: number }
+      setUnreadContactCount(json.unreadCount ?? 0)
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) return
       fetch('/api/admin/me', { headers: { Authorization: `Bearer ${session.access_token}` } })
@@ -92,15 +101,16 @@ export default function SidebarNav() {
           setIsAdmin(d.isAdmin === true)
           // Badge de "Panel interno" -- solo se pide el contador si de verdad
           // es interno, para no hacer esta llamada extra a cualquier alumno.
-          if (d.isAdmin === true) {
-            fetch('/api/admin/contact-messages/unread-count', { headers: { Authorization: `Bearer ${session.access_token}` } })
-              .then(r => r.ok ? r.json() : { unreadCount: 0 })
-              .then((c: { unreadCount?: number }) => setUnreadContactCount(c.unreadCount ?? 0))
-              .catch(() => {})
-          }
+          if (d.isAdmin === true) refreshUnreadCount().catch(() => {})
         })
         .catch(() => {})
     })
+
+    // Se dispara desde app/admin/contact-messages/page.tsx tras marcar un
+    // mensaje como leído -- sin esto el badge se queda con el número viejo
+    // hasta que esta pestaña concreta vuelva a montar SidebarNav (nunca
+    // coexisten en el mismo layout, y a menudo están en pestañas distintas).
+    return onContactUnreadChanged(() => { refreshUnreadCount().catch(() => {}) })
   }, [])
 
   useEffect(() => {

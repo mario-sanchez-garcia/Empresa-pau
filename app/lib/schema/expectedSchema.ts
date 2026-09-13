@@ -56,6 +56,8 @@ export const EXPECTED_COLUMNS: ExpectedColumn[] = [
     porque: 'La racha se calcula con la fecha real, no con scheduled_date' },
   { table: 'camino_ensure_log', column: 'last_ensured_day',
     porque: 'Throttle diario de ensure-calendar' },
+  { table: 'camino_ensure_log', column: 'replan_pending_at',
+    porque: 'Sin ella, un reajuste que pilla el Camino ocupado se pierde y el alumno tiene que pulsar «Recalcular mi plan» a mano' },
   { table: 'perfiles', column: 'username',
     porque: 'Nombre mostrado en rankings; sin ella se ve "Alumno Kairo" a todos' },
   { table: 'perfiles', column: 'subjects',

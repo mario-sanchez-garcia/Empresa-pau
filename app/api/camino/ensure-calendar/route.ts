@@ -16,6 +16,30 @@ export const dynamic = 'force-dynamic'
 export const maxDuration = 300
 
 /**
+ * Deja constancia de un reajuste forzado que no ha llegado a entrar.
+ *
+ * El bloqueo por alumno que comparte esta ruta con el resto del Camino hace
+ * que un `force` legítimo se lleve un 409 solo por tener el Camino abierto en
+ * otra pestaña. Antes eso acababa en un aviso pidiéndole al alumno que cerrase
+ * pestañas y pulsara «Recalcular mi plan»: sus ajustes estaban guardados y su
+ * plan no. Con la marca, la siguiente ejecución —la propia carga del Camino—
+ * lo aplica sola.
+ *
+ * `upsert` y no `update`: el alumno puede no tener fila todavía (la crea la
+ * primera ejecución completa). Nunca lanza: no poder anotar el pendiente no
+ * puede tumbar una respuesta que ya tiene su propio significado.
+ */
+async function markReplanPending(db: ReturnType<typeof checkedDb>, userId: string) {
+  const { error } = await db
+    .from('camino_ensure_log')
+    .upsert(
+      { user_id: userId, replan_pending_at: new Date().toISOString() },
+      { onConflict: 'user_id' },
+    )
+  if (error) console.error('[camino/ensure-calendar] no se pudo anotar el reajuste pendiente:', error.message)
+}
+
+/**
  * Prepara el Camino del usuario. Encadena tres operaciones de escritura, así
  * que NO debe ejecutarse en cada carga de página: una vez al día por usuario
  * basta para que aparezcan misiones nuevas y repasos.
@@ -38,19 +62,44 @@ export async function POST(request: NextRequest) {
     // Sin cuerpo (o cuerpo no-JSON) es una llamada normal de carga: throttled.
   }
 
+  const db = checkedDb(createServiceClient())
+
   try {
-    const db = checkedDb(createServiceClient())
     return await withPlanLock(db, user.id, async () => {
     const today = getMadridToday()
 
-    if (!force) {
-      const { data: log, error: logReadError } = await db
+    // La columna del pendiente se lee aparte y tolera no existir: entre el
+    // despliegue del código y la aplicación de su migración hay una ventana, y
+    // en ella un select que falla dejaría el Camino entero en 500. Sin
+    // columna, el comportamiento es exactamente el de antes.
+    let pendingAt: string | null = null
+    const withPending = await db
+      .from('camino_ensure_log')
+      .select('last_ensured_day, replan_pending_at')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    let log: { last_ensured_day?: string | null } | null = withPending.data
+    if (withPending.error) {
+      console.warn('[camino/ensure-calendar] sin columna de reajuste pendiente (¿migración sin aplicar?):', withPending.error.message)
+      const fallback = await db
         .from('camino_ensure_log')
         .select('last_ensured_day')
         .eq('user_id', user.id)
         .maybeSingle()
+      if (fallback.error) throw fallback.error
+      log = fallback.data
+    } else {
+      // Reajuste que quedó pendiente de una vez anterior: el alumno guardó sus
+      // ajustes y el bloqueo estaba ocupado (o el intento salió degradado),
+      // así que aquello no llegó a entrar. Vale tanto como un `force`
+      // explícito —y es justo lo que evita tener que pulsar «Recalcular mi
+      // plan»—, pero solo se limpia si ESTA ejecución termina limpia.
+      pendingAt = (withPending.data?.replan_pending_at as string | null) ?? null
+    }
+    if (pendingAt) force = true
 
-      if (logReadError) throw logReadError
+    if (!force) {
       if (log?.last_ensured_day === today) {
         // Saltarse el día no puede significar saltarse la realidad. Dos cosas
         // pasan aquí que antes no:
@@ -108,12 +157,31 @@ export async function POST(request: NextRequest) {
       const { error: logError } = await db
         .from('camino_ensure_log')
         .upsert(
-          { user_id: user.id, last_ensured_at: new Date().toISOString(), last_ensured_day: today },
+          {
+            user_id: user.id,
+            last_ensured_at: new Date().toISOString(),
+            last_ensured_day: today,
+          },
           { onConflict: 'user_id' },
         )
       if (logError) degraded.push('ensure_log')
+      else if (pendingAt) {
+        // El pendiente se salda aquí y solo aquí: esta ejecución lo atendió y
+        // ha terminado limpia. Y se salda por igualdad con la marca que
+        // leímos, no a ciegas: si mientras corría entró un pendiente NUEVO
+        // (otro guardado en Ajustes), la marca ya es otra y sobrevive para la
+        // siguiente ejecución en vez de perderse.
+        await db
+          .from('camino_ensure_log')
+          .update({ replan_pending_at: null })
+          .eq('user_id', user.id)
+          .eq('replan_pending_at', pendingAt)
+      }
     } else {
       console.error('[camino/ensure-calendar] degraded run, day not marked:', degraded.join(', '))
+      // Un reajuste forzado que sale degradado no se pierde: queda pendiente y
+      // lo recoge la siguiente ejecución, sin que el alumno pulse nada.
+      if (force) await markReplanPending(db, user.id)
     }
 
     return NextResponse.json({
@@ -128,11 +196,17 @@ export async function POST(request: NextRequest) {
       protectedConflicts: notices.protectedConflicts,
       availability: notices.availability,
       retryable: degraded.length > 0,
+      // El cliente lo usa para no pedir una acción manual que ya no hace
+      // falta: el reajuste quedó apuntado y entrará solo.
+      replanPending: degraded.length > 0 && force,
     }, { status: degraded.length > 0 ? 503 : 200 })
     })
   } catch (error) {
-    if (error instanceof PlanBusyError) return NextResponse.json({ ok: false, retryable: true, error: 'plan_busy' }, { status: 409, headers: { 'Retry-After': '2' } })
+    // Un `force` que no entra queda anotado, ocupado o roto el motivo: lo que
+    // el alumno acaba de guardar se aplicará solo en la siguiente ejecución.
+    if (force) await markReplanPending(db, user.id)
+    if (error instanceof PlanBusyError) return NextResponse.json({ ok: false, retryable: true, error: 'plan_busy', replanPending: force }, { status: 409, headers: { 'Retry-After': '2' } })
     console.error('[camino/ensure-calendar]', error)
-    return NextResponse.json({ error: 'No se pudo preparar tu Camino' }, { status: 500 })
+    return NextResponse.json({ error: 'No se pudo preparar tu Camino', replanPending: force }, { status: 500 })
   }
 }

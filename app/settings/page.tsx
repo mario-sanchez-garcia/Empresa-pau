@@ -102,11 +102,20 @@ type CaminoPrefsStatus = { tone: 'ok' | 'warn'; text: string }
  * abierto en otra pestaña para llevarse un 409 `plan_busy` — que viaja con su
  * `Retry-After` justo para que el cliente reintente, cosa que no hacía. El 503
  * degradado se marca `retryable` por lo mismo. Reintentamos los dos.
+ *
+ * Y cuando ni con reintentos entra, tampoco se le pide nada al alumno:
+ * guardar sus ajustes tiene que bastar. El servidor deja el reajuste apuntado
+ * (`replanPending`, ver camino_ensure_log.replan_pending_at) y lo aplica en su
+ * siguiente ejecución —abrir el Camino ya la provoca—, así que aquí solo se
+ * cuenta lo que va a pasar. «Recalcular mi plan» sigue existiendo, pero como
+ * opción, no como deber.
  */
 async function recalculateCamino(token: string): Promise<CaminoPrefsStatus> {
-  const busy: CaminoPrefsStatus = { tone: 'warn', text: 'Tus ajustes se han guardado. Tu Camino se estaba actualizando en otro sitio y el reajuste no ha llegado a entrar: ciérralo en las demás pestañas y pulsa «Recalcular mi plan».' }
-  const failed: CaminoPrefsStatus = { tone: 'warn', text: 'Tus ajustes se han guardado, pero no hemos podido reajustar tu Camino ahora. Prueba con «Recalcular mi plan»; si sigue igual, repórtalo y lo miramos.' }
-  let lastWasBusy = false
+  const pending: CaminoPrefsStatus = { tone: 'ok', text: 'Tus ajustes se han guardado. Tu Camino se estaba actualizando en otro sitio, así que el reajuste queda pendiente y se aplicará solo en cuanto termine: no tienes que hacer nada.' }
+  const failed: CaminoPrefsStatus = { tone: 'warn', text: 'Tus ajustes se han guardado, pero el reajuste de tu Camino no ha entrado a la primera. Queda pendiente y se aplicará solo la próxima vez que lo abras; si lo ves igual mañana, repórtalo y lo miramos.' }
+  // Solo para un servidor que ni siquiera pudo apuntar el pendiente (respuesta
+  // antigua, sin `replanPending`): ahí sí hace falta la acción manual.
+  const hardFailure: CaminoPrefsStatus = { tone: 'warn', text: 'Tus ajustes se han guardado, pero no hemos podido reajustar tu Camino ahora. Prueba con «Recalcular mi plan»; si sigue igual, repórtalo y lo miramos.' }
 
   for (let attempt = 1; attempt <= 3; attempt++) {
     let response: Response
@@ -121,19 +130,22 @@ async function recalculateCamino(token: string): Promise<CaminoPrefsStatus> {
     }
     if (response.ok) return { tone: 'ok', text: 'Tu Camino se ha ajustado para las próximas misiones.' }
 
-    const body = await response.json().catch(() => null) as { error?: string; retryable?: boolean; degraded?: string[] } | null
-    lastWasBusy = response.status === 409
-    if (!lastWasBusy && body?.retryable !== true) {
+    const body = await response.json().catch(() => null) as { error?: string; retryable?: boolean; degraded?: string[]; replanPending?: boolean } | null
+    const busy = response.status === 409
+    if (!busy && body?.retryable !== true) {
       // El motivo real solo existe aquí: la respuesta lo trae y antes se tiraba.
       console.error('[settings] recalculo del Camino fallido:', response.status, body?.degraded?.join(', ') ?? body?.error ?? '')
-      return failed
+      return body?.replanPending ? failed : hardFailure
     }
     if (attempt < 3) {
       const seconds = Number(response.headers.get('Retry-After')) || 2
       await new Promise(resolve => window.setTimeout(resolve, seconds * 1000 * attempt))
+      continue
     }
+    // Agotados los reintentos: el servidor ya lo dejó apuntado.
+    return busy ? pending : failed
   }
-  return lastWasBusy ? busy : failed
+  return failed
 }
 
 function weeklyDaysLabel(days: number | null) {

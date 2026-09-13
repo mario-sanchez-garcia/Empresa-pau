@@ -317,6 +317,35 @@ test('una ejecución degradada NO marca el día como hecho', () => {
   )
 })
 
+test('un reajuste que pilla el Camino ocupado no se pierde ni se delega en el alumno', () => {
+  // Guardar los ajustes tiene que bastar. El bloqueo por alumno que comparte
+  // ensure-calendar con el resto del Camino hace que un `force` legítimo se
+  // lleve un 409 solo por tenerlo abierto en otra pestaña; antes eso acababa
+  // en «cierra las demás pestañas y pulsa Recalcular» y el plan se quedaba
+  // viejo. Ahora queda apuntado en camino_ensure_log.replan_pending_at y lo
+  // aplica la siguiente ejecución.
+  const route = stripComments(
+    readFileSync(join(ROOT, '../api/camino/ensure-calendar/route.ts'), 'utf8'),
+  ).replace(/\s+/g, ' ')
+  assert.ok(route.includes('markReplanPending'), 'un reajuste que no entra no se apunta en ninguna parte')
+  assert.ok(route.includes('if (force) await markReplanPending(db, user.id)'), 'el fallo de un reajuste forzado se pierde')
+  assert.ok(route.includes('if (pendingAt) force = true'), 'el pendiente no se salta el throttle diario, así que no llegaría a aplicarse')
+  // La limpieza va por igualdad con la marca leída: un pendiente NUEVO que
+  // entre mientras corre esta ejecución tiene que sobrevivir.
+  assert.ok(
+    route.includes(".eq('replan_pending_at', pendingAt)"),
+    'el pendiente se borra a ciegas y puede llevarse por delante uno posterior',
+  )
+
+  const settings = readFileSync(join(process.cwd(), 'app', 'settings', 'page.tsx'), 'utf8')
+  const busyMessage = settings.split('\n').find(line => line.includes('const pending: CaminoPrefsStatus')) ?? ''
+  assert.ok(busyMessage.length > 0, 'Ajustes ya no distingue el caso "ocupado"')
+  assert.ok(
+    !busyMessage.includes('Recalcular'),
+    'Ajustes sigue pidiendo pulsar «Recalcular» por algo que se aplica solo',
+  )
+})
+
 test('el trabajo sin fecha se le muestra al alumno', () => {
   // El recuento ya no lo hace el navegador: vive en /api/camino/plan-status,
   // que puede descontar el trabajo que la cola ya ha resuelto — algo que el

@@ -131,6 +131,9 @@ const CALENDAR_WEEK_CACHE_KEY = 'kairo_camino_week_cache_v2'
 // por tanto se pueden pintar antes de que responda la red (ver
 // saveCalendarWeeksToCache y loadCalendarWeeksFromCache).
 const SERVER_WEEKS_KEY = 'kairo_camino_server_weeks_v1'
+// Cuántas semanas ANTERIORES a la actual se leen del servidor, para que
+// "← Ant" enseñe el historial real y no un hueco (ver fetchCaminoCalendar).
+const CALENDAR_HISTORY_WEEKS = 4
 const SCHOOL_FEEDBACK_KEY = 'kairo_school_topic_feedback_v1'
 const SCHOOL_ADJUSTMENTS_KEY = 'kairo_camino_school_adjustments_v1'
 const BETA_FEEDBACK_URL = process.env.NEXT_PUBLIC_BETA_FEEDBACK_URL
@@ -618,7 +621,16 @@ async function fetchCaminoCalendar(userId: string): Promise<DayPlan[] | null> {
   // con misiones ya completadas se veía como "estudio libre" en el widget de
   // semana. Estos días pasados son solo lectura aquí: se muestran tal cual
   // quedaron registrados (completed/missed/pending), nunca se recalculan.
-  const weekStartStr = currentWeekStartISO()
+  //
+  // Y arranca CALENDAR_HISTORY_WEEKS antes de ese lunes, no en él: "← Ant"
+  // deja navegar a semanas pasadas, pero de ellas no llegaba ni una fila, así
+  // que resolveWeek no encontraba nada en `calendar` y caía al generador
+  // local — que pintaba los siete días como "Repaso libre" (o se inventaba un
+  // plan para una semana que ya ocurrió). El alumno veía su semana anterior
+  // vacía y concluía, con razón, que sus días de estudio no se habían
+  // respetado. Las semanas pasadas son historial de solo lectura igual que
+  // los días pasados de la semana en curso.
+  const weekStartStr = toISO(addDays(dateFromISO(currentWeekStartISO()), -7 * CALENDAR_HISTORY_WEEKS))
   // Se PAGINA, no se recorta. Aquí había un `.limit(110)` con la intención de
   // cubrir de sobra los días sembrados, pero el tope es de FILAS y los días
   // llevan varias misiones cada uno: con 180 min al día caben siete u ocho.
@@ -1696,8 +1708,21 @@ export default function CaminoCalendarClient() {
   }))
   const today = visibleCalendar.find(day => day.date === realToday) ?? { date: realToday, label: calendarDayLabel(realToday), isToday: true, missions: [] }
   const allMissions = visibleCalendar.flatMap(day => day.missions)
-  const totalMain = allMissions.filter(mission => mission.role === 'main').length
-  const completedMain = allMissions.filter(mission => mission.role === 'main' && mission.status === 'done').length
+  // El contador que se rotula "Esta semana" cuenta LA SEMANA EN CURSO, no el
+  // calendario entero. Contaba `allMissions` —los ~30 días sembrados— y
+  // además topaba el objetivo en 5, así que a un alumno con 6 días de estudio
+  // a la semana le salía "0/5" con independencia de lo que hubiera elegido en
+  // Ajustes, y el numerador incluía misiones hechas semanas atrás. Es la
+  // semana natural (lunes a domingo), no `selectedWeekStart`: weeklySims /
+  // weeklyExamsCompleted vienen de /api/camino/bootstrap acotados a la semana
+  // actual, y mezclarlos con otra semana volvería a descuadrar el numerador.
+  const currentWeekStart = currentWeekStartISO()
+  const currentWeekEnd = toISO(addDays(dateFromISO(currentWeekStart), 6))
+  const currentWeekMissions = visibleCalendar
+    .filter(day => day.date >= currentWeekStart && day.date <= currentWeekEnd)
+    .flatMap(day => day.missions)
+  const totalMain = currentWeekMissions.filter(mission => mission.role === 'main').length
+  const completedMain = currentWeekMissions.filter(mission => mission.role === 'main' && mission.status === 'done').length
   // Un simulacro/práctica parcial (historial_simulacros, weeklySimsCompleted)
   // o una corrección de Exámenes (historial_examenes, weeklyExamsCompleted)
   // no viven como filas de camino_calendar, así que nunca marcan como 'done'
@@ -1705,9 +1730,8 @@ export default function CaminoCalendarClient() {
   // ese día una misión kind='mock_exam' o 'evau_practice'. Sin esto el
   // contador se quedaba en 0 tras completar cualquiera de los dos, aunque XP
   // y racha sí se actualizaran (esos sí leen camino_xp_events). Se suman como
-  // si fueran una misión normal más, sin superar el objetivo semanal ya
-  // mostrado (Math.min(totalMain, 5)) para no desbordar la UI.
-  const completedMainWithSims = Math.min(completedMain + weeklySimsCompleted + weeklyExamsCompleted, Math.min(totalMain, 5))
+  // si fueran una misión normal más, sin superar el objetivo semanal real.
+  const completedMainWithSims = Math.min(completedMain + weeklySimsCompleted + weeklyExamsCompleted, totalMain)
   const todayMain = rankMissionCandidates(today?.missions.filter(mission => mission.role === 'main') ?? [], orientationContext, realToday)
   const todayBonus = today?.missions.filter(mission => mission.role === 'bonus') ?? []
   const todayDone = todayMain.length > 0 && todayMain.every(mission => mission.status === 'done')
@@ -1756,7 +1780,10 @@ export default function CaminoCalendarClient() {
         : `/examenes?subject=${encodeURIComponent(topSlug)}&mode=random&source=repaso_express`
       return { subject: subjectLabel, subjectSlug: topSlug, topic: item?.topic ?? subjectLabel, href, hasCompletedItems: Boolean(topEntry) }
     })()
-  const isRescueMode = calendar.some(day => day.missions.some(m => m.metadata?.plan_mode === 'rescue'))
+  // Solo el plan VIGENTE decide si el alumno está en modo rescate: `calendar`
+  // ya trae CALENDAR_HISTORY_WEEKS de historial, y una semana de rescate que
+  // quedó atrás no debe seguir tiñendo el hub de hoy.
+  const isRescueMode = calendar.some(day => day.date >= realToday && day.missions.some(m => m.metadata?.plan_mode === 'rescue'))
   const selectedWeekLabel = weekRangeLabel(selectedWeekStart)
   const selectedIsCurrentWeek = selectedWeekStart === currentWeekStartISO()
   const nextMissionInCalendar = visibleCalendar
@@ -2602,7 +2629,7 @@ export default function CaminoCalendarClient() {
           {/* Ticker */}
           <div style={{ background: 'var(--clay-surface-raised)', borderTop: '1px solid var(--clay-border)', padding: '5px 20px', display: 'flex', gap: 16, overflowX: 'auto' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--clay-accent)', flexShrink: 0, display: 'inline-block' }} />{streak > 0 ? `${streak} días de racha` : 'Empieza tu racha hoy'}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--clay-accent)', flexShrink: 0, display: 'inline-block' }} />{completedMainWithSims}/{Math.min(totalMain, 5)} principales</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--clay-accent)', flexShrink: 0, display: 'inline-block' }} />{completedMainWithSims}/{totalMain} principales</div>
             {weeklyXP > 0 && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--clay-accent)', flexShrink: 0, display: 'inline-block' }} />+{weeklyXP} XP semana</div>}
             <div data-testid="camino-days-until-pau" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--clay-accent)', flexShrink: 0, display: 'inline-block' }} />{daysUntilPAU} días para la PAU</div>
             {upcomingPartial && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 800, color: 'var(--clay-accent-text)', whiteSpace: 'nowrap' }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--clay-accent)', flexShrink: 0, display: 'inline-block' }} />Parcial · {upcomingPartial.subject}</div>}
@@ -2745,10 +2772,11 @@ export default function CaminoCalendarClient() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid var(--clay-border)', background: 'var(--clay-surface-raised)' }}>
             <span style={{ fontSize: 13, fontWeight: 900, color: 'var(--clay-text)' }}>Haz esto ahora</span>
             {/* "principales" deja claro que este contador es solo del objetivo
-                semanal (role='main', tope de 5) — las bonus no cuentan aquí y
-                nunca bloquean nada, así que "sigue con las bonus" evita que
-                llegar a 5/5 se lea como un tope duro de toda la app. */}
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--clay-text-muted)' }}>{completedMainWithSims}/{Math.min(totalMain, 5)} principales</span>
+                semanal (role='main' de la semana en curso) — las bonus no
+                cuentan aquí y nunca bloquean nada, así que "sigue con las
+                bonus" evita que completarlo se lea como un tope duro de toda
+                la app. */}
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--clay-text-muted)' }}>{completedMainWithSims}/{totalMain} principales</span>
           </div>
 
           {/* Trabajo de hoy hecho por iniciativa propia fuera de Camino
@@ -3039,7 +3067,7 @@ export default function CaminoCalendarClient() {
               <ChevronDown style={{ transition: 'transform 200ms', transform: calendarExpanded ? 'rotate(180deg)' : 'none' }} size={12} />
               {calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}
             </button>
-            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} confirmedPlanEnd={confirmedPlanEnd} />}
+            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} confirmedPlanEnd={confirmedPlanEnd} realToday={realToday} />}
             {/* "Personaliza tu repaso libre" ("Sugiéreme qué repasar") se
                 sustituye por completo por el chat de Kairo (tool calling
                 real, ver CaminoAssistant.tsx) -- mismo hueco exacto, no una
@@ -3152,7 +3180,7 @@ export default function CaminoCalendarClient() {
                 <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--clay-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>Racha</div>
               </div>
               <div style={{ background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)', borderRadius: 10, padding: '10px 12px' }}>
-                <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--clay-text)' }}>{completedMainWithSims}/{Math.min(totalMain, 5)}</div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--clay-text)' }}>{completedMainWithSims}/{totalMain}</div>
                 <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--clay-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 2 }}>Esta semana</div>
               </div>
             </div>
@@ -4937,6 +4965,20 @@ type PositionedTimelineBlock = TimelineBlock & { lane: number; laneCount: number
 const TIMELINE_PX_PER_MINUTE = 1.2
 const TIMELINE_MIN_BLOCK_HEIGHT = 28
 
+// Suelo FIJO de la rejilla: la unión de las dos ventanas de estudio del motor
+// (entre semana 16:00–22:00, fin de semana 10:00–21:00; ver
+// scheduleTimeSlot.ts). Es lo que hace que la rejilla sea la misma al pasar de
+// semana.
+const TIMELINE_BASE_START = 10 * 60
+const TIMELINE_BASE_END = 22 * 60
+
+// El rango se derivaba SOLO de lo que hubiera esa semana, así que cambiaba de
+// una semana a otra: una semana con una única misión a las 19:45 empezaba a
+// las 18:00 y la siguiente, con una del sábado a las 10:00, empezaba a las
+// 09:00. Misma pantalla, mismo alumno, dos rejillas distintas — y al navegar
+// con Ant/Sig parecía que el calendario se movía solo. Ahora la ventana de
+// estudio es siempre el suelo y lo que se salga de ella la AMPLÍA (una misión
+// a las 07:30 o un entreno a las 23:00 se siguen viendo); nunca la encoge.
 function buildTimelineRange(days: DayPlan[], externalBusyByDate: ExternalBusyByDate) {
   const times: number[] = []
   for (const day of days) {
@@ -4951,10 +4993,10 @@ function buildTimelineRange(days: DayPlan[], externalBusyByDate: ExternalBusyByD
       if (start !== null && end !== null && end > start) times.push(start, end)
     }
   }
-  if (!times.length) return { start: 8 * 60, end: 22 * 60 }
-  const start = Math.max(7 * 60, Math.floor((Math.min(...times) - 45) / 60) * 60)
-  const end = Math.min(23 * 60, Math.ceil((Math.max(...times) + 45) / 60) * 60)
-  return end - start < 180 ? { start: Math.max(0, start - 60), end: Math.min(24 * 60, start + 240) } : { start, end }
+  if (!times.length) return { start: TIMELINE_BASE_START, end: TIMELINE_BASE_END }
+  const start = Math.min(TIMELINE_BASE_START, Math.max(0, Math.floor((Math.min(...times) - 45) / 60) * 60))
+  const end = Math.max(TIMELINE_BASE_END, Math.min(24 * 60, Math.ceil((Math.max(...times) + 45) / 60) * 60))
+  return { start, end }
 }
 
 function buildTimelineBlocks(days: DayPlan[], externalBusyByDate: ExternalBusyByDate, conflicts: CalendarConflict[]) {
@@ -5114,7 +5156,7 @@ function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, sele
   )
 }
 
-function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusyByDate, conflicts, confirmedPlanEnd = '' }: { days: DayPlan[]; exams: StudentExam[]; initialExpandedDate?: string | null; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[]; confirmedPlanEnd?: string }) {
+function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusyByDate, conflicts, confirmedPlanEnd = '', realToday = '' }: { days: DayPlan[]; exams: StudentExam[]; initialExpandedDate?: string | null; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[]; confirmedPlanEnd?: string; realToday?: string }) {
   // Only used as the useState initializer, not a live-controlled prop: this
   // component remounts fresh every time the parent's "Ver semana completa"
   // toggle opens it (conditional render, not display:none), so seeding from
@@ -5138,7 +5180,11 @@ function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusy
         // calendario del servidor aún no ha cargado) no se afirma ninguna de
         // las dos cosas y se mantiene el texto de siempre.
         const beyondPlan = main.length === 0 && confirmedPlanEnd !== '' && day.date > confirmedPlanEnd
-        const emptyLabel = beyondPlan ? 'Aún sin planificar' : 'Repaso libre'
+        // Y un día YA PASADO sin misiones tampoco es un día libre: es un día
+        // que quedó sin actividad. "Repaso libre" en pasado suena a que el
+        // plan reservó ese día para repasar, cuando lo que hubo fue nada.
+        const pastEmpty = main.length === 0 && realToday !== '' && day.date < realToday
+        const emptyLabel = beyondPlan ? 'Aún sin planificar' : pastEmpty ? 'Sin actividad' : 'Repaso libre'
         const subjectLabel = subjects.length ? subjects.map(shortSubjectLabel).join(', ') : emptyLabel
         const missionCount = main.length
         const busyCount = externalBusyByDate[day.date]?.length ?? 0

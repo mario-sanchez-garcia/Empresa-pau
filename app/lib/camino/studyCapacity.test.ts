@@ -22,8 +22,8 @@ test('studyDatesBetween descuenta festivos', () => {
 
 test('C04: 500 temas en 184 días a 180 min/día SÍ caben — no debe haber rescate', () => {
   const capacity = computeStudyCapacity('2026-09-14', '2027-03-17', { dailyMinutes: 180 })
-  // 180 min/día = 4 misiones/día en la tabla de capacidad.
-  assert.equal(capacity.sessionsPerDay, 4)
+  // Referencia de 25 min: siete sesiones nominales; el presupuesto real sigue siendo 180.
+  assert.equal(capacity.sessionsPerDay, 7)
   assert.ok(capacity.sessions > 500, `esperaba holgura para 500 temas, hay ${capacity.sessions}`)
 })
 

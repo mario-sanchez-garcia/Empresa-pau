@@ -1082,7 +1082,16 @@ function generateCalendar(onboarding: OnboardingData, exams: StudentExam[], curr
       }
     }
 
-    return { date: dateISO, label: calendarDayLabel(dateISO), isToday: isRealToday(dateISO), missions }
+    // Las tarjetas de previsión, incluidos bonus, comparten el presupuesto.
+    // No se persiste ni se elimina trabajo real en esta vista provisional.
+    let previewMinutes = 0
+    const withinBudget: typeof missions = []
+    for (const mission of missions) {
+      if (previewMinutes + mission.estimatedMinutes > minutes) break
+      previewMinutes += mission.estimatedMinutes
+      withinBudget.push(mission)
+    }
+    return { date: dateISO, label: calendarDayLabel(dateISO), isToday: isRealToday(dateISO), missions: withinBudget }
   })
 }
 

@@ -1,6 +1,6 @@
 import 'server-only'
 import { MISSION_COMPLETION_XP } from '@/app/lib/camino/caminoProgressServer'
-import { estimatedMinutesForSlot } from '@/app/lib/camino/dailyTimeCapacity'
+import { estimatedMinutesForMission } from '@/app/lib/camino/missionDuration'
 import type { CleanPainType } from '@/app/lib/onboarding/saveOnboardingProfile'
 
 // Construye la recompensa real que ve el alumno al terminar Fase 2 — nunca
@@ -14,6 +14,9 @@ export interface RewardMissionRow {
   scheduled_date: string
   mission_type: string
   supportsStepCorrection: boolean
+  metadata?: Record<string, unknown> | null
+  start_time?: string | null
+  end_time?: string | null
 }
 
 export interface RewardMission {
@@ -41,16 +44,14 @@ export function buildOnboardingReward(
   dailyMinutes: number | null,
   painType: CleanPainType | null,
 ): OnboardingReward {
-  const slotByDate: Record<string, number> = {}
+  void dailyMinutes // Conserva el contrato de llamada; la duración viene de la misión.
   const shaped: RewardMission[] = missions.slice(0, 3).map(row => {
-    const slot = slotByDate[row.scheduled_date] ?? 0
-    slotByDate[row.scheduled_date] = slot + 1
     return {
       title: row.title,
       subject: row.subject,
       scheduledDate: row.scheduled_date,
       missionType: row.mission_type,
-      durationMinutes: estimatedMinutesForSlot(dailyMinutes, slot),
+      durationMinutes: estimatedMinutesForMission(row),
       xp: MISSION_COMPLETION_XP,
       supportsStepCorrection: row.supportsStepCorrection,
     }

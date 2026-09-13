@@ -118,7 +118,7 @@ test('sin temario en ninguna asignatura el día queda explicado, no en silencio'
 
 test('los minutos declarados deciden los huecos por día', () => {
   assert.equal(base({ dailyMinutes: 30 })[0].missionSlots, 1)
-  assert.equal(base({ dailyMinutes: 180 })[0].missionSlots, 4)
+  assert.equal(base({ dailyMinutes: 180 })[0].missionSlots, 7)
 })
 
 // ── Disponibilidad efectiva: filtro de días y rotación, una sola lista ───

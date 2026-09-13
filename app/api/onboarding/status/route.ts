@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     const today = new Date().toISOString().slice(0, 10)
     const { data: rows } = await db
       .from('camino_calendar')
-      .select('title, subject, scheduled_date, mission_type, v2_sort_order, block_slug, metadata, created_at')
+      .select('title, subject, scheduled_date, mission_type, v2_sort_order, block_slug, metadata, start_time, end_time, created_at')
       .eq('user_id', user.id)
       .eq('status', 'pending')
       .gte('scheduled_date', today)
@@ -61,6 +61,9 @@ export async function GET(request: NextRequest) {
         subject: row.subject,
         scheduled_date: row.scheduled_date,
         mission_type: row.mission_type,
+        metadata: row.metadata,
+        start_time: row.start_time,
+        end_time: row.end_time,
         supportsStepCorrection: Boolean(topic),
       }
     })

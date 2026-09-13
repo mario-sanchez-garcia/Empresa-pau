@@ -1,25 +1,26 @@
 import 'server-only'
 
+import { loadCalendarDiagnostics } from './calendarDiagnostics'
 import { createHash } from 'crypto'
 import { readAllRows } from './readAllRows'
 import { reconcilePlanWork } from './planPersistence'
 import { getAvailabilityForDate } from '../calendar/availability'
-import { minutesForPlacement } from './placementDuration'
+import { minutesForPlacement, placementDurationMetadata } from './placementDuration'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { getMadridToday } from './studyDays'
 import { canRepositionAutomatically } from './automaticPlacement'
-import { VALID_DAILY_MINUTES, missionsPerDayForMinutes } from './dailyTimeCapacity'
+import { VALID_DAILY_MINUTES } from './dailyTimeCapacity'
 import { createDayScheduler } from './scheduleTimeSlot'
 import { loadStudentPlanContext, planningDates, type DeclaredAvailability, type StudentPlanContext } from './studentPlanContext'
-import { orderRowsForPlacement, preferredDatesFor, eligibleDatesForRow, unscheduledReasonFor, type PlacementRow, type PlacementWindow } from './planPlacement'
+import { orderRowsForPlacement, preferredDatesFor, unscheduledReasonFor, type PlacementRow, type PlacementWindow } from './planPlacement'
 
 const VALID_WEEKLY_DAYS = [1, 2, 3, 4, 5, 6, 7] as const
 // v3: la colocación cambió de algoritmo (dos ventanas — temario nuevo y
 // repaso —, reintento sobre todos los días elegibles y estado explícito para
 // lo que no cabe). Sin subir la versión, las filas con el hash anterior salían
 // por `already_current` y nunca llegaban a pasar por las reglas nuevas.
-const PERSONALIZATION_VERSION = 'calendar_personalization_v5'
+const PERSONALIZATION_VERSION = 'calendar_personalization_v6'
 
 type PersonalizationPrefs = {
   weeklyStudyDaysValue: number
@@ -190,29 +191,13 @@ export async function applyCalendarPersonalization(
       return personalization.preference_hash === preferenceHash
     })
 
-    // El hash dice "nada ha cambiado desde la última vez". No dice que el
-    // calendario esté BIEN. Una versión anterior del hash pudo dejar filas en
-    // días que hoy no valen, y entonces coincidir con él es justo la razón por
-    // la que no se arreglarían nunca. Así que antes de cortocircuitar se
-    // comprueba lo único que importa de verdad: que cada fila activa esté en
-    // una fecha que el alumno puede usar HOY, con su acceso de hoy.
-    const validationWindow: PlacementWindow = {
-      dates: candidateDates(context, today), capacityPerDay: missionsPerDayForMinutes(prefs.dailyMinutes),
-      planningCutoff: context.planningCutoff, examDate: context.examDate,
-    }
-    const misplacedRows = rows.filter(row => row.status !== 'unscheduled'
-      && !eligibleDatesForRow({ id: row.id, scheduledDate: row.scheduled_date,
-        missionType: missionTypeOf(row), source: row.source,
-        deadlineDate: typeof row.metadata?.partial_exam_date === 'string' ? row.metadata.partial_exam_date : null,
-      }, validationWindow).includes(row.scheduled_date))
-
-    if (alreadyCurrent && !options.force
-      && !rows.some(row => row.status === 'unscheduled')
-      && misplacedRows.length === 0) {
-      return { applied: false, reason: 'already_current', updatedRows: 0, preferenceHash }
+    if (alreadyCurrent && !options.force && !rows.some(row => row.status === 'unscheduled')) {
+      const { conflicts } = await loadCalendarDiagnostics(userId, supabase, context)
+      if (!conflicts.some(row => row.scheduled && row.automatic))
+        return { applied: false, reason: 'already_current', updatedRows: 0, preferenceHash }
     }
 
-    const capacity = missionsPerDayForMinutes(prefs.dailyMinutes)
+    const capacity = Infinity
     const appliedFrom = today
     const applicationHash = stableHash(`${preferenceHash}:${appliedFrom}`)
 
@@ -243,7 +228,6 @@ export async function applyCalendarPersonalization(
     // sobre datos. Aquí se ejecutan contra el scheduler real: un día sin hueco
     // horario hace pasar al SIGUIENTE día elegible, nunca abandonar la misión.
     // Declarar "no cabe" tras probar una sola fecha era exactamente el fallo.
-    const used = new Map<string, number>()
     const changes: Record<string, unknown>[] = []
     const placedIds = new Set<string>()
 
@@ -265,13 +249,8 @@ export async function applyCalendarPersonalization(
       const row = candidate.row
       const meta = metadataObject(row.metadata)
       for (const date of preferredDatesFor(candidate, window)) {
-        const slot = used.get(date) ?? 0
-        // Los parciales cuentan igual que todo lo demás. Eximirlos del
-        // contador es crear tiempo que el alumno no tiene: declaró 60 minutos
-        // y acababa con la lección del día MÁS la preparación del examen.
-        if (slot >= capacity) continue
         const scheduler = await schedulerFor(date)
-        const duration = minutesForPlacement(prefs.dailyMinutes, slot, candidate.missionType, meta)
+        const duration = minutesForPlacement(candidate.missionType, meta)
         const timeSlot = scheduler.placeBest(duration, {
           date,
           subject: row.subject,
@@ -282,13 +261,14 @@ export async function applyCalendarPersonalization(
         // La agenda propia del alumno (clase, extraescolares) llena este día:
         // se prueba el siguiente, sin consumir su capacidad.
         if (!timeSlot) continue
-        used.set(date, slot + 1)
-        const { unscheduled_reason: _reason, unscheduled_at: _at, ...resolvedMeta } = meta
+        const resolvedMeta = { ...meta }
+        delete resolvedMeta.unscheduled_reason
+        delete resolvedMeta.unscheduled_at
         changes.push({
           id: row.id, expected_status: row.status, expected_updated_at: row.updated_at,
           status: row.status === 'unscheduled' ? 'pending' : row.status,
           scheduled_date: date, start_time: timeSlot.start, end_time: timeSlot.end,
-          metadata: { ...resolvedMeta, estimated_minutes: duration,
+          metadata: { ...resolvedMeta, ...placementDurationMetadata(candidate.missionType, meta),
             camino_personalization: {
               version: PERSONALIZATION_VERSION, preference_hash: preferenceHash,
               application_hash: applicationHash, applied_from: appliedFrom,

@@ -137,7 +137,7 @@ export type ExamBudgetOptions = CapacityOptions & {
 export function computeStudyCapacity(from: string, to: string, options: CapacityOptions = {}): StudyCapacity {
   const plan = missionPlanForMinutes(options.dailyMinutes)
   const days = studyDatesBetween(from, to, options).length
-  const minutesPerDay = plan.slotMinutes.reduce((a, b) => a + b, 0)
+  const minutesPerDay = options.dailyMinutes ?? 60
   return {
     days,
     sessionsPerDay: plan.count,

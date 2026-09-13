@@ -2,19 +2,19 @@ import type { StudentPlanContext } from './planWindow.ts'
 import { planningDates } from './planWindow.ts'
 import { eligibleDatesForRow, preferredDatesFor, isNewContent, orderRowsForPlacement, type PlacementRow } from './planPlacement.ts'
 import { estimatedMinutesForMission, minutesBetweenTimes, toMinutes } from './missionDuration.ts'
-import { missionsPerDayForMinutes, VALID_DAILY_MINUTES } from './dailyTimeCapacity.ts'
-import { minutesForPlacement } from './placementDuration.ts'
+import { VALID_DAILY_MINUTES } from './dailyTimeCapacity.ts'
+import { minutesForPlacement, placementDuration } from './placementDuration.ts'
 import { canRepositionAutomatically } from './automaticPlacement.ts'
 import { planningCutoffDate, studyDayIndexesFor } from './studyCapacity.ts'
 import { FINAL_REVIEW_RESERVED_STUDY_DAYS } from './examDate.ts'
 
 export type ForecastCalendarRow = {
-  id: string; queue_id: string | null; subject: string; scheduled_date: string;
+  id: string; title?: string | null; queue_id: string | null; subject: string; scheduled_date: string;
   status: string; source: string | null; locked: boolean | null; mission_type: string | null;
   start_time: string | null; end_time: string | null; metadata: Record<string, unknown> | null
 }
 export type ForecastQueueRow = {
-  id: string; subject: string; queue_status: string; retry_not_before?: string | null;
+  id: string; title?: string | null; subject: string; queue_status: string; retry_not_before?: string | null;
   metadata: Record<string, unknown> | null
 }
 export type ForecastEvent = {
@@ -23,30 +23,25 @@ export type ForecastEvent = {
 }
 type Range = [number, number]
 type Day = { date: string; free: Range[]; budget: number; capacity: number; usedSlots: number }
-type Work = PlacementRow & { subject: string; minutes: number; metadata: Record<string, unknown> | null; notBefore?: string | null }
+type Work = PlacementRow & { title?: string | null; subject: string; minutes: number; metadata: Record<string, unknown> | null; notBefore?: string | null }
 export type SubjectForecast = {
   subject: string; scheduledMinutes: number; pendingMinutes: number; projectedPendingMinutes: number;
   scheduledAtRiskMinutes: number; atRiskMinutes: number; reservedActivityMinutes: number; estimatedItems: number
 }
 
-/**
- * Qué habría que CAMBIAR para que quepa todo, no solo qué se queda fuera.
- *
- * Decir "2 h fuera" describe el problema pero deja al alumno adivinando el
- * remedio. Cada cifra de aquí sale de volver a simular el mismo Camino con
- * una disponibilidad distinta, así que es la respuesta real del motor y no
- * una regla de tres sobre el déficit: subir los minutos diarios también
- * alarga las sesiones de teoría (ver minutesForPlacement), o sea que más
- * tiempo no equivale a más temario cubierto en proporción.
- */
+export type ForecastRiskReason = 'after_exam' | 'partial_deadline' | 'final_review_window'
+  | 'unavailable_day' | 'daily_budget' | 'occupied_time' | 'task_too_long' | 'retry_wait' | 'no_slot'
+export type ForecastRiskItem = {
+  id: string; title?: string | null; subject: string; minutes: number; reason: ForecastRiskReason
+  scheduled: boolean; automatic: boolean; date: string; deadlineDate?: string | null
+}
 export type ForecastRemedy = {
-  /** Opción declarable de min/día más baja con la que cabe todo. null = no basta ni el máximo. */
   dailyMinutesNeeded: number | null
-  /** Días/semana más bajos con los que cabe todo, con los min/día actuales. null = no basta ni 7. */
   weeklyStudyDaysNeeded: number | null
-  /** Minutos en conflicto que ningún ajuste recoloca: hay que moverlos a mano. */
+  combinedChange: { dailyMinutes: number; weeklyStudyDays: number } | null
+  replanRecommended: boolean
+  maxAvailabilityAtRiskMinutes: number
   manualMinutes: number
-  /** Cuánto trabajo excede la capacidad total. 0 si el problema es de encaje, no de horas. */
   deficitMinutes: number
 }
 
@@ -71,15 +66,6 @@ function asPlacement(row: ForecastCalendarRow): PlacementRow {
     queueId: row.queue_id, source: row.source,
     deadlineDate: typeof row.metadata?.partial_exam_date === 'string' ? row.metadata.partial_exam_date : null }
 }
-function estimate(type: string | null, metadata: Record<string, unknown> | null, context: StudentPlanContext, placing = false) {
-  if (placing && (type === 'concept' || type === 'review'))
-    return { minutes: minutesForPlacement(context.dailyMinutes, 0, type, metadata), estimated: true }
-  const declared = typeof metadata?.estimated_minutes === 'number' && Number.isFinite(metadata.estimated_minutes) && metadata.estimated_minutes > 0
-  if (declared || metadata?.links_to_simulacro_exam_id)
-    return { minutes: estimatedMinutesForMission({ mission_type: type, metadata }), estimated: false }
-  return { minutes: minutesForPlacement(context.dailyMinutes, 0, type, metadata), estimated: true }
-}
-
 /** El mismo alumno con otra disponibilidad declarada, para poder resimular. */
 function withAvailability(context: StudentPlanContext, dailyMinutes: number, weeklyStudyDays: number | null): StudentPlanContext {
   return {
@@ -120,7 +106,7 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
     return { date, free, budget: capacity, capacity, usedSlots: 0 }
   })
   const dayByDate = new Map(days.map(day => [day.date, day]))
-  const window = { dates, examDate: context.examDate, planningCutoff: context.planningCutoff, capacityPerDay: missionsPerDayForMinutes(context.dailyMinutes) }
+  const window = { dates, examDate: context.examDate, planningCutoff: context.planningCutoff, capacityPerDay: Infinity }
   const completedIds = new Set(queue.filter(row => row.queue_status === 'completed').map(row => row.id))
   for (const row of calendar) if (row.status === 'completed' && row.queue_id) completedIds.add(row.queue_id)
   const subjectMap = new Map<string, SubjectForecast>()
@@ -133,9 +119,10 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
   const seen = new Set<string>()
   const pending: Work[] = []
   let protectedConflictMinutes = 0
+  const riskItems: ForecastRiskItem[] = []
   // Activas antes que restos unscheduled del mismo trabajo: un reintento no
   // convierte dos colocaciones de una identidad en dos temas que estudiar.
-  const rows = [...calendar].sort((a, b) => Number(!['pending', 'postponed'].includes(a.status)) - Number(!['pending', 'postponed'].includes(b.status)) || a.id.localeCompare(b.id))
+  const rows = [...calendar].sort((a, b) => Number(!['pending', 'postponed'].includes(a.status)) - Number(!['pending', 'postponed'].includes(b.status)) || Number(canRepositionAutomatically(a)) - Number(canRepositionAutomatically(b)) || a.id.localeCompare(b.id))
   for (const row of rows) {
     if (!['pending', 'postponed', 'unscheduled', 'missed'].includes(row.status) || (row.queue_id && completedIds.has(row.queue_id))) continue
     const key = row.queue_id ? `queue:${row.queue_id}` : row.metadata?.partial_exam_id
@@ -145,8 +132,8 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
     const isScheduled = ['pending', 'postponed'].includes(row.status) && row.scheduled_date >= context.today
     const duration = minutesBetweenTimes(row.start_time, row.end_time)
     const type = row.mission_type ?? (typeof row.metadata?.mission_type === 'string' ? row.metadata.mission_type : 'concept')
-    const estimated = isScheduled && duration != null ? { minutes: duration, estimated: false } : estimate(type, row.metadata, context, !isScheduled)
-    const work: Work = { ...asPlacement(row), missionType: type, minutes: estimated.minutes, subject: row.subject, metadata: row.metadata }
+    const estimated = isScheduled && duration != null ? { minutes: duration, estimated: false } : placementDuration(type, row.metadata)
+    const work: Work = { ...asPlacement(row), missionType: type, minutes: estimated.minutes, subject: row.subject, title: row.title, metadata: row.metadata }
     const stats = subject(row.subject)
     if (estimated.estimated) stats.estimatedItems++
     const eligible = eligibleDatesForRow(work, window)
@@ -156,10 +143,16 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
       if (row.source === 'partial' || !isNewContent(row.mission_type)) stats.reservedActivityMinutes += work.minutes
       const automatic = canRepositionAutomatically(row)
       const fits = day && eligible.includes(row.scheduled_date)
-        && (!automatic || day.usedSlots < window.capacityPerDay)
         && consume(day, work.minutes, row.start_time, row.end_time)
       if (day && automatic) day.usedSlots++
       if (!fits) {
+        const reason: ForecastRiskReason = row.scheduled_date >= context.examDate ? 'after_exam'
+          : row.source === 'partial' && work.deadlineDate && row.scheduled_date >= work.deadlineDate ? 'partial_deadline'
+          : !day ? 'unavailable_day'
+          : !eligible.includes(row.scheduled_date) ? 'final_review_window'
+          : work.minutes > day.budget ? 'daily_budget' : 'occupied_time'
+        riskItems.push({ id: row.id, title: row.title, subject: row.subject, minutes: work.minutes,
+          reason, scheduled: true, automatic, date: row.scheduled_date, deadlineDate: work.deadlineDate })
         stats.scheduledAtRiskMinutes += work.minutes
         stats.atRiskMinutes += work.minutes
         if (!canRepositionAutomatically(row)) protectedConflictMinutes += work.minutes
@@ -176,10 +169,10 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
     if (completedIds.has(row.id) || seen.has(`queue:${row.id}`)) continue
     seen.add(`queue:${row.id}`)
     const type = typeof row.metadata?.mission_type === 'string' ? row.metadata.mission_type : 'concept'
-    const estimated = estimate(type, row.metadata, context, true)
+    const estimated = placementDuration(type, row.metadata)
     const stats = subject(row.subject)
     if (estimated.estimated) stats.estimatedItems++
-    pending.push({ id: row.id, queueId: row.id, subject: row.subject, scheduledDate: context.today,
+    pending.push({ id: row.id, queueId: row.id, subject: row.subject, title: row.title, scheduledDate: context.today,
       missionType: type, source: 'algorithm', minutes: estimated.minutes, metadata: row.metadata, notBefore: row.retry_not_before })
   }
   const availableAfterScheduledMinutes = days.reduce((sum, day) => sum + Math.min(day.budget, length(day.free)), 0)
@@ -187,55 +180,71 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
     let placedMinutes: number | null = null
     for (const date of preferredDatesFor(work, window)) {
       const day = dayByDate.get(date)!
-      if ((work.notBefore && date < work.notBefore.slice(0, 10)) || day.usedSlots >= window.capacityPerDay) continue
-      const minutes = minutesForPlacement(context.dailyMinutes, day.usedSlots, work.missionType, work.metadata)
+      if (work.notBefore && date < work.notBefore.slice(0, 10)) continue
+      const minutes = minutesForPlacement(work.missionType, work.metadata)
       if (!consume(day, minutes)) continue
       day.usedSlots++
       placedMinutes = minutes
       break
     }
-    // Sin hueco concreto, la carga variable conserva la estimación del primer
-    // slot. Con hueco, cuenta la duración que el motor le asignaría allí.
+    // La carga pendiente conserva su estimación aunque no encuentre hueco.
     const stats = subject(work.subject)
     stats.pendingMinutes += placedMinutes ?? work.minutes
     if (placedMinutes != null) stats.projectedPendingMinutes += placedMinutes
-    else stats.atRiskMinutes += work.minutes
+    else {
+      stats.atRiskMinutes += work.minutes
+      const eligible = eligibleDatesForRow(work, window)
+      const reason: ForecastRiskReason = work.source === 'partial' && work.deadlineDate && eligible.length === 0 ? 'partial_deadline'
+        : isNewContent(work.missionType) && context.today >= context.planningCutoff ? 'final_review_window'
+        : work.minutes > (context.dailyMinutes ?? 60) ? 'task_too_long'
+        : work.notBefore && !eligible.some(date => date >= work.notBefore!.slice(0, 10)) ? 'retry_wait' : 'no_slot'
+      riskItems.push({ id: work.id, title: work.title, subject: work.subject, minutes: work.minutes,
+        reason, scheduled: false, automatic: true, date: work.scheduledDate, deadlineDate: work.deadlineDate })
+    }
   }
   const subjects = [...subjectMap.values()]
   const total = (key: keyof Omit<SubjectForecast, 'subject'>) => subjects.reduce((sum, row) => sum + row[key], 0)
   const atRisk = total('atRiskMinutes')
   const totalCapacityMinutes = days.reduce((sum, day) => sum + day.capacity, 0)
 
-  // Busca el ajuste MÁS PEQUEÑO que hace que quepa todo, probando de menor a
-  // mayor cada opción que el alumno puede declarar de verdad. Se prueba en
-  // vez de despejarse porque la carga no es constante: con más minutos al día
-  // las sesiones de teoría también se alargan. Al recorrer en orden y parar
-  // en la primera que cuadra, el resultado es correcto aunque la relación no
-  // sea monótona. Las resimulaciones van sin remedio para no recursar, y como
-  // las opciones declarables son finitas el coste está acotado: como mucho 11
-  // pasadas más, y solo cuando algo se sale (medido: ~30 ms extra en un caso
-  // normal, ~200 ms en el peor con un curso entero y 600 misiones).
   let remedy: ForecastRemedy | null = null
   if (atRisk > 0 && options.withRemedy !== false) {
     const currentDaily = context.dailyMinutes ?? 60
     const currentWeekly = context.weeklyStudyDays ?? 5
-    const covers = (next: StudentPlanContext) =>
-      buildCoverageForecast(next, calendar, queue, events, activeSubjects, { withRemedy: false }).atRiskMinutes === 0
-
+    const maxWeekly = Math.max(currentWeekly, Math.min(7, context.accessMaxStudyDaysPerWeek ?? 7))
+    // Un cambio de disponibilidad RECOLOCA trabajo automático. Mantener sus
+    // horas antiguas aquí hacía que ningún ajuste pudiera resolver un solape.
+    const movable = calendar.map(row => canRepositionAutomatically(row)
+      ? { ...row, status: 'unscheduled', start_time: null, end_time: null } : row)
+    const simulations = new Map<string, number>()
+    const riskFor = (daily: number, weekly: number) => {
+      const key = `${daily}:${weekly}`
+      if (!simulations.has(key)) simulations.set(key, buildCoverageForecast(
+        withAvailability(context, daily, weekly), movable, queue, events, activeSubjects, { withRemedy: false },
+      ).atRiskMinutes)
+      return simulations.get(key)!
+    }
+    const replanRecommended = riskFor(currentDaily, currentWeekly) === 0
     let dailyMinutesNeeded: number | null = null
-    for (const candidate of VALID_DAILY_MINUTES.filter(value => value > currentDaily)) {
-      if (covers(withAvailability(context, candidate, context.weeklyStudyDays))) { dailyMinutesNeeded = candidate; break }
-    }
     let weeklyStudyDaysNeeded: number | null = null
-    for (let candidate = currentWeekly + 1; candidate <= 7; candidate++) {
-      if (covers(withAvailability(context, currentDaily, candidate))) { weeklyStudyDaysNeeded = candidate; break }
+    let combinedChange: ForecastRemedy['combinedChange'] = null
+    if (!replanRecommended) {
+      for (const daily of VALID_DAILY_MINUTES.filter(value => value > currentDaily)) {
+        if (riskFor(daily, currentWeekly) === 0) { dailyMinutesNeeded = daily; break }
+      }
+      for (let weekly = currentWeekly + 1; weekly <= maxWeekly; weekly++) {
+        if (riskFor(currentDaily, weekly) === 0) { weeklyStudyDaysNeeded = weekly; break }
+      }
+      if (dailyMinutesNeeded == null && weeklyStudyDaysNeeded == null) {
+        const combinations = VALID_DAILY_MINUTES.filter(daily => daily > currentDaily).flatMap(daily =>
+          Array.from({ length: Math.max(0, maxWeekly - currentWeekly) }, (_, i) => ({ dailyMinutes: daily, weeklyStudyDays: currentWeekly + i + 1 })))
+          .sort((a, b) => a.dailyMinutes * a.weeklyStudyDays - b.dailyMinutes * b.weeklyStudyDays || a.dailyMinutes - b.dailyMinutes)
+        combinedChange = combinations.find(c => riskFor(c.dailyMinutes, c.weeklyStudyDays) === 0) ?? null
+      }
     }
-    remedy = {
-      dailyMinutesNeeded,
-      weeklyStudyDaysNeeded,
-      manualMinutes: protectedConflictMinutes,
-      deficitMinutes: Math.max(0, total('scheduledMinutes') + total('pendingMinutes') - totalCapacityMinutes),
-    }
+    remedy = { dailyMinutesNeeded, weeklyStudyDaysNeeded, combinedChange, replanRecommended,
+      maxAvailabilityAtRiskMinutes: riskFor(180, maxWeekly), manualMinutes: protectedConflictMinutes,
+      deficitMinutes: Math.max(0, total('scheduledMinutes') + total('pendingMinutes') - totalCapacityMinutes) }
   }
 
   return {
@@ -248,7 +257,7 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
     validScheduledMinutes: total('scheduledMinutes') - total('scheduledAtRiskMinutes'),
     projectedPendingMinutes: total('projectedPendingMinutes'), atRiskMinutes: atRisk,
     reservedActivityMinutes: total('reservedActivityMinutes'), availableAfterScheduledMinutes,
-    protectedConflictMinutes, estimatedItems: total('estimatedItems'), subjects,
+    riskItems, protectedConflictMinutes, estimatedItems: total('estimatedItems'), subjects,
     missingSubjects: activeSubjects.filter(name => !queue.some(row => row.subject === name) && !calendar.some(row => row.subject === name)),
     externalCalendarIncluded: false as const,
     remedy,
@@ -264,6 +273,7 @@ export type CoverageForecast = {
   scheduledMinutes: number; pendingMinutes: number; scheduledAtRiskMinutes: number
   validScheduledMinutes: number; projectedPendingMinutes: number; atRiskMinutes: number
   reservedActivityMinutes: number; availableAfterScheduledMinutes: number
+  riskItems: ForecastRiskItem[]
   protectedConflictMinutes: number; estimatedItems: number
   subjects: SubjectForecast[]; missingSubjects: string[]
   externalCalendarIncluded: false

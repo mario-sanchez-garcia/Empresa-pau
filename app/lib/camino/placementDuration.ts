@@ -1,16 +1,44 @@
-import { estimatedMinutesForSlot } from './dailyTimeCapacity.ts'
-import { estimatedMinutesForMission } from './missionDuration.ts'
+import { estimatedMinutesForMission, estimatedMinutesForMissionType } from './missionDuration.ts'
 
-/** Duración al COLOCAR trabajo: las sesiones de teoría/repaso dependen del
- * hueco del día. Los parciales y simulacros conservan su duración propia.
- * Una fila ya calendarizada se mide con estimatedMinutesForMission. */
-export function minutesForPlacement(
-  dailyMinutes: number | null | undefined,
-  slot: number,
-  missionType: string | null,
-  metadata: Record<string, unknown> | null,
-): number {
-  return missionType === 'concept' || missionType === 'review'
-    ? estimatedMinutesForSlot(dailyMinutes, slot)
-    : estimatedMinutesForMission({ mission_type: missionType, metadata })
+export const CONTENT_DURATION_MODEL = 'content_v1'
+
+type DurationSource = 'content' | 'declared' | 'reference' | 'simulacro'
+const positiveMinutes = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value) && value >= 1
+
+/** La carga pertenece a la actividad, nunca al presupuesto diario del alumno.
+ * `estimated_minutes` antiguo puede ser el tamaño de un slot, no una medida
+ * del contenido. Para teoría/repaso personalizados por el modelo anterior
+ * se ignora ese valor; una duración de contenido explícita tiene prioridad. */
+export function placementDuration(missionType: string | null, metadata: Record<string, unknown> | null) {
+  const type = missionType ?? 'concept'
+  const meta = metadata ?? {}
+  let minutes: number
+  let source: DurationSource
+  if (meta.links_to_simulacro_exam_id) {
+    minutes = estimatedMinutesForMission({ mission_type: type, metadata: meta })
+    source = 'simulacro'
+  } else if (positiveMinutes(meta.content_estimated_minutes)) {
+    minutes = meta.content_estimated_minutes
+    source = meta.duration_source === 'reference' ? 'reference' : 'content'
+  } else if (positiveMinutes(meta.estimated_minutes)
+    && !((type === 'concept' || type === 'review') && meta.camino_personalization && meta.duration_model !== CONTENT_DURATION_MODEL)) {
+    minutes = meta.estimated_minutes
+    source = 'declared'
+  } else {
+    minutes = estimatedMinutesForMissionType(type)
+    source = 'reference'
+  }
+  return { minutes, source, estimated: source === 'reference' }
+}
+
+export function minutesForPlacement(missionType: string | null, metadata: Record<string, unknown> | null): number {
+  return placementDuration(missionType, metadata).minutes
+}
+
+/** Conserva la estimación independiente y la duración reservada por separado. */
+export function placementDurationMetadata(missionType: string | null, metadata: Record<string, unknown> | null) {
+  const estimate = placementDuration(missionType, metadata)
+  return { content_estimated_minutes: estimate.minutes, estimated_minutes: estimate.minutes,
+    duration_source: estimate.source, duration_model: CONTENT_DURATION_MODEL }
 }

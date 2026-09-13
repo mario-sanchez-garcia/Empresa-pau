@@ -5,7 +5,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, getTopic, getTopicByV2SortOrder, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
-import { missionsPerDayForMinutes } from '@/app/lib/camino/dailyTimeCapacity'
+import { minutesForPlacement, placementDurationMetadata } from '@/app/lib/camino/placementDuration'
 import { injectAllPartialExamMissions } from '@/app/lib/camino/injectPartialExamMissions'
 import { cleanStudentExams, type StudentExam } from '@/app/lib/camino/cleanStudentExams'
 import { getMadridToday } from '@/app/lib/camino/studyDays'
@@ -415,7 +415,6 @@ async function generateCaminoPlanLocked(params: GenerateCaminoPlanParams): Promi
     const scheduleSubjects = subjects.filter(s => (subjectQueues[s]?.length ?? 0) > 0)
     const cursors: Record<string, number> = Object.fromEntries(scheduleSubjects.map(s => [s, 0]))
 
-    const slotsPerDay = missionsPerDayForMinutes(planContext.dailyMinutes)
 
     const calRows: object[] = []
     const scheduledQueueIds: string[] = []
@@ -427,13 +426,21 @@ async function generateCaminoPlanLocked(params: GenerateCaminoPlanParams): Promi
       // hasWork evita que un día lectivo se pierda porque a la asignatura que
       // le tocaba ya no le queda cola: la rotación cede el turno a la
       // siguiente asignatura que sí tenga temario pendiente.
-      const subject = subjectForDay(dateStr, scheduleSubjects, planContext.studyDayIndexes, s => {
+      const preferredSubject = subjectForDay(dateStr, scheduleSubjects, planContext.studyDayIndexes, s => {
         const queue = subjectQueues[s] ?? []
         return (cursors[s] ?? 0) < queue.length
       })
-      if (!subject) continue
-
-      for (let slot = 0; slot < slotsPerDay; slot++) {
+      if (!preferredSubject) continue
+      let remainingMinutes = planContext.dailyMinutes ?? 60
+      const candidates = [preferredSubject, ...scheduleSubjects.filter(s => s !== preferredSubject)]
+      while (remainingMinutes > 0) {
+        const subject = candidates.find(s => {
+          const next = subjectQueues[s]?.[cursors[s] ?? 0]
+          if (!next) return false
+          const type = finalSprint ? 'review' : ((next.metadata?.mission_type as string) ?? 'concept')
+          return minutesForPlacement(type, next.metadata) <= remainingMinutes
+        })
+        if (!subject) break
         const queue = subjectQueues[subject] ?? []
         const cursor = cursors[subject] ?? 0
         if (cursor >= queue.length) break
@@ -454,9 +461,11 @@ async function generateCaminoPlanLocked(params: GenerateCaminoPlanParams): Promi
         // disponibles son los de la reserva final, y ahí no se siembra
         // temario nuevo. El título lo dice, para que el alumno vea qué es.
         const missionType = finalSprint ? 'review' : ((itemMeta.mission_type as string) ?? 'concept')
+        remainingMinutes -= minutesForPlacement(missionType, itemMeta)
+        const durationMetadata = placementDurationMetadata(missionType, itemMeta)
         const baseMetadata = itemMeta.express
-          ? { express: true, topic_slug: topicMeta.topicSlug }
-          : { topic_slug: topicMeta.topicSlug }
+          ? { express: true, topic_slug: topicMeta.topicSlug, ...durationMetadata }
+          : { topic_slug: topicMeta.topicSlug, ...durationMetadata }
         const calMetadata = finalSprint
           ? { ...baseMetadata, plan_mode: 'final_sprint', final_review_window: true, knowledge_verified: false }
           : baseMetadata

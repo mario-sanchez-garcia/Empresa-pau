@@ -87,6 +87,53 @@ const EDUC_LABELS: Record<string, string> = {
 
 const DAILY_MINUTES_OPTIONS = VALID_DAILY_MINUTES
 
+type CaminoPrefsStatus = { tone: 'ok' | 'warn'; text: string }
+
+/**
+ * Reajusta el Camino después de guardar. Cuando esto corre, los ajustes YA
+ * están guardados, así que un fallo aquí no puede presentarse como que no se
+ * ha guardado nada: antes se lanzaba `camino_personalization_failed`, que
+ * caía en el catch del guardado entero y pintaba ese código interno crudo en
+ * pantalla sobre unos cambios que sí habían entrado.
+ *
+ * Y buena parte de esos fallos no eran fallos, sino esperas. `/ensure-calendar`
+ * comparte con /camino un bloqueo por alumno, así que basta tener el Camino
+ * abierto en otra pestaña para llevarse un 409 `plan_busy` — que viaja con su
+ * `Retry-After` justo para que el cliente reintente, cosa que no hacía. El 503
+ * degradado se marca `retryable` por lo mismo. Reintentamos los dos.
+ */
+async function recalculateCamino(token: string): Promise<CaminoPrefsStatus> {
+  const busy: CaminoPrefsStatus = { tone: 'warn', text: 'Tus ajustes se han guardado. Tu Camino se estaba actualizando en otro sitio y el reajuste no ha llegado a entrar: ciérralo en las demás pestañas y pulsa «Recalcular mi plan».' }
+  const failed: CaminoPrefsStatus = { tone: 'warn', text: 'Tus ajustes se han guardado, pero no hemos podido reajustar tu Camino ahora. Prueba con «Recalcular mi plan»; si sigue igual, repórtalo y lo miramos.' }
+  let lastWasBusy = false
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    let response: Response
+    try {
+      response = await fetch('/api/camino/ensure-calendar', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ force: true }),
+      })
+    } catch {
+      return { tone: 'warn', text: 'Tus ajustes se han guardado, pero no hemos podido recalcular tu Camino: revisa la conexión. Se reajustará solo la próxima vez que lo abras.' }
+    }
+    if (response.ok) return { tone: 'ok', text: 'Tu Camino se ha ajustado para las próximas misiones.' }
+
+    const body = await response.json().catch(() => null) as { error?: string; retryable?: boolean; degraded?: string[] } | null
+    lastWasBusy = response.status === 409
+    if (!lastWasBusy && body?.retryable !== true) {
+      // El motivo real solo existe aquí: la respuesta lo trae y antes se tiraba.
+      console.error('[settings] recalculo del Camino fallido:', response.status, body?.degraded?.join(', ') ?? body?.error ?? '')
+      return failed
+    }
+    if (attempt < 3) {
+      const seconds = Number(response.headers.get('Retry-After')) || 2
+      await new Promise(resolve => window.setTimeout(resolve, seconds * 1000 * attempt))
+    }
+  }
+  return lastWasBusy ? busy : failed
+}
 
 function weeklyDaysLabel(days: number | null) {
   if (!days) return null
@@ -110,7 +157,7 @@ export default function SettingsPage() {
   const [onboarding, setOnboarding] = useState<OnboardingData | null>(null)
   const [caminoDailyMinutes, setCaminoDailyMinutes] = useState(60)
   const [caminoWeeklyDays, setCaminoWeeklyDays] = useState(4)
-  const [caminoPrefsStatus, setCaminoPrefsStatus] = useState('')
+  const [caminoPrefsStatus, setCaminoPrefsStatus] = useState<CaminoPrefsStatus | null>(null)
   const [subjectLevels, setSubjectLevels] = useState<Record<string, SubjectLevel>>({})
   const [gradeThresholdMode, setGradeThresholdMode] = useState<GradeThresholdMode>('general')
   const [gradeThreshold, setGradeThreshold] = useState<number | null>(null)
@@ -345,7 +392,7 @@ export default function SettingsPage() {
     try {
       saveProfilePreferences(userId, preferences)
       setSaveError('')
-      setCaminoPrefsStatus('')
+      setCaminoPrefsStatus(null)
       setSaved(true)
       window.setTimeout(() => setSaved(false), 2200)
       const session = await supabase.auth.getSession()
@@ -419,13 +466,7 @@ export default function SettingsPage() {
         // personalizadas) y espera que sus próximas misiones se reajusten
         // ahora, no mañana. Sin esto, el throttle diario de la ruta se lo
         // saltaría en silencio.
-        const ensureRes = await fetch('/api/camino/ensure-calendar', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ force: true }),
-        })
-        if (!ensureRes.ok) throw new Error('camino_personalization_failed')
-        setCaminoPrefsStatus('Tu Camino se ha ajustado para las próximas misiones.')
+        setCaminoPrefsStatus(await recalculateCamino(token))
       } else if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged)) {
         await fetch('/api/camino/ensure-calendar', {
           method: 'POST',
@@ -800,8 +841,19 @@ export default function SettingsPage() {
             </Field>
           </div>
           {caminoPrefsStatus && (
-            <div style={{ margin: '-4px 0 18px', borderRadius: 14, border: '1px solid var(--clay-border)', background: 'var(--clay-accent-soft)', padding: '10px 12px', fontSize: 11, fontWeight: 750, color: 'var(--clay-accent-text)' }}>
-              {caminoPrefsStatus}
+            <div
+              role={caminoPrefsStatus.tone === 'warn' ? 'alert' : undefined}
+              style={{
+                margin: '-4px 0 18px', borderRadius: 14, padding: '10px 12px',
+                fontSize: 11, fontWeight: 750, lineHeight: 1.5,
+                border: '1px solid var(--clay-border)',
+                // Un aviso no puede llevar la misma ropa que una confirmación:
+                // el reajuste que no ha entrado se leería como que sí entró.
+                background: caminoPrefsStatus.tone === 'warn' ? 'var(--clay-warn-soft)' : 'var(--clay-accent-soft)',
+                color: caminoPrefsStatus.tone === 'warn' ? 'var(--clay-warn)' : 'var(--clay-accent-text)',
+              }}
+            >
+              {caminoPrefsStatus.text}
             </div>
           )}
 

@@ -20,6 +20,45 @@ function addSchoolDays(fromDateStr: string, n: number): string {
   return d
 }
 
+// "No lo he dado en clase" nació como señal genérica, pero solo se pidió
+// para estos 2 temas de integrales de Matemáticas CCSS (llegan tarde en
+// muchos institutos) — MISMA allowlist que NOT_SEEN_BUTTON_TOPICS en
+// CaminoTopicClient.tsx, replicada aquí porque esa restricción solo vivía
+// en el frontend: cualquier llamada directa a este endpoint (o una futura
+// IA con esta herramienta) podía marcar como "no dado" cualquier tema de
+// cualquier asignatura sin que el servidor lo impidiera.
+const NOT_SEEN_ALLOWLIST = new Set<string>([
+  'matematicas_ccss:primitiva-de-una-funcion-y-la-integral-indefinida',
+  'matematicas_ccss:la-integral-definida-regla-de-barrow-y-areas',
+])
+
+// Resuelve el topic_slug real de subject+v2SortOrder -- SOLO para
+// matematicas_ccss, la única asignatura cuyo contenido es 100%
+// curriculum_content_v2/flashcard_v2 (ver memoria "v2SortOrder dual
+// meaning": para el resto de asignaturas ese mismo número es metadata de
+// orden de calendario/betaCurriculum.ts, no una fila real de
+// curriculum_content_v2 -- unirlo ahí devolvería un tema equivocado).
+async function resolveAllowlistTopicSlug(
+  db: ReturnType<typeof createServiceClient>,
+  subject: string,
+  v2SortOrder: number
+): Promise<string | null> {
+  if (subject !== 'matematicas_ccss') return null
+  const { data: contentRow } = await db
+    .from('curriculum_content_v2')
+    .select('topic_id')
+    .eq('subject', subject)
+    .eq('sort_order', v2SortOrder)
+    .maybeSingle()
+  if (!contentRow?.topic_id) return null
+  const { data: topicRow } = await db
+    .from('curriculum_topics')
+    .select('topic_slug')
+    .eq('id', contentRow.topic_id)
+    .maybeSingle()
+  return topicRow?.topic_slug ?? null
+}
+
 export async function POST(request: NextRequest) {
   try {
     const authContext = await getAuthContext(request)
@@ -38,6 +77,14 @@ export async function POST(request: NextRequest) {
     }
 
     const db = createServiceClient()
+
+    // PASO 0: "No lo he dado en clase" solo está habilitado para los 2 temas
+    // de integrales de Matemáticas CCSS -- rechazar aquí, en el servidor,
+    // para cualquier otro subject/tema, sea quien sea el que llame.
+    const allowlistTopicSlug = await resolveAllowlistTopicSlug(db, subject, v2SortOrder)
+    if (!NOT_SEEN_ALLOWLIST.has(`${subject}:${allowlistTopicSlug ?? ''}`)) {
+      return NextResponse.json({ success: false, error: 'not_seen_not_allowed_for_topic' }, { status: 403 })
+    }
 
     // PASO 1: Buscar el item en la cola
     const { data: queueItem } = await db

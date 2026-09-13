@@ -3305,13 +3305,15 @@ function Shell({ children }: { children: React.ReactNode }) {
   // vista, así que claro/color no cambian visualmente -- solo se corrige oscuro.
   const { theme: shellTheme } = useClayThemePreference()
   return (
-    // flexDirection explícito: hasta ahora todo lo que colgaba de este nivel
-    // aparte de la cabecera y el grid de contenido era position:fixed
-    // (modales, el chat flotante antiguo) y por eso nunca reveló si esto era
-    // fila o columna -- el nuevo chat (CaminoAssistant, ya en flujo normal
-    // bajo el calendario semanal) sí necesita que esto apile verticalmente
-    // de verdad.
-    <div data-kairo-clay-theme={shellTheme} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--clay-bg)' }}>
+    // Dos ejes, y hacen falta los dos. El de fuera es FILA porque
+    // .kairo-sidebar-spacer (SidebarNav) es quien reserva los 60 px del rail
+    // fijo: en columna el spacer se apila encima del contenido en vez de
+    // ponerse a su lado, y el rail -- position:fixed, z-index 200 -- pasa a
+    // tapar la esquina superior izquierda, justo donde empieza el ticker
+    // ("N días de racha"). El de dentro es COLUMNA porque el chat
+    // (CaminoAssistant, ya en flujo normal bajo el calendario semanal)
+    // necesita apilar verticalmente de verdad bajo la cabecera y el grid.
+    <div data-kairo-clay-theme={shellTheme} style={{ display: 'flex', minHeight: '100vh', background: 'var(--clay-bg)' }}>
       <style>{`
         .camino-reason-list {
           display: flex;
@@ -3421,7 +3423,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         }
       `}</style>
       <SidebarNav />
-      <div className="kairo-page-scroll" style={{ minWidth: 0, flex: 1 }}>{children}</div>
+      <div className="kairo-page-scroll" style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>{children}</div>
     </div>
   )
 }

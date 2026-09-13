@@ -1,10 +1,7 @@
+import { loadCalendarDiagnostics } from './calendarDiagnostics'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import { canRepositionAutomatically } from './automaticPlacement.ts'
-import { planningDates } from './planWindow.ts'
 import { loadStudentPlanContext, type StudentPlanContext } from './studentPlanContext.ts'
-import { readAllRows } from './readAllRows'
-import { eligibleDatesForRow } from './planPlacement'
 import { getMadridToday } from './studyDays.ts'
 
 // El estado del plan que hay que CONTARLE al alumno, calculado aparte de quien
@@ -44,16 +41,6 @@ export type PlanNotices = {
   misplaced: string[]
 }
 
-type NoticeRow = {
-  id: string
-  scheduled_date: string | null
-  status: string
-  mission_type: string | null
-  source: string | null
-  locked: boolean | null
-  metadata: Record<string, unknown> | null
-}
-
 export async function collectPlanNotices(
   userId: string,
   db: SupabaseClient,
@@ -62,34 +49,11 @@ export async function collectPlanNotices(
 ): Promise<PlanNotices> {
   const context = planContext ?? await loadStudentPlanContext(userId, db, today)
 
-  const rows = await readAllRows<NoticeRow>((from, to) => db
-    .from('camino_calendar')
-    .select('id, scheduled_date, status, source, locked, metadata, mission_type')
-    .eq('user_id', userId).in('status', ['pending', 'postponed'])
-    .gte('scheduled_date', today).order('id').range(from, to))
-  const window = { dates: planningDates(context, { includeFinalReviewWindow: true, limit: 730 }),
-    examDate: context.examDate, planningCutoff: context.planningCutoff, capacityPerDay: 0 }
-
-  const protectedConflicts: string[] = []
-  const misplaced: string[] = []
-
-  for (const row of rows) {
-    if (typeof row.scheduled_date !== 'string') continue
-    const repositionable = canRepositionAutomatically(row)
-    // Después de la fecha objetivo no hay plan que valga. Si el alumno la
-    // fijó, es conflicto suyo y se le enseña; si no, es trabajo a recolocar.
-    if (row.scheduled_date >= context.examDate) {
-      if (repositionable) misplaced.push(row.id)
-      else protectedConflicts.push(row.id)
-      continue
-    }
-    // Dentro de plazo pero en un día que su patrón actual no incluye: pasa
-    // cuando el acceso se degrada después de haber planificado.
-    if (repositionable && !eligibleDatesForRow({ id: row.id, scheduledDate: row.scheduled_date,
-      missionType: row.mission_type ?? 'concept', source: row.source,
-      deadlineDate: typeof row.metadata?.partial_exam_date === 'string' ? row.metadata.partial_exam_date : null,
-    }, window).includes(row.scheduled_date)) misplaced.push(row.id)
-  }
+  const { conflicts, requiresDurationRefresh } = await loadCalendarDiagnostics(userId, db, context)
+  const misplaced = [...new Set([...conflicts.filter(row => row.scheduled && row.automatic).map(row => row.id), ...requiresDurationRefresh])]
+  // El banner histórico se refiere a fechas posteriores a la PAU. Los demás
+  // conflictos protegidos aparecen con su motivo en la previsión detallada.
+  const protectedConflicts = conflicts.filter(row => row.scheduled && !row.automatic && row.reason === 'after_exam').map(row => row.id)
 
   return {
     availability: context.availabilityExceedsAccess

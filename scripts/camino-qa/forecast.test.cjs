@@ -91,6 +91,12 @@ test('actual ensure HTTP handler: same-day invalid placement does not bypass rep
 function assertPartition(result) {
  assert.equal(result.validScheduledMinutes + result.projectedPendingMinutes + result.atRiskMinutes,
   result.scheduledMinutes + result.pendingMinutes, 'every minute belongs to exactly one displayed category')
+ // Decir "se salen 11,3 h" sin decir CUÁLES es el diagnóstico que llevaba a
+ // recomendar quitar temario ante un simple solape. Cada minuto en riesgo
+ // tiene que venir con la actividad concreta y su causa.
+ assert.equal(result.riskItems.reduce((sum, item) => sum + item.minutes, 0), result.atRiskMinutes,
+  'every at-risk minute names the activity and the cause behind it')
+ for (const item of result.riskItems) assert.ok(item.reason && item.subject, 'a risk item without a cause explains nothing')
  for (const subject of result.subjects) {
   assert.equal(subject.scheduledMinutes - subject.scheduledAtRiskMinutes + subject.projectedPendingMinutes + subject.atRiskMinutes,
    subject.scheduledMinutes + subject.pendingMinutes)
@@ -104,82 +110,96 @@ test('forecast: scheduled conflicts occupy one category, never two',()=>{
  assert.equal(result.projectedPendingMinutes,20)
  assertPartition(result)
 })
-for (const [minutes, slots] of [[30,[30]],[45,[45]],[60,[35,25]],[90,[50,40]],[150,[55,50,45]],[180,[50,45,45,40]]]) {
- for (const type of ['concept','review']) test(`forecast and real placement agree: ${minutes} minutes, ${type}`,async()=>{
+// Same six 20-minute activities at every availability setting: more daily
+// time may fit more work, but cannot inflate the workload of these activities.
+for (const minutes of [30,45,60,90,150,180]) {
+ for (const type of ['concept','review']) test(`content duration and actual placement agree: ${minutes} minutes, ${type}`,async()=>{
   const context=load('app/lib/camino/planWindow.ts').buildStudentPlanContext({today:ctx.today,examDate:'2027-01-17',dailyMinutes:minutes,weeklyStudyDays:7,holidays:new Set()})
-  const work=slots.map((_,i)=>q(`q-${i}`,0,{metadata:type==='concept'?{mission_type:type}:{mission_type:type,estimated_minutes:999}}))
+  const work=Array.from({length:6},(_,i)=>q(`q-${i}`,0,{metadata:{mission_type:type,content_estimated_minutes:20}}))
   const before=forecast(context,[],work,[])
-  assert.equal(before.pendingMinutes,minutes)
-  assert.equal(before.projectedPendingMinutes,minutes)
-  assert.equal(before.atRiskMinutes,0)
-  const db=database({
-   perfiles:[{id:'u',pau_exam_date:context.examDate}],
+  assert.equal(before.pendingMinutes,120,'workload cannot grow with availability')
+  const db=database({perfiles:[{id:'u',pau_exam_date:context.examDate}],
    billing_events:[{user_id:'u',event_type:'onboarding_completed',payload:{daily_minutes:minutes,weekly_study_days_value:7}}],
    user_learning_queue:work.map(q=>({...q,user_id:'u'})),
    camino_calendar:work.map((q,i)=>({...row(`c-${i}`,{queue_id:q.id,mission_type:type,metadata:q.metadata}),user_id:'u'})),
   })
   const result=await load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization('u',db,{planContext:context})
-  assert.equal(result.reason,'applied');assert.equal(result.unscheduledRows,0)
+  assert.equal(result.reason,'applied')
   const placed=db.tables.camino_calendar.filter(r=>r.status==='pending')
-  assert.deepEqual(placed.map(r=>r.metadata.estimated_minutes),slots)
-  assert.ok(placed.every(r=>r.scheduled_date===context.today))
+  assert.ok(placed.every(r=>r.metadata.estimated_minutes===20))
+  assert.equal(placed.length+result.unscheduledRows,6)
+  const perDay=new Map()
+  for(const r of placed) perDay.set(r.scheduled_date,(perDay.get(r.scheduled_date)||0)+20)
+  assert.ok([...perDay.values()].every(value=>value<=minutes))
   const after=forecast(context,db.tables.camino_calendar,db.tables.user_learning_queue,[])
   assert.equal(after.scheduledMinutes,before.projectedPendingMinutes)
-  assert.equal(after.atRiskMinutes,0);assert.equal(after.pendingMinutes,0)
+  assert.equal(after.atRiskMinutes,before.atRiskMinutes)
+  assert.equal(after.scheduledMinutes+after.pendingMinutes,120)
   assertPartition(before);assertPartition(after)
  })
 }
-test('forecast: remaining slot follows existing automatic work; completed/manual work only consumes minutes',()=>{
+test('forecast: existing automatic, completed and manual work all consume minutes without resizing new work',()=>{
  const concept=q('c',0,{metadata:{mission_type:'concept'}})
  const withFirst=forecast(ctx,[row('a',{end_time:'16:35'})],[concept],[])
  assert.equal(withFirst.projectedPendingMinutes,25);assert.equal(withFirst.atRiskMinutes,0)
  for(const extra of [{source:'manual'},{locked:true},{status:'completed'}]) {
   const result=forecast(ctx,[row('a',{end_time:'16:25',...extra})],[concept],[])
-  assert.equal(result.projectedPendingMinutes,35);assert.equal(result.atRiskMinutes,0)
+  assert.equal(result.projectedPendingMinutes,25);assert.equal(result.atRiskMinutes,0)
   assertPartition(result)
  }
 })
-test('forecast: spare minutes do not invent extra sessions',()=>{
+test('forecast: three short activities fit when their total fits, without a session-count cap',()=>{
  const result=forecast(ctx,[],[q('a',10),q('b',10),q('c',10)],[])
- assert.equal(result.projectedPendingMinutes,20);assert.equal(result.atRiskMinutes,10)
+ assert.equal(result.projectedPendingMinutes,30);assert.equal(result.atRiskMinutes,0)
  assertPartition(result)
 })
 test('forecast: an unscheduled lesson forgets old hours and adapts to the current session length',()=>{
- const result=forecast(ctx,[row('a',{status:'unscheduled',end_time:'19:00',metadata:{estimated_minutes:180}})],[],[])
- assert.equal(result.pendingMinutes,35);assert.equal(result.projectedPendingMinutes,35);assert.equal(result.atRiskMinutes,0)
+ const result=forecast(ctx,[row('a',{status:'unscheduled',end_time:'19:00',metadata:{estimated_minutes:180,camino_personalization:{version:'calendar_personalization_v5'}}})],[],[])
+ assert.equal(result.pendingMinutes,25);assert.equal(result.projectedPendingMinutes,25);assert.equal(result.atRiskMinutes,0)
  assertPartition(result)
 })
 test('forecast: an unplaced session keeps an explicit estimate, with no lost minutes',()=>{
  const result=forecast(ctx,[],['a','b','c'].map(id=>q(id,0,{metadata:{mission_type:'concept'}})),[])
- assert.equal(result.projectedPendingMinutes,60);assert.equal(result.atRiskMinutes,35)
- assert.equal(result.pendingMinutes,95);assertPartition(result)
+ assert.equal(result.projectedPendingMinutes,50);assert.equal(result.atRiskMinutes,25)
+ assert.equal(result.pendingMinutes,75);assertPartition(result)
 })
 
 // End-to-end orchestration with the beta curriculum shipped in the repository.
 // Supabase is in-memory here; these tests do not certify the production catalog.
-for (const [today, count, minutes] of [['2026-09-14',6,90],['2027-01-11',4,60],['2027-05-31',6,90],['2027-06-05',4,60]]) {
+// Nueve asignaturas es el caso real que rompia el modelo anterior: con un tope
+// de misiones por dia, mas tiempo declarado no compraba mas temario cubierto.
+// Las nueve que el onboarding sabe generar hoy (ALLOWED_GENERATE_SUBJECTS).
+const JOURNEY_SUBJECTS=['matematicas_ii','fisica','lengua','historia_espana','ingles','quimica','matematicas_ccss','historia_filosofia','economia']
+// Filas publicadas de las asignaturas sin fallback estatico, tomadas del
+// catalogo real: la identidad de un tema es (block_slug, v2_sort_order), asi
+// que inventarlas aqui no las haria coincidir con nada.
+const JOURNEY_PUBLISHED=['ingles','historia_filosofia','economia'].flatMap(subject=>
+ load('app/lib/camino/caminoCurriculumPlan.ts').CAMINO_CURRICULUM_TOPICS
+  .filter(topic=>topic.subject===subject&&topic.v2SortOrder).slice(0,3)
+  .map(topic=>({subject,block_key:topic.blockTitle,block_slug:topic.blockSlug,sort_order:topic.v2SortOrder,title:topic.title,review_status:'published'})))
+for (const [today, count, minutes] of [['2026-09-14',6,90],['2027-01-11',4,60],['2027-05-31',6,90],['2027-06-05',4,60],['2026-09-14',9,180]]) {
  test(`generate → personalize → read → forecast: ${today}, ${count} subjects`,async()=>{
   const user='journey', examDate='2027-06-07'
-  const subjects=['matematicas_ii','fisica','lengua','historia_espana','ingles','quimica'].slice(0,count)
+  const subjects=JOURNEY_SUBJECTS.slice(0,count)
+  const weekly=Math.min(count,7)
   const journey=runtime(today,{'app/lib/onboarding/hasCompletedOnboarding.ts':{hasCompletedOnboarding:async()=>false}})
   const partialDate=today<'2027-05-01' ? today.slice(0,8)+'25' : '2027-06-06'
   const exams=[{id:'exam',subject:'fisica',date:partialDate,name:'Parcial',block:'Repaso general',topic:'',priority:'normal'}]
   const db=database({perfiles:[{id:user,subjects,pau_exam_date:examDate,student_exams:exams}],
    user_entitlements:[{user_id:user,plan_id:'premium',status:'active',source:'auto_promo_beta'}],
-   // Representative published English rows; this subject has no static fallback.
    // Titles/keys follow 20260901090000; publication follows 20260904093000.
-   curriculum_content_v2:['Comprensión Lectora: Verdadero/Falso con Evidencia Textual','Vocabulario en Contexto','Redacción: Ensayo de Opinión (150-200 palabras)'].map((title,i)=>({subject:'ingles',block_key:'Destrezas PAU',block_slug:'destrezas-pau',sort_order:i+2,title,review_status:'published'})),
+   curriculum_content_v2:JOURNEY_PUBLISHED,
   })
-  const generated=await journey('app/lib/onboarding/generateCaminoPlan.ts').generateCaminoPlan({userId:user,db,subjects,startMode:'from_zero',studentExams:exams,dailyMinutes:minutes,weeklyStudyDays:count})
+  const generated=await journey('app/lib/onboarding/generateCaminoPlan.ts').generateCaminoPlan({userId:user,db,subjects,startMode:'from_zero',studentExams:exams,dailyMinutes:minutes,weeklyStudyDays:weekly})
   assert.equal(generated.success,true)
   assert.ok(generated.missions.length>0,'onboarding returns actual calendar missions')
   assert.equal(generated.skippedSubjects.length,0)
   for (const name of subjects) assert.ok(db.tables.user_learning_queue.some(q=>q.subject===name),`${name} must have curriculum work`)
-  const pref={user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:minutes,weekly_study_days_value:count}}
+  const pref={user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:minutes,weekly_study_days_value:weekly}}
   db.tables.billing_events.push(pref)
   const queueIds=new Set(db.tables.user_learning_queue.map(q=>q.id))
   const durations=journey('app/lib/camino/missionDuration.ts')
-  for (const [days, daily, target] of [[count,minutes,examDate],[2,30,examDate],[6,90,examDate],[4,60,'2027-06-06']]) {
+  for (const [days, daily, target] of [[weekly,minutes,examDate],[2,30,examDate],[6,90,examDate],[4,60,'2027-06-06']]) {
    pref.payload={daily_minutes:daily,weekly_study_days_value:days}
    db.tables.perfiles[0].pau_exam_date=target
    const personalize=await journey('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization(user,db)
@@ -306,7 +326,7 @@ test('forecast: el remedio nombra el ajuste mas pequeno que cubre todo, por tiem
 })
 test('forecast: sin riesgo no hay remedio; lo que no cabe ni al maximo se dice como deficit',()=>{
  assert.equal(forecast(ctx,[],[q('a',30)],[]).remedy,null)
- const impossible=forecast(long,[],Array.from({length:30},(_,i)=>q('x'+i,30)),[])
+ const impossible=forecast(long,[],Array.from({length:200},(_,i)=>q('x'+i,30)),[])
  assert.equal(impossible.remedy.dailyMinutesNeeded,null)
  assert.equal(impossible.remedy.weeklyStudyDaysNeeded,null)
  assert.equal(impossible.remedy.deficitMinutes,impossible.scheduledMinutes+impossible.pendingMinutes-impossible.totalCapacityMinutes)
@@ -315,4 +335,49 @@ test('forecast: las reservas fijas en conflicto se cuentan aparte, porque ningun
  const result=forecast(ctx,[row('a',{locked:true,end_time:'17:00'}),row('b',{locked:true,start_time:'17:00',end_time:'17:30'})],[],[])
  assert.equal(result.remedy.manualMinutes,30)
  assert.equal(result.remedy.manualMinutes,result.protectedConflictMinutes)
+})
+
+// El aviso "no cabe ni con el maximo" era falso: probaba subir minutos y subir
+// dias por separado, nunca los dos a la vez. Con 40 lecciones de 30 min, ni 180
+// min/dia a 3 dias ni 30 min/dia a 7 dias bastan — 60 min/dia x 7 dias si.
+test('forecast: un cambio combinado de minutos y dias se propone antes de declarar imposible',()=>{
+ const work=Array.from({length:40},(_,i)=>q('x'+i,30))
+ const result=forecast(long,[],work,[])
+ assert.ok(result.atRiskMinutes>0)
+ assert.equal(result.remedy.dailyMinutesNeeded,null,'ningun cambio de minutos por si solo basta')
+ assert.equal(result.remedy.weeklyStudyDaysNeeded,null,'ningun cambio de dias por si solo basta')
+ assert.equal(result.remedy.combinedChange.dailyMinutes,60)
+ assert.equal(result.remedy.combinedChange.weeklyStudyDays,7)
+ // Y ese cambio combinado tiene que caber DE VERDAD al resimularlo entero:
+ // subir los dias tambien mueve el corte del repaso final.
+ const capacity=load('app/lib/camino/studyCapacity.ts')
+ const combined={...long,dailyMinutes:60,weeklyStudyDays:7,studyDayIndexes:capacity.studyDayIndexesFor(7),
+  planningCutoff:capacity.planningCutoffDate(long.today,long.examDate,load('app/lib/camino/examDate.ts').FINAL_REVIEW_RESERVED_STUDY_DAYS,{weeklyStudyDays:7,holidays:long.holidays})}
+ assert.equal(forecast(combined,[],work,[]).atRiskMinutes,0)
+ assertPartition(result)
+})
+test('forecast: lo que no cabe ni con la disponibilidad maxima se dice como tal',()=>{
+ const impossible=forecast(long,[],Array.from({length:200},(_,i)=>q('x'+i,30)),[])
+ assert.equal(impossible.remedy.combinedChange,null)
+ assert.ok(impossible.remedy.maxAvailabilityAtRiskMinutes>0,'con 180 min y 7 dias sigue sin caber')
+ assert.equal(impossible.remedy.replanRecommended,false)
+})
+// El solape es el caso que la comprobacion previa de already_current no veia:
+// las dos filas tienen fecha valida, asi que revisar fechas las daba por buenas
+// mientras la prevision seguia marcando trabajo en riesgo.
+test('un solape entre misiones automaticas con fecha valida sigue siendo trabajo a recolocar',async()=>{
+ const meta={duration_model:'content_v1'}
+ const db=database({perfiles:[{id:'u',pau_exam_date:'2027-06-07'}],
+  billing_events:[{user_id:'u',event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:7}}],
+  camino_calendar:[{...row('a',{metadata:meta}),user_id:'u'},{...row('b',{start_time:'16:20',end_time:'16:50',metadata:meta}),user_id:'u'}]})
+ const notices=await load('app/lib/camino/planNotices.ts').collectPlanNotices('u',db)
+ assert.deepEqual([...notices.misplaced],['b'],'revisar solo fechas dejaba el solape invisible para siempre')
+})
+test('forecast: el solape se nombra como conflicto de hueco, no como falta de horas',()=>{
+ const result=forecast(ctx,[row('a'),row('b',{start_time:'16:20',end_time:'16:50'})],[],[])
+ const risk=result.riskItems.find(item=>item.id==='b')
+ assert.equal(risk.reason,'occupied_time')
+ assert.equal(risk.automatic,true,'es trabajo que Camino si puede recolocar')
+ assert.equal(result.remedy.replanRecommended,true,'con recolocar basta: no hay que quitar temario')
+ assert.equal(result.remedy.deficitMinutes,0)
 })

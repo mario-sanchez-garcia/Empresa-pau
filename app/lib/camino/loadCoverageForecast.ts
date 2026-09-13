@@ -9,10 +9,10 @@ export async function loadCoverageForecast(userId: string, db: SupabaseClient, p
   const [context, calendar, queue, events, profile] = await Promise.all([
     planContext ?? loadStudentPlanContext(userId, db),
     readAllRows<ForecastCalendarRow>((from, to) => db.from('camino_calendar')
-      .select('id, queue_id, subject, scheduled_date, status, source, locked, mission_type, start_time, end_time, metadata')
+      .select('id, title, queue_id, subject, scheduled_date, status, source, locked, mission_type, start_time, end_time, metadata')
       .eq('user_id', userId).in('status', ['pending', 'postponed', 'unscheduled', 'missed', 'completed']).order('id').range(from, to)),
     readAllRows<ForecastQueueRow>((from, to) => db.from('user_learning_queue')
-      .select('id, subject, queue_status, retry_not_before, metadata').eq('user_id', userId).order('subject_position').order('id').range(from, to)),
+      .select('id, title, subject, queue_status, retry_not_before, metadata').eq('user_id', userId).order('subject_position').order('id').range(from, to)),
     readAllRows<ForecastEvent>((from, to) => db.from('camino_custom_events')
       .select('event_date, recurrence, recurrence_until, day_of_week, start_time, end_time').eq('user_id', userId).order('id').range(from, to)),
     db.from('perfiles').select('subjects').eq('id', userId).maybeSingle(),

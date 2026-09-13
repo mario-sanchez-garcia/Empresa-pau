@@ -326,7 +326,7 @@ async function loadRewardMissions(db: SupabaseClient, userId: string): Promise<R
   const today = new Date().toISOString().slice(0, 10)
   const { data } = await db
     .from('camino_calendar')
-    .select('title, subject, scheduled_date, mission_type, v2_sort_order, block_slug, metadata, created_at')
+    .select('title, subject, scheduled_date, mission_type, v2_sort_order, block_slug, metadata, start_time, end_time, created_at')
     .eq('user_id', userId)
     .eq('status', 'pending')
     .gte('scheduled_date', today)
@@ -343,6 +343,9 @@ async function loadRewardMissions(db: SupabaseClient, userId: string): Promise<R
       subject: row.subject,
       scheduled_date: row.scheduled_date,
       mission_type: row.mission_type,
+      metadata: row.metadata,
+      start_time: row.start_time,
+      end_time: row.end_time,
       supportsStepCorrection: Boolean(topic),
     }
   })

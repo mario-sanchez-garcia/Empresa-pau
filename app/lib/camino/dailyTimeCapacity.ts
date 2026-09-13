@@ -1,35 +1,20 @@
-// Single source of truth for turning a student's declared daily study time
-// into how many main missions Camino generates for a day and how many
-// minutes each one should target.
-//
-// Before this existed, every layer of the pipeline (the initial onboarding
-// seed, the daily ensureCaminoCalendar fill, the after-the-fact
-// applyCalendarPersonalization pass, and the client-side local preview)
-// independently hardcoded its own cap — mostly "1 or 2 missions, ~25-60 min
-// each" — regardless of what the student actually declared. A student who
-// said "2-3 horas" (150 min) still only ever got up to ~90 min of content,
-// and the very first seed (onboarding/generate) created exactly one mission
-// per day no matter what, so in practice a lot of students just saw a
-// single ~25 min mission. Every layer must use this table so "150 min/day"
-// means the same thing everywhere.
-
 export const VALID_DAILY_MINUTES = [30, 45, 60, 90, 150, 180] as const
 export type DailyMinutes = typeof VALID_DAILY_MINUTES[number]
 
 export type DailyMissionPlan = {
   count: number
-  /** Target minutes per slot, index 0 = first/main mission of the day. Sums to the declared minutes. */
+  /** Sesiones de referencia de 25 min, solo para previsiones sin contenido. No es un límite del planificador. */
   slotMinutes: number[]
 }
 
-const PLAN_BY_MINUTES: Record<number, DailyMissionPlan> = {
-  30: { count: 1, slotMinutes: [30] },
-  45: { count: 1, slotMinutes: [45] },
-  60: { count: 2, slotMinutes: [35, 25] },
-  90: { count: 2, slotMinutes: [50, 40] },
-  150: { count: 3, slotMinutes: [55, 50, 45] },
-  180: { count: 4, slotMinutes: [50, 45, 45, 40] },
-}
+// El número de actividades reales depende de sus duraciones. Esta tabla
+// solo conserva una estimación nominal para rotación y vistas sin cola.
+const PLAN_BY_MINUTES: Record<number, DailyMissionPlan> = Object.fromEntries(
+  VALID_DAILY_MINUTES.map(minutes => {
+    const count = Math.max(1, Math.floor(minutes / 25))
+    return [minutes, { count, slotMinutes: Array.from({ length: count }, () => 25) }]
+  }),
+)
 
 const DEFAULT_PLAN = PLAN_BY_MINUTES[60]
 
@@ -54,12 +39,12 @@ export function estimatedMinutesForSlot(dailyMinutes: number | null | undefined,
 // onboarding, desincronizado del número real tras cualquier cambio
 // posterior en Ajustes) siempre coinciden.
 export const DAILY_MINUTES_LABELS: Record<number, string> = {
-  30: '15-30 min',
-  45: '30-45 min',
-  60: '45-60 min',
-  90: '1-2 horas',
-  150: '2-3 horas',
-  180: 'Más de 3 horas',
+  30: '30 min',
+  45: '45 min',
+  60: '1 hora',
+  90: '1 h 30 min',
+  150: '2 h 30 min',
+  180: '3 horas',
 }
 
 export function dailyMinutesLabel(dailyMinutes: number | null | undefined): string {
@@ -67,15 +52,6 @@ export function dailyMinutesLabel(dailyMinutes: number | null | undefined): stri
   return `${dailyMinutes ?? 60} min`
 }
 
-// Explica en una frase qué implica en la práctica elegir ese tiempo diario —
-// calculado a partir del mismo PLAN_BY_MINUTES que de verdad genera las
-// misiones, para que el texto nunca pueda desincronizarse de lo que Camino
-// realmente hace con ese valor.
 export function describeDailyPlan(dailyMinutes: number | null | undefined): string {
-  const plan = missionPlanForMinutes(dailyMinutes)
-  if (plan.count === 1) {
-    return `Kairo te genera 1 misión de ~${plan.slotMinutes[0]} min al día — una sesión corta y directa al grano.`
-  }
-  const minutesList = plan.slotMinutes.join(' + ')
-  return `Kairo te genera ${plan.count} misiones al día (~${minutesList} min) — sesiones más largas y completas para cubrir más contenido de una sentada.`
+  return `Tu presupuesto es de ${dailyMinutes ?? 60} min al día. El número de actividades depende de lo que dure cada una; las más cortas dejan sitio para avanzar más.`
 }

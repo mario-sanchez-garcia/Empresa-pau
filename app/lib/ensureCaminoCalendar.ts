@@ -6,7 +6,7 @@ import { getAvailabilityForDate, type LocalBusyRange } from './calendar/availabi
 import { PRIVATE_BETA_SUBJECTS, isPrivateBetaSubject } from './camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from './camino/caminoCurriculumPlan'
 import { cleanStudentExams } from './camino/cleanStudentExams'
-import { estimatedMinutesForSlot } from './camino/dailyTimeCapacity'
+import { minutesForPlacement, placementDurationMetadata } from './camino/placementDuration'
 import { EXAM_SUBJECT_SLUG } from './camino/partialExamSubjects'
 import { computeExamCoverage, reactivateAllInactiveQueueItems, reactivateQueueItems } from './camino/examCoverage'
 import { FINAL_MOCK_WINDOW_DAYS, injectAllPartialExamMissions, resolveFinalMockSlot } from './camino/injectPartialExamMissions'
@@ -676,7 +676,7 @@ export async function ensureCaminoCalendar(
           // llenan) se salta sin avanzar el cursor, igual que el bucle
           // principal.
           const scheduler = await createAvailabilityAwareScheduler(userId, supabase, dateStr, externalBusyByDate)
-          const timeSlot = scheduler.placeBest(estimatedMinutesForSlot(dailyMinutesForSlots, 0), {
+          const timeSlot = scheduler.placeBest(minutesForPlacement((item.metadata?.mission_type as string) ?? 'concept', item.metadata ?? {}), {
             date: dateStr,
             subject: item.subject,
             missionType: (item.metadata?.mission_type as string) ?? 'concept',
@@ -686,7 +686,7 @@ export async function ensureCaminoCalendar(
           const itemMeta = item.metadata ?? {}
           const topicMeta = queueTopicMeta(item)
           const missionType = (itemMeta.mission_type as string) ?? 'concept'
-          const calMetadata: Record<string, unknown> = { topic_slug: topicMeta.topicSlug, exam_forced: true }
+          const calMetadata: Record<string, unknown> = { topic_slug: topicMeta.topicSlug, exam_forced: true, ...placementDurationMetadata(missionType, itemMeta) }
           const topicId = topicIdBySortOrder.get(item.v2_sort_order)
           if (topicId) calMetadata.topic_id = topicId
           if (itemMeta.express) calMetadata.express = true
@@ -783,12 +783,11 @@ export async function ensureCaminoCalendar(
   // disponibles antes del examen.
   const pressure = capacity.sessions > 0 ? pendingTotal / capacity.sessions : 0
   const rescueMode = pressure > 1
-  // itemsPerDay toma el MAYOR de dos señales independientes: la presión real
-  // del backlog frente a la capacidad y el ritmo que el propio alumno declaró
-  // en onboarding — así un backlog pesado puede empujar más items incluso con
-  // poco tiempo diario declarado, pero el tiempo declarado siempre se respeta
-  // como mínimo.
-  const itemsPerDay = capacity.sessionsPerDay
+  // Ya NO hay un número de misiones por día. El día se llena por PRESUPUESTO
+  // DE MINUTOS: cada actividad pide su propia duración (ver placementDuration)
+  // y el DayScheduler la rechaza en cuanto no queda presupuesto o hueco
+  // horario. Así ocho actividades de 20 min caben en 180 min/día, algo que el
+  // tope rígido de cuatro sesiones impedía por construcción.
 
   // Obtener items pendientes de la cola ordenados por posición
   // queue_status='pending' excluye automáticamente postponed/scheduled/completed
@@ -812,8 +811,8 @@ export async function ensureCaminoCalendar(
   // Antes esto marcaba como 'inactive' todo lo que pasara de
   // `ceil(CALENDAR_HORIZON * 2 / nºasignaturas)` items por asignatura — 15
   // con cuatro asignaturas. Ese recorte no aportaba nada a la programación
-  // (el bucle de abajo solo puede colocar `emptyDays × itemsPerDay` misiones
-  // de todos modos, así que nunca llegaba tan lejos en la cola) y en cambio
+  // (el bucle de abajo solo puede colocar lo que quepa en el presupuesto de
+  // `emptyDays` días, así que nunca llegaba tan lejos en la cola) y en cambio
   // sí rompía dos cosas: cambiaba el temario pendiente que ve el alumno y
   // falseaba el propio `pendingTotal` de la siguiente ejecución, que es la
   // entrada del cálculo de urgencia. Un alumno agobiado veía desaparecer
@@ -936,86 +935,91 @@ export async function ensureCaminoCalendar(
     // asignatura se le agotó la cola MIENTRAS corría este bucle (el motor no
     // conoce los cursores): sin ese respaldo el día lectivo se perdía entero.
     const planned = plannedSubjectByDate.get(dateStr)
-    const subject = planned && hasQueueLeft(planned)
+    const preferredSubject = planned && hasQueueLeft(planned)
       ? planned
       : subjectForDay(dateStr, subjects, subjectsByBacklog, planContext.studyDayIndexes, examSubjectsByDate.get(dateStr), hasQueueLeft)
-    if (!subject) continue
-
-    const queue = subjectQueues[subject] ?? []
-    let cursor = cursors[subject] ?? 0
+    if (!preferredSubject) continue
     // Un scheduler por día, sembrado con el horario propio del alumno
     // (camino_custom_events, incluidas sus recurrencias semanales) — cada
     // misión que coloca este bucle ocupa el hueco elegido antes de buscar el
     // siguiente, así dos misiones del mismo día tampoco se pisan entre sí.
     const scheduler = await createAvailabilityAwareScheduler(userId, supabase, dateStr, externalBusyByDate)
 
-    for (let slot = 0; slot < itemsPerDay; slot++) {
-      if (cursor >= queue.length) break
-      const item = queue[cursor]
-      // "No lo he dado" a mitad de bloque deja la tarjeta en 'pending' pero
-      // con retry_not_before en el futuro (ver postpone-mission/route.ts) —
-      // mientras dure la espera, esta asignatura no aporta nada ese día
-      // (rota a las demás) en vez de forzar la misma tarjeta o saltarla.
-      if (item.retry_not_before && item.retry_not_before > dateStr) break
-      // Mismo motivo, otro caso: este tema es de un examen cuyo Simulacro ya
-      // cae en esta fecha o antes — el turno normal de rotación no debe
-      // colocarlo aquí (rompería Curso→Simulacro), así que se deja pendiente
-      // igual que retry_not_before, para que un día POSTERIOR al Simulacro
-      // (donde el límite ya no aplica) lo recoja. PASO 2.6 ya respeta este
-      // mismo límite para sus propias fechas forzadas; esto cubre el resto
-      // de temas que ese forzado no alcanzó a colocar antes del Simulacro.
-      const examMockBoundary = item.subject === 'historia_espana'
-        ? historiaSortOrderMockDate.get(item.v2_sort_order)
-        : undefined
-      if (examMockBoundary && dateStr >= examMockBoundary) break
-      const itemMeta = item.metadata ?? {}
-      const topicMeta = queueTopicMeta(item)
-      const missionType = finalSprint ? 'review' : ((itemMeta.mission_type as string) ?? 'concept')
-      const calMetadata: Record<string, unknown> = {}
-      calMetadata.topic_slug = topicMeta.topicSlug
-      const topicId = item.subject === 'historia_espana' ? historiaTopicIdBySortOrder.get(item.v2_sort_order) : null
-      if (topicId) calMetadata.topic_id = topicId
-      if (itemMeta.express) calMetadata.express = true
-      if (finalSprint) { calMetadata.plan_mode = 'final_sprint'; calMetadata.final_review_window = true; calMetadata.knowledge_verified = false }
-      if (rescueMode && !finalSprint) calMetadata.plan_mode = 'rescue'
-      const timeSlot = scheduler.placeBest(estimatedMinutesForSlot(dailyMinutesForSlots, slot), {
-        date: dateStr,
-        subject: item.subject,
-        missionType,
-        deadlineDate: item.subject === 'historia_espana' ? historiaSortOrderMockDate.get(item.v2_sort_order) ?? null : null,
-        daysUntilExam: item.subject === 'historia_espana' && historiaSortOrderMockDate.get(item.v2_sort_order)
-          ? daysBetween(dateStr, historiaSortOrderMockDate.get(item.v2_sort_order)!)
-          : null,
-      })
-      // Sin hueco libre en la ventana de estudio de este día (agenda propia
-      // — cole/extraescolares — ya lo llena) -> no se fuerza la misión aquí.
-      // Se deja en la cola sin avanzar el cursor, así un día futuro con
-      // menos ocupación la recoge en vez de aterrizar sin hora en un día ya
-      // completo.
-      if (!timeSlot) break
-      calendarRows.push({
-        user_id: userId,
-        scheduled_date: dateStr,
-        subject: item.subject,
-        v2_sort_order: item.v2_sort_order,
-        title: finalSprint ? `Práctica prioritaria: ${sanitizeLessonTitle(item.title)}` : sanitizeLessonTitle(item.title),
-        block_key: item.block_key,
-        block_slug: topicMeta.blockSlug,
-        mission_type: missionType,
-        is_main: true,
-        is_bonus: false,
-        status: 'pending',
-        source: 'algorithm',
-        generated_by: 'algorithm_v1',
-        queue_id: item.id,
-        start_time: timeSlot.start,
-        end_time: timeSlot.end,
-        metadata: calMetadata,
-      })
-      scheduledQueueIds.push(item.id)
-      cursor++
+    // Sin tope de sesiones: el día se llena por PRESUPUESTO DE MINUTOS. Se
+    // empieza por la asignatura que le toca por rotación y, cuando esa se
+    // queda sin cola o su siguiente tema no cabe, se ofrece el hueco restante
+    // a las demás en vez de desperdiciarlo. Quien corta es el scheduler:
+    // devuelve null en cuanto no quedan minutos del día o hueco horario libre.
+    for (const subject of [preferredSubject, ...subjects.filter(s => s !== preferredSubject)]) {
+      const queue = subjectQueues[subject] ?? []
+      let cursor = cursors[subject] ?? 0
+      while (cursor < queue.length) {
+        const item = queue[cursor]
+        // "No lo he dado" a mitad de bloque deja la tarjeta en 'pending' pero
+        // con retry_not_before en el futuro (ver postpone-mission/route.ts) —
+        // mientras dure la espera, esta asignatura no aporta nada ese día
+        // (rota a las demás) en vez de forzar la misma tarjeta o saltarla.
+        if (item.retry_not_before && item.retry_not_before > dateStr) break
+        // Mismo motivo, otro caso: este tema es de un examen cuyo Simulacro ya
+        // cae en esta fecha o antes — el turno normal de rotación no debe
+        // colocarlo aquí (rompería Curso→Simulacro), así que se deja pendiente
+        // igual que retry_not_before, para que un día POSTERIOR al Simulacro
+        // (donde el límite ya no aplica) lo recoja. PASO 2.6 ya respeta este
+        // mismo límite para sus propias fechas forzadas; esto cubre el resto
+        // de temas que ese forzado no alcanzó a colocar antes del Simulacro.
+        const examMockBoundary = item.subject === 'historia_espana'
+          ? historiaSortOrderMockDate.get(item.v2_sort_order)
+          : undefined
+        if (examMockBoundary && dateStr >= examMockBoundary) break
+        const itemMeta = item.metadata ?? {}
+        const topicMeta = queueTopicMeta(item)
+        const missionType = finalSprint ? 'review' : ((itemMeta.mission_type as string) ?? 'concept')
+        const calMetadata: Record<string, unknown> = { ...placementDurationMetadata(missionType, itemMeta) }
+        calMetadata.topic_slug = topicMeta.topicSlug
+        const topicId = item.subject === 'historia_espana' ? historiaTopicIdBySortOrder.get(item.v2_sort_order) : null
+        if (topicId) calMetadata.topic_id = topicId
+        if (itemMeta.express) calMetadata.express = true
+        if (finalSprint) { calMetadata.plan_mode = 'final_sprint'; calMetadata.final_review_window = true; calMetadata.knowledge_verified = false }
+        if (rescueMode && !finalSprint) calMetadata.plan_mode = 'rescue'
+        const timeSlot = scheduler.placeBest(minutesForPlacement(missionType, itemMeta), {
+          date: dateStr,
+          subject: item.subject,
+          missionType,
+          deadlineDate: item.subject === 'historia_espana' ? historiaSortOrderMockDate.get(item.v2_sort_order) ?? null : null,
+          daysUntilExam: item.subject === 'historia_espana' && historiaSortOrderMockDate.get(item.v2_sort_order)
+            ? daysBetween(dateStr, historiaSortOrderMockDate.get(item.v2_sort_order)!)
+            : null,
+        })
+        // Sin hueco libre en la ventana de estudio de este día (agenda propia
+        // — cole/extraescolares — ya lo llena) -> no se fuerza la misión aquí.
+        // Se deja en la cola sin avanzar el cursor, así un día futuro con
+        // menos ocupación la recoge en vez de aterrizar sin hora en un día ya
+        // completo.
+        if (!timeSlot) break
+        calendarRows.push({
+          user_id: userId,
+          scheduled_date: dateStr,
+          subject: item.subject,
+          v2_sort_order: item.v2_sort_order,
+          title: finalSprint ? `Práctica prioritaria: ${sanitizeLessonTitle(item.title)}` : sanitizeLessonTitle(item.title),
+          block_key: item.block_key,
+          block_slug: topicMeta.blockSlug,
+          mission_type: missionType,
+          is_main: true,
+          is_bonus: false,
+          status: 'pending',
+          source: 'algorithm',
+          generated_by: 'algorithm_v1',
+          queue_id: item.id,
+          start_time: timeSlot.start,
+          end_time: timeSlot.end,
+          metadata: calMetadata,
+        })
+        scheduledQueueIds.push(item.id)
+        cursor++
+      }
+      cursors[subject] = cursor
     }
-    cursors[subject] = cursor
   }
 
   // Calendario y cola son DOS tablas que tienen que quedar de acuerdo: una

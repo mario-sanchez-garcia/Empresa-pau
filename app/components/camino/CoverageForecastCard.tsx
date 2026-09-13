@@ -2,7 +2,8 @@
 
 import { useId, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import type { CoverageForecast } from '@/app/lib/camino/coverageForecast'
+import type { CoverageForecast, ForecastRiskReason } from '@/app/lib/camino/coverageForecast'
+import { supabase } from '@/app/lib/supabase'
 import { dailyMinutesLabel } from '@/app/lib/camino/dailyTimeCapacity'
 
 // La cabecera muestra el resultado incluso cerrada. Se limita al trabajo
@@ -22,6 +23,14 @@ const SUBJECT_LABELS: Record<string, string> = {
   biologia: 'Biología',
   ingles: 'Inglés',
   economia: 'Economía',
+}
+
+const RISK_LABELS: Record<ForecastRiskReason, string> = {
+  after_exam: 'Fecha posterior a la PAU', partial_deadline: 'Fuera del plazo del parcial',
+  final_review_window: 'Temario nuevo en la reserva de repaso', unavailable_day: 'Día fuera de tu disponibilidad',
+  daily_budget: 'Supera los minutos de ese día', occupied_time: 'Solape o hueco horario ocupado',
+  task_too_long: 'La actividad supera tu presupuesto diario', retry_wait: 'La espera no deja días dentro del plazo',
+  no_slot: 'No se ha encontrado un hueco antes del plazo',
 }
 
 function hours(minutes: number) {
@@ -107,6 +116,29 @@ function RemedyRow({ label, value, from }: { label: string; value: string; from:
 export default function CoverageForecastCard({ forecast }: { forecast: CoverageForecast }) {
   const [open, setOpen] = useState(false)
   const panelId = useId()
+  const [replanning, setReplanning] = useState(false)
+  const [replanError, setReplanError] = useState<string | null>(null)
+  const [visibleRisks, setVisibleRisks] = useState(10)
+  async function replan() {
+    if (replanning) return
+    setReplanning(true); setReplanError(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Vuelve a iniciar sesión para recolocar tu plan.')
+      const response = await fetch('/api/camino/ensure-calendar', {
+        method: 'POST', headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ force: true }), signal: AbortSignal.timeout(60000),
+      })
+      const result = await response.json()
+      if (!response.ok || result.ok !== true) throw new Error(response.status === 409
+        ? 'Tu Camino se está actualizando. Espera unos segundos y vuelve a intentarlo.'
+        : 'No se pudo terminar la recolocación. Puedes volver a intentarlo.')
+      // Recargar también renueva el calendario, no solo las cifras del aviso.
+      window.location.reload()
+    } catch (error) {
+      setReplanError(error instanceof Error ? error.message : 'No se pudo recolocar el plan.')
+    } finally { setReplanning(false) }
+  }
 
   const known = forecast.scheduledMinutes + forecast.pendingMinutes
   const incomplete = forecast.missingSubjects.length > 0
@@ -252,49 +284,53 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
               </>
             )}
 
+            {forecast.riskItems.length > 0 && (
+              <details>
+                <summary style={{ ...num, fontSize: 12, cursor: 'pointer' }}>Ver las {forecast.riskItems.length} actividades sin encajar</summary>
+                <ul style={{ paddingLeft: 18, display: 'grid', gap: 10, ...muted }}>
+                  {forecast.riskItems.slice(0, visibleRisks).map(item => (
+                    <li key={`${item.scheduled ? 'calendar' : 'pending'}:${item.id}`}>
+                      <strong>{item.title || SUBJECT_LABELS[item.subject] || item.subject}</strong> · {Math.round(item.minutes)} min<br />
+                      {RISK_LABELS[item.reason]}{item.deadlineDate ? ` (${examDateLabel(item.deadlineDate)})` : ''}.
+                      {!item.automatic && ' La colocaste tú; no la moveremos automáticamente.'}
+                    </li>
+                  ))}
+                </ul>
+                {visibleRisks < forecast.riskItems.length && <button type="button" onClick={() => setVisibleRisks(value => value + 10)}>Ver 10 más</button>}
+              </details>
+            )}
+
             {remedy && (
               <div style={{ display: 'grid', gap: 10, borderTop: '1px solid var(--clay-border)', paddingTop: 14 }}>
                 <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--clay-text-muted)' }}>
                   Para cubrir todo
                 </span>
 
-                {remedy.dailyMinutesNeeded == null && remedy.weeklyStudyDaysNeeded == null ? (
-                  <p style={prose}>
-                    No cabe ni estudiando lo máximo todos los días: te sobran{' '}
-                    <strong style={num}>{hours(remedy.deficitMinutes || atRisk)}</strong> de trabajo. Aquí el ajuste
-                    no llega — hay que quitar temario, adelantar el arranque o mover exámenes.
-                  </p>
-                ) : (
+                {remedy.replanRecommended ? (
                   <>
-                    <div style={{ display: 'grid', gap: 7 }}>
-                      {remedy.dailyMinutesNeeded != null && (
-                        <RemedyRow
-                          label="Sube tu tiempo diario a"
-                          value={dailyMinutesLabel(remedy.dailyMinutesNeeded)}
-                          from={dailyMinutesLabel(forecast.dailyMinutes)}
-                        />
-                      )}
-                      {remedy.weeklyStudyDaysNeeded != null && (
-                        <RemedyRow
-                          label={remedy.dailyMinutesNeeded != null ? 'O estudia a la semana' : 'Estudia a la semana'}
-                          value={`${remedy.weeklyStudyDaysNeeded} días`}
-                          from={`${forecast.weeklyStudyDays ?? 5} días`}
-                        />
-                      )}
-                    </div>
-                    <p style={prose}>
-                      {remedy.dailyMinutesNeeded != null && remedy.weeklyStudyDaysNeeded != null
-                        ? 'Con cualquiera de las dos te cabe todo lo que tienes registrado: no hacen falta las dos.'
-                        : 'Con ese cambio te cabe todo lo que tienes registrado.'}
-                      {remedy.deficitMinutes > 0 && ` Son ${hours(remedy.deficitMinutes)} más de las que da tu disponibilidad de ahora.`}
-                    </p>
+                    <p style={prose}>Lo registrado puede encajar con tu disponibilidad actual. Hay que recolocar las actividades automáticas que están en conflicto.</p>
+                    <button type="button" disabled={replanning} onClick={() => void replan()}
+                      style={{ color: 'var(--clay-accent-text)', background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)', borderRadius: 8, padding: '10px 12px', cursor: replanning ? 'wait' : 'pointer' }}>
+                      {replanning ? 'Recolocando…' : 'Recolocar mi plan'}
+                    </button>
+                    {replanError && <p role="alert" style={prose}>{replanError}</p>}
                   </>
+                ) : remedy.combinedChange ? (
+                  <p style={prose}>Con <strong>{dailyMinutesLabel(remedy.combinedChange.dailyMinutes)} al día y {remedy.combinedChange.weeklyStudyDays} días a la semana</strong> puede encajar lo registrado. En este caso hay que cambiar ambas opciones.</p>
+                ) : remedy.dailyMinutesNeeded != null || remedy.weeklyStudyDaysNeeded != null ? (
+                  <>
+                    {remedy.dailyMinutesNeeded != null && <RemedyRow label="Tiempo diario" value={dailyMinutesLabel(remedy.dailyMinutesNeeded)} from={dailyMinutesLabel(forecast.dailyMinutes)} />}
+                    {remedy.weeklyStudyDaysNeeded != null && <RemedyRow label={remedy.dailyMinutesNeeded != null ? 'O días a la semana' : 'Días a la semana'} value={`${remedy.weeklyStudyDaysNeeded} días`} from={`${forecast.weeklyStudyDays ?? 5} días`} />}
+                    <p style={prose}>La previsión contempla recolocar las actividades automáticas al guardar el cambio.</p>
+                  </>
+                ) : (
+                  <p style={prose}>Con los ajustes permitidos siguen quedando actividades sin encajar. Revisa los motivos de cada actividad: un plazo vencido o un solape no se resuelve necesariamente añadiendo horas.</p>
                 )}
 
                 {remedy.manualMinutes > 0 && (
                   <p style={prose}>
                     <strong style={num}>{hours(remedy.manualMinutes)}</strong> están en sesiones con hora fija que
-                    pusiste tú, así que ningún ajuste las recoloca: cámbialas de día o de hora desde el calendario.
+                    pusiste tú, y conservamos tu decisión. Revisa su fecha u horario desde el calendario.
                   </p>
                 )}
               </div>
@@ -310,6 +346,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
                 Es una estimación sobre el trabajo ya registrado: no cuenta tu Google Calendar, ausencias
                 futuras ni repasos que aún no existen. No predice tu nota.
               </p>
+              {forecast.estimatedItems > 0 && <p style={prose}>{forecast.estimatedItems} actividades usan duraciones de referencia por tipo; todavía no son mediciones personales.</p>}
               {incomplete && (
                 <p style={{ ...prose, color: 'var(--clay-warn)' }}>
                   {forecast.missingSubjects.map(name => SUBJECT_LABELS[name] ?? name).join(', ')} no{' '}

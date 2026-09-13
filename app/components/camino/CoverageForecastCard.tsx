@@ -3,6 +3,7 @@
 import { useId, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import type { CoverageForecast } from '@/app/lib/camino/coverageForecast'
+import { dailyMinutesLabel } from '@/app/lib/camino/dailyTimeCapacity'
 
 // La cabecera muestra el resultado incluso cerrada. Se limita al trabajo
 // registrado: caber en el calendario no acredita la preparación académica.
@@ -91,6 +92,18 @@ function Dot({ tone, faded }: { tone: Tone; faded?: boolean }) {
   )
 }
 
+/** Una receta: qué tocar y desde qué valor. El "ahora" es lo que hace que se
+ *  entienda el salto, así que nunca se enseña el destino sin el punto de partida. */
+function RemedyRow({ label, value, from }: { label: string; value: string; from: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, fontSize: 12.5 }}>
+      <span style={{ flex: 1, minWidth: 0, color: 'var(--clay-text-muted)' }}>{label}</span>
+      <span style={{ fontSize: 11.5, color: 'var(--clay-text-muted)' }}>ahora {from}</span>
+      <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 800, color: 'var(--clay-accent-text)' }}>{value}</span>
+    </div>
+  )
+}
+
 export default function CoverageForecastCard({ forecast }: { forecast: CoverageForecast }) {
   const [open, setOpen] = useState(false)
   const panelId = useId()
@@ -98,6 +111,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
   const known = forecast.scheduledMinutes + forecast.pendingMinutes
   const incomplete = forecast.missingSubjects.length > 0
   const atRisk = forecast.atRiskMinutes
+  const remedy = forecast.remedy
 
   // El denominador nunca deja que las barras se salgan: si el trabajo supera
   // la capacidad, la escala pasa a ser el trabajo.
@@ -238,6 +252,54 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
               </>
             )}
 
+            {remedy && (
+              <div style={{ display: 'grid', gap: 10, borderTop: '1px solid var(--clay-border)', paddingTop: 14 }}>
+                <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--clay-text-muted)' }}>
+                  Para cubrir todo
+                </span>
+
+                {remedy.dailyMinutesNeeded == null && remedy.weeklyStudyDaysNeeded == null ? (
+                  <p style={prose}>
+                    No cabe ni estudiando lo máximo todos los días: te sobran{' '}
+                    <strong style={num}>{hours(remedy.deficitMinutes || atRisk)}</strong> de trabajo. Aquí el ajuste
+                    no llega — hay que quitar temario, adelantar el arranque o mover exámenes.
+                  </p>
+                ) : (
+                  <>
+                    <div style={{ display: 'grid', gap: 7 }}>
+                      {remedy.dailyMinutesNeeded != null && (
+                        <RemedyRow
+                          label="Sube tu tiempo diario a"
+                          value={dailyMinutesLabel(remedy.dailyMinutesNeeded)}
+                          from={dailyMinutesLabel(forecast.dailyMinutes)}
+                        />
+                      )}
+                      {remedy.weeklyStudyDaysNeeded != null && (
+                        <RemedyRow
+                          label={remedy.dailyMinutesNeeded != null ? 'O estudia a la semana' : 'Estudia a la semana'}
+                          value={`${remedy.weeklyStudyDaysNeeded} días`}
+                          from={`${forecast.weeklyStudyDays ?? 5} días`}
+                        />
+                      )}
+                    </div>
+                    <p style={prose}>
+                      {remedy.dailyMinutesNeeded != null && remedy.weeklyStudyDaysNeeded != null
+                        ? 'Con cualquiera de las dos te cabe todo lo que tienes registrado: no hacen falta las dos.'
+                        : 'Con ese cambio te cabe todo lo que tienes registrado.'}
+                      {remedy.deficitMinutes > 0 && ` Son ${hours(remedy.deficitMinutes)} más de las que da tu disponibilidad de ahora.`}
+                    </p>
+                  </>
+                )}
+
+                {remedy.manualMinutes > 0 && (
+                  <p style={prose}>
+                    <strong style={num}>{hours(remedy.manualMinutes)}</strong> están en sesiones con hora fija que
+                    pusiste tú, así que ningún ajuste las recoloca: cámbialas de día o de hora desde el calendario.
+                  </p>
+                )}
+              </div>
+            )}
+
             <div style={{ display: 'grid', gap: 10, borderTop: '1px solid var(--clay-border)', paddingTop: 14 }}>
               <p style={prose}>
                 Calculado con {forecast.dailyMinutes} min al día y {forecast.weeklyStudyDays ?? 5} días por
@@ -250,8 +312,11 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
               </p>
               {incomplete && (
                 <p style={{ ...prose, color: 'var(--clay-warn)' }}>
-                  Faltan datos de {forecast.missingSubjects.map(name => SUBJECT_LABELS[name] ?? name).join(', ')},
-                  así que la previsión se queda corta.
+                  {forecast.missingSubjects.map(name => SUBJECT_LABELS[name] ?? name).join(', ')} no{' '}
+                  {forecast.missingSubjects.length === 1 ? 'tiene' : 'tienen'} ni una misión en tu Camino, así que
+                  esta previsión se queda corta. Genera{' '}
+                  {forecast.missingSubjects.length === 1 ? 'su temario' : 'sus temarios'} desde «+ Añadir asignatura»
+                  y vuelve a mirarla: el trabajo que falta puede cambiar el resultado.
                 </p>
               )}
             </div>

@@ -2,9 +2,11 @@ import type { StudentPlanContext } from './planWindow.ts'
 import { planningDates } from './planWindow.ts'
 import { eligibleDatesForRow, preferredDatesFor, isNewContent, orderRowsForPlacement, type PlacementRow } from './planPlacement.ts'
 import { estimatedMinutesForMission, minutesBetweenTimes, toMinutes } from './missionDuration.ts'
-import { missionsPerDayForMinutes } from './dailyTimeCapacity.ts'
+import { missionsPerDayForMinutes, VALID_DAILY_MINUTES } from './dailyTimeCapacity.ts'
 import { minutesForPlacement } from './placementDuration.ts'
 import { canRepositionAutomatically } from './automaticPlacement.ts'
+import { planningCutoffDate, studyDayIndexesFor } from './studyCapacity.ts'
+import { FINAL_REVIEW_RESERVED_STUDY_DAYS } from './examDate.ts'
 
 export type ForecastCalendarRow = {
   id: string; queue_id: string | null; subject: string; scheduled_date: string;
@@ -25,6 +27,27 @@ type Work = PlacementRow & { subject: string; minutes: number; metadata: Record<
 export type SubjectForecast = {
   subject: string; scheduledMinutes: number; pendingMinutes: number; projectedPendingMinutes: number;
   scheduledAtRiskMinutes: number; atRiskMinutes: number; reservedActivityMinutes: number; estimatedItems: number
+}
+
+/**
+ * Qué habría que CAMBIAR para que quepa todo, no solo qué se queda fuera.
+ *
+ * Decir "2 h fuera" describe el problema pero deja al alumno adivinando el
+ * remedio. Cada cifra de aquí sale de volver a simular el mismo Camino con
+ * una disponibilidad distinta, así que es la respuesta real del motor y no
+ * una regla de tres sobre el déficit: subir los minutos diarios también
+ * alarga las sesiones de teoría (ver minutesForPlacement), o sea que más
+ * tiempo no equivale a más temario cubierto en proporción.
+ */
+export type ForecastRemedy = {
+  /** Opción declarable de min/día más baja con la que cabe todo. null = no basta ni el máximo. */
+  dailyMinutesNeeded: number | null
+  /** Días/semana más bajos con los que cabe todo, con los min/día actuales. null = no basta ni 7. */
+  weeklyStudyDaysNeeded: number | null
+  /** Minutos en conflicto que ningún ajuste recoloca: hay que moverlos a mano. */
+  manualMinutes: number
+  /** Cuánto trabajo excede la capacidad total. 0 si el problema es de encaje, no de horas. */
+  deficitMinutes: number
 }
 
 function subtract(ranges: Range[], from: number, to: number): Range[] {
@@ -57,8 +80,26 @@ function estimate(type: string | null, metadata: Record<string, unknown> | null,
   return { minutes: minutesForPlacement(context.dailyMinutes, 0, type, metadata), estimated: true }
 }
 
+/** El mismo alumno con otra disponibilidad declarada, para poder resimular. */
+function withAvailability(context: StudentPlanContext, dailyMinutes: number, weeklyStudyDays: number | null): StudentPlanContext {
+  return {
+    ...context,
+    dailyMinutes,
+    weeklyStudyDays,
+    studyDayIndexes: studyDayIndexesFor(weeklyStudyDays),
+    // El corte del repaso final se mide en DÍAS DE ESTUDIO: cambiar el patrón
+    // semanal lo mueve y hay que recalcularlo, pero cambiar los minutos al día
+    // no, y recalcularlo igualmente pisaría el corte real del alumno.
+    planningCutoff: weeklyStudyDays === context.weeklyStudyDays
+      ? context.planningCutoff
+      : planningCutoffDate(context.today, context.examDate, FINAL_REVIEW_RESERVED_STUDY_DAYS, {
+          weeklyStudyDays, holidays: context.holidays,
+        }),
+  }
+}
+
 /** Simulación de solo lectura. Un presupuesto compartido, plazos y huecos reales. */
-export function buildCoverageForecast(context: StudentPlanContext, calendar: readonly ForecastCalendarRow[], queue: readonly ForecastQueueRow[], events: readonly ForecastEvent[], activeSubjects: readonly string[] = []) {
+export function buildCoverageForecast(context: StudentPlanContext, calendar: readonly ForecastCalendarRow[], queue: readonly ForecastQueueRow[], events: readonly ForecastEvent[], activeSubjects: readonly string[] = [], options: { withRemedy?: boolean } = {}): CoverageForecast {
   const dates = planningDates(context, { includeFinalReviewWindow: true, limit: 730 })
   const days: Day[] = dates.map(date => {
     const dow = new Date(`${date}T12:00:00Z`).getUTCDay()
@@ -162,19 +203,69 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
   }
   const subjects = [...subjectMap.values()]
   const total = (key: keyof Omit<SubjectForecast, 'subject'>) => subjects.reduce((sum, row) => sum + row[key], 0)
+  const atRisk = total('atRiskMinutes')
+  const totalCapacityMinutes = days.reduce((sum, day) => sum + day.capacity, 0)
+
+  // Busca el ajuste MÁS PEQUEÑO que hace que quepa todo, probando de menor a
+  // mayor cada opción que el alumno puede declarar de verdad. Se prueba en
+  // vez de despejarse porque la carga no es constante: con más minutos al día
+  // las sesiones de teoría también se alargan. Al recorrer en orden y parar
+  // en la primera que cuadra, el resultado es correcto aunque la relación no
+  // sea monótona. Las resimulaciones van sin remedio para no recursar, y como
+  // las opciones declarables son finitas el coste está acotado: como mucho 11
+  // pasadas más, y solo cuando algo se sale (medido: ~30 ms extra en un caso
+  // normal, ~200 ms en el peor con un curso entero y 600 misiones).
+  let remedy: ForecastRemedy | null = null
+  if (atRisk > 0 && options.withRemedy !== false) {
+    const currentDaily = context.dailyMinutes ?? 60
+    const currentWeekly = context.weeklyStudyDays ?? 5
+    const covers = (next: StudentPlanContext) =>
+      buildCoverageForecast(next, calendar, queue, events, activeSubjects, { withRemedy: false }).atRiskMinutes === 0
+
+    let dailyMinutesNeeded: number | null = null
+    for (const candidate of VALID_DAILY_MINUTES.filter(value => value > currentDaily)) {
+      if (covers(withAvailability(context, candidate, context.weeklyStudyDays))) { dailyMinutesNeeded = candidate; break }
+    }
+    let weeklyStudyDaysNeeded: number | null = null
+    for (let candidate = currentWeekly + 1; candidate <= 7; candidate++) {
+      if (covers(withAvailability(context, currentDaily, candidate))) { weeklyStudyDaysNeeded = candidate; break }
+    }
+    remedy = {
+      dailyMinutesNeeded,
+      weeklyStudyDaysNeeded,
+      manualMinutes: protectedConflictMinutes,
+      deficitMinutes: Math.max(0, total('scheduledMinutes') + total('pendingMinutes') - totalCapacityMinutes),
+    }
+  }
+
   return {
     asOf: context.today, examDate: context.examDate, planningCutoff: context.planningCutoff,
     dailyMinutes: context.dailyMinutes ?? 60, weeklyStudyDays: context.weeklyStudyDays,
-    totalCapacityMinutes: days.reduce((sum, day) => sum + day.capacity, 0),
+    totalCapacityMinutes,
     finalReviewCapacityMinutes: days.filter(day => day.date >= context.planningCutoff).reduce((sum, day) => sum + day.capacity, 0),
     scheduledMinutes: total('scheduledMinutes'), pendingMinutes: total('pendingMinutes'),
     scheduledAtRiskMinutes: total('scheduledAtRiskMinutes'),
     validScheduledMinutes: total('scheduledMinutes') - total('scheduledAtRiskMinutes'),
-    projectedPendingMinutes: total('projectedPendingMinutes'), atRiskMinutes: total('atRiskMinutes'),
+    projectedPendingMinutes: total('projectedPendingMinutes'), atRiskMinutes: atRisk,
     reservedActivityMinutes: total('reservedActivityMinutes'), availableAfterScheduledMinutes,
     protectedConflictMinutes, estimatedItems: total('estimatedItems'), subjects,
     missingSubjects: activeSubjects.filter(name => !queue.some(row => row.subject === name) && !calendar.some(row => row.subject === name)),
     externalCalendarIncluded: false as const,
+    remedy,
   }
 }
-export type CoverageForecast = ReturnType<typeof buildCoverageForecast>
+
+// Explícito y no ReturnType: la función se llama a sí misma para calcular el
+// remedio, y un tipo inferido sobre una función recursiva no se puede resolver.
+export type CoverageForecast = {
+  asOf: string; examDate: string; planningCutoff: string
+  dailyMinutes: number; weeklyStudyDays: number | null
+  totalCapacityMinutes: number; finalReviewCapacityMinutes: number
+  scheduledMinutes: number; pendingMinutes: number; scheduledAtRiskMinutes: number
+  validScheduledMinutes: number; projectedPendingMinutes: number; atRiskMinutes: number
+  reservedActivityMinutes: number; availableAfterScheduledMinutes: number
+  protectedConflictMinutes: number; estimatedItems: number
+  subjects: SubjectForecast[]; missingSubjects: string[]
+  externalCalendarIncluded: false
+  remedy: ForecastRemedy | null
+}

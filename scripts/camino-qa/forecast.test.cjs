@@ -285,3 +285,34 @@ test('150 concurrent overview requests keep each student’s work and access iso
  // Real route and planning modules, simulated auth and DB. This proves
  // concurrent isolation, not Vercel/Postgres throughput for 150 real users.
 })
+// El remedio: no basta con decir cuánto se sale, hay que decir qué tocar. Cada
+// cifra sale de resimular el mismo Camino con otra disponibilidad, así que lo
+// que se comprueba es que sea el ajuste MÁS PEQUEÑO que de verdad lo cubre.
+const long = load('app/lib/camino/planWindow.ts').buildStudentPlanContext({today:'2027-05-11',examDate:'2027-06-07',dailyMinutes:30,weeklyStudyDays:3,holidays:new Set()})
+test('forecast: el remedio nombra el ajuste mas pequeno que cubre todo, por tiempo diario y por dias',()=>{
+ const result=forecast(long,[],Array.from({length:10},(_,i)=>q('x'+i,30)),[])
+ assert.ok(result.atRiskMinutes>0)
+ assert.equal(result.remedy.dailyMinutesNeeded,60)
+ assert.equal(result.remedy.weeklyStudyDaysNeeded,4)
+ // Y el ajuste que propone tiene que bastar de verdad, cada uno por su cuenta.
+ const withMinutes=forecast({...long,dailyMinutes:60},[],Array.from({length:10},(_,i)=>q('x'+i,30)),[])
+ assert.equal(withMinutes.atRiskMinutes,0)
+ // Subir los dias tambien mueve el corte del repaso final, que se mide en dias
+ // de estudio: reproducirlo a mano sin moverlo no seria el mismo escenario.
+ const capacity=load('app/lib/camino/studyCapacity.ts')
+ const four={...long,weeklyStudyDays:4,studyDayIndexes:capacity.studyDayIndexesFor(4),
+  planningCutoff:capacity.planningCutoffDate(long.today,long.examDate,load('app/lib/camino/examDate.ts').FINAL_REVIEW_RESERVED_STUDY_DAYS,{weeklyStudyDays:4,holidays:long.holidays})}
+ assert.equal(forecast(four,[],Array.from({length:10},(_,i)=>q('x'+i,30)),[]).atRiskMinutes,0)
+})
+test('forecast: sin riesgo no hay remedio; lo que no cabe ni al maximo se dice como deficit',()=>{
+ assert.equal(forecast(ctx,[],[q('a',30)],[]).remedy,null)
+ const impossible=forecast(long,[],Array.from({length:30},(_,i)=>q('x'+i,30)),[])
+ assert.equal(impossible.remedy.dailyMinutesNeeded,null)
+ assert.equal(impossible.remedy.weeklyStudyDaysNeeded,null)
+ assert.equal(impossible.remedy.deficitMinutes,impossible.scheduledMinutes+impossible.pendingMinutes-impossible.totalCapacityMinutes)
+})
+test('forecast: las reservas fijas en conflicto se cuentan aparte, porque ningun ajuste las recoloca',()=>{
+ const result=forecast(ctx,[row('a',{locked:true,end_time:'17:00'}),row('b',{locked:true,start_time:'17:00',end_time:'17:30'})],[],[])
+ assert.equal(result.remedy.manualMinutes,30)
+ assert.equal(result.remedy.manualMinutes,result.protectedConflictMinutes)
+})

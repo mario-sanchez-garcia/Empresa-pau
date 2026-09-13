@@ -800,8 +800,34 @@ export async function ensureCaminoCalendar(
     .order('subject', { ascending: true })
     .order('subject_position', { ascending: true })
 
+  // ...pero 'pending' en la cola no garantiza que el item NO tenga ya su sitio
+  // en el calendario. Cuando las dos tablas se desajustan —postponer, una
+  // escritura a medias, cualquier camino que devuelva el item a 'pending' sin
+  // retirar su fila— sembrarlo otra vez crea una SEGUNDA colocación viva del
+  // mismo item, y eso lo prohíbe el índice `camino_one_live_placement_per_queue`.
+  //
+  // Eso no costaría una misión: costaría la siembra entera. El upsert de abajo
+  // lleva `ignoreDuplicates` sobre `user_id,scheduled_date,subject,
+  // v2_sort_order`, y en Postgres un ON CONFLICT DO NOTHING sólo perdona la
+  // restricción que nombra: chocar con la OTRA aborta el lote completo. Una
+  // sola fila desajustada dejaba al alumno sin las ~100 misiones del mes, con
+  // el calendario congelado en su último día sembrado y días vacíos detrás,
+  // repitiéndose en cada carga porque nada llegaba a escribirse.
+  //
+  // `camino_reconcile_work` corrige el desajuste en el otro sentido (marca la
+  // cola como 'scheduled'), pero se ejecuta ANTES: lo que llegue después, o lo
+  // que él no alcance, no puede tumbar la siembra de todos los demás.
+  const { data: livePlacementRows } = await supabase
+    .from('camino_calendar')
+    .select('queue_id')
+    .eq('user_id', userId)
+    .in('status', ['pending', 'postponed'])
+    .not('queue_id', 'is', null)
+  const alreadyPlacedQueueIds = new Set((livePlacementRows ?? []).map(row => row.queue_id as string))
+
   const subjectQueues: Record<string, QueueItem[]> = {}
   for (const item of (queueItems ?? []) as QueueItem[]) {
+    if (alreadyPlacedQueueIds.has(item.id)) continue
     if (!subjectQueues[item.subject]) subjectQueues[item.subject] = []
     subjectQueues[item.subject].push(item)
   }

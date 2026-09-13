@@ -317,6 +317,30 @@ test('una ejecución degradada NO marca el día como hecho', () => {
   )
 })
 
+test('la siembra no puede proponer una segunda colocacion viva del mismo item', () => {
+  // Un alumno con 6 dias de estudio a la semana veia "Repaso libre" a partir
+  // de su ultimo dia sembrado. No era una decision sobre sus dias: el lote de
+  // ~100 misiones del mes se rechazaba ENTERO porque una sola fila chocaba con
+  // el indice camino_one_live_placement_per_queue. El upsert lleva
+  // ignoreDuplicates sobre (user_id, scheduled_date, subject, v2_sort_order) y
+  // un ON CONFLICT DO NOTHING solo perdona la restriccion que nombra.
+  const ensure = stripComments(read('ensureCaminoCalendar.ts')).replace(/\s+/g, ' ')
+  assert.ok(
+    ensure.includes('alreadyPlacedQueueIds'),
+    'la siembra no mira si el item de cola ya tiene una colocacion viva',
+  )
+  assert.ok(
+    ensure.includes('if (alreadyPlacedQueueIds.has(item.id)) continue'),
+    'un item ya colocado entra igual en la siembra y tumba el lote entero',
+  )
+  // La lista de ocupados se lee SIN filtro de fecha: el indice unico no mira
+  // scheduled_date, asi que una colocacion viva en el pasado colisiona igual.
+  assert.ok(
+    /livePlacementRows[\s\S]{0,400}?\.in\('status', \['pending', 'postponed'\]\)/.test(ensure),
+    'la lista de items ya colocados no se limita a las filas vivas',
+  )
+})
+
 test('un reajuste que pilla el Camino ocupado no se pierde ni se delega en el alumno', () => {
   // Guardar los ajustes tiene que bastar. El bloqueo por alumno que comparte
   // ensure-calendar con el resto del Camino hace que un `force` legítimo se

@@ -5,7 +5,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, Loader2, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
+import { ArrowRight, BookOpen, BookPlus, BrainCircuit, Bookmark, CalendarDays, Check, ChevronDown, ChevronLeft, ClipboardList, Clock3, GripVertical, MessageCircle, Pencil, Plus, RotateCcw, Route, Target, TimerReset, Trash2, Trophy, Zap } from 'lucide-react'
 import WeeklyCheckinBanner from '@/app/components/camino/WeeklyCheckinBanner'
 import ExamCoverageBanner from '@/app/components/camino/ExamCoverageBanner'
 import { ensureServerCalendar } from '@/app/lib/camino/ensureCalendarClient'
@@ -39,7 +39,6 @@ import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
 import { monthlyLimitResetNotice } from '@/app/lib/rateLimitMessages'
 import { DEFAULT_MISSION_DURATION_MINUTES } from '@/app/lib/camino/calendarEditorConfig'
-import { CONTENT_TYPE_COLORS } from '@/app/lib/camino/contentTypeColors'
 import DivisionIcon from '@/components/shared/DivisionIcon'
 import FullRankingModal from '@/components/shared/FullRankingModal'
 import { RankingRow } from '@/components/shared/RankingRow'
@@ -382,13 +381,6 @@ function missionMeta(kind: MissionKind, subject: string, topic?: string, block?:
 function titleFor(kind: MissionKind, subject: string, item?: CurriculumItem) { if (kind === 'concept_explanation') return `Tema de hoy: ${item?.topic ?? subject}`; if (kind === 'guided_example') return `Ejemplo guiado: ${item?.topic ?? subject}`; if (kind === 'guided_practice') return `Practica guiada: ${item?.topic ?? subject}`; if (kind === 'evau_practice') return `Ejercicio PAU de ${item?.topic ?? subject}`; if (kind === 'exam_focus') return `Parcial cerca: ${item?.topic ?? subject}`; if (kind === 'mock_exam') return `Mini simulacro de ${subject}`; return `Tarea personalizada de ${subject}` }
 function loadJson<T>(key: string, fallback: T): T { try { const raw = window.localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback } catch { return fallback } }
 function saveJson(key: string, value: unknown) { window.localStorage.setItem(key, JSON.stringify(value)) }
-// "Sugiéreme qué repasar" (FreeReviewPanel) guarda la propuesta aquí para
-// que CompactWeekView pueda mostrarla junto a "Repaso libre" del día de hoy.
-// Si el alumno pulsa "Añadir misión sugerida", se persiste en
-// camino_calendar desde el endpoint idempotente correspondiente.
-const FREE_REVIEW_SUGGESTION_KEY = 'kairo_free_review_suggestion_v2'
-type FreeReviewOption = { subject: string; focusNote: string }
-type FreeReviewSuggestion = { date: string; options: FreeReviewOption[]; selectedIndex: number; addedKeys?: string[] }
 // `exam-${date}-${exams.length + 1}` could collide with an existing exam's id
 // once one had been deleted (the counter resets to a value already used by a
 // surviving exam on the same date) — a React key collision that can hide the
@@ -3025,10 +3017,11 @@ export default function CaminoCalendarClient() {
               {calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}
             </button>
             {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} />}
-            {/* "Personaliza tu repaso libre" / "Sugiéreme qué repasar": lo
-                borró 0f1e99e al convertir este div en <section>. Ningún test
-                lo cubría y su función seguía viva y sin usar en el fichero. */}
-            <FreeReviewPanel subjects={onboardingSubjects} />
+            {/* "Personaliza tu repaso libre" ("Sugiéreme qué repasar") se
+                sustituye por completo por el chat de Kairo (tool calling
+                real, ver CaminoAssistant.tsx) -- mismo hueco exacto, no una
+                sección aparte. */}
+            <CaminoAssistant onChanged={refreshAfterChat} />
           </section>
 
           {/* ── EXAMS SECTION ── */}
@@ -3242,13 +3235,6 @@ export default function CaminoCalendarClient() {
 
           <button onClick={() => setShowAddSubjectModal(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: 10, fontSize: 11, fontWeight: 700, color: 'var(--clay-text-muted)', background: 'none', border: 'none', borderTop: '1px solid var(--clay-border)', cursor: 'pointer' }}>+ Añadir asignatura</button>
         </div>
-      </div>
-
-      {/* ── CHAT DE KAIRO ── sección de ancho completo, en el flujo normal del
-          documento justo debajo del calendario semanal -- ya no vive como
-          overlay flotante (ver CaminoAssistant.tsx). */}
-      <div style={{ padding: '20px 24px 28px' }}>
-        <CaminoAssistant onChanged={refreshAfterChat} />
       </div>
 
       {/* ── MODALS ── */}
@@ -4859,255 +4845,6 @@ function PartialExamBanner({ exam, today, completedToday = false, missionId }: {
   )
 }
 
-// Personalization for "Repaso libre" days (the empty days the week widget
-// above already labels that way). Reuses perfiles.custom_instructions —
-// the exact same field Ajustes → Personalización IA and Parciales
-// (plan-intensity) already read — instead of a parallel notes store, so
-// writing here, in Ajustes, or in the monthly calendar's notes field all
-// edit the same thing. "Sugiéreme qué repasar" calls a small AI endpoint
-// (mirroring plan-intensity's pattern) that actually reads those
-// instructions to pick a subject and a focus note, with a deterministic
-// fallback if the AI call fails.
-function FreeReviewPanel({ subjects }: { subjects: string[] }) {
-  const { theme: frpTheme } = useClayThemePreference()
-  const addedBg = frpTheme === 'dark' ? 'rgba(74,222,128,0.16)' : '#ecfdf5'
-  const addedText = frpTheme === 'dark' ? '#4ade80' : '#047857'
-  const addedBorder = frpTheme === 'dark' ? 'rgba(74,222,128,0.35)' : '#bbf7d0'
-  const [notes, setNotes] = useState('')
-  const [notesLoaded, setNotesLoaded] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [options, setOptions] = useState<FreeReviewOption[]>([])
-  const [selectedIndex, setSelectedIndex] = useState(0)
-  const [loadingSuggestion, setLoadingSuggestion] = useState(false)
-  const [addingKey, setAddingKey] = useState('')
-  const [addedKeys, setAddedKeys] = useState<string[]>([])
-  const [addErrorKey, setAddErrorKey] = useState('')
-  const [addInfoByKey, setAddInfoByKey] = useState<Record<string, string>>({})
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    let cancelled = false
-    supabase.auth.getSession().then(async ({ data }) => {
-      const token = data.session?.access_token
-      if (!token) return
-      try {
-        const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
-        if (!res.ok || cancelled) return
-        const json = await res.json() as { custom_instructions?: string }
-        if (!cancelled) setNotes(json.custom_instructions ?? '')
-      } finally {
-        if (!cancelled) setNotesLoaded(true)
-      }
-    })
-    return () => { cancelled = true }
-  }, [])
-
-  // Recupera la sugerencia de hoy si el alumno ya la pidió antes y volvió a
-  // esta pantalla (p. ej. tras navegar a Exámenes y volver) — sin esto, un
-  // simple remount de FreeReviewPanel la perdía aunque siguiera siendo el
-  // mismo día.
-  useEffect(() => {
-    const saved = loadJson<FreeReviewSuggestion | null>(FREE_REVIEW_SUGGESTION_KEY, null)
-    if (saved && saved.date === todayMadrid() && saved.options.length > 0) {
-      setOptions(saved.options)
-      setSelectedIndex(Math.min(saved.selectedIndex, saved.options.length - 1))
-      setAddedKeys(saved.addedKeys ?? [])
-    }
-  }, [])
-
-  function suggestionKey(opt: FreeReviewOption) {
-    return `${todayMadrid()}:${subjectSlug(opt.subject)}:${textSlug(opt.focusNote || opt.subject)}`
-  }
-
-  function saveSuggestion(nextOptions: FreeReviewOption[], nextSelectedIndex: number, nextAddedKeys = addedKeys) {
-    saveJson(FREE_REVIEW_SUGGESTION_KEY, {
-      date: todayMadrid(),
-      options: nextOptions,
-      selectedIndex: nextSelectedIndex,
-      addedKeys: nextAddedKeys,
-    } satisfies FreeReviewSuggestion)
-  }
-
-  async function suggest() {
-    if (subjects.length === 0 || loadingSuggestion) return
-    setLoadingSuggestion(true)
-    setError('')
-    setOptions([])
-    try {
-      const { data } = await supabase.auth.getSession()
-      const token = data.session?.access_token
-      if (!token) { setError('Inicia sesión para pedir una sugerencia.'); return }
-      // Save the notes first so this suggestion — and everywhere else that
-      // reads custom_instructions — sees the latest text, not stale state.
-      setSaving(true)
-      await fetch('/api/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ custom_instructions: notes }),
-      }).catch(() => undefined)
-      setSaving(false)
-      const res = await fetch('/api/camino/free-review-suggestion', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ subjects }),
-      })
-      if (!res.ok) { setError('No se ha podido generar una sugerencia. Inténtalo de nuevo.'); return }
-      const json = await res.json() as { options?: FreeReviewOption[] }
-      if (json.options && json.options.length > 0) {
-        setOptions(json.options)
-        setSelectedIndex(0)
-        setAddedKeys([])
-        setAddErrorKey('')
-        saveSuggestion(json.options, 0, [])
-      } else setError('No se ha podido generar una sugerencia. Inténtalo de nuevo.')
-    } catch {
-      setError('No se ha podido generar una sugerencia. Revisa la conexión.')
-    } finally {
-      setLoadingSuggestion(false)
-    }
-  }
-
-  function selectOption(index: number) {
-    setSelectedIndex(index)
-    saveSuggestion(options, index)
-  }
-
-  async function addSuggestedMission() {
-    const suggestion = options[selectedIndex]
-    if (!suggestion) return
-    const key = suggestionKey(suggestion)
-    if (addingKey || addedKeys.includes(key)) return
-    setAddingKey(key)
-    setAddErrorKey('')
-    setAddInfoByKey(current => ({ ...current, [key]: '' }))
-    try {
-      const { data } = await supabase.auth.getSession()
-      const token = data.session?.access_token
-      if (!token) { setAddErrorKey(key); return }
-      const res = await fetch('/api/camino/free-review-suggestion/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ subject: suggestion.subject, focusNote: suggestion.focusNote, date: todayMadrid() }),
-      })
-      if (!res.ok) { setAddErrorKey(key); return }
-      const json = await res.json() as { calendarSync?: string }
-      const nextAddedKeys = Array.from(new Set([...addedKeys, key]))
-      setAddedKeys(nextAddedKeys)
-      if (json.calendarSync === 'pending_no_time') {
-        setAddInfoByKey(current => ({ ...current, [key]: 'Añadida en Kairo; se sincronizará cuando tenga hora.' }))
-      }
-      saveSuggestion(options, selectedIndex, nextAddedKeys)
-    } catch {
-      setAddErrorKey(key)
-    } finally {
-      setAddingKey('')
-    }
-  }
-
-  if (subjects.length === 0) return null
-
-  const suggestion = options[selectedIndex] ?? null
-  const caminoSlug = suggestion ? subjectSlug(suggestion.subject) : null
-  const examSlug = suggestion ? (CAMINO_TO_SIM_SUBJECT[subjectSlug(suggestion.subject)] ?? subjectSlug(suggestion.subject)) : null
-  const examSearchTerm = suggestion
-    ? (suggestion.focusNote || suggestion.subject).replace(/^repasa\s+/i, '').slice(0, 140)
-    : ''
-  const selectedSuggestionKey = suggestion ? suggestionKey(suggestion) : ''
-  const selectedAdded = !!selectedSuggestionKey && addedKeys.includes(selectedSuggestionKey)
-  const selectedAdding = !!selectedSuggestionKey && addingKey === selectedSuggestionKey
-  const selectedAddError = !!selectedSuggestionKey && addErrorKey === selectedSuggestionKey
-  const selectedAddInfo = selectedSuggestionKey ? addInfoByKey[selectedSuggestionKey] : ''
-
-  return (
-    <div className="mt-3 rounded-2xl border border-[var(--clay-border)] bg-[var(--clay-bg)] p-3">
-      <p className="mb-2 text-[10px] font-black uppercase tracking-[.12em] text-[var(--clay-text-muted)]">Personaliza tu repaso libre</p>
-      <textarea
-        value={notes}
-        onChange={e => setNotes(e.target.value.slice(0, 600))}
-        placeholder={notesLoaded ? 'Ej: "en mis días libres quiero repasar más Historia", "prefiero ejercicios cortos"...' : 'Cargando…'}
-        disabled={!notesLoaded}
-        rows={2}
-        className="w-full rounded-lg border border-[var(--clay-border)] bg-[var(--clay-surface)] px-2.5 py-2 text-[11px] font-semibold text-[var(--clay-text)] outline-none focus:border-[var(--clay-accent)] disabled:opacity-60"
-        style={{ resize: 'vertical' }}
-      />
-      <div className="mt-2 flex items-center justify-between gap-2">
-        <p className="text-[9px] font-semibold text-[var(--clay-text-muted)]">Mismo campo que Ajustes → Personalización IA.</p>
-        <button
-          onClick={suggest}
-          disabled={loadingSuggestion || saving || !notesLoaded}
-          className="shrink-0 rounded-lg bg-[var(--clay-accent)] px-3 py-1.5 text-[10px] font-black text-[var(--clay-on-accent)] disabled:opacity-40"
-        >
-          {loadingSuggestion || saving ? 'Pensando…' : 'Sugiéreme qué repasar'}
-        </button>
-      </div>
-      {error && <p className="mt-2 text-[10px] font-bold text-red-500">{error}</p>}
-      {options.length > 0 && (
-        <div className="mt-2">
-          <p className="mb-1.5 text-[9px] font-black uppercase tracking-[.1em]" style={{ color: CONTENT_TYPE_COLORS.suggestion.text }}>💡 3 opciones — elige una</p>
-          <div className="grid gap-1.5">
-            {options.map((opt, i) => {
-              const active = i === selectedIndex
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => selectOption(i)}
-                  className="rounded-xl px-3 py-2 text-left transition"
-                  style={{
-                    background: active ? CONTENT_TYPE_COLORS.suggestion.bg : 'var(--clay-surface)',
-                    border: `1px solid ${active ? CONTENT_TYPE_COLORS.suggestion.border : 'var(--clay-border)'}`,
-                  }}
-                >
-                  <p className="text-[11px] font-black" style={{ color: active ? CONTENT_TYPE_COLORS.suggestion.text : 'var(--clay-text)' }}>{opt.subject}</p>
-                  {opt.focusNote && <p className="mt-0.5 text-[10px] font-semibold" style={{ color: active ? CONTENT_TYPE_COLORS.suggestion.text : 'var(--clay-text-muted)', opacity: active ? 0.85 : 1 }}>{opt.focusNote}</p>}
-                </button>
-              )
-            })}
-          </div>
-          {suggestion && (
-            <div className="mt-2">
-              <p className="mb-1.5 text-[9px] font-black uppercase tracking-[.1em] text-[var(--clay-text-muted)]">
-                ¿Cómo repasas &quot;{suggestion.subject}&quot;?
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  type="button"
-                  onClick={addSuggestedMission}
-                  disabled={selectedAdding || selectedAdded}
-                  className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-black disabled:cursor-default disabled:opacity-80"
-                  style={{ background: selectedAdded ? addedBg : CONTENT_TYPE_COLORS.suggestion.text, color: selectedAdded ? addedText : 'white', border: selectedAdded ? `1px solid ${addedBorder}` : 'none' }}
-                >
-                  {selectedAdding ? <Loader2 size={12} className="animate-spin" /> : selectedAdded ? <Check size={12} /> : <Plus size={12} />}
-                  {selectedAdding ? 'Añadiendo...' : selectedAdded ? 'Añadida' : selectedAddError ? 'No se ha podido añadir. Reintentar' : 'Añadir misión sugerida'}
-                </button>
-                {examSlug && (
-                  <a
-                    href={`/examenes?subject=${encodeURIComponent(examSlug)}&search=${encodeURIComponent(examSearchTerm)}&source=camino_free_review`}
-                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-black"
-                    style={{ background: CONTENT_TYPE_COLORS.suggestion.text, color: 'white' }}
-                  >
-                    📝 Ejercicios de Exámenes
-                  </a>
-                )}
-                {caminoSlug && (
-                  <a
-                    href={`/zona/cursos?subject=${encodeURIComponent(caminoSlug)}&source=camino_free_review`}
-                    className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[10px] font-black"
-                    style={{ background: 'var(--clay-surface)', color: CONTENT_TYPE_COLORS.suggestion.text, border: `1px solid ${CONTENT_TYPE_COLORS.suggestion.border}` }}
-                  >
-                    📘 Hacer el curso
-                  </a>
-                )}
-              </div>
-              {selectedAddInfo && <p className="mt-1.5 text-[9px] font-bold text-[var(--clay-text-muted)]">{selectedAddInfo}</p>}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
 function formatTimeRange(start?: string | null, end?: string | null) {
   return start && end ? `${start.slice(0, 5)}–${end.slice(0, 5)}` : 'Sin hora'
 }
@@ -5363,14 +5100,6 @@ function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusy
   const { theme: cwvTheme } = useClayThemePreference()
   const doneColor = cwvTheme === 'dark' ? '#4ade80' : '#065f46'
   const [expandedDate, setExpandedDate] = useState<string | null>(initialExpandedDate)
-  // Solo lectura: la sugerencia la genera/guarda FreeReviewPanel. Se lee una
-  // vez al montar — este widget no necesita reaccionar en vivo a que el
-  // alumno pida una sugerencia nueva mientras está abierto.
-  const [freeReviewSuggestion] = useState<FreeReviewSuggestion | null>(() => {
-    const saved = loadJson<FreeReviewSuggestion | null>(FREE_REVIEW_SUGGESTION_KEY, null)
-    return saved && saved.date === todayMadrid() && saved.options.length > 0 ? saved : null
-  })
-  const selectedFreeReviewOption = freeReviewSuggestion?.options[freeReviewSuggestion.selectedIndex] ?? freeReviewSuggestion?.options[0] ?? null
   return (
     <div className="mt-3 divide-y divide-[var(--clay-border)] overflow-hidden rounded-2xl border border-[var(--clay-border)] bg-[var(--clay-surface)]">
       {days.map(day => {
@@ -5387,10 +5116,6 @@ function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusy
         const conflictCount = conflicts.filter(conflict => conflict.date === day.date).length
         const isExpanded = expandedDate === day.date
         const isToday = day.isToday
-        // La sugerencia es un añadido opcional al lado de "Repaso libre", no
-        // lo sustituye — solo se muestra si el día sigue sin misiones
-        // asignadas (si mientras tanto se le asignó una, ya no aplica).
-        const showSuggestion = isToday && missionCount === 0 && Boolean(freeReviewSuggestion)
         return (
           <div key={day.date}>
             <button
@@ -5415,20 +5140,6 @@ function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusy
               <span className={`shrink-0 text-xs font-bold ${missionCount === 0 ? 'text-[var(--clay-border)]' : done ? '' : 'text-[var(--clay-text-muted)]'}`} style={done ? { color: doneColor } : undefined}>
                 {done ? '✅ Hecho' : missionCount === 0 ? 'Repaso libre' : `${missionCount} misión${missionCount !== 1 ? 'es' : ''}`}
               </span>
-              {showSuggestion && (
-                <span
-                  className="shrink-0 truncate rounded-full px-2 py-0.5 text-[10px] font-black"
-                  style={{
-                    maxWidth: 130,
-                    background: CONTENT_TYPE_COLORS.suggestion.bg,
-                    color: CONTENT_TYPE_COLORS.suggestion.text,
-                    border: `1px solid ${CONTENT_TYPE_COLORS.suggestion.border}`,
-                  }}
-                  title={`Sugerencia opcional: ${selectedFreeReviewOption?.subject}${selectedFreeReviewOption?.focusNote ? ` — ${selectedFreeReviewOption.focusNote}` : ''}`}
-                >
-                  💡 {shortSubjectLabel(selectedFreeReviewOption?.subject ?? '')}
-                </span>
-              )}
               <ChevronDown size={13} className={`shrink-0 text-[var(--clay-text-muted)] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
             </button>
             {isExpanded && (

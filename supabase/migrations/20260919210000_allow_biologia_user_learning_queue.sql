@@ -1,5 +1,9 @@
 -- Biología no podía generarse en Camino, en silencio.
 --
+-- Nombrada 20260919210000 y no con la fecha de hoy (2026-09-13) a propósito:
+-- las migraciones ya aplicadas llegan hasta 20260919200000, y una nueva con
+-- versión anterior a la última aplicada la salta el CLI de Supabase.
+--
 -- Desde el 2026-09-11 Biología tiene sus 63 temas publicados en
 -- curriculum_content_v2 y se puede elegir en el onboarding
 -- (PRIVATE_BETA_SUBJECTS), pero faltaba en las DOS puertas que hay entre

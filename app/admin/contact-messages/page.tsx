@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { supabase } from '@/app/lib/supabase'
 import ClayThemeScope from '@/components/clay/ClayThemeScope'
 import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
+import { notifyContactUnreadChanged } from '@/app/lib/admin/contactUnreadChannel'
 
 // Mismo patron que app/admin/camino-status/page.tsx: C.bg es texto legible
 // sobre el fondo claro del cuerpo (--clay-accent-text); la cabecera usa
@@ -140,6 +141,10 @@ export default function ContactMessagesPage() {
       setState(current => current.status === 'loaded'
         ? { ...current, messages: current.messages.map(m => m.id === id ? { ...m, is_read: true } : m) }
         : current)
+      // Avisa al badge del sidebar y de /admin (cuentan aparte, ver
+      // SidebarNav.tsx y app/admin/page.tsx) de que el no-leídos global
+      // cambió, para que se refresquen sin esperar a la siguiente navegación.
+      notifyContactUnreadChanged()
     } finally {
       setPendingId(null)
     }

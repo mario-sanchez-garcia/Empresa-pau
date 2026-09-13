@@ -5,6 +5,7 @@ import { supabase } from '@/app/lib/supabase'
 import type { AdminMetrics, RangeSummary } from '@/app/lib/adminMetrics'
 import ClayThemeScope from '@/components/clay/ClayThemeScope'
 import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
+import { onContactUnreadChanged } from '@/app/lib/admin/contactUnreadChannel'
 
 // ─── Design tokens ─────────────────────────────────────────────────────────────
 // Ya enrutaba todo el archivo a traves de este objeto -- retargetear sus
@@ -706,12 +707,24 @@ export default function AdminPage() {
       .catch(() => {})
   }
 
+  async function refreshUnreadCount() {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    const res = await fetch('/api/admin/contact-messages/unread-count', { headers: { Authorization: `Bearer ${session.access_token}` } })
+    const json = await res.json().catch(() => ({ unreadCount: 0 })) as { unreadCount?: number }
+    setUnreadContactCount(json.unreadCount ?? 0)
+  }
+
   useEffect(() => {
     const guard = { current: false }
     // async con cancelled guard — setState ocurre de forma asíncrona, no síncrona
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load(guard)
-    return () => { guard.current = true }
+    // Se dispara desde /admin/contact-messages tras marcar un mensaje como
+    // leído -- refresca el badge de esta página sin esperar a un reload,
+    // incluso si están en pestañas distintas (ver contactUnreadChannel.ts).
+    const unsubscribe = onContactUnreadChanged(() => { refreshUnreadCount().catch(() => {}) })
+    return () => { guard.current = true; unsubscribe() }
   }, [])
 
   function refresh() {

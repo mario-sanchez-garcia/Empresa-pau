@@ -21,13 +21,16 @@ async function main(){
    }
  }};
  `)
- fs.writeFileSync(path.join(temp,'entry.js'),`import React from 'react';import{createRoot}from'react-dom/client';import Banner from ${JSON.stringify(path.join(root,'app/components/camino/PlanNoticeBanner.tsx'))};createRoot(document.getElementById('root')).render(React.createElement(Banner));`)
+ fs.writeFileSync(path.join(temp,'entry.js'),`import React from 'react';import{createRoot}from'react-dom/client';import Banner from ${JSON.stringify(path.join(root,'app/components/camino/PlanNoticeBanner.tsx'))};import WorkBanner from ${JSON.stringify(path.join(root,'app/components/camino/UnscheduledWorkBanner.tsx'))};createRoot(document.getElementById('root')).render(React.createElement(React.Fragment,null,React.createElement(WorkBanner),React.createElement(Banner)));`)
  await new Promise((resolve,reject)=>webpack({mode:'development',devtool:false,entry:path.join(temp,'entry.js'),output:{path:temp,filename:'bundle.js'},resolve:{extensions:['.tsx','.ts','.js'],modules:[path.join(root,'node_modules'),'node_modules'],alias:{'@/app/lib/supabase$':path.join(temp,'auth.js'),'@':root}},module:{rules:[{test:/\.tsx?$/,exclude:/node_modules/,use:path.join(temp,'loader.cjs')}]},infrastructureLogging:{level:'error'}},(error,stats)=>error||stats.hasErrors()?reject(error||new Error(stats.toString({all:false,errors:true}))):resolve()))
  const server=http.createServer((req,res)=>{res.setHeader('Content-Type',req.url==='/bundle.js'?'text/javascript; charset=utf-8':'text/html; charset=utf-8');res.end(req.url==='/bundle.js'?fs.readFileSync(path.join(temp,'bundle.js')):'<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+CLAY_TOKENS+'</style><body style="margin:16px"><main id="root"></main><script src="/bundle.js"></script></body></html>')})
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve))
  const browser=await chromium.launch({channel:'chrome',headless:true})
  try{
  const page=await browser.newPage({viewport:{width:390,height:844}})
+ // Acortar solo los backoffs del planificador; la lógica de reintentos es real.
+ await page.addInitScript(()=>{const timer=window.setTimeout.bind(window);window.setTimeout=((fn,ms,...args)=>timer(fn,typeof ms==='number'&&ms>=1000&&ms<=10000?10:ms,...args))})
+ await page.route('**/api/camino/plan-status',route=>route.fulfill({json:{topics:0,subjects:[],reasons:[],needsAvailability:false}}))
  const errors=[];page.on('pageerror',error=>errors.push(error.message))
  const load=runtime(),context=load('app/lib/camino/planWindow.ts').buildStudentPlanContext({today:'2027-01-11',examDate:'2027-06-07',dailyMinutes:60,weeklyStudyDays:2})
  const forecast=load('app/lib/camino/coverageForecast.ts').buildCoverageForecast(context,[],[{id:'q',subject:'fisica',queue_status:'pending',metadata:{estimated_minutes:30}}],[],['fisica'])
@@ -44,13 +47,14 @@ async function main(){
  const combinedForecast=build(combinedContext,[],Array.from({length:40},(_,i)=>({id:'q'+i,subject:'fisica',queue_status:'pending',metadata:{content_estimated_minutes:30}})),[])
  const expiredForecast=build(context,[{id:'expired',title:'Parcial vencido',subject:'fisica',status:'unscheduled',source:'partial',mission_type:'partial_practice',scheduled_date:'2027-01-09',metadata:{partial_exam_date:'2027-01-10'}}],[],[])
  let mode='cap', delayA=false
- let replanStatus=409, replanRequests=0
+ let replanStatus=503, replanRequests=0, busyRemaining=0
  await page.route('**/api/camino/ensure-calendar',async route=>{
   replanRequests++
   assert.deepEqual(route.request().postDataJSON(),{force:true})
   assert.equal(route.request().headers().authorization,'Bearer b')
-  if(replanStatus===200)mode='clear'
-  await route.fulfill({status:replanStatus,json:{ok:replanStatus===200}})
+  const status=busyRemaining-->0?409:replanStatus
+  if(status===200)mode='clear'
+  await route.fulfill({status,json:{ok:status===200,retryable:true}})
  })
  await page.route('**/api/camino/plan-overview',async route=>{
   const userId=route.request().headers().authorization.split(' ')[1]
@@ -119,13 +123,16 @@ async function main(){
  const replanButton=page.getByRole('button',{name:'Recolocar mi plan'})
  await expect(replanButton).toBeVisible()
  await replanButton.click()
- await expect(page.getByText(/Tu Camino se está actualizando/)).toBeVisible()
+ await expect(page.getByText('No hemos podido terminar de actualizar tu Camino',{exact:true})).toBeVisible()
+ await page.evaluate(()=>window.dispatchEvent(new Event('focus')))
+ await expect(page.getByText('No hemos podido terminar de actualizar tu Camino',{exact:true})).toBeVisible()
  await expect(replanButton).toBeEnabled()
- replanStatus=200
+ replanStatus=200;busyRemaining=4
  await replanButton.click()
  await expect(trigger).toContainText('Lo registrado cabe')
- assert.equal(replanRequests,2)
- await expect(page.getByText(/Tu Camino se está actualizando/)).toHaveCount(0)
+ assert.equal(replanRequests,8)
+ await expect(page.getByText('No hemos podido terminar de actualizar tu Camino',{exact:true})).toHaveCount(0)
+ await expect(page.getByText(/Actualizando tu Camino/)).toHaveCount(0)
  await expect(trigger).toHaveAttribute('aria-expanded','false')
  await trigger.click()
  // Cerrada es el estado por defecto y el que mas se ve: se captura tambien.
@@ -140,7 +147,7 @@ async function main(){
  await page.evaluate(()=>document.documentElement.removeAttribute('data-kairo-clay-theme'))
  const screenshot=shots.expanded
  assert.deepEqual(errors,[])
- console.log(JSON.stringify({shots,passed:['reload','resolve-cap','resolve-protected-conflict','account-switch-late-response','retry','forecast-collapsed-by-default','forecast-expands','mobile-no-overflow-320-390','forecast-conflict-counted-once','registered-work-copy','combined-remedy-within-access','expired-partial-reason','replan-409-retry-reload'],screenshot}))
+ console.log(JSON.stringify({shots,passed:['reload','resolve-cap','resolve-protected-conflict','account-switch-late-response','retry','forecast-collapsed-by-default','forecast-expands','mobile-no-overflow-320-390','forecast-conflict-counted-once','registered-work-copy','combined-remedy-within-access','expired-partial-reason','replan-503-visible-after-focus','replan-4-busy-then-success-reload'],screenshot}))
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
 }
 main().catch(error=>{console.error(error);process.exitCode=1})

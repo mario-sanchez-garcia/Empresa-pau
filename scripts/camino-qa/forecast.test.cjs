@@ -490,3 +490,24 @@ test('ensure cannot report a successful empty plan when reading the pending queu
  db.failNext('user_learning_queue','select')
  await assert.rejects(load('app/lib/ensureCaminoCalendar.ts').ensureCaminoCalendar('u',db),/injected_write_failure/)
 })
+
+test('HTTP planning contention returns 409 only while the owner runs and succeeds after release',async()=>{
+ const user='http-lock',db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',subjects:[]}],billing_events:[]})
+ let release,entered
+ const gate=new Promise(resolve=>{release=resolve}),started=new Promise(resolve=>{entered=resolve})
+ const api=runtime('2027-01-11',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'test'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+  'app/lib/ensureCaminoCalendar.ts':{ensureCaminoCalendar:async()=>{entered();await gate;return{ok:true,degraded:[],protectedConflicts:[]}}},
+ })('app/api/camino/ensure-calendar/route.ts')
+ const first=api.POST({json:async()=>({})})
+ await started
+ const duplicate=await api.POST({json:async()=>({})})
+ assert.equal(duplicate.status,409)
+ assert.equal((await duplicate.json()).error,'plan_busy')
+ release()
+ assert.equal((await first).status,200)
+ const retry=await api.POST({json:async()=>({})})
+ assert.equal(retry.status,200)
+ assert.equal((await retry.json()).skipped,'already_ensured_today')
+})

@@ -21,6 +21,7 @@ import ClayButton from '@/components/clay/ClayButton'
 import ClayLinkButton from '@/components/clay/ClayLinkButton'
 import { useClayThemePreference } from '@/components/clay/useClayThemePreference'
 import { supabase } from '@/app/lib/supabase'
+import { readAllRows } from '@/app/lib/camino/readAllRows'
 import { clearOnboarding, loadOnboarding, restoreOnboardingFromServer, saveOnboarding, type OnboardingData } from '@/app/lib/onboarding/onboardingStorage'
 import { buildEvauHref, buildTopicHref, getCurriculumForSubjects, getTopicByV2SortOrder, normalizeCaminoSlug, normalizeSubjectSlug, normalizeTopicSlug, resolveCaminoTopic, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug, type CaminoCurriculumTopic } from '@/app/lib/camino/caminoCurriculumPlan'
 import { PRIVATE_BETA_SUBJECTS } from '@/app/lib/camino/betaCurriculum'
@@ -618,27 +619,36 @@ async function fetchCaminoCalendar(userId: string): Promise<DayPlan[] | null> {
   // semana. Estos días pasados son solo lectura aquí: se muestran tal cual
   // quedaron registrados (completed/missed/pending), nunca se recalculan.
   const weekStartStr = currentWeekStartISO()
-  const { data, error } = await supabase
-    .from('camino_calendar')
-    .select('id, scheduled_date, subject, title, block_key, block_slug, is_main, is_bonus, status, v2_sort_order, mission_type, xp_awarded, start_time, end_time, metadata')
-    .eq('user_id', userId)
-    .gte('scheduled_date', weekStartStr)
-    // Una fila postponed se conserva en BD como auditoría del motor, pero
-    // ya no es una misión activa. Pintarla como pending (el modelo de UI
-    // solo distingue pending/done) hacía que “Aún no lo he dado” reapareciese
-    // al recargar aunque el servidor lo hubiera guardado correctamente.
-    .in('status', ['pending', 'missed', 'completed'])
-    .order('scheduled_date', { ascending: true })
-    // Filas, no días — un día puede tener más de una misión (bonus,
-    // comment_text, prácticas de parcial). ensureCaminoCalendar mantiene
-    // sembrados CALENDAR_HORIZON=30 días futuros más hasta 6 días pasados de
-    // esta semana; este límite tiene que ser generoso para no cortar antes
-    // de cubrirlos todos, o el cliente caería al generador local (ver
-    // generateCalendar) para días que en realidad ya están en Supabase.
-    .limit(110)
-  if (error || !data || data.length === 0) return null
+  // Se PAGINA, no se recorta. Aquí había un `.limit(110)` con la intención de
+  // cubrir de sobra los días sembrados, pero el tope es de FILAS y los días
+  // llevan varias misiones cada uno: con 180 min al día caben siete u ocho.
+  // Un Camino bien sembrado (CALENDAR_HORIZON = 30 días) pasa de 170 filas, y
+  // como el orden es por fecha, lo que se perdía era justo la cola: 14 días
+  // que SÍ existían en Supabase llegaban vacíos al cliente y caían al
+  // generador local, que los pintaba como "Repaso libre". Es decir, el límite
+  // rompía el calendario precisamente cuando el motor empezaba a funcionar
+  // bien, y al alumno le parecía que sus días de estudio no se respetaban.
+  let data: CaminoCalRow[]
+  try {
+    data = await readAllRows<CaminoCalRow>((from, to) => supabase
+      .from('camino_calendar')
+      .select('id, scheduled_date, subject, title, block_key, block_slug, is_main, is_bonus, status, v2_sort_order, mission_type, xp_awarded, start_time, end_time, metadata')
+      .eq('user_id', userId)
+      .gte('scheduled_date', weekStartStr)
+      // Una fila postponed se conserva en BD como auditoría del motor, pero
+      // ya no es una misión activa. Pintarla como pending (el modelo de UI
+      // solo distingue pending/done) hacía que “Aún no lo he dado” reapareciese
+      // al recargar aunque el servidor lo hubiera guardado correctamente.
+      .in('status', ['pending', 'missed', 'completed'])
+      .order('scheduled_date', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, to))
+  } catch {
+    return null
+  }
+  if (data.length === 0) return null
   const byDate = new Map<string, CaminoCalRow[]>()
-  for (const row of data as CaminoCalRow[]) {
+  for (const row of data) {
     if (!byDate.has(row.scheduled_date)) byDate.set(row.scheduled_date, [])
     byDate.get(row.scheduled_date)!.push(row)
   }
@@ -1762,6 +1772,19 @@ export default function CaminoCalendarClient() {
   // "esto es lo que previsiblemente harás": antes ambas cosas se dibujaban
   // exactamente igual, y la segunda además podía variar entre dispositivos.
   const weekIsForecast = weekCalendar.some(day => day.missions.some(m => m.metadata?.forecast === true))
+  // Hasta dónde llega el plan CONFIRMADO: la última fecha con alguna misión
+  // que venga del servidor (las de previsión llevan metadata.forecast).
+  //
+  // Sirve para no llamarle "Repaso libre" a un día que simplemente todavía no
+  // se ha planificado. El Camino se siembra un mes por delante y se reajusta
+  // conforme avanzas; más allá de ahí no hay una decisión de dejarte el día
+  // libre, hay ausencia de decisión. Decir "Repaso libre" en enero sonaba a
+  // que el sistema había resuelto que ese día descansaras —y contradecía los
+  // días de estudio que el alumno acababa de elegir—.
+  const confirmedPlanEnd = calendar.reduce(
+    (last, day) => (day.date > last && day.missions.some(m => m.metadata?.forecast !== true) ? day.date : last),
+    '',
+  )
   const activeExams = exams.filter(e => e.date >= realToday)
   const pastExams = exams.filter(e => e.date < realToday)
   const upcomingPartial = (() => {
@@ -3016,7 +3039,7 @@ export default function CaminoCalendarClient() {
               <ChevronDown style={{ transition: 'transform 200ms', transform: calendarExpanded ? 'rotate(180deg)' : 'none' }} size={12} />
               {calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}
             </button>
-            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} />}
+            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} confirmedPlanEnd={confirmedPlanEnd} />}
             {/* "Personaliza tu repaso libre" ("Sugiéreme qué repasar") se
                 sustituye por completo por el chat de Kairo (tool calling
                 real, ver CaminoAssistant.tsx) -- mismo hueco exacto, no una
@@ -5091,7 +5114,7 @@ function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, sele
   )
 }
 
-function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusyByDate, conflicts }: { days: DayPlan[]; exams: StudentExam[]; initialExpandedDate?: string | null; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[] }) {
+function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusyByDate, conflicts, confirmedPlanEnd = '' }: { days: DayPlan[]; exams: StudentExam[]; initialExpandedDate?: string | null; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[]; confirmedPlanEnd?: string }) {
   // Only used as the useState initializer, not a live-controlled prop: this
   // component remounts fresh every time the parent's "Ver semana completa"
   // toggle opens it (conditional render, not display:none), so seeding from
@@ -5110,7 +5133,13 @@ function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusy
         const main = day.missions.filter(m => m.role === 'main' || m.metadata?.free_initiative)
         const done = main.length > 0 && main.every(m => m.status === 'done')
         const subjects = [...new Set(main.map(m => m.subject))]
-        const subjectLabel = subjects.length ? subjects.map(shortSubjectLabel).join(', ') : 'Repaso libre'
+        // Un día vacío más allá del plan confirmado no es un día libre: es un
+        // día que todavía no se ha planificado. Sin `confirmedPlanEnd` (el
+        // calendario del servidor aún no ha cargado) no se afirma ninguna de
+        // las dos cosas y se mantiene el texto de siempre.
+        const beyondPlan = main.length === 0 && confirmedPlanEnd !== '' && day.date > confirmedPlanEnd
+        const emptyLabel = beyondPlan ? 'Aún sin planificar' : 'Repaso libre'
+        const subjectLabel = subjects.length ? subjects.map(shortSubjectLabel).join(', ') : emptyLabel
         const missionCount = main.length
         const busyCount = externalBusyByDate[day.date]?.length ?? 0
         const conflictCount = conflicts.filter(conflict => conflict.date === day.date).length
@@ -5138,7 +5167,7 @@ function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusy
                 <span className="shrink-0 rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-black text-orange-700">Conflicto</span>
               )}
               <span className={`shrink-0 text-xs font-bold ${missionCount === 0 ? 'text-[var(--clay-border)]' : done ? '' : 'text-[var(--clay-text-muted)]'}`} style={done ? { color: doneColor } : undefined}>
-                {done ? '✅ Hecho' : missionCount === 0 ? 'Repaso libre' : `${missionCount} misión${missionCount !== 1 ? 'es' : ''}`}
+                {done ? '✅ Hecho' : missionCount === 0 ? emptyLabel : `${missionCount} misión${missionCount !== 1 ? 'es' : ''}`}
               </span>
               <ChevronDown size={13} className={`shrink-0 text-[var(--clay-text-muted)] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
             </button>

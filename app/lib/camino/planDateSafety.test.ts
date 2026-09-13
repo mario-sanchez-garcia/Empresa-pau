@@ -341,6 +341,41 @@ test('la siembra no puede proponer una segunda colocacion viva del mismo item', 
   )
 })
 
+test('el cliente no recorta los dias que el servidor ya tiene sembrados', () => {
+  // El fetch del calendario llevaba un `.limit(110)` pensado como "de sobra".
+  // El tope es de FILAS y cada dia lleva varias misiones: un Camino bien
+  // sembrado (30 dias) pasa de 170, y como el orden es por fecha lo que se
+  // perdia era la cola. Catorce dias que SI estaban en Supabase llegaban
+  // vacios y el generador local los pintaba como "Repaso libre", justo
+  // despues de que el motor empezara a sembrar bien.
+  const client = stripComments(
+    readFileSync(join(process.cwd(), 'app', 'components', 'camino', 'CaminoCalendarClient.tsx'), 'utf8'),
+  )
+  const fetchBody = client.slice(
+    client.indexOf('async function fetchCaminoCalendar'),
+    client.indexOf('async function fetchCaminoCalendar') + 2000,
+  )
+  assert.ok(fetchBody.includes('readAllRows'), 'el calendario del cliente no se pagina')
+  assert.ok(!/\.limit\(\d+\)/.test(fetchBody), 'el calendario del cliente vuelve a recortarse con un tope de filas')
+})
+
+test('un dia sin planificar no se anuncia como dia libre', () => {
+  // "Repaso libre" significa que ese dia de estudio se queda sin mision.
+  // Un dia posterior al ultimo que el servidor ha sembrado no es eso: es un
+  // dia sobre el que todavia no hay decision. Llamarlo libre contradecia los
+  // dias de estudio que el alumno acababa de elegir.
+  const client = stripComments(
+    readFileSync(join(process.cwd(), 'app', 'components', 'camino', 'CaminoCalendarClient.tsx'), 'utf8'),
+  ).replace(/\s+/g, ' ')
+  assert.ok(client.includes('Aún sin planificar'), 'no se distingue el dia sin planificar del dia libre')
+  assert.ok(client.includes('const beyondPlan ='), 'no se calcula si el dia cae mas alla del plan confirmado')
+  // Sin plan confirmado cargado no se afirma ninguna de las dos cosas.
+  assert.ok(
+    client.includes("confirmedPlanEnd !== '' && day.date > confirmedPlanEnd"),
+    'se decide "sin planificar" sin saber hasta donde llega el plan confirmado',
+  )
+})
+
 test('un reajuste que pilla el Camino ocupado no se pierde ni se delega en el alumno', () => {
   // Guardar los ajustes tiene que bastar. El bloqueo por alumno que comparte
   // ensure-calendar con el resto del Camino hace que un `force` legítimo se

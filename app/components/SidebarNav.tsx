@@ -72,6 +72,7 @@ export default function SidebarNav() {
   const [open, setOpen] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [unreadContactCount, setUnreadContactCount] = useState(0)
+  const [unreadContactResponses, setUnreadContactResponses] = useState(0)
   const { loading: billingLoading, hasActivePack, activePlans } = useBillingStatus()
   const currentPlanLabel = activePlans[0] ? getCaminoPlanLimits(activePlans[0].planId).label : null
   const [currentView, setCurrentView] = useState<string | null>(null)
@@ -111,6 +112,29 @@ export default function SidebarNav() {
     // hasta que esta pestaña concreta vuelva a montar SidebarNav (nunca
     // coexisten en el mismo layout, y a menudo están en pestañas distintas).
     return onContactUnreadChanged(() => { refreshUnreadCount().catch(() => {}) })
+  }, [])
+
+  // Badge de "Ayuda" para CUALQUIER alumno (no solo admins): respuestas del
+  // equipo que todavía no ha visto. La lectura va directa con el cliente de
+  // Supabase (no una API route) porque la RLS de contact_messages ya limita
+  // cada fila al email verificado del JWT -- mismo criterio que
+  // ContactanosWidget.tsx, que es quien marca respuesta_leida=true al abrir
+  // Ayuda -> Contactanos y dispara este mismo canal para que el badge
+  // desaparezca sin esperar a un reload, incluso en otra pestaña.
+  useEffect(() => {
+    async function refreshUnreadResponses() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      const { count } = await supabase
+        .from('contact_messages')
+        .select('id', { count: 'exact', head: true })
+        .not('respuesta', 'is', null)
+        .eq('respuesta_leida', false)
+      setUnreadContactResponses(count ?? 0)
+    }
+
+    refreshUnreadResponses().catch(() => {})
+    return onContactUnreadChanged(() => { refreshUnreadResponses().catch(() => {}) })
   }, [])
 
   useEffect(() => {
@@ -338,13 +362,27 @@ export default function SidebarNav() {
                 borderRadius: 10, padding: '6px', cursor: 'pointer', overflow: 'hidden',
               }}
             >
-              <div style={{
-                width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                background: 'linear-gradient(135deg, #2563eb, #38bdf8)', color: '#fff', fontSize: 13, fontWeight: 800,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 8px 18px rgba(37,99,235,.24)',
-              }}>
-                {(profile?.label ?? '?')[0]?.toUpperCase()}
+              <div style={{ position: 'relative', flexShrink: 0 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #2563eb, #38bdf8)', color: '#fff', fontSize: 13, fontWeight: 800,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 8px 18px rgba(37,99,235,.24)',
+                }}>
+                  {(profile?.label ?? '?')[0]?.toUpperCase()}
+                </div>
+                {unreadContactResponses > 0 && (
+                  <span
+                    aria-label={`${unreadContactResponses} respuesta${unreadContactResponses === 1 ? '' : 's'} sin leer en Ayuda`}
+                    style={{
+                      position: 'absolute', top: -3, right: -3, minWidth: 15, height: 15, padding: '0 3px',
+                      borderRadius: 999, background: '#ef4444', color: '#fff', border: '2px solid #0a1326',
+                      fontSize: 9, fontWeight: 800, lineHeight: '11px', textAlign: 'center',
+                    }}
+                  >
+                    {unreadContactResponses > 9 ? '9+' : unreadContactResponses}
+                  </span>
+                )}
               </div>
               {open && (
                 <div style={{ minWidth: 0, flex: 1, textAlign: 'left' }}>
@@ -382,6 +420,14 @@ export default function SidebarNav() {
                       transition: 'background 120ms',
                     }}
                   >
+                    {label === 'Ayuda' && unreadContactResponses > 0 && (
+                      <span style={{
+                        marginLeft: 'auto', minWidth: 16, height: 16, padding: '0 4px', borderRadius: 999,
+                        background: '#ef4444', color: '#fff', fontSize: 9, fontWeight: 800, lineHeight: '16px', textAlign: 'center', order: 99,
+                      }}>
+                        {unreadContactResponses > 9 ? '9+' : unreadContactResponses}
+                      </span>
+                    )}
                     <Icon size={15} color="#64748b" /> {label}
                   </a>
                 ))}

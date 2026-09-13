@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/app/lib/supabase'
+import { notifyContactUnreadChanged } from '@/app/lib/admin/contactUnreadChannel'
 
 type ContactMessage = {
   id: number
@@ -67,11 +68,15 @@ export default function ContactanosWidget() {
       const unread = messages.filter(m => m.respuesta && !m.respuesta_leida).map(m => m.id)
       if (unread.length > 0) {
         try {
-          await fetch('/api/contact-messages', {
+          const res = await fetch('/api/contact-messages', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
             body: JSON.stringify({ ids: unread }),
           })
+          // Avisa al badge de "Ayuda" en SidebarNav (misma pestaña ya lo verá
+          // por su propia recarga al navegar, pero esto cubre otras pestañas
+          // abiertas al mismo tiempo -- mismo mecanismo que ya usa el admin).
+          if (res.ok) notifyContactUnreadChanged()
         } catch {
           // Best-effort: si falla, la respuesta sigue visible, solo no se marca como leida.
         }

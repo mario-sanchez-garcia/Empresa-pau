@@ -1,14 +1,17 @@
 // TEMPORAL -- solo para depurar el 500 de /api/camino/chat, se borra antes de commitear.
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { CAMINO_CHAT_TOOLS } from '@/app/lib/camino/chatTools'
 
 export async function GET() {
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 30_000 })
   try {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-5',
-      max_tokens: 50,
-      messages: [{ role: 'user', content: 'di hola' }],
+      max_tokens: 1024,
+      system: 'Eres Kairo. Hoy es 2026-09-13.',
+      tools: CAMINO_CHAT_TOOLS,
+      messages: [{ role: 'user', content: 'mueve mi misión de mañana a las 18h' }],
     })
     return NextResponse.json({ ok: true, response })
   } catch (error) {

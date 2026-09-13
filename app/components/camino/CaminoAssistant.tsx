@@ -52,11 +52,22 @@ export default function CaminoAssistant({ onChanged }: { onChanged: () => Promis
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const lastTurns = useRef<ApiTurn[] | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesRef = useRef<HTMLDivElement>(null)
+  const didMount = useRef(false)
   const { theme } = useClayThemePreference()
 
+  // Scrolleamos el contenedor del chat a mano en vez de scrollIntoView: ese
+  // scrollea TODOS los ancestros scrollables, incluida la ventana, y como el
+  // chat vive como sección normal al final del documento arrastraba la página
+  // entera hacia abajo. Además lo saltamos en el primer render, para que al
+  // cargar /camino se entre por arriba y no a media página.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    if (!didMount.current) {
+      didMount.current = true
+      return
+    }
+    const container = messagesRef.current
+    if (container) container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
   }, [displayMessages, busy])
 
   function addDisplay(role: DisplayMessage['role'], text: string) {
@@ -165,7 +176,7 @@ export default function CaminoAssistant({ onChanged }: { onChanged: () => Promis
           </div>
         </header>
 
-        <div className="camino-chat-panel__messages" aria-live="polite">
+        <div ref={messagesRef} className="camino-chat-panel__messages" aria-live="polite">
           {displayMessages.map(message => (
             <p key={message.id} className={`camino-chat-panel__message camino-chat-panel__message--${message.role}`}>{message.text}</p>
           ))}
@@ -194,7 +205,6 @@ export default function CaminoAssistant({ onChanged }: { onChanged: () => Promis
               <button type="button" onClick={() => lastTurns.current ? send(lastTurns.current) : undefined}><RotateCcw size={12} /> Reintentar</button>
             </div>
           )}
-          <div ref={messagesEndRef} />
         </div>
 
         {displayMessages.length <= 1 && (

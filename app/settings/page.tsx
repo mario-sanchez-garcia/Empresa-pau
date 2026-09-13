@@ -132,20 +132,25 @@ async function recalculateCamino(token: string): Promise<CaminoPrefsStatus> {
 
     const body = await response.json().catch(() => null) as { error?: string; retryable?: boolean; degraded?: string[]; replanPending?: boolean } | null
     const busy = response.status === 409
+    // `replanPending` solo es true si el servidor CONSIGUIÓ anotar el reajuste.
+    // Si no pudo, el mensaje vuelve a pedir la acción manual: prometer que se
+    // aplicará solo cuando no hay nada apuntado es la peor de las dos.
+    const anotado = body?.replanPending === true
     if (!busy && body?.retryable !== true) {
       // El motivo real solo existe aquí: la respuesta lo trae y antes se tiraba.
       console.error('[settings] recalculo del Camino fallido:', response.status, body?.degraded?.join(', ') ?? body?.error ?? '')
-      return body?.replanPending ? failed : hardFailure
+      return anotado ? failed : hardFailure
     }
     if (attempt < 3) {
       const seconds = Number(response.headers.get('Retry-After')) || 2
       await new Promise(resolve => window.setTimeout(resolve, seconds * 1000 * attempt))
       continue
     }
-    // Agotados los reintentos: el servidor ya lo dejó apuntado.
+    // Agotados los reintentos.
+    if (!anotado) return hardFailure
     return busy ? pending : failed
   }
-  return failed
+  return hardFailure
 }
 
 function weeklyDaysLabel(days: number | null) {

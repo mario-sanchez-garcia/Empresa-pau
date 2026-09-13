@@ -28,15 +28,24 @@ export const maxDuration = 300
  * `upsert` y no `update`: el alumno puede no tener fila todavía (la crea la
  * primera ejecución completa). Nunca lanza: no poder anotar el pendiente no
  * puede tumbar una respuesta que ya tiene su propio significado.
+ *
+ * Devuelve si la marca ENTRÓ, y la respuesta lo dice tal cual. Importa: entre
+ * el despliegue y su migración la columna no existe, y prometerle al alumno
+ * que "se aplicará solo" cuando no hay nada anotado es peor que pedirle que
+ * pulse «Recalcular» — es pedírselo sin decírselo.
  */
-async function markReplanPending(db: ReturnType<typeof checkedDb>, userId: string) {
+async function markReplanPending(db: ReturnType<typeof checkedDb>, userId: string): Promise<boolean> {
   const { error } = await db
     .from('camino_ensure_log')
     .upsert(
       { user_id: userId, replan_pending_at: new Date().toISOString() },
       { onConflict: 'user_id' },
     )
-  if (error) console.error('[camino/ensure-calendar] no se pudo anotar el reajuste pendiente:', error.message)
+  if (error) {
+    console.error('[camino/ensure-calendar] no se pudo anotar el reajuste pendiente:', error.message)
+    return false
+  }
+  return true
 }
 
 /**
@@ -147,6 +156,7 @@ export async function POST(request: NextRequest) {
     // incompleto sin excepción ninguna; marcar el día igualmente convertía un
     // fallo recuperable en un día perdido. Un resultado degradado NO marca el
     // día: el siguiente intento reintenta.
+    let degradedPending = false
     const degraded = [
       ...ensure.degraded,
       ...(weakReviews.reason === 'error' ? ['weak_reviews'] : []),
@@ -181,7 +191,7 @@ export async function POST(request: NextRequest) {
       console.error('[camino/ensure-calendar] degraded run, day not marked:', degraded.join(', '))
       // Un reajuste forzado que sale degradado no se pierde: queda pendiente y
       // lo recoge la siguiente ejecución, sin que el alumno pulse nada.
-      if (force) await markReplanPending(db, user.id)
+      if (force) degradedPending = await markReplanPending(db, user.id)
     }
 
     return NextResponse.json({
@@ -198,15 +208,15 @@ export async function POST(request: NextRequest) {
       retryable: degraded.length > 0,
       // El cliente lo usa para no pedir una acción manual que ya no hace
       // falta: el reajuste quedó apuntado y entrará solo.
-      replanPending: degraded.length > 0 && force,
+      replanPending: degradedPending,
     }, { status: degraded.length > 0 ? 503 : 200 })
     })
   } catch (error) {
     // Un `force` que no entra queda anotado, ocupado o roto el motivo: lo que
     // el alumno acaba de guardar se aplicará solo en la siguiente ejecución.
-    if (force) await markReplanPending(db, user.id)
-    if (error instanceof PlanBusyError) return NextResponse.json({ ok: false, retryable: true, error: 'plan_busy', replanPending: force }, { status: 409, headers: { 'Retry-After': '2' } })
+    const pending = force ? await markReplanPending(db, user.id) : false
+    if (error instanceof PlanBusyError) return NextResponse.json({ ok: false, retryable: true, error: 'plan_busy', replanPending: pending }, { status: 409, headers: { 'Retry-After': '2' } })
     console.error('[camino/ensure-calendar]', error)
-    return NextResponse.json({ error: 'No se pudo preparar tu Camino', replanPending: force }, { status: 500 })
+    return NextResponse.json({ error: 'No se pudo preparar tu Camino', replanPending: pending }, { status: 500 })
   }
 }

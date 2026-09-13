@@ -328,7 +328,10 @@ test('un reajuste que pilla el Camino ocupado no se pierde ni se delega en el al
     readFileSync(join(ROOT, '../api/camino/ensure-calendar/route.ts'), 'utf8'),
   ).replace(/\s+/g, ' ')
   assert.ok(route.includes('markReplanPending'), 'un reajuste que no entra no se apunta en ninguna parte')
-  assert.ok(route.includes('if (force) await markReplanPending(db, user.id)'), 'el fallo de un reajuste forzado se pierde')
+  // Las dos salidas por las que un `force` puede no entrar: la ejecución
+  // degradada y el catch (ocupado o error). Ninguna puede quedarse sin anotar.
+  assert.ok(route.includes('if (force) degradedPending = await markReplanPending(db, user.id)'), 'un reajuste forzado que sale degradado se pierde')
+  assert.ok(route.includes('const pending = force ? await markReplanPending(db, user.id) : false'), 'un reajuste forzado que falla o pilla el plan ocupado se pierde')
   assert.ok(route.includes('if (pendingAt) force = true'), 'el pendiente no se salta el throttle diario, así que no llegaría a aplicarse')
   // La limpieza va por igualdad con la marca leída: un pendiente NUEVO que
   // entre mientras corre esta ejecución tiene que sobrevivir.

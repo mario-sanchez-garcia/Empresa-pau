@@ -234,11 +234,11 @@ export default function CaminoAssistant({ onChanged }: { onChanged: () => Promis
           box-shadow: 0 10px 0 var(--clay-shadow-shelf), 0 16px 28px var(--clay-shadow-elevate);
           overflow: hidden;
         }
-        .camino-chat-panel__header { display: flex; align-items: flex-start; gap: 10px; padding: 18px 20px 14px; border-bottom: 1px solid var(--clay-border); }
+        .camino-chat-panel__header { display: flex; align-items: flex-start; gap: 10px; padding: 14px 20px 10px; border-bottom: 1px solid var(--clay-border); }
         .camino-chat-panel__header div { display: flex; flex-direction: column; gap: 3px; }
         .camino-chat-panel__header strong { color: var(--clay-text); font-size: 15px; font-weight: 800; }
         .camino-chat-panel__header small { color: var(--clay-text-muted); font-size: 12px; line-height: 1.4; }
-        .camino-chat-panel__messages { min-height: 220px; max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 16px 20px; }
+        .camino-chat-panel__messages { min-height: 0; max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 12px 20px; }
         .camino-chat-panel__message { max-width: 78%; margin: 0; border-radius: 14px; padding: 10px 13px; font-size: 13px; font-weight: 500; line-height: 1.5; }
         .camino-chat-panel__message--kairo { align-self: flex-start; background: var(--clay-surface-raised); border: 1px solid var(--clay-border); color: var(--clay-text); }
         .camino-chat-panel__message--user { align-self: flex-end; background: var(--clay-accent); color: var(--clay-on-accent); font-weight: 600; }
@@ -253,9 +253,9 @@ export default function CaminoAssistant({ onChanged }: { onChanged: () => Promis
         .camino-chat-panel__preview button:last-child { background: var(--clay-surface); color: var(--clay-text-muted); border: 1px solid var(--clay-border); }
         .camino-chat-panel__error { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid rgba(248,113,113,.4); border-radius: 12px; background: rgba(248,113,113,.1); color: #dc2626; padding: 10px 13px; font-size: 12px; font-weight: 700; }
         .camino-chat-panel__error button { display: flex; align-items: center; gap: 5px; border: 0; background: transparent; color: #dc2626; font-size: 12px; font-weight: 900; cursor: pointer; }
-        .camino-chat-panel__quick { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px 14px; scrollbar-width: none; }
+        .camino-chat-panel__quick { display: flex; gap: 8px; overflow-x: auto; padding: 0 20px 10px; scrollbar-width: none; }
         .camino-chat-panel__quick button { flex: none; border: 1px solid var(--clay-border); border-radius: 999px; background: var(--clay-surface-raised); color: var(--clay-text-muted); padding: 7px 12px; font-size: 11px; font-weight: 700; cursor: pointer; }
-        .camino-chat-panel__form { display: flex; gap: 9px; border-top: 1px solid var(--clay-border); padding: 14px 20px; background: var(--clay-surface); }
+        .camino-chat-panel__form { display: flex; gap: 9px; border-top: 1px solid var(--clay-border); padding: 10px 20px; background: var(--clay-surface); }
         .camino-chat-panel__form input { flex: 1; min-width: 0; border: 1px solid var(--clay-border); border-radius: 13px; background: var(--clay-surface-raised); color: var(--clay-text); padding: 11px 13px; font-size: 13px; outline: none; }
         .camino-chat-panel__form input:focus { border-color: var(--clay-accent); }
         .camino-chat-panel__form button { width: 42px; border: 0; border-radius: 12px; background: var(--clay-accent); color: var(--clay-on-accent); display: grid; place-items: center; cursor: pointer; box-shadow: 0 3px 0 var(--clay-accent-deep); }

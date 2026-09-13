@@ -1,11 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { createServiceClient } from '@/app/lib/billing/supabase'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
 import { normalizeSubjectSlug, subjectLabelFromSlug } from '@/app/lib/camino/caminoCurriculumPlan'
-import { missionPriorityScore, priorityReasonsForMission } from '@/app/lib/camino/orientationPriority'
-import { normalizeChatText, parseCaminoChatAction } from '@/app/lib/camino/chatActions'
+import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
+import { withAnthropicRetry, isOverloadedError } from '@/app/lib/ai/withAnthropicRetry'
+import { CAMINO_CHAT_TOOLS, type MoverMisionInput, type AnadirRepasoExtraInput, type AnadirExamenInput, type ReorganizarDiaInput } from '@/app/lib/camino/chatTools'
 
 export const dynamic = 'force-dynamic'
+
+// Capacidad nueva (tool calling sobre el calendario real) -- se pinneó al
+// modelo más reciente y capaz a propósito, distinto del claude-sonnet-4-6
+// ya estable que usa la corrección de exámenes (exam/correct, camino/correct):
+// aquí no hay una regresión que temer sobre un pipeline ya probado, así que
+// no hace falta quedarse en el modelo antiguo.
+const MODEL = 'claude-sonnet-5'
+const MAX_HISTORY_MESSAGES = 12
+const MAX_MESSAGE_LENGTH = 1000
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: 30_000 })
 
 type MissionRow = {
   id: string
@@ -24,24 +37,26 @@ type MissionRow = {
   metadata: Record<string, unknown> | null
 }
 
-type TopicRow = {
-  id: string
-  subject: string
-  block_key: string
-  block_title: string
-  topic_slug: string
-  title: string
-}
-
 export type CaminoChatPreview =
   | { kind: 'MOVE_MISSION'; missionId: string; missionTitle: string; subject: string; fromDate: string; toDate: string; startTime: string | null; durationMinutes: number }
   | { kind: 'CREATE_EXTRA_MISSION'; subject: string; subjectLabel: string; title: string; topicSlug: string | null; blockKey: string | null; blockSlug: string | null; scheduledDate: string; startTime: string | null; durationMinutes: number }
   | { kind: 'CREATE_EXAM'; subject: string; subjectLabel: string; topic: string; date: string }
-  | { kind: 'POSTPONE_MISSION'; missionId: string; missionTitle: string; subject: string; v2SortOrder: number }
   | { kind: 'REORGANIZE_DAY'; sourceDate: string; missionIds: string[]; summary: string[] }
 
 function madridToday() {
   return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' })
+}
+
+function friendlyDate(date: string) {
+  return new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'Europe/Madrid' }).format(new Date(`${date}T12:00:00+02:00`))
+}
+
+function isValidDate(value: unknown): value is string {
+  return typeof value === 'string' && /^20\d{2}-\d{2}-\d{2}$/.test(value)
+}
+
+function isValidTime(value: unknown): value is string {
+  return typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value)
 }
 
 function minutesBetween(start: string | null, end: string | null) {
@@ -51,35 +66,21 @@ function minutesBetween(start: string | null, end: string | null) {
   return Math.max(5, Math.min(180, eh * 60 + em - (sh * 60 + sm)))
 }
 
-function cleanMessage(value: unknown) {
-  return typeof value === 'string' ? value.trim().slice(0, 500) : ''
-}
+type ChatTurn = { role: 'user' | 'assistant'; content: string }
 
-function relevance(query: string, ...values: Array<string | null | undefined>) {
-  const haystack = normalizeChatText(values.filter(Boolean).join(' '))
-  const tokens = normalizeChatText(query).split(/\s+/).filter(token => token.length >= 3 && !['mision', 'jueves', 'viernes', 'sabado', 'domingo', 'lunes', 'martes', 'miercoles', 'manana', 'pasame'].includes(token))
-  return tokens.reduce((score, token) => score + (haystack.includes(token) ? token.length : 0), 0)
-}
-
-function resolveMission(query: string | undefined, missions: MissionRow[]) {
-  if (!query) return missions.length === 1 ? missions[0] : null
-  return missions
-    .map(mission => ({ mission, score: relevance(query, mission.subject, subjectLabelFromSlug(mission.subject), mission.title, mission.block_key) }))
-    .filter(item => item.score > 0)
-    .sort((a, b) => b.score - a.score || a.mission.scheduled_date.localeCompare(b.mission.scheduled_date))[0]?.mission ?? null
-}
-
-function resolveSubject(query: string | undefined, subjects: string[]) {
-  if (!query) return null
-  const ranked = subjects
-    .map(subject => ({ subject: normalizeSubjectSlug(subject), score: relevance(query, subject, normalizeSubjectSlug(subject), subjectLabelFromSlug(normalizeSubjectSlug(subject))) }))
-    .filter(item => item.score > 0)
-    .sort((a, b) => b.score - a.score)
-  return ranked[0]?.subject ?? null
-}
-
-function friendlyDate(date: string) {
-  return new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'Europe/Madrid' }).format(new Date(`${date}T12:00:00+02:00`))
+// El cliente manda el historial completo cada turno (sin sesión server-side)
+// -- reemplaza al pendingContext de un solo string que usaba el parser
+// anterior: con conversación real, si a Kairo le falta un dato simplemente
+// lo pregunta en texto y el turno siguiente ya trae la respuesta en el
+// historial, sin ningún mecanismo especial de "pendiente".
+function cleanHistory(raw: unknown): ChatTurn[] {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .filter((m): m is { role: string; content: unknown } => Boolean(m) && typeof m === 'object')
+    .filter(m => m.role === 'user' || m.role === 'assistant')
+    .map(m => ({ role: m.role as 'user' | 'assistant', content: typeof m.content === 'string' ? m.content.trim().slice(0, MAX_MESSAGE_LENGTH) : '' }))
+    .filter(m => m.content.length > 0)
+    .slice(-MAX_HISTORY_MESSAGES)
 }
 
 export async function POST(request: NextRequest) {
@@ -87,11 +88,12 @@ export async function POST(request: NextRequest) {
     const auth = await getAuthContext(request)
     if ('response' in auth) return auth.response
     const body = await request.json().catch(() => ({})) as Record<string, unknown>
-    const message = cleanMessage(body.message)
-    if (!message) return NextResponse.json({ error: 'message_required' }, { status: 400 })
+    const history = cleanHistory(body.messages)
+    if (history.length === 0 || history[history.length - 1].role !== 'user') {
+      return NextResponse.json({ error: 'message_required' }, { status: 400 })
+    }
 
     const today = madridToday()
-    const action = parseCaminoChatAction(message, today)
     const db = createServiceClient()
     const [calendarResult, profileResult] = await Promise.all([
       db.from('camino_calendar')
@@ -109,95 +111,115 @@ export async function POST(request: NextRequest) {
     const profileSubjects = Array.isArray(profileResult.data?.subjects)
       ? profileResult.data.subjects.filter((value): value is string => typeof value === 'string')
       : []
-    const subjects = [...new Set([...profileSubjects, ...missions.map(mission => mission.subject)])]
+    const subjects = [...new Set([...profileSubjects, ...missions.map(mission => mission.subject)])].map(normalizeSubjectSlug)
+    const exams = cleanStudentExams(profileResult.data?.student_exams)
 
-    if (action.intent === 'SUGGEST_STUDY' || action.intent === 'ASK_PRIORITY') {
-      const candidates = missions.filter(mission => !action.targetDate || mission.scheduled_date === action.targetDate)
-      const mission = [...(candidates.length ? candidates : missions)]
-        .sort((a, b) => {
-          const score = missionPriorityScore({ ...b, metadata: b.metadata ?? undefined }, null, today) - missionPriorityScore({ ...a, metadata: a.metadata ?? undefined }, null, today)
-          return score || Number(b.is_main) - Number(a.is_main) || a.scheduled_date.localeCompare(b.scheduled_date)
-        })[0]
-      if (!mission) return NextResponse.json({ reply: 'Todavía no tienes misiones pendientes. Abre el calendario para preparar tu próxima semana.', mutates: false })
-      const reasons = priorityReasonsForMission({ ...mission, metadata: mission.metadata ?? undefined }, null, today)
-      const storedReasons = Array.isArray(mission.metadata?.priorityReasons)
-        ? (mission.metadata?.priorityReasons as Array<{ label?: unknown }>).flatMap(reason => typeof reason.label === 'string' ? [reason.label] : [])
-        : []
-      const reason = reasons[0]?.label || storedReasons[0] || (mission.is_main ? 'es la misión principal que marca tu Camino para ese día.' : 'encaja con tu progreso y tu semana actual.')
-      const when = mission.scheduled_date === today ? 'hoy' : friendlyDate(mission.scheduled_date)
-      return NextResponse.json({
-        reply: `Empieza por ${mission.title}, de ${subjectLabelFromSlug(mission.subject)}, ${when}. ${reason}`,
-        mutates: false,
-        evidence: { missionId: mission.id, scheduledDate: mission.scheduled_date },
-      })
+    // Contexto real para que Claude pueda referenciar misiones/asignaturas
+    // EXISTENTES en vez de inventarlas -- listado acotado (60 misiones) para
+    // no disparar el tamaño del prompt en alumnos con muchas semanas por delante.
+    const missionLines = missions.slice(0, 60).map(mission =>
+      `- id=${mission.id} | ${mission.scheduled_date} (${friendlyDate(mission.scheduled_date)})${mission.start_time ? ` a las ${mission.start_time.slice(0, 5)}` : ' sin hora fija'} | ${subjectLabelFromSlug(mission.subject)} | "${mission.title}"${mission.is_bonus ? ' [bonus]' : ''}`
+    ).join('\n') || '(el alumno no tiene misiones pendientes)'
+    const subjectLines = subjects.map(subject => `- ${subject} (${subjectLabelFromSlug(subject)})`).join('\n') || '(sin asignaturas activas)'
+    const examLines = exams.length
+      ? exams.map(exam => `- ${subjectLabelFromSlug(normalizeSubjectSlug(exam.subject))}: ${exam.topic} el ${exam.date}`).join('\n')
+      : '(sin exámenes registrados)'
+
+    const systemPrompt = `Eres Kairo, el asistente del "Camino PAU" dentro de la app Kairo. Ayudas al alumno a entender su plan de estudio y, cuando lo pide, a proponer cambios seguros en su calendario real.
+
+Hoy es ${friendlyDate(today)} (${today}), zona horaria Europe/Madrid.
+
+Asignaturas del alumno:
+${subjectLines}
+
+Misiones pendientes (usa el id EXACTO si vas a mover alguna):
+${missionLines}
+
+Exámenes ya registrados:
+${examLines}
+
+REGLAS ESTRICTAS, sin excepción:
+1. Nunca inventes ni asumas un dato que el alumno no ha dado explícitamente (hora, asignatura, duración, tema, fecha exacta). Si falta algo necesario para ejecutar una acción con seguridad, PREGÚNTALO en una respuesta de texto normal -- no llames a ninguna herramienta todavía.
+2. Cada llamada a una herramienta es solo una PROPUESTA: el alumno tiene que confirmarla aparte antes de que se aplique de verdad. Nunca digas que un cambio "ya se ha hecho" o "ya está aplicado".
+3. missionId debe copiarse literalmente del listado de misiones pendientes de arriba. Si no encuentras una misión que encaje con lo que pide el alumno, dilo y pide más detalle (asignatura o título) en vez de adivinar.
+4. subject debe ser uno de los slugs exactos de la lista de asignaturas de arriba. Nunca inventes una asignatura que el alumno no tenga activa.
+5. No tienes ninguna herramienta para marcar contenido como "no dado en clase" ni para crear Simulacros. Si el alumno lo pide, explica que eso se hace desde la propia pantalla del tema o de Simulacros, no desde este chat.
+6. Sé breve, cercano y en español, tuteando al alumno. Nunca menciones nombres de herramientas, ids internos ni detalles técnicos en lo que le dices.`
+
+    const messages: Anthropic.MessageParam[] = history.map(turn => ({ role: turn.role, content: turn.content }))
+
+    const response = await withAnthropicRetry(() => anthropic.messages.create({
+      model: MODEL,
+      max_tokens: 1024,
+      system: systemPrompt,
+      tools: CAMINO_CHAT_TOOLS,
+      messages,
+    }))
+
+    const textBlock = response.content.find((block): block is Anthropic.TextBlock => block.type === 'text')
+    const toolUse = response.content.find((block): block is Anthropic.ToolUseBlock => block.type === 'tool_use')
+    const claudeText = textBlock?.text?.trim() || ''
+
+    if (!toolUse) {
+      return NextResponse.json({ reply: claudeText || 'No te he entendido bien. ¿Puedes explicármelo de otra forma?', mutates: false })
     }
 
-    if (action.intent === 'MOVE_MISSION') {
-      const mission = resolveMission(action.missionQuery, missions)
-      if (!mission) return NextResponse.json({ reply: 'No encuentro una única misión pendiente con esa descripción. Dime la asignatura o el título.', mutates: false })
-      const toDate = action.targetDate ?? mission.scheduled_date
-      const startTime = action.targetTime ?? mission.start_time?.slice(0, 5) ?? null
+    if (toolUse.name === 'moverMision') {
+      const input = toolUse.input as MoverMisionInput
+      const mission = missions.find(candidate => candidate.id === input.missionId)
+      if (!mission) return NextResponse.json({ reply: 'No encuentro esa misión en tu calendario. ¿Me dices la asignatura o el título exacto?', mutates: false })
+      if (!isValidDate(input.nuevaFecha)) return NextResponse.json({ reply: 'No he entendido bien la fecha nueva. ¿Puedes decírmela otra vez?', mutates: false })
+      const startTime = isValidTime(input.nuevaHora) ? input.nuevaHora : mission.start_time?.slice(0, 5) ?? null
       const durationMinutes = minutesBetween(mission.start_time, mission.end_time)
-      const preview: CaminoChatPreview = { kind: 'MOVE_MISSION', missionId: mission.id, missionTitle: mission.title, subject: mission.subject, fromDate: mission.scheduled_date, toDate, startTime, durationMinutes }
-      return NextResponse.json({
-        reply: `Puedo mover ${mission.title} al ${friendlyDate(toDate)}${startTime ? ` a las ${startTime}` : ''}.`,
-        mutates: true,
-        requiresConfirmation: true,
-        preview,
-      })
+      const preview: CaminoChatPreview = { kind: 'MOVE_MISSION', missionId: mission.id, missionTitle: mission.title, subject: mission.subject, fromDate: mission.scheduled_date, toDate: input.nuevaFecha, startTime, durationMinutes }
+      const reply = claudeText || `Puedo mover "${mission.title}" al ${friendlyDate(input.nuevaFecha)}${startTime ? ` a las ${startTime}` : ''}. ¿Lo confirmas?`
+      return NextResponse.json({ reply, mutates: true, requiresConfirmation: true, preview })
     }
 
-    if (action.intent === 'CREATE_EXTRA_MISSION') {
-      if (!action.targetDate) return NextResponse.json({ reply: '¿Qué día quieres hacer ese repaso?', mutates: false })
-      const { data: topicRows, error: topicsError } = await db
-        .from('curriculum_topics')
-        .select('id, subject, block_key, block_title, topic_slug, title')
-        .limit(800)
-      if (topicsError) throw topicsError
-      const query = action.topicQuery ?? message
-      const activeSubjects = new Set(subjects.map(normalizeSubjectSlug))
-      const topic = ((topicRows ?? []) as TopicRow[])
-        .filter(row => activeSubjects.has(normalizeSubjectSlug(row.subject)))
-        .map(row => ({ row, score: relevance(query, row.title, row.topic_slug, row.block_title, subjectLabelFromSlug(row.subject)) }))
-        .filter(item => item.score > 0)
-        .sort((a, b) => b.score - a.score)[0]?.row
-      const subject = topic?.subject ? normalizeSubjectSlug(topic.subject) : resolveSubject(query, subjects)
-      if (!subject) return NextResponse.json({ reply: 'No puedo conectar ese repaso con una de tus asignaturas. Dime la asignatura y el tema.', mutates: false })
-      const title = topic ? `Repaso extra: ${topic.title}` : `Repaso extra de ${subjectLabelFromSlug(subject)}`
-      const preview: CaminoChatPreview = {
-        kind: 'CREATE_EXTRA_MISSION', subject, subjectLabel: subjectLabelFromSlug(subject), title,
-        topicSlug: topic?.topic_slug ?? null, blockKey: topic?.block_key ?? null, blockSlug: topic?.block_key ?? null,
-        scheduledDate: action.targetDate, startTime: action.targetTime ?? null, durationMinutes: action.durationMinutes ?? 30,
+    if (toolUse.name === 'añadirRepasoExtra') {
+      const input = toolUse.input as AnadirRepasoExtraInput
+      const subject = normalizeSubjectSlug(input.subject)
+      if (!subjects.includes(subject)) return NextResponse.json({ reply: `No veo "${input.subject}" entre tus asignaturas activas. ¿De cuál es el repaso?`, mutates: false })
+      if (!isValidDate(input.fecha)) return NextResponse.json({ reply: 'No he entendido bien la fecha del repaso. ¿Qué día quieres hacerlo?', mutates: false })
+      if (typeof input.duracionMin !== 'number' || !Number.isFinite(input.duracionMin)) {
+        return NextResponse.json({ reply: '¿Cuántos minutos quieres dedicarle a este repaso?', mutates: false })
       }
-      return NextResponse.json({ reply: `Puedo añadir ${title}, ${action.durationMinutes ?? 30} min, el ${friendlyDate(action.targetDate)}${action.targetTime ? ` a las ${action.targetTime}` : ''}.`, mutates: true, requiresConfirmation: true, preview })
+      const durationMinutes = Math.max(5, Math.min(180, Math.round(input.duracionMin)))
+      const startTime = isValidTime(input.hora) ? input.hora : null
+      const title = `Repaso extra: ${input.tema}`.slice(0, 200)
+      // topicSlug/blockKey siempre null: la IA describe el tema en lenguaje
+      // natural, nunca intenta enlazarlo a una fila real de curriculum_topics.
+      const preview: CaminoChatPreview = { kind: 'CREATE_EXTRA_MISSION', subject, subjectLabel: subjectLabelFromSlug(subject), title, topicSlug: null, blockKey: null, blockSlug: null, scheduledDate: input.fecha, startTime, durationMinutes }
+      const reply = claudeText || `Puedo añadir "${title}" (${durationMinutes} min) el ${friendlyDate(input.fecha)}${startTime ? ` a las ${startTime}` : ''}. ¿Lo confirmas?`
+      return NextResponse.json({ reply, mutates: true, requiresConfirmation: true, preview })
     }
 
-    if (action.intent === 'CREATE_EXAM') {
-      const subject = resolveSubject(action.subjectQuery ?? message, subjects)
-      if (!subject) return NextResponse.json({ reply: '¿De qué asignatura es el examen?', mutates: false })
-      if (!action.targetDate) return NextResponse.json({ reply: '¿Qué día es el examen?', mutates: false })
-      if (!action.topicQuery) return NextResponse.json({ reply: `¿Qué tema o bloque entra en el examen de ${subjectLabelFromSlug(subject)}?`, mutates: false, pending: { kind: 'CREATE_EXAM', message } })
-      const preview: CaminoChatPreview = { kind: 'CREATE_EXAM', subject, subjectLabel: subjectLabelFromSlug(subject), topic: action.topicQuery, date: action.targetDate }
-      return NextResponse.json({ reply: `Puedo añadir el examen de ${subjectLabelFromSlug(subject)} del ${friendlyDate(action.targetDate)} sobre ${action.topicQuery}.`, mutates: true, requiresConfirmation: true, preview })
+    if (toolUse.name === 'añadirExamen') {
+      const input = toolUse.input as AnadirExamenInput
+      const subject = normalizeSubjectSlug(input.subject)
+      if (!subjects.includes(subject)) return NextResponse.json({ reply: `No veo "${input.subject}" entre tus asignaturas activas. ¿De qué asignatura es el examen?`, mutates: false })
+      if (!isValidDate(input.fecha) || input.fecha < today) return NextResponse.json({ reply: 'Necesito una fecha futura válida para el examen. ¿Qué día es?', mutates: false })
+      if (!input.temario?.trim()) return NextResponse.json({ reply: `¿Qué tema o bloque entra en el examen de ${subjectLabelFromSlug(subject)}?`, mutates: false })
+      const preview: CaminoChatPreview = { kind: 'CREATE_EXAM', subject, subjectLabel: subjectLabelFromSlug(subject), topic: input.temario.trim().slice(0, 120), date: input.fecha }
+      const reply = claudeText || `Puedo añadir el examen de ${subjectLabelFromSlug(subject)} del ${friendlyDate(input.fecha)} sobre ${preview.topic}. ¿Lo confirmas?`
+      return NextResponse.json({ reply, mutates: true, requiresConfirmation: true, preview })
     }
 
-    if (action.intent === 'POSTPONE_MISSION') {
-      const mission = resolveMission(action.missionQuery, missions)
-      if (!mission) return NextResponse.json({ reply: 'Dime qué misión quieres posponer.', mutates: false })
-      if (mission.v2_sort_order == null) return NextResponse.json({ reply: 'Esa misión no pertenece a una lección de curso. Puedo moverla a otro día, pero no marcarla como contenido aún no dado.', mutates: false })
-      const preview: CaminoChatPreview = { kind: 'POSTPONE_MISSION', missionId: mission.id, missionTitle: mission.title, subject: mission.subject, v2SortOrder: mission.v2_sort_order }
-      return NextResponse.json({ reply: `Puedo marcar “${mission.title}” como contenido aún no dado y dejar que Camino lo reprograme.`, mutates: true, requiresConfirmation: true, preview })
+    if (toolUse.name === 'reorganizarDia') {
+      const input = toolUse.input as ReorganizarDiaInput
+      if (!isValidDate(input.fecha)) return NextResponse.json({ reply: 'No he entendido bien qué día quieres reorganizar.', mutates: false })
+      const dayMissions = missions.filter(mission => mission.scheduled_date === input.fecha)
+      if (dayMissions.length === 0) return NextResponse.json({ reply: `No tienes misiones pendientes el ${friendlyDate(input.fecha)}.`, mutates: false })
+      const preview: CaminoChatPreview = { kind: 'REORGANIZE_DAY', sourceDate: input.fecha, missionIds: dayMissions.map(mission => mission.id), summary: dayMissions.map(mission => `${mission.title} → próximo hueco libre`) }
+      const reply = claudeText || `Puedo reorganizar ${dayMissions.length === 1 ? 'esta misión' : `estas ${dayMissions.length} misiones`} del ${friendlyDate(input.fecha)} en los próximos huecos libres. ¿Lo confirmas?`
+      return NextResponse.json({ reply, mutates: true, requiresConfirmation: true, preview })
     }
 
-    if (action.intent === 'REORGANIZE_DAY') {
-      const dayMissions = missions.filter(mission => mission.scheduled_date === action.sourceDate)
-      if (dayMissions.length === 0) return NextResponse.json({ reply: `No tienes misiones pendientes el ${friendlyDate(action.sourceDate ?? today)}.`, mutates: false })
-      const preview: CaminoChatPreview = { kind: 'REORGANIZE_DAY', sourceDate: action.sourceDate ?? today, missionIds: dayMissions.map(mission => mission.id), summary: dayMissions.map(mission => `${mission.title} → próximo hueco libre`) }
-      return NextResponse.json({ reply: `Puedo reorganizar ${dayMissions.length === 1 ? 'esta misión' : `estas ${dayMissions.length} misiones`} en los próximos huecos libres.`, mutates: true, requiresConfirmation: true, preview })
-    }
-
-    return NextResponse.json({ reply: 'Puedo ayudarte con tus misiones, exámenes y calendario. Prueba con “¿qué estudio hoy?” o “mueve Física al viernes”.', mutates: false })
+    return NextResponse.json({ reply: claudeText || 'No he podido procesar esa acción. ¿Puedes reformularlo?', mutates: false })
   } catch (error) {
+    if (isOverloadedError(error)) {
+      return NextResponse.json({ error: 'Kairo está saturado ahora mismo. Reintenta en unos segundos.' }, { status: 503 })
+    }
     console.error('[camino/chat]', error)
     return NextResponse.json({ error: 'No he podido consultar tu Camino. Reintentar.' }, { status: 500 })
   }

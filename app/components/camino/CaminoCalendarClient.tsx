@@ -131,6 +131,9 @@ const CALENDAR_WEEK_CACHE_KEY = 'kairo_camino_week_cache_v2'
 // por tanto se pueden pintar antes de que responda la red (ver
 // saveCalendarWeeksToCache y loadCalendarWeeksFromCache).
 const SERVER_WEEKS_KEY = 'kairo_camino_server_weeks_v1'
+// Con qué disponibilidad se calcularon las semanas de PREVISIÓN guardadas en
+// CALENDAR_WEEK_CACHE_KEY (ver forecastStamp y resolveWeek).
+const FORECAST_STAMP_KEY = 'kairo_camino_forecast_stamp_v1'
 // Cuántas semanas ANTERIORES a la actual se leen del servidor, para que
 // "← Ant" enseñe el historial real y no un hueco (ver fetchCaminoCalendar).
 const CALENDAR_HISTORY_WEEKS = 4
@@ -289,6 +292,34 @@ function mergeWeekIntoCalendar(current: DayPlan[], weekStartISO: string, weekDay
   const weekEndISO = toISO(addDays(dateFromISO(weekStartISO), 6))
   const outsideWeek = current.filter(day => day.date < weekStartISO || day.date > weekEndISO)
   return [...outsideWeek, ...cloneWeek(weekDays)].sort((a, b) => a.date.localeCompare(b.date))
+}
+// Huella de la disponibilidad con la que se generó una semana de previsión.
+//
+// generateCalendar recorta los días de estudio al tope del plan comercial
+// (`Math.min(weeklyStudyDaysValue, planLimits.maxStudyDaysPerWeek)`), y
+// `caminoPlanId` arranca en 'free' —2 días por semana— hasta que contesta
+// /api/billing/me. Cualquier semana que se generase en esa ventana salía con
+// 2 días en vez de los 6 elegidos, se guardaba en la caché, y resolveWeek la
+// prefería a partir de entonces: el recorte se quedaba pegado para siempre.
+// Lo mismo, sin carrera ninguna, al subir de plan — las semanas cacheadas
+// seguían siendo las del plan viejo. Ahora la caché de previsión lleva
+// estampada su disponibilidad y se descarta en cuanto deja de coincidir.
+function forecastStamp(planId: CaminoPlanId, weeklyStudyDaysValue: number | null | undefined) {
+  return `${planId}:${weeklyStudyDaysValue ?? 'na'}`
+}
+// Anota con qué disponibilidad se está cacheando la previsión. Si cambió, tira
+// primero TODAS las semanas de previsión guardadas con la anterior: la huella
+// es una sola para toda la caché, así que sellarla sin limpiar revalidaría de
+// golpe las semanas viejas. Las semanas del servidor son datos reales y se
+// quedan donde están.
+function commitForecastStamp(stamp: string) {
+  if (loadJson<string>(FORECAST_STAMP_KEY, '') === stamp) return
+  const serverWeeks = new Set(loadJson<string[]>(SERVER_WEEKS_KEY, []))
+  const cache = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})
+  saveJson(CALENDAR_WEEK_CACHE_KEY, Object.fromEntries(
+    Object.entries(cache).filter(([weekStart]) => serverWeeks.has(weekStart)),
+  ))
+  saveJson(FORECAST_STAMP_KEY, stamp)
 }
 function saveWeekCache(weekStartISO: string, weekDays: DayPlan[]) {
   const cache = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})
@@ -1212,6 +1243,10 @@ export default function CaminoCalendarClient() {
   const [calendarReorganizeStatus, setCalendarReorganizeStatus] = useState<'idle' | 'saving' | 'done' | 'error'>('idle')
   const [calendarAvailabilityRefreshKey, setCalendarAvailabilityRefreshKey] = useState(0)
   const [caminoPlanId, setCaminoPlanId] = useState<CaminoPlanId>('free')
+  // ¿Sabemos ya cuál es el plan de verdad? 'free' es el valor de arranque, no
+  // una respuesta: hasta que /api/billing/me contesta, cualquier previsión
+  // sale recortada al tope del plan gratuito (ver forecastStamp).
+  const [planResolved, setPlanResolved] = useState(false)
   const [ligas, setLigas] = useState<LigaInfo[]>([])
   const [ligaLoading, setLigaLoading] = useState(true)
   const [globalTop, setGlobalTop] = useState<GlobalTopEntry[] | null>(null)
@@ -1645,7 +1680,7 @@ export default function CaminoCalendarClient() {
       if (!res.ok || cancelled) return
       const billing = await res.json() as { activePlans?: Array<{ planId?: string | null }> }
       const planId = normalizeCaminoPlanId(billing.activePlans?.[0]?.planId)
-      if (!cancelled) setCaminoPlanId(planId)
+      if (!cancelled) { setCaminoPlanId(planId); setPlanResolved(true) }
     }).catch(() => undefined)
     return () => { cancelled = true }
   }, [onboarding?.completedAt])
@@ -2033,15 +2068,30 @@ export default function CaminoCalendarClient() {
     if (existingWeek.some(day => day.missions.length > 0)) {
       return { days: existingWeek, source: supabaseCalLoaded ? 'server' : 'cache', reason: 'existing_visible_week', shouldCache: true, shouldMerge: false }
     }
+    // Una semana de previsión solo vale si se calculó con la disponibilidad
+    // que el alumno tiene AHORA. Las semanas del servidor son datos reales y
+    // no dependen de esto.
+    const stamp = forecastStamp(planId, onboarding.weeklyStudyDaysValue)
+    const isServerWeek = new Set(loadJson<string[]>(SERVER_WEEKS_KEY, [])).has(weekStartISO)
+    const stampMatches = isServerWeek || loadJson<string>(FORECAST_STAMP_KEY, '') === stamp
     const cachedWeek = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})[weekStartISO]
-    if (cachedWeek) {
+    if (cachedWeek && stampMatches) {
       const stableWeek = buildWeekDays(weekStartISO, cachedWeek)
       return { days: stableWeek, source: 'cache', reason: 'cached_week', shouldCache: false, shouldMerge: true }
     }
     const source = curriculumItems.length ? curriculumItems : FALLBACK_CURRICULUM
     const weekCache = loadJson<CalendarWeekCache>(CALENDAR_WEEK_CACHE_KEY, {})
     const nextCalendar = generateCalendar(onboarding, nextExams, source, planId, weekStartISO, weekCache, orientationContext, targetExamDate)
-    return { days: nextCalendar, source: 'client', reason: 'no_server_or_cache_week', shouldCache: true, shouldMerge: true }
+    // Mientras /api/billing/me no haya contestado, `planId` sigue siendo el
+    // 'free' inicial: se puede PINTAR la previsión, pero no guardarla, o el
+    // recorte a 2 días se quedaría en la caché.
+    return {
+      days: nextCalendar,
+      source: 'client',
+      reason: planResolved ? 'no_server_or_cache_week' : 'plan_not_resolved_yet',
+      shouldCache: planResolved,
+      shouldMerge: true,
+    }
   }
   function generateWeek(weekStartISO: string, nextExams = exams, planId = caminoPlanId) {
     return resolveWeek(weekStartISO, nextExams, planId).days
@@ -2050,7 +2100,10 @@ export default function CaminoCalendarClient() {
     const result = resolveWeek(weekStartISO, nextExams, planId)
     const nextCalendar = result.days
     setSelectedWeekStart(weekStartISO)
-    if (result.shouldCache) saveWeekCache(weekStartISO, nextCalendar)
+    if (result.shouldCache) {
+      if (result.source === 'client') commitForecastStamp(forecastStamp(planId, onboarding?.weeklyStudyDaysValue))
+      saveWeekCache(weekStartISO, nextCalendar)
+    }
     if (result.shouldMerge) setCalendar(current => mergeWeekIntoCalendar(current, weekStartISO, nextCalendar))
     recordCalendarSource(result.source, 'week_navigation', { weekStart: weekStartISO, missionCount: missionCount(nextCalendar), reason: result.reason })
     return nextCalendar

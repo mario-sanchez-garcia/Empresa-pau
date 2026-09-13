@@ -7,6 +7,7 @@ import { EXAM_SUBJECT_SLUG, SIMULACRO_SUBJECT } from './partialExamSubjects'
 import { SPAIN_HOLIDAYS } from './spainHolidays'
 import { allocateExamBudgets } from './studyCapacity.ts'
 import type { StudentPlanContext } from './planWindow'
+import { resolveSimulacroCoverageThreshold } from './simulacroCoverageOverride'
 
 /** Traduce la ventana de planificación a las opciones de hueco de preparación. */
 function prepSlotOptions(context?: StudentPlanContext) {
@@ -35,10 +36,12 @@ const BLOCK_DISPLAY: Record<string, string> = {
   Probabilidad: 'Probabilidad',
 }
 
-// Umbral de cobertura de Curso para generar el Simulacro (ver
-// decideMissionFate) — mismo número usado para elegir EN QUÉ día de los
-// últimos FINAL_MOCK_WINDOW_DAYS colocarlo (más abajo).
-const MIN_COVERAGE_PCT_FOR_SIMULACRO = 80
+// El umbral de cobertura de Curso para generar el Simulacro (ver
+// decideMissionFate) ya no es una constante fija aquí -- resolveCoverageThresholdForStudent
+// devuelve DEFAULT_SIMULACRO_COVERAGE_PCT (80, ver simulacroCoverageOverride.ts)
+// salvo que el alumno haya activado su propio ajuste en Ajustes. Mismo número
+// se usa para elegir EN QUÉ día de los últimos FINAL_MOCK_WINDOW_DAYS
+// colocarlo (más abajo).
 // final_mini_mock nunca se coloca a más de esto de días hábiles del examen
 // (nunca el día del examen en sí — weekdaysBefore ya lo excluye) —
 // exercise_practice no tiene esta restricción, puede usar cualquier día
@@ -190,6 +193,21 @@ async function resolveFullMocksLimit(supabase: SupabaseClient, userId: string): 
   return baseLimit + ((override?.extra_mocks_per_month as number | null) ?? 0)
 }
 
+// Umbral de cobertura efectivo para ESTE alumno: DEFAULT_SIMULACRO_COVERAGE_PCT
+// (80%) salvo que haya activado su propio ajuste en Ajustes (ver
+// simulacroCoverageOverride.ts) -- un alumno que nunca toca ese ajuste sigue
+// devolviendo exactamente 80, sin ningún cambio de comportamiento.
+async function resolveCoverageThresholdForStudent(supabase: SupabaseClient, userId: string): Promise<number> {
+  const { data } = await supabase
+    .from('perfiles')
+    .select('simulacro_coverage_override_enabled, simulacro_coverage_override_pct')
+    .eq('id', userId)
+    .maybeSingle()
+  return resolveSimulacroCoverageThreshold(data
+    ? { enabled: Boolean(data.simulacro_coverage_override_enabled), pct: data.simulacro_coverage_override_pct as number | null }
+    : null)
+}
+
 // Cuenta por CREACIÓN (created_at), no por fecha programada — mismo criterio
 // que ya usa /api/practica-parcial para su propio tope mensual. Solo cuenta
 // Simulacros de examen reales (mission_type='pau_practice' Y
@@ -282,7 +300,8 @@ function projectedCoveragePctThrough(coverage: ExamCoverage, allSlots: string[],
 // Finds the day to place final_mini_mock on: within the last
 // FINAL_MOCK_WINDOW_DAYS weekdays of `allSlots`, the EARLIEST one (most
 // margin for the student) whose projected coverage through that day already
-// clears MIN_COVERAGE_PCT_FOR_SIMULACRO; if none clears it, the LATEST one
+// clears coverageThreshold (80% by default, see resolveCoverageThresholdForStudent);
+// if none clears it, the LATEST one
 // (closest to the exam, maximum compression) — decideMissionFate elsewhere
 // decides whether that's actually enough to generate the Simulacro. If every
 // day in that 3-day window is excluded by `excludedDates` (e.g. all claimed
@@ -290,11 +309,11 @@ function projectedCoveragePctThrough(coverage: ExamCoverage, allSlots: string[],
 // window with at least one available candidate, so the Simulacro lands as
 // close to the exam as physically possible rather than jumping to the
 // farthest free day in the whole ≤10-day window.
-function findFinalMockSlotInWindow(allSlots: string[], excludedDates: Set<string> | undefined, coverage: ExamCoverage): string | null {
+function findFinalMockSlotInWindow(allSlots: string[], excludedDates: Set<string> | undefined, coverage: ExamCoverage, coverageThreshold: number): string | null {
   for (let windowSize = Math.min(FINAL_MOCK_WINDOW_DAYS, allSlots.length); windowSize <= allSlots.length; windowSize++) {
     const candidates = allSlots.slice(-windowSize).filter(d => !excludedDates?.has(d))
     if (candidates.length === 0) continue
-    return candidates.find(d => projectedCoveragePctThrough(coverage, allSlots, d) >= MIN_COVERAGE_PCT_FOR_SIMULACRO) ?? candidates[candidates.length - 1]
+    return candidates.find(d => projectedCoveragePctThrough(coverage, allSlots, d) >= coverageThreshold) ?? candidates[candidates.length - 1]
   }
   return null
 }
@@ -357,8 +376,9 @@ export async function resolveFinalMockSlot(
 
   const subjectSlug = EXAM_SUBJECT_SLUG[partialExam.subject] ?? partialExam.subject
   const coverage = await computeExamCoverage(supabase, userId, partialExam.id, subjectSlug, partialExam.date, today, { budgetSessions: partialExam.budgetSessions })
+  const coverageThreshold = await resolveCoverageThresholdForStudent(supabase, userId)
 
-  return findFinalMockSlotInWindow(allSlots, otherExamDates, coverage)
+  return findFinalMockSlotInWindow(allSlots, otherExamDates, coverage, coverageThreshold)
 }
 
 /**
@@ -460,11 +480,12 @@ export async function injectPartialExamMissions(
   // la práctica dirigida puede generarse, pero el Simulacro exige evidencia
   // medible y al menos un tema completado (decideMissionFate).
   const coverage = await computeExamCoverage(supabase, userId, partialExam.id, subjectSlug, partialExam.date, today, { budgetSessions: partialExam.budgetSessions })
+  const coverageThreshold = await resolveCoverageThresholdForStudent(supabase, userId)
   const coverageDecision: 'full' | 'partial' | 'cancelled' | null = !coverage.computable
     ? null
     : coverage.maxProjectedCoveragePct >= 100
       ? 'full'
-      : coverage.maxProjectedCoveragePct >= MIN_COVERAGE_PCT_FOR_SIMULACRO
+      : coverage.maxProjectedCoveragePct >= coverageThreshold
         ? 'partial'
         : 'cancelled'
 
@@ -484,7 +505,7 @@ export async function injectPartialExamMissions(
   // contra las fechas de otro examen.
   const finalMockSlot = options.finalMockSlot !== undefined
     ? options.finalMockSlot
-    : findFinalMockSlotInWindow(allSlots, reserved, coverage)
+    : findFinalMockSlotInWindow(allSlots, reserved, coverage, coverageThreshold)
 
   // exercise_practice usa el resto de la ventana de ≤10 días (sin la
   // restricción de los últimos 1-3) — mismo empaquetado "más cercano

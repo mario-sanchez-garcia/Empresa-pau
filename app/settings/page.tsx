@@ -14,6 +14,7 @@ import { loadProfilePreferences, saveProfilePreferences } from '@/app/lib/profil
 import { VALID_DAILY_MINUTES, dailyMinutesLabel, describeDailyPlan } from '@/app/lib/camino/dailyTimeCapacity'
 import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 import { DEFAULT_GRADE_THRESHOLD, type GradeThresholdMode } from '@/app/lib/camino/gradeThreshold'
+import { DEFAULT_SIMULACRO_COVERAGE_PCT, MAX_SIMULACRO_COVERAGE_OVERRIDE_PCT, MIN_SIMULACRO_COVERAGE_OVERRIDE_PCT } from '@/app/lib/camino/simulacroCoverageOverride'
 import { defaultTargetExamDate, isConvocatoria, type Convocatoria } from '@/app/lib/camino/examDate'
 import { getMadridDate } from '@/app/lib/camino/madridDate'
 import SidebarNav from '@/app/components/SidebarNav'
@@ -163,6 +164,9 @@ export default function SettingsPage() {
   const [gradeThreshold, setGradeThreshold] = useState<number | null>(null)
   const [subjectGradeThresholds, setSubjectGradeThresholds] = useState<Record<string, number>>({})
   const [gradeThresholdLoaded, setGradeThresholdLoaded] = useState('')
+  const [simulacroOverrideEnabled, setSimulacroOverrideEnabled] = useState(false)
+  const [simulacroOverridePct, setSimulacroOverridePct] = useState(DEFAULT_SIMULACRO_COVERAGE_PCT)
+  const [simulacroOverrideLoaded, setSimulacroOverrideLoaded] = useState('')
   // Convocatoria objetivo. Vive en Ajustes y no en el onboarding a propósito:
   // la inmensa mayoría se presenta a la ordinaria (que es el valor por defecto
   // correcto), y quien va a extraordinaria necesita poder cambiarlo sin que
@@ -210,6 +214,7 @@ export default function SettingsPage() {
               email_notifications: boolean; username?: string; custom_instructions?: string; subject_levels?: Record<string, string>
               grade_threshold_mode?: string; grade_threshold?: number | null; subject_grade_thresholds?: Record<string, number>
               pau_convocatoria?: string | null; pau_exam_date?: string | null
+              simulacro_coverage_override_enabled?: boolean; simulacro_coverage_override_pct?: number | null
             }
             setEmailNotifications(json.email_notifications ?? true)
             serverDisplayName = json.username ?? ''
@@ -252,6 +257,11 @@ export default function SettingsPage() {
             setPauConvocatoria(loadedConvocatoria)
             setPauExamDate(loadedExamDate)
             setPauLoaded(JSON.stringify({ convocatoria: loadedConvocatoria, examDate: loadedExamDate }))
+            const loadedOverrideEnabled = json.simulacro_coverage_override_enabled === true
+            const loadedOverridePct = typeof json.simulacro_coverage_override_pct === 'number' ? json.simulacro_coverage_override_pct : DEFAULT_SIMULACRO_COVERAGE_PCT
+            setSimulacroOverrideEnabled(loadedOverrideEnabled)
+            setSimulacroOverridePct(loadedOverridePct)
+            setSimulacroOverrideLoaded(JSON.stringify({ enabled: loadedOverrideEnabled, pct: loadedOverridePct }))
           }
         } catch { /* silent */ }
         try {
@@ -400,7 +410,8 @@ export default function SettingsPage() {
       const instructionsChanged = customInstructions.trim() !== customInstructionsLoaded.trim()
       const gradeThresholdChanged = JSON.stringify({ mode: gradeThresholdMode, general: gradeThreshold, bySubject: subjectGradeThresholds }) !== gradeThresholdLoaded
       const pauChanged = JSON.stringify({ convocatoria: pauConvocatoria, examDate: pauExamDate }) !== pauLoaded
-      if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged || pauChanged)) {
+      const simulacroOverrideChanged = JSON.stringify({ enabled: simulacroOverrideEnabled, pct: simulacroOverridePct }) !== simulacroOverrideLoaded
+      if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged || pauChanged || simulacroOverrideChanged)) {
         const res = await fetch('/api/profile', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -416,6 +427,10 @@ export default function SettingsPage() {
               pau_convocatoria: pauConvocatoria,
               pau_exam_date: pauExamDate || null,
             } : {}),
+            ...(simulacroOverrideChanged ? {
+              simulacro_coverage_override_enabled: simulacroOverrideEnabled,
+              simulacro_coverage_override_pct: simulacroOverridePct,
+            } : {}),
           }),
         })
         if (res.ok && instructionsChanged) setCustomInstructionsLoaded(customInstructions.trim())
@@ -424,6 +439,9 @@ export default function SettingsPage() {
         }
         if (res.ok && pauChanged) {
           setPauLoaded(JSON.stringify({ convocatoria: pauConvocatoria, examDate: pauExamDate }))
+        }
+        if (res.ok && simulacroOverrideChanged) {
+          setSimulacroOverrideLoaded(JSON.stringify({ enabled: simulacroOverrideEnabled, pct: simulacroOverridePct }))
         }
       }
       if (token && onboarding?.completedAt) {
@@ -467,7 +485,7 @@ export default function SettingsPage() {
         // ahora, no mañana. Sin esto, el throttle diario de la ruta se lo
         // saltaría en silencio.
         setCaminoPrefsStatus(await recalculateCamino(token))
-      } else if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged)) {
+      } else if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged || simulacroOverrideChanged)) {
         await fetch('/api/camino/ensure-calendar', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -987,6 +1005,37 @@ export default function SettingsPage() {
               </div>
             )}
             <Hint>Cuando saques menos de esta nota en un simulacro, examen o curso, Kairo te sugerirá repetirlo — tú decides si aceptar.</Hint>
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <Toggle
+              label="Generar Simulacro aunque no haya completado el Curso"
+              description="Por defecto, Kairo nunca genera el Simulacro de un examen si no llegas (o no puedes llegar a tiempo) al umbral mínimo de Curso completado. Actívalo si prefieres hacer el Simulacro igualmente."
+              checked={simulacroOverrideEnabled}
+              onChange={setSimulacroOverrideEnabled}
+            />
+            {simulacroOverrideEnabled && (
+              <div style={{ marginTop: 14, padding: '14px 16px', borderRadius: 10, border: '1px solid var(--clay-border)', background: 'var(--clay-bg)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--clay-text)' }}>
+                    Umbral mínimo de Curso completado
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 900, color: 'var(--clay-accent-text)' }}>{simulacroOverridePct}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={MIN_SIMULACRO_COVERAGE_OVERRIDE_PCT}
+                  max={MAX_SIMULACRO_COVERAGE_OVERRIDE_PCT}
+                  step={5}
+                  value={simulacroOverridePct}
+                  onChange={e => setSimulacroOverridePct(Number(e.target.value))}
+                  style={{ width: '100%', accentColor: 'var(--clay-accent)' }}
+                />
+                <Hint>
+                  Si hay que saltarse temario por falta de tiempo, Kairo generará el Simulacro en cuanto llegues a este porcentaje de misiones completadas del bloque, en vez de exigir el {DEFAULT_SIMULACRO_COVERAGE_PCT}% por defecto.
+                </Hint>
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>

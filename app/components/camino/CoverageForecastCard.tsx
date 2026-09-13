@@ -120,6 +120,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
   const withWork = forecast.subjects.filter(row => row.scheduledMinutes + row.pendingMinutes > 0)
 
   const muted = { fontSize: 12, lineHeight: 1.5, color: 'var(--clay-text-muted)' }
+  const prose = { ...muted, lineHeight: 1.65, margin: 0 }
   const num = { fontVariantNumeric: 'tabular-nums' as const, fontWeight: 800, color: 'var(--clay-text)' }
 
   return (
@@ -173,7 +174,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
         style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr' }}
       >
         <div style={{ overflow: 'hidden', visibility: open ? 'visible' : 'hidden' }}>
-          <div style={{ padding: '0 16px 16px', display: 'grid', gap: 14 }}>
+          <div style={{ padding: '0 16px 18px', display: 'grid', gap: 16 }}>
             {known === 0 ? (
               <p style={{ ...muted, margin: 0 }}>
                 Todavía no hay trabajo registrado en tu Camino, así que no hay nada que estimar.
@@ -216,7 +217,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
                 </div>
 
                 {withWork.length > 0 && (
-                  <div style={{ display: 'grid', gap: 6, borderTop: '1px solid var(--clay-border)', paddingTop: 12 }}>
+                  <div style={{ display: 'grid', gap: 9, borderTop: '1px solid var(--clay-border)', paddingTop: 14 }}>
                     {withWork.map(row => (
                       <div key={row.subject} style={{ display: 'flex', alignItems: 'baseline', gap: 10, fontSize: 12.5 }}>
                         <span style={{ flex: 1, minWidth: 0, fontWeight: 700 }}>
@@ -237,18 +238,18 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
               </>
             )}
 
-            <div style={{ display: 'grid', gap: 6, borderTop: '1px solid var(--clay-border)', paddingTop: 12 }}>
-              <p style={{ ...muted, margin: 0 }}>
+            <div style={{ display: 'grid', gap: 10, borderTop: '1px solid var(--clay-border)', paddingTop: 14 }}>
+              <p style={prose}>
                 Calculado con {forecast.dailyMinutes} min al día y {forecast.weeklyStudyDays ?? 5} días por
                 semana hasta el {examDateLabel(forecast.examDate)}. Respeta festivos, tus eventos y el plazo
                 de cada parcial, y reserva {hours(forecast.finalReviewCapacityMinutes)} para el repaso final.
               </p>
-              <p style={{ ...muted, margin: 0 }}>
+              <p style={prose}>
                 Es una estimación sobre el trabajo ya registrado: no cuenta tu Google Calendar, ausencias
                 futuras ni repasos que aún no existen. No predice tu nota.
               </p>
               {incomplete && (
-                <p style={{ ...muted, margin: 0, color: 'var(--clay-warn)' }}>
+                <p style={{ ...prose, color: 'var(--clay-warn)' }}>
                   Faltan datos de {forecast.missingSubjects.map(name => SUBJECT_LABELS[name] ?? name).join(', ')},
                   así que la previsión se queda corta.
                 </p>

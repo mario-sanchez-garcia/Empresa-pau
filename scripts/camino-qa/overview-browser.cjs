@@ -4,6 +4,9 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
 const ts=require('typescript'), webpack=require('next/dist/compiled/webpack/webpack').webpack
 const {chromium}=require('@playwright/test'),assert=require('node:assert/strict')
 const {runtime}=require('./runtime.cjs'),root=path.resolve(__dirname,'../..')
+// Tokens clay del tema claro: el bundle no incluye globals.css, y sin ellos la
+// captura de verificacion no representa lo que ve el alumno.
+const CLAY_TOKENS=":root{--clay-bg:#e9eefb;--clay-surface:#eef3fc;--clay-surface-raised:#f6f9fe;--clay-shadow-dark:rgba(37, 99, 235, 0.22);--clay-shadow-light:rgba(255, 255, 255, 0.95);--clay-accent:#2563eb;--clay-accent-soft:rgba(37, 99, 235, 0.12);--clay-accent-text:#1d4ed8;--clay-text:#0d1424;--clay-text-muted:#55627a;--clay-border:rgba(37, 99, 235, 0.14);--clay-accent-deep:#1d4ed8;--clay-surface-deep:#c7d6f0;--clay-shadow-shelf:rgba(37, 99, 235, 0.10);--clay-shadow-elevate:rgba(37, 99, 235, 0.18);--clay-on-accent:#ffffff;--clay-warn:#b45309;--clay-warn-soft:rgba(180, 83, 9, 0.12);--clay-warn-deep:#92400e;}body{background:var(--clay-bg);font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:var(--clay-text)}"+'[data-kairo-clay-theme="dark"]{--clay-bg:#10162a;--clay-surface:#171e38;--clay-surface-raised:#1c2440;--clay-shadow-dark:rgba(0, 0, 0, 0.55);--clay-shadow-light:rgba(96, 165, 250, 0.28);--clay-accent:#60a5fa;--clay-accent-soft:rgba(96, 165, 250, 0.16);--clay-accent-text:#60a5fa;--clay-text:#eef2fb;--clay-text-muted:#9aa7c4;--clay-border:rgba(96, 165, 250, 0.20);--clay-accent-deep:#1e3a8a;--clay-surface-deep:#060912;--clay-shadow-shelf:rgba(0, 0, 0, 0.35);--clay-shadow-elevate:rgba(0, 0, 0, 0.55);--clay-on-accent:#0b1220;--clay-warn:#fbbf24;--clay-warn-soft:rgba(251, 191, 36, 0.16);--clay-warn-deep:#78350f;}'
 async function main(){
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'kairo-overview-'))
  fs.writeFileSync(path.join(temp,'loader.cjs'),`const ts=require(${JSON.stringify(require.resolve('typescript'))});module.exports=function(source){return ts.transpileModule(source,{compilerOptions:{jsx:ts.JsxEmit.ReactJSX,module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText}`)
@@ -20,7 +23,7 @@ async function main(){
  `)
  fs.writeFileSync(path.join(temp,'entry.js'),`import React from 'react';import{createRoot}from'react-dom/client';import Banner from ${JSON.stringify(path.join(root,'app/components/camino/PlanNoticeBanner.tsx'))};createRoot(document.getElementById('root')).render(React.createElement(Banner));`)
  await new Promise((resolve,reject)=>webpack({mode:'development',devtool:false,entry:path.join(temp,'entry.js'),output:{path:temp,filename:'bundle.js'},resolve:{extensions:['.tsx','.ts','.js'],modules:[path.join(root,'node_modules'),'node_modules'],alias:{'@/app/lib/supabase$':path.join(temp,'auth.js'),'@':root}},module:{rules:[{test:/\.tsx?$/,exclude:/node_modules/,use:path.join(temp,'loader.cjs')}]},infrastructureLogging:{level:'error'}},(error,stats)=>error||stats.hasErrors()?reject(error||new Error(stats.toString({all:false,errors:true}))):resolve()))
- const server=http.createServer((req,res)=>{res.setHeader('Content-Type',req.url==='/bundle.js'?'text/javascript; charset=utf-8':'text/html; charset=utf-8');res.end(req.url==='/bundle.js'?fs.readFileSync(path.join(temp,'bundle.js')):'<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><body style="font-family:Arial;margin:20px"><main id="root"></main><script src="/bundle.js"></script></body></html>')})
+ const server=http.createServer((req,res)=>{res.setHeader('Content-Type',req.url==='/bundle.js'?'text/javascript; charset=utf-8':'text/html; charset=utf-8');res.end(req.url==='/bundle.js'?fs.readFileSync(path.join(temp,'bundle.js')):'<html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+CLAY_TOKENS+'</style><body style="margin:16px"><main id="root"></main><script src="/bundle.js"></script></body></html>')})
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve))
  const browser=await chromium.launch({channel:'chrome',headless:true})
  try{
@@ -49,16 +52,34 @@ async function main(){
  await expect(page.getByText('Tu plan usa 2 días a la semana')).toBeVisible()
  delayA=true;await page.evaluate(()=>{window.dispatchEvent(new Event('camino:updated'));window.switchAccount('b')})
  await expect(page.getByText('Tu plan usa 2 días a la semana')).toHaveCount(0)
- await expect(page.getByRole('heading',{name:'¿Qué cabe antes de tu PAU?'})).toBeVisible()
+ await expect(page.getByRole('button',{name:/¿Te cabe todo antes de la PAU\?/})).toBeVisible()
  mode='error';await page.evaluate(()=>window.dispatchEvent(new Event('camino:updated')))
  await expect(page.getByRole('button',{name:'Reintentar'})).toBeVisible()
  mode='clear';await page.getByRole('button',{name:'Reintentar'}).click()
- await expect(page.getByRole('heading',{name:'¿Qué cabe antes de tu PAU?'})).toBeVisible()
- await page.getByText('Ver reparto por asignatura y supuestos').click()
+ // La previsión abre cerrada: la pregunta es el disparador y ya trae respuesta.
+ const trigger=page.getByRole('button',{name:/¿Te cabe todo antes de la PAU\?/})
+ await expect(trigger).toBeVisible()
+ await expect(trigger).toHaveAttribute('aria-expanded','false')
+ await expect(page.getByText('Capacidad hasta la PAU')).not.toBeVisible()
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true)
- const screenshot=path.join(temp,'overview-mobile.png');await page.screenshot({path:screenshot,fullPage:true})
+ await trigger.click()
+ await expect(trigger).toHaveAttribute('aria-expanded','true')
+ await expect(page.getByText('Capacidad hasta la PAU')).toBeVisible()
+ await expect(page.getByText('No predice tu nota.')).toBeVisible()
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true)
+ // Cerrada es el estado por defecto y el que mas se ve: se captura tambien.
+ const shots={}
+ await trigger.click();await expect(trigger).toHaveAttribute('aria-expanded','false')
+ shots.collapsed=path.join(temp,'forecast-collapsed.png');await page.screenshot({path:shots.collapsed,fullPage:true})
+ await trigger.click();await expect(trigger).toHaveAttribute('aria-expanded','true')
+ shots.expanded=path.join(temp,'forecast-expanded.png');await page.screenshot({path:shots.expanded,fullPage:true})
+ // El tema oscuro usa otros tokens: el aviso ambar cambia para no fallar AA.
+ await page.evaluate(()=>document.documentElement.setAttribute('data-kairo-clay-theme','dark'))
+ shots.dark=path.join(temp,'forecast-dark.png');await page.screenshot({path:shots.dark,fullPage:true})
+ await page.evaluate(()=>document.documentElement.removeAttribute('data-kairo-clay-theme'))
+ const screenshot=shots.expanded
  assert.deepEqual(errors,[])
- console.log(JSON.stringify({passed:['reload','resolve-cap','resolve-protected-conflict','account-switch-late-response','retry','mobile-no-overflow'],screenshot}))
+ console.log(JSON.stringify({shots,passed:['reload','resolve-cap','resolve-protected-conflict','account-switch-late-response','retry','forecast-collapsed-by-default','forecast-expands','mobile-no-overflow'],screenshot}))
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
 }
 main().catch(error=>{console.error(error);process.exitCode=1})

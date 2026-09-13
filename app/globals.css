@@ -122,6 +122,11 @@
   --clay-shadow-shelf: rgba(37, 99, 235, 0.10);
   --clay-shadow-elevate: rgba(37, 99, 235, 0.18);
   --clay-on-accent: #ffffff;
+  /* Semantico de aviso. El sistema no lo tenia y los avisos del plan
+     hardcodeaban ambares que se rompen al cambiar de tema. */
+  --clay-warn: #b45309;
+  --clay-warn-soft: rgba(180, 83, 9, 0.12);
+  --clay-warn-deep: #92400e;
 }
 
 [data-kairo-clay-theme="dark"] {
@@ -149,6 +154,10 @@
   /* #60a5fa (acento claro) con texto blanco encima da un contraste de 2.5:1
      — falla AA. Con relleno sólido de acento, el texto pasa a oscuro. */
   --clay-on-accent: #0b1220;
+  /* Ambar claro: #b45309 sobre #171e38 se hunde y falla AA. */
+  --clay-warn: #fbbf24;
+  --clay-warn-soft: rgba(251, 191, 36, 0.16);
+  --clay-warn-deep: #78350f;
 }
 
 [data-kairo-clay-theme="color"] {
@@ -168,6 +177,9 @@
   --clay-shadow-shelf: rgba(124, 58, 237, 0.10);
   --clay-shadow-elevate: rgba(124, 58, 237, 0.18);
   --clay-on-accent: #ffffff;
+  --clay-warn: #b45309;
+  --clay-warn-soft: rgba(180, 83, 9, 0.12);
+  --clay-warn-deep: #92400e;
 }
 
 @keyframes clay-progress-bounce {
@@ -1434,4 +1446,17 @@ button:active:not(:disabled),
    "esto está cargando" sin animar nada. */
 @media (prefers-reduced-motion: reduce) {
   .kairo-skeleton::after { display: none; }
+}
+
+.forecast-panel {
+  transition: grid-template-rows 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.forecast-panel > * { transition: visibility 260ms; }
+.forecast-chevron { transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1); }
+.forecast-trigger:focus-visible {
+  outline: 2px solid var(--clay-accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .forecast-panel, .forecast-panel > *, .forecast-chevron { transition: none; }
 }

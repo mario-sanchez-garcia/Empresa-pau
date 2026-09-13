@@ -2733,8 +2733,11 @@ export default function CaminoCalendarClient() {
               misiones y ninguna explicación (ver UnscheduledWorkBanner). */}
           <div style={{ order: -2 }}><UnscheduledWorkBanner /></div>
           {/* Recorte de disponibilidad por acceso y conflictos protegidos: el
-              servidor ya los calculaba, faltaba decirlos. */}
-          <div style={{ order: -2 }}><PlanNoticeBanner /></div>
+              servidor ya los calculaba, faltaba decirlos. Movido al final de
+              la columna (order alto, el resto del contenido usa el order:0
+              por defecto o valores negativos para ir antes) -- mismo bloque,
+              mismo componente, solo cambia su posición vertical. */}
+          <div style={{ order: 999 }}><PlanNoticeBanner /></div>
 
           {/* ── OBJETIVO DE ORIENTACIÓN ──
               Se quita de esta pantalla (rediseño clay, fase 1 del hub) — deja

@@ -683,6 +683,7 @@ function Dashboard({ m }: { m: AdminMetrics }) {
 // ─── Page ────────────────────────────────────────────────────────────────────────
 export default function AdminPage() {
   const [state, setState] = useState<PageState>({ status: 'loading' })
+  const [unreadContactCount, setUnreadContactCount] = useState(0)
 
   async function load(cancelled?: { current: boolean }) {
     const { data: { session } } = await supabase.auth.getSession()
@@ -698,6 +699,11 @@ export default function AdminPage() {
     if (!res.ok) { setState({ status: 'error', message: `HTTP ${res.status}` }); return }
     const metrics: AdminMetrics = await res.json()
     setState({ status: 'loaded', metrics })
+
+    fetch('/api/admin/contact-messages/unread-count', { headers: { Authorization: `Bearer ${session.access_token}` } })
+      .then(r => r.ok ? r.json() : { unreadCount: 0 })
+      .then((c: { unreadCount?: number }) => { if (!cancelled?.current) setUnreadContactCount(c.unreadCount ?? 0) })
+      .catch(() => {})
   }
 
   useEffect(() => {
@@ -758,9 +764,18 @@ export default function AdminPage() {
             </Link>
             <Link
               href="/admin/contact-messages"
-              style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 700, textDecoration: 'none', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 7, padding: '5px 12px' }}
+              style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 700, textDecoration: 'none', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 7, padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
             >
               Mensajes de contacto
+              {unreadContactCount > 0 && (
+                <span style={{
+                  minWidth: 16, height: 16, padding: '0 4px', borderRadius: 999,
+                  background: '#ef4444', color: '#fff',
+                  fontSize: 9, fontWeight: 800, lineHeight: '16px', textAlign: 'center',
+                }}>
+                  {unreadContactCount > 99 ? '99+' : unreadContactCount}
+                </span>
+              )}
             </Link>
             {updatedAt && (
               <span style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 500 }}>

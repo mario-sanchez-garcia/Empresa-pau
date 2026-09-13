@@ -192,8 +192,8 @@ export async function applyCalendarPersonalization(
     })
 
     if (alreadyCurrent && !options.force && !rows.some(row => row.status === 'unscheduled')) {
-      const { conflicts } = await loadCalendarDiagnostics(userId, supabase, context)
-      if (!conflicts.some(row => row.scheduled && row.automatic))
+      const { conflicts, requiresDurationRefresh } = await loadCalendarDiagnostics(userId, supabase, context)
+      if (requiresDurationRefresh.length === 0 && !conflicts.some(row => row.scheduled && row.automatic))
         return { applied: false, reason: 'already_current', updatedRows: 0, preferenceHash }
     }
 

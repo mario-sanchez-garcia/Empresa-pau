@@ -22,7 +22,7 @@ export type ForecastEvent = {
   start_time: string | null; end_time: string | null
 }
 type Range = [number, number]
-type Day = { date: string; free: Range[]; budget: number; capacity: number; usedSlots: number }
+type Day = { date: string; free: Range[]; budget: number; capacity: number }
 type Work = PlacementRow & { title?: string | null; subject: string; minutes: number; metadata: Record<string, unknown> | null; notBefore?: string | null }
 export type SubjectForecast = {
   subject: string; scheduledMinutes: number; pendingMinutes: number; projectedPendingMinutes: number;
@@ -103,7 +103,7 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
       free = subtract(free, toMinutes(row.start_time!), toMinutes(row.end_time!))
     const spent = completed.reduce((sum, row) => sum + estimatedMinutesForMission(row), 0)
     const capacity = Math.max(0, Math.min((context.dailyMinutes ?? 60) - spent, length(free)))
-    return { date, free, budget: capacity, capacity, usedSlots: 0 }
+    return { date, free, budget: capacity, capacity }
   })
   const dayByDate = new Map(days.map(day => [day.date, day]))
   const window = { dates, examDate: context.examDate, planningCutoff: context.planningCutoff, capacityPerDay: Infinity }
@@ -132,7 +132,11 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
     const isScheduled = ['pending', 'postponed'].includes(row.status) && row.scheduled_date >= context.today
     const duration = minutesBetweenTimes(row.start_time, row.end_time)
     const type = row.mission_type ?? (typeof row.metadata?.mission_type === 'string' ? row.metadata.mission_type : 'concept')
-    const estimated = isScheduled && duration != null ? { minutes: duration, estimated: false } : placementDuration(type, row.metadata)
+    const contentEstimate = placementDuration(type, row.metadata)
+    // El horario reservado mide ocupación, no el tiempo real de aprendizaje.
+    // Si se obtuvo de una referencia por tipo, sigue siendo una estimación.
+    const estimated = isScheduled && duration != null
+      ? { minutes: duration, estimated: contentEstimate.estimated } : contentEstimate
     const work: Work = { ...asPlacement(row), missionType: type, minutes: estimated.minutes, subject: row.subject, title: row.title, metadata: row.metadata }
     const stats = subject(row.subject)
     if (estimated.estimated) stats.estimatedItems++
@@ -144,7 +148,6 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
       const automatic = canRepositionAutomatically(row)
       const fits = day && eligible.includes(row.scheduled_date)
         && consume(day, work.minutes, row.start_time, row.end_time)
-      if (day && automatic) day.usedSlots++
       if (!fits) {
         const reason: ForecastRiskReason = row.scheduled_date >= context.examDate ? 'after_exam'
           : row.source === 'partial' && work.deadlineDate && row.scheduled_date >= work.deadlineDate ? 'partial_deadline'
@@ -183,7 +186,6 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
       if (work.notBefore && date < work.notBefore.slice(0, 10)) continue
       const minutes = minutesForPlacement(work.missionType, work.metadata)
       if (!consume(day, minutes)) continue
-      day.usedSlots++
       placedMinutes = minutes
       break
     }

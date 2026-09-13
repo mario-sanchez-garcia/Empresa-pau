@@ -175,9 +175,9 @@ const JOURNEY_SUBJECTS=['matematicas_ii','fisica','lengua','historia_espana','in
 // que inventarlas aqui no las haria coincidir con nada.
 const JOURNEY_PUBLISHED=['ingles','historia_filosofia','economia','biologia'].flatMap(subject=>
  load('app/lib/camino/caminoCurriculumPlan.ts').CAMINO_CURRICULUM_TOPICS
-  .filter(topic=>topic.subject===subject&&topic.v2SortOrder).slice(0,3)
+  .filter(topic=>topic.subject===subject&&topic.v2SortOrder)
   .map(topic=>({subject,block_key:topic.blockTitle,block_slug:topic.blockSlug,sort_order:topic.v2SortOrder,title:topic.title,review_status:'published'})))
-for (const [today, count, minutes] of [['2026-09-14',6,90],['2027-01-11',4,60],['2027-05-31',6,90],['2027-06-05',4,60],['2026-09-14',10,180]]) {
+for (const [today, count, minutes] of [['2026-09-14',6,90],['2027-01-11',4,60],['2027-05-31',6,90],['2027-06-05',4,60],['2026-09-14',10,180],['2027-05-31',9,180]]) {
  test(`generate → personalize → read → forecast: ${today}, ${count} subjects`,async()=>{
   const user='journey', examDate='2027-06-07'
   const subjects=JOURNEY_SUBJECTS.slice(0,count)
@@ -397,4 +397,96 @@ test('las asignaturas elegibles, las generables y las que acepta la cola son la 
  const bloque=fs.readFileSync(path.join(dir,ultima),'utf8').split('add constraint user_learning_queue_subject_check').pop()
  const permitidas=[...bloque.slice(0,bloque.indexOf(')')).matchAll(/'([a-z_]+)'/g)].map(m=>m[1]).sort()
  assert.deepEqual(permitidas,elegibles,`${ultima} no acepta las mismas asignaturas que el generador`)
+})
+
+
+for (const occupiedDays of [1,30]) test(`ensure fills unused minutes even with ${occupiedDays} occupied future days`,async()=>{
+ const journey=runtime('2027-01-11'),user='fill'
+ const context=journey('app/lib/camino/planWindow.ts').buildStudentPlanContext({today:'2027-01-11',examDate:'2027-06-07',dailyMinutes:180,weeklyStudyDays:6})
+ const dates=journey('app/lib/camino/planWindow.ts').planningDates(context).slice(0,occupiedDays)
+ const calendar=dates.map((date,i)=>({...row(`existing-${i}`,{scheduled_date:date,queue_id:`existing-q${i}`,end_time:'16:20',metadata:{content_estimated_minutes:20,duration_model:'content_v1'}}),user_id:user,v2_sort_order:100+i}))
+ const work=Array.from({length:8},(_,i)=>({...q(`new-${i}`,20,{metadata:{mission_type:'concept',content_estimated_minutes:20}}),user_id:user,title:`Tema ${i}`,v2_sort_order:i+1,subject_position:i}))
+ const db=database({perfiles:[{id:user,subjects:['fisica'],pau_exam_date:context.examDate,student_exams:[]}],
+  user_entitlements:[{user_id:user,status:'active',plan_id:'premium'}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:6}}],
+  camino_calendar:calendar,user_learning_queue:[...calendar.map(r=>({...q(r.queue_id,20,{queue_status:'scheduled'}),user_id:user,v2_sort_order:r.v2_sort_order})),...work]})
+ const result=await journey('app/lib/ensureCaminoCalendar.ts').ensureCaminoCalendar(user,db)
+ assert.equal(result.ok,true)
+ const monday=db.tables.camino_calendar.filter(r=>r.scheduled_date===dates[0]&&r.status==='pending')
+ assert.equal(monday.length,9,'one existing 20-minute mission must leave room for eight more')
+ assert.equal(monday.reduce((sum,r)=>sum+journey('app/lib/camino/missionDuration.ts').estimatedMinutesForMission(r),0),180)
+ monday.sort((a,b)=>a.start_time.localeCompare(b.start_time))
+ for(let i=1;i<monday.length;i++) assert.ok(monday[i].start_time>=monday[i-1].end_time)
+ assert.equal(new Set(monday.map(r=>r.queue_id)).size,9)
+ assert.equal(db.tables.user_learning_queue.filter(r=>r.queue_status==='pending').length,0)
+})
+
+for (const damage of ['overlap','budget']) test(`personalization repairs same-hash ${damage} without force and preserves manual work`,async()=>{
+ const user='repair', context={...ctx,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
+ const db=database({perfiles:[{id:user,pau_exam_date:context.examDate}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:7}}],
+  camino_calendar:[row('a'),row('b'),row('z-manual',{locked:true,scheduled_date:'2027-01-12'})].map(r=>({...r,user_id:user,metadata:{content_estimated_minutes:40}}))})
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ assert.equal((await personalize(user,db,{planContext:context})).reason,'applied')
+ const manual=JSON.stringify(db.tables.camino_calendar.find(r=>r.locked))
+ const [a,b]=['a','b'].map(id=>db.tables.camino_calendar.find(r=>r.id===id))
+ b.scheduled_date=a.scheduled_date
+ b.start_time=damage==='overlap'?a.start_time:a.end_time
+ b.end_time=damage==='overlap'?a.end_time:'18:00'
+ const result=await personalize(user,db,{planContext:context})
+ assert.equal(result.reason,'applied','matching preferences cannot conceal invalid placements')
+ assert.equal(forecast(context,db.tables.camino_calendar,[],[],[],{withRemedy:false}).scheduledAtRiskMinutes,0)
+ assert.equal(JSON.stringify(db.tables.camino_calendar.find(r=>r.locked)),manual)
+ assert.equal((await personalize(user,db,{planContext:context})).reason,'already_current')
+})
+
+test('forecast recommendations never exceed beta access and an expired partial is not an annual deficit',()=>{
+ const result=forecast({...long,accessMaxStudyDaysPerWeek:6},[],Array.from({length:40},(_,i)=>q(`access-${i}`,30)),[])
+ assert.ok(result.remedy.combinedChange)
+ assert.ok(result.remedy.combinedChange.weeklyStudyDays<=6)
+ const expired=forecast({...long,today:'2027-01-11',planningCutoff:'2027-05-31',dailyMinutes:180},[
+  row('expired',{status:'unscheduled',source:'partial',mission_type:'partial_practice',metadata:{partial_exam_date:'2027-01-10'}})
+ ],[],[])
+ assert.equal(expired.riskItems[0].reason,'partial_deadline')
+ assert.equal(expired.remedy.deficitMinutes,0)
+ assert.equal(expired.remedy.replanRecommended,false)
+ assert.equal(expired.remedy.combinedChange,null)
+})
+
+test('scheduled reference durations remain labelled as estimates',()=>{
+ const result=forecast(ctx,[row('reference',{end_time:'16:25',metadata:{duration_model:'content_v1',duration_source:'reference',content_estimated_minutes:25}})],[],[])
+ assert.equal(result.scheduledMinutes,25)
+ assert.equal(result.estimatedItems,1,'a scheduled slot is not an empirically measured learning duration')
+})
+
+
+test('same-day ensure upgrades legacy durations even if the preference hash still matches',async()=>{
+ const user='legacy',db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',subjects:[]}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:2}}],
+  camino_ensure_log:[{user_id:user,last_ensured_day:'2027-01-11'}],
+  camino_calendar:[{...row('legacy'),user_id:user}]})
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ await personalize(user,db)
+ const saved=db.tables.camino_calendar[0]
+ delete saved.metadata.duration_model;delete saved.metadata.content_estimated_minutes
+ saved.metadata.estimated_minutes=55
+ saved.start_time='16:00';saved.end_time='16:55'
+ const api=runtime('2027-01-11',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'test'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/ensure-calendar/route.ts')
+ const response=await api.POST({json:async()=>({})}),body=await response.json()
+ assert.equal(response.status,200);assert.equal(body.skipped,undefined)
+ assert.equal(saved.metadata.duration_model,'content_v1')
+ assert.equal(load('app/lib/camino/missionDuration.ts').estimatedMinutesForMission(saved),25)
+ const again=await api.POST({json:async()=>({})})
+ assert.equal((await again.json()).skipped,'already_ensured_today')
+})
+
+
+test('ensure cannot report a successful empty plan when reading the pending queue fails',async()=>{
+ const db=database({perfiles:[{id:'u',subjects:['fisica'],pau_exam_date:'2027-06-07'}],
+  billing_events:[{user_id:'u',event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:2}}]})
+ db.failNext('user_learning_queue','select')
+ await assert.rejects(load('app/lib/ensureCaminoCalendar.ts').ensureCaminoCalendar('u',db),/injected_write_failure/)
 })

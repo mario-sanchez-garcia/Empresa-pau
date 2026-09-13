@@ -35,12 +35,28 @@ async function main(){
   {id:'a',subject:'fisica',status:'pending',source:'algorithm',locked:true,mission_type:'concept',scheduled_date:context.today,start_time:'16:00',end_time:'17:00'},
   {id:'b',subject:'fisica',status:'pending',source:'algorithm',locked:true,mission_type:'concept',scheduled_date:context.today,start_time:'17:00',end_time:'17:30'},
  ],[],[],['fisica'])
+ const build=load('app/lib/camino/coverageForecast.ts').buildCoverageForecast
+ const replanForecast=build(context,[
+  {id:'auto-a',title:'Física A',subject:'fisica',status:'pending',source:'algorithm',locked:false,mission_type:'concept',scheduled_date:context.today,start_time:'16:00',end_time:'16:25'},
+  {id:'auto-b',title:'Física B',subject:'fisica',status:'pending',source:'algorithm',locked:false,mission_type:'concept',scheduled_date:context.today,start_time:'16:10',end_time:'16:35'},
+ ],[],[],['fisica'])
+ const combinedContext={...load('app/lib/camino/planWindow.ts').buildStudentPlanContext({today:'2027-05-11',examDate:'2027-06-07',dailyMinutes:30,weeklyStudyDays:3,holidays:new Set()}),accessMaxStudyDaysPerWeek:6}
+ const combinedForecast=build(combinedContext,[],Array.from({length:40},(_,i)=>({id:'q'+i,subject:'fisica',queue_status:'pending',metadata:{content_estimated_minutes:30}})),[])
+ const expiredForecast=build(context,[{id:'expired',title:'Parcial vencido',subject:'fisica',status:'unscheduled',source:'partial',mission_type:'partial_practice',scheduled_date:'2027-01-09',metadata:{partial_exam_date:'2027-01-10'}}],[],[])
  let mode='cap', delayA=false
+ let replanStatus=409, replanRequests=0
+ await page.route('**/api/camino/ensure-calendar',async route=>{
+  replanRequests++
+  assert.deepEqual(route.request().postDataJSON(),{force:true})
+  assert.equal(route.request().headers().authorization,'Bearer b')
+  if(replanStatus===200)mode='clear'
+  await route.fulfill({status:replanStatus,json:{ok:replanStatus===200}})
+ })
  await page.route('**/api/camino/plan-overview',async route=>{
   const userId=route.request().headers().authorization.split(' ')[1]
   if(delayA&&userId==='a')await new Promise(resolve=>setTimeout(resolve,200))
   if(mode==='error')return route.fulfill({status:503,json:{error:'test'}})
-  await route.fulfill({json:{userId,forecast:mode==='forecast-conflict'?conflictForecast:forecast,notices:{availability:mode==='cap'&&userId==='a'?{requestedWeeklyStudyDays:7,effectiveWeeklyStudyDays:2,accessMaxStudyDaysPerWeek:2,accessLabel:'Free'}:null,protectedConflicts:mode==='conflict'?['locked']:[],misplaced:[]}}}).catch(()=>{})
+  await route.fulfill({json:{userId,forecast:mode==='forecast-conflict'?conflictForecast:mode==='replan'?replanForecast:mode==='combined'?combinedForecast:mode==='expired'?expiredForecast:forecast,notices:{availability:mode==='cap'&&userId==='a'?{requestedWeeklyStudyDays:7,effectiveWeeklyStudyDays:2,accessMaxStudyDaysPerWeek:2,accessLabel:'Free'}:null,protectedConflicts:mode==='conflict'?['locked']:[],misplaced:[]}}}).catch(()=>{})
  })
  const {expect}=require('@playwright/test')
  await page.goto(`http://127.0.0.1:${server.address().port}`)
@@ -90,6 +106,28 @@ async function main(){
  }
  mode='clear';await page.evaluate(()=>window.dispatchEvent(new Event('camino:updated')))
  await expect(trigger).toContainText('Lo registrado cabe')
+ // Probar las recomendaciones y la recuperación del botón con transporte simulado.
+ mode='combined';await page.evaluate(()=>window.dispatchEvent(new Event('camino:updated')))
+ await expect(page.getByText(/hay que cambiar ambas opciones/)).toBeVisible()
+ assert.ok(combinedForecast.remedy.combinedChange.weeklyStudyDays<=6)
+ mode='expired';await page.evaluate(()=>window.dispatchEvent(new Event('camino:updated')))
+ await page.getByText(/Ver las 1 actividades sin encajar/).click()
+ await expect(page.getByText(/Fuera del plazo del parcial/)).toBeVisible()
+ await expect(page.getByRole('button',{name:'Recolocar mi plan'})).toHaveCount(0)
+ await expect(page.getByText(/No cabe ni estudiando/)).toHaveCount(0)
+ mode='replan';await page.evaluate(()=>window.dispatchEvent(new Event('camino:updated')))
+ const replanButton=page.getByRole('button',{name:'Recolocar mi plan'})
+ await expect(replanButton).toBeVisible()
+ await replanButton.click()
+ await expect(page.getByText(/Tu Camino se está actualizando/)).toBeVisible()
+ await expect(replanButton).toBeEnabled()
+ replanStatus=200
+ await replanButton.click()
+ await expect(trigger).toContainText('Lo registrado cabe')
+ assert.equal(replanRequests,2)
+ await expect(page.getByText(/Tu Camino se está actualizando/)).toHaveCount(0)
+ await expect(trigger).toHaveAttribute('aria-expanded','false')
+ await trigger.click()
  // Cerrada es el estado por defecto y el que mas se ve: se captura tambien.
  const shots={}
  await trigger.click();await expect(trigger).toHaveAttribute('aria-expanded','false')
@@ -102,7 +140,7 @@ async function main(){
  await page.evaluate(()=>document.documentElement.removeAttribute('data-kairo-clay-theme'))
  const screenshot=shots.expanded
  assert.deepEqual(errors,[])
- console.log(JSON.stringify({shots,passed:['reload','resolve-cap','resolve-protected-conflict','account-switch-late-response','retry','forecast-collapsed-by-default','forecast-expands','mobile-no-overflow-320-390','forecast-conflict-counted-once','registered-work-copy'],screenshot}))
+ console.log(JSON.stringify({shots,passed:['reload','resolve-cap','resolve-protected-conflict','account-switch-late-response','retry','forecast-collapsed-by-default','forecast-expands','mobile-no-overflow-320-390','forecast-conflict-counted-once','registered-work-copy','combined-remedy-within-access','expired-partial-reason','replan-409-retry-reload'],screenshot}))
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
 }
 main().catch(error=>{console.error(error);process.exitCode=1})

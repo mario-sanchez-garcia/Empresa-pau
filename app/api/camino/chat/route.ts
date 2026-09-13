@@ -176,7 +176,7 @@ REGLAS ESTRICTAS, sin excepción:
       return NextResponse.json({ reply, mutates: true, requiresConfirmation: true, preview })
     }
 
-    if (toolUse.name === 'añadirRepasoExtra') {
+    if (toolUse.name === 'anadirRepasoExtra') {
       const input = toolUse.input as AnadirRepasoExtraInput
       const subject = normalizeSubjectSlug(input.subject)
       if (!subjects.includes(subject)) return NextResponse.json({ reply: `No veo "${input.subject}" entre tus asignaturas activas. ¿De cuál es el repaso?`, mutates: false })
@@ -194,7 +194,7 @@ REGLAS ESTRICTAS, sin excepción:
       return NextResponse.json({ reply, mutates: true, requiresConfirmation: true, preview })
     }
 
-    if (toolUse.name === 'añadirExamen') {
+    if (toolUse.name === 'anadirExamen') {
       const input = toolUse.input as AnadirExamenInput
       const subject = normalizeSubjectSlug(input.subject)
       if (!subjects.includes(subject)) return NextResponse.json({ reply: `No veo "${input.subject}" entre tus asignaturas activas. ¿De qué asignatura es el examen?`, mutates: false })

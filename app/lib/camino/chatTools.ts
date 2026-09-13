@@ -13,7 +13,7 @@ import type Anthropic from '@anthropic-ai/sdk'
 // acción solo está permitida para 2 temas concretos (ver allowlist en
 // /api/camino/postpone-mission) y no tiene sentido exponerla a lenguaje
 // natural. Tampoco existe ninguna tool que permita elegir missionType/kind
-// libremente -- añadirRepasoExtra siempre crea contenido bonus/review, nunca
+// libremente -- anadirRepasoExtra siempre crea contenido bonus/review, nunca
 // un Simulacro (ver límite mensual aplicado en calendar-editor/mission).
 export const CAMINO_CHAT_TOOLS: Anthropic.Tool[] = [
   {
@@ -43,7 +43,7 @@ export const CAMINO_CHAT_TOOLS: Anthropic.Tool[] = [
     },
   },
   {
-    name: 'añadirRepasoExtra',
+    name: 'anadirRepasoExtra',
     description:
       'Añade una sesión de repaso adicional (bonus) al calendario del alumno. Nunca cuenta ' +
       'como Simulacro ni como misión del Curso -- es siempre contenido extra de refuerzo. ' +
@@ -78,7 +78,7 @@ export const CAMINO_CHAT_TOOLS: Anthropic.Tool[] = [
     },
   },
   {
-    name: 'añadirExamen',
+    name: 'anadirExamen',
     description:
       'Registra un examen real del alumno y hace que Kairo reorganice su plan de estudio ' +
       'alrededor de esa fecha (motor real de planificación, no un simple recordatorio). ' +

@@ -41,6 +41,7 @@ const SUBJECT_LABELS: Record<string, string> = {
   historia_filosofia: 'Historia de la Filosofía',
   fisica: 'Física',
   quimica: 'Química',
+  biologia: 'Biología',
   ingles: 'Inglés',
   economia: 'Economía',
 }

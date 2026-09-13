@@ -168,16 +168,16 @@ test('forecast: an unplaced session keeps an explicit estimate, with no lost min
 // Supabase is in-memory here; these tests do not certify the production catalog.
 // Nueve asignaturas es el caso real que rompia el modelo anterior: con un tope
 // de misiones por dia, mas tiempo declarado no compraba mas temario cubierto.
-// Las nueve que el onboarding sabe generar hoy (ALLOWED_GENERATE_SUBJECTS).
-const JOURNEY_SUBJECTS=['matematicas_ii','fisica','lengua','historia_espana','ingles','quimica','matematicas_ccss','historia_filosofia','economia']
+// Todas las que el onboarding sabe generar (ALLOWED_GENERATE_SUBJECTS).
+const JOURNEY_SUBJECTS=['matematicas_ii','fisica','lengua','historia_espana','ingles','quimica','matematicas_ccss','historia_filosofia','economia','biologia']
 // Filas publicadas de las asignaturas sin fallback estatico, tomadas del
 // catalogo real: la identidad de un tema es (block_slug, v2_sort_order), asi
 // que inventarlas aqui no las haria coincidir con nada.
-const JOURNEY_PUBLISHED=['ingles','historia_filosofia','economia'].flatMap(subject=>
+const JOURNEY_PUBLISHED=['ingles','historia_filosofia','economia','biologia'].flatMap(subject=>
  load('app/lib/camino/caminoCurriculumPlan.ts').CAMINO_CURRICULUM_TOPICS
   .filter(topic=>topic.subject===subject&&topic.v2SortOrder).slice(0,3)
   .map(topic=>({subject,block_key:topic.blockTitle,block_slug:topic.blockSlug,sort_order:topic.v2SortOrder,title:topic.title,review_status:'published'})))
-for (const [today, count, minutes] of [['2026-09-14',6,90],['2027-01-11',4,60],['2027-05-31',6,90],['2027-06-05',4,60],['2026-09-14',9,180]]) {
+for (const [today, count, minutes] of [['2026-09-14',6,90],['2027-01-11',4,60],['2027-05-31',6,90],['2027-06-05',4,60],['2026-09-14',10,180]]) {
  test(`generate → personalize → read → forecast: ${today}, ${count} subjects`,async()=>{
   const user='journey', examDate='2027-06-07'
   const subjects=JOURNEY_SUBJECTS.slice(0,count)
@@ -380,4 +380,21 @@ test('forecast: el solape se nombra como conflicto de hueco, no como falta de ho
  assert.equal(risk.automatic,true,'es trabajo que Camino si puede recolocar')
  assert.equal(result.remedy.replanRecommended,true,'con recolocar basta: no hay que quitar temario')
  assert.equal(result.remedy.deficitMinutes,0)
+})
+
+// Tres listas que TIENEN que decir lo mismo: lo que el alumno puede elegir, lo
+// que el generador acepta y lo que la base de datos deja insertar. Biologia
+// estaba solo en la primera, asi que se elegia, no se generaba y nadie veia un
+// error: el onboarding terminaba "con exito" y sin una sola mision suya.
+test('las asignaturas elegibles, las generables y las que acepta la cola son la misma lista',()=>{
+ const elegibles=[...load('app/lib/camino/betaCurriculum.ts').PRIVATE_BETA_SUBJECTS].sort()
+ const generables=[...load('app/lib/onboarding/generateCaminoPlan.ts').ALLOWED_GENERATE_SUBJECTS].sort()
+ assert.deepEqual(generables,elegibles,'una asignatura elegible que el generador no acepta se descarta en silencio')
+ const fs=require('node:fs'), path=require('node:path')
+ const dir=path.join(__dirname,'..','..','supabase','migrations')
+ const ultima=fs.readdirSync(dir).sort()
+  .filter(name=>fs.readFileSync(path.join(dir,name),'utf8').includes('add constraint user_learning_queue_subject_check')).pop()
+ const bloque=fs.readFileSync(path.join(dir,ultima),'utf8').split('add constraint user_learning_queue_subject_check').pop()
+ const permitidas=[...bloque.slice(0,bloque.indexOf(')')).matchAll(/'([a-z_]+)'/g)].map(m=>m[1]).sort()
+ assert.deepEqual(permitidas,elegibles,`${ultima} no acepta las mismas asignaturas que el generador`)
 })

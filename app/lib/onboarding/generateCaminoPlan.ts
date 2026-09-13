@@ -28,8 +28,14 @@ import { generateUnsubscribeToken } from '@/app/lib/unsubscribeToken'
 export { VALID_START_MODES } from '@/app/lib/camino/startingPoint'
 export type { StartMode } from '@/app/lib/camino/startingPoint'
 
-// Private beta scope: Camino PAU is active only for these core PAU subjects.
-export const ALLOWED_GENERATE_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana', 'fisica', 'quimica', 'ingles', 'historia_filosofia', 'economia'])
+// Ámbito de la beta privada. Tiene que coincidir EXACTAMENTE con
+// PRIVATE_BETA_SUBJECTS (lo que el alumno puede elegir en el onboarding) y con
+// el check constraint user_learning_queue_subject_check de Supabase: una
+// asignatura elegible que falte aquí se descarta en silencio y el alumno acaba
+// sin cola de esa asignatura sin que nada falle. Fue el caso de Biología, que
+// tenía sus 63 temas publicados y aun así nunca llegaba a generarse. Hay un
+// test que verifica las tres listas a la vez (scripts/camino-qa/forecast.test.cjs).
+export const ALLOWED_GENERATE_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana', 'fisica', 'quimica', 'biologia', 'ingles', 'historia_filosofia', 'economia'])
 
 // El orden fijo por defecto solo decide QUIÉN empieza la rotación, no cuántos
 // días recibe cada una: rotateSubjectForDay usa un índice continuo entre

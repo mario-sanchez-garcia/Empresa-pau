@@ -43,6 +43,9 @@ export interface PlanDefinition {
   orientationLabel: string
   rankingLabel: string
   reasonableUse: boolean
+  /** Cartel de ahorro opcional en la tarjeta (ver curso_pau: 9 meses de
+   *  docencia activa de Premium, sept-mayo, frente al pago único). */
+  savingsBadge?: string
 }
 
 const COMMON_INCLUDED = {
@@ -116,10 +119,14 @@ export const PLAN_DEFINITIONS: Record<CommercialPlanId, PlanDefinition> = {
   curso_pau: {
     id: 'curso_pau',
     persistentIds: ['curso_pau', 'pack_curso_pau', 'curso_pau_early', 'curso_pau_normal'],
-    name: 'Curso PAU',
-    commercialName: 'Curso PAU',
+    name: 'Todo el curso',
+    commercialName: 'Todo el curso',
     valueProposition: 'Un solo pago para llegar acompañado hasta junio.',
     description: 'Incluye la experiencia Premium hasta el final del curso, sin renovación mensual.',
+    // 9 meses de docencia activa (septiembre-mayo) antes de la PAU de junio a
+    // 9,99€/mes = 89,91€ frente a los 79€ del pago único -- ahorro real
+    // verificado, no una cifra redonda inventada.
+    savingsBadge: 'Ahorras 10,91 € frente a Premium mensual',
     billingPeriod: 'one_time',
     basePriceCents: 7900,
     monthlyEquivalentCents: 790,

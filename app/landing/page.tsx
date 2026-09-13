@@ -565,7 +565,7 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1040, margin: '0 auto' }}>
           <span style={{ fontFamily: M, fontSize: 10, color: 'rgba(147,197,253,.75)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 14, display: 'block' }}>Planes claros</span>
           <h2 style={{ fontFamily: B, fontSize: 'clamp(36px, 5vw, 60px)', letterSpacing: '.01em', color: '#fff', lineHeight: .95, marginBottom: 14 }}>Elige cuánto acompañamiento necesitas.</h2>
-          <p style={{ maxWidth: 610, color: 'rgba(255,255,255,.5)', fontSize: 14, lineHeight: 1.65, marginBottom: 42 }}>Primero el valor, después los límites. Premium es la opción completa para el curso; Free te deja probar Kairo y Curso PAU evita la renovación mensual.</p>
+          <p style={{ maxWidth: 610, color: 'rgba(255,255,255,.5)', fontSize: 14, lineHeight: 1.65, marginBottom: 42 }}>Primero el valor, después los límites. Premium es la opción completa para el curso; Free te deja probar Kairo y Todo el curso evita la renovación mensual.</p>
           <div className="v4c-p-cols">
             {PLANS.map((plan) => (
               <div data-testid={`landing-pricing-card-${plan.id}`} key={plan.id} className={`v4c-p-col${plan.highlighted ? ' v4c-p-col--featured' : ''}`}>
@@ -577,7 +577,17 @@ export default function LandingPage() {
                 <span style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 14, display: 'block' }}>{plan.name}</span>
                 <h3 className="v4c-p-value" style={{ fontSize: 20, color: '#fff', lineHeight: 1.2, letterSpacing: '-.02em', marginBottom: 18 }}>{plan.valueProposition}</h3>
                 <p style={{ fontFamily: B, fontSize: 52, color: '#fff', letterSpacing: '.01em', lineHeight: 1, marginBottom: 2 }}>{plan.priceDisplay}</p>
-                <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.48)', marginBottom: 24, display: 'block' }}>{plan.periodDisplay}</span>
+                <span style={{ fontFamily: M, fontSize: 9, color: 'rgba(255,255,255,.48)', marginBottom: plan.savingsBadge ? 10 : 24, display: 'block' }}>{plan.periodDisplay}</span>
+                {plan.savingsBadge && (
+                  <span style={{
+                    display: 'inline-block', alignSelf: 'flex-start', marginBottom: 24,
+                    fontFamily: M, fontSize: 9, fontWeight: 700, letterSpacing: '.04em',
+                    color: '#93c5fd', background: 'rgba(147,197,253,.14)',
+                    border: '1px solid rgba(147,197,253,.3)', borderRadius: 999, padding: '4px 10px',
+                  }}>
+                    {plan.savingsBadge}
+                  </span>
+                )}
                 <div style={{ height: 1, background: 'rgba(255,255,255,.08)', marginBottom: 18 }} />
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24, padding: 0, flex: 1 }}>
                   {plan.highlights.slice(0, 5).map((b) => (
@@ -586,6 +596,10 @@ export default function LandingPage() {
                       {b}
                     </li>
                   ))}
+                  <li style={{ fontSize: 12, color: 'rgba(255,255,255,.55)', lineHeight: 1.4, paddingLeft: 10, position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: 0, color: 'rgba(255,255,255,.18)', fontSize: 10 }}>—</span>
+                    Y mucho más
+                  </li>
                 </ul>
                 <PricingPlanCta planId={plan.id} isFree={plan.id === 'free'} cta={plan.ctaLabel} checkoutPlan={plan.checkoutPlanId ?? undefined} />
               </div>

@@ -40,7 +40,7 @@ const TRUST = ['IVA incluido', 'Sin cargos de prueba', 'Pago seguro con Stripe']
 
 const CONDITIONS = [
   'Premium se renueva cada mes. Puedes cancelarlo desde tu portal de facturación y conservar el acceso hasta terminar el periodo pagado.',
-  'Curso PAU es un pago único, no se renueva y da acceso hasta el 30 de junio.',
+  'Todo el curso es un pago único, no se renueva y da acceso hasta el 30 de junio.',
   'Las cuotas de correcciones, fotos y simulacros se reinician al comenzar cada mes natural.',
   'Los precios mostrados incluyen IVA. La política comercial de reembolso vigente está enlazada arriba.',
 ]
@@ -173,6 +173,13 @@ export default function PricingClient({ plans, children }: Props) {
         .pr-value { min-height: 66px; margin: 0 0 18px; font-size: 20px; line-height: 1.2; letter-spacing: -.02em; color: #fff; }
         .pr-price { margin: 0 0 2px; font-size: 52px; line-height: 1; letter-spacing: .01em; color: #fff; }
         .pr-period { display: block; margin-bottom: 20px; font-size: 9px; color: rgba(255,255,255,.48); }
+        .pr-savings {
+          display: inline-block; align-self: flex-start; margin: -12px 0 20px;
+          font-size: 9px; font-weight: 700; letter-spacing: .04em;
+          color: #93c5fd; background: rgba(147,197,253,.14);
+          border: 1px solid rgba(147,197,253,.3); border-radius: 999px;
+          padding: 4px 10px;
+        }
         .pr-desc { margin: 0 0 20px; font-size: 12px; line-height: 1.6; color: rgba(255,255,255,.45); }
         .pr-col--featured .pr-desc { color: rgba(255,255,255,.7); }
         .pr-rule { height: 1px; background: rgba(255,255,255,.08); margin-bottom: 18px; }
@@ -299,10 +306,14 @@ export default function PricingClient({ plans, children }: Props) {
               <h2 className="pr-value">{plan.valueProposition}</h2>
               <p className="pr-price" style={{ fontFamily: B }}>{plan.priceDisplay}</p>
               <span className="pr-period" style={{ fontFamily: M }}>{plan.periodDisplay}</span>
+              {plan.savingsBadge && (
+                <span className="pr-savings" style={{ fontFamily: M }}>{plan.savingsBadge}</span>
+              )}
               <p className="pr-desc">{plan.description}</p>
               <div className="pr-rule" />
               <ul className="pr-features">
                 {plan.highlights.map((feature) => <li key={feature}>{feature}</li>)}
+                <li>Y mucho más</li>
               </ul>
               <PricingCta plan={plan} consent={status} />
             </article>

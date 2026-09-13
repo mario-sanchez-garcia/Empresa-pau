@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Bug, Camera, Check, Loader2, X } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import ClayThemeScope from '@/components/clay/ClayThemeScope'
@@ -14,12 +15,26 @@ const WIDGET_IGNORE_ATTR = 'data-bug-widget-ignore'
 
 type Phase = 'idle' | 'capturing' | 'submitting' | 'sent'
 
+// La landing pública y la pantalla de login no deben mostrar el widget aunque
+// el visitante arrastre una sesión activa de otra pestaña (Supabase guarda la
+// sesión en localStorage, así que hasSession por sí solo no distingue "estoy
+// en la app" de "estoy de paso por la landing"). El onboarding NO se excluye
+// aquí a propósito: antes de crear la cuenta no hay sesión (ni siquiera
+// anónima -- no se usa signInAnonymously en el proyecto) y /api/contact exige
+// un JWT con email real para un bug_report, así que el widget ya aparece solo
+// en cuanto el alumno tiene cuenta (a mitad de OnboardingFlow o en
+// /onboarding/finalizando), vía el mismo chequeo de hasSession de abajo.
+function isPublicRoute(pathname: string) {
+  return pathname === '/' || pathname === '/landing' || pathname.startsWith('/landing/') || pathname === '/login' || pathname.startsWith('/login/')
+}
+
 // Widget flotante global de reporte de bugs — vive fuera de <main>, montado
 // directamente en app/layout.tsx (igual que BackToTop), y solo se muestra
 // con sesión activa: un reporte de bug siempre debe poder atribuirse a un
 // alumno via el email de su JWT (ver /api/contact, rama report_type ===
 // 'bug_report'), nunca a un visitante anónimo.
 export default function BugReportWidget() {
+  const pathname = usePathname()
   const [hasSession, setHasSession] = useState(false)
   const [open, setOpen] = useState(false)
   const [message, setMessage] = useState('')
@@ -39,6 +54,7 @@ export default function BugReportWidget() {
     return () => { cancelled = true; subscription.subscription.unsubscribe() }
   }, [])
 
+  if (isPublicRoute(pathname ?? '')) return null
   if (!hasSession) return null
 
   async function handleCapture() {

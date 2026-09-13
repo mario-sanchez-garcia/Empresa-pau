@@ -163,7 +163,10 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
 
   const withWork = forecast.subjects.filter(row => row.scheduledMinutes + row.pendingMinutes > 0)
 
-  const muted = { fontSize: 12, lineHeight: 1.5, color: 'var(--clay-text-muted)' }
+  // `p, li { max-width: 72ch }` de globals.css corta estos parrafos a media
+  // tarjeta (a 12px, 72ch son ~430px) y deja el lado derecho vacio. Aqui el
+  // ancho lo pone la tarjeta, asi que se quita el tope.
+  const muted = { fontSize: 12, lineHeight: 1.5, color: 'var(--clay-text-muted)', maxWidth: 'none' }
   const prose = { ...muted, lineHeight: 1.65, margin: 0 }
   const num = { fontVariantNumeric: 'tabular-nums' as const, fontWeight: 800, color: 'var(--clay-text)' }
 
@@ -289,7 +292,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
                 <summary style={{ ...num, fontSize: 12, cursor: 'pointer' }}>Ver las {forecast.riskItems.length} actividades sin encajar</summary>
                 <ul style={{ paddingLeft: 18, display: 'grid', gap: 10, ...muted }}>
                   {forecast.riskItems.slice(0, visibleRisks).map(item => (
-                    <li key={`${item.scheduled ? 'calendar' : 'pending'}:${item.id}`}>
+                    <li key={`${item.scheduled ? 'calendar' : 'pending'}:${item.id}`} style={{ maxWidth: 'none' }}>
                       <strong>{item.title || SUBJECT_LABELS[item.subject] || item.subject}</strong> · {Math.round(item.minutes)} min<br />
                       {RISK_LABELS[item.reason]}{item.deadlineDate ? ` (${examDateLabel(item.deadlineDate)})` : ''}.
                       {!item.automatic && ' La colocaste tú; no la moveremos automáticamente.'}

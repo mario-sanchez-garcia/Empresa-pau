@@ -3252,7 +3252,11 @@ export default function CaminoCalendarClient() {
         </div>
 
         {/* ── RIGHT PANEL ── */}
-        <div style={{ width: 288, flexShrink: 0, flexDirection: 'column', background: 'var(--clay-surface)', borderLeft: '1px solid var(--clay-border)', position: 'sticky', top: 81, maxHeight: 'calc(100vh - 81px)', overflowY: 'auto' }} className="hidden lg:flex">
+        {/* height, no maxHeight: con maxHeight el panel medía lo que midiera su
+            contenido, así que al bajar la página quedaba un bloque flotando a
+            media pantalla con el borde cortado. Ocupando el alto disponible,
+            fondo y borde llegan hasta abajo y el contenido scrollea dentro. */}
+        <div style={{ width: 288, flexShrink: 0, flexDirection: 'column', background: 'var(--clay-surface)', borderLeft: '1px solid var(--clay-border)', position: 'sticky', top: 81, height: 'calc(100vh - 81px)', overflowY: 'auto' }} className="hidden lg:flex">
 
           {/* XP + División */}
           <div style={{ padding: 16, borderBottom: '1px solid var(--clay-border)' }}>

@@ -77,7 +77,7 @@ const STEP_TEXT: Record<string, string> = {
 }
 
 function planFailureText(failure: PlanFailure): string {
-  if (failure.kind === 'busy') return 'Tu Camino se estaba actualizando en otro sitio a la vez.'
+  if (failure.kind === 'busy') return 'El servidor sigue ocupado con una actualización de tu Camino. Puedes volver a intentarlo en unos momentos.'
   if (failure.kind === 'network') return 'No hemos podido conectar con el servidor.'
   if (failure.kind === 'status') return 'No hemos podido consultar el estado de tu plan.'
   const known = failure.steps.find(step => STEP_TEXT[step])
@@ -95,6 +95,7 @@ export default function UnscheduledWorkBanner() {
 
   const [error, setError] = useState<PlanFailure | null>(null)
   const [saving, setSaving] = useState(false)
+  const [updating, setUpdating] = useState(false)
   useEffect(() => {
     let cancelled = false
     let generation = 0
@@ -106,20 +107,27 @@ export default function UnscheduledWorkBanner() {
         const response = await fetch('/api/camino/plan-status', { headers: { Authorization: `Bearer ${session.access_token}` } })
         if (!response.ok) throw new Error('status_unavailable')
         const next = await response.json()
-        if (!cancelled && version === generation) { setState(next); setError(null) }
-      } catch { if (!cancelled) setError({ kind: 'status', steps: [], status: null }) }
+        if (!cancelled && version === generation) { setState(next); setError(current => current?.kind === 'status' ? null : current) }
+      } catch { if (!cancelled && version === generation) setError({ kind: 'status', steps: [], status: null }) }
     }
     // El detalle lo manda ensureServerCalendar; un evento sin detalle (o de
     // una versión anterior del cliente ya cargada) sigue mostrando el aviso.
     const failed = (event: Event) => setError((event as CustomEvent<PlanFailure>).detail
       ?? { kind: 'server', steps: [], status: null })
     void load()
-    window.addEventListener('camino:updated', load)
+    const updatingPlan = () => { setUpdating(true); setError(null) }
+    const idlePlan = () => setUpdating(false)
+    window.addEventListener('camino:plan-updating', updatingPlan)
+    window.addEventListener('camino:plan-idle', idlePlan)
+    const updatedPlan = () => { setError(null); void load() }
+    window.addEventListener('camino:updated', updatedPlan)
     window.addEventListener('focus', load)
     window.addEventListener('camino:plan-error', failed)
     return () => {
       cancelled = true
-      window.removeEventListener('camino:updated', load)
+      window.removeEventListener('camino:plan-updating', updatingPlan)
+      window.removeEventListener('camino:plan-idle', idlePlan)
+      window.removeEventListener('camino:updated', updatedPlan)
       window.removeEventListener('focus', load)
       window.removeEventListener('camino:plan-error', failed)
     }
@@ -143,17 +151,21 @@ export default function UnscheduledWorkBanner() {
     finally { setSaving(false) }
   }
 
+  if (updating) return <div role="status" style={{ padding: '14px 16px', margin: '12px 20px 0' }}>
+    Actualizando tu Camino. Puedes seguir consultándolo mientras termina.
+  </div>
+
   if (error) return (
     <div role="status" style={{
       display: 'grid', gap: 6, padding: '14px 16px', margin: '12px 20px 0',
-      background: '#fef2f2', borderLeft: '3px solid #dc2626', borderRadius: 8,
+      background: error.kind === 'busy' ? '#fffbeb' : '#fef2f2', borderLeft: `3px solid ${error.kind === 'busy' ? '#d97706' : '#dc2626'}`, borderRadius: 8,
     }}>
       <p style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', lineHeight: 1.4 }}>
-        No hemos podido terminar de actualizar tu Camino
+        {error.kind === 'busy' ? 'La actualización de tu Camino sigue pendiente' : 'No hemos podido terminar de actualizar tu Camino'}
       </p>
       <p style={{ fontSize: 12, fontWeight: 500, color: '#64748b', lineHeight: 1.5 }}>
         {planFailureText(error)}{' '}
-        No se ha borrado ni cambiado nada: tus misiones y tu progreso siguen como estaban.
+        Puedes consultar las misiones guardadas mientras se completa la actualización.
       </p>
       <p>
         <button disabled={saving} onClick={() => void retry()}>

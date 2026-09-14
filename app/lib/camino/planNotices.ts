@@ -34,8 +34,8 @@ export type PlanNotices = {
    */
   protectedConflicts: string[]
   /**
-   * Misiones recolocables que están en una fecha que el alumno YA NO PUEDE
-   * usar. No es un aviso para él: es la señal de que hay que replanificar
+   * Misiones recolocables con conflicto de fecha, horario, presupuesto o
+   * modelo de duración antiguo. Es la señal de que hay que replanificar
    * aunque el día ya estuviera marcado como hecho.
    */
   misplaced: string[]

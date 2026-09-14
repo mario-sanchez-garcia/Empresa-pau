@@ -35,6 +35,7 @@ import { buildRecalcMessage, computeExamTimeNeed, getBlockPerformance } from '@/
 import { FINAL_REVIEW_RESERVED_STUDY_DAYS, resolveTargetExamDate } from '@/app/lib/camino/examDate'
 import { PLAN_ENGINE_VERSION, buildPlanDays, type PlanDay } from '@/app/lib/camino/planEngine'
 import { examRotationWeight, priorityWeight, type ExamRotationPriority } from '@/app/lib/camino/rotationWeights'
+import { studyDayIndexesFor } from '@/app/lib/camino/studyCapacity'
 import { SPAIN_HOLIDAYS } from '@/app/lib/camino/spainHolidays'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
 import { normalizeBlockKey } from '@/app/lib/simulacros/blockNormalization'
@@ -689,7 +690,8 @@ async function fetchCaminoCalendar(userId: string): Promise<DayPlan[] | null> {
   } catch {
     return null
   }
-  if (data.length === 0) return null
+  // Una lectura vacía correcta no es un fallo de red.
+  if (data.length === 0) return []
   const byDate = new Map<string, CaminoCalRow[]>()
   for (const row of data) {
     if (!byDate.has(row.scheduled_date)) byDate.set(row.scheduled_date, [])
@@ -1237,6 +1239,9 @@ export default function CaminoCalendarClient() {
   const [expandedDayDate, setExpandedDayDate] = useState<string | null>(null)
   const [showPastExams, setShowPastExams] = useState(false)
   const [selectedWeekStart, setSelectedWeekStart] = useState(currentWeekStartISO())
+  const [checkedFutureWeeks, setCheckedFutureWeeks] = useState(new Set<string>())
+  const [weekLoadState, setWeekLoadState] = useState<{ key: string; status: 'loading' | 'ready' | 'error' } | null>(null)
+  const [weekLoadRetry, setWeekLoadRetry] = useState(0)
   const [calendarConflicts, setCalendarConflicts] = useState<CalendarConflict[]>([])
   const [externalBusyByDate, setExternalBusyByDate] = useState<ExternalBusyByDate>({})
   const [calendarConflictStatus, setCalendarConflictStatus] = useState<'idle' | 'loading' | 'ready' | 'unavailable'>('idle')
@@ -1847,6 +1852,37 @@ export default function CaminoCalendarClient() {
     (last, day) => (day.date > last && day.missions.some(m => m.metadata?.forecast !== true) ? day.date : last),
     '',
   )
+  const weekRequestKey = `${selectedWeekStart}:${targetExamDate}:${onboarding?.dailyMinutes}:${onboarding?.weeklyStudyDaysValue}:${caminoPlanId}`
+  const effectiveStudyIndexes = studyDayIndexesFor(Math.min(onboarding?.weeklyStudyDaysValue ?? 4, getCaminoPlanLimits(caminoPlanId).maxStudyDaysPerWeek))
+  const needsWeekMaterialization = weekCalendar.some(day => day.date >= realToday && day.date < targetExamDate
+    && effectiveStudyIndexes.includes((dateFromISO(day.date).getDay() + 6) % 7) && !SPAIN_HOLIDAYS.has(day.date)
+    && (day.missions.length === 0 || day.missions.some(mission => mission.metadata?.forecast === true)))
+  useEffect(() => {
+    if (!hasProfile || !supabaseCalLoaded || !planResolved || selectedWeekStart < currentWeekStartISO()
+      || selectedWeekStart >= targetExamDate || !needsWeekMaterialization || checkedFutureWeeks.has(weekRequestKey)) return
+    let cancelled = false
+    async function loadWeek() {
+      setWeekLoadState({ key: weekRequestKey, status: 'loading' })
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) throw new Error('session_required')
+        if (!(await ensureServerCalendar(session.access_token, false, weekEndISO))) throw new Error('week_pending')
+        const days = await fetchCaminoCalendar(session.user.id)
+        if (days === null) throw new Error('calendar_read_failed')
+        if (cancelled) return
+        setCheckedFutureWeeks(current => new Set(current).add(weekRequestKey))
+        setCalendar(days)
+        saveWeekCache(selectedWeekStart, buildWeekDays(selectedWeekStart, days))
+        saveCalendarWeeksToCache(days)
+        setWeekLoadState({ key: weekRequestKey, status: 'ready' })
+      } catch {
+        if (!cancelled) setWeekLoadState({ key: weekRequestKey, status: 'error' })
+      }
+    }
+    void loadWeek()
+    return () => { cancelled = true }
+  }, [hasProfile, supabaseCalLoaded, planResolved, selectedWeekStart, targetExamDate, needsWeekMaterialization, weekRequestKey, weekEndISO, weekLoadRetry, checkedFutureWeeks])
+
   const activeExams = exams.filter(e => e.date >= realToday)
   const pastExams = exams.filter(e => e.date < realToday)
   const upcomingPartial = (() => {
@@ -3077,6 +3113,8 @@ export default function CaminoCalendarClient() {
             {calendarConflictStatus === 'unavailable' && (
               <div style={{ marginBottom: 12, fontSize: 10, fontWeight: 700, color: 'var(--clay-text-muted)' }}>Disponibilidad externa no disponible; Camino sigue usando tu calendario Kairo.</div>
             )}
+            {needsWeekMaterialization && weekLoadState?.key === weekRequestKey && weekLoadState.status === 'loading' && <p role="status">Preparando las misiones de esta semana…</p>}
+            {weekLoadState?.key === weekRequestKey && weekLoadState.status === 'error' && <p role="status">No se ha podido terminar de cargar esta semana. <button onClick={() => setWeekLoadRetry(value => value + 1)}>Reintentar carga</button></p>}
             {weekIsForecast && (
               <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, borderRadius: 12, border: '1px dashed var(--clay-border)', background: 'var(--clay-surface-muted, transparent)', padding: '8px 12px' }}>
                 <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--clay-text-muted)' }}>Previsión</span>
@@ -3123,7 +3161,7 @@ export default function CaminoCalendarClient() {
               <ChevronDown style={{ transition: 'transform 200ms', transform: calendarExpanded ? 'rotate(180deg)' : 'none' }} size={12} />
               {calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}
             </button>
-            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} confirmedPlanEnd={confirmedPlanEnd} realToday={realToday} />}
+            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} confirmedPlanEnd={confirmedPlanEnd} realToday={realToday} weekChecked={checkedFutureWeeks.has(weekRequestKey)} targetExamDate={targetExamDate} />}
             {/* "Personaliza tu repaso libre" ("Sugiéreme qué repasar") se
                 sustituye por completo por el chat de Kairo (tool calling
                 real, ver CaminoAssistant.tsx) -- mismo hueco exacto, no una
@@ -5212,7 +5250,7 @@ function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, sele
   )
 }
 
-function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusyByDate, conflicts, confirmedPlanEnd = '', realToday = '' }: { days: DayPlan[]; exams: StudentExam[]; initialExpandedDate?: string | null; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[]; confirmedPlanEnd?: string; realToday?: string }) {
+function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusyByDate, conflicts, confirmedPlanEnd = '', realToday = '', weekChecked = false, targetExamDate = '' }: { days: DayPlan[]; exams: StudentExam[]; initialExpandedDate?: string | null; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[]; confirmedPlanEnd?: string; realToday?: string; weekChecked?: boolean; targetExamDate?: string }) {
   // Only used as the useState initializer, not a live-controlled prop: this
   // component remounts fresh every time the parent's "Ver semana completa"
   // toggle opens it (conditional render, not display:none), so seeding from
@@ -5240,7 +5278,7 @@ function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusy
         // que quedó sin actividad. "Repaso libre" en pasado suena a que el
         // plan reservó ese día para repasar, cuando lo que hubo fue nada.
         const pastEmpty = main.length === 0 && realToday !== '' && day.date < realToday
-        const emptyLabel = beyondPlan ? 'Aún sin planificar' : pastEmpty ? 'Sin actividad' : 'Repaso libre'
+        const emptyLabel = targetExamDate && day.date >= targetExamDate ? 'Fuera del periodo de preparación' : pastEmpty ? 'Sin actividad' : weekChecked ? 'Sin misiones programadas' : beyondPlan ? 'Aún sin planificar' : 'Repaso libre'
         const subjectLabel = subjects.length ? subjects.map(shortSubjectLabel).join(', ') : emptyLabel
         const missionCount = main.length
         const busyCount = externalBusyByDate[day.date]?.length ?? 0

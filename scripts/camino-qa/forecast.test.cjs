@@ -701,3 +701,48 @@ test('batched day schedulers preserve slots and shared minutes with bounded data
  db.failNext('camino_calendar','select')
  await assert.rejects(api.createDaySchedulers(user,db,dates,{dailyMinutes:180}),/injected_write_failure/)
 })
+
+test('abrir una semana lejana no cuesta una lectura por dia de plan',async()=>{
+ // EL CASO DE LOS 45 SEGUNDOS. La recolocacion pedia un scheduler por fecha
+ // candidata (5 lecturas) y la disponibilidad de Google dia a dia: con el
+ // curso entero abierto eran ~500 idas y vueltas SECUENCIALES contra Supabase
+ // antes de responder. El plan resultante tiene que ser el mismo; lo que no
+ // puede es escalar con el numero de dias.
+ const seed=require('../../app/data/camino/curriculum_seed.json')
+ const user='coste-apertura',subjects=['matematicas_ii','historia_espana','lengua','fisica']
+ const topics=(Array.isArray(seed)?seed:(seed.topics||Object.values(seed)[0])).filter(t=>subjects.includes(t.subject))
+ const work=topics.map((t,i)=>({id:`q-${i}`,user_id:user,subject:t.subject,queue_status:'pending',
+  v2_sort_order:t.v2SortOrder??t.orderIndex??i+1,subject_position:i,title:t.title??`Tema ${i}`,
+  block_key:t.blockSlug??null,block_slug:t.blockSlug??null,
+  metadata:{mission_type:'concept',topic_slug:t.topicSlug},retry_not_before:null}))
+ const db=database({perfiles:[{id:user,subjects,pau_exam_date:'2027-06-07',student_exams:[]}],
+  user_entitlements:[{user_id:user,plan_id:'premium',status:'active'}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:6}}],
+  user_learning_queue:work})
+ let reads=0
+ const originalFrom=db.from.bind(db);db.from=(...args)=>{reads++;return originalFrom(...args)}
+ const api=runtime('2026-09-14',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'fixture'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/ensure-calendar/route.ts')
+ assert.equal((await api.POST({json:async()=>({})})).status,200)
+ assert.ok(reads<=120,`la primera carga ya cuesta ${reads} consultas`)
+ for(const throughDate of ['2026-12-06','2027-02-07']){
+  reads=0
+  assert.equal((await api.POST({json:async()=>({throughDate})})).status,200)
+  assert.ok(reads<=120,`abrir ${throughDate} cuesta ${reads} consultas: alguien ha vuelto a leer por dia`)
+ }
+ // Y sigue planificando: ni una fecha vacia ni presupuesto desbordado.
+ const journey=runtime('2026-09-14')
+ const context=await journey('app/lib/camino/studentPlanContext.ts').loadStudentPlanContext(user,db)
+ const est=journey('app/lib/camino/missionDuration.ts').estimatedMinutesForMission
+ const minutesByDate=new Map()
+ for(const r of db.tables.camino_calendar.filter(r=>['pending','postponed'].includes(r.status)))
+  minutesByDate.set(r.scheduled_date,(minutesByDate.get(r.scheduled_date)??0)+est(r))
+ // Solo el horizonte pedido: lo posterior a febrero se materializa cuando el
+ // alumno llegue a esa semana, no en esta peticion.
+ const days=journey('app/lib/camino/planWindow.ts').planningDates(context,{includeFinalReviewWindow:true}).filter(d=>d<='2027-02-07')
+ const empty=days.filter(d=>!(minutesByDate.get(d)>0))
+ assert.equal(empty.length,0,`${empty.length} de ${days.length} dias sembrados se quedan sin mision: ${empty.slice(0,5).join(', ')}`)
+ for(const d of days) assert.ok(minutesByDate.get(d)<=180,`${d} se pasa del presupuesto declarado`)
+})

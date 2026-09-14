@@ -4,7 +4,7 @@ import { loadCalendarDiagnostics } from './calendarDiagnostics'
 import { createHash } from 'crypto'
 import { readAllRows } from './readAllRows'
 import { reconcilePlanWork } from './planPersistence'
-import { getAvailabilityForDate } from '../calendar/availability'
+import { getAvailability, busySlotsForMadridDate, type LocalBusyRange } from '../calendar/availability'
 import { minutesForPlacement, placementDurationMetadata } from './placementDuration'
 import { MissionSlots, type SlotRow } from './placementSlots'
 import { type SupabaseClient } from '@supabase/supabase-js'
@@ -12,7 +12,7 @@ import { type SupabaseClient } from '@supabase/supabase-js'
 import { getMadridToday } from './studyDays'
 import { canRepositionAutomatically } from './automaticPlacement'
 import { VALID_DAILY_MINUTES } from './dailyTimeCapacity'
-import { createDayScheduler } from './scheduleTimeSlot'
+import { createDaySchedulers, type DayScheduler } from './scheduleTimeSlot'
 import { loadStudentPlanContext, planningDates, type DeclaredAvailability, type StudentPlanContext } from './studentPlanContext'
 import { isNewContent, orderRowsForPlacement, preferredDatesFor, unscheduledReasonFor, type PlacementRow, type PlacementWindow } from './planPlacement'
 import { admitsMoreNewContent, contentPaceDates, dailyNewContentBudget } from './contentPace'
@@ -209,20 +209,34 @@ export async function applyCalendarPersonalization(
     // importa lo que el alumno tiene fuera de Camino (camino_custom_events) y
     // lo que otras misiones YA reubicadas en este pase hayan ocupado.
     const excludeCalendarRowIds = new Set(rows.map(row => row.id))
-    const schedulers = new Map<string, Awaited<ReturnType<typeof createDayScheduler>>>()
-    const schedulerFor = async (date: string) => {
-      const existing = schedulers.get(date)
-      if (existing) return existing
-      const created = await createDayScheduler(userId, supabase, date, { excludeCalendarRowIds, dailyMinutes: prefs.dailyMinutes, externalBusy: await getAvailabilityForDate(userId, date) })
-      schedulers.set(date, created)
-      return created
-    }
 
     const window: PlacementWindow = {
       dates: candidateDates(context, appliedFrom),
       capacityPerDay: capacity,
       planningCutoff: context.planningCutoff,
       examDate: context.examDate,
+    }
+
+    // UNA fotografía del rango entero, no una por día. Este pase no escribe
+    // hasta el `camino_apply_placements` final, así que el snapshot vale para
+    // todas las fechas — es lo mismo que hacía el caché por día de antes, pero
+    // con 3 lecturas en vez de 5 por fecha y una llamada a Google en vez de
+    // una por fecha. Con el curso abierto eso eran ~500 idas y vueltas
+    // secuenciales, que es de donde salía el minuto largo de «Preparando las
+    // misiones de esta semana».
+    let schedulers: Map<string, DayScheduler> | null = null
+    const schedulerFor = async (date: string) => {
+      if (!schedulers) {
+        const dates = window.dates
+        if (!dates.length) return null
+        const externalBusyByDate = new Map<string, LocalBusyRange[]>()
+        const busy = await getAvailability(userId, dates[0], dates[dates.length - 1])
+        for (const day of dates) externalBusyByDate.set(day, busySlotsForMadridDate(busy, day))
+        schedulers = await createDaySchedulers(userId, supabase, [...dates], {
+          dailyMinutes: prefs.dailyMinutes, externalBusyByDate, excludeCalendarRowIds,
+        })
+      }
+      return schedulers.get(date) ?? null
     }
 
     // Las REGLAS (qué fechas admite cada misión, en qué orden se sirven, por
@@ -305,6 +319,7 @@ export async function applyCalendarPersonalization(
         // misión: colocarla ahí abortaría la transacción entera del pase.
         if (!slots.available(date, row)) continue
         const scheduler = await schedulerFor(date)
+        if (!scheduler) continue
         const duration = minutesForPlacement(candidate.missionType, meta)
         const contentToday = contentMinutesByDate.get(date) ?? 0
         // `continue`, no `break`: una fecha que ya tiene su temario del día no

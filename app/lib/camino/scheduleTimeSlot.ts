@@ -213,7 +213,7 @@ export async function createDaySchedulers(
   userId: string,
   supabase: SupabaseClient,
   dates: string[],
-  options: { dailyMinutes: number; externalBusyByDate?: Map<string, TimeRange[]> },
+  options: { dailyMinutes: number; externalBusyByDate?: Map<string, TimeRange[]>; excludeCalendarRowIds?: Set<string> },
 ): Promise<Map<string, DayScheduler>> {
   if (!dates.length) return new Map()
   const ordered = [...dates].sort()
@@ -238,7 +238,9 @@ export async function createDaySchedulers(
     day.push(row); rowsByDate.set(row.scheduled_date, day)
   }
   return new Map(ordered.map(date => {
-    const reserved = rowsByDate.get(date) ?? []
+    // Mismo criterio que createDayScheduler: una fila que este pase está
+    // reubicando no se ocupa a sí misma ni consume su presupuesto.
+    const reserved = (rowsByDate.get(date) ?? []).filter(row => !options.excludeCalendarRowIds?.has(row.id))
     const busy: TimeRange[] = [...(options.externalBusyByDate?.get(date) ?? [])]
     for (const event of events) {
       const applies = event.recurrence === 'none' ? event.event_date === date

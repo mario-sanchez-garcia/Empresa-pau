@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { reportPlanIncident } from '@/app/lib/beta/incidents'
 import { loadStudentPlanContext, planningDates } from '@/app/lib/camino/studentPlanContext'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getAuthContext } from '@/app/lib/camino/caminoProgressServer'
@@ -123,9 +122,6 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString(),
     }).eq('id', draftId).eq('claimed_by', user.id).eq('status', 'processing').eq('processing_token', processingToken)
     logOnboardingStage({ traceId: draft.trace_id, requestId, endpoint: 'finalize', result: 'failed', errorCode, durationMs: Date.now() - startedAt })
-    // Quedarse sin Camino al terminar el onboarding es lo más grave que le
-    // puede pasar a un alumno del piloto: va al panel como bloqueante.
-    if (errorCode.endsWith('_failed')) await reportPlanIncident(db, user.id, 'onboarding_failed')
     return NextResponse.json({ status: 'failed', error_code: errorCode })
   }
 

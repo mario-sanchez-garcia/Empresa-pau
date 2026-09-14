@@ -3,6 +3,7 @@
 import { useId, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import type { CoverageForecast, ForecastRiskReason } from '@/app/lib/camino/coverageForecast'
+import { ensureServerCalendar } from '@/app/lib/camino/ensureCalendarClient'
 import { supabase } from '@/app/lib/supabase'
 import { dailyMinutesLabel } from '@/app/lib/camino/dailyTimeCapacity'
 
@@ -125,14 +126,8 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('Vuelve a iniciar sesión para recolocar tu plan.')
-      const response = await fetch('/api/camino/ensure-calendar', {
-        method: 'POST', headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ force: true }), signal: AbortSignal.timeout(60000),
-      })
-      const result = await response.json()
-      if (!response.ok || result.ok !== true) throw new Error(response.status === 409
-        ? 'Tu Camino se está actualizando. Espera unos segundos y vuelve a intentarlo.'
-        : 'No se pudo terminar la recolocación. Puedes volver a intentarlo.')
+      if (!(await ensureServerCalendar(session.access_token, true)))
+        throw new Error('La actualización sigue pendiente. Consulta el aviso de Camino y vuelve a intentarlo.')
       // Recargar también renueva el calendario, no solo las cifras del aviso.
       window.location.reload()
     } catch (error) {

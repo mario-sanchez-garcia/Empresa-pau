@@ -175,9 +175,9 @@ const JOURNEY_SUBJECTS=['matematicas_ii','fisica','lengua','historia_espana','in
 // que inventarlas aqui no las haria coincidir con nada.
 const JOURNEY_PUBLISHED=['ingles','historia_filosofia','economia','biologia'].flatMap(subject=>
  load('app/lib/camino/caminoCurriculumPlan.ts').CAMINO_CURRICULUM_TOPICS
-  .filter(topic=>topic.subject===subject&&topic.v2SortOrder).slice(0,3)
+  .filter(topic=>topic.subject===subject&&topic.v2SortOrder)
   .map(topic=>({subject,block_key:topic.blockTitle,block_slug:topic.blockSlug,sort_order:topic.v2SortOrder,title:topic.title,review_status:'published'})))
-for (const [today, count, minutes] of [['2026-09-14',6,90],['2027-01-11',4,60],['2027-05-31',6,90],['2027-06-05',4,60],['2026-09-14',10,180]]) {
+for (const [today, count, minutes] of [['2026-09-14',6,90],['2027-01-11',4,60],['2027-05-31',6,90],['2027-06-05',4,60],['2026-09-14',10,180],['2027-05-31',9,180]]) {
  test(`generate → personalize → read → forecast: ${today}, ${count} subjects`,async()=>{
   const user='journey', examDate='2027-06-07'
   const subjects=JOURNEY_SUBJECTS.slice(0,count)
@@ -397,4 +397,275 @@ test('las asignaturas elegibles, las generables y las que acepta la cola son la 
  const bloque=fs.readFileSync(path.join(dir,ultima),'utf8').split('add constraint user_learning_queue_subject_check').pop()
  const permitidas=[...bloque.slice(0,bloque.indexOf(')')).matchAll(/'([a-z_]+)'/g)].map(m=>m[1]).sort()
  assert.deepEqual(permitidas,elegibles,`${ultima} no acepta las mismas asignaturas que el generador`)
+})
+
+
+for (const occupiedDays of [1,30]) test(`ensure fills unused minutes even with ${occupiedDays} occupied future days`,async()=>{
+ const journey=runtime('2027-01-11'),user='fill'
+ const context=journey('app/lib/camino/planWindow.ts').buildStudentPlanContext({today:'2027-01-11',examDate:'2027-06-07',dailyMinutes:180,weeklyStudyDays:6})
+ const dates=journey('app/lib/camino/planWindow.ts').planningDates(context).slice(0,occupiedDays)
+ const calendar=dates.map((date,i)=>({...row(`existing-${i}`,{scheduled_date:date,queue_id:`existing-q${i}`,end_time:'16:20',metadata:{content_estimated_minutes:20,duration_model:'content_v1'}}),user_id:user,v2_sort_order:100+i}))
+ const work=Array.from({length:8},(_,i)=>({...q(`new-${i}`,20,{metadata:{mission_type:'concept',content_estimated_minutes:20}}),user_id:user,title:`Tema ${i}`,v2_sort_order:i+1,subject_position:i}))
+ const db=database({perfiles:[{id:user,subjects:['fisica'],pau_exam_date:context.examDate,student_exams:[]}],
+  user_entitlements:[{user_id:user,status:'active',plan_id:'premium'}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:6}}],
+  camino_calendar:calendar,user_learning_queue:[...calendar.map(r=>({...q(r.queue_id,20,{queue_status:'scheduled'}),user_id:user,v2_sort_order:r.v2_sort_order})),...work]})
+ const result=await journey('app/lib/ensureCaminoCalendar.ts').ensureCaminoCalendar(user,db)
+ assert.equal(result.ok,true)
+ // El temario ya NO se apelmaza contra el primer día disponible: el ritmo
+ // (camino/contentPace.ts) lo reparte para que el curso llegue entero a la
+ // PAU en vez de agotarse en ocho semanas. Lo que este caso sigue
+ // garantizando es que un día ya ocupado no bloquea la siembra y que no se
+ // pierde ni un tema.
+ const est=journey('app/lib/camino/missionDuration.ts').estimatedMinutesForMission
+ const seeded=db.tables.camino_calendar.filter(r=>r.status==='pending'&&work.some(w=>w.id===r.queue_id))
+ // Nada se pierde: lo que no recibe fecha en este horizonte sigue pendiente
+ // en la cola, nunca desaparece ni se marca como programado en falso.
+ assert.equal(seeded.length+db.tables.user_learning_queue.filter(r=>r.queue_status==='pending').length,work.length)
+ for(const r of seeded) assert.ok(r.start_time&&r.end_time,'un tema colocado sin hora es un tema sin sitio real')
+ // Y lo que sí la recibe se REPARTE. Apelmazar los ocho temas en el primer
+ // día es exactamente lo que vaciaba el resto del curso.
+ if(seeded.length>1) assert.ok(new Set(seeded.map(r=>r.scheduled_date)).size>1,'el temario no puede apelmazarse en un solo dia')
+ const monday=db.tables.camino_calendar.filter(r=>r.scheduled_date===dates[0]&&r.status==='pending')
+ monday.sort((a,b)=>a.start_time.localeCompare(b.start_time))
+ for(let i=1;i<monday.length;i++) assert.ok(monday[i].start_time>=monday[i-1].end_time)
+ assert.equal(new Set(monday.map(r=>r.queue_id)).size,monday.length)
+ for(const date of new Set(db.tables.camino_calendar.filter(r=>r.status==='pending').map(r=>r.scheduled_date))){
+  const total=db.tables.camino_calendar.filter(r=>r.scheduled_date===date&&r.status==='pending').reduce((sum,r)=>sum+est(r),0)
+  assert.ok(total<=180,`${date} se pasa del presupuesto declarado`)
+ }
+ // Con un solo dia ocupado, los dias libres del horizonte sí reciben temario.
+ if(occupiedDays===1) assert.ok(seeded.length===work.length,'con horizonte libre no puede quedarse temario sin fecha')
+})
+
+for (const damage of ['overlap','budget']) test(`personalization repairs same-hash ${damage} without force and preserves manual work`,async()=>{
+ const user='repair', context={...ctx,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
+ const db=database({perfiles:[{id:user,pau_exam_date:context.examDate}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:7}}],
+  camino_calendar:[row('a'),row('b'),row('z-manual',{locked:true,scheduled_date:'2027-01-12'})].map(r=>({...r,user_id:user,metadata:{content_estimated_minutes:40}}))})
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ assert.equal((await personalize(user,db,{planContext:context})).reason,'applied')
+ const manual=JSON.stringify(db.tables.camino_calendar.find(r=>r.locked))
+ const [a,b]=['a','b'].map(id=>db.tables.camino_calendar.find(r=>r.id===id))
+ b.scheduled_date=a.scheduled_date
+ b.start_time=damage==='overlap'?a.start_time:a.end_time
+ b.end_time=damage==='overlap'?a.end_time:'18:00'
+ const result=await personalize(user,db,{planContext:context})
+ assert.equal(result.reason,'applied','matching preferences cannot conceal invalid placements')
+ assert.equal(forecast(context,db.tables.camino_calendar,[],[],[],{withRemedy:false}).scheduledAtRiskMinutes,0)
+ assert.equal(JSON.stringify(db.tables.camino_calendar.find(r=>r.locked)),manual)
+ assert.equal((await personalize(user,db,{planContext:context})).reason,'already_current')
+})
+
+test('forecast recommendations never exceed beta access and an expired partial is not an annual deficit',()=>{
+ const result=forecast({...long,accessMaxStudyDaysPerWeek:6},[],Array.from({length:40},(_,i)=>q(`access-${i}`,30)),[])
+ assert.ok(result.remedy.combinedChange)
+ assert.ok(result.remedy.combinedChange.weeklyStudyDays<=6)
+ const expired=forecast({...long,today:'2027-01-11',planningCutoff:'2027-05-31',dailyMinutes:180},[
+  row('expired',{status:'unscheduled',source:'partial',mission_type:'partial_practice',metadata:{partial_exam_date:'2027-01-10'}})
+ ],[],[])
+ assert.equal(expired.riskItems[0].reason,'partial_deadline')
+ assert.equal(expired.remedy.deficitMinutes,0)
+ assert.equal(expired.remedy.replanRecommended,false)
+ assert.equal(expired.remedy.combinedChange,null)
+})
+
+test('scheduled reference durations remain labelled as estimates',()=>{
+ const result=forecast(ctx,[row('reference',{end_time:'16:25',metadata:{duration_model:'content_v1',duration_source:'reference',content_estimated_minutes:25}})],[],[])
+ assert.equal(result.scheduledMinutes,25)
+ assert.equal(result.estimatedItems,1,'a scheduled slot is not an empirically measured learning duration')
+})
+
+
+test('same-day ensure upgrades legacy durations even if the preference hash still matches',async()=>{
+ const user='legacy',db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',subjects:[]}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:2}}],
+  camino_ensure_log:[{user_id:user,last_ensured_day:'2027-01-11'}],
+  camino_calendar:[{...row('legacy'),user_id:user}]})
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ await personalize(user,db)
+ const saved=db.tables.camino_calendar[0]
+ delete saved.metadata.duration_model;delete saved.metadata.content_estimated_minutes
+ saved.metadata.estimated_minutes=55
+ saved.start_time='16:00';saved.end_time='16:55'
+ const api=runtime('2027-01-11',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'test'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/ensure-calendar/route.ts')
+ const response=await api.POST({json:async()=>({})}),body=await response.json()
+ assert.equal(response.status,200);assert.equal(body.skipped,undefined)
+ assert.equal(saved.metadata.duration_model,'content_v1')
+ assert.equal(load('app/lib/camino/missionDuration.ts').estimatedMinutesForMission(saved),25)
+ const again=await api.POST({json:async()=>({})})
+ assert.equal((await again.json()).skipped,'already_ensured_today')
+})
+
+
+test('ensure cannot report a successful empty plan when reading the pending queue fails',async()=>{
+ const db=database({perfiles:[{id:'u',subjects:['fisica'],pau_exam_date:'2027-06-07'}],
+  billing_events:[{user_id:'u',event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:2}}]})
+ db.failNext('user_learning_queue','select')
+ await assert.rejects(load('app/lib/ensureCaminoCalendar.ts').ensureCaminoCalendar('u',db),/injected_write_failure/)
+})
+
+test('HTTP planning contention returns 409 only while the owner runs and succeeds after release',async()=>{
+ const user='http-lock',db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',subjects:[]}],billing_events:[]})
+ let release,entered
+ const gate=new Promise(resolve=>{release=resolve}),started=new Promise(resolve=>{entered=resolve})
+ const api=runtime('2027-01-11',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'test'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+  'app/lib/ensureCaminoCalendar.ts':{ensureCaminoCalendar:async()=>{entered();await gate;return{ok:true,degraded:[],protectedConflicts:[]}}},
+ })('app/api/camino/ensure-calendar/route.ts')
+ const first=api.POST({json:async()=>({})})
+ await started
+ const duplicate=await api.POST({json:async()=>({})})
+ assert.equal(duplicate.status,409)
+ assert.equal((await duplicate.json()).error,'plan_busy')
+ release()
+ assert.equal((await first).status,200)
+ const retry=await api.POST({json:async()=>({})})
+ assert.equal(retry.status,200)
+ assert.equal((await retry.json()).skipped,'already_ensured_today')
+})
+
+test('opening October 19–25 extends the real server plan beyond thirty study days at 180 min × 6',async()=>{
+ const user='future-week',journey=runtime('2026-09-14'),subjects=['fisica','matematicas_ii','matematicas_ccss','historia_espana']
+ const work=Array.from({length:480},(_,i)=>({...q(`topic-${i}`,20,{subject:subjects[i%4],metadata:{mission_type:'concept',content_estimated_minutes:20}}),user_id:user,v2_sort_order:Math.floor(i/4)+1,subject_position:Math.floor(i/4),title:`Tema ${i}`}))
+ const db=database({perfiles:[{id:user,subjects,pau_exam_date:'2027-06-07',student_exams:[]}],
+  user_entitlements:[{user_id:user,plan_id:'premium',status:'active'}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:6}}],user_learning_queue:work})
+ const api=runtime('2026-09-14',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'fixture'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/ensure-calendar/route.ts')
+ assert.equal((await api.POST({json:async()=>({})})).status,200)
+ assert.ok(db.tables.camino_calendar.filter(r=>r.scheduled_date==='2026-10-20'&&r.status==='pending').reduce((sum,r)=>sum+journey('app/lib/camino/missionDuration.ts').estimatedMinutesForMission(r),0)<180,'the initial horizon leaves the following week incomplete')
+ const response=await api.POST({json:async()=>({throughDate:'2026-10-25'})})
+ assert.equal(response.status,200);assert.equal((await response.json()).skipped,undefined)
+ const days=journey('app/lib/camino/planWindow.ts').planningDates(await journey('app/lib/camino/studentPlanContext.ts').loadStudentPlanContext(user,db))
+ const rows=db.tables.camino_calendar.filter(r=>r.status==='pending')
+ for(const date of days.filter(d=>d>='2026-10-19'&&d<='2026-10-25')){
+  const day=rows.filter(r=>r.scheduled_date===date)
+  assert.ok(day.length>0,`${date} must be materialized when opening this week`)
+  const total=day.reduce((sum,r)=>sum+journey('app/lib/camino/missionDuration.ts').estimatedMinutesForMission(r),0)
+  // El día ya no es "180 minutos de temario nuevo": es su parte de temario
+  // según el ritmo más el repaso espaciado que llena lo que sobra. Lo que se
+  // exige es que el presupuesto declarado se aproveche y no se rebase.
+  assert.ok(total>=120&&total<=180,`${date} aprovecha ${total} de 180 minutos declarados`)
+ }
+ // La semana sigue llevando temario nuevo: el ritmo reparte, no suprime. No
+ // se exige en CADA día — con el reparto hay días que salen solo de repaso, y
+ // eso es el plan funcionando, no un hueco.
+ assert.ok(days.filter(d=>d>='2026-10-19'&&d<='2026-10-25').some(date=>rows.some(r=>r.scheduled_date===date&&r.queue_id)),
+  'la semana abierta debe llevar temario nuevo ademas de repaso')
+ const ids=rows.map(r=>r.queue_id).filter(Boolean)
+ assert.equal(new Set(ids).size,ids.length,'no duplicated work while expanding')
+ // Repetir la misma petición no duplica trabajo. El relleno de repaso sí
+ // puede rematar los minutos que quedaran libres, así que la garantía no es
+ // "el mismo número de filas para siempre" sino que CONVERGE y que ningún día
+ // se pasa del presupuesto declarado: dos pasadas más no mueven el número.
+ const again=await api.POST({json:async()=>({throughDate:'2026-10-25'})})
+ assert.equal(again.status,200)
+ const afterSecond=db.tables.camino_calendar.filter(r=>r.status==='pending')
+ const idsAfter=afterSecond.map(r=>r.queue_id).filter(Boolean)
+ assert.equal(new Set(idsAfter).size,idsAfter.length,'no duplicated work while expanding')
+ assert.equal((await api.POST({json:async()=>({throughDate:'2026-10-25'})})).status,200)
+ assert.equal((await api.POST({json:async()=>({throughDate:'2026-10-25'})})).status,200)
+ assert.equal(db.tables.camino_calendar.filter(r=>r.status==='pending').length,afterSecond.length,'el relleno tiene que converger, no crecer en cada carga')
+ const est=journey('app/lib/camino/missionDuration.ts').estimatedMinutesForMission
+ for(const date of new Set(afterSecond.map(r=>r.scheduled_date))){
+  const total=afterSecond.filter(r=>r.scheduled_date===date).reduce((sum,r)=>sum+est(r),0)
+  assert.ok(total<=180,`${date} se pasa del presupuesto declarado (${total})`)
+ }
+})
+
+test('el curso entero se reparte: 180 min x 6 dias no puede dejar semanas en blanco',async()=>{
+ // EL CASO REPRODUCIDO. Con el temario REAL de cuatro asignaturas (308 temas),
+ // disponibilidad maxima y la PAU en junio, el motor colocaba todo el curso
+ // entre el 14/09 y el 06/11 y dejaba 173 de los 218 dias de estudio sin una
+ // sola mision — el 79% del curso en "Aun sin planificar". Y elegir MAS
+ // disponibilidad lo empeoraba, porque vaciaba la cola antes.
+ const seed=require('../../app/data/camino/curriculum_seed.json')
+ const user='curso-completo',subjects=['matematicas_ii','historia_espana','lengua','fisica']
+ const topics=(Array.isArray(seed)?seed:(seed.topics||Object.values(seed)[0])).filter(t=>subjects.includes(t.subject))
+ assert.ok(topics.length>250,'el seed real tiene que traer el temario de las cuatro asignaturas')
+ const work=topics.map((t,i)=>({id:`q-${i}`,user_id:user,subject:t.subject,queue_status:'pending',
+  v2_sort_order:t.v2SortOrder??t.orderIndex??i+1,subject_position:i,title:t.title??`Tema ${i}`,
+  block_key:t.blockSlug??null,block_slug:t.blockSlug??null,
+  metadata:{mission_type:'concept',topic_slug:t.topicSlug},retry_not_before:null}))
+ const db=database({perfiles:[{id:user,subjects,pau_exam_date:'2027-06-07',student_exams:[]}],
+  user_entitlements:[{user_id:user,plan_id:'premium',status:'active'}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:6}}],
+  user_learning_queue:work})
+ const journey=runtime('2026-09-14')
+ const api=runtime('2026-09-14',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'fixture'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/ensure-calendar/route.ts')
+ assert.equal((await api.POST({json:async()=>({})})).status,200)
+ const context=await journey('app/lib/camino/studentPlanContext.ts').loadStudentPlanContext(user,db)
+ const allDays=journey('app/lib/camino/planWindow.ts').planningDates(context,{includeFinalReviewWindow:true})
+ assert.equal((await api.POST({json:async()=>({throughDate:allDays[allDays.length-1]})})).status,200)
+
+ const est=journey('app/lib/camino/missionDuration.ts').estimatedMinutesForMission
+ const rows=db.tables.camino_calendar.filter(r=>['pending','postponed'].includes(r.status))
+ const minutesByDate=new Map()
+ for(const r of rows) minutesByDate.set(r.scheduled_date,(minutesByDate.get(r.scheduled_date)??0)+est(r))
+ const empty=allDays.filter(d=>!(minutesByDate.get(d)>0))
+ assert.equal(empty.length,0,`${empty.length} de ${allDays.length} dias de estudio se quedan sin una sola mision: ${empty.slice(0,5).join(', ')}`)
+ for(const d of allDays) assert.ok(minutesByDate.get(d)<=180,`${d} se pasa del presupuesto declarado`)
+
+ // El temario no se pierde y no se agota en ocho semanas: entra entero y
+ // termina con margen antes de la PAU, no la vispera y no en noviembre.
+ assert.equal(db.tables.user_learning_queue.filter(r=>r.queue_status==='pending').length,0)
+ const contentDates=rows.filter(r=>r.queue_id).map(r=>r.scheduled_date).sort()
+ assert.equal(contentDates.length,work.length)
+ assert.ok(contentDates[contentDates.length-1]>'2027-01-31',`el temario seguia agotandose el ${contentDates[contentDates.length-1]}`)
+ assert.ok(contentDates[contentDates.length-1]<context.planningCutoff,'el temario nuevo no puede llegar pegado al examen')
+ // Ningun repaso puede caer antes de la leccion que repasa. Se compara con la
+ // PRIMERA leccion del tema, no con una cualquiera: hay contenidos que se
+ // repiten a lo largo del curso (el comentario de texto entra cada pocas
+ // semanas) y comparar con la ultima daria por adelantado un repaso correcto.
+ const lessonByTopic=new Map()
+ // "Leccion" es toda mision que NO es repaso, tenga o no fila de cola: el
+ // comentario de texto se inyecta sin queue_id y es contenido igual.
+ for(const r of rows.filter(x=>x.mission_type!=='review'&&x.v2_sort_order!=null)){
+  const key=`${r.subject}:${r.v2_sort_order}`
+  const known=lessonByTopic.get(key)
+  if(!known||r.scheduled_date<known) lessonByTopic.set(key,r.scheduled_date)
+ }
+ for(const r of rows.filter(x=>x.mission_type==='review')){
+  const lesson=lessonByTopic.get(`${r.subject}:${r.v2_sort_order}`)
+  if(lesson) assert.ok(r.scheduled_date>lesson,`repaso del ${r.scheduled_date} antes de su leccion del ${lesson}`)
+ }
+})
+
+test('pending settings apply on a normal visit without a manual recalculation request',async()=>{
+ const user='saved-settings',db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',subjects:[]}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:2}}],
+  camino_calendar:[{...row('existing'),user_id:user}],camino_ensure_log:[{user_id:user,last_ensured_day:'2027-01-11'}]})
+ await load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization(user,db)
+ db.tables.billing_events[0].payload.daily_minutes=30
+ assert.equal(await load('app/lib/camino/replanPending.ts').markReplanPending(db,user),true)
+ const api=runtime('2027-01-11',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'fixture'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/ensure-calendar/route.ts')
+ const response=await api.POST({json:async()=>({})})
+ assert.equal(response.status,200);assert.equal((await response.json()).skipped,undefined)
+ assert.equal(db.tables.camino_ensure_log[0].replan_pending_at,null)
+ assert.equal((await load('app/lib/camino/planNotices.ts').collectPlanNotices(user,db)).misplaced.length,0)
+})
+
+test('planning dates are validated and optional pending-marker failure never masks the main result',async()=>{
+ const user='validation',db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',subjects:[]}]})
+ const api=runtime('2027-01-11',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'fixture'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/ensure-calendar/route.ts')
+ for(const throughDate of ['bad','2027-02-31','2030-01-01']) assert.equal((await api.POST({json:async()=>({throughDate})})).status,400)
+ db.failNext('camino_ensure_log','upsert')
+ const checked=load('app/lib/camino/checkedDb.ts').checkedDb(db)
+ assert.equal(await load('app/lib/camino/replanPending.ts').markReplanPending(checked,user),false)
 })

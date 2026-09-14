@@ -1,3 +1,4 @@
+import { readAllRows } from './camino/readAllRows'
 import { reconcilePlanWork } from './camino/planPersistence'
 import { canRepositionAutomatically } from '@/app/lib/camino/automaticPlacement'
 import { type SupabaseClient } from '@supabase/supabase-js'
@@ -11,13 +12,14 @@ import { EXAM_SUBJECT_SLUG } from './camino/partialExamSubjects'
 import { computeExamCoverage, reactivateAllInactiveQueueItems, reactivateQueueItems } from './camino/examCoverage'
 import { FINAL_MOCK_WINDOW_DAYS, injectAllPartialExamMissions, resolveFinalMockSlot } from './camino/injectPartialExamMissions'
 import { resolveTopicIdentitiesBatch } from './camino/resolveTopicIdentity'
-import { createDayScheduler, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
+import { createDayScheduler, estimatedMinutesForMission, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
 import { computeStudyCapacity } from './camino/studyCapacity'
 import { FINAL_REVIEW_RESERVED_STUDY_DAYS } from './camino/examDate'
 import { buildPlanDays } from './camino/planEngine'
 import { examRotationWeights, type ExamRotationPriority, type RotationExam } from './camino/rotationWeights'
 import { rotateSubjectForDay } from './camino/subjectRotation'
 import { capacityOptionsFor, planningDates, loadStudentPlanContext } from './camino/studentPlanContext'
+import { admitsMoreNewContent, contentPaceDates, dailyNewContentBudget } from './camino/contentPace'
 import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
 import { addDays, getMadridToday } from './camino/studyDays'
 
@@ -268,6 +270,7 @@ export type EnsureCaminoCalendarResult = {
 export async function ensureCaminoCalendar(
   userId: string,
   supabase: SupabaseClient,
+  options: { throughDate?: string } = {},
 ): Promise<EnsureCaminoCalendarResult> {
   const degraded: string[] = []
   const protectedConflicts: string[] = []
@@ -373,16 +376,14 @@ export async function ensureCaminoCalendar(
   // pendiente de Curso en NINGUNA asignatura no debe cortar PASO 2.5/3, que
   // siguen aplicando igual (un examen puede necesitar sus misiones aunque el
   // Curso de esa asignatura esté momentáneamente vacío).
-  // Límite generoso (muy por encima del temario más grande de una sola
-  // asignatura) para que, además de listar qué asignaturas tienen algo
-  // pendiente, esta misma consulta sirva para contar CUÁNTOS temas
-  // pendientes tiene cada una — necesario para subjectsByBacklog, más abajo.
-  const { data: subjectRows } = await supabase
+  // Leer toda la cola: PostgREST puede limitar filas aunque pidamos 2000.
+  // Un fallo de lectura se propaga; no significa que el alumno no tenga trabajo.
+  const subjectRows = await readAllRows<{ subject: string }>((from, to) => supabase
     .from('user_learning_queue')
-    .select('subject')
+    .select('id, subject')
     .eq('user_id', userId)
     .eq('queue_status', 'pending')
-    .limit(2000)
+    .order('id').range(from, to))
 
   const pendingCountBySubject: Record<string, number> = {}
   for (const row of subjectRows ?? []) {
@@ -731,27 +732,11 @@ export async function ensureCaminoCalendar(
     } catch (error) { console.error('[camino] forced planning failed', error); degraded.push('forced_missions') }
   }
 
-  // PASO 3 — Contar días futuros pendientes (distintos) — SOLO source='algorithm'
-  // (Curso normal). Las misiones de examen (source='partial') tienen su
-  // propia ventana natural y acotada (≤10 días hábiles antes de cada examen,
-  // ver injectPartialExamMissions.ts) y no cuentan aquí — así el Curso tiene
-  // siempre sus 30 días completos de presupuesto propio, y las misiones de
-  // examen conviven en las mismas fechas sin competir por el mismo contador.
-  // Una misión de Curso degradada a is_bonus=true (cuando un examen le "roba"
-  // el hueco visual ese día) sigue siendo source='algorithm' — sigue
-  // contando aquí, correctamente, como parte del presupuesto de Curso.
-  const { data: futureDayRows } = await supabase
-    .from('camino_calendar')
-    .select('scheduled_date')
-    .eq('user_id', userId)
-    .eq('source', 'algorithm')
-    .gte('scheduled_date', today)
-    .in('status', ['pending', 'postponed'])
-
-  const futureDaySet = new Set((futureDayRows ?? []).map(r => r.scheduled_date as string))
-  if (futureDaySet.size >= CALENDAR_HORIZON) return { ok: degraded.length === 0, degraded, protectedConflicts }
-
-  // PASO 4+5 — Generar días hasta completar CALENDAR_HORIZON
+  // PASO 3–5 — Completar el presupuesto de los próximos días de estudio.
+  // Tener una tarjeta no llena un día: el scheduler descuenta todas las
+  // reservas existentes (curso, parcial, manual y trabajo completado).
+  // El horizonte limita las fechas que examinamos, no descarta fechas con
+  // minutos libres ni crea un presupuesto paralelo para cada fuente.
 
   // Private beta scope: the Supabase calendar engine only schedules the
   // active core PAU subjects. `subjects` ya se calculó arriba, antes de
@@ -759,11 +744,13 @@ export async function ensureCaminoCalendar(
   if (subjects.length === 0) return { ok: degraded.length === 0, degraded, protectedConflicts }
 
   // PASO 5 — Ratio de velocidad
-  const { count: remainingQueue } = await supabase
+  const { count: remainingQueue, error: remainingQueueError } = await supabase
     .from('user_learning_queue')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
     .eq('queue_status', 'pending')
+
+  if (remainingQueueError) throw new Error(`Pending workload read failed: ${remainingQueueError.message}`)
 
   // Presupuesto REAL hasta el examen: días de estudio que el alumno tiene de
   // verdad (su patrón semanal, descontando festivos) por las misiones que
@@ -779,8 +766,8 @@ export async function ensureCaminoCalendar(
   // el rescate no se activara en casos en los que de verdad no cabe.
   const capacity = computeStudyCapacity(today, planContext.planningCutoff, capacityOptionsFor(planContext))
   const pendingTotal = remainingQueue ?? 0
-  // >1 significa literalmente "no cabe": hay más temas pendientes que sesiones
-  // disponibles antes del examen.
+  // Señal aproximada para el orden de rescate, usando sesiones de referencia.
+  // La viabilidad por minutos y plazos la calcula coverageForecast.
   const pressure = capacity.sessions > 0 ? pendingTotal / capacity.sessions : 0
   const rescueMode = pressure > 1
   // Ya NO hay un número de misiones por día. El día se llena por PRESUPUESTO
@@ -791,14 +778,14 @@ export async function ensureCaminoCalendar(
 
   // Obtener items pendientes de la cola ordenados por posición
   // queue_status='pending' excluye automáticamente postponed/scheduled/completed
-  const { data: queueItems } = await supabase
+  const queueItems = await readAllRows<QueueItem>((from, to) => supabase
     .from('user_learning_queue')
     .select('id, subject, v2_sort_order, title, block_key, block_slug, metadata, retry_not_before')
     .eq('user_id', userId)
     .eq('queue_status', 'pending')
     .in('subject', subjects)
     .order('subject', { ascending: true })
-    .order('subject_position', { ascending: true })
+    .order('subject_position', { ascending: true }).order('id').range(from, to))
 
   // ...pero 'pending' en la cola no garantiza que el item NO tenga ya su sitio
   // en el calendario. Cuando las dos tablas se desajustan —postponer, una
@@ -903,7 +890,13 @@ export async function ensureCaminoCalendar(
   // mitad de la decisión. Ahora se consume su salida completa, y la elección
   // local solo actúa como respaldo cuando a la asignatura que el motor eligió
   // ya no le queda cola (dato que el motor no tiene hasta este punto).
-  const horizonEndDate = addDays(today, CALENDAR_HORIZON * 4)
+  // La navegación puede pedir una semana posterior a los 30 días iniciales.
+  // Se rellena el prefijo cronológico, conservando los mismos límites de carga.
+  const requestedDates = options.throughDate
+    ? planningDates(planContext, { includeFinalReviewWindow: true }).filter(date => date <= options.throughDate!).length : 0
+  const calendarHorizon = Math.max(CALENDAR_HORIZON, requestedDates)
+  const horizonEndDate = options.throughDate && options.throughDate > addDays(today, CALENDAR_HORIZON * 4)
+    ? options.throughDate : addDays(today, CALENDAR_HORIZON * 4)
   const planDays = buildPlanDays({
     from: today,
     to: horizonEndDate,
@@ -927,16 +920,15 @@ export async function ensureCaminoCalendar(
     if (day.subject) plannedSubjectByDate.set(day.date, day.subject)
   }
   const finalSprint = planningDates(planContext).length === 0
-  const emptyDays = (finalSprint
+  const candidateFillDays = (finalSprint
     ? planningDates(planContext, { includeFinalReviewWindow: true }).map(date => ({ date, subject: subjectsByBacklog[0] ?? null }))
     : planDays)
     .filter(day => day.subject != null)
     .map(day => day.date)
     .filter(d => finalSprint || d < planningCutoff)
-    .filter(d => !futureDaySet.has(d))
-    .slice(0, CALENDAR_HORIZON - futureDaySet.size)
+    .slice(0, calendarHorizon)
 
-  if (emptyDays.length === 0) return { ok: degraded.length === 0, degraded, protectedConflicts }
+  if (candidateFillDays.length === 0) return { ok: degraded.length === 0, degraded, protectedConflicts }
 
   const calendarRows: object[] = []
   const scheduledQueueIds: string[] = []
@@ -956,7 +948,45 @@ export async function ensureCaminoCalendar(
 
   const hasQueueLeft = (s: string) => (cursors[s] ?? 0) < (subjectQueues[s]?.length ?? 0)
 
-  for (const dateStr of emptyDays) {
+  // RITMO DEL TEMARIO NUEVO. Sin esto, el bucle llena cada día hasta su
+  // presupuesto con lo primero de la cola: con 180 min × 6 días y el temario
+  // real (308 temas), colocaba el curso ENTERO entre septiembre y el 6 de
+  // noviembre y dejaba los 173 días de estudio siguientes —el 79% del
+  // curso— sin una sola misión. Los huecos no eran un fallo de siembra: era
+  // que ya no quedaba temario que sembrar. Ver camino/contentPace.ts.
+  //
+  // El tope se recalcula en cada ejecución sobre lo que queda de verdad, así
+  // que se corrige solo, y solo actúa cuando SOBRA tiempo: a quien va justo
+  // le devuelve su presupuesto diario completo, igual que antes.
+  const pendingContentMinutes = Object.values(subjectQueues).flat()
+    .reduce((sum, item) => sum + minutesForPlacement(
+      ((item.metadata ?? {}).mission_type as string) ?? 'concept', item.metadata ?? {},
+    ), 0)
+  const paceStudyDays = contentPaceDates(planningDates(planContext)).length
+  const newContentBudget = dailyNewContentBudget({
+    pendingContentMinutes,
+    paceStudyDays,
+    dailyMinutes: dailyMinutesForSlots ?? 60,
+  })
+  // Lo que cada fecha ya tiene sembrado de temario nuevo por ejecuciones
+  // anteriores. El scheduler descuenta esos minutos del presupuesto del día,
+  // pero no sabe distinguir temario de repaso, y el ritmo sí tiene que
+  // hacerlo: si no, un día ya lleno de repaso rechazaría su tema del día.
+  const { data: pacedRows } = await supabase
+    .from('camino_calendar')
+    .select('scheduled_date, mission_type, metadata, start_time, end_time, queue_id')
+    .eq('user_id', userId)
+    .eq('source', 'algorithm')
+    .gte('scheduled_date', today)
+    .not('queue_id', 'is', null)
+    .in('status', ['pending', 'postponed'])
+  const contentMinutesByDate = new Map<string, number>()
+  for (const row of pacedRows ?? []) {
+    const date = row.scheduled_date as string
+    contentMinutesByDate.set(date, (contentMinutesByDate.get(date) ?? 0) + estimatedMinutesForMission(row))
+  }
+
+  for (const dateStr of candidateFillDays) {
     // La asignatura la decidió ya el motor. Solo se vuelve a rotar si a esa
     // asignatura se le agotó la cola MIENTRAS corría este bucle (el motor no
     // conoce los cursores): sin ese respaldo el día lectivo se perdía entero.
@@ -970,6 +1000,10 @@ export async function ensureCaminoCalendar(
     // misión que coloca este bucle ocupa el hueco elegido antes de buscar el
     // siguiente, así dos misiones del mismo día tampoco se pisan entre sí.
     const scheduler = await createAvailabilityAwareScheduler(userId, supabase, dateStr, externalBusyByDate)
+    // El ritmo NUNCA impide la primera misión del día: el tope decide cuándo
+    // dejar de añadir más temario, no si el día recibe temario. Un tema más
+    // largo que el tope sigue entrando solo en un día que aún no tiene nada.
+    let contentMinutesToday = contentMinutesByDate.get(dateStr) ?? 0
 
     // Sin tope de sesiones: el día se llena por PRESUPUESTO DE MINUTOS. Se
     // empieza por la asignatura que le toca por rotación y, cuando esa se
@@ -1007,7 +1041,13 @@ export async function ensureCaminoCalendar(
         if (itemMeta.express) calMetadata.express = true
         if (finalSprint) { calMetadata.plan_mode = 'final_sprint'; calMetadata.final_review_window = true; calMetadata.knowledge_verified = false }
         if (rescueMode && !finalSprint) calMetadata.plan_mode = 'rescue'
-        const timeSlot = scheduler.placeBest(minutesForPlacement(missionType, itemMeta), {
+        const itemMinutes = minutesForPlacement(missionType, itemMeta)
+        // finalSprint es el tramo reservado a repaso: ahí ya no hay ritmo que
+        // respetar, lo que se coloca es precisamente la vuelta final.
+        if (!finalSprint && !admitsMoreNewContent({
+          scheduledMinutes: contentMinutesToday, missionMinutes: itemMinutes, dailyBudget: newContentBudget,
+        })) break
+        const timeSlot = scheduler.placeBest(itemMinutes, {
           date: dateStr,
           subject: item.subject,
           missionType,
@@ -1042,6 +1082,7 @@ export async function ensureCaminoCalendar(
           metadata: calMetadata,
         })
         scheduledQueueIds.push(item.id)
+        contentMinutesToday += itemMinutes
         cursor++
       }
       cursors[subject] = cursor

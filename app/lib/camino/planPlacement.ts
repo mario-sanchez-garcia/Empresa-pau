@@ -31,6 +31,15 @@ export type PlacementRow = {
    * práctica para el examen del día 12 no vale de nada el día 13.
    */
   deadlineDate?: string | null
+  /**
+   * Primera fecha en la que esta fila tiene sentido. Un repaso de un tema no
+   * puede caer ANTES de la lección de ese tema: el reparto del temario deja
+   * lecciones por delante durante todo el curso, así que una recolocación que
+   * ignore esto propone repasar en septiembre algo que se da en marzo.
+   *
+   * Es un suelo, no una preferencia: por debajo de él no hay fecha elegible.
+   */
+  notBeforeDate?: string | null
 }
 
 export type PlacementWindow = {
@@ -88,10 +97,10 @@ export function isDeadlineBound(row: Pick<PlacementRow, 'source' | 'deadlineDate
  * que las demás no tienen: su propio examen.
  */
 export function eligibleDatesForRow(row: PlacementRow, window: PlacementWindow): string[] {
-  if (isDeadlineBound(row)) {
-    return window.dates.filter(date => date < row.deadlineDate! && date < window.examDate)
-  }
-  return eligibleDatesFor(row.missionType, window)
+  const dates = isDeadlineBound(row)
+    ? window.dates.filter(date => date < row.deadlineDate! && date < window.examDate)
+    : eligibleDatesFor(row.missionType, window)
+  return row.notBeforeDate ? dates.filter(date => date >= row.notBeforeDate!) : dates
 }
 
 /**

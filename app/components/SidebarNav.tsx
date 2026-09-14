@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { CheckCircle2, ClipboardList, Clock, Compass, CreditCard, GraduationCap, HelpCircle, LayoutDashboard, LayoutGrid, LogOut, MessageCircle, MoreVertical, Settings, ShieldCheck, Sparkles, UserRound, Zap } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
+import BetaIssueReporter from './BetaIssueReporter'
 import { signOutLocally } from '@/app/lib/auth/signOutLocally'
 import { loadProfilePreferences } from '@/app/lib/profilePreferences'
 import { useBillingStatus } from '@/app/hooks/useBillingStatus'
@@ -495,6 +496,9 @@ export default function SidebarNav() {
           )
         })}
       </nav>
+      {/* Durante la beta, en todas las pantallas con navegación: el alumno
+          avisa desde donde le ha pasado, sin buscar un formulario aparte. */}
+      <BetaIssueReporter />
     </>
   )
 }

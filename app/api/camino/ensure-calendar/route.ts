@@ -1,4 +1,5 @@
 import { markReplanPending } from '@/app/lib/camino/replanPending'
+import { reportPlanIncident } from '@/app/lib/beta/incidents'
 import { checkedDb } from '@/app/lib/camino/checkedDb'
 import { NextRequest, NextResponse } from 'next/server'
 import { withPlanLock, PlanBusyError, reconcilePlanWork } from '@/app/lib/camino/planPersistence'
@@ -182,6 +183,10 @@ export async function POST(request: NextRequest) {
       }
     } else {
       console.error('[camino/ensure-calendar] degraded run, day not marked:', degraded.join(', '))
+      // Durante la beta, un Camino incompleto tiene que llegar al panel de
+      // incidencias, no solo a los registros del servidor: el alumno rara vez
+      // avisa de lo que no sabe que está mal.
+      await reportPlanIncident(db, user.id, 'plan_degraded')
       // Un reajuste forzado que sale degradado no se pierde: queda pendiente y
       // lo recoge la siguiente ejecución, sin que el alumno pulse nada.
       if (force) degradedPending = await markReplanPending(db, user.id)
@@ -211,6 +216,9 @@ export async function POST(request: NextRequest) {
     const pending = force ? await markReplanPending(db, user.id) : false
     if (error instanceof PlanBusyError) return NextResponse.json({ ok: false, retryable: true, error: 'plan_busy', replanPending: pending }, { status: 409, headers: { 'Retry-After': '2' } })
     console.error('[camino/ensure-calendar]', error)
+    // Nunca puede tapar el error original: si la propia incidencia no se
+    // guarda, el alumno recibe igual su 500 y el servidor lo tiene registrado.
+    try { await reportPlanIncident(createServiceClient(), user.id, 'plan_failed') } catch { /* registro del servidor disponible igualmente */ }
     return NextResponse.json({ error: 'No se pudo preparar tu Camino', replanPending: pending }, { status: 500 })
   }
 }

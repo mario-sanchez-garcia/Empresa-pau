@@ -776,6 +776,12 @@ export default function AdminPage() {
               Estado por usuario
             </Link>
             <Link
+              href="/admin/beta-incidents"
+              style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 700, textDecoration: 'none', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 7, padding: '5px 12px' }}
+            >
+              Incidencias de la beta
+            </Link>
+            <Link
               href="/admin/contact-messages"
               style={{ color: '#bfdbfe', fontSize: 11, fontWeight: 700, textDecoration: 'none', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 7, padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
             >

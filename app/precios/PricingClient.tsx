@@ -46,6 +46,15 @@ const CONDITIONS = [
 ]
 
 function PricingCta({ plan, consent }: { plan: PublicPlanView; consent: string }) {
+  if (plan.comingSoon) {
+    // No href, no onClick, not focusable: there is no interaction here that
+    // could ever navigate to /checkout, by click, keyboard, or otherwise.
+    return (
+      <span data-testid={`pricing-cta-${plan.id}`} className="pr-cta pr-cta--disabled" aria-disabled="true">
+        {plan.ctaLabel}
+      </span>
+    )
+  }
   return (
     <Link
       href={plan.ctaHref}
@@ -198,6 +207,8 @@ export default function PricingClient({ plans, children }: Props) {
         }
         .pr-cta:hover { border-bottom-color: #fff; }
         .pr-cta--primary { border-bottom-color: rgba(255,255,255,.75); }
+        .pr-cta--disabled { color: rgba(255,255,255,.4); border-bottom-color: rgba(255,255,255,.15); cursor: default; }
+        .pr-cta--disabled:hover { border-bottom-color: rgba(255,255,255,.15); }
 
         /* Comparativa */
         .pr-compare { padding: 56px 72px 0; }
@@ -301,7 +312,9 @@ export default function PricingClient({ plans, children }: Props) {
             >
               {plan.highlighted
                 ? <p className="pr-badge" style={{ fontFamily: M }}>● Recomendado</p>
-                : <p className="pr-badge" style={{ fontFamily: M, visibility: 'hidden' }} aria-hidden="true">●</p>}
+                : plan.comingSoon
+                  ? <p className="pr-badge" style={{ fontFamily: M }}>○ Próximamente</p>
+                  : <p className="pr-badge" style={{ fontFamily: M, visibility: 'hidden' }} aria-hidden="true">●</p>}
               <span className="pr-name" style={{ fontFamily: M }}>{plan.name}</span>
               <h2 className="pr-value">{plan.valueProposition}</h2>
               <p className="pr-price" style={{ fontFamily: B }}>{plan.priceDisplay}</p>

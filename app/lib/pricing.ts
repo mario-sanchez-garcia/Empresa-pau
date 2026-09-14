@@ -187,8 +187,8 @@ export const PLAN_DEFINITIONS: Record<CommercialPlanId, PlanDefinition> = {
     persistentIds: ['superpremium', 'super_premium'],
     name: 'Superpremium',
     commercialName: 'Superpremium',
-    valueProposition: 'Compatibilidad para accesos intensivos ya concedidos.',
-    description: 'El backend conserva sus límites, pero no existe una compra pública operativa.',
+    valueProposition: 'La preparación más completa, para quien quiere ir a por todo.',
+    description: 'Más correcciones, más simulacros y Camino los 7 días de la semana. Disponible en breve.',
     billingPeriod: 'monthly',
     basePriceCents: 1799,
     monthlyEquivalentCents: 1799,
@@ -336,6 +336,10 @@ export interface PublicPlanView extends PlanDefinition {
   ctaLabel: string
   ctaHref: string
   highlights: string[]
+  /** true only for the Superpremium preview card (see getSuperpremiumPreviewPlan):
+   *  no ctaHref is safe to render as a link, so consumers must render a
+   *  non-interactive placeholder instead of following ctaHref. */
+  comingSoon: boolean
 }
 
 function getPeriodDisplay(plan: PlanDefinition): string {
@@ -375,7 +379,29 @@ export function getPublicPlanDefinitions(now: Date = new Date()): PublicPlanView
         ? '/onboarding'
         : `/checkout?plan=${encodeURIComponent(plan.checkoutPlanId ?? '')}`,
       highlights: getPlanFeatureLabels(plan.id),
+      comingSoon: false,
     }))
+}
+
+// Superpremium is deliberately shown on /precios and the landing so visitors
+// can see what it includes, but it has no checkoutPlanId and is never part of
+// getPublicPlanDefinitions()/PUBLIC_PLAN_IDS -- it cannot be purchased today.
+// ctaHref is intentionally empty: UI consumers must check comingSoon and
+// render a non-interactive placeholder (never a real link) for this card's
+// CTA. See PricingCta in app/precios/PricingClient.tsx and PricingPlanCta in
+// app/landing/LandingCta.tsx.
+export function getSuperpremiumPreviewPlan(now: Date = new Date()): PublicPlanView {
+  const plan = PLAN_DEFINITIONS.superpremium
+  return {
+    ...plan,
+    priceCents: getPlanPriceCents(plan.id, now),
+    priceDisplay: getPlanPriceDisplay(plan.id, now),
+    periodDisplay: getPeriodDisplay(plan),
+    ctaLabel: 'Próximamente',
+    ctaHref: '',
+    highlights: getPlanFeatureLabels(plan.id),
+    comingSoon: true,
+  }
 }
 
 // Backwards-compatible view for older imports. New UI should consume

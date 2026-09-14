@@ -10,6 +10,7 @@ import {
   getPlanDefinitionByCheckoutId,
   getPlanPriceCents,
   getPublicPlanDefinitions,
+  getSuperpremiumPreviewPlan,
   normalizeCommercialPlanId,
 } from './pricing.ts'
 import { CAMINO_PLAN_LIMITS } from './camino/caminoPlanLimits.ts'
@@ -31,7 +32,7 @@ test('public catalogue only exposes free or operational checkout plans', () => {
   }
 })
 
-test('entitlement-only plans remain compatible but cannot leak into public pricing', () => {
+test('entitlement-only plans remain compatible but cannot leak into the purchasable catalogue', () => {
   for (const id of ENTITLEMENT_ONLY_PLAN_IDS) {
     const plan = PLAN_DEFINITIONS[id]
     assert.equal(plan.availability, 'entitlement_only')
@@ -40,6 +41,23 @@ test('entitlement-only plans remain compatible but cannot leak into public prici
   }
   assert.equal(normalizeCommercialPlanId('intensivo_pau'), 'intensivo')
   assert.equal(normalizeCommercialPlanId('super_premium'), 'superpremium')
+})
+
+// Superpremium is deliberately visible on /precios and the landing (a
+// showcase card, not a hidden plan) while production Stripe is live and the
+// user cannot legally invoice for it yet. This locks in the two properties
+// that make that safe: it never joins the real purchasable catalogue, and
+// its card has no ctaHref a UI could turn into a checkout link.
+test('Superpremium preview card is visible but structurally unpurchasable', () => {
+  assert.ok(!PUBLIC_PLAN_IDS.includes('superpremium' as never))
+  assert.equal(getPublicPlanDefinitions().some((plan) => plan.id === 'superpremium'), false)
+  assert.equal(PLAN_DEFINITIONS.superpremium.checkoutPlanId, null)
+  assert.equal(PLAN_DEFINITIONS.superpremium.stripePricingMode, 'none')
+
+  const preview = getSuperpremiumPreviewPlan()
+  assert.equal(preview.comingSoon, true)
+  assert.equal(preview.ctaHref, '')
+  assert.equal(preview.checkoutPlanId, null)
 })
 
 test('legacy billing IDs keep their historical entitlement mapping', () => {

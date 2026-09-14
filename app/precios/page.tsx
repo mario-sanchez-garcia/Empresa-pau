@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getPublicPlanDefinitions } from '@/app/lib/pricing'
+import { getPublicPlanDefinitions, getSuperpremiumPreviewPlan } from '@/app/lib/pricing'
 import ParentLinkSection from '@/app/pricing/ParentLinkSection'
 import PricingClient from './PricingClient'
 
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 }
 
 export default function PreciosPage() {
-  const plans = getPublicPlanDefinitions()
+  const plans = [...getPublicPlanDefinitions(), getSuperpremiumPreviewPlan()]
   return (
     <PricingClient plans={plans}>
       <ParentLinkSection />

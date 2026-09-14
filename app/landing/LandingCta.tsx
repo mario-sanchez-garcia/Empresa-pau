@@ -137,10 +137,22 @@ export function StickyMobileCta() {
   )
 }
 
-export function PricingPlanCta({ planId, isFree, cta, checkoutPlan }: { planId: CommercialPlanId; isFree: boolean; cta: string; checkoutPlan?: string }) {
+export function PricingPlanCta({ planId, isFree, cta, checkoutPlan, comingSoon }: { planId: CommercialPlanId; isFree: boolean; cta: string; checkoutPlan?: string; comingSoon?: boolean }) {
   const { status, href } = useLandingAuth()
   const { status: consent } = useCookieConsent()
   const isLoading = status === 'loading'
+  // No href, no onClick, not focusable: nothing here can ever navigate to
+  // /checkout, unlike the branches below which all resolve a real target.
+  if (comingSoon) {
+    return (
+      <span
+        aria-disabled="true"
+        style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.35)', letterSpacing: '.1em', textTransform: 'uppercase', borderBottom: '1px solid rgba(255,255,255,.15)', paddingBottom: 1, display: 'inline-block' }}
+      >
+        {cta}
+      </span>
+    )
+  }
   // Para un plan de pago sin sesión, el destino es /checkout (no /login):
   // /checkout ya sabe redirigir a /login?returnTo=/checkout?plan=... y traer
   // de vuelta al alumno al checkout correcto tras loguearse (mismo patrón que

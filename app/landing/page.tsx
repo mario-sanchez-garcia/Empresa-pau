@@ -5,7 +5,7 @@ import {
   PLATFORM_STRUCTURED_EXERCISES_LABEL,
   PLATFORM_STRUCTURED_EXERCISES_LONG_TEXT,
 } from '@/app/lib/platformStats'
-import { getPlanPriceDisplay, getPublicPlanDefinitions } from '@/app/lib/pricing'
+import { getPlanPriceDisplay, getPublicPlanDefinitions, getSuperpremiumPreviewPlan } from '@/app/lib/pricing'
 import LandingAuthProvider from './LandingAuthState'
 import { NavLoginLink, BottomCta, HeroFreeLink, PricingPlanCta, PricingSectionTracker, StickyMobileCta } from './LandingCta'
 import { ClayHeroCta, ClayHeroMiniCards } from './LandingClayPilotHero'
@@ -54,7 +54,7 @@ const COMPARE_ROWS: CompareRow[] = [
 // faltaban Historia de la Filosofía, Inglés y Economía de la Empresa).
 const SUBJECTS = SUBJECT_OPTS.map(s => ({ label: s.label, ready: s.betaStatus === 'enabled' }))
 
-const PLANS = getPublicPlanDefinitions()
+const PLANS = [...getPublicPlanDefinitions(), getSuperpremiumPreviewPlan()]
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
@@ -574,6 +574,11 @@ export default function LandingPage() {
                     ● Recomendado
                   </p>
                 )}
+                {plan.comingSoon && (
+                  <p style={{ fontFamily: M, fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,.4)', letterSpacing: '.18em', textTransform: 'uppercase', marginBottom: 10 }}>
+                    ○ Próximamente
+                  </p>
+                )}
                 <span style={{ fontFamily: M, fontSize: 10, color: 'rgba(255,255,255,.3)', letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 14, display: 'block' }}>{plan.name}</span>
                 <h3 className="v4c-p-value" style={{ fontSize: 20, color: '#fff', lineHeight: 1.2, letterSpacing: '-.02em', marginBottom: 18 }}>{plan.valueProposition}</h3>
                 <p style={{ fontFamily: B, fontSize: 52, color: '#fff', letterSpacing: '.01em', lineHeight: 1, marginBottom: 2 }}>{plan.priceDisplay}</p>
@@ -601,7 +606,7 @@ export default function LandingPage() {
                     Y mucho más
                   </li>
                 </ul>
-                <PricingPlanCta planId={plan.id} isFree={plan.id === 'free'} cta={plan.ctaLabel} checkoutPlan={plan.checkoutPlanId ?? undefined} />
+                <PricingPlanCta planId={plan.id} isFree={plan.id === 'free'} cta={plan.ctaLabel} checkoutPlan={plan.checkoutPlanId ?? undefined} comingSoon={plan.comingSoon} />
               </div>
             ))}
           </div>

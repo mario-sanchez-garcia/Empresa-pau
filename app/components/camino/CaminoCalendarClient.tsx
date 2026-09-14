@@ -35,6 +35,7 @@ import { buildRecalcMessage, computeExamTimeNeed, getBlockPerformance } from '@/
 import { FINAL_REVIEW_RESERVED_STUDY_DAYS, resolveTargetExamDate } from '@/app/lib/camino/examDate'
 import { PLAN_ENGINE_VERSION, buildPlanDays, type PlanDay } from '@/app/lib/camino/planEngine'
 import { examRotationWeight, priorityWeight, type ExamRotationPriority } from '@/app/lib/camino/rotationWeights'
+import { emptyStudyDayLabel, type WeekLoadStatus } from '@/app/lib/camino/weekPresentation'
 import { studyDayIndexesFor } from '@/app/lib/camino/studyCapacity'
 import { SPAIN_HOLIDAYS } from '@/app/lib/camino/spainHolidays'
 import { resolveMissionTypeXp } from '@/app/lib/camino/xpMap'
@@ -1839,19 +1840,6 @@ export default function CaminoCalendarClient() {
   // "esto es lo que previsiblemente harás": antes ambas cosas se dibujaban
   // exactamente igual, y la segunda además podía variar entre dispositivos.
   const weekIsForecast = weekCalendar.some(day => day.missions.some(m => m.metadata?.forecast === true))
-  // Hasta dónde llega el plan CONFIRMADO: la última fecha con alguna misión
-  // que venga del servidor (las de previsión llevan metadata.forecast).
-  //
-  // Sirve para no llamarle "Repaso libre" a un día que simplemente todavía no
-  // se ha planificado. El Camino se siembra un mes por delante y se reajusta
-  // conforme avanzas; más allá de ahí no hay una decisión de dejarte el día
-  // libre, hay ausencia de decisión. Decir "Repaso libre" en enero sonaba a
-  // que el sistema había resuelto que ese día descansaras —y contradecía los
-  // días de estudio que el alumno acababa de elegir—.
-  const confirmedPlanEnd = calendar.reduce(
-    (last, day) => (day.date > last && day.missions.some(m => m.metadata?.forecast !== true) ? day.date : last),
-    '',
-  )
   const weekRequestKey = `${selectedWeekStart}:${targetExamDate}:${onboarding?.dailyMinutes}:${onboarding?.weeklyStudyDaysValue}:${caminoPlanId}`
   const effectiveStudyIndexes = studyDayIndexesFor(Math.min(onboarding?.weeklyStudyDaysValue ?? 4, getCaminoPlanLimits(caminoPlanId).maxStudyDaysPerWeek))
   const needsWeekMaterialization = weekCalendar.some(day => day.date >= realToday && day.date < targetExamDate
@@ -1879,8 +1867,8 @@ export default function CaminoCalendarClient() {
         if (!cancelled) setWeekLoadState({ key: weekRequestKey, status: 'error' })
       }
     }
-    void loadWeek()
-    return () => { cancelled = true }
+    const timer = setTimeout(() => { void loadWeek() }, 250)
+    return () => { cancelled = true; clearTimeout(timer) }
   }, [hasProfile, supabaseCalLoaded, planResolved, selectedWeekStart, targetExamDate, needsWeekMaterialization, weekRequestKey, weekEndISO, weekLoadRetry, checkedFutureWeeks])
 
   const activeExams = exams.filter(e => e.date >= realToday)
@@ -3161,7 +3149,7 @@ export default function CaminoCalendarClient() {
               <ChevronDown style={{ transition: 'transform 200ms', transform: calendarExpanded ? 'rotate(180deg)' : 'none' }} size={12} />
               {calendarExpanded ? 'Ocultar semana' : 'Ver semana completa'}
             </button>
-            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} confirmedPlanEnd={confirmedPlanEnd} realToday={realToday} weekChecked={checkedFutureWeeks.has(weekRequestKey)} targetExamDate={targetExamDate} />}
+            {calendarExpanded && <CompactWeekView days={weekCalendar} exams={exams} initialExpandedDate={expandedDayDate} externalBusyByDate={externalBusyByDate} conflicts={calendarConflicts} realToday={realToday} studyIndexes={effectiveStudyIndexes} loadStatus={checkedFutureWeeks.has(weekRequestKey) ? 'ready' : weekLoadState?.key === weekRequestKey ? weekLoadState.status : 'pending'} targetExamDate={targetExamDate} />}
             {/* "Personaliza tu repaso libre" ("Sugiéreme qué repasar") se
                 sustituye por completo por el chat de Kairo (tool calling
                 real, ver CaminoAssistant.tsx) -- mismo hueco exacto, no una
@@ -5250,7 +5238,7 @@ function CalendarWeekTimeline({ days, exams, externalBusyByDate, conflicts, sele
   )
 }
 
-function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusyByDate, conflicts, confirmedPlanEnd = '', realToday = '', weekChecked = false, targetExamDate = '' }: { days: DayPlan[]; exams: StudentExam[]; initialExpandedDate?: string | null; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[]; confirmedPlanEnd?: string; realToday?: string; weekChecked?: boolean; targetExamDate?: string }) {
+function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusyByDate, conflicts, realToday = '', studyIndexes = [], loadStatus = 'pending', targetExamDate = '' }: { days: DayPlan[]; exams: StudentExam[]; initialExpandedDate?: string | null; externalBusyByDate: ExternalBusyByDate; conflicts: CalendarConflict[]; realToday?: string; studyIndexes?: number[]; loadStatus?: WeekLoadStatus; targetExamDate?: string }) {
   // Only used as the useState initializer, not a live-controlled prop: this
   // component remounts fresh every time the parent's "Ver semana completa"
   // toggle opens it (conditional render, not display:none), so seeding from
@@ -5269,16 +5257,9 @@ function CompactWeekView({ days, exams, initialExpandedDate = null, externalBusy
         const main = day.missions.filter(m => m.role === 'main' || m.metadata?.free_initiative)
         const done = main.length > 0 && main.every(m => m.status === 'done')
         const subjects = [...new Set(main.map(m => m.subject))]
-        // Un día vacío más allá del plan confirmado no es un día libre: es un
-        // día que todavía no se ha planificado. Sin `confirmedPlanEnd` (el
-        // calendario del servidor aún no ha cargado) no se afirma ninguna de
-        // las dos cosas y se mantiene el texto de siempre.
-        const beyondPlan = main.length === 0 && confirmedPlanEnd !== '' && day.date > confirmedPlanEnd
-        // Y un día YA PASADO sin misiones tampoco es un día libre: es un día
-        // que quedó sin actividad. "Repaso libre" en pasado suena a que el
-        // plan reservó ese día para repasar, cuando lo que hubo fue nada.
-        const pastEmpty = main.length === 0 && realToday !== '' && day.date < realToday
-        const emptyLabel = targetExamDate && day.date >= targetExamDate ? 'Fuera del periodo de preparación' : pastEmpty ? 'Sin actividad' : weekChecked ? 'Sin misiones programadas' : beyondPlan ? 'Aún sin planificar' : 'Repaso libre'
+        const emptyLabel = emptyStudyDayLabel({ date: day.date, today: realToday, examDate: targetExamDate,
+          isStudyDay: studyIndexes.includes((dateFromISO(day.date).getDay() + 6) % 7),
+          isHoliday: SPAIN_HOLIDAYS.has(day.date), state: loadStatus })
         const subjectLabel = subjects.length ? subjects.map(shortSubjectLabel).join(', ') : emptyLabel
         const missionCount = main.length
         const busyCount = externalBusyByDate[day.date]?.length ?? 0

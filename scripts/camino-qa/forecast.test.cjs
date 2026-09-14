@@ -669,3 +669,35 @@ test('planning dates are validated and optional pending-marker failure never mas
  const checked=load('app/lib/camino/checkedDb.ts').checkedDb(db)
  assert.equal(await load('app/lib/camino/replanPending.ts').markReplanPending(checked,user),false)
 })
+
+test('batched day schedulers preserve slots and shared minutes with bounded database reads',async()=>{
+ const user='batch',dates=Array.from({length:30},(_,i)=>load('app/lib/camino/studyDays.ts').addDays('2027-01-11',i))
+ const db=database({billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180}}],
+  camino_custom_events:[
+   {id:'one',user_id:user,event_date:'2027-01-11',recurrence:'none',start_time:'16:00',end_time:'17:00'},
+   {id:'weekly',user_id:user,event_date:'2027-01-01',recurrence:'weekly',day_of_week:3,recurrence_until:'2027-06-01',start_time:'16:00',end_time:'18:00'}],
+  camino_calendar:[
+   {...row('manual',{source:'manual',start_time:'17:00',end_time:'17:30'}),user_id:user},
+   {...row('untimed',{start_time:null,end_time:null,metadata:{estimated_minutes:30}}),user_id:user},
+   {...row('done',{status:'completed',start_time:'18:00',end_time:'18:45'}),user_id:user}]})
+ const external=new Map([['2027-01-11',[{start:'17:30',end:'18:00'}]]])
+ let reads=0
+ const originalFrom=db.from.bind(db);db.from=(...args)=>{reads++;return originalFrom(...args)}
+ const api=load('app/lib/camino/scheduleTimeSlot.ts')
+ const batch=await api.createDaySchedulers(user,db,dates,{dailyMinutes:180,externalBusyByDate:external})
+ const batchReads=reads
+ assert.ok(batchReads<=3,`expected <=3 reads, got ${batchReads}`)
+ reads=0
+ for(const date of dates){
+  const old=await api.createDayScheduler(user,db,date,{externalBusy:external.get(date)??[]})
+  const expected=[],actual=[]
+  for(let n=0;n<12;n++){
+   expected.push(old.placeBest(25,{date,subject:'fisica',missionType:'concept'}))
+   actual.push(batch.get(date).placeBest(25,{date,subject:'fisica',missionType:'concept'}))
+  }
+  assert.deepEqual(actual,expected,`${date}: same reservations, events, scoring and minutes`)
+ }
+ assert.ok(reads>=150,`daily version should demonstrate repeated reads: ${reads}`)
+ db.failNext('camino_calendar','select')
+ await assert.rejects(api.createDaySchedulers(user,db,dates,{dailyMinutes:180}),/injected_write_failure/)
+})

@@ -1,3 +1,4 @@
+import { emptyStudyDayLabel } from './weekPresentation.ts'
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { readFileSync } from 'node:fs'
@@ -359,21 +360,15 @@ test('el cliente no recorta los dias que el servidor ya tiene sembrados', () => 
   assert.ok(!/\.limit\(\d+\)/.test(fetchBody), 'el calendario del cliente vuelve a recortarse con un tope de filas')
 })
 
-test('un dia sin planificar no se anuncia como dia libre', () => {
-  // "Repaso libre" significa que ese dia de estudio se queda sin mision.
-  // Un dia posterior al ultimo que el servidor ha sembrado no es eso: es un
-  // dia sobre el que todavia no hay decision. Llamarlo libre contradecia los
-  // dias de estudio que el alumno acababa de elegir.
-  const client = stripComments(
-    readFileSync(join(process.cwd(), 'app', 'components', 'camino', 'CaminoCalendarClient.tsx'), 'utf8'),
-  ).replace(/\s+/g, ' ')
-  assert.ok(client.includes('Aún sin planificar'), 'no se distingue el dia sin planificar del dia libre')
-  assert.ok(client.includes('const beyondPlan ='), 'no se calcula si el dia cae mas alla del plan confirmado')
-  // Sin plan confirmado cargado no se afirma ninguna de las dos cosas.
-  assert.ok(
-    client.includes("confirmedPlanEnd !== '' && day.date > confirmedPlanEnd"),
-    'se decide "sin planificar" sin saber hasta donde llega el plan confirmado',
-  )
+test('los días vacíos distinguen carga, fallo, descanso y resultado confirmado', () => {
+  const day = { date: '2026-12-01', today: '2026-09-14', examDate: '2027-06-07', isStudyDay: true, isHoliday: false }
+  assert.equal(emptyStudyDayLabel({ ...day, state: 'pending' }), 'Pendiente de planificar')
+  assert.equal(emptyStudyDayLabel({ ...day, state: 'loading' }), 'Preparando misiones…')
+  assert.equal(emptyStudyDayLabel({ ...day, state: 'error' }), 'No se ha podido cargar')
+  assert.equal(emptyStudyDayLabel({ ...day, state: 'ready' }), 'Sin misiones programadas')
+  assert.equal(emptyStudyDayLabel({ ...day, isStudyDay: false, state: 'loading' }), 'Descanso')
+  assert.equal(emptyStudyDayLabel({ ...day, isHoliday: true, state: 'loading' }), 'Festivo')
+  assert.equal(emptyStudyDayLabel({ ...day, date: '2026-09-01', state: 'ready' }), 'Sin actividad')
 })
 
 test('un reajuste que pilla el Camino ocupado no se pierde ni se delega en el alumno', () => {

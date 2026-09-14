@@ -3,7 +3,7 @@ import { reconcilePlanWork } from './camino/planPersistence'
 import { canRepositionAutomatically } from '@/app/lib/camino/automaticPlacement'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
-import { getAvailabilityForDate, type LocalBusyRange } from './calendar/availability'
+import { getAvailabilityForDate, getAvailability, busySlotsForMadridDate, type LocalBusyRange } from './calendar/availability'
 import { PRIVATE_BETA_SUBJECTS, isPrivateBetaSubject } from './camino/betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from './camino/caminoCurriculumPlan'
 import { cleanStudentExams } from './camino/cleanStudentExams'
@@ -12,7 +12,7 @@ import { EXAM_SUBJECT_SLUG } from './camino/partialExamSubjects'
 import { computeExamCoverage, reactivateAllInactiveQueueItems, reactivateQueueItems } from './camino/examCoverage'
 import { FINAL_MOCK_WINDOW_DAYS, injectAllPartialExamMissions, resolveFinalMockSlot } from './camino/injectPartialExamMissions'
 import { resolveTopicIdentitiesBatch } from './camino/resolveTopicIdentity'
-import { createDayScheduler, estimatedMinutesForMission, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
+import { createDayScheduler, createDaySchedulers, estimatedMinutesForMission, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
 import { computeStudyCapacity } from './camino/studyCapacity'
 import { FINAL_REVIEW_RESERVED_STUDY_DAYS } from './camino/examDate'
 import { buildPlanDays } from './camino/planEngine'
@@ -986,6 +986,13 @@ export async function ensureCaminoCalendar(
     contentMinutesByDate.set(date, (contentMinutesByDate.get(date) ?? 0) + estimatedMinutesForMission(row))
   }
 
+  // Una lectura por rango, no preferencias/historial/eventos/Google por día.
+  // Los pasos anteriores ya han terminado sus escrituras bajo el mismo lock.
+  const externalBusy = await getAvailability(userId, candidateFillDays[0], candidateFillDays[candidateFillDays.length - 1])
+  for (const date of candidateFillDays) externalBusyByDate.set(date, busySlotsForMadridDate(externalBusy, date))
+  const fillSchedulers = await createDaySchedulers(userId, supabase, candidateFillDays, {
+    dailyMinutes: dailyMinutesForSlots ?? 60, externalBusyByDate,
+  })
   for (const dateStr of candidateFillDays) {
     // La asignatura la decidió ya el motor. Solo se vuelve a rotar si a esa
     // asignatura se le agotó la cola MIENTRAS corría este bucle (el motor no
@@ -999,7 +1006,7 @@ export async function ensureCaminoCalendar(
     // (camino_custom_events, incluidas sus recurrencias semanales) — cada
     // misión que coloca este bucle ocupa el hueco elegido antes de buscar el
     // siguiente, así dos misiones del mismo día tampoco se pisan entre sí.
-    const scheduler = await createAvailabilityAwareScheduler(userId, supabase, dateStr, externalBusyByDate)
+    const scheduler = fillSchedulers.get(dateStr)!
     // El ritmo NUNCA impide la primera misión del día: el tope decide cuándo
     // dejar de añadir más temario, no si el día recibe temario. Un tema más
     // largo que el tope sigue entrando solo en un día que aún no tiene nada.

@@ -1,3 +1,4 @@
+import { readAllRows } from './readAllRows'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { estimatedMinutesForMission } from './missionDuration'
@@ -205,6 +206,51 @@ export async function createDayScheduler(
     .reduce((sum, row) => sum + estimatedMinutesForMission(row), 0)
   // All mission sources consume the same budget, including rows without hours.
   return new DayScheduler(busy, studyWindowFor(dateStr), behaviorProfile, (dailyMinutes ?? 60) - used)
+}
+
+/** One consistent snapshot for a planning pass; call after earlier writes finish. */
+export async function createDaySchedulers(
+  userId: string,
+  supabase: SupabaseClient,
+  dates: string[],
+  options: { dailyMinutes: number; externalBusyByDate?: Map<string, TimeRange[]> },
+): Promise<Map<string, DayScheduler>> {
+  if (!dates.length) return new Map()
+  const ordered = [...dates].sort()
+  type Reserved = { id: string; scheduled_date: string; start_time: string | null; end_time: string | null;
+    subject: string | null; mission_type: string | null; metadata: Record<string, unknown> | null }
+  type BusyEvent = { id: string; event_date: string; recurrence: string; recurrence_until: string | null;
+    day_of_week: number | null; start_time: string; end_time: string }
+  const [rows, events, behavior] = await Promise.all([
+    readAllRows<Reserved>((from, to) => supabase.from('camino_calendar')
+      .select('id, scheduled_date, start_time, end_time, subject, mission_type, metadata')
+      .eq('user_id', userId).gte('scheduled_date', ordered[0]).lte('scheduled_date', ordered[ordered.length - 1])
+      .in('status', ['pending', 'postponed', 'completed']).order('id').range(from, to)),
+    readAllRows<BusyEvent>((from, to) => supabase.from('camino_custom_events')
+      .select('id, event_date, recurrence, recurrence_until, day_of_week, start_time, end_time')
+      .eq('user_id', userId).lte('event_date', ordered[ordered.length - 1])
+      .not('start_time', 'is', null).not('end_time', 'is', null).order('id').range(from, to)),
+    loadSchedulingBehaviorProfile(supabase, userId),
+  ])
+  const rowsByDate = new Map<string, Reserved[]>()
+  for (const row of rows) {
+    const day = rowsByDate.get(row.scheduled_date) ?? []
+    day.push(row); rowsByDate.set(row.scheduled_date, day)
+  }
+  return new Map(ordered.map(date => {
+    const reserved = rowsByDate.get(date) ?? []
+    const busy: TimeRange[] = [...(options.externalBusyByDate?.get(date) ?? [])]
+    for (const event of events) {
+      const applies = event.recurrence === 'none' ? event.event_date === date
+        : event.recurrence === 'weekly' && event.day_of_week === mondayBasedDayIndex(date)
+          && event.event_date <= date && (!event.recurrence_until || event.recurrence_until >= date)
+      if (applies) busy.push({ start: normalizeTime(event.start_time), end: normalizeTime(event.end_time) })
+    }
+    for (const row of reserved) if (row.start_time && row.end_time)
+      busy.push({ start: normalizeTime(row.start_time), end: normalizeTime(row.end_time), subject: row.subject, missionType: row.mission_type })
+    const used = reserved.reduce((sum, row) => sum + estimatedMinutesForMission(row), 0)
+    return [date, new DayScheduler(busy, studyWindowFor(date), behavior, options.dailyMinutes - used)]
+  }))
 }
 
 export async function placeBestAcrossDates(

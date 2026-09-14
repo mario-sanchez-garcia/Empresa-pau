@@ -5,7 +5,7 @@ function runtime(today = '2027-05-17', overrides = {}) {
   const cache = new Map()
   class Clock extends Date { constructor(...args) { super(...(args.length ? args : [today + 'T08:00:00Z'])) } static now() { return new Date(today + 'T08:00:00Z').getTime() } }
   const stubs = {
-    'app/lib/calendar/availability.ts': { getAvailabilityForDate: async () => [] },
+    'app/lib/calendar/availability.ts': { getAvailabilityForDate: async () => [], getAvailability: async () => [], busySlotsForMadridDate: () => [] },
     'app/lib/calendar/sync.ts': { syncKairoMissionsToGoogle: async () => ({ failed: 0 }) },
     'app/lib/email/sendWelcomeEmail.ts': { sendWelcomeEmail: async () => {} },
     'app/lib/unsubscribeToken.ts': { generateUnsubscribeToken: () => 'test' },

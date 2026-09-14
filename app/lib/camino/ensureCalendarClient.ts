@@ -22,15 +22,23 @@ export type PlanErrorEvent = CustomEvent<PlanFailure>
 
 // Una llamada compartida por sesión. El montaje, el reintento tras calendario
 // vacío y los botones pueden coincidir; no deben competir por el mismo lease.
-const running = new Map<string, { force: boolean; throughDate?: string; promise: Promise<boolean> }>()
+const running = new Map<string, { force: boolean; throughDate?: string; started: boolean; promise: Promise<boolean> }>()
 
 export function ensureServerCalendar(token: string, force = false, throughDate?: string): Promise<boolean> {
   const previous = running.get(token)
+  // Mientras espera al trabajo activo, ampliar UNA petición pendiente en vez
+  // de encolar un recálculo completo por cada clic en Siguiente.
+  if (previous && !previous.started) {
+    previous.force ||= force
+    if (throughDate && throughDate > (previous.throughDate ?? '')) previous.throughDate = throughDate
+    return previous.promise
+  }
   if (previous && (!force || previous.force) && (!throughDate || (previous.throughDate ?? '') >= throughDate)) return previous.promise
   // Un cambio de preferencias exige force; si estaba en curso una carga normal,
   // ejecutar el cambio después. Otros llamantes compartirán esa misma espera.
-  const entry = { force, throughDate, promise: null as unknown as Promise<boolean> }
-  entry.promise = (previous ? previous.promise.then(() => runEnsure(token, force, throughDate)) : runEnsure(token, force, throughDate))
+  const entry = { force, throughDate, started: false, promise: null as unknown as Promise<boolean> }
+  const start = () => { entry.started = true; return runEnsure(token, entry.force, entry.throughDate) }
+  entry.promise = (previous ? previous.promise.then(start) : start())
     .finally(() => { if (running.get(token) === entry) running.delete(token) })
   running.set(token, entry)
   return entry.promise

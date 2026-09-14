@@ -143,3 +143,19 @@ test('opening a farther week queues the requested horizon without losing it behi
  release();await Promise.all([initial,later])
  assert.deepEqual(h.calls,[{force:false},{force:false,throughDate:'2026-10-25'}])
 })
+
+test('rapid navigation coalesces all waiting weeks into one request and preserves a pending settings change', async () => {
+  const h = harness([{ status: 200, body: { ok: true } }])
+  let release!: () => void
+  const gate = new Promise<void>(resolve => { release = resolve })
+  const fetchImpl = globalThis.fetch
+  globalThis.fetch = async (...args) => { await gate; return fetchImpl(...args) }
+  const active = ensureServerCalendar('rapid-weeks')
+  const pending = ensureServerCalendar('rapid-weeks', false, '2026-10-25')
+  for (const date of ['2026-11-01', '2026-11-08', '2026-11-15', '2026-12-06'])
+    assert.equal(ensureServerCalendar('rapid-weeks', false, date), pending)
+  assert.equal(ensureServerCalendar('rapid-weeks', true), pending)
+  release()
+  assert.deepEqual(await Promise.all([active, pending]), [true, true])
+  assert.deepEqual(h.calls, [{ force: false }, { force: true, throughDate: '2026-12-06' }])
+})

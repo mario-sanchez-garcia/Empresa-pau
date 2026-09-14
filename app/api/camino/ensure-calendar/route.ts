@@ -11,6 +11,7 @@ import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
 import { addDays, getMadridToday } from '@/app/lib/camino/studyDays'
 import { injectWeakReviewMissions } from '@/app/lib/camino/injectWeakReviewMissions'
 import { injectDiagnosticMissions } from '@/app/lib/camino/injectDiagnosticMissions'
+import { injectPlanFillerMissions } from '@/app/lib/camino/injectPlanFillerMissions'
 import { collectPlanNotices } from '@/app/lib/camino/planNotices'
 
 export const dynamic = 'force-dynamic'
@@ -120,6 +121,16 @@ export async function POST(request: NextRequest) {
     // (ver camino/knowledgeState.ts). Nunca bloquea el resto del Camino.
     const diagnostics = await injectDiagnosticMissions(user.id, db)
     const personalization = await applyCalendarPersonalization(user.id, db, { force })
+    // Relleno: el ÚLTIMO paso que escribe misiones, y tiene que serlo.
+    //
+    // Va después de todo lo que reserva minutos del día (temario, repaso por
+    // área débil, diagnóstico) para ocupar solo el presupuesto que de verdad
+    // ha quedado libre. Y después de personalizar porque la recolocación MUEVE
+    // lecciones: sembrar el repaso antes significaba fijar la vuelta de un
+    // tema y que su lección se fuera detrás, proponiendo repasar en octubre
+    // algo que se da en febrero. Coloca su propio hueco horario con el mismo
+    // scheduler que el resto, así que no necesita pasar por la recolocación.
+    const filler = await injectPlanFillerMissions(user.id, db, { throughDate })
     // Se lee DESPUÉS de personalizar: es el estado con el que el alumno se va
     // a encontrar, no el de antes de recolocar. Misma fuente que el camino
     // corto de arriba, para que ambos digan exactamente lo mismo.
@@ -142,6 +153,7 @@ export async function POST(request: NextRequest) {
       ...ensure.degraded,
       ...(weakReviews.reason === 'error' ? ['weak_reviews'] : []),
       ...(diagnostics.reason === 'error' ? ['diagnostics'] : []),
+      ...(filler.reason === 'error' ? ['plan_filler'] : []),
       ...(personalization.reason === 'error' ? ['personalization'] : []),
     ]
     if (degraded.length === 0) {
@@ -181,6 +193,7 @@ export async function POST(request: NextRequest) {
       personalization,
       weakReviews,
       diagnostics,
+      filler,
       // Ambos viajan SIEMPRE, también vacíos: es lo que permite retirar un
       // aviso cuando el problema se resuelve. Omitirlos dejaba el banner
       // encendido para siempre.

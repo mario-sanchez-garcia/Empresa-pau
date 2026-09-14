@@ -14,7 +14,8 @@ import { canRepositionAutomatically } from './automaticPlacement'
 import { VALID_DAILY_MINUTES } from './dailyTimeCapacity'
 import { createDayScheduler } from './scheduleTimeSlot'
 import { loadStudentPlanContext, planningDates, type DeclaredAvailability, type StudentPlanContext } from './studentPlanContext'
-import { orderRowsForPlacement, preferredDatesFor, unscheduledReasonFor, type PlacementRow, type PlacementWindow } from './planPlacement'
+import { isNewContent, orderRowsForPlacement, preferredDatesFor, unscheduledReasonFor, type PlacementRow, type PlacementWindow } from './planPlacement'
+import { admitsMoreNewContent, contentPaceDates, dailyNewContentBudget } from './contentPace'
 
 const VALID_WEEKLY_DAYS = [1, 2, 3, 4, 5, 6, 7] as const
 // v3: la colocación cambió de algoritmo (dos ventanas — temario nuevo y
@@ -240,8 +241,46 @@ export async function applyCalendarPersonalization(
       source: row.source,
       deadlineDate: typeof metadataObject(row.metadata).partial_exam_date === 'string'
         ? String(metadataObject(row.metadata).partial_exam_date) : null,
+      // Suelo de fecha de la propia fila (ver planPlacement.notBeforeDate). Lo
+      // escribe quien la genera: hoy, el repaso espaciado, que sin esto se
+      // recolocaba delante de la lección que repasa.
+      notBeforeDate: typeof metadataObject(row.metadata).place_not_before === 'string'
+        ? String(metadataObject(row.metadata).place_not_before) : null,
       row,
     }))
+
+    // RITMO. Sin esto la recolocación deshace lo que siembra
+    // ensureCaminoCalendar: el personalizador sirve cada misión en el primer
+    // día elegible con presupuesto libre, así que volvía a apelmazar el curso
+    // entero contra septiembre y octubre por mucho que la siembra lo hubiera
+    // repartido. El tope es el MISMO cálculo (camino/contentPace.ts) para que
+    // las dos pasadas no discrepen.
+    //
+    // El temario pendiente son DOS cosas: lo que ya tiene fila de calendario y
+    // lo que sigue en la cola sin materializar. Contar solo lo primero hacía
+    // que el personalizador calculara un ritmo mucho más lento que la siembra
+    // —el calendario lleva 30 días y la cola, el curso entero— y acabara
+    // dejando un solo tema al día donde el motor había puesto tres.
+    const queuedRows = await readAllRows<{ metadata: Record<string, unknown> | null }>((from, to) => supabase
+      .from('user_learning_queue')
+      .select('id, metadata')
+      .eq('user_id', userId)
+      .eq('queue_status', 'pending')
+      .order('id', { ascending: true })
+      .range(from, to))
+    const newContentMinutes = placementRows
+      .filter(candidate => isNewContent(candidate.missionType))
+      .reduce((sum, candidate) => sum + minutesForPlacement(candidate.missionType, metadataObject(candidate.row.metadata)), 0)
+      + queuedRows.reduce((sum, item) => {
+        const meta = metadataObject(item.metadata)
+        return sum + minutesForPlacement((meta.mission_type as string) ?? 'concept', meta)
+      }, 0)
+    const newContentBudget = dailyNewContentBudget({
+      pendingContentMinutes: newContentMinutes,
+      paceStudyDays: contentPaceDates(planningDates(context)).length,
+      dailyMinutes: prefs.dailyMinutes,
+    })
+    const contentMinutesByDate = new Map<string, number>()
 
     // Plazas de la restricción UNIQUE(user_id, scheduled_date, subject,
     // v2_sort_order). Se siembra con TODO el calendario del alumno, no sólo
@@ -267,6 +306,15 @@ export async function applyCalendarPersonalization(
         if (!slots.available(date, row)) continue
         const scheduler = await schedulerFor(date)
         const duration = minutesForPlacement(candidate.missionType, meta)
+        const contentToday = contentMinutesByDate.get(date) ?? 0
+        // `continue`, no `break`: una fecha que ya tiene su temario del día no
+        // descarta la misión, la empuja al siguiente día elegible — que es
+        // exactamente el reparto que se busca. Y el ritmo nunca deja un día de
+        // temario a cero: decide cuándo dejar de añadir MÁS, no si el día
+        // recibe su primera misión.
+        if (isNewContent(candidate.missionType) && !admitsMoreNewContent({
+          scheduledMinutes: contentToday, missionMinutes: duration, dailyBudget: newContentBudget,
+        })) continue
         const timeSlot = scheduler.placeBest(duration, {
           date,
           subject: row.subject,
@@ -293,6 +341,7 @@ export async function applyCalendarPersonalization(
             },
           },
         })
+        if (isNewContent(candidate.missionType)) contentMinutesByDate.set(date, contentToday + duration)
         slots.move(date, row)
         placedIds.add(row.id)
         break

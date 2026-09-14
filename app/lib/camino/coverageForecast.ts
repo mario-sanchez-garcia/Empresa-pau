@@ -64,7 +64,8 @@ function consume(day: Day, minutes: number, start?: string | null, end?: string 
 function asPlacement(row: ForecastCalendarRow): PlacementRow {
   return { id: row.id, scheduledDate: row.scheduled_date, missionType: row.mission_type,
     queueId: row.queue_id, source: row.source,
-    deadlineDate: typeof row.metadata?.partial_exam_date === 'string' ? row.metadata.partial_exam_date : null }
+    deadlineDate: typeof row.metadata?.partial_exam_date === 'string' ? row.metadata.partial_exam_date : null,
+    notBeforeDate: typeof row.metadata?.place_not_before === 'string' ? row.metadata.place_not_before : null }
 }
 /** El mismo alumno con otra disponibilidad declarada, para poder resimular. */
 function withAvailability(context: StudentPlanContext, dailyMinutes: number, weeklyStudyDays: number | null): StudentPlanContext {

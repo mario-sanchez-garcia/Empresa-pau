@@ -1210,6 +1210,11 @@ export default function CaminoCalendarClient() {
   const editExamParam = searchParams.get('editExam')
   const editExamParamHandledRef = useRef<string | null>(null)
   const [xpTotal, setXpTotal] = useState(0)
+  // Cero no es "sin XP todavía": son cosas distintas y el hub las pintaba
+  // igual. Mientras /api/camino/bootstrap viaja, el alumno veía 0 XP y la
+  // clasificación vacía — es decir, su progreso BORRADO — y volvía al
+  // resolverse. Hasta que llega la respuesta no se afirma ninguna cifra.
+  const [progressLoaded, setProgressLoaded] = useState(false)
   const [weeklyXP, setWeeklyXP] = useState(0)
   const [weeklySimsCompleted, setWeeklySimsCompleted] = useState(0)
   const [weeklyExamsCompleted, setWeeklyExamsCompleted] = useState(0)
@@ -1532,6 +1537,7 @@ export default function CaminoCalendarClient() {
         setStreak(boot.streak ?? 0)
         if (boot.subjectProgress) setSubjectProgress(boot.subjectProgress)
         setXpTotal(boot.xpTotal ?? 0)
+        setProgressLoaded(true)
         setWeeklyXP(boot.weeklyXP ?? 0)
         setWeeklySimsCompleted(boot.weeklySimsCompleted ?? 0)
         setMonthlySimsUsed(boot.monthlySimsUsed ?? 0)
@@ -1777,6 +1783,9 @@ export default function CaminoCalendarClient() {
   const todayBonus = today?.missions.filter(mission => mission.role === 'bonus') ?? []
   const todayDone = todayMain.length > 0 && todayMain.every(mission => mission.status === 'done')
   const displayedXP = leaderboard?.currentXp ?? xpTotal
+  // El marcador puede venir por dos caminos; basta con que uno haya llegado.
+  const xpKnown = leaderboard?.currentXp != null || progressLoaded
+  const displayedXPLabel = xpKnown ? displayedXP.toLocaleString('es-ES') : '—'
   const division = divisionFor(displayedXP)
   const nextDivision = DIVISIONS[DIVISIONS.indexOf(division) + 1]
   const divisionPct = nextDivision ? Math.min(100, Math.round(((displayedXP - division.min) / (nextDivision.min - division.min)) * 100)) : 100
@@ -2794,7 +2803,7 @@ export default function CaminoCalendarClient() {
               <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 8 }}>Restan</div>
               <div style={{ display: 'flex', gap: 22, marginTop: 16 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>{streak > 0 ? `🔥 ${streak}` : '—'}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Racha</span></div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>{displayedXP.toLocaleString('es-ES')}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>XP total</span></div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>{displayedXPLabel}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>XP total</span></div>
                 {heroRank != null && <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span style={{ fontSize: 19, fontWeight: 900, color: 'white' }}>#{heroRank}</span><span style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ranking</span></div>}
               </div>
             </div>
@@ -3249,13 +3258,19 @@ export default function CaminoCalendarClient() {
           <div style={{ padding: 16, borderBottom: '1px solid var(--clay-border)' }}>
             <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--clay-text)', marginBottom: 10 }}>Tu progreso</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-              <span style={{ fontSize: 36, fontWeight: 900, color: 'var(--clay-accent-text)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{displayedXP.toLocaleString('es-ES')}</span>
+              <span style={{ fontSize: 36, fontWeight: 900, color: 'var(--clay-accent-text)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{displayedXPLabel}</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--clay-text-muted)' }}>XP</span>
             </div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 8, padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, background: division.bg, color: division.text }}>
-              <DivisionIcon tierIndex={DIVISIONS.indexOf(division)} size={12} color={division.text} strokeWidth={1.1} />
-              {division.name}{nextDivision ? ` · ${nextDivision.name} en ${Math.max(0, nextDivision.min - displayedXP)} XP` : ''}
-            </div>
+            {xpKnown ? (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 8, padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, background: division.bg, color: division.text }}>
+                <DivisionIcon tierIndex={DIVISIONS.indexOf(division)} size={12} color={division.text} strokeWidth={1.1} />
+                {division.name}{nextDivision ? ` · ${nextDivision.name} en ${Math.max(0, nextDivision.min - displayedXP)} XP` : ''}
+              </div>
+            ) : (
+              <div style={{ display: 'inline-flex', alignItems: 'center', marginTop: 8, padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, background: 'var(--clay-surface-raised)', color: 'var(--clay-text-muted)' }}>
+                Cargando tu progreso…
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10 }}>
               <div style={{ background: 'var(--clay-surface-raised)', border: '1px solid var(--clay-border)', borderRadius: 10, padding: '10px 12px' }}>
                 <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--clay-text)' }}>{streak > 0 ? `🔥 ${streak}` : '—'}</div>
@@ -3310,6 +3325,9 @@ export default function CaminoCalendarClient() {
               </button>
             </div>
             <LigaSection ligas={ligas} loading={ligaLoading} onCreateLiga={createLiga} onJoinLiga={joinLiga} />
+            {ligaLoading && !(globalTop && globalTop.length > 0) && (
+              <p className="mt-4 pt-4 border-t border-[var(--clay-border)] text-[11px] font-bold text-[var(--clay-text-muted)]">Cargando la clasificación…</p>
+            )}
             {globalTop && globalTop.length > 0 && (
               <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--clay-border)' }}>
                 <p className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--clay-text-muted)]">Top 5 Global</p>

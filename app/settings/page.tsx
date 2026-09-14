@@ -14,6 +14,7 @@ import { loadProfilePreferences, saveProfilePreferences } from '@/app/lib/profil
 import { VALID_DAILY_MINUTES, dailyMinutesLabel, describeDailyPlan } from '@/app/lib/camino/dailyTimeCapacity'
 import { normalizeSubjectSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 import { DEFAULT_GRADE_THRESHOLD, type GradeThresholdMode } from '@/app/lib/camino/gradeThreshold'
+import { DEFAULT_SIMULACRO_COVERAGE_PCT, MAX_SIMULACRO_COVERAGE_OVERRIDE_PCT, MIN_SIMULACRO_COVERAGE_OVERRIDE_PCT } from '@/app/lib/camino/simulacroCoverageOverride'
 import { defaultTargetExamDate, isConvocatoria, type Convocatoria } from '@/app/lib/camino/examDate'
 import { getMadridDate } from '@/app/lib/camino/madridDate'
 import SidebarNav from '@/app/components/SidebarNav'
@@ -101,11 +102,20 @@ type CaminoPrefsStatus = { tone: 'ok' | 'warn'; text: string }
  * abierto en otra pestaña para llevarse un 409 `plan_busy` — que viaja con su
  * `Retry-After` justo para que el cliente reintente, cosa que no hacía. El 503
  * degradado se marca `retryable` por lo mismo. Reintentamos los dos.
+ *
+ * Y cuando ni con reintentos entra, tampoco se le pide nada al alumno:
+ * guardar sus ajustes tiene que bastar. El servidor deja el reajuste apuntado
+ * (`replanPending`, ver camino_ensure_log.replan_pending_at) y lo aplica en su
+ * siguiente ejecución —abrir el Camino ya la provoca—, así que aquí solo se
+ * cuenta lo que va a pasar. «Recalcular mi plan» sigue existiendo, pero como
+ * opción, no como deber.
  */
 async function recalculateCamino(token: string): Promise<CaminoPrefsStatus> {
-  const busy: CaminoPrefsStatus = { tone: 'warn', text: 'Tus ajustes se han guardado. Tu Camino se estaba actualizando en otro sitio y el reajuste no ha llegado a entrar: ciérralo en las demás pestañas y pulsa «Recalcular mi plan».' }
-  const failed: CaminoPrefsStatus = { tone: 'warn', text: 'Tus ajustes se han guardado, pero no hemos podido reajustar tu Camino ahora. Prueba con «Recalcular mi plan»; si sigue igual, repórtalo y lo miramos.' }
-  let lastWasBusy = false
+  const pending: CaminoPrefsStatus = { tone: 'ok', text: 'Tus ajustes se han guardado. Tu Camino se estaba actualizando en otro sitio, así que el reajuste queda pendiente y se aplicará solo en cuanto termine: no tienes que hacer nada.' }
+  const failed: CaminoPrefsStatus = { tone: 'warn', text: 'Tus ajustes se han guardado, pero el reajuste de tu Camino no ha entrado a la primera. Queda pendiente y se aplicará solo la próxima vez que lo abras; si lo ves igual mañana, repórtalo y lo miramos.' }
+  // Solo para un servidor que ni siquiera pudo apuntar el pendiente (respuesta
+  // antigua, sin `replanPending`): ahí sí hace falta la acción manual.
+  const hardFailure: CaminoPrefsStatus = { tone: 'warn', text: 'Tus ajustes se han guardado, pero no hemos podido reajustar tu Camino ahora. Prueba con «Recalcular mi plan»; si sigue igual, repórtalo y lo miramos.' }
 
   for (let attempt = 1; attempt <= 3; attempt++) {
     let response: Response
@@ -120,19 +130,27 @@ async function recalculateCamino(token: string): Promise<CaminoPrefsStatus> {
     }
     if (response.ok) return { tone: 'ok', text: 'Tu Camino se ha ajustado para las próximas misiones.' }
 
-    const body = await response.json().catch(() => null) as { error?: string; retryable?: boolean; degraded?: string[] } | null
-    lastWasBusy = response.status === 409
-    if (!lastWasBusy && body?.retryable !== true) {
+    const body = await response.json().catch(() => null) as { error?: string; retryable?: boolean; degraded?: string[]; replanPending?: boolean } | null
+    const busy = response.status === 409
+    // `replanPending` solo es true si el servidor CONSIGUIÓ anotar el reajuste.
+    // Si no pudo, el mensaje vuelve a pedir la acción manual: prometer que se
+    // aplicará solo cuando no hay nada apuntado es la peor de las dos.
+    const anotado = body?.replanPending === true
+    if (!busy && body?.retryable !== true) {
       // El motivo real solo existe aquí: la respuesta lo trae y antes se tiraba.
       console.error('[settings] recalculo del Camino fallido:', response.status, body?.degraded?.join(', ') ?? body?.error ?? '')
-      return failed
+      return anotado ? failed : hardFailure
     }
     if (attempt < 3) {
       const seconds = Number(response.headers.get('Retry-After')) || 2
       await new Promise(resolve => window.setTimeout(resolve, seconds * 1000 * attempt))
+      continue
     }
+    // Agotados los reintentos.
+    if (!anotado) return hardFailure
+    return busy ? pending : failed
   }
-  return lastWasBusy ? busy : failed
+  return hardFailure
 }
 
 function weeklyDaysLabel(days: number | null) {
@@ -163,6 +181,9 @@ export default function SettingsPage() {
   const [gradeThreshold, setGradeThreshold] = useState<number | null>(null)
   const [subjectGradeThresholds, setSubjectGradeThresholds] = useState<Record<string, number>>({})
   const [gradeThresholdLoaded, setGradeThresholdLoaded] = useState('')
+  const [simulacroOverrideEnabled, setSimulacroOverrideEnabled] = useState(false)
+  const [simulacroOverridePct, setSimulacroOverridePct] = useState(DEFAULT_SIMULACRO_COVERAGE_PCT)
+  const [simulacroOverrideLoaded, setSimulacroOverrideLoaded] = useState('')
   // Convocatoria objetivo. Vive en Ajustes y no en el onboarding a propósito:
   // la inmensa mayoría se presenta a la ordinaria (que es el valor por defecto
   // correcto), y quien va a extraordinaria necesita poder cambiarlo sin que
@@ -210,6 +231,7 @@ export default function SettingsPage() {
               email_notifications: boolean; username?: string; custom_instructions?: string; subject_levels?: Record<string, string>
               grade_threshold_mode?: string; grade_threshold?: number | null; subject_grade_thresholds?: Record<string, number>
               pau_convocatoria?: string | null; pau_exam_date?: string | null
+              simulacro_coverage_override_enabled?: boolean; simulacro_coverage_override_pct?: number | null
             }
             setEmailNotifications(json.email_notifications ?? true)
             serverDisplayName = json.username ?? ''
@@ -252,6 +274,11 @@ export default function SettingsPage() {
             setPauConvocatoria(loadedConvocatoria)
             setPauExamDate(loadedExamDate)
             setPauLoaded(JSON.stringify({ convocatoria: loadedConvocatoria, examDate: loadedExamDate }))
+            const loadedOverrideEnabled = json.simulacro_coverage_override_enabled === true
+            const loadedOverridePct = typeof json.simulacro_coverage_override_pct === 'number' ? json.simulacro_coverage_override_pct : DEFAULT_SIMULACRO_COVERAGE_PCT
+            setSimulacroOverrideEnabled(loadedOverrideEnabled)
+            setSimulacroOverridePct(loadedOverridePct)
+            setSimulacroOverrideLoaded(JSON.stringify({ enabled: loadedOverrideEnabled, pct: loadedOverridePct }))
           }
         } catch { /* silent */ }
         try {
@@ -400,7 +427,8 @@ export default function SettingsPage() {
       const instructionsChanged = customInstructions.trim() !== customInstructionsLoaded.trim()
       const gradeThresholdChanged = JSON.stringify({ mode: gradeThresholdMode, general: gradeThreshold, bySubject: subjectGradeThresholds }) !== gradeThresholdLoaded
       const pauChanged = JSON.stringify({ convocatoria: pauConvocatoria, examDate: pauExamDate }) !== pauLoaded
-      if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged || pauChanged)) {
+      const simulacroOverrideChanged = JSON.stringify({ enabled: simulacroOverrideEnabled, pct: simulacroOverridePct }) !== simulacroOverrideLoaded
+      if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged || pauChanged || simulacroOverrideChanged)) {
         const res = await fetch('/api/profile', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -416,6 +444,10 @@ export default function SettingsPage() {
               pau_convocatoria: pauConvocatoria,
               pau_exam_date: pauExamDate || null,
             } : {}),
+            ...(simulacroOverrideChanged ? {
+              simulacro_coverage_override_enabled: simulacroOverrideEnabled,
+              simulacro_coverage_override_pct: simulacroOverridePct,
+            } : {}),
           }),
         })
         if (res.ok && instructionsChanged) setCustomInstructionsLoaded(customInstructions.trim())
@@ -424,6 +456,9 @@ export default function SettingsPage() {
         }
         if (res.ok && pauChanged) {
           setPauLoaded(JSON.stringify({ convocatoria: pauConvocatoria, examDate: pauExamDate }))
+        }
+        if (res.ok && simulacroOverrideChanged) {
+          setSimulacroOverrideLoaded(JSON.stringify({ enabled: simulacroOverrideEnabled, pct: simulacroOverridePct }))
         }
       }
       if (token && onboarding?.completedAt) {
@@ -467,7 +502,7 @@ export default function SettingsPage() {
         // ahora, no mañana. Sin esto, el throttle diario de la ruta se lo
         // saltaría en silencio.
         setCaminoPrefsStatus(await recalculateCamino(token))
-      } else if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged)) {
+      } else if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged || simulacroOverrideChanged)) {
         await fetch('/api/camino/ensure-calendar', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -987,6 +1022,37 @@ export default function SettingsPage() {
               </div>
             )}
             <Hint>Cuando saques menos de esta nota en un simulacro, examen o curso, Kairo te sugerirá repetirlo — tú decides si aceptar.</Hint>
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <Toggle
+              label="Generar Simulacro aunque no haya completado el Curso"
+              description="Por defecto, Kairo nunca genera el Simulacro de un examen si no llegas (o no puedes llegar a tiempo) al umbral mínimo de Curso completado. Actívalo si prefieres hacer el Simulacro igualmente."
+              checked={simulacroOverrideEnabled}
+              onChange={setSimulacroOverrideEnabled}
+            />
+            {simulacroOverrideEnabled && (
+              <div style={{ marginTop: 14, padding: '14px 16px', borderRadius: 10, border: '1px solid var(--clay-border)', background: 'var(--clay-bg)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--clay-text)' }}>
+                    Umbral mínimo de Curso completado
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 900, color: 'var(--clay-accent-text)' }}>{simulacroOverridePct}%</span>
+                </div>
+                <input
+                  type="range"
+                  min={MIN_SIMULACRO_COVERAGE_OVERRIDE_PCT}
+                  max={MAX_SIMULACRO_COVERAGE_OVERRIDE_PCT}
+                  step={5}
+                  value={simulacroOverridePct}
+                  onChange={e => setSimulacroOverridePct(Number(e.target.value))}
+                  style={{ width: '100%', accentColor: 'var(--clay-accent)' }}
+                />
+                <Hint>
+                  Si hay que saltarse temario por falta de tiempo, Kairo generará el Simulacro en cuanto llegues a este porcentaje de misiones completadas del bloque, en vez de exigir el {DEFAULT_SIMULACRO_COVERAGE_PCT}% por defecto.
+                </Hint>
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>

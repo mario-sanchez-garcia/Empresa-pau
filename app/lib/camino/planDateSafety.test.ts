@@ -317,6 +317,97 @@ test('una ejecución degradada NO marca el día como hecho', () => {
   )
 })
 
+test('la siembra no puede proponer una segunda colocacion viva del mismo item', () => {
+  // Un alumno con 6 dias de estudio a la semana veia "Repaso libre" a partir
+  // de su ultimo dia sembrado. No era una decision sobre sus dias: el lote de
+  // ~100 misiones del mes se rechazaba ENTERO porque una sola fila chocaba con
+  // el indice camino_one_live_placement_per_queue. El upsert lleva
+  // ignoreDuplicates sobre (user_id, scheduled_date, subject, v2_sort_order) y
+  // un ON CONFLICT DO NOTHING solo perdona la restriccion que nombra.
+  const ensure = stripComments(read('ensureCaminoCalendar.ts')).replace(/\s+/g, ' ')
+  assert.ok(
+    ensure.includes('alreadyPlacedQueueIds'),
+    'la siembra no mira si el item de cola ya tiene una colocacion viva',
+  )
+  assert.ok(
+    ensure.includes('if (alreadyPlacedQueueIds.has(item.id)) continue'),
+    'un item ya colocado entra igual en la siembra y tumba el lote entero',
+  )
+  // La lista de ocupados se lee SIN filtro de fecha: el indice unico no mira
+  // scheduled_date, asi que una colocacion viva en el pasado colisiona igual.
+  assert.ok(
+    /livePlacementRows[\s\S]{0,400}?\.in\('status', \['pending', 'postponed'\]\)/.test(ensure),
+    'la lista de items ya colocados no se limita a las filas vivas',
+  )
+})
+
+test('el cliente no recorta los dias que el servidor ya tiene sembrados', () => {
+  // El fetch del calendario llevaba un `.limit(110)` pensado como "de sobra".
+  // El tope es de FILAS y cada dia lleva varias misiones: un Camino bien
+  // sembrado (30 dias) pasa de 170, y como el orden es por fecha lo que se
+  // perdia era la cola. Catorce dias que SI estaban en Supabase llegaban
+  // vacios y el generador local los pintaba como "Repaso libre", justo
+  // despues de que el motor empezara a sembrar bien.
+  const client = stripComments(
+    readFileSync(join(process.cwd(), 'app', 'components', 'camino', 'CaminoCalendarClient.tsx'), 'utf8'),
+  )
+  const fetchBody = client.slice(
+    client.indexOf('async function fetchCaminoCalendar'),
+    client.indexOf('async function fetchCaminoCalendar') + 2000,
+  )
+  assert.ok(fetchBody.includes('readAllRows'), 'el calendario del cliente no se pagina')
+  assert.ok(!/\.limit\(\d+\)/.test(fetchBody), 'el calendario del cliente vuelve a recortarse con un tope de filas')
+})
+
+test('un dia sin planificar no se anuncia como dia libre', () => {
+  // "Repaso libre" significa que ese dia de estudio se queda sin mision.
+  // Un dia posterior al ultimo que el servidor ha sembrado no es eso: es un
+  // dia sobre el que todavia no hay decision. Llamarlo libre contradecia los
+  // dias de estudio que el alumno acababa de elegir.
+  const client = stripComments(
+    readFileSync(join(process.cwd(), 'app', 'components', 'camino', 'CaminoCalendarClient.tsx'), 'utf8'),
+  ).replace(/\s+/g, ' ')
+  assert.ok(client.includes('Aún sin planificar'), 'no se distingue el dia sin planificar del dia libre')
+  assert.ok(client.includes('const beyondPlan ='), 'no se calcula si el dia cae mas alla del plan confirmado')
+  // Sin plan confirmado cargado no se afirma ninguna de las dos cosas.
+  assert.ok(
+    client.includes("confirmedPlanEnd !== '' && day.date > confirmedPlanEnd"),
+    'se decide "sin planificar" sin saber hasta donde llega el plan confirmado',
+  )
+})
+
+test('un reajuste que pilla el Camino ocupado no se pierde ni se delega en el alumno', () => {
+  // Guardar los ajustes tiene que bastar. El bloqueo por alumno que comparte
+  // ensure-calendar con el resto del Camino hace que un `force` legítimo se
+  // lleve un 409 solo por tenerlo abierto en otra pestaña; antes eso acababa
+  // en «cierra las demás pestañas y pulsa Recalcular» y el plan se quedaba
+  // viejo. Ahora queda apuntado en camino_ensure_log.replan_pending_at y lo
+  // aplica la siguiente ejecución.
+  const route = stripComments(
+    readFileSync(join(ROOT, '../api/camino/ensure-calendar/route.ts'), 'utf8'),
+  ).replace(/\s+/g, ' ')
+  assert.ok(route.includes('markReplanPending'), 'un reajuste que no entra no se apunta en ninguna parte')
+  // Las dos salidas por las que un `force` puede no entrar: la ejecución
+  // degradada y el catch (ocupado o error). Ninguna puede quedarse sin anotar.
+  assert.ok(route.includes('if (force) degradedPending = await markReplanPending(db, user.id)'), 'un reajuste forzado que sale degradado se pierde')
+  assert.ok(route.includes('const pending = force ? await markReplanPending(db, user.id) : false'), 'un reajuste forzado que falla o pilla el plan ocupado se pierde')
+  assert.ok(route.includes('if (pendingAt) force = true'), 'el pendiente no se salta el throttle diario, así que no llegaría a aplicarse')
+  // La limpieza va por igualdad con la marca leída: un pendiente NUEVO que
+  // entre mientras corre esta ejecución tiene que sobrevivir.
+  assert.ok(
+    route.includes(".eq('replan_pending_at', pendingAt)"),
+    'el pendiente se borra a ciegas y puede llevarse por delante uno posterior',
+  )
+
+  const settings = readFileSync(join(process.cwd(), 'app', 'settings', 'page.tsx'), 'utf8')
+  const busyMessage = settings.split('\n').find(line => line.includes('const pending: CaminoPrefsStatus')) ?? ''
+  assert.ok(busyMessage.length > 0, 'Ajustes ya no distingue el caso "ocupado"')
+  assert.ok(
+    !busyMessage.includes('Recalcular'),
+    'Ajustes sigue pidiendo pulsar «Recalcular» por algo que se aplica solo',
+  )
+})
+
 test('el trabajo sin fecha se le muestra al alumno', () => {
   // El recuento ya no lo hace el navegador: vive en /api/camino/plan-status,
   // que puede descontar el trabajo que la cola ya ha resuelto — algo que el

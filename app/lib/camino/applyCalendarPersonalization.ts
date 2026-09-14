@@ -6,6 +6,7 @@ import { readAllRows } from './readAllRows'
 import { reconcilePlanWork } from './planPersistence'
 import { getAvailabilityForDate } from '../calendar/availability'
 import { minutesForPlacement, placementDurationMetadata } from './placementDuration'
+import { MissionSlots, type SlotRow } from './placementSlots'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
 import { getMadridToday } from './studyDays'
@@ -242,6 +243,18 @@ export async function applyCalendarPersonalization(
       row,
     }))
 
+    // Plazas de la restricción UNIQUE(user_id, scheduled_date, subject,
+    // v2_sort_order). Se siembra con TODO el calendario del alumno, no sólo
+    // con lo que este pase mueve: una misión completada o fallada ocupa su
+    // plaza igual, porque la restricción no mira el estado. Ver placementSlots.
+    const slots = new MissionSlots(await readAllRows<SlotRow>((from, to) => supabase
+      .from('camino_calendar')
+      .select('scheduled_date, subject, v2_sort_order')
+      .eq('user_id', userId)
+      .not('v2_sort_order', 'is', null)
+      .order('id', { ascending: true })
+      .range(from, to)))
+
     // El ORDEN y las FECHAS ELEGIBLES de cada fila —parciales incluidos— los
     // decide planPlacement.ts, puro y con tests. Aquí solo se ejecuta contra
     // el scheduler real.
@@ -249,6 +262,9 @@ export async function applyCalendarPersonalization(
       const row = candidate.row
       const meta = metadataObject(row.metadata)
       for (const date of preferredDatesFor(candidate, window)) {
+        // Un día cuya plaza ya está tomada no es una fecha elegible para esta
+        // misión: colocarla ahí abortaría la transacción entera del pase.
+        if (!slots.available(date, row)) continue
         const scheduler = await schedulerFor(date)
         const duration = minutesForPlacement(candidate.missionType, meta)
         const timeSlot = scheduler.placeBest(duration, {
@@ -277,6 +293,7 @@ export async function applyCalendarPersonalization(
             },
           },
         })
+        slots.move(date, row)
         placedIds.add(row.id)
         break
       }

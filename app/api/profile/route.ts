@@ -5,6 +5,7 @@ import { validateUsername, normalizeUsername } from '@/app/lib/username'
 import { cleanStudentExams } from '@/app/lib/camino/cleanStudentExams'
 import { isConvocatoria } from '@/app/lib/camino/examDate'
 import { MAX_GRADE_THRESHOLD, MIN_GRADE_THRESHOLD, type GradeThresholdMode } from '@/app/lib/camino/gradeThreshold'
+import { clampSimulacroCoveragePct } from '@/app/lib/camino/simulacroCoverageOverride'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,6 +36,15 @@ function cleanGradeThreshold(value: unknown): number | null | undefined {
   const n = Number(value)
   if (!Number.isFinite(n)) return undefined
   return Math.min(MAX_GRADE_THRESHOLD, Math.max(MIN_GRADE_THRESHOLD, n))
+}
+
+// null explícito = "borra el valor guardado" (igual que cleanGradeThreshold);
+// cualquier otro valor no numérico se ignora sin error.
+function cleanSimulacroCoverageOverridePct(value: unknown): number | null | undefined {
+  if (value === null) return null
+  const n = Number(value)
+  if (!Number.isFinite(n)) return undefined
+  return clampSimulacroCoveragePct(n)
 }
 
 function cleanSubjectGradeThresholds(value: unknown): Record<string, number> {
@@ -76,7 +86,7 @@ export async function GET(request: NextRequest) {
   const db = createServiceClient()
   let { data, error: fetchError } = await db
     .from('perfiles')
-    .select('email_notifications, student_exams, username, custom_instructions, subject_levels, last_weekly_checkin_at, grade_threshold_mode, grade_threshold, subject_grade_thresholds, target_degree, target_university, target_admission_score, target_orientation_source_type, target_orientation_updated_at, target_orientation_community, pau_convocatoria, pau_comunidad, pau_exam_date')
+    .select('email_notifications, student_exams, username, custom_instructions, subject_levels, last_weekly_checkin_at, grade_threshold_mode, grade_threshold, subject_grade_thresholds, target_degree, target_university, target_admission_score, target_orientation_source_type, target_orientation_updated_at, target_orientation_community, pau_convocatoria, pau_comunidad, pau_exam_date, simulacro_coverage_override_enabled, simulacro_coverage_override_pct')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -114,6 +124,8 @@ export async function GET(request: NextRequest) {
     pau_convocatoria: data?.pau_convocatoria ?? null,
     pau_comunidad: data?.pau_comunidad ?? null,
     pau_exam_date: data?.pau_exam_date ?? null,
+    simulacro_coverage_override_enabled: data?.simulacro_coverage_override_enabled ?? false,
+    simulacro_coverage_override_pct: data?.simulacro_coverage_override_pct ?? null,
   })
 }
 
@@ -156,6 +168,17 @@ export async function PATCH(request: NextRequest) {
   }
   if (body.pau_comunidad !== undefined) {
     allowed.pau_comunidad = typeof body.pau_comunidad === 'string' ? body.pau_comunidad.trim().slice(0, 80) || null : null
+  }
+  // Ajuste individual para desactivar bajo su propio criterio el umbral fijo
+  // del 80% de cobertura del Curso antes de generar el Simulacro (ver
+  // resolveCoverageThresholdForStudent en injectPartialExamMissions.ts). Solo
+  // afecta a este alumno -- nadie más cambia de comportamiento por esto.
+  if (typeof body.simulacro_coverage_override_enabled === 'boolean') {
+    allowed.simulacro_coverage_override_enabled = body.simulacro_coverage_override_enabled
+  }
+  if (body.simulacro_coverage_override_pct !== undefined) {
+    const cleaned = cleanSimulacroCoverageOverridePct(body.simulacro_coverage_override_pct)
+    if (cleaned !== undefined) allowed.simulacro_coverage_override_pct = cleaned
   }
 
   if (typeof body.username === 'string') {

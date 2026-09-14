@@ -28,6 +28,13 @@ function isPublicRoute(pathname: string) {
   return pathname === '/' || pathname === '/landing' || pathname.startsWith('/landing/') || pathname === '/login' || pathname.startsWith('/login/')
 }
 
+// En /settings la barra de guardado ("Guardar cambios") vive pegada abajo del
+// todo -- el widget flotante, en su posición normal (bottom:20), la tapa. Solo
+// aquí se sube con un offset extra; en el resto de la app no cambia nada.
+function isSettingsRoute(pathname: string) {
+  return pathname === '/settings' || pathname.startsWith('/settings/')
+}
+
 // Widget flotante global de reporte de bugs — vive fuera de <main>, montado
 // directamente en app/layout.tsx (igual que BackToTop), y solo se muestra
 // con sesión activa: un reporte de bug siempre debe poder atribuirse a un
@@ -143,7 +150,7 @@ export default function BugReportWidget() {
   const canSubmit = message.trim().length >= MIN_MESSAGE_LENGTH && phase === 'idle'
 
   return (
-    <div data-bug-widget-ignore="true" style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 50 }}>
+    <div data-bug-widget-ignore="true" style={{ position: 'fixed', bottom: isSettingsRoute(pathname ?? '') ? 90 : 20, right: 20, zIndex: 50 }}>
       <ClayThemeScope theme={theme} style={{ background: 'transparent' }}>
         {open ? (
           <div

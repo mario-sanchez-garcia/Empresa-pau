@@ -1,5 +1,6 @@
 'use client'
 
+import { ensureServerCalendar } from '@/app/lib/camino/ensureCalendarClient'
 import { useStudyAccess } from '@/app/hooks/useStudyAccess'
 import { availabilityError, studyDayOptions } from '@/app/lib/camino/studyAccess'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -107,50 +108,13 @@ type CaminoPrefsStatus = { tone: 'ok' | 'warn'; text: string }
  * guardar sus ajustes tiene que bastar. El servidor deja el reajuste apuntado
  * (`replanPending`, ver camino_ensure_log.replan_pending_at) y lo aplica en su
  * siguiente ejecución —abrir el Camino ya la provoca—, así que aquí solo se
- * cuenta lo que va a pasar. «Recalcular mi plan» sigue existiendo, pero como
- * opción, no como deber.
+ * cuenta lo que va a pasar. Se usa el mismo coordinador que la carga de Camino.
  */
 async function recalculateCamino(token: string): Promise<CaminoPrefsStatus> {
-  const pending: CaminoPrefsStatus = { tone: 'ok', text: 'Tus ajustes se han guardado. Tu Camino se estaba actualizando en otro sitio, así que el reajuste queda pendiente y se aplicará solo en cuanto termine: no tienes que hacer nada.' }
-  const failed: CaminoPrefsStatus = { tone: 'warn', text: 'Tus ajustes se han guardado, pero el reajuste de tu Camino no ha entrado a la primera. Queda pendiente y se aplicará solo la próxima vez que lo abras; si lo ves igual mañana, repórtalo y lo miramos.' }
-  // Solo para un servidor que ni siquiera pudo apuntar el pendiente (respuesta
-  // antigua, sin `replanPending`): ahí sí hace falta la acción manual.
-  const hardFailure: CaminoPrefsStatus = { tone: 'warn', text: 'Tus ajustes se han guardado, pero no hemos podido reajustar tu Camino ahora. Prueba con «Recalcular mi plan»; si sigue igual, repórtalo y lo miramos.' }
-
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    let response: Response
-    try {
-      response = await fetch('/api/camino/ensure-calendar', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ force: true }),
-      })
-    } catch {
-      return { tone: 'warn', text: 'Tus ajustes se han guardado, pero no hemos podido recalcular tu Camino: revisa la conexión. Se reajustará solo la próxima vez que lo abras.' }
-    }
-    if (response.ok) return { tone: 'ok', text: 'Tu Camino se ha ajustado para las próximas misiones.' }
-
-    const body = await response.json().catch(() => null) as { error?: string; retryable?: boolean; degraded?: string[]; replanPending?: boolean } | null
-    const busy = response.status === 409
-    // `replanPending` solo es true si el servidor CONSIGUIÓ anotar el reajuste.
-    // Si no pudo, el mensaje vuelve a pedir la acción manual: prometer que se
-    // aplicará solo cuando no hay nada apuntado es la peor de las dos.
-    const anotado = body?.replanPending === true
-    if (!busy && body?.retryable !== true) {
-      // El motivo real solo existe aquí: la respuesta lo trae y antes se tiraba.
-      console.error('[settings] recalculo del Camino fallido:', response.status, body?.degraded?.join(', ') ?? body?.error ?? '')
-      return anotado ? failed : hardFailure
-    }
-    if (attempt < 3) {
-      const seconds = Number(response.headers.get('Retry-After')) || 2
-      await new Promise(resolve => window.setTimeout(resolve, seconds * 1000 * attempt))
-      continue
-    }
-    // Agotados los reintentos.
-    if (!anotado) return hardFailure
-    return busy ? pending : failed
-  }
-  return hardFailure
+  const pending: CaminoPrefsStatus = { tone: 'warn', text: 'Tus ajustes están guardados. La actualización sigue pendiente; volveremos a intentarla automáticamente al abrir Camino.' }
+  return await ensureServerCalendar(token, true)
+    ? { tone: 'ok', text: 'Tus ajustes están guardados y tu Camino actualizado.' }
+    : pending
 }
 
 function weeklyDaysLabel(days: number | null) {
@@ -169,6 +133,7 @@ export default function SettingsPage() {
   const [email, setEmail] = useState('')
   const [preferences, setPreferences] = useState<Preferences>(defaults)
   const [saved, setSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [emailNotifSaving, setEmailNotifSaving] = useState(false)
@@ -191,8 +156,6 @@ export default function SettingsPage() {
   const [pauConvocatoria, setPauConvocatoria] = useState<Convocatoria>('ordinaria')
   const [pauExamDate, setPauExamDate] = useState('')
   const [pauLoaded, setPauLoaded] = useState('')
-  const [recalculating, setRecalculating] = useState(false)
-  const [recalculateStatus, setRecalculateStatus] = useState('')
   const [customInstructions, setCustomInstructions] = useState('')
   const [customInstructionsLoaded, setCustomInstructionsLoaded] = useState('')
   const [username, setUsername] = useState('')
@@ -416,14 +379,16 @@ export default function SettingsPage() {
   }
 
   async function save() {
+    if (saving) return
+    setSaving(true)
     try {
       saveProfilePreferences(userId, preferences)
       setSaveError('')
       setCaminoPrefsStatus(null)
-      setSaved(true)
-      window.setTimeout(() => setSaved(false), 2200)
+      setSaved(false)
       const session = await supabase.auth.getSession()
       const token = session.data.session?.access_token
+      if (!token) throw new Error('Vuelve a iniciar sesión para guardar tus ajustes.')
       const instructionsChanged = customInstructions.trim() !== customInstructionsLoaded.trim()
       const gradeThresholdChanged = JSON.stringify({ mode: gradeThresholdMode, general: gradeThreshold, bySubject: subjectGradeThresholds }) !== gradeThresholdLoaded
       const pauChanged = JSON.stringify({ convocatoria: pauConvocatoria, examDate: pauExamDate }) !== pauLoaded
@@ -450,6 +415,7 @@ export default function SettingsPage() {
             } : {}),
           }),
         })
+        if (!res.ok) throw new Error('No se pudieron guardar los cambios de tu perfil. Revisa la conexión e inténtalo de nuevo.')
         if (res.ok && instructionsChanged) setCustomInstructionsLoaded(customInstructions.trim())
         if (res.ok && gradeThresholdChanged) {
           setGradeThresholdLoaded(JSON.stringify({ mode: gradeThresholdMode, general: gradeThreshold, bySubject: subjectGradeThresholds }))
@@ -501,49 +467,18 @@ export default function SettingsPage() {
         // personalizadas) y espera que sus próximas misiones se reajusten
         // ahora, no mañana. Sin esto, el throttle diario de la ruta se lo
         // saltaría en silencio.
+        setCaminoPrefsStatus({ tone: 'ok', text: 'Ajustes guardados. Actualizando tu Camino…' })
         setCaminoPrefsStatus(await recalculateCamino(token))
-      } else if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged || simulacroOverrideChanged)) {
-        await fetch('/api/camino/ensure-calendar', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ force: true }),
-        }).catch(() => undefined)
+      } else if (token && (instructionsChanged || Object.keys(subjectLevels).length > 0 || gradeThresholdChanged || pauChanged)) {
+        setCaminoPrefsStatus({ tone: 'ok', text: 'Ajustes guardados. Actualizando tu Camino…' })
+        setCaminoPrefsStatus(await recalculateCamino(token))
       }
+      setSaved(true)
+      window.setTimeout(() => setSaved(false), 2200)
     } catch (error) {
       setSaved(false)
       setSaveError(error instanceof Error ? error.message : 'No se han podido guardar todos los cambios. Revisa la conexión y vuelve a intentarlo.')
-    }
-  }
-
-  // Manual "recalcular mi plan" — always available, independent of whether
-  // any field actually changed (saving days/minutos/instrucciones already
-  // forces a recalculation as a side effect of changing them; this covers
-  // "nothing changed but I want a fresh look at my plan").
-  async function recalculateNow() {
-    setRecalculating(true)
-    setRecalculateStatus('')
-    try {
-      const session = await supabase.auth.getSession()
-      const token = session.data.session?.access_token
-      if (!token) throw new Error('no_session')
-      const res = await fetch('/api/camino/ensure-calendar', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ force: true }),
-      })
-      if (!res.ok) throw new Error('recalculate_failed')
-      await fetch('/api/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ mark_weekly_checkin: true }),
-      }).catch(() => undefined)
-      setRecalculateStatus('Tu Camino se ha recalculado.')
-    } catch {
-      setRecalculateStatus('No se ha podido recalcular. Revisa la conexión e inténtalo de nuevo.')
-    } finally {
-      setRecalculating(false)
-      window.setTimeout(() => setRecalculateStatus(''), 4000)
-    }
+    } finally { setSaving(false) }
   }
 
   async function deleteAccount() {
@@ -1055,18 +990,6 @@ export default function SettingsPage() {
             )}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-            <button
-              type="button"
-              onClick={recalculateNow}
-              disabled={recalculating}
-              style={{ padding: '10px 16px', borderRadius: 10, border: '1px solid var(--clay-border)', background: 'var(--clay-surface)', fontSize: 12, fontWeight: 800, color: 'var(--clay-text)', cursor: recalculating ? 'default' : 'pointer', opacity: recalculating ? 0.6 : 1 }}
-            >
-              {recalculating ? 'Recalculando…' : 'Recalcular mi plan ahora'}
-            </button>
-            {recalculateStatus && <span style={{ fontSize: 11, fontWeight: 700, color: recalculateStatus.startsWith('No') ? (dark ? '#fca5a5' : '#dc2626') : '#16a34a' }}>{recalculateStatus}</span>}
-          </div>
-
           <Toggle
             label={`Recordatorios de estudio por email${emailNotifSaving ? ' · Guardando…' : ''}`}
             description="Kairo te avisará cuando tengas misiones pendientes en Camino PAU."
@@ -1114,8 +1037,8 @@ export default function SettingsPage() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
             {saveError && <div style={{ maxWidth: 360, borderRadius: 10, padding: '8px 14px', fontSize: 11, fontWeight: 600, ...(dark ? { border: '1px solid rgba(248,113,113,0.35)', background: 'rgba(248,113,113,0.12)', color: '#fca5a5' } : { border: '1px solid #fee2e2', background: '#fff5f5', color: '#dc2626' }) }}>{saveError}</div>}
-            <button type="button" onClick={save} style={{ padding: '10px 22px', borderRadius: 999, background: 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', fontSize: 12, fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
-              <Save size={14} /> {saved ? 'Cambios guardados' : 'Guardar cambios'}
+            <button type="button" onClick={save} disabled={saving} style={{ padding: '10px 22px', borderRadius: 999, background: 'var(--clay-accent-deep)', color: 'var(--clay-on-accent)', fontSize: 12, fontWeight: 900, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
+              <Save size={14} /> {saving ? 'Guardando y actualizando…' : saved ? 'Cambios guardados' : 'Guardar cambios'}
             </button>
           </div>
         </div>

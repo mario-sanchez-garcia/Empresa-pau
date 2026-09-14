@@ -511,3 +511,61 @@ test('HTTP planning contention returns 409 only while the owner runs and succeed
  assert.equal(retry.status,200)
  assert.equal((await retry.json()).skipped,'already_ensured_today')
 })
+
+test('opening October 19–25 extends the real server plan beyond thirty study days at 180 min × 6',async()=>{
+ const user='future-week',journey=runtime('2026-09-14'),subjects=['fisica','matematicas_ii','matematicas_ccss','historia_espana']
+ const work=Array.from({length:480},(_,i)=>({...q(`topic-${i}`,20,{subject:subjects[i%4],metadata:{mission_type:'concept',content_estimated_minutes:20}}),user_id:user,v2_sort_order:Math.floor(i/4)+1,subject_position:Math.floor(i/4),title:`Tema ${i}`}))
+ const db=database({perfiles:[{id:user,subjects,pau_exam_date:'2027-06-07',student_exams:[]}],
+  user_entitlements:[{user_id:user,plan_id:'premium',status:'active'}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:6}}],user_learning_queue:work})
+ const api=runtime('2026-09-14',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'fixture'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/ensure-calendar/route.ts')
+ assert.equal((await api.POST({json:async()=>({})})).status,200)
+ assert.ok(db.tables.camino_calendar.filter(r=>r.scheduled_date==='2026-10-20'&&r.status==='pending').reduce((sum,r)=>sum+journey('app/lib/camino/missionDuration.ts').estimatedMinutesForMission(r),0)<180,'the initial horizon leaves the following week incomplete')
+ const response=await api.POST({json:async()=>({throughDate:'2026-10-25'})})
+ assert.equal(response.status,200);assert.equal((await response.json()).skipped,undefined)
+ const days=journey('app/lib/camino/planWindow.ts').planningDates(await journey('app/lib/camino/studentPlanContext.ts').loadStudentPlanContext(user,db))
+ const rows=db.tables.camino_calendar.filter(r=>r.status==='pending')
+ for(const date of days.filter(d=>d>='2026-10-19'&&d<='2026-10-25')){
+  const day=rows.filter(r=>r.scheduled_date===date)
+  assert.ok(day.length>0,`${date} must be materialized when opening this week`)
+  const total=day.reduce((sum,r)=>sum+journey('app/lib/camino/missionDuration.ts').estimatedMinutesForMission(r),0)
+  assert.equal(total,180)
+ }
+ const ids=rows.map(r=>r.queue_id).filter(Boolean)
+ assert.equal(new Set(ids).size,ids.length,'no duplicated work while expanding')
+ const again=await api.POST({json:async()=>({throughDate:'2026-10-25'})})
+ assert.equal(again.status,200)
+ assert.equal(db.tables.camino_calendar.filter(r=>r.status==='pending').length,rows.length)
+})
+
+test('pending settings apply on a normal visit without a manual recalculation request',async()=>{
+ const user='saved-settings',db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',subjects:[]}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:2}}],
+  camino_calendar:[{...row('existing'),user_id:user}],camino_ensure_log:[{user_id:user,last_ensured_day:'2027-01-11'}]})
+ await load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization(user,db)
+ db.tables.billing_events[0].payload.daily_minutes=30
+ assert.equal(await load('app/lib/camino/replanPending.ts').markReplanPending(db,user),true)
+ const api=runtime('2027-01-11',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'fixture'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/ensure-calendar/route.ts')
+ const response=await api.POST({json:async()=>({})})
+ assert.equal(response.status,200);assert.equal((await response.json()).skipped,undefined)
+ assert.equal(db.tables.camino_ensure_log[0].replan_pending_at,null)
+ assert.equal((await load('app/lib/camino/planNotices.ts').collectPlanNotices(user,db)).misplaced.length,0)
+})
+
+test('planning dates are validated and optional pending-marker failure never masks the main result',async()=>{
+ const user='validation',db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',subjects:[]}]})
+ const api=runtime('2027-01-11',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'fixture'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/ensure-calendar/route.ts')
+ for(const throughDate of ['bad','2027-02-31','2030-01-01']) assert.equal((await api.POST({json:async()=>({throughDate})})).status,400)
+ db.failNext('camino_ensure_log','upsert')
+ const checked=load('app/lib/camino/checkedDb.ts').checkedDb(db)
+ assert.equal(await load('app/lib/camino/replanPending.ts').markReplanPending(checked,user),false)
+})

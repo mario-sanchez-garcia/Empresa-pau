@@ -131,3 +131,15 @@ test('different sessions never share a planning response',async()=>{
   await Promise.all([ensureServerCalendar('one'),ensureServerCalendar('two')])
   assert.equal(h.attempts(),2)
 })
+
+test('opening a farther week queues the requested horizon without losing it behind the initial load',async()=>{
+ const h=harness([{status:200,body:{ok:true}}])
+ let release!:()=>void
+ const gate=new Promise<void>(resolve=>{release=resolve}),fetchImpl=globalThis.fetch
+ globalThis.fetch=async(...args)=>{await gate;return fetchImpl(...args)}
+ const initial=ensureServerCalendar('week')
+ const later=ensureServerCalendar('week',false,'2026-10-25')
+ assert.equal(later,ensureServerCalendar('week',false,'2026-10-25'))
+ release();await Promise.all([initial,later])
+ assert.deepEqual(h.calls,[{force:false},{force:false,throughDate:'2026-10-25'}])
+})

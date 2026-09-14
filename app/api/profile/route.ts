@@ -1,3 +1,4 @@
+import { markReplanPending } from '@/app/lib/camino/replanPending'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServiceClient } from '@/app/lib/billing/supabase'
@@ -208,5 +209,7 @@ export async function PATCH(request: NextRequest) {
 
   if (upsertError) return NextResponse.json({ error: upsertError.message }, { status: 500 })
 
-  return NextResponse.json({ ok: true })
+  const planChanged = ['pau_exam_date', 'pau_convocatoria', 'pau_comunidad', 'student_exams', 'subject_levels'].some(key => key in allowed)
+  const replanPending = planChanged ? await markReplanPending(db, user.id) : false
+  return NextResponse.json({ ok: true, replanPending })
 }

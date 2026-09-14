@@ -269,6 +269,7 @@ export type EnsureCaminoCalendarResult = {
 export async function ensureCaminoCalendar(
   userId: string,
   supabase: SupabaseClient,
+  options: { throughDate?: string } = {},
 ): Promise<EnsureCaminoCalendarResult> {
   const degraded: string[] = []
   const protectedConflicts: string[] = []
@@ -888,7 +889,13 @@ export async function ensureCaminoCalendar(
   // mitad de la decisión. Ahora se consume su salida completa, y la elección
   // local solo actúa como respaldo cuando a la asignatura que el motor eligió
   // ya no le queda cola (dato que el motor no tiene hasta este punto).
-  const horizonEndDate = addDays(today, CALENDAR_HORIZON * 4)
+  // La navegación puede pedir una semana posterior a los 30 días iniciales.
+  // Se rellena el prefijo cronológico, conservando los mismos límites de carga.
+  const requestedDates = options.throughDate
+    ? planningDates(planContext, { includeFinalReviewWindow: true }).filter(date => date <= options.throughDate!).length : 0
+  const calendarHorizon = Math.max(CALENDAR_HORIZON, requestedDates)
+  const horizonEndDate = options.throughDate && options.throughDate > addDays(today, CALENDAR_HORIZON * 4)
+    ? options.throughDate : addDays(today, CALENDAR_HORIZON * 4)
   const planDays = buildPlanDays({
     from: today,
     to: horizonEndDate,
@@ -918,7 +925,7 @@ export async function ensureCaminoCalendar(
     .filter(day => day.subject != null)
     .map(day => day.date)
     .filter(d => finalSprint || d < planningCutoff)
-    .slice(0, CALENDAR_HORIZON)
+    .slice(0, calendarHorizon)
 
   if (candidateFillDays.length === 0) return { ok: degraded.length === 0, degraded, protectedConflicts }
 

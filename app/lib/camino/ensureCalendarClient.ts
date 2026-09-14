@@ -22,22 +22,22 @@ export type PlanErrorEvent = CustomEvent<PlanFailure>
 
 // Una llamada compartida por sesión. El montaje, el reintento tras calendario
 // vacío y los botones pueden coincidir; no deben competir por el mismo lease.
-const running = new Map<string, { force: boolean; promise: Promise<boolean> }>()
+const running = new Map<string, { force: boolean; throughDate?: string; promise: Promise<boolean> }>()
 
-export function ensureServerCalendar(token: string, force = false): Promise<boolean> {
+export function ensureServerCalendar(token: string, force = false, throughDate?: string): Promise<boolean> {
   const previous = running.get(token)
-  if (previous && (!force || previous.force)) return previous.promise
+  if (previous && (!force || previous.force) && (!throughDate || (previous.throughDate ?? '') >= throughDate)) return previous.promise
   // Un cambio de preferencias exige force; si estaba en curso una carga normal,
   // ejecutar el cambio después. Otros llamantes compartirán esa misma espera.
-  const entry = { force, promise: null as unknown as Promise<boolean> }
-  entry.promise = (previous ? previous.promise.then(() => runEnsure(token, force)) : runEnsure(token, force))
+  const entry = { force, throughDate, promise: null as unknown as Promise<boolean> }
+  entry.promise = (previous ? previous.promise.then(() => runEnsure(token, force, throughDate)) : runEnsure(token, force, throughDate))
     .finally(() => { if (running.get(token) === entry) running.delete(token) })
   running.set(token, entry)
   return entry.promise
 }
 
 /** A successful HTTP response alone does not mean the planning run succeeded. */
-async function runEnsure(token: string, force: boolean): Promise<boolean> {
+async function runEnsure(token: string, force: boolean, throughDate?: string): Promise<boolean> {
   let failure: PlanFailure = { kind: 'network', steps: [], status: null }
   let busyAttempts = 0
   let failedAttempts = 0
@@ -49,7 +49,7 @@ async function runEnsure(token: string, force: boolean): Promise<boolean> {
       try {
         const response = await fetch('/api/camino/ensure-calendar', {
           method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ force }), signal: AbortSignal.timeout(320_000),
+          body: JSON.stringify({ force, ...(throughDate ? { throughDate } : {}) }), signal: AbortSignal.timeout(320_000),
         })
         const body = await response.json().catch(() => null)
         if (response.ok && body?.ok === true) {

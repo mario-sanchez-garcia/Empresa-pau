@@ -1,3 +1,4 @@
+import { markReplanPending } from '@/app/lib/camino/replanPending'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthContext, isValidRouteId } from '@/app/lib/camino/caminoProgressServer'
 import { createServiceClient } from '@/app/lib/billing/supabase'
@@ -106,5 +107,6 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  return respond({ ok: true, routeId, entryDate, studyAccess: access, weeklyStudyDaysValue: cleaned.weeklyStudyDaysValue, dailyMinutes: cleaned.dailyMinutes })
+  const replanPending = await markReplanPending(serviceDb, user.id)
+  return respond({ ok: true, replanPending, routeId, entryDate, studyAccess: access, weeklyStudyDaysValue: cleaned.weeklyStudyDaysValue, dailyMinutes: cleaned.dailyMinutes })
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Bug, Camera, Check, Loader2, X } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
@@ -12,6 +12,52 @@ import { useClayThemePreference } from '@/components/clay/useClayThemePreference
 // rechazaría igualmente.
 const MIN_MESSAGE_LENGTH = 10
 const WIDGET_IGNORE_ATTR = 'data-bug-widget-ignore'
+
+// El widget es fijo, así que en alguna pantalla SIEMPRE tapa algo: el botón
+// de una corrección, el último día de una semana del Camino, la barra de
+// guardado. El offset de /settings de abajo es la prueba de que no existe una
+// esquina buena para todas las páginas. En vez de seguir añadiendo excepciones
+// por ruta, el alumno lo aparta donde quiera.
+//
+// La posición se guarda por dispositivo (localStorage): dónde estorba en el
+// portátil no dice nada de dónde estorba en el móvil, y perderla al recargar
+// haría el gesto inútil.
+const POSITION_KEY = 'kairo:bug-widget-position'
+const VIEWPORT_MARGIN = 8
+// Por debajo de esto es un dedo temblando, no un arrastre: el clic tiene que
+// seguir abriendo el formulario.
+const DRAG_THRESHOLD_PX = 4
+
+type WidgetPosition = { left: number; top: number }
+
+/** Nunca fuera de la pantalla: ni al soltarlo, ni al abrir el panel (que es
+ *  mucho más alto que el botón), ni al girar el móvil, ni al recuperar una
+ *  posición guardada con otro tamaño de ventana. */
+function clampToViewport(position: WidgetPosition, element: HTMLElement | null): WidgetPosition {
+  const width = element?.offsetWidth ?? 0
+  const height = element?.offsetHeight ?? 0
+  const maxLeft = Math.max(VIEWPORT_MARGIN, window.innerWidth - width - VIEWPORT_MARGIN)
+  const maxTop = Math.max(VIEWPORT_MARGIN, window.innerHeight - height - VIEWPORT_MARGIN)
+  return {
+    left: Math.min(Math.max(position.left, VIEWPORT_MARGIN), maxLeft),
+    top: Math.min(Math.max(position.top, VIEWPORT_MARGIN), maxTop),
+  }
+}
+
+function readSavedPosition(): WidgetPosition | null {
+  try {
+    const raw = localStorage.getItem(POSITION_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as Partial<WidgetPosition>
+    if (typeof parsed?.left !== 'number' || typeof parsed?.top !== 'number') return null
+    if (!Number.isFinite(parsed.left) || !Number.isFinite(parsed.top)) return null
+    return { left: parsed.left, top: parsed.top }
+  } catch {
+    // Ventana privada o almacenamiento bloqueado: el widget sigue donde
+    // siempre y se puede mover igual, solo que no lo recuerda.
+    return null
+  }
+}
 
 type Phase = 'idle' | 'capturing' | 'submitting' | 'sent'
 
@@ -49,6 +95,12 @@ export default function BugReportWidget() {
   const [phase, setPhase] = useState<Phase>('idle')
   const [error, setError] = useState<string | null>(null)
   const { theme } = useClayThemePreference()
+  const container = useRef<HTMLDivElement>(null)
+  const [position, setPosition] = useState<WidgetPosition | null>(null)
+  const drag = useRef<{ pointerId: number; offsetX: number; offsetY: number; moved: boolean } | null>(null)
+  // Soltar tras arrastrar dispara igualmente un `click`. Sin esto, apartar el
+  // widget abriría el formulario cada vez.
+  const ignoreNextClick = useRef(false)
 
   useEffect(() => {
     let cancelled = false
@@ -59,6 +111,71 @@ export default function BugReportWidget() {
       setHasSession(!!session)
     })
     return () => { cancelled = true; subscription.subscription.unsubscribe() }
+  }, [])
+
+  useEffect(() => {
+    const saved = readSavedPosition()
+    if (saved) setPosition(clampToViewport(saved, container.current))
+    const onResize = () => setPosition(current => (current ? clampToViewport(current, container.current) : null))
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  // Abrir el panel convierte un botón de 44 px en una tarjeta de 320 px: desde
+  // una posición baja o pegada a la derecha se saldría de la pantalla.
+  useEffect(() => {
+    if (!open) return
+    setPosition(current => (current ? clampToViewport(current, container.current) : null))
+  }, [open])
+
+  const startDrag = useCallback((event: React.PointerEvent<HTMLElement>) => {
+    if (event.button !== 0) return
+    const box = container.current
+    if (!box) return
+    const rect = box.getBoundingClientRect()
+    drag.current = { pointerId: event.pointerId, offsetX: event.clientX - rect.left, offsetY: event.clientY - rect.top, moved: false }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }, [])
+
+  const onDragMove = useCallback((event: React.PointerEvent<HTMLElement>) => {
+    const state = drag.current
+    if (!state || state.pointerId !== event.pointerId) return
+    const box = container.current
+    if (!box) return
+    const rect = box.getBoundingClientRect()
+    const next = clampToViewport({ left: event.clientX - state.offsetX, top: event.clientY - state.offsetY }, box)
+    if (!state.moved) {
+      if (Math.abs(next.left - rect.left) < DRAG_THRESHOLD_PX && Math.abs(next.top - rect.top) < DRAG_THRESHOLD_PX) return
+      state.moved = true
+    }
+    setPosition(next)
+  }, [])
+
+  const endDrag = useCallback((event: React.PointerEvent<HTMLElement>) => {
+    const state = drag.current
+    if (!state || state.pointerId !== event.pointerId) return
+    drag.current = null
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+    if (!state.moved) return
+    ignoreNextClick.current = true
+    // Se guarda lo que se ve, no el último estado de React: el rectángulo real
+    // ya está recortado a la pantalla.
+    const rect = container.current?.getBoundingClientRect()
+    if (!rect) return
+    try { localStorage.setItem(POSITION_KEY, JSON.stringify({ left: rect.left, top: rect.top })) } catch { /* sin almacenamiento: vale para esta sesión */ }
+  }, [])
+
+  // Teclado: el arrastre con puntero no existe para quien navega con tabulador.
+  const onWidgetKeyDown = useCallback((event: React.KeyboardEvent<HTMLElement>) => {
+    const step = event.shiftKey ? 32 : 8
+    const delta = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[event.key]
+    const box = container.current
+    if (!delta || !box) return
+    event.preventDefault()
+    const rect = box.getBoundingClientRect()
+    const next = clampToViewport({ left: rect.left + delta[0], top: rect.top + delta[1] }, box)
+    setPosition(next)
+    try { localStorage.setItem(POSITION_KEY, JSON.stringify(next)) } catch { /* sin almacenamiento */ }
   }, [])
 
   if (isPublicRoute(pathname ?? '')) return null
@@ -150,7 +267,16 @@ export default function BugReportWidget() {
   const canSubmit = message.trim().length >= MIN_MESSAGE_LENGTH && phase === 'idle'
 
   return (
-    <div data-bug-widget-ignore="true" style={{ position: 'fixed', bottom: isSettingsRoute(pathname ?? '') ? 90 : 20, right: 20, zIndex: 50 }}>
+    <div
+      ref={container}
+      data-bug-widget-ignore="true"
+      style={{
+        position: 'fixed', zIndex: 50,
+        // Mientras el alumno no lo mueva, exactamente donde estaba (con el
+        // offset de /settings incluido); en cuanto lo mueve, manda su sitio.
+        ...(position ? { left: position.left, top: position.top } : { bottom: isSettingsRoute(pathname ?? '') ? 90 : 20, right: 20 }),
+      }}
+    >
       <ClayThemeScope theme={theme} style={{ background: 'transparent' }}>
         {open ? (
           <div
@@ -279,9 +405,22 @@ export default function BugReportWidget() {
         ) : (
           <button
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              if (ignoreNextClick.current) { ignoreNextClick.current = false; return }
+              setOpen(true)
+            }}
+            onPointerDown={startDrag}
+            onPointerMove={onDragMove}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+            onKeyDown={onWidgetKeyDown}
             aria-label="Reportar un problema"
+            title="Arrástralo si te tapa algo (o muévelo con las flechas)"
             style={{
+              // touchAction none: sin esto, arrastrarlo en móvil hace scroll
+              // de la página en vez de mover el widget.
+              touchAction: 'none',
+              userSelect: 'none',
               height: 44,
               padding: '0 16px 0 14px',
               borderRadius: 999,

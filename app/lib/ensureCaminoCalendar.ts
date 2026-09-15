@@ -12,14 +12,13 @@ import { EXAM_SUBJECT_SLUG } from './camino/partialExamSubjects'
 import { computeExamCoverage, reactivateAllInactiveQueueItems, reactivateQueueItems } from './camino/examCoverage'
 import { FINAL_MOCK_WINDOW_DAYS, injectAllPartialExamMissions, resolveFinalMockSlot } from './camino/injectPartialExamMissions'
 import { resolveTopicIdentitiesBatch } from './camino/resolveTopicIdentity'
-import { createDayScheduler, createDaySchedulers, estimatedMinutesForMission, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
+import { createDayScheduler, createDaySchedulers, estimatedMinutesForMissionType } from './camino/scheduleTimeSlot'
 import { computeStudyCapacity } from './camino/studyCapacity'
 import { FINAL_REVIEW_RESERVED_STUDY_DAYS } from './camino/examDate'
 import { buildPlanDays } from './camino/planEngine'
 import { examRotationWeights, type ExamRotationPriority, type RotationExam } from './camino/rotationWeights'
 import { rotateSubjectForDay } from './camino/subjectRotation'
 import { capacityOptionsFor, planningDates, loadStudentPlanContext } from './camino/studentPlanContext'
-import { admitsCumulativeNewContent, contentPaceDates, cumulativeNewContentAllowance, dailyNewContentBudget } from './camino/contentPace'
 import { SPAIN_HOLIDAYS } from './camino/spainHolidays'
 import { addDays, getMadridToday } from './camino/studyDays'
 
@@ -948,87 +947,23 @@ export async function ensureCaminoCalendar(
 
   const hasQueueLeft = (s: string) => (cursors[s] ?? 0) < (subjectQueues[s]?.length ?? 0)
 
-  // RITMO DEL TEMARIO NUEVO. Sin esto, el bucle llena cada día hasta su
-  // presupuesto con lo primero de la cola: con 180 min × 6 días y el temario
-  // real (308 temas), colocaba el curso ENTERO entre septiembre y el 6 de
-  // noviembre y dejaba los 173 días de estudio siguientes —el 79% del
-  // curso— sin una sola misión. Los huecos no eran un fallo de siembra: era
-  // que ya no quedaba temario que sembrar. Ver camino/contentPace.ts.
-  //
-  // Lo que cada fecha ya tiene sembrado de temario nuevo por ejecuciones
-  // anteriores. Se lee ANTES de calcular la tasa (más abajo) a propósito:
-  // la tasa necesita saber cuánto se ha colocado ya, no solo cuánto queda.
-  const { data: pacedRows } = await supabase
-    .from('camino_calendar')
-    .select('scheduled_date, mission_type, metadata, start_time, end_time, queue_id')
-    .eq('user_id', userId)
-    .eq('source', 'algorithm')
-    .gte('scheduled_date', today)
-    .not('queue_id', 'is', null)
-    .in('status', ['pending', 'postponed'])
-  const contentMinutesByDate = new Map<string, number>()
-  let alreadyPlacedContentMinutes = 0
-  for (const row of pacedRows ?? []) {
-    const date = row.scheduled_date as string
-    const minutes = estimatedMinutesForMission(row)
-    contentMinutesByDate.set(date, (contentMinutesByDate.get(date) ?? 0) + minutes)
-    alreadyPlacedContentMinutes += minutes
-  }
-
-  // El tope se recalcula en cada ejecución sobre lo que queda de verdad, así
-  // que se corrige solo, y solo actúa cuando SOBRA tiempo: a quien va justo
-  // le devuelve su presupuesto diario completo, igual que antes.
-  //
-  // El numerador es el temario TOTAL a repartir —lo pendiente MÁS lo que
-  // esta misma tanda ya colocó en una ejecución anterior—, no solo lo
-  // pendiente. Con solo lo pendiente, la tasa BAJA en cada ejecución según
-  // avanza la cola (hay menos por repartir), y con presupuesto acumulado eso
-  // es un problema nuevo que el reparto día a día no tenía: una ejecución
-  // posterior, con una tasa más lenta, ve lo que una ejecución anterior —con
-  // una tasa más rápida— ya colocó como si fuera "ir adelantado", y frena la
-  // colocación de fechas posteriores hasta que la tasa lenta alcanza lo que
-  // la tasa rápida ya había puesto. Reproducido: abrir una semana lejana
-  // dejaba 2026-10-24 y 25 completamente vacíos —ni temario ni repaso—
-  // porque el acumulado de esa tasa más lenta no llegaba tan lejos. Sumar lo
-  // ya colocado al numerador mantiene la tasa estable mientras el temario
-  // total a repartir no cambie, que es la mayoría de las ejecuciones.
-  const pendingContentMinutes = Object.values(subjectQueues).flat()
-    .reduce((sum, item) => sum + minutesForPlacement(
-      ((item.metadata ?? {}).mission_type as string) ?? 'concept', item.metadata ?? {}, dailyMinutesForSlots,
-    ), 0)
-  const paceStudyDays = contentPaceDates(planningDates(planContext)).length
-  const newContentBudget = dailyNewContentBudget({
-    pendingContentMinutes: pendingContentMinutes + alreadyPlacedContentMinutes,
-    paceStudyDays,
-    dailyMinutes: dailyMinutesForSlots ?? 60,
-  })
-  // El presupuesto es ACUMULADO, no diario. Con 36 min/día y sesiones de 30,
-  // repartir día a día redondea a "cabe una" y tira los 6 min sobrantes —
-  // CADA DÍA, para siempre, porque el sobrante nunca se lleva al siguiente:
-  // reproducido, 44 de 119 días sin una sola lección nueva pese a tener más
-  // de 100 temas pendientes, porque el relleno de repaso ocupaba ese hueco
-  // en su lugar. Con el acumulado, lo que un día no gasta lo hereda el
-  // siguiente: día 1-4 caben 30 min, día 5 el acumulado ya permite 60 (ver
-  // camino/contentPace.ts para el porqué y los dos intentos descartados
-  // antes de este — presupuesto por asignatura rompía la idempotencia,
-  // arrastre mutable no bastaba).
-  //
-  // Sigue siendo UN ÚNICO presupuesto GLOBAL, compartido por todas las
-  // asignaturas — la rotación decide QUÉ asignatura recibe cada misión, el
-  // acumulado decide CUÁNTO temario nuevo puede existir en total. Y sigue
-  // aplicándose por igual a TODOS los días candidatos, también los que caen
-  // dentro de la reserva de consolidación del ritmo (contentPaceDates recorta
-  // el último 25% solo para CALCULAR una tasa diaria más exigente —de ahí
-  // sale el margen—, nunca para bloquear que se coloque temario ahí: ese
-  // corte duro es planningCutoff, ya aplicado antes de este bucle).
-  const newContentAllowance = cumulativeNewContentAllowance(candidateFillDays, newContentBudget)
-  // Único contador, compartido por TODAS las fechas y asignaturas del bucle
-  // —esto es lo que hace el presupuesto global y no por asignatura, y lo que
-  // lo hace determinista entre ejecuciones: es una lectura de lo que YA hay
-  // en el calendario más lo que esta pasada añade, nunca un cálculo que
-  // dependa de cuántas veces se haya llamado antes.
-  let cumulativeContentMinutes = 0
-
+  // RITMO DEL TEMARIO NUEVO — DESACTIVADO A PROPÓSITO (16/09/2026, decisión de
+  // producto de Mario). Hasta ahora este bloque limitaba cuánto temario nuevo
+  // podía entrar por día/acumulado (ver camino/contentPace.ts) para dejar
+  // hueco al repaso espaciado y no vaciar la cola en ocho semanas. Pero eso
+  // significaba que un alumno con temario pendiente y hueco libre ese día
+  // veía REPASO de algo que ya sabía en vez de la siguiente lección que
+  // todavía no ha visto — "no puede ser que te falten 90 horas y no puedas
+  // dar todo pero sí des repasos". Prioridad explícita: ver todo el temario
+  // ANTES que repasar. Mientras quede una sola lección sin ver en CUALQUIER
+  // asignatura, injectPlanFillerMissions.ts no siembra ni un repaso (ver ese
+  // archivo) y este bucle ya no frena el temario nuevo por ritmo: el único
+  // límite que queda es la capacidad física del día (scheduler.placeBest más
+  // abajo), igual que en finalSprint. Consecuencia aceptada: el temario puede
+  // ir más rápido que el ritmo del instituto si el alumno declara mucha
+  // disponibilidad — el repaso (y quizás un ritmo más comedido) vuelve más
+  // adelante con un diseño propio (simulacros u otra estrategia), no con este
+  // freno. contentPace.ts se queda intacto, sin usar aquí, por si se retoma.
   // Una lectura por rango, no preferencias/historial/eventos/Google por día.
   // Los pasos anteriores ya han terminado sus escrituras bajo el mismo lock.
   const externalBusy = await getAvailability(userId, candidateFillDays[0], candidateFillDays[candidateFillDays.length - 1])
@@ -1050,12 +985,6 @@ export async function ensureCaminoCalendar(
     // misión que coloca este bucle ocupa el hueco elegido antes de buscar el
     // siguiente, así dos misiones del mismo día tampoco se pisan entre sí.
     const scheduler = fillSchedulers.get(dateStr)!
-    // Lo que esta fecha ya tenía sembrado (de una ejecución anterior) se
-    // suma al acumulado AHORA, en su sitio cronológico dentro del bucle —no
-    // antes de empezar—, para que el corte de fechas posteriores sea el
-    // mismo que si esta pasada hubiera colocado ese temario ella misma.
-    cumulativeContentMinutes += contentMinutesByDate.get(dateStr) ?? 0
-    const cumulativeAllowedToday = newContentAllowance.get(dateStr) ?? cumulativeContentMinutes
 
     // Sin tope de sesiones: el día se llena por PRESUPUESTO DE MINUTOS. Se
     // empieza por la asignatura que le toca por rotación y, cuando esa se
@@ -1094,11 +1023,6 @@ export async function ensureCaminoCalendar(
         if (finalSprint) { calMetadata.plan_mode = 'final_sprint'; calMetadata.final_review_window = true; calMetadata.knowledge_verified = false }
         if (rescueMode && !finalSprint) calMetadata.plan_mode = 'rescue'
         const itemMinutes = minutesForPlacement(missionType, itemMeta, dailyMinutesForSlots)
-        // finalSprint es el tramo reservado a repaso: ahí ya no hay ritmo que
-        // respetar, lo que se coloca es precisamente la vuelta final.
-        if (!finalSprint && !admitsCumulativeNewContent({
-          cumulativeScheduledMinutes: cumulativeContentMinutes, missionMinutes: itemMinutes, cumulativeAllowedMinutes: cumulativeAllowedToday,
-        })) break
         const timeSlot = scheduler.placeBest(itemMinutes, {
           date: dateStr,
           subject: item.subject,
@@ -1134,7 +1058,6 @@ export async function ensureCaminoCalendar(
           metadata: calMetadata,
         })
         scheduledQueueIds.push(item.id)
-        cumulativeContentMinutes += itemMinutes
         cursor++
       }
       cursors[subject] = cursor

@@ -501,20 +501,17 @@ for (const occupiedDays of [1,30]) test(`ensure fills unused minutes even with $
   camino_calendar:calendar,user_learning_queue:[...calendar.map(r=>({...q(r.queue_id,20,{queue_status:'scheduled'}),user_id:user,v2_sort_order:r.v2_sort_order})),...work]})
  const result=await journey('app/lib/ensureCaminoCalendar.ts').ensureCaminoCalendar(user,db)
  assert.equal(result.ok,true)
- // El temario ya NO se apelmaza contra el primer día disponible: el ritmo
- // (camino/contentPace.ts) lo reparte para que el curso llegue entero a la
- // PAU en vez de agotarse en ocho semanas. Lo que este caso sigue
- // garantizando es que un día ya ocupado no bloquea la siembra y que no se
- // pierde ni un tema.
+ // El unico limite del temario nuevo es la capacidad FISICA del dia (decision
+ // de producto 16/09/2026: ver todo el temario antes que repasar, asi que ya
+ // no hay un ritmo que lo reparta artificialmente). Lo que este caso sigue
+ // garantizando es que un día ya ocupado no bloquea la siembra, que no se
+ // pierde ni un tema y que nadie se pasa del presupuesto diario declarado.
  const est=journey('app/lib/camino/missionDuration.ts').estimatedMinutesForMission
  const seeded=db.tables.camino_calendar.filter(r=>r.status==='pending'&&work.some(w=>w.id===r.queue_id))
  // Nada se pierde: lo que no recibe fecha en este horizonte sigue pendiente
  // en la cola, nunca desaparece ni se marca como programado en falso.
  assert.equal(seeded.length+db.tables.user_learning_queue.filter(r=>r.queue_status==='pending').length,work.length)
  for(const r of seeded) assert.ok(r.start_time&&r.end_time,'un tema colocado sin hora es un tema sin sitio real')
- // Y lo que sí la recibe se REPARTE. Apelmazar los ocho temas en el primer
- // día es exactamente lo que vaciaba el resto del curso.
- if(seeded.length>1) assert.ok(new Set(seeded.map(r=>r.scheduled_date)).size>1,'el temario no puede apelmazarse en un solo dia')
  const monday=db.tables.camino_calendar.filter(r=>r.scheduled_date===dates[0]&&r.status==='pending')
  monday.sort((a,b)=>a.start_time.localeCompare(b.start_time))
  for(let i=1;i<monday.length;i++) assert.ok(monday[i].start_time>=monday[i-1].end_time)
@@ -982,11 +979,24 @@ test('opening October 19–25 extends the real server plan beyond thirty study d
 })
 
 test('el curso entero se reparte: 180 min x 6 dias no puede dejar semanas en blanco',async()=>{
- // EL CASO REPRODUCIDO. Con el temario REAL de cuatro asignaturas (308 temas),
- // disponibilidad maxima y la PAU en junio, el motor colocaba todo el curso
+ // EL CASO REPRODUCIDO originalmente (antes del 16/09/2026). Con el temario
+ // REAL de cuatro asignaturas (308 temas), disponibilidad maxima y la PAU en
+ // junio, el motor colocaba todo el curso
  // entre el 14/09 y el 06/11 y dejaba 173 de los 218 dias de estudio sin una
  // sola mision — el 79% del curso en "Aun sin planificar". Y elegir MAS
  // disponibilidad lo empeoraba, porque vaciaba la cola antes.
+ //
+ // Arreglo de entonces (contentPace.ts): repartir el temario nuevo con un
+ // ritmo para que llegase entero a la PAU sin agotarse en semanas. Decision
+ // de producto del 16/09/2026 (Mario): ese ritmo dejaba repaso compitiendo
+ // por hueco con temario que el alumno aun no habia visto — "no puede ser
+ // que te falten 90 horas y no puedas dar todo pero si des repasos". Prioridad
+ // invertida: el temario YA NO se reparte con calma, se coloca tan rapido como
+ // quepa fisicamente cada dia, y el repaso (injectPlanFillerMissions) se
+ // desactiva mientras quede una sola leccion sin ver en cualquier asignatura.
+ // Lo que este test verifica ahora es que, aun asi, ningun dia de estudio se
+ // queda vacio: en cuanto el temario se agota (mucho antes que antes, a
+ // proposito), el repaso ocupa el resto del curso sin dejar huecos.
  const seed=require('../../app/data/camino/curriculum_seed.json')
  const user='curso-completo',subjects=['matematicas_ii','historia_espana','lengua','fisica']
  const topics=(Array.isArray(seed)?seed:(seed.topics||Object.values(seed)[0])).filter(t=>subjects.includes(t.subject))
@@ -1017,12 +1027,11 @@ test('el curso entero se reparte: 180 min x 6 dias no puede dejar semanas en bla
  assert.equal(empty.length,0,`${empty.length} de ${allDays.length} dias de estudio se quedan sin una sola mision: ${empty.slice(0,5).join(', ')}`)
  for(const d of allDays) assert.ok(minutesByDate.get(d)<=180,`${d} se pasa del presupuesto declarado`)
 
- // El temario no se pierde y no se agota en ocho semanas: entra entero y
- // termina con margen antes de la PAU, no la vispera y no en noviembre.
+ // El temario no se pierde: entra entero, y nunca aterriza pegado al examen
+ // (eso lo sigue decidiendo planningCutoff, no el ritmo que se quito).
  assert.equal(db.tables.user_learning_queue.filter(r=>r.queue_status==='pending').length,0)
  const contentDates=rows.filter(r=>r.queue_id).map(r=>r.scheduled_date).sort()
  assert.equal(contentDates.length,work.length)
- assert.ok(contentDates[contentDates.length-1]>'2027-01-31',`el temario seguia agotandose el ${contentDates[contentDates.length-1]}`)
  assert.ok(contentDates[contentDates.length-1]<context.planningCutoff,'el temario nuevo no puede llegar pegado al examen')
  // Ningun repaso puede caer antes de la leccion que repasa. Se compara con la
  // PRIMERA leccion del tema, no con una cualquiera: hay contenidos que se
@@ -1330,9 +1339,12 @@ test('una fila estable sigue bloqueando su plaza (fecha, asignatura, v2_sort_ord
  const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
  await personalize(user,db,{planContext:context})
  const placed=db.tables.camino_calendar.find(r=>r.id==='plaza-1')
- // Misma plaza (fecha, asignatura, v2_sort_order): el UNIQUE de
- // camino_calendar la rechazaria si aterrizara ahi.
- db.tables.camino_calendar.push({...row('plaza-2',{subject:'fisica',v2_sort_order:1,scheduled_date:placed.scheduled_date,
+ // Misma asignatura y v2_sort_order, pero una fecha PROPIA distinta a la de
+ // plaza-1 (dos filas con la MISMA fecha+asignatura+v2_sort_order violarian
+ // el UNIQUE de camino_calendar y no pueden coexistir de verdad; lo realista
+ // es una fila cuya busqueda de hueco LLEGA a la fecha que plaza-1 ya ocupa).
+ const laterDate=load('app/lib/camino/studyDays.ts').addDays(placed.scheduled_date,30)
+ db.tables.camino_calendar.push({...row('plaza-2',{subject:'fisica',v2_sort_order:1,scheduled_date:laterDate,
   metadata:{content_estimated_minutes:30}}),user_id:user})
  const result=await personalize(user,db,{planContext:context})
  assert.equal(result.reason,'applied')
@@ -1359,6 +1371,56 @@ test('una fila con modelo de duracion antiguo se recoloca aunque el hash coincid
  assert.equal(after.metadata.duration_model,'content_v1','la duracion antigua tiene que refrescarse aunque el hash coincida')
 })
 
+// REGRESION (16/09/2026, reportado por Mario): "un mes fisica, otro mes
+// historia, otro mes mates" — no debia sentirse asi, las asignaturas tenian
+// que alternar. Causa raiz: el arreglo del orden pedagogico (mas arriba,
+// "el orden pedagogico...") habia puesto `subject` como PRIMER criterio de
+// lectura en applyCalendarPersonalization, así que `orderRowsForPlacement`
+// -que preserva el orden de entrada para el grupo "resto"- procesaba TODO
+// el backlog de una asignatura antes que el de la siguiente, deshaciendo la
+// rotacion dia-a-dia que ensureCaminoCalendar ya habia calculado (reproducido
+// con el temario real: fisica ocupaba en solitario los primeros ~9 dias de
+// estudio, historia_espana no aparecia ni una vez en ese tramo). El arreglo:
+// `scheduled_date` vuelve a ir PRIMERO (agrupa por el dia que decidio la
+// rotacion), y `subject`+`v2_sort_order` quedan como desempate DENTRO del
+// mismo dia -que es donde arreglaban el bug original sin deshacer este otro.
+test('las asignaturas alternan: ninguna ocupa en solitario los primeros dias de estudio',async()=>{
+ const seed=require('../../app/data/camino/curriculum_seed.json')
+ const user='alternancia-asignaturas',subjects=['matematicas_ii','historia_espana','lengua','fisica']
+ const topics=(Array.isArray(seed)?seed:(seed.topics||Object.values(seed)[0])).filter(t=>subjects.includes(t.subject))
+ const work=topics.map((t,i)=>({id:`q-${i}`,user_id:user,subject:t.subject,queue_status:'pending',
+  v2_sort_order:t.v2SortOrder??t.orderIndex??i+1,subject_position:i,title:t.title??`Tema ${i}`,
+  block_key:t.blockSlug??null,block_slug:t.blockSlug??null,
+  metadata:{mission_type:'concept',topic_slug:t.topicSlug},retry_not_before:null}))
+ const db=database({perfiles:[{id:user,subjects,pau_exam_date:'2027-06-07',student_exams:[]}],
+  user_entitlements:[{user_id:user,plan_id:'premium',status:'active'}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:6}}],
+  user_learning_queue:work})
+ const api=runtime('2026-09-14',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'fixture'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/ensure-calendar/route.ts')
+ assert.equal((await api.POST({json:async()=>({})})).status,200)
+ const rows=db.tables.camino_calendar.filter(r=>['pending','postponed'].includes(r.status))
+ const dates=[...new Set(rows.map(r=>r.scheduled_date))].sort().slice(0,12)
+ const subjectsSeen=new Set(rows.filter(r=>dates.includes(r.scheduled_date)).map(r=>r.subject))
+ assert.ok(subjectsSeen.size>=3,
+  `en los primeros ${dates.length} dias de estudio solo aparecen ${subjectsSeen.size} asignaturas (${[...subjectsSeen]}): no estan alternando`)
+ // Un dia entero dedicado a UNA sola asignatura es correcto (llenarlo con
+ // temario nuevo sin repartir el hueco es justo lo que se pidio); lo que no
+ // puede pasar es que la MISMA asignatura vuelva a ocupar ella sola el dia
+ // SIGUIENTE teniendo las demas backlog de sobra — eso es "un mes entero".
+ let previousSoloSubject=null, repeatedSoloStreak=0, worstStreak=0
+ for(const d of dates){
+  const subjectsThatDay=[...new Set(rows.filter(r=>r.scheduled_date===d).map(r=>r.subject))]
+  const soloSubject=subjectsThatDay.length===1?subjectsThatDay[0]:null
+  repeatedSoloStreak=(soloSubject&&soloSubject===previousSoloSubject)?repeatedSoloStreak+1:(soloSubject?1:0)
+  worstStreak=Math.max(worstStreak,repeatedSoloStreak)
+  previousSoloSubject=soloSubject
+ }
+ assert.ok(worstStreak<=1,`la misma asignatura ocupa en solitario ${worstStreak+1} dias seguidos, deberian alternar cada dia`)
+})
+
 test('la comprobacion de estabilidad no cuesta una lectura por fila ni por fecha',async()=>{
  const user='coste-estabilidad', context={...ctx,dailyMinutes:180,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
  const addDays=load('app/lib/camino/studyDays.ts').addDays
@@ -1376,4 +1438,31 @@ test('la comprobacion de estabilidad no cuesta una lectura por fila ni por fecha
  const result=await personalize(user,db,{planContext:context})
  assert.equal(result.reason,'applied')
  assert.ok(reads<=15,`la comprobacion de estabilidad deberia costar un punado de lecturas por lote, no ${reads}`)
+})
+
+// Decision de producto 16/09/2026 (Mario): "olvidate del repaso... priorizar
+// que una persona vea todo antes que repase". Mientras quede una sola leccion
+// sin ver en CUALQUIER asignatura, injectPlanFillerMissions no debe sembrar
+// ni un repaso — y en cuanto la cola queda vacia, vuelve a funcionar igual
+// que siempre.
+test('el relleno de repaso no siembra nada mientras quede temario nuevo pendiente',async()=>{
+ const user='repaso-esperando'
+ const db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',subjects:['fisica']}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:6}}],
+  // Una leccion ya dada hace mas de 7 dias (repasable segun REVIEW_INTERVALS_DAYS)...
+  camino_calendar:[row('leccion-dada',{subject:'fisica',v2_sort_order:1,scheduled_date:'2027-01-01',status:'completed',metadata:{content_estimated_minutes:30}})].map(r=>({...r,user_id:user})),
+  // ...pero queda temario SIN VER en la cola, aunque sea de otra asignatura.
+  user_learning_queue:[{id:'q-pendiente',user_id:user,subject:'historia_espana',queue_status:'pending',
+   subject_position:1,title:'Tema pendiente',block_key:null,block_slug:null,metadata:{mission_type:'concept'}}]})
+ const filler=load('app/lib/camino/injectPlanFillerMissions.ts').injectPlanFillerMissions
+ const result=await filler(user,db)
+ assert.equal(result.inserted,0,'no puede sembrar repaso con temario sin ver en cualquier asignatura')
+ assert.equal(result.reason,'pending_new_content')
+ assert.equal(db.tables.camino_calendar.filter(r=>r.generated_by==='plan_filler_v1').length,0)
+
+ // En cuanto la cola queda vacia (todo visto), el relleno vuelve a actuar.
+ db.tables.user_learning_queue = []
+ const afterEmpty=await filler(user,db)
+ assert.notEqual(afterEmpty.reason,'pending_new_content')
+ assert.ok(afterEmpty.inserted>0,'con la cola vacia el repaso tiene que volver a rellenar el hueco libre')
 })

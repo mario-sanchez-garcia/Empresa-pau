@@ -110,6 +110,18 @@ function dueDateFor(candidate: ReviewCandidate): string | null {
  * Nunca toca lo ya programado ni el temario nuevo: solo AÑADE en el hueco que
  * el resto del motor ha dejado. Como el resto de inyectores, un fallo aquí no
  * puede tumbar la carga del Camino — se reporta y se sigue.
+ *
+ * DESACTIVADO mientras quede temario sin ver en CUALQUIER asignatura del
+ * alumno (16/09/2026, decisión de producto de Mario): "no puede ser que te
+ * falten 90 horas y no puedas dar todo pero sí des repasos" — un alumno con
+ * lecciones nuevas todavía pendientes no debe ver repaso de lo que ya sabe
+ * mientras le queda por ver lo que no. ensureCaminoCalendar.ts ya no frena el
+ * temario nuevo por ritmo (ver ese archivo), así que el hueco que antes
+ * ocupaba este relleno ahora lo ocupa la siguiente lección. En cuanto el
+ * alumno haya visto TODO su temario (cola vacía en todas sus asignaturas),
+ * este inyector vuelve a actuar exactamente como antes — es la vuelta al
+ * repaso que toca una vez no queda nada nuevo que dar; el repaso NO
+ * desaparece para siempre, solo cede el turno.
  */
 export async function injectPlanFillerMissions(
   userId: string,
@@ -117,6 +129,14 @@ export async function injectPlanFillerMissions(
   options: { throughDate?: string } = {},
 ): Promise<{ inserted: number; filledDays: number; reason?: string }> {
   try {
+    const { count: pendingCount, error: pendingError } = await supabase
+      .from('user_learning_queue')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('queue_status', 'pending')
+    if (pendingError) throw new Error(`Filler pending-queue check failed: ${pendingError.message}`)
+    if ((pendingCount ?? 0) > 0) return { inserted: 0, filledDays: 0, reason: 'pending_new_content' }
+
     const today = getMadridToday()
     const planContext = await loadStudentPlanContext(userId, supabase, today)
     const dailyMinutes = planContext.dailyMinutes

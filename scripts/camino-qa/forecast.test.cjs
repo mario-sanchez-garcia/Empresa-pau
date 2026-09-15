@@ -634,6 +634,65 @@ test('se declara QUE bloque se ha dado, aunque no sea el primero de nuestra list
  assert.equal((await api.POST({json:async()=>({subject:'fisica',lessons:['q-9-9']})})).status,409)
 })
 
+// El caso real: matematicas_ccss tenia 43 temas publicados en
+// curriculum_content_v2 y 4 de 5 alumnos seguian con los 6 de relleno de
+// betaCurriculum.ts, porque su cola se sembro ANTES de que el catalogo real
+// se publicara y nada volvio a mirarla despues. topUpSubjectQueue repara
+// eso: solo ANADE lo que falte, nunca borra ni reescribe una fila existente.
+test('topUpSubjectQueue completa una cola atrapada en el relleno, sin tocar nada existente',async()=>{
+ const { topUpSubjectQueue, topUpQueues } = load('app/lib/camino/topUpSubjectQueue.ts')
+ const relleno = ['Matrices, sistemas y Gauss','Programacion lineal','Limites y continuidad',
+  'Derivadas y optimizacion','Sucesos y Bayes','Intervalos de confianza']
+ const catalogo = Array.from({length:8},(_,i)=>({
+  id:100+i, sort_order:i+1, subject:'matematicas_ccss', review_status:'published',
+  title:`Tema real ${i+1}`, block_key:'Bloque real', block_slug:'bloque-real'}))
+ const user='stuck'
+ const db=database({
+  user_learning_queue: relleno.map((title,i)=>({id:`f-${i}`,user_id:user,subject:'matematicas_ccss',
+   queue_status: i===0?'completed':'pending', subject_position:i+1, title,
+   block_key:'Relleno', block_slug:'relleno', metadata:{mission_type: i===0?'concept':'concept'}})),
+  curriculum_content_v2: catalogo,
+ })
+
+ const result = await topUpSubjectQueue(user,'matematicas_ccss',db)
+ assert.equal(result.added,8,'las 8 filas del catalogo real, ninguna coincide con el relleno por titulo')
+
+ const rows = db.tables.user_learning_queue.filter(r=>r.user_id===user)
+ assert.equal(rows.length,14,'6 de relleno + 8 reales, nada borrado')
+ assert.equal(rows.find(r=>r.id==='f-0').queue_status,'completed','lo completado no se toca')
+ for(const r of relleno) assert.ok(rows.some(row=>row.title===r),'el relleno sigue entero')
+ for(const c of catalogo) assert.ok(rows.some(row=>row.title===c.title&&row.queue_status==='pending'),'el catalogo real entro como pendiente')
+
+ // Idempotente: repetirlo no duplica.
+ const again = await topUpSubjectQueue(user,'matematicas_ccss',db)
+ assert.equal(again.added,0)
+ assert.equal(db.tables.user_learning_queue.filter(r=>r.user_id===user).length,14)
+
+ // El alumno que YA tenia el catalogo real (el 1 de 5 que no se quedo
+ // atrapado): nada que anadir.
+ const sano='sano'
+ const dbSano=database({
+  user_learning_queue: catalogo.map((c,i)=>({id:`r-${i}`,user_id:sano,subject:'matematicas_ccss',
+   queue_status:'pending', subject_position:i+1, title:c.title, block_key:c.block_key, block_slug:c.block_slug,
+   metadata:{mission_type:'concept'}})),
+  curriculum_content_v2: catalogo,
+ })
+ assert.equal((await topUpSubjectQueue(sano,'matematicas_ccss',dbSano)).added,0)
+
+ // Una asignatura que el alumno nunca eligio (sin cola) no se siembra aqui:
+ // eso es trabajo de generateCaminoPlan/add-subject, no de la reparacion.
+ const nuevo='nuevo'
+ const dbNuevo=database({ curriculum_content_v2: catalogo })
+ assert.equal((await topUpSubjectQueue(nuevo,'matematicas_ccss',dbNuevo)).added,0)
+
+ // topUpQueues descubre las asignaturas de la propia cola, no de perfiles.
+ // El objeto vuelve de un contexto vm distinto (ver runtime.cjs): comparar
+ // por claves evita el falso negativo de deepEqual entre realms.
+ const { added, bySubject } = await topUpQueues(user, db)
+ assert.equal(added,0,'ya se completo arriba')
+ assert.equal(Object.keys(bySubject).length,0)
+})
+
 test('same-day ensure upgrades legacy durations even if the preference hash still matches',async()=>{
  const user='legacy',db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',subjects:[]}],
   billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:2}}],

@@ -13,6 +13,7 @@ import { injectWeakReviewMissions } from '@/app/lib/camino/injectWeakReviewMissi
 import { injectDiagnosticMissions } from '@/app/lib/camino/injectDiagnosticMissions'
 import { injectPlanFillerMissions } from '@/app/lib/camino/injectPlanFillerMissions'
 import { collectPlanNotices } from '@/app/lib/camino/planNotices'
+import { topUpQueues } from '@/app/lib/camino/topUpSubjectQueue'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -133,6 +134,17 @@ export async function POST(request: NextRequest) {
     }
 
     await reconcilePlanWork(db, user.id)
+    // Repara colas que se quedaron con el temario de relleno de una
+    // asignatura cuyo catálogo real se publicó después de sembrarla (ver
+    // topUpSubjectQueue.ts). Va antes de sembrar el calendario para que lo
+    // añadido hoy ya pueda colocarse hoy, y dentro del mismo throttle diario
+    // que el resto de este endpoint: no es una lectura nueva en cada carga.
+    let topUp: { added: number; bySubject: Record<string, number> } = { added: 0, bySubject: {} }
+    try {
+      topUp = await topUpQueues(user.id, db)
+    } catch (error) {
+      console.error('[camino/ensure-calendar] top-up de cola falló, se reintenta mañana:', error)
+    }
     const ensure = await ensureCaminoCalendar(user.id, db, { throughDate })
     const weakReviews = await injectWeakReviewMissions(user.id, db)
     // Microdiagnóstico: como mucho uno, y solo si el alumno ya tiene ritmo
@@ -212,6 +224,7 @@ export async function POST(request: NextRequest) {
       weakReviews,
       diagnostics,
       filler,
+      topUp,
       // Ambos viajan SIEMPRE, también vacíos: es lo que permite retirar un
       // aviso cuando el problema se resuelve. Omitirlos dejaba el banner
       // encendido para siempre.

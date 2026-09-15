@@ -22,8 +22,10 @@ test('studyDatesBetween descuenta festivos', () => {
 
 test('C04: 500 temas en 184 días a 180 min/día SÍ caben — no debe haber rescate', () => {
   const capacity = computeStudyCapacity('2026-09-14', '2027-03-17', { dailyMinutes: 180 })
-  // Referencia de 25 min: siete sesiones nominales; el presupuesto real sigue siendo 180.
-  assert.equal(capacity.sessionsPerDay, 7)
+  // Seis sesiones de 30, que SUMAN los 180 declarados. Con la referencia
+  // antigua de 25 min salían siete (175 min) y el dia perdia 5 minutos; el
+  // presupuesto real sigue siendo 180 en los dos casos.
+  assert.equal(capacity.sessionsPerDay, 6)
   assert.ok(capacity.sessions > 500, `esperaba holgura para 500 temas, hay ${capacity.sessions}`)
 })
 

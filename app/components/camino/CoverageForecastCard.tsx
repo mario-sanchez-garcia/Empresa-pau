@@ -26,6 +26,16 @@ const SUBJECT_LABELS: Record<string, string> = {
   economia: 'Economía',
 }
 
+// Las mismas opciones del onboarding, con el texto en primera persona: aquí
+// el alumno no está describiendo un curso que aún no ha empezado, está
+// corrigiendo lo que declaró cuando se dio de alta.
+const START_MODE_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: 'zero', label: 'No he dado nada todavía' },
+  { value: 'first_block', label: 'He dado el primer bloque' },
+  { value: 'mid', label: 'Voy por la mitad' },
+  { value: 'review', label: 'Lo he dado todo, me toca repasar' },
+]
+
 const RISK_LABELS: Record<ForecastRiskReason, string> = {
   after_exam: 'Fecha posterior a la PAU', partial_deadline: 'Fuera del plazo del parcial',
   final_review_window: 'Temario nuevo en la reserva de repaso', unavailable_day: 'Día fuera de tu disponibilidad',
@@ -120,6 +130,31 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
   const [replanning, setReplanning] = useState(false)
   const [replanError, setReplanError] = useState<string | null>(null)
   const [visibleRisks, setVisibleRisks] = useState(10)
+  const [startModes, setStartModes] = useState<Record<string, string>>({})
+  const [savingSubject, setSavingSubject] = useState<string | null>(null)
+  const [startModeError, setStartModeError] = useState<string | null>(null)
+
+  async function declareStartMode(subject: string) {
+    const mode = startModes[subject]
+    if (!mode || savingSubject) return
+    setSavingSubject(subject); setStartModeError(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Vuelve a iniciar sesión para cambiar tu punto de partida.')
+      const response = await fetch('/api/camino/start-mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ subject, mode }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(payload?.error ?? 'No se pudo cambiar tu punto de partida.')
+      window.location.reload()
+    } catch (error) {
+      setStartModeError(error instanceof Error ? error.message : 'No se pudo cambiar tu punto de partida.')
+      setSavingSubject(null)
+    }
+  }
+
   async function replan() {
     if (replanning) return
     setReplanning(true); setReplanError(null)
@@ -148,13 +183,18 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
     1,
   )
 
+  // El titular dice el problema DOMINANTE, no la suma. "102 h fuera" cuando el
+  // tiempo existe y lo que falla es el encaje empujaba a la conclusión
+  // equivocada: que no da tiempo y hay que estudiar el doble.
   const answer: { tone: Tone; text: string } = incomplete
     ? { tone: 'neutral', text: 'Incompleta' }
     : known === 0
       ? { tone: 'neutral', text: 'Sin datos' }
-      : atRisk > 0
-        ? { tone: 'warn', text: `${hours(atRisk)} fuera` }
-        : { tone: 'accent', text: 'Lo registrado cabe' }
+      : forecast.deficitMinutes > 0
+        ? { tone: 'warn', text: `${hours(forecast.deficitMinutes)} de más` }
+        : atRisk > 0
+          ? { tone: 'warn', text: 'Hay que recolocar' }
+          : { tone: 'accent', text: 'Lo registrado cabe' }
 
   const withWork = forecast.subjects.filter(row => row.scheduledMinutes + row.pendingMinutes > 0)
 
@@ -230,7 +270,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
                   </div>
                   <div
                     role="img"
-                    aria-label={`Reparto del trabajo registrado: ${hours(forecast.validScheduledMinutes)} programado sin conflicto, ${hours(forecast.projectedPendingMinutes)} pendiente que cabe, ${hours(atRisk)} en riesgo`}
+                    aria-label={`Reparto del trabajo registrado: ${hours(forecast.validScheduledMinutes)} programado sin conflicto, ${hours(forecast.projectedPendingMinutes)} pendiente que cabe, ${hours(forecast.deficitMinutes)} sin tiempo suficiente y ${hours(forecast.unfitMinutes)} que no encaja`}
                     style={{
                       display: 'flex', height: 10, borderRadius: 999, overflow: 'hidden',
                       background: 'var(--clay-surface-deep)',
@@ -238,7 +278,8 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
                   >
                     <Segment minutes={forecast.validScheduledMinutes} total={scale} tone="accent" />
                     <Segment minutes={forecast.projectedPendingMinutes} total={scale} tone="accent" faded />
-                    <Segment minutes={atRisk} total={scale} tone="warn" />
+                    <Segment minutes={forecast.deficitMinutes} total={scale} tone="warn" />
+                    <Segment minutes={forecast.unfitMinutes} total={scale} tone="warn" faded />
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, fontSize: 12.5 }}>
                     <span style={muted}>Capacidad hasta la PAU</span>
@@ -250,7 +291,8 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
                   {[
                     { tone: 'accent' as Tone, faded: false, label: 'Programado sin conflicto', value: forecast.validScheduledMinutes },
                     { tone: 'accent' as Tone, faded: true, label: 'Pendiente que prevemos que cabe', value: forecast.projectedPendingMinutes },
-                    { tone: 'warn' as Tone, faded: false, label: 'Sin hueco con tu disponibilidad', value: atRisk },
+                    { tone: 'warn' as Tone, faded: false, label: 'Más trabajo que tiempo hasta la PAU', value: forecast.deficitMinutes },
+                    { tone: 'warn' as Tone, faded: true, label: 'Tiempo que existe pero no encaja', value: forecast.unfitMinutes },
                   ].filter(row => row.value > 0).map(row => (
                     <div key={row.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <Dot tone={row.tone} faded={row.faded} />
@@ -323,6 +365,58 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
                   </>
                 ) : (
                   <p style={prose}>Con los ajustes permitidos siguen quedando actividades sin encajar. Revisa los motivos de cada actividad: un plazo vencido o un solape no se resuelve necesariamente añadiendo horas.</p>
+                )}
+
+                {forecast.unfitMinutes > 0 && (
+                  <p style={prose}>
+                    <strong style={num}>{hours(forecast.unfitMinutes)}</strong> no encajan aunque el tiempo
+                    exista: son la reserva de repaso final —que el temario nuevo no cruza—, plazos de parciales
+                    ya pasados y huecos que ninguna actividad llena. Añadir horas al día puede no mover esta
+                    parte; mira los motivos de cada actividad antes de cambiar tu disponibilidad.
+                  </p>
+                )}
+
+                {forecast.deficitMinutes > 0 && withWork.length > 0 && (
+                  <div style={{ display: 'grid', gap: 10 }}>
+                    <p style={prose}>
+                      Sumar horas no es la única salida. Si parte de este temario ya lo has dado en clase,
+                      dilo y entrará como <strong>repaso express</strong> en vez de como lección nueva: más
+                      corto, pero sigue en tu Camino y sigue contando. No lo damos por aprobado — declarar
+                      no es demostrar.
+                    </p>
+                    {withWork.map(row => (
+                      <div key={row.subject} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <span style={{ flex: '1 1 120px', minWidth: 0, fontSize: 12.5, fontWeight: 700 }}>
+                          {SUBJECT_LABELS[row.subject] ?? row.subject}
+                        </span>
+                        <select
+                          aria-label={`Punto de partida en ${SUBJECT_LABELS[row.subject] ?? row.subject}`}
+                          value={startModes[row.subject] ?? ''}
+                          onChange={event => setStartModes(current => ({ ...current, [row.subject]: event.target.value }))}
+                          style={{ flex: '1 1 160px', minWidth: 0, fontSize: 12, padding: '7px 8px', borderRadius: 8,
+                            border: '1px solid var(--clay-border)', background: 'var(--clay-surface-raised)', color: 'inherit' }}
+                        >
+                          <option value="">¿Por dónde vas?</option>
+                          {START_MODE_OPTIONS.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          disabled={!startModes[row.subject] || savingSubject != null}
+                          onClick={() => void declareStartMode(row.subject)}
+                          style={{ flex: 'none', fontSize: 12, fontWeight: 800, padding: '7px 12px', borderRadius: 8,
+                            border: '1px solid var(--clay-border)', background: 'var(--clay-surface-raised)',
+                            color: 'var(--clay-accent-text)',
+                            cursor: !startModes[row.subject] || savingSubject != null ? 'not-allowed' : 'pointer',
+                            opacity: !startModes[row.subject] || savingSubject != null ? 0.5 : 1 }}
+                        >
+                          {savingSubject === row.subject ? 'Aplicando…' : 'Aplicar'}
+                        </button>
+                      </div>
+                    ))}
+                    {startModeError && <p role="alert" style={prose}>{startModeError}</p>}
+                  </div>
                 )}
 
                 {remedy.manualMinutes > 0 && (

@@ -284,10 +284,10 @@ export async function applyCalendarPersonalization(
       .range(from, to))
     const newContentMinutes = placementRows
       .filter(candidate => isNewContent(candidate.missionType))
-      .reduce((sum, candidate) => sum + minutesForPlacement(candidate.missionType, metadataObject(candidate.row.metadata)), 0)
+      .reduce((sum, candidate) => sum + minutesForPlacement(candidate.missionType, metadataObject(candidate.row.metadata), prefs.dailyMinutes), 0)
       + queuedRows.reduce((sum, item) => {
         const meta = metadataObject(item.metadata)
-        return sum + minutesForPlacement((meta.mission_type as string) ?? 'concept', meta)
+        return sum + minutesForPlacement((meta.mission_type as string) ?? 'concept', meta, prefs.dailyMinutes)
       }, 0)
     const newContentBudget = dailyNewContentBudget({
       pendingContentMinutes: newContentMinutes,
@@ -320,7 +320,7 @@ export async function applyCalendarPersonalization(
         if (!slots.available(date, row)) continue
         const scheduler = await schedulerFor(date)
         if (!scheduler) continue
-        const duration = minutesForPlacement(candidate.missionType, meta)
+        const duration = minutesForPlacement(candidate.missionType, meta, prefs.dailyMinutes)
         const contentToday = contentMinutesByDate.get(date) ?? 0
         // `continue`, no `break`: una fecha que ya tiene su temario del día no
         // descarta la misión, la empuja al siguiente día elegible — que es
@@ -347,7 +347,7 @@ export async function applyCalendarPersonalization(
           id: row.id, expected_status: row.status, expected_updated_at: row.updated_at,
           status: row.status === 'unscheduled' ? 'pending' : row.status,
           scheduled_date: date, start_time: timeSlot.start, end_time: timeSlot.end,
-          metadata: { ...resolvedMeta, ...placementDurationMetadata(candidate.missionType, meta),
+          metadata: { ...resolvedMeta, ...placementDurationMetadata(candidate.missionType, meta, prefs.dailyMinutes),
             camino_personalization: {
               version: PERSONALIZATION_VERSION, preference_hash: preferenceHash,
               application_hash: applicationHash, applied_from: appliedFrom,

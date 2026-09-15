@@ -140,11 +140,13 @@ for (const minutes of [30,45,60,90,150,180]) {
 }
 test('forecast: existing automatic, completed and manual work all consume minutes without resizing new work',()=>{
  const concept=q('c',0,{metadata:{mission_type:'concept'}})
- const withFirst=forecast(ctx,[row('a',{end_time:'16:35'})],[concept],[])
- assert.equal(withFirst.projectedPendingMinutes,25);assert.equal(withFirst.atRiskMinutes,0)
+ // La sesion de estudio mide lo que reparte el dia declarado: con 60 min al
+ // dia son 30, no 25 fijos (ver dailyTimeCapacity.sessionSlotsForMinutes).
+ const withFirst=forecast(ctx,[row('a',{end_time:'16:30'})],[concept],[])
+ assert.equal(withFirst.projectedPendingMinutes,30);assert.equal(withFirst.atRiskMinutes,0)
  for(const extra of [{source:'manual'},{locked:true},{status:'completed'}]) {
   const result=forecast(ctx,[row('a',{end_time:'16:25',...extra})],[concept],[])
-  assert.equal(result.projectedPendingMinutes,25);assert.equal(result.atRiskMinutes,0)
+  assert.equal(result.projectedPendingMinutes,30);assert.equal(result.atRiskMinutes,0)
   assertPartition(result)
  }
 })
@@ -155,13 +157,21 @@ test('forecast: three short activities fit when their total fits, without a sess
 })
 test('forecast: an unscheduled lesson forgets old hours and adapts to the current session length',()=>{
  const result=forecast(ctx,[row('a',{status:'unscheduled',end_time:'19:00',metadata:{estimated_minutes:180,camino_personalization:{version:'calendar_personalization_v5'}}})],[],[])
- assert.equal(result.pendingMinutes,25);assert.equal(result.projectedPendingMinutes,25);assert.equal(result.atRiskMinutes,0)
+ assert.equal(result.pendingMinutes,30);assert.equal(result.projectedPendingMinutes,30);assert.equal(result.atRiskMinutes,0)
  assertPartition(result)
 })
 test('forecast: an unplaced session keeps an explicit estimate, with no lost minutes',()=>{
  const result=forecast(ctx,[],['a','b','c'].map(id=>q(id,0,{metadata:{mission_type:'concept'}})),[])
- assert.equal(result.projectedPendingMinutes,50);assert.equal(result.atRiskMinutes,25)
- assert.equal(result.pendingMinutes,75);assertPartition(result)
+ // Dos sesiones llenan el dia ENTERO (30+30=60). Antes entraban dos de 25 y
+ // los 10 minutos sobrantes no le valian a nadie: eso es lo que sumaba horas
+ // de "no cabe" sobre un curso completo.
+ assert.equal(result.projectedPendingMinutes,60);assert.equal(result.atRiskMinutes,30)
+ assert.equal(result.pendingMinutes,90);assertPartition(result)
+ // Capacidad total 120 min (dos dias), trabajo 90: de tiempo va sobrado. Lo
+ // que deja fuera la tercera sesion es la reserva de repaso final, que el
+ // temario nuevo no cruza — encaje, no volumen. Sumar horas no lo arregla.
+ assert.equal(result.deficitMinutes,0,'hay tiempo de sobra: esto no es un deficit')
+ assert.equal(result.unfitMinutes,30,'no encaja, que es otro problema')
 })
 
 // End-to-end orchestration with the beta curriculum shipped in the repository.
@@ -329,7 +339,7 @@ test('forecast: sin riesgo no hay remedio; lo que no cabe ni al maximo se dice c
  const impossible=forecast(long,[],Array.from({length:200},(_,i)=>q('x'+i,30)),[])
  assert.equal(impossible.remedy.dailyMinutesNeeded,null)
  assert.equal(impossible.remedy.weeklyStudyDaysNeeded,null)
- assert.equal(impossible.remedy.deficitMinutes,impossible.scheduledMinutes+impossible.pendingMinutes-impossible.totalCapacityMinutes)
+ assert.equal(impossible.deficitMinutes,impossible.scheduledMinutes+impossible.pendingMinutes-impossible.totalCapacityMinutes)
 })
 test('forecast: las reservas fijas en conflicto se cuentan aparte, porque ningun ajuste las recoloca',()=>{
  const result=forecast(ctx,[row('a',{locked:true,end_time:'17:00'}),row('b',{locked:true,start_time:'17:00',end_time:'17:30'})],[],[])
@@ -379,7 +389,10 @@ test('forecast: el solape se nombra como conflicto de hueco, no como falta de ho
  assert.equal(risk.reason,'occupied_time')
  assert.equal(risk.automatic,true,'es trabajo que Camino si puede recolocar')
  assert.equal(result.remedy.replanRecommended,true,'con recolocar basta: no hay que quitar temario')
- assert.equal(result.remedy.deficitMinutes,0)
+ // Un solape NO es falta de horas: el deficit es cero y lo que no encaja se
+ // cuenta aparte, para no proponer "estudia mas" donde basta recolocar.
+ assert.equal(result.deficitMinutes,0)
+ assert.equal(result.unfitMinutes,result.atRiskMinutes)
 })
 
 // Tres listas que TIENEN que decir lo mismo: lo que el alumno puede elegir, lo
@@ -465,7 +478,10 @@ test('forecast recommendations never exceed beta access and an expired partial i
   row('expired',{status:'unscheduled',source:'partial',mission_type:'partial_practice',metadata:{partial_exam_date:'2027-01-10'}})
  ],[],[])
  assert.equal(expired.riskItems[0].reason,'partial_deadline')
- assert.equal(expired.remedy.deficitMinutes,0)
+ // Un plazo vencido no es falta de horas al año: deficit cero, y los minutos
+ // se cuentan como lo que son, trabajo que ya no encaja en ningun sitio.
+ assert.equal(expired.deficitMinutes,0)
+ assert.equal(expired.unfitMinutes,expired.atRiskMinutes)
  assert.equal(expired.remedy.replanRecommended,false)
  assert.equal(expired.remedy.combinedChange,null)
 })
@@ -476,6 +492,85 @@ test('scheduled reference durations remain labelled as estimates',()=>{
  assert.equal(result.estimatedItems,1,'a scheduled slot is not an empirically measured learning duration')
 })
 
+
+// El caso de la captura: cuatro asignaturas, 60 min al dia, 6 dias a la
+// semana, y una previsión que anunciaba ~100 h "fuera". Eran DOS problemas
+// sumados bajo una etiqueta, y la salida que ofrecia la tarjeta —subir horas—
+// no atacaba ninguno del todo.
+test('las sesiones embaldosan el dia: ningun presupuesto declarado pierde minutos',()=>{
+ const { sessionSlotsForMinutes, VALID_DAILY_MINUTES }=load('app/lib/camino/dailyTimeCapacity.ts')
+ for(const minutes of VALID_DAILY_MINUTES){
+  const slots=sessionSlotsForMinutes(minutes)
+  assert.equal(slots.reduce((sum,value)=>sum+value,0),minutes,`${minutes} min al dia tiene que repartirse entero`)
+  assert.ok(slots.every(value=>value>=20&&value<=45),`sesiones de ${minutes} fuera de rango: ${slots}`)
+ }
+})
+
+test('lo que no cabe se parte en volumen y encaje, que no se arreglan igual',()=>{
+ // Tiempo de sobra y aun asi hay trabajo fuera: es encaje (la reserva de
+ // repaso final), no deficit. Proponer mas horas aqui seria mentir.
+ const soloEncaje=forecast(ctx,[],['a','b','c'].map(id=>q(id,0,{metadata:{mission_type:'concept'}})),[])
+ assert.equal(soloEncaje.deficitMinutes,0)
+ assert.ok(soloEncaje.unfitMinutes>0)
+ // Y al reves: cinco sesiones de 30 en dos dias de 60 (capacidad 120, trabajo
+ // 150). Las cuatro primeras llenan los dos dias EXACTOS, asi que lo que queda
+ // fuera es volumen puro y no sobra ni un minuto por encaje.
+ const soloVolumen=forecast({...ctx,planningCutoff:'2027-01-13'},[],
+  ['v1','v2','v3','v4','v5'].map(id=>q(id,30)),[])
+ assert.equal(soloVolumen.totalCapacityMinutes,120)
+ assert.equal(soloVolumen.atRiskMinutes,30)
+ assert.equal(soloVolumen.deficitMinutes,30)
+ assert.equal(soloVolumen.unfitMinutes,0)
+ // La particion es exacta en los dos casos: ni se pierde ni se cuenta doble.
+ for(const result of [soloEncaje,soloVolumen])
+  assert.equal(result.deficitMinutes+result.unfitMinutes,result.atRiskMinutes)
+})
+
+test('declarar "ya lo he dado" recorta trabajo sin darlo por aprobado, y no se repite',async()=>{
+ const user='punto-partida',subjects=['fisica']
+ const bloques=['b1','b2','b3','b4']
+ const cola=bloques.flatMap((block,b)=>Array.from({length:3},(_,i)=>({
+  id:`q-${b}-${i}`,user_id:user,subject:'fisica',queue_status:'pending',
+  v2_sort_order:b*10+i,subject_position:b*10+i,title:`Tema ${b}.${i}`,
+  block_key:block,block_slug:block,metadata:{mission_type:'concept',topic_slug:`t-${b}-${i}`},retry_not_before:null})))
+ // Una ya terminada: lo hecho no se reescribe nunca.
+ cola[0].queue_status='completed'
+ const db=database({perfiles:[{id:user,subjects,pau_exam_date:'2027-06-07',student_exams:[]}],
+  user_entitlements:[{user_id:user,plan_id:'premium',status:'active'}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:6}}],
+  user_learning_queue:cola})
+ const mk=mod=>runtime('2026-09-15',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'t'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })(mod)
+ assert.equal((await mk('app/api/camino/ensure-calendar/route.ts').POST({json:async()=>({})})).status,200)
+ // Una sesion movida a mano por el alumno: ningun pase automatico la toca.
+ const aMano=db.tables.camino_calendar.find(r=>r.status==='pending'&&r.queue_id)
+ aMano.locked=true
+ const tipoAntes=aMano.mission_type
+
+ const api=mk('app/api/camino/start-mode/route.ts')
+ assert.equal((await api.POST({json:async()=>({subject:'fisica',mode:'nope'})})).status,400)
+ assert.equal((await api.POST({json:async()=>({mode:'mid'})})).status,400)
+
+ const respuesta=await api.POST({json:async()=>({subject:'fisica',mode:'mid'})})
+ const cuerpo=await respuesta.json()
+ assert.equal(respuesta.status,200)
+ assert.ok(cuerpo.changedQueueItems>0,'la mitad del temario tenia que pasar a repaso')
+
+ const porId=new Map(db.tables.user_learning_queue.map(r=>[r.id,r]))
+ assert.equal(porId.get('q-0-0').queue_status,'completed')
+ assert.equal(porId.get('q-0-0').metadata.mission_type,'concept','lo completado no se reescribe')
+ assert.equal(porId.get('q-0-1').metadata.mission_type,'review','el primer bloque queda como repaso')
+ assert.equal(porId.get('q-0-1').metadata.express,true)
+ assert.notEqual(porId.get('q-0-1').queue_status,'completed','declarar no es demostrar: sigue en el plan')
+ assert.equal(porId.get('q-3-2').metadata.mission_type,'concept','el ultimo bloque sigue siendo temario nuevo')
+ assert.equal(db.tables.camino_calendar.find(r=>r.id===aMano.id).mission_type,tipoAntes,'lo que el alumno fijo no se toca')
+
+ // Repetir el mismo punto de partida no vuelve a cambiar nada.
+ assert.deepEqual(await (await api.POST({json:async()=>({subject:'fisica',mode:'mid'})})).json(),
+  {ok:true,changedQueueItems:0,changedMissions:0})
+})
 
 test('same-day ensure upgrades legacy durations even if the preference hash still matches',async()=>{
  const user='legacy',db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',subjects:[]}],
@@ -495,7 +590,9 @@ test('same-day ensure upgrades legacy durations even if the preference hash stil
  const response=await api.POST({json:async()=>({})}),body=await response.json()
  assert.equal(response.status,200);assert.equal(body.skipped,undefined)
  assert.equal(saved.metadata.duration_model,'content_v1')
- assert.equal(load('app/lib/camino/missionDuration.ts').estimatedMinutesForMission(saved),25)
+ // La duracion heredada (55 min declarados) se reescribe a la sesion que
+ // reparte este dia: 180 min al dia son 6 sesiones de 30.
+ assert.equal(load('app/lib/camino/missionDuration.ts').estimatedMinutesForMission(saved),30)
  const again=await api.POST({json:async()=>({})})
  assert.equal((await again.json()).skipped,'already_ensured_today')
 })

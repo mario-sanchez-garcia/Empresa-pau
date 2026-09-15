@@ -3,16 +3,49 @@ export type DailyMinutes = typeof VALID_DAILY_MINUTES[number]
 
 export type DailyMissionPlan = {
   count: number
-  /** Sesiones de referencia de 25 min, solo para previsiones sin contenido. No es un límite del planificador. */
+  /** Sesiones que SUMAN el presupuesto del día. No es un límite del planificador. */
   slotMinutes: number[]
 }
 
-// El número de actividades reales depende de sus duraciones. Esta tabla
-// solo conserva una estimación nominal para rotación y vistas sin cola.
+// Duración a la que se aspira para una sesión de estudio sin duración medida.
+// No es la misión de referencia de XP (REFERENCE_MISSION_MINUTES, 25 min): esa
+// es el ancla de la escala de puntos y no debe moverse. Esta es la diana del
+// TAMAÑO de sesión, y existe para que las sesiones puedan embaldosar el día.
+export const SESSION_TARGET_MINUTES = 30
+
+/**
+ * Reparte el presupuesto del día en sesiones que lo suman EXACTO.
+ *
+ * Antes la sesión era una constante de 25 min y el día un presupuesto suelto,
+ * así que casi ningún presupuesto se dejaba embaldosar: con 60 min al día
+ * entraban dos sesiones (50 min) y los 10 minutos restantes no le valían a
+ * nadie, porque nada duraba menos. Diez minutos al día sobre un curso entero
+ * son ~38 h que la previsión contaba como "no cabe" cuando en realidad era
+ * "no encaja". El reparto desigual (45 min -> 23 + 22) es deliberado: preferimos
+ * un minuto de diferencia entre sesiones a un minuto tirado del día.
+ */
+export function sessionSlotsForMinutes(dailyMinutes: number): number[] {
+  const budget = Math.max(1, Math.round(dailyMinutes))
+  const count = Math.max(1, Math.round(budget / SESSION_TARGET_MINUTES))
+  const base = Math.floor(budget / count)
+  const remainder = budget - base * count
+  return Array.from({ length: count }, (_, index) => base + (index < remainder ? 1 : 0))
+}
+
+/**
+ * Duración de UNA sesión de estudio sin duración propia medida, para este
+ * presupuesto diario. Es la más corta del reparto: usar la más larga haría que
+ * la última sesión del día no cupiera en el resto que queda.
+ */
+export function sessionMinutesForMinutes(dailyMinutes: number | null | undefined): number {
+  const slots = sessionSlotsForMinutes(dailyMinutes ?? 60)
+  return slots[slots.length - 1]
+}
+
 const PLAN_BY_MINUTES: Record<number, DailyMissionPlan> = Object.fromEntries(
   VALID_DAILY_MINUTES.map(minutes => {
-    const count = Math.max(1, Math.floor(minutes / 25))
-    return [minutes, { count, slotMinutes: Array.from({ length: count }, () => 25) }]
+    const slotMinutes = sessionSlotsForMinutes(minutes)
+    return [minutes, { count: slotMinutes.length, slotMinutes }]
   }),
 )
 

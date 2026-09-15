@@ -9,6 +9,7 @@
 // 135 reservados.
 
 import { PARCIAL_MINUTES, REFERENCE_MISSION_MINUTES, SIMULACRO_MINUTES } from './xpMap.ts'
+import { sessionMinutesForMinutes } from './dailyTimeCapacity.ts'
 
 // Duración estimada por mission_type para los tipos que no pasan por el
 // cálculo por-slot de dailyTimeCapacity.ts (ese cubre las misiones
@@ -22,8 +23,33 @@ const MISSION_TYPE_MINUTES: Record<string, number> = {
   partial_practice: PARCIAL_MINUTES,
 }
 
-export function estimatedMinutesForMissionType(missionType: string): number {
-  return MISSION_TYPE_MINUTES[missionType] ?? REFERENCE_MISSION_MINUTES
+/**
+ * Tipos cuya duración es la de UNA SESIÓN DE ESTUDIO, no la de un artefacto
+ * con duración propia. Un simulacro dura 90 minutos porque el examen dura 90
+ * minutos, y un parcial 45 porque el parcial dura 45: esos no se estiran ni se
+ * encogen con el presupuesto del alumno. Una lección de temario, en cambio, no
+ * tiene una duración natural — es tanto como le dediques —, así que su
+ * referencia es el reparto del día y no una constante.
+ *
+ * `review` y `comment_text` se quedan fuera a propósito: tienen una duración
+ * medida que no es un hueco del día.
+ */
+function isStudySession(missionType: string): boolean {
+  return !(missionType in MISSION_TYPE_MINUTES)
+}
+
+/**
+ * Duración de referencia de un tipo de misión.
+ *
+ * `dailyMinutes` solo influye en las sesiones de estudio (ver `isStudySession`)
+ * y sirve para que encajen exactas en el día: sin él, la referencia era 25 min
+ * fijos y todo presupuesto que no fuera múltiplo de 25 perdía el resto.
+ */
+export function estimatedMinutesForMissionType(missionType: string, dailyMinutes?: number | null): number {
+  if (isStudySession(missionType)) {
+    return dailyMinutes == null ? REFERENCE_MISSION_MINUTES : sessionMinutesForMinutes(dailyMinutes)
+  }
+  return MISSION_TYPE_MINUTES[missionType]
 }
 
 // Postgres/PostgREST devuelve `time` como "HH:MM:SS" — el resto de la app

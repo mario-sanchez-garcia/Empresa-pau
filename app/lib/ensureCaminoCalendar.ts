@@ -677,7 +677,7 @@ export async function ensureCaminoCalendar(
           // llenan) se salta sin avanzar el cursor, igual que el bucle
           // principal.
           const scheduler = await createAvailabilityAwareScheduler(userId, supabase, dateStr, externalBusyByDate)
-          const timeSlot = scheduler.placeBest(minutesForPlacement((item.metadata?.mission_type as string) ?? 'concept', item.metadata ?? {}), {
+          const timeSlot = scheduler.placeBest(minutesForPlacement((item.metadata?.mission_type as string) ?? 'concept', item.metadata ?? {}, dailyMinutesForSlots), {
             date: dateStr,
             subject: item.subject,
             missionType: (item.metadata?.mission_type as string) ?? 'concept',
@@ -687,7 +687,7 @@ export async function ensureCaminoCalendar(
           const itemMeta = item.metadata ?? {}
           const topicMeta = queueTopicMeta(item)
           const missionType = (itemMeta.mission_type as string) ?? 'concept'
-          const calMetadata: Record<string, unknown> = { topic_slug: topicMeta.topicSlug, exam_forced: true, ...placementDurationMetadata(missionType, itemMeta) }
+          const calMetadata: Record<string, unknown> = { topic_slug: topicMeta.topicSlug, exam_forced: true, ...placementDurationMetadata(missionType, itemMeta, dailyMinutesForSlots) }
           const topicId = topicIdBySortOrder.get(item.v2_sort_order)
           if (topicId) calMetadata.topic_id = topicId
           if (itemMeta.express) calMetadata.express = true
@@ -960,7 +960,7 @@ export async function ensureCaminoCalendar(
   // le devuelve su presupuesto diario completo, igual que antes.
   const pendingContentMinutes = Object.values(subjectQueues).flat()
     .reduce((sum, item) => sum + minutesForPlacement(
-      ((item.metadata ?? {}).mission_type as string) ?? 'concept', item.metadata ?? {},
+      ((item.metadata ?? {}).mission_type as string) ?? 'concept', item.metadata ?? {}, dailyMinutesForSlots,
     ), 0)
   const paceStudyDays = contentPaceDates(planningDates(planContext)).length
   const newContentBudget = dailyNewContentBudget({
@@ -1041,14 +1041,14 @@ export async function ensureCaminoCalendar(
         const itemMeta = item.metadata ?? {}
         const topicMeta = queueTopicMeta(item)
         const missionType = finalSprint ? 'review' : ((itemMeta.mission_type as string) ?? 'concept')
-        const calMetadata: Record<string, unknown> = { ...placementDurationMetadata(missionType, itemMeta) }
+        const calMetadata: Record<string, unknown> = { ...placementDurationMetadata(missionType, itemMeta, dailyMinutesForSlots) }
         calMetadata.topic_slug = topicMeta.topicSlug
         const topicId = item.subject === 'historia_espana' ? historiaTopicIdBySortOrder.get(item.v2_sort_order) : null
         if (topicId) calMetadata.topic_id = topicId
         if (itemMeta.express) calMetadata.express = true
         if (finalSprint) { calMetadata.plan_mode = 'final_sprint'; calMetadata.final_review_window = true; calMetadata.knowledge_verified = false }
         if (rescueMode && !finalSprint) calMetadata.plan_mode = 'rescue'
-        const itemMinutes = minutesForPlacement(missionType, itemMeta)
+        const itemMinutes = minutesForPlacement(missionType, itemMeta, dailyMinutesForSlots)
         // finalSprint es el tramo reservado a repaso: ahí ya no hay ritmo que
         // respetar, lo que se coloca es precisamente la vuelta final.
         if (!finalSprint && !admitsMoreNewContent({

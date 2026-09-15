@@ -116,9 +116,18 @@ test('sin temario en ninguna asignatura el día queda explicado, no en silencio'
   assert.equal(day.excludedReason, 'no_subject_available')
 })
 
-test('los minutos declarados deciden los huecos por día', () => {
+test('los minutos declarados deciden los huecos por día, y las sesiones suman el día entero', () => {
   assert.equal(base({ dailyMinutes: 30 })[0].missionSlots, 1)
-  assert.equal(base({ dailyMinutes: 180 })[0].missionSlots, 7)
+  // 6 sesiones de 30, no 7 de 25: con la sesión fija en 25 min el día de 180
+  // colocaba 175 y tiraba 5 minutos, y el de 60 tiraba 10. Sobre un curso
+  // entero esos restos eran decenas de horas que la previsión contaba como
+  // "no cabe" cuando en realidad era "no encaja".
+  assert.equal(base({ dailyMinutes: 180 })[0].missionSlots, 6)
+  for (const minutes of [30, 45, 60, 90, 150, 180]) {
+    const day = base({ dailyMinutes: minutes })[0]
+    assert.equal(day.slotMinutes.reduce((sum, value) => sum + value, 0), minutes,
+      `las sesiones de un día de ${minutes} min tienen que sumar ${minutes}`)
+  }
 })
 
 // ── Disponibilidad efectiva: filtro de días y rotación, una sola lista ───

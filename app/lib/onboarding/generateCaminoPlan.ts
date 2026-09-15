@@ -444,7 +444,7 @@ async function generateCaminoPlanLocked(params: GenerateCaminoPlanParams): Promi
           const next = subjectQueues[s]?.[cursors[s] ?? 0]
           if (!next) return false
           const type = finalSprint ? 'review' : ((next.metadata?.mission_type as string) ?? 'concept')
-          return minutesForPlacement(type, next.metadata) <= remainingMinutes
+          return minutesForPlacement(type, next.metadata, planContext.dailyMinutes) <= remainingMinutes
         })
         if (!subject) break
         const queue = subjectQueues[subject] ?? []
@@ -467,8 +467,8 @@ async function generateCaminoPlanLocked(params: GenerateCaminoPlanParams): Promi
         // disponibles son los de la reserva final, y ahí no se siembra
         // temario nuevo. El título lo dice, para que el alumno vea qué es.
         const missionType = finalSprint ? 'review' : ((itemMeta.mission_type as string) ?? 'concept')
-        remainingMinutes -= minutesForPlacement(missionType, itemMeta)
-        const durationMetadata = placementDurationMetadata(missionType, itemMeta)
+        remainingMinutes -= minutesForPlacement(missionType, itemMeta, planContext.dailyMinutes)
+        const durationMetadata = placementDurationMetadata(missionType, itemMeta, planContext.dailyMinutes)
         const baseMetadata = itemMeta.express
           ? { express: true, topic_slug: topicMeta.topicSlug, ...durationMetadata }
           : { topic_slug: topicMeta.topicSlug, ...durationMetadata }

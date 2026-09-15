@@ -42,7 +42,6 @@ export type ForecastRemedy = {
   replanRecommended: boolean
   maxAvailabilityAtRiskMinutes: number
   manualMinutes: number
-  deficitMinutes: number
 }
 
 function subtract(ranges: Range[], from: number, to: number): Range[] {
@@ -133,7 +132,7 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
     const isScheduled = ['pending', 'postponed'].includes(row.status) && row.scheduled_date >= context.today
     const duration = minutesBetweenTimes(row.start_time, row.end_time)
     const type = row.mission_type ?? (typeof row.metadata?.mission_type === 'string' ? row.metadata.mission_type : 'concept')
-    const contentEstimate = placementDuration(type, row.metadata)
+    const contentEstimate = placementDuration(type, row.metadata, context.dailyMinutes)
     // El horario reservado mide ocupación, no el tiempo real de aprendizaje.
     // Si se obtuvo de una referencia por tipo, sigue siendo una estimación.
     const estimated = isScheduled && duration != null
@@ -173,7 +172,7 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
     if (completedIds.has(row.id) || seen.has(`queue:${row.id}`)) continue
     seen.add(`queue:${row.id}`)
     const type = typeof row.metadata?.mission_type === 'string' ? row.metadata.mission_type : 'concept'
-    const estimated = placementDuration(type, row.metadata)
+    const estimated = placementDuration(type, row.metadata, context.dailyMinutes)
     const stats = subject(row.subject)
     if (estimated.estimated) stats.estimatedItems++
     pending.push({ id: row.id, queueId: row.id, subject: row.subject, title: row.title, scheduledDate: context.today,
@@ -185,7 +184,7 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
     for (const date of preferredDatesFor(work, window)) {
       const day = dayByDate.get(date)!
       if (work.notBefore && date < work.notBefore.slice(0, 10)) continue
-      const minutes = minutesForPlacement(work.missionType, work.metadata)
+      const minutes = minutesForPlacement(work.missionType, work.metadata, context.dailyMinutes)
       if (!consume(day, minutes)) continue
       placedMinutes = minutes
       break
@@ -209,6 +208,19 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
   const total = (key: keyof Omit<SubjectForecast, 'subject'>) => subjects.reduce((sum, row) => sum + row[key], 0)
   const atRisk = total('atRiskMinutes')
   const totalCapacityMinutes = days.reduce((sum, day) => sum + day.capacity, 0)
+
+  // "No cabe" son DOS problemas con soluciones opuestas, y enseñarlos sumados
+  // llevaba a la conclusión equivocada:
+  //
+  //  - VOLUMEN: hay más trabajo que tiempo hasta la PAU. Solo se arregla con
+  //    más disponibilidad o con menos trabajo.
+  //  - ENCAJE: el tiempo existe, pero está en trozos que ninguna actividad
+  //    llena —minutos sueltos al final del día, la reserva de repaso final que
+  //    el temario nuevo no puede cruzar, un plazo de parcial que ya pasó—.
+  //    Añadir horas puede no mover esto ni un minuto.
+  const knownMinutes = total('scheduledMinutes') + total('pendingMinutes')
+  const deficitMinutes = Math.max(0, knownMinutes - totalCapacityMinutes)
+  const unfitMinutes = Math.max(0, atRisk - deficitMinutes)
 
   let remedy: ForecastRemedy | null = null
   if (atRisk > 0 && options.withRemedy !== false) {
@@ -246,8 +258,7 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
       }
     }
     remedy = { dailyMinutesNeeded, weeklyStudyDaysNeeded, combinedChange, replanRecommended,
-      maxAvailabilityAtRiskMinutes: riskFor(180, maxWeekly), manualMinutes: protectedConflictMinutes,
-      deficitMinutes: Math.max(0, total('scheduledMinutes') + total('pendingMinutes') - totalCapacityMinutes) }
+      maxAvailabilityAtRiskMinutes: riskFor(180, maxWeekly), manualMinutes: protectedConflictMinutes }
   }
 
   return {
@@ -260,6 +271,7 @@ export function buildCoverageForecast(context: StudentPlanContext, calendar: rea
     validScheduledMinutes: total('scheduledMinutes') - total('scheduledAtRiskMinutes'),
     projectedPendingMinutes: total('projectedPendingMinutes'), atRiskMinutes: atRisk,
     reservedActivityMinutes: total('reservedActivityMinutes'), availableAfterScheduledMinutes,
+    deficitMinutes, unfitMinutes,
     riskItems, protectedConflictMinutes, estimatedItems: total('estimatedItems'), subjects,
     missingSubjects: activeSubjects.filter(name => !queue.some(row => row.subject === name) && !calendar.some(row => row.subject === name)),
     externalCalendarIncluded: false as const,
@@ -276,6 +288,10 @@ export type CoverageForecast = {
   scheduledMinutes: number; pendingMinutes: number; scheduledAtRiskMinutes: number
   validScheduledMinutes: number; projectedPendingMinutes: number; atRiskMinutes: number
   reservedActivityMinutes: number; availableAfterScheduledMinutes: number
+  /** De `atRiskMinutes`, lo que no cabe porque no hay tanto tiempo hasta la PAU. */
+  deficitMinutes: number
+  /** De `atRiskMinutes`, lo que no cabe aunque el tiempo exista: encaje, reserva de repaso, plazos. */
+  unfitMinutes: number
   riskItems: ForecastRiskItem[]
   protectedConflictMinutes: number; estimatedItems: number
   subjects: SubjectForecast[]; missingSubjects: string[]

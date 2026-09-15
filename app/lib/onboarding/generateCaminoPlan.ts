@@ -3,7 +3,7 @@ import { checkedDb } from '@/app/lib/camino/checkedDb'
 import { withPlanLock } from '@/app/lib/camino/planPersistence'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
-import { isCcssBlockCoveredByMatesII } from '@/app/lib/camino/mathOverlap'
+import { isCcssTopicCoveredByMatesII } from '@/app/lib/camino/mathOverlap'
 import { CAMINO_CURRICULUM_TOPICS, getTopic, getTopicByV2SortOrder, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
 import { minutesForPlacement, placementDurationMetadata } from '@/app/lib/camino/placementDuration'
@@ -252,7 +252,7 @@ async function generateCaminoPlanLocked(params: GenerateCaminoPlanParams): Promi
       // más profunda) y de CCSS solo entra lo que Mates II no cubre
       // (Inferencia). Ver mathOverlap.ts.
       if (subjects.includes('matematicas_ii') && bySubject.matematicas_ccss?.length) {
-        bySubject.matematicas_ccss = bySubject.matematicas_ccss.filter(item => !isCcssBlockCoveredByMatesII(item.block_slug))
+        bySubject.matematicas_ccss = bySubject.matematicas_ccss.filter(item => !isCcssTopicCoveredByMatesII(item.block_slug, item.title))
       }
 
       // Punto de partida declarado POR ASIGNATURA (ver camino/startingPoint.ts).

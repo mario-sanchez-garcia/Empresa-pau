@@ -5,7 +5,7 @@ import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
 import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
-import { isCcssBlockCoveredByMatesII } from '@/app/lib/camino/mathOverlap'
+import { isCcssTopicCoveredByMatesII } from '@/app/lib/camino/mathOverlap'
 
 export const dynamic = 'force-dynamic'
 
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
         .eq('user_id', user.id)
         .eq('subject', 'matematicas_ii')
       if (hasMatesII && hasMatesII > 0) {
-        finalItems = finalItems.filter(item => !isCcssBlockCoveredByMatesII(item.block_slug))
+        finalItems = finalItems.filter(item => !isCcssTopicCoveredByMatesII(item.block_slug, item.title))
       }
     }
 

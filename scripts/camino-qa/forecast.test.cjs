@@ -790,6 +790,38 @@ test('topUpSubjectQueue completa una cola atrapada en el relleno, sin tocar nada
  assert.equal(Object.keys(bySubject).length,0)
 })
 
+// Comparacion tema a tema del temario real (15/09/2026), no por bloque ni
+// por coincidencia de texto: "Discusion de Sistemas: Teorema de
+// Rouche-Frobenius" (CCSS) y "Teorema de Rouche-Frobenius (Discusion)"
+// (Mates II) son el mismo tema con las palabras en otro orden, y
+// "Programacion Lineal" no tiene NINGUN equivalente en Mates II aunque este
+// en el bloque de Algebra. mathOverlap.ts fija el contrato: exactamente 8
+// de los 38 temas de los tres bloques con solape son exclusivos de CCSS.
+test('el solape con Mates II es tema a tema, no por bloque ni por texto exacto',()=>{
+ const { isCcssTopicCoveredByMatesII } = load('app/lib/camino/mathOverlap.ts')
+ const seed = require('../../app/data/camino/curriculum_seed.json')
+ const overlapBlocks = new Set(['algebra','analisis','probabilidad'])
+ const ccssOverlap = seed.filter(t=>t.subject==='matematicas_ccss'&&overlapBlocks.has(t.blockSlug))
+ assert.equal(ccssOverlap.length,38,'si el temario real cambio de tamano, esta lista curada hay que revisarla')
+
+ const unicos = ccssOverlap.filter(t=>!isCcssTopicCoveredByMatesII(t.blockSlug,t.title)).map(t=>t.title).sort()
+ assert.deepEqual(unicos,[
+  'Asíntotas de una Función',
+  'Dominio de una Función',
+  'Funciones de Coste, Ingreso y Beneficio',
+  'Optimización Económica: Máximo Beneficio y Mínimo Coste',
+  'Optimización económica',
+  'Probabilidad Condicionada e Independencia',
+  'Programación Lineal: Región Factible y Optimización',
+  'Representación Gráfica de Funciones',
+ ].sort(),'los 8 exclusivos de CCSS, y solo esos, tienen que sobrevivir al filtro')
+
+ // Palabras en otro orden: SI es el mismo tema y SI se descarta.
+ assert.equal(isCcssTopicCoveredByMatesII('algebra','Discusión de Sistemas: Teorema de Rouché-Frobenius'),true)
+ // Inferencia nunca pasa por esta comparacion, sea cual sea el titulo.
+ assert.equal(isCcssTopicCoveredByMatesII('inferencia','Programación Lineal: Región Factible y Optimización'),false)
+})
+
 test('topUpSubjectQueue respeta el solape: no repone Algebra/Analisis/Probabilidad si ya hay Mates II',async()=>{
  const { topUpSubjectQueue } = load('app/lib/camino/topUpSubjectQueue.ts')
  const user='reparar-con-solape'

@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { isPrivateBetaSubject } from './betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from './caminoCurriculumPlan'
-import { isCcssBlockCoveredByMatesII } from './mathOverlap'
+import { isCcssTopicCoveredByMatesII } from './mathOverlap'
 
 // Repara la cola de un alumno cuando `curriculum_content_v2` publica más
 // temario del que su cola ya tiene sembrado.
@@ -102,7 +102,7 @@ export async function topUpSubjectQueue(
       .eq('user_id', userId)
       .eq('subject', 'matematicas_ii')
     if (hasMatesII && hasMatesII > 0) {
-      missing = missing.filter(row => !isCcssBlockCoveredByMatesII(row.block_slug))
+      missing = missing.filter(row => !isCcssTopicCoveredByMatesII(row.block_slug, row.title))
     }
   }
   if (missing.length === 0) return { added: 0 }

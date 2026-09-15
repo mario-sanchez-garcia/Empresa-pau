@@ -2453,18 +2453,7 @@ export default function CaminoCalendarClient() {
   }
 
   async function addSubject(subjectLabel: string) {
-    const SUBJECT_TO_SLUG: Record<string, string> = {
-      'Matemáticas II': 'matematicas_ii',
-      'Matemáticas CCSS': 'matematicas_ccss',
-      'Lengua Castellana': 'lengua',
-      'Historia de España': 'historia_espana',
-      'Historia de la Filosofía': 'historia_filosofia',
-      'Inglés': 'ingles',
-      'Física': 'fisica',
-      'Química': 'quimica',
-      'Economía de la Empresa': 'economia',
-    }
-    const slug = SUBJECT_TO_SLUG[subjectLabel]
+    const slug = SUBJECT_LABEL_TO_SLUG[subjectLabel]
     if (!slug) return
     setAddSubjectLoading(true)
     try {
@@ -5762,6 +5751,18 @@ function LigaSection({ ligas, loading, onCreateLiga, onJoinLiga }: { ligas: Liga
   )
 }
 
+const SUBJECT_LABEL_TO_SLUG: Record<string, string> = {
+  'Matemáticas II': 'matematicas_ii',
+  'Matemáticas CCSS': 'matematicas_ccss',
+  'Lengua Castellana': 'lengua',
+  'Historia de España': 'historia_espana',
+  'Historia de la Filosofía': 'historia_filosofia',
+  'Inglés': 'ingles',
+  'Física': 'fisica',
+  'Química': 'quimica',
+  'Economía de la Empresa': 'economia',
+}
+
 const ADDABLE_SUBJECT_OPTS = [
   { id: 'Matemáticas II', color: '#2563eb', bg: '#eff6ff' },
   { id: 'Matemáticas CCSS', color: '#7c3aed', bg: '#f5f3ff' },
@@ -5781,7 +5782,41 @@ function AddSubjectModal({ currentSubjects, onClose, onAdd, loading }: {
   loading: boolean
 }) {
   const [selected, setSelected] = useState<string | null>(null)
-  const available = ADDABLE_SUBJECT_OPTS.filter(s => !currentSubjects.includes(s.id))
+  // `currentSubjects` es la copia de localStorage: dice lo ELEGIDO, no lo
+  // SEMBRADO. Una asignatura elegida cuya generación falló en su momento (el
+  // caso de Biología, ver camino/biologia_camino) queda invisible para
+  // siempre —ni el modal la ofrece ni hay forma de volver a pedirla— porque
+  // el filtro de abajo la trata como ya resuelta. Se comprueba la cola real
+  // al abrir el modal y esas asignaturas vuelven a ofrecerse.
+  const [emptySubjectLabels, setEmptySubjectLabels] = useState<Set<string> | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    async function checkRealQueue() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) return
+        const response = await fetch('/api/camino/start-mode?status=any', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        if (!response.ok) return
+        const payload = await response.json().catch(() => null)
+        const seededSlugs = new Set(Object.keys(payload?.subjects ?? {}))
+        const empty = new Set(
+          currentSubjects.filter(label => {
+            const slug = SUBJECT_LABEL_TO_SLUG[label]
+            return slug != null && !seededSlugs.has(slug)
+          }),
+        )
+        if (!cancelled) setEmptySubjectLabels(empty)
+      } catch { /* si falla la comprobación, se queda con el filtro de siempre */ }
+    }
+    void checkRealQueue()
+    return () => { cancelled = true }
+  }, [currentSubjects])
+
+  const available = ADDABLE_SUBJECT_OPTS.filter(s =>
+    !currentSubjects.includes(s.id) || emptySubjectLabels?.has(s.id),
+  )
 
   const modalCardStyle: React.CSSProperties = { background: 'var(--clay-surface)', border: '1px solid var(--clay-border)', borderRadius: 18, boxShadow: '0 18px 50px rgba(15,23,42,0.18)', backdropFilter: 'blur(18px) saturate(1.12)', WebkitBackdropFilter: 'blur(18px) saturate(1.12)' }
 

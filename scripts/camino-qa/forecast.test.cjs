@@ -651,6 +651,27 @@ test('declarar "ya lo he dado" recorta trabajo sin darlo por aprobado, y no se r
 // El orden del temario es NUESTRO, no el del instituto del alumno. "He dado
 // el primer bloque" daba por vistos los primeros de nuestra lista, que para
 // media beta no son por donde empezó su clase. Se declara por nombre.
+// El caso de Mario (15/09/2026): una asignatura ELEGIDA (perfiles.subjects)
+// cuya siembra nunca se completo -- mismo patron que el incidente de
+// Biologia (camino/biologia_camino) -- no debe distinguirse de una
+// asignatura 100% terminada: `status=any` es lo unico que las separa.
+test('GET start-mode: status=any distingue "nunca sembrada" de "terminada del todo"',async()=>{
+ const user='u-estados'
+ const db=database({user_learning_queue:[
+  {id:'p1',user_id:user,subject:'fisica',queue_status:'pending',subject_position:1,title:'T1',block_key:'B',block_slug:'b',metadata:{mission_type:'concept'}},
+  {id:'c1',user_id:user,subject:'quimica',queue_status:'completed',subject_position:1,title:'T2',block_key:'B',block_slug:'b',metadata:{mission_type:'concept'}},
+ ]})
+ const api=runtime('2026-09-15',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'t'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/start-mode/route.ts')
+ const normal=await (await api.GET({url:'http://x/api/camino/start-mode'})).json()
+ assert.deepEqual(Object.keys(normal.subjects).sort(),['fisica'],'sin status=any, quimica (toda completada) no tiene nada que declarar')
+ const any=await (await api.GET({url:'http://x/api/camino/start-mode?status=any'})).json()
+ assert.deepEqual(Object.keys(any.subjects).sort(),['fisica','quimica'],'con status=any, quimica SI aparece: tiene cola real, solo que terminada')
+ assert.ok(!('matematicas_ccss' in any.subjects),'una elegida y nunca sembrada no aparece en ningun caso: eso es lo que hay que re-ofrecer')
+})
+
 test('se declara QUE bloque se ha dado, aunque no sea el primero de nuestra lista',async()=>{
  const user='bloques-sueltos'
  const bloques=['Cinematica','Campo gravitatorio','Ondas','Optica']

@@ -107,11 +107,17 @@ export async function GET(request: NextRequest) {
     const { user } = authContext
 
     const db = createServiceClient()
-    const { data: rows, error } = await db
-      .from('user_learning_queue')
-      .select('subject')
-      .eq('user_id', user.id)
-      .in('queue_status', ['pending', 'scheduled'])
+    // Por defecto solo pendiente/programado: es lo que tiene sentido
+    // declarar como "ya dado". `?status=any` amplía a CUALQUIER fila
+    // (incluida completada) — lo usa "+ Añadir asignatura" para saber si
+    // una asignatura tiene cola real y no confundir "100% terminada" con
+    // "nunca se sembró" (esa sí hay que poder volver a pedirla).
+    // request.url puede faltar en llamadas directas de test — sin URL no hay
+    // query que leer, así que se queda en el comportamiento de siempre.
+    const includeCompleted = typeof request.url === 'string' && new URL(request.url).searchParams.get('status') === 'any'
+    let queueQuery = db.from('user_learning_queue').select('subject').eq('user_id', user.id)
+    queueQuery = includeCompleted ? queueQuery : queueQuery.in('queue_status', ['pending', 'scheduled'])
+    const { data: rows, error } = await queueQuery
     if (error) throw new Error(`Subjects read: ${error.message}`)
 
     const subjects = [...new Set((rows ?? []).map(row => normalizeSubjectSlug(row.subject)))]

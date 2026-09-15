@@ -107,3 +107,93 @@ export function admitsMoreNewContent(input: {
   if (input.scheduledMinutes <= 0) return true
   return input.scheduledMinutes + input.missionMinutes / 2 <= input.dailyBudget
 }
+
+// ── Presupuesto ACUMULADO ────────────────────────────────────────────────
+//
+// dailyNewContentBudget/admitsMoreNewContent reparten el ritmo DÍA A DÍA: un
+// presupuesto de 36 min con sesiones de 30 redondea a "cabe una" y tira los
+// 6 min sobrantes — CADA DÍA, para siempre, porque el sobrante nunca se lleva
+// al día siguiente. Reproducido con el temario real: 44 de 119 días sin una
+// sola lección nueva pese a tener más de 100 temas pendientes, porque ese
+// hueco lo ocupaba el repaso en su lugar.
+//
+// Dos arreglos probados y descartados el mismo día (15/09/2026):
+//   1. Presupuesto independiente por asignatura — arregla el síntoma pero
+//      ROMPE LA IDEMPOTENCIA: la asignatura "preferida" de un día cambia
+//      entre ejecuciones según cuánta cola le va quedando a cada una, y con
+//      presupuesto propio cada una que llega a ser preferida en algún
+//      momento añade SU cuota — llamar a ensureCaminoCalendar varias veces
+//      seguidas con el mismo throughDate seguía añadiendo filas sin parar
+//      (480 → 494 → 516 → ...). No puede llegar a producción.
+//   2. Arrastre mutable (carryMinutes) acotado a una sesión — mismo defecto
+//      de fondo (estado que depende del ORDEN de ejecución) y además
+//      insuficiente (solo bajaba de 44 a 35 días de puro repaso).
+//
+// La diferencia de fondo: los dos intentos anteriores repartían el
+// presupuesto EN EL TIEMPO (por día) o ENTRE ASIGNATURAS. Lo correcto es
+// repartirlo como lo que es — un total — y comparar contra un ACUMULADO:
+//
+//   cumulativeAllowedNewContentMinutes(D) = N-ésimo día de ritmo × presupuesto diario
+//   cumulativeScheduledNewContentMinutes(D) = temario nuevo YA colocado con fecha <= D
+//
+// Una misión cabe si scheduled + su duración <= allowed. Sin redondear "al
+// más cercano" — el acumulado no lo necesita, porque lo que un día no gasta
+// sigue disponible en el siguiente en vez de perderse; redondear aquí
+// volvería a regalar minutos que el acumulado ya cuenta con exactitud.
+//
+// Por qué esto SÍ es idempotente y los otros dos no: `allowed` es una
+// función puramente POSICIONAL (día 1º, 2º, 3º... del ritmo) que no depende
+// de cuántas veces se haya ejecutado el motor, y `scheduled` es lo que YA
+// hay en el calendario (una lectura, no un cálculo que dependa de la
+// ejecución anterior). Dos ejecuciones seguidas con la misma cola ven el
+// mismo `allowed` y el mismo `scheduled` inicial, así que colocan lo mismo
+// y paran en el mismo sitio — no hay estado intermedio que arrastrar entre
+// llamadas, ni un reparto por asignatura que dependa del orden de rotación.
+
+/**
+ * Presupuesto ACUMULADO de temario nuevo autorizado hasta cada fecha de
+ * ritmo (inclusive), en el mismo orden que `contentPaceDates`.
+ *
+ * La fecha N-ésima autoriza `N × dailyBudget` en total — no `dailyBudget`
+ * por separado cada día. Es una tabla, no un contador: se recalcula entera
+ * cada vez a partir de las mismas fechas y el mismo presupuesto diario, así
+ * que la misma entrada produce siempre la misma tabla.
+ */
+export function cumulativeNewContentAllowance(
+  paceDates: readonly string[],
+  dailyBudget: number,
+): Map<string, number> {
+  const result = new Map<string, number>()
+  let cumulative = 0
+  for (const date of paceDates) {
+    cumulative += dailyBudget
+    result.set(date, cumulative)
+  }
+  return result
+}
+
+/**
+ * ¿Cabe esta misión de temario nuevo dentro del presupuesto ACUMULADO hasta
+ * su fecha? Sustituye a `admitsMoreNewContent` cuando se usa presupuesto
+ * acumulado — comparación exacta, sin redondeo: lo que un día no gasta lo
+ * hereda el siguiente a través del propio acumulado, así que no hace falta
+ * la tolerancia de "media misión" que `admitsMoreNewContent` necesitaba
+ * para compensar el redondeo día a día.
+ *
+ * La primera misión de TODO el plan siempre cabe (scheduled=0), aunque sea
+ * más larga que un solo día de presupuesto: el plan no puede empezar a
+ * cero. A partir de ahí, cabe justo lo que el acumulado permite — ni una
+ * asignatura recibe trato especial, ni el orden en que se prueban importa
+ * para CUÁNTO cabe, solo para QUÉ es lo que cabe.
+ */
+export function admitsCumulativeNewContent(input: {
+  /** Minutos de temario nuevo (cualquier asignatura) ya colocados con fecha <= la de esta misión. */
+  cumulativeScheduledMinutes: number
+  /** Duración de la misión que se quiere añadir. */
+  missionMinutes: number
+  /** Presupuesto acumulado autorizado hasta esta fecha (cumulativeNewContentAllowance). */
+  cumulativeAllowedMinutes: number
+}): boolean {
+  if (input.cumulativeScheduledMinutes <= 0) return true
+  return input.cumulativeScheduledMinutes + input.missionMinutes <= input.cumulativeAllowedMinutes
+}

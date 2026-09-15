@@ -5,17 +5,18 @@ import { createHash } from 'crypto'
 import { readAllRows } from './readAllRows'
 import { reconcilePlanWork } from './planPersistence'
 import { getAvailability, busySlotsForMadridDate, type LocalBusyRange } from '../calendar/availability'
-import { minutesForPlacement, placementDurationMetadata } from './placementDuration'
+import { minutesForPlacement, placementDurationMetadata, CONTENT_DURATION_MODEL } from './placementDuration'
 import { MissionSlots, type SlotRow } from './placementSlots'
 import { type SupabaseClient } from '@supabase/supabase-js'
 
-import { getMadridToday } from './studyDays'
+import { getMadridToday, mondayBasedDayIndex } from './studyDays'
 import { canRepositionAutomatically } from './automaticPlacement'
 import { VALID_DAILY_MINUTES } from './dailyTimeCapacity'
 import { createDaySchedulers, type DayScheduler } from './scheduleTimeSlot'
 import { loadStudentPlanContext, planningDates, type DeclaredAvailability, type StudentPlanContext } from './studentPlanContext'
-import { isNewContent, orderRowsForPlacement, preferredDatesFor, unscheduledReasonFor, type PlacementRow, type PlacementWindow } from './planPlacement'
+import { eligibleDatesForRow, isNewContent, orderRowsForPlacement, preferredDatesFor, unscheduledReasonFor, type PlacementRow, type PlacementWindow } from './planPlacement'
 import { admitsMoreNewContent, contentPaceDates, dailyNewContentBudget } from './contentPace'
+import { normalizeTime, toMinutes } from './missionDuration'
 
 const VALID_WEEKLY_DAYS = [1, 2, 3, 4, 5, 6, 7] as const
 // v3: la colocación cambió de algoritmo (dos ventanas — temario nuevo y
@@ -176,6 +177,17 @@ export async function applyCalendarPersonalization(
     const preferenceHash = stableHash(
       `${PERSONALIZATION_VERSION}:${context.weeklyStudyDays}:${prefs.dailyMinutes}:${context.examDate}:${context.planningCutoff}:${context.today}:${context.emergencyAvailability}`,
     )
+    // Orden de LECTURA, no solo de exhibición: `orderRowsForPlacement` (más
+    // abajo) sirve las filas "resto" —ni parcial ni por tipo— en el mismo
+    // orden en que llegan aquí (usa `.filter()`, que no reordena). Antes se
+    // leían por `scheduled_date` — precisamente el campo que ESTE MISMO paso
+    // reescribe. Con dos temas de un tema/asignatura empatados a fecha de
+    // partida, el desempate caía en `id` (un UUID sin relación con el
+    // temario) y podía colocar el tema con v2_sort_order MAYOR en una fecha
+    // ANTERIOR al de v2_sort_order menor — el orden curricular invertido,
+    // reproducido en un test dedicado sin hacer falta repetir la llamada.
+    // `v2_sort_order` es la posición curricular: no cambia nunca, así que
+    // el orden de servicio es estable pase lo que pase con las fechas.
     const rows = (await readAllRows<CalendarRow>((from, to) => supabase
       .from('camino_calendar')
       .select('id, source, start_time, end_time, scheduled_date, subject, v2_sort_order, status, locked, metadata, created_at, updated_at, mission_type, queue_id')
@@ -183,7 +195,9 @@ export async function applyCalendarPersonalization(
       .or(`scheduled_date.gte.${today},status.eq.unscheduled`)
       .in('status', ['pending', 'postponed', 'unscheduled'])
       .in('source', ['algorithm', 'partial'])
-      .order('scheduled_date', { ascending: true }).order('id', { ascending: true })
+      .order('subject', { ascending: true })
+      .order('v2_sort_order', { ascending: true, nullsFirst: false })
+      .order('id', { ascending: true })
       .range(from, to))).filter(canRepositionAutomatically)
     if (rows.length === 0) return { applied: false, reason: 'no_rows', updatedRows: 0, preferenceHash }
 
@@ -203,40 +217,11 @@ export async function applyCalendarPersonalization(
     const appliedFrom = today
     const applicationHash = stableHash(`${preferenceHash}:${appliedFrom}`)
 
-    // Todas las filas de `rows` se están reubicando en este mismo pase, así
-    // que su hora actual (si la tenían de una pasada anterior) nunca debe
-    // contar como "hueco ocupado" al buscar sitio en su nueva fecha — solo
-    // importa lo que el alumno tiene fuera de Camino (camino_custom_events) y
-    // lo que otras misiones YA reubicadas en este pase hayan ocupado.
-    const excludeCalendarRowIds = new Set(rows.map(row => row.id))
-
     const window: PlacementWindow = {
       dates: candidateDates(context, appliedFrom),
       capacityPerDay: capacity,
       planningCutoff: context.planningCutoff,
       examDate: context.examDate,
-    }
-
-    // UNA fotografía del rango entero, no una por día. Este pase no escribe
-    // hasta el `camino_apply_placements` final, así que el snapshot vale para
-    // todas las fechas — es lo mismo que hacía el caché por día de antes, pero
-    // con 3 lecturas en vez de 5 por fecha y una llamada a Google en vez de
-    // una por fecha. Con el curso abierto eso eran ~500 idas y vueltas
-    // secuenciales, que es de donde salía el minuto largo de «Preparando las
-    // misiones de esta semana».
-    let schedulers: Map<string, DayScheduler> | null = null
-    const schedulerFor = async (date: string) => {
-      if (!schedulers) {
-        const dates = window.dates
-        if (!dates.length) return null
-        const externalBusyByDate = new Map<string, LocalBusyRange[]>()
-        const busy = await getAvailability(userId, dates[0], dates[dates.length - 1])
-        for (const day of dates) externalBusyByDate.set(day, busySlotsForMadridDate(busy, day))
-        schedulers = await createDaySchedulers(userId, supabase, [...dates], {
-          dailyMinutes: prefs.dailyMinutes, externalBusyByDate, excludeCalendarRowIds,
-        })
-      }
-      return schedulers.get(date) ?? null
     }
 
     // Las REGLAS (qué fechas admite cada misión, en qué orden se sirven, por
@@ -262,6 +247,165 @@ export async function applyCalendarPersonalization(
         ? String(metadataObject(row.metadata).place_not_before) : null,
       row,
     }))
+
+    // ── Estabilidad: no recolocar lo que ya está bien colocado ──────────────
+    //
+    // Antes este pase recolocaba TODA `rows` en cada ejecución, aunque nada
+    // hubiera cambiado — así que abrir Camino dos veces seguidas sin tocar
+    // ninguna entrada reordenaba el calendario igualmente: bastaba con que
+    // ensureCaminoCalendar hubiera añadido una sola fila nueva desde la
+    // última vez (backlog restante, repaso espaciado que ahora tocaba) para
+    // que TODO el resto — ya personalizado, ya con hora — se recalculara
+    // desde cero y aterrizara en fechas distintas por el simple azar de en
+    // qué orden entraban las filas nuevas.
+    //
+    // Una fila es ESTABLE (no pasa por reposition) si:
+    //   1. Su `preference_hash` coincide con el actual — nada de lo que
+    //      determina la personalización (días, minutos, examen, corte,
+    //      disponibilidad de emergencia) ha cambiado desde que se colocó.
+    //   2. Su fecha actual sigue dentro de `eligibleDatesForRow` — no cruzó
+    //      una convocatoria parcial ni quedó antes de su `notBeforeDate`.
+    //   3. Tiene hora asignada (start_time/end_time) — sin hora no hay un
+    //      "sitio real" que validar.
+    //   4. El día en que vive sigue cumpliendo TODAS las reglas vigentes
+    //      contando solo lo real: otras filas estables de ese día, eventos
+    //      propios del alumno (camino_custom_events) y lo externo (Google
+    //      Calendar) no dejan que se pase del presupuesto diario declarado
+    //      ni que dos horarios se pisen.
+    //
+    // El punto 4 se resuelve POR FECHA: si cualquier fila estable de un día
+    // incumple capacidad u horario, se degradan TODAS las de ese día a
+    // reposition — nunca se elige cuál "tenía prioridad", porque esa
+    // elección volvería a depender del orden de lectura.
+    const tentativelyStable: Array<PlacementRow & {
+      row: CalendarRow; startMinutes: number; endMinutes: number; durationMinutes: number
+    }> = []
+    const needsPlacementRows: Array<PlacementRow & { row: CalendarRow }> = []
+    for (const candidate of placementRows) {
+      const row = candidate.row
+      const meta = metadataObject(row.metadata)
+      const personalization = metadataObject(meta.camino_personalization as Record<string, unknown> | null)
+      const hashMatches = personalization.preference_hash === preferenceHash
+      const hasTimeSlot = typeof row.start_time === 'string' && typeof row.end_time === 'string'
+      const dateStillEligible = row.status !== 'unscheduled'
+        && eligibleDatesForRow(candidate, window).includes(row.scheduled_date)
+      // Una fila con duración heredada de un modelo anterior no es estable
+      // aunque su fecha y su hash sigan siendo válidos: dejarla tal cual
+      // congelaría para siempre una duración que ya no es la que calcula
+      // el modelo actual (ver placementDurationMetadata).
+      const durationCurrent = meta.duration_model === CONTENT_DURATION_MODEL
+      if (hashMatches && hasTimeSlot && dateStillEligible && durationCurrent) {
+        tentativelyStable.push({
+          ...candidate,
+          startMinutes: toMinutes(normalizeTime(row.start_time as string)),
+          endMinutes: toMinutes(normalizeTime(row.end_time as string)),
+          durationMinutes: minutesForPlacement(candidate.missionType, meta, prefs.dailyMinutes),
+        })
+      } else {
+        needsPlacementRows.push(candidate)
+      }
+    }
+
+    const stableDates = [...new Set(tentativelyStable.map(c => c.row.scheduled_date))].sort()
+    const externalBusyByDate = new Map<string, LocalBusyRange[]>()
+    if (stableDates.length) {
+      const busy = await getAvailability(userId, stableDates[0], stableDates[stableDates.length - 1])
+      for (const day of stableDates) externalBusyByDate.set(day, busySlotsForMadridDate(busy, day))
+    }
+    type BusyEvent = { event_date: string; recurrence: string; recurrence_until: string | null
+      day_of_week: number | null; start_time: string; end_time: string }
+    const customEvents = stableDates.length ? await readAllRows<BusyEvent>((from, to) => supabase
+      .from('camino_custom_events')
+      .select('event_date, recurrence, recurrence_until, day_of_week, start_time, end_time')
+      .eq('user_id', userId)
+      .not('start_time', 'is', null).not('end_time', 'is', null)
+      .order('event_date', { ascending: true })
+      .range(from, to)) : []
+    const customEventsBusyFor = (date: string) => customEvents
+      .filter(event => event.recurrence === 'none' ? event.event_date === date
+        : event.recurrence === 'weekly' && event.day_of_week === mondayBasedDayIndex(date)
+          && event.event_date <= date && (!event.recurrence_until || event.recurrence_until >= date))
+      .map(event => ({ start: toMinutes(normalizeTime(event.start_time)), end: toMinutes(normalizeTime(event.end_time)) }))
+    // Filas de camino_calendar que NO están en `rows` (completadas, bloqueadas
+    // manualmente, editadas a mano) pero pueden compartir fecha con una
+    // candidata estable — su hora ya es un compromiso real, no negociable en
+    // este pase, exactamente igual que ve `createDaySchedulers` para todo lo
+    // que no excluye.
+    const rowIdSet = new Set(rows.map(r => r.id))
+    type OtherBusyRow = { id: string; scheduled_date: string; start_time: string | null; end_time: string | null }
+    const otherCalendarRows = stableDates.length ? (await readAllRows<OtherBusyRow>((from, to) => supabase
+      .from('camino_calendar')
+      .select('id, scheduled_date, start_time, end_time')
+      .eq('user_id', userId)
+      .in('scheduled_date', stableDates)
+      .in('status', ['pending', 'postponed', 'completed'])
+      .not('start_time', 'is', null).not('end_time', 'is', null)
+      .range(from, to))).filter(r => !rowIdSet.has(r.id)) : []
+    const otherByDate = new Map<string, OtherBusyRow[]>()
+    for (const r of otherCalendarRows) {
+      const list = otherByDate.get(r.scheduled_date) ?? []
+      list.push(r); otherByDate.set(r.scheduled_date, list)
+    }
+    const overlaps = (aStart: number, aEnd: number, bStart: number, bEnd: number) => aStart < bEnd && bStart < aEnd
+
+    const stableByDate = new Map<string, typeof tentativelyStable>()
+    for (const c of tentativelyStable) {
+      const list = stableByDate.get(c.row.scheduled_date) ?? []
+      list.push(c); stableByDate.set(c.row.scheduled_date, list)
+    }
+    const invalidDates = new Set<string>()
+    for (const [date, candidates] of stableByDate) {
+      const fixedBusy: { start: number; end: number }[] = [
+        ...(externalBusyByDate.get(date) ?? []).map(b => ({ start: toMinutes(normalizeTime(b.start)), end: toMinutes(normalizeTime(b.end)) })),
+        ...customEventsBusyFor(date),
+        ...(otherByDate.get(date) ?? []).map(r => ({ start: toMinutes(normalizeTime(r.start_time as string)), end: toMinutes(normalizeTime(r.end_time as string)) })),
+      ]
+      let totalMinutes = 0
+      let dateInvalid = false
+      for (let i = 0; i < candidates.length; i++) {
+        const c = candidates[i]
+        totalMinutes += c.durationMinutes
+        if (fixedBusy.some(busy => overlaps(c.startMinutes, c.endMinutes, busy.start, busy.end))) { dateInvalid = true; break }
+        for (let j = i + 1; j < candidates.length; j++) {
+          if (overlaps(c.startMinutes, c.endMinutes, candidates[j].startMinutes, candidates[j].endMinutes)) { dateInvalid = true; break }
+        }
+        if (dateInvalid) break
+      }
+      if (totalMinutes > prefs.dailyMinutes) dateInvalid = true
+      if (dateInvalid) invalidDates.add(date)
+    }
+    for (const c of tentativelyStable) {
+      if (invalidDates.has(c.row.scheduled_date)) needsPlacementRows.push(c)
+    }
+    const stableRows = tentativelyStable.filter(c => !invalidDates.has(c.row.scheduled_date))
+
+    // Solo lo que SÍ va a pasar por reposition debe dejar de contar como
+    // "hueco ocupado" al buscar sitio: las filas estables siguen siendo una
+    // ocupación real del día, exactamente igual que un evento propio o una
+    // misión ya completada.
+    const excludeCalendarRowIds = new Set(needsPlacementRows.map(candidate => candidate.id))
+
+    // UNA fotografía del rango entero, no una por día. Este pase no escribe
+    // hasta el `camino_apply_placements` final, así que el snapshot vale para
+    // todas las fechas — es lo mismo que hacía el caché por día de antes, pero
+    // con 3 lecturas en vez de 5 por fecha y una llamada a Google en vez de
+    // una por fecha. Con el curso abierto eso eran ~500 idas y vueltas
+    // secuenciales, que es de donde salía el minuto largo de «Preparando las
+    // misiones de esta semana».
+    let schedulers: Map<string, DayScheduler> | null = null
+    const schedulerFor = async (date: string) => {
+      if (!schedulers) {
+        const dates = window.dates
+        if (!dates.length) return null
+        const placementExternalBusyByDate = new Map<string, LocalBusyRange[]>()
+        const busy = await getAvailability(userId, dates[0], dates[dates.length - 1])
+        for (const day of dates) placementExternalBusyByDate.set(day, busySlotsForMadridDate(busy, day))
+        schedulers = await createDaySchedulers(userId, supabase, [...dates], {
+          dailyMinutes: prefs.dailyMinutes, externalBusyByDate: placementExternalBusyByDate, excludeCalendarRowIds,
+        })
+      }
+      return schedulers.get(date) ?? null
+    }
 
     // RITMO. Sin esto la recolocación deshace lo que siembra
     // ensureCaminoCalendar: el personalizador sirve cada misión en el primer
@@ -294,7 +438,15 @@ export async function applyCalendarPersonalization(
       paceStudyDays: contentPaceDates(planningDates(context)).length,
       dailyMinutes: prefs.dailyMinutes,
     })
+    // Se siembra con lo que las filas ESTABLES ya ocupan de temario nuevo en
+    // su fecha: sin esto, el ritmo del día vería la fecha "vacía" y dejaría
+    // colocar más de la cuenta encima de lo que ya había.
     const contentMinutesByDate = new Map<string, number>()
+    for (const c of stableRows) {
+      if (isNewContent(c.missionType)) {
+        contentMinutesByDate.set(c.row.scheduled_date, (contentMinutesByDate.get(c.row.scheduled_date) ?? 0) + c.durationMinutes)
+      }
+    }
 
     // Plazas de la restricción UNIQUE(user_id, scheduled_date, subject,
     // v2_sort_order). Se siembra con TODO el calendario del alumno, no sólo
@@ -311,7 +463,7 @@ export async function applyCalendarPersonalization(
     // El ORDEN y las FECHAS ELEGIBLES de cada fila —parciales incluidos— los
     // decide planPlacement.ts, puro y con tests. Aquí solo se ejecuta contra
     // el scheduler real.
-    for (const candidate of orderRowsForPlacement(placementRows)) {
+    for (const candidate of orderRowsForPlacement(needsPlacementRows)) {
       const row = candidate.row
       const meta = metadataObject(row.metadata)
       for (const date of preferredDatesFor(candidate, window)) {
@@ -368,7 +520,7 @@ export async function applyCalendarPersonalization(
     // del 08/06, con la PAU el 07/06, siguiera mostrándose como trabajo
     // programado normal. Pasa a 'unscheduled' —explícito, contado y NO
     // borrado— y su fila de cola vuelve a 'pending' para replanificarse.
-    const unplaced = placementRows.filter(candidate => !placedIds.has(candidate.id))
+    const unplaced = needsPlacementRows.filter(candidate => !placedIds.has(candidate.id))
     for (const candidate of unplaced) {
       const meta = metadataObject(candidate.row.metadata)
       changes.push({

@@ -546,6 +546,37 @@ for (const damage of ['overlap','budget']) test(`personalization repairs same-ha
  assert.equal((await personalize(user,db,{planContext:context})).reason,'already_current')
 })
 
+// REPRODUCCION MINIMA (15/09/2026, investigacion pedida por Mario): dos temas
+// del MISMO tema/asignatura, mismo dia de partida, compitiendo por un hueco
+// que solo cabe uno. orderRowsForPlacement (planPlacement.ts) preserva el
+// orden de ENTRADA para el grupo "resto" (ni deadline ni distinto tipo), y
+// ese orden de entrada es la consulta SQL `.order('scheduled_date').order('id')`
+// -- 'id' es un UUID sin relacion con el temario. Con v2_sort_order 1 y 2
+// puestos deliberadamente en el orden de id CONTRARIO a su orden curricular,
+// el que se sirve primero (y se queda con el hueco mas temprano) es el de
+// v2_sort_order MAYOR -- el tema que pedagogicamente va DESPUES queda ANTES
+// en el calendario. No hace falta repetir la llamada para verlo: pasa en una
+// sola pasada, porque el desempate por id ya es arbitrario desde el principio.
+test('el orden pedagogico (v2_sort_order) no puede invertirse por un desempate arbitrario',async()=>{
+ const user='orden-pedagogico', context={...ctx,dailyMinutes:30,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
+ const db=database({perfiles:[{id:user,pau_exam_date:context.examDate}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:30,weekly_study_days_value:7}}],
+  // Solo cabe UNA sesion de 25 min en un dia de 30: los dos temas compiten de
+  // verdad por cual se lleva el primer dia disponible. id 'a-...' ordena
+  // ANTES que 'z-...' alfabeticamente, al reves que su v2_sort_order.
+  camino_calendar:[
+   row('z-va-primero',{v2_sort_order:1,metadata:{content_estimated_minutes:25}}),
+   row('a-va-segundo',{v2_sort_order:2,metadata:{content_estimated_minutes:25}}),
+  ].map(r=>({...r,user_id:user})),
+ })
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ assert.equal((await personalize(user,db,{planContext:context})).reason,'applied')
+ const primero=db.tables.camino_calendar.find(r=>r.id==='z-va-primero')
+ const segundo=db.tables.camino_calendar.find(r=>r.id==='a-va-segundo')
+ assert.ok(primero.scheduled_date<segundo.scheduled_date,
+  `v2_sort_order=1 (${primero.scheduled_date}) tiene que quedar ANTES que v2_sort_order=2 (${segundo.scheduled_date}), el orden curricular no puede invertirse`)
+})
+
 test('forecast recommendations never exceed beta access and an expired partial is not an annual deficit',()=>{
  const result=forecast({...long,accessMaxStudyDaysPerWeek:6},[],Array.from({length:40},(_,i)=>q(`access-${i}`,30)),[])
  assert.ok(result.remedy.combinedChange)
@@ -1130,4 +1161,219 @@ test('abrir una semana lejana no cuesta una lectura por dia de plan',async()=>{
   minutosFinal.set(r.scheduled_date,(minutosFinal.get(r.scheduled_date)??0)+est(r))
  const vacios=todo.filter(d=>!(minutosFinal.get(d)>0))
  assert.equal(vacios.length,0,`${vacios.length} de ${todo.length} dias del curso se quedan sin mision: ${vacios.slice(0,5).join(', ')}`)
+})
+
+// ── Estabilidad de applyCalendarPersonalization (15/09/2026) ────────────────
+// Abrir Camino repetidamente sin cambiar ninguna entrada no puede cambiar el
+// calendario visible. El fallo real: esta funcion recolocaba TODA la cola
+// candidata en cada pase, asi que bastaba con que ensureCaminoCalendar
+// hubiera anadido UNA fila desde la ultima vez para que el resto -- ya
+// personalizado, ya con hora -- se recalculara entero y aterrizara en fechas
+// distintas. El arreglo: una fila ya personalizada solo se recoloca si su
+// hash de preferencias cambio, su fecha dejo de ser valida, su duracion es de
+// un modelo antiguo, o el dia donde vive ya no cumple capacidad/horario
+// reales -- nunca porque otra fila cualquiera necesitaba sitio.
+test('idempotencia: una fila nueva no mueve las filas ya personalizadas',async()=>{
+ const user='no-drift', context={...ctx,dailyMinutes:60,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
+ const db=database({perfiles:[{id:user,pau_exam_date:context.examDate}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:7}}],
+  camino_calendar:[
+   row('vieja-1',{subject:'fisica',metadata:{content_estimated_minutes:30}}),
+   row('vieja-2',{subject:'historia',metadata:{content_estimated_minutes:30}}),
+  ].map(r=>({...r,user_id:user})),
+ })
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ assert.equal((await personalize(user,db,{planContext:context})).reason,'applied')
+ const snapshot=id=>{const r=db.tables.camino_calendar.find(x=>x.id===id)
+  return JSON.stringify({date:r.scheduled_date,start:r.start_time,end:r.end_time,updated:r.updated_at})}
+ const before1=snapshot('vieja-1'), before2=snapshot('vieja-2')
+ // Una fila NUEVA sin hash, como la que sembraria ensureCaminoCalendar entre
+ // dos aperturas: obliga a este pase a volver a recorrer todas las filas.
+ db.tables.camino_calendar.push({...row('nueva',{subject:'lengua',metadata:{content_estimated_minutes:30}}),user_id:user})
+ const result=await personalize(user,db,{planContext:context})
+ assert.equal(result.reason,'applied')
+ assert.equal(before1,snapshot('vieja-1'),'vieja-1 no puede moverse solo porque llego una fila nueva')
+ assert.equal(before2,snapshot('vieja-2'),'vieja-2 no puede moverse solo porque llego una fila nueva')
+ assert.equal(result.updatedRows,1,'solo la fila nueva deberia escribirse')
+})
+
+test('convergencia: tras anadir una fila, la siguiente llamada sin cambios no vuelve a moverse',async()=>{
+ const user='converge-tras-nueva', context={...ctx,dailyMinutes:60,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
+ const db=database({perfiles:[{id:user,pau_exam_date:context.examDate}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:7}}],
+  camino_calendar:['a','b','c'].map((id,i)=>row(`r-${id}`,{subject:i%2?'historia':'fisica',metadata:{content_estimated_minutes:30}}))
+   .map(r=>({...r,user_id:user}))})
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ await personalize(user,db,{planContext:context})
+ db.tables.camino_calendar.push({...row('nueva',{subject:'lengua',metadata:{content_estimated_minutes:30}}),user_id:user})
+ await personalize(user,db,{planContext:context})
+ const snap=()=>JSON.stringify(db.tables.camino_calendar.map(r=>({id:r.id,date:r.scheduled_date,start:r.start_time,end:r.end_time}))
+  .sort((a,b)=>a.id.localeCompare(b.id)))
+ const snapAfterSecond=snap()
+ const third=await personalize(user,db,{planContext:context})
+ assert.equal(snap(),snapAfterSecond,'sin cambios de entrada, la tercera llamada tiene que producir el mismo calendario que la segunda')
+ assert.equal(third.updatedRows,0,'la tercera llamada no deberia escribir nada')
+})
+
+test('un evento propio nuevo que pisa una fila estable la recoloca, sin tocar otras fechas',async()=>{
+ const user='evento-nuevo', context={...ctx,dailyMinutes:60,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
+ const db=database({perfiles:[{id:user,pau_exam_date:context.examDate}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:7}}],
+  camino_calendar:[
+   row('dia-1',{subject:'fisica',metadata:{content_estimated_minutes:30}}),
+   // notBeforeDate mas tarde fuerza a que esta fila caiga en OTRO dia distinto.
+   row('dia-2',{subject:'historia',metadata:{content_estimated_minutes:30,place_not_before:'2027-01-20'}}),
+  ].map(r=>({...r,user_id:user}))})
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ await personalize(user,db,{planContext:context})
+ const d1row=db.tables.camino_calendar.find(r=>r.id==='dia-1')
+ const d2row=db.tables.camino_calendar.find(r=>r.id==='dia-2')
+ // Snapshots por valor: d1row/d2row son referencias vivas al mismo objeto que
+ // el stub muta al escribir, así que comparar contra ellas DESPUÉS de la
+ // segunda llamada compararía el objeto consigo mismo ya cambiado.
+ const d1=JSON.stringify({date:d1row.scheduled_date,start:d1row.start_time,end:d1row.end_time})
+ const d2=JSON.stringify({date:d2row.scheduled_date,start:d2row.start_time,end:d2row.end_time})
+ assert.notEqual(d1row.scheduled_date,d2row.scheduled_date,'fixture invalida: las dos filas deberian caer en dias distintos')
+ db.tables.camino_custom_events=[{id:'choque',user_id:user,event_date:d1row.scheduled_date,recurrence:'none',
+  start_time:d1row.start_time,end_time:d1row.end_time}]
+ const result=await personalize(user,db,{planContext:context})
+ assert.equal(result.reason,'applied')
+ const d1after=db.tables.camino_calendar.find(r=>r.id==='dia-1')
+ assert.notEqual(JSON.stringify({date:d1after.scheduled_date,start:d1after.start_time,end:d1after.end_time}),d1,
+  'dia-1 tiene que recolocarse: su hora ahora choca con un evento propio')
+ const d2after=db.tables.camino_calendar.find(r=>r.id==='dia-2')
+ assert.equal(JSON.stringify({date:d2after.scheduled_date,start:d2after.start_time,end:d2after.end_time}),d2,
+  'dia-2 no tiene por que moverse: el choque es solo en la fecha de dia-1')
+})
+
+test('una reserva bloqueada manualmente en el mismo hueco tambien recoloca la fila estable',async()=>{
+ const user='manual-choca', context={...ctx,dailyMinutes:60,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
+ const db=database({perfiles:[{id:user,pau_exam_date:context.examDate}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:7}}],
+  camino_calendar:[row('base',{subject:'fisica',metadata:{content_estimated_minutes:30}})].map(r=>({...r,user_id:user}))})
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ await personalize(user,db,{planContext:context})
+ const baseRow=db.tables.camino_calendar.find(r=>r.id==='base')
+ const base=JSON.stringify({date:baseRow.scheduled_date,start:baseRow.start_time,end:baseRow.end_time})
+ // 'locked' excluye a esta fila de canRepositionAutomatically: no pasa por
+ // este pase, pero su hora es un compromiso real que otra fila no puede pisar.
+ db.tables.camino_calendar.push({...row('bloqueada',{subject:'fisica',locked:true,
+  scheduled_date:baseRow.scheduled_date,start_time:baseRow.start_time,end_time:baseRow.end_time,
+  metadata:{content_estimated_minutes:30}}),user_id:user})
+ const result=await personalize(user,db,{planContext:context})
+ assert.equal(result.reason,'applied')
+ const baseAfter=db.tables.camino_calendar.find(r=>r.id==='base')
+ assert.notEqual(JSON.stringify({date:baseAfter.scheduled_date,start:baseAfter.start_time,end:baseAfter.end_time}),base,
+  'base tiene que recolocarse: su hora choca con una reserva bloqueada que no puede moverse ella misma')
+})
+
+test('una fila cuyo suelo de fecha ya no incluye su fecha actual pasa a reposition',async()=>{
+ const user='suelo-fecha', context={...ctx,dailyMinutes:60,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
+ const db=database({perfiles:[{id:user,pau_exam_date:context.examDate}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:7}}],
+  camino_calendar:[row('repaso',{subject:'fisica',metadata:{content_estimated_minutes:30}})].map(r=>({...r,user_id:user}))})
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ await personalize(user,db,{planContext:context})
+ const placed=db.tables.camino_calendar.find(r=>r.id==='repaso')
+ const oldDate=placed.scheduled_date
+ // La leccion que este repaso sigue se retrasa: su suelo de fecha ahora cae
+ // DESPUES de donde ya estaba colocado.
+ const later=load('app/lib/camino/studyDays.ts').addDays(oldDate,10)
+ placed.metadata={...placed.metadata,place_not_before:later}
+ const result=await personalize(user,db,{planContext:context})
+ assert.equal(result.reason,'applied')
+ const after=db.tables.camino_calendar.find(r=>r.id==='repaso')
+ assert.ok(after.scheduled_date>=later,'la fila tiene que recolocarse en o despues de su nuevo suelo de fecha')
+})
+
+test('una fila unscheduled con el hash igual sigue pasando por reposition',async()=>{
+ const user='unscheduled-hash', context={...ctx,dailyMinutes:60,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
+ const db=database({perfiles:[{id:user,pau_exam_date:context.examDate}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:7}}],
+  camino_calendar:[row('sin-hueco',{subject:'fisica',metadata:{content_estimated_minutes:30}})].map(r=>({...r,user_id:user}))})
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ await personalize(user,db,{planContext:context})
+ const placed=db.tables.camino_calendar.find(r=>r.id==='sin-hueco')
+ // Estado contrived a proposito: status 'unscheduled' con hora todavia puesta,
+ // para aislar exactamente esta condicion de la de 'sin hora'.
+ placed.status='unscheduled'
+ const result=await personalize(user,db,{planContext:context})
+ assert.equal(result.reason,'applied')
+ const after=db.tables.camino_calendar.find(r=>r.id==='sin-hueco')
+ assert.equal(after.status,'pending','una fila unscheduled con hueco real disponible tiene que recuperar fecha')
+})
+
+test('las filas estables siguen contando presupuesto real: una fila nueva no puede desbordar el dia',async()=>{
+ const user='presupuesto-real', context={...ctx,dailyMinutes:30,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
+ const db=database({perfiles:[{id:user,pau_exam_date:context.examDate}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:30,weekly_study_days_value:7}}],
+  camino_calendar:[row('ocupa-el-dia',{subject:'fisica',metadata:{content_estimated_minutes:30}})].map(r=>({...r,user_id:user}))})
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ await personalize(user,db,{planContext:context})
+ const occupied=db.tables.camino_calendar.find(r=>r.id==='ocupa-el-dia')
+ // 30 min al dia, ya llenos por la fila estable: no cabe ni un minuto mas.
+ db.tables.camino_calendar.push({...row('nueva-30',{subject:'historia',scheduled_date:occupied.scheduled_date,
+  metadata:{content_estimated_minutes:30}}),user_id:user})
+ await personalize(user,db,{planContext:context})
+ const nueva=db.tables.camino_calendar.find(r=>r.id==='nueva-30')
+ assert.notEqual(nueva.scheduled_date,occupied.scheduled_date,
+  'la fila nueva no puede caber ese dia: la estable ya ocupa 30 de los 40 minutos')
+ const occupiedAfter=db.tables.camino_calendar.find(r=>r.id==='ocupa-el-dia')
+ assert.equal(occupiedAfter.scheduled_date,occupied.scheduled_date,'la fila estable no se mueve')
+})
+
+test('una fila estable sigue bloqueando su plaza (fecha, asignatura, v2_sort_order)',async()=>{
+ const user='plaza-real', context={...ctx,dailyMinutes:90,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
+ const db=database({perfiles:[{id:user,pau_exam_date:context.examDate}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:90,weekly_study_days_value:7}}],
+  camino_calendar:[row('plaza-1',{subject:'fisica',v2_sort_order:1,metadata:{content_estimated_minutes:30}})].map(r=>({...r,user_id:user}))})
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ await personalize(user,db,{planContext:context})
+ const placed=db.tables.camino_calendar.find(r=>r.id==='plaza-1')
+ // Misma plaza (fecha, asignatura, v2_sort_order): el UNIQUE de
+ // camino_calendar la rechazaria si aterrizara ahi.
+ db.tables.camino_calendar.push({...row('plaza-2',{subject:'fisica',v2_sort_order:1,scheduled_date:placed.scheduled_date,
+  metadata:{content_estimated_minutes:30}}),user_id:user})
+ const result=await personalize(user,db,{planContext:context})
+ assert.equal(result.reason,'applied')
+ const plaza2=db.tables.camino_calendar.find(r=>r.id==='plaza-2')
+ assert.notEqual(plaza2.scheduled_date,placed.scheduled_date,
+  'la plaza (fecha, asignatura, v2_sort_order) ya la ocupa la fila estable')
+})
+
+test('una fila con modelo de duracion antiguo se recoloca aunque el hash coincida',async()=>{
+ const user='duracion-antigua', context={...ctx,dailyMinutes:60,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
+ const db=database({perfiles:[{id:user,pau_exam_date:context.examDate}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:7}}],
+  camino_calendar:[row('vieja-duracion',{subject:'fisica',metadata:{content_estimated_minutes:30}})].map(r=>({...r,user_id:user}))})
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ await personalize(user,db,{planContext:context})
+ const placed=db.tables.camino_calendar.find(r=>r.id==='vieja-duracion')
+ assert.equal(placed.metadata.duration_model,'content_v1')
+ // Fila heredada de antes del modelo de duracion actual, con el hash de
+ // personalizacion intacto: solo cambia duration_model.
+ placed.metadata={...placed.metadata,duration_model:'legacy_v0'}
+ const result=await personalize(user,db,{planContext:context})
+ assert.equal(result.reason,'applied')
+ const after=db.tables.camino_calendar.find(r=>r.id==='vieja-duracion')
+ assert.equal(after.metadata.duration_model,'content_v1','la duracion antigua tiene que refrescarse aunque el hash coincida')
+})
+
+test('la comprobacion de estabilidad no cuesta una lectura por fila ni por fecha',async()=>{
+ const user='coste-estabilidad', context={...ctx,dailyMinutes:180,examDate:'2027-06-07',planningCutoff:'2027-05-31'}
+ const addDays=load('app/lib/camino/studyDays.ts').addDays
+ const many=Array.from({length:40},(_,i)=>row(`r-${i}`,{subject:i%3===0?'fisica':i%3===1?'historia':'lengua',
+  scheduled_date:addDays('2027-01-11',i),metadata:{content_estimated_minutes:30}}))
+ const db=database({perfiles:[{id:user,pau_exam_date:context.examDate}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:7}}],
+  camino_calendar:many.map(r=>({...r,user_id:user}))})
+ const personalize=load('app/lib/camino/applyCalendarPersonalization.ts').applyCalendarPersonalization
+ await personalize(user,db,{planContext:context})
+ db.tables.camino_calendar.push({...row('nueva-forzadora',{subject:'fisica',
+  scheduled_date:addDays('2027-01-11',60),metadata:{content_estimated_minutes:30}}),user_id:user})
+ let reads=0
+ const originalFrom=db.from.bind(db); db.from=(...args)=>{reads++;return originalFrom(...args)}
+ const result=await personalize(user,db,{planContext:context})
+ assert.equal(result.reason,'applied')
+ assert.ok(reads<=15,`la comprobacion de estabilidad deberia costar un punado de lecturas por lote, no ${reads}`)
 })

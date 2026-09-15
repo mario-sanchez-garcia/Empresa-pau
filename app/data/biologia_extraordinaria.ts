@@ -976,6 +976,8 @@ b) Explique en qué consiste el “corte y empalme” o splicing del pre-ARN men
 
 a) Nombre las moléculas del esquema adjunto representadas por los números del 1 al 6, y los procesos representados por las letras A, B, y C (1,5 puntos).
 
+![Esquema de metabolismo mitocondrial](/biologia-imgs/madrid/2021/extraordinaria/pregunta-B2-metabolismo-mitocondrial.png)
+
 b) Explique brevemente la teoría quimiosmótica y su función (0,5 puntos).`,
         puntuacion: 2,
         criterios: criteriosGenericosExtraordinaria,
@@ -1010,12 +1012,7 @@ b) Indique el tipo de agente causante y la vía de transmisión preferente de la
 
 a) Considerando una célula somática animal, ordene la secuencia de los siguientes procesos del ciclo celular numerados del 1 al 6, comenzando por el número 3. Indique la fase concreta a la que corresponde cada proceso (no es necesario que copie los procesos, solo que asocie los números con la fase) (1 punto):
 
-1- cromosomas dispuestos en el plano ecuatorial
-2- descondensación de los cromosomas y reconstrucción de la envoltura nuclear
-3- replicación del ADN nuclear
-4- separación de dos juegos de cromosomas hacia los polos
-5- actividad metabólica y crecimiento celular
-6- desintegración de la envoltura nuclear y condensación de los cromosomas
+![Procesos del ciclo celular](/biologia-imgs/madrid/2021/extraordinaria/pregunta-B4-procesos-ciclo-celular.png)
 
 b) Indique si los cromosomas se encuentran constituidos por una o por dos cromátidas durante las fases de los procesos 1, 4, 5 y 6 (0,5 puntos).
 
@@ -1039,6 +1036,602 @@ a) Indique qué papel juegan las vitaminas en el metabolismo (0,5 puntos).
 b) Explique por qué es necesario que los seres humanos tomemos vitaminas en la dieta y si esto les ocurre a todos los organismos (0,5 puntos).
 
 c) Indique el tipo de biomolécula asociándolo con su función: hemoglobina, actina, NADH, quitina (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+    ],
+  },
+  {
+    id: 20202,
+    año: 2020,
+    tipo: "Extraordinaria",
+    asignatura: "Biología",
+    comunidad: "Madrid",
+    fuenteDocumento: "2019-2020 Extraordinaria Biología.pdf",
+    preguntas: [
+      {
+        id: "bio-extra-2020-A-1",
+        año: 2020,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        tema: "Respuesta inmune",
+        enunciado: `En relación con la respuesta inmune:
+
+a) Defina autoinmunidad e inmunodeficiencia. Indique una enfermedad causada por cada una de estas anomalías de la respuesta inmune (1 punto).
+
+b) Indique la función de los anticuerpos, su estructura básica y el tipo celular que los produce (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2020-A-2",
+        año: 2020,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        tema: "Propiedades fisicoquímicas del agua",
+        enunciado: `En relación con las propiedades fisicoquímicas del agua:
+
+a) Cite dos cambios que se producen en las propiedades del agua como consecuencia de la presencia de solutos (0,5 puntos).
+
+b) Indique qué significa que el agua posee un elevado calor específico y qué utilidad obtienen los seres vivos de dicha propiedad (0,5 puntos).
+
+c) Explique brevemente qué significa que una solución sea hipotónica o hipertónica. Indique las consecuencias que tendría para los glóbulos rojos si se introducen en cada uno de estos dos tipos de soluciones (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2020-A-3",
+        año: 2020,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        tema: "Expresión génica en procariotas",
+        enunciado: `Respecto a la expresión génica en procariotas:
+
+La figura adjunta representa el proceso de transcripción y traducción en bacterias.
+
+![Proceso de transcripción y traducción en bacterias](/biologia-imgs/madrid/2020/extraordinaria/pregunta-A3-transcripcion-traduccion.png)
+
+a) Identifique las moléculas y estructuras marcadas con los números del 1 al 4 (1 punto).
+
+b) Indique cuatro características típicas de la molécula señalada como 2 (0,5 puntos).
+
+c) Describa brevemente cómo es la fase de iniciación del proceso de traducción (0,5 puntos).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2020-A-4",
+        año: 2020,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        tema: "Meiosis",
+        enunciado: `Respecto a la meiosis:
+
+a) Si consideramos una célula animal de la línea germinal con 2n=48 cromosomas, indique las fases concretas del proceso meiótico a las que se hace referencia en las siguientes frases (1,5 puntos):
+
+![Fases concretas del proceso meiótico](/biologia-imgs/madrid/2020/extraordinaria/pregunta-A4-fases-meiosis.png)
+
+b) Explique qué relación existe entre complejo sinaptonémico y bivalente (0,5 puntos).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2020-A-5",
+        año: 2020,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        tema: "Fotosíntesis",
+        enunciado: `Referente al proceso fotosintético en una célula eucariota:
+
+a) Indique cómo se denomina el proceso de fijación de CO2 que se produce en los cloroplastos y cuáles son sus tres etapas principales (1 punto).
+
+b) Indique cuál es la molécula que actúa como donadora de electrones en el proceso de transporte electrónico fotosintético. Mencione los tipos de transporte electrónico fotosintético que existen. Indique cómo se denomina el proceso de síntesis de ATP en los cloroplastos (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2020-B-1",
+        año: 2020,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        tema: "Célula eucariota",
+        enunciado: `Referente a la célula eucariota:
+
+a) Indique a qué orgánulo o estructura corresponde cada una de las siguientes descripciones:
+
+![Descripciones de orgánulos y estructuras celulares](/biologia-imgs/madrid/2020/extraordinaria/pregunta-B1-descripciones-celula.png)
+
+b) Haga un esquema rotulado indicando las principales estructuras del orgánulo indicado con el número 3 del listado de la cuestión anterior (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2020-B-2",
+        año: 2020,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        tema: "Herencia",
+        enunciado: `Con relación al estudio de la herencia:
+
+Suponga que en los pimientos el color rojo “A” es dominante sobre el amarillo “a”. Si se cruza una planta homocigótica que da pimientos rojos con otra homocigótica que da pimientos amarillos:
+
+a) Indique las proporciones genotípicas y fenotípicas de la F1 (0,5 puntos).
+
+b) Indique las proporciones genotípicas y fenotípicas de la F2 resultante de cruzar dos plantas de la F1 (0,5 puntos).
+
+c) Defina codominancia y describa el fenotipo de la F1 si el color rojo y el amarillo fueran codominantes en los pimientos. Defina herencia intermedia y describa el fenotipo de la F1 si ambos colores presentaran herencia intermedia (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2020-B-3",
+        año: 2020,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        tema: "Biomoléculas",
+        enunciado: `Con referencia a las biomoléculas:
+
+a) Indique la función de las siguientes moléculas: pectina, histamina, sacarosa y ribosa (1 punto).
+
+b) Defina enzima, coenzima, centro activo e inhibidor enzimático (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2020-B-4",
+        año: 2020,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        tema: "Metabolismo celular",
+        enunciado: `Referente al metabolismo celular:
+
+a) Especifique qué compuestos son el donador inicial y el aceptor final de electrones de la cadena respiratoria (0,5 puntos).
+
+b) Indique las diferencias entre el proceso de elaboración de yogur y el proceso de elaboración de vino, atendiendo a: tipo de proceso, organismos implicados y productos metabólicos finales en cada caso (1,5 puntos).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2020-B-5",
+        año: 2020,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        tema: "Procariotas",
+        enunciado: `En relación a la estructura de los organismos procariotas:
+
+a) Cite cuatro estructuras que puede presentar una bacteria y que se localicen hacia el exterior de la membrana plasmática (0,5 puntos).
+
+b) Mencione una función en la que estén implicadas cada una de las cuatro estructuras que se hayan citado en el apartado anterior (1 punto).
+
+c) Defina nucleoide y plásmido (0,5 puntos).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+    ],
+  },
+  {
+    id: 20192,
+    año: 2019,
+    tipo: "Extraordinaria",
+    asignatura: "Biología",
+    comunidad: "Madrid",
+    fuenteDocumento: "2018-2019 Extraordinaria Biología.pdf",
+    preguntas: [
+      {
+        id: "bio-extra-2019-A-1",
+        año: 2019,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        tema: "Mendel y herencia",
+        enunciado: `Con relación a las aportaciones de Mendel al estudio de la herencia:
+
+a) Enuncie la primera ley de Mendel. Explique cómo es el genotipo de los parentales si en un cruzamiento experimental entre plantas de guisante se observa que un rasgo recesivo “a” se manifiesta en toda la descendencia (0,5 puntos).
+
+b) Explique la diferente manifestación de un carácter recesivo ligado al cromosoma X en un hombre y en una mujer, y cite un ejemplo (0,75 puntos).
+
+c) Relacione cada concepto de la columna izquierda con una definición de la columna derecha (0,75 puntos).
+
+![Relación de conceptos de genética](/biologia-imgs/madrid/2019/extraordinaria/pregunta-A1-conceptos-genetica.png)`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2019-A-2",
+        año: 2019,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        tema: "Molécula de agua",
+        enunciado: `Con relación a la molécula de agua:
+
+a) Describa la estructura de la molécula de agua. Explique su carácter dipolar y el tipo de interacciones que se establecen como consecuencia de su polaridad (1 punto).
+
+b) Relacione dos propiedades físico-químicas de la molécula de agua con dos funciones biológicas que se deriven de ellas (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2019-A-3",
+        año: 2019,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        tema: "Biotecnología",
+        enunciado: `En relación a la Biotecnología:
+
+a) Relacione los microorganismos: 1) Saccharomyces cerevisiae, 2) Lactobacillus, 3) Penicillium, 4) Streptomyces, 5) Streptococcus, con una o más de las aplicaciones siguientes: A) Derivados lácteos, B) Antibióticos, C) Bebidas alcohólicas, D) Pan (1,5 puntos).
+
+b) Defina Biotecnología (0,5 puntos).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2019-A-4",
+        año: 2019,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        tema: "Células vegetales",
+        enunciado: `En relación con las células vegetales:
+
+a) Conteste a las siguientes cuestiones: 1) ¿Cómo se llama el compartimento del orgánulo donde tiene lugar el ciclo de Calvin? 2) ¿En qué lugar del cloroplasto se sitúan los fotosistemas I y II (PS I y PS II)? 3) ¿Cuál es la proteína más abundante en los cloroplastos? 4) ¿Dónde se localiza la ATP sintasa del cloroplasto? (1 punto).
+
+b) Indique cuatro funciones del aparato de Golgi en células vegetales (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2019-A-5",
+        año: 2019,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        tema: "Respuesta inmune",
+        enunciado: `Con respecto a la respuesta inmune:
+
+a) En relación con los anticuerpos, responda a lo siguiente: 1) definición, 2) estructura, 3) mencione tres tipos, 4) célula que los produce y 5) indique una función (1,25 puntos).
+
+b) Explique qué es el complejo mayor de histocompatibilidad (MHC). Indique los tipos de MHC y la parte de la célula en que se localizan (0,75 puntos).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2019-B-1",
+        año: 2019,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        tema: "Cromosomas y división celular",
+        enunciado: `Con respecto a los cromosomas en los procesos de división celular:
+
+a) Las figuras (A, B, C y D) representan esquemas de la disposición de los cromosomas en diferentes fases de la mitosis o la meiosis para cuatro organismos distintos.
+
+![Figuras de disposición de cromosomas](/biologia-imgs/madrid/2019/extraordinaria/pregunta-B1-fases-division.png)
+
+Copie la siguiente tabla en la hoja de respuestas y complete los datos que faltan en cada caso: proceso de división, fase del mismo, ploidía y número de cromosomas del organismo (1,25 puntos).
+
+![Tabla para completar sobre división celular](/biologia-imgs/madrid/2019/extraordinaria/pregunta-B1-tabla-division.png)
+
+b) Para el caso (C), indique cómo se denominan los cromosomas 1, 2 y 3 respecto a la posición del centrómero (0,75 puntos).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2019-B-2",
+        año: 2019,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        tema: "Membranas celulares",
+        enunciado: `En relación con las membranas celulares:
+
+a) Describa el funcionamiento de la bomba de sodio / potasio. Explique por qué necesita energía para su funcionamiento (1 punto).
+
+b) ¿Qué ocurriría si introducimos una célula vegetal en una solución hipertónica? ¿Y en una hipotónica? ¿Qué fenómeno se observa en cada caso? (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2019-B-3",
+        año: 2019,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        tema: "Información genética",
+        enunciado: `En relación con la información genética de los seres vivos:
+
+a) Indique qué mecanismo molecular es responsable de la transmisión de la información genética de generación en generación. Mencione un requisito que debe cumplir este mecanismo para garantizar dicha transmisión (0,5 puntos).
+
+b) Indique dos mecanismos moleculares por los que se puede generar diversidad genética en los seres vivos (0,5 puntos).
+
+c) Indique el orgánulo celular donde tiene lugar la traducción del mensaje genético. Describa su correspondiente estructura e indique sus componentes moleculares (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2019-B-4",
+        año: 2019,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        tema: "Microorganismos",
+        enunciado: `En relación con los microorganismos:
+
+a) Señale cuatro diferencias respecto a la estructura, composición molecular o metabolismo entre virus y bacterias (1 punto).
+
+b) Defina los siguientes conceptos: microorganismo, saprofito, retrovirus y bacteriófago (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2019-B-5",
+        año: 2019,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        tema: "Glúcidos",
+        enunciado: `En relación con las propiedades de los glúcidos:
+
+a) Indique cómo se forman los polisacáridos. Mencione la diferencia existente entre los compuestos homopolisacáridos y los heteropolisacáridos, indicando un ejemplo de cada uno de ellos (1 punto).
+
+b) Explique brevemente qué es un carbono asimétrico, y en qué se diferencian los monosacáridos denominados epímeros (0,5 puntos).
+
+c) Mencione una aldohexosa y una cetohexosa, e indique para cada ejemplo qué productos naturales los contienen en cantidades importantes (0,5 puntos).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+    ],
+  },
+  {
+    id: 20182,
+    año: 2018,
+    tipo: "Extraordinaria",
+    asignatura: "Biología",
+    comunidad: "Madrid",
+    fuenteDocumento: "2017-2018 Extraordinaria Biología.pdf",
+    preguntas: [
+      {
+        id: "bio-extra-2018-A-1",
+        año: 2018,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "A.1",
+        tema: "Mendel y herencia",
+        enunciado: `Con relación a las aportaciones de Mendel al estudio de la herencia:
+
+Un piscicultor cruza dos ejemplares puros: una hembra de escamas azules (A) con un macho de escamas rojas (R). Cada uno de los individuos de la descendencia F1 que resulta del cruce tiene mezcla de escamas azules y rojas.
+
+a) Indique los genotipos parentales y de los individuos de la F1 (0,5 puntos).
+
+b) Explique razonadamente de qué tipo de herencia se trata (0,5 puntos).
+
+c) Indique las proporciones genotípicas y fenotípicas de la F2 resultante del cruce de dos individuos de la F1 (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2018-A-2",
+        año: 2018,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "A.2",
+        tema: "Procesos celulares",
+        enunciado: `Respecto a algunos procesos celulares:
+
+a) Explique la diferencia entre pinocitosis y fagocitosis (1 punto).
+
+b) Indique los tipos de transporte de moléculas mediado por proteínas a través de las membranas y explique sus características. Ponga un ejemplo de cada uno (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2018-A-3",
+        año: 2018,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "A.3",
+        tema: "Glúcidos",
+        enunciado: `En relación con los glúcidos como biomoléculas:
+
+Al analizar una muestra de azúcar de mesa se ha aislado la molécula de la figura. Al someterla a una prueba (Fehling), se ha encontrado que no tiene poder reductor.
+
+![Molécula de glúcido con enlace señalado](/biologia-imgs/madrid/2018/extraordinaria/pregunta-A3-glucido.png)
+
+a) Indique el nombre de la molécula, el nombre de los monómeros que la componen y a qué tipo específico de glúcido pertenece (0,75 puntos).
+
+b) Nombre el enlace que está señalado por la letra A. Indique si este enlace es mono o dicarbonílico y explique por qué la molécula no tiene poder reductor (0,75 puntos).
+
+c) Cite dos moléculas similares, que tengan el mismo número de monómeros (0,5 puntos).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2018-A-4",
+        año: 2018,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "A.4",
+        tema: "Ciclo celular",
+        enunciado: `En relación con el ciclo celular de una célula animal:
+
+a) Indique en qué fase concreta del ciclo celular se producen los siguientes procesos: 1) La célula entra en una fase quiescente bloqueando su entrada en un nuevo ciclo de división; 2) La cromatina está duplicada y la actividad celular principal es preparatoria de la mitosis; 3) Se replica todo el ADN nuclear; 4) Se produce crecimiento y actividad celular, duplicando el número de orgánulos y estructuras citoplasmáticas; 5) Condensación máxima de toda la cromatina nuclear y separación en dos juegos idénticos de cromosomas, que se reparten entre los dos polos celulares (1,25 puntos).
+
+b) Sobre el proceso de división del citoplasma en células animales indique: 1) En qué momento del ciclo celular se produce; 2) De qué modo se produce la separación entre las dos células hijas; 3) Qué elementos del citoesqueleto están implicados en este proceso (0,75 puntos).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2018-A-5",
+        año: 2018,
+        convocatoria: "Extraordinaria",
+        opcion: "A",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "A.5",
+        tema: "Inflamación",
+        enunciado: `En relación con la respuesta del organismo ante una herida:
+
+a) Defina inflamación (0,5 puntos).
+
+b) Nombre cuatro síntomas característicos de la respuesta inflamatoria (0,5 puntos).
+
+c) Defina mediador de la inflamación y nombre tres de ellos (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2018-B-1",
+        año: 2018,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta1",
+        label: "Pregunta 1",
+        numero: "B.1",
+        tema: "Metabolismo eucariota",
+        enunciado: `Respecto al metabolismo de las células eucariotas, el esquema adjunto representa un proceso metabólico esencial en la biosfera:
+
+a) Indique qué proceso se esquematiza en la figura, el orgánulo donde se realiza, las fases en las que se divide y la localización de cada una de ellas dentro del orgánulo donde tiene lugar (0,75 puntos).
+
+![Proceso fotosintético en cloroplasto](/biologia-imgs/madrid/2018/extraordinaria/pregunta-B1-proceso-fotosintetico.png)
+
+b) Indique a qué proceso, sustrato o producto corresponden los números 1 al 6 (0,75 puntos).
+
+c) ¿Es posible que en este orgánulo se sinteticen proteínas? Razone la respuesta (0,5 puntos).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2018-B-2",
+        año: 2018,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta2",
+        label: "Pregunta 2",
+        numero: "B.2",
+        tema: "Eucariotas y procariotas",
+        enunciado: `Con respecto a la estructura, composición y morfología celular:
+
+a) Cite las principales diferencias entre eucariotas y procariotas respecto a: 1. Ribosomas; 2. Tipos de orgánulos; 3. Pared celular; 4. Localización del material genético (1 punto).
+
+b) Cite cuatro tipos morfológicos bacterianos y descríbalos brevemente (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2018-B-3",
+        año: 2018,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta3",
+        label: "Pregunta 3",
+        numero: "B.3",
+        tema: "Material hereditario",
+        enunciado: `En referencia al material hereditario:
+
+a) Si la cadena molde de un fragmento de ADN tiene la secuencia: 3´ TACGACATGCGGATTACG 5´. ¿Cuál es la secuencia y polaridad de la otra cadena de la doble hélice? (0,5 puntos).
+
+b) Escriba la secuencia de ARN producto de la transcripción con sus polaridades (0,5 puntos).
+
+c) Indique cuántos aminoácidos se traducirán a partir de la secuencia de ARN transcrita y escriba las secuencias de los anticodones de los ARN transferentes de los mismos y sus polaridades (1 punto).`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2018-B-4",
+        año: 2018,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta4",
+        label: "Pregunta 4",
+        numero: "B.4",
+        tema: "Base fisicoquímica de la vida",
+        enunciado: `En relación con la base fisicoquímica de la vida:
+
+a) Indique una función en los seres vivos de las sales minerales disueltas fosfato y carbonato y cite un ejemplo de función biológica de dos sales minerales sólidas (0,75 puntos).
+
+b) En la gráfica de la derecha se reflejan las variaciones de volumen que ha sufrido una célula cuando se añaden dos soluciones, A y B, de forma sucesiva al medio donde se encuentra. Explique razonadamente el cambio de volumen de la célula, indicando el nombre que recibe este fenómeno y cómo se denomina al medio en relación con este proceso, antes de añadir las soluciones y después de añadir la solución A y la solución B (1,25 puntos).
+
+![Variaciones de volumen celular](/biologia-imgs/madrid/2018/extraordinaria/pregunta-B4-volumen-celular.png)`,
+        puntuacion: 2,
+        criterios: criteriosGenericosExtraordinaria,
+      },
+      {
+        id: "bio-extra-2018-B-5",
+        año: 2018,
+        convocatoria: "Extraordinaria",
+        opcion: "B",
+        bloque: "Pregunta5",
+        label: "Pregunta 5",
+        numero: "B.5",
+        tema: "Cromosomas",
+        enunciado: `En relación con los cromosomas:
+
+a) El saltamontes tiene un número diploide de 24, mientras que la mosca de la fruta tiene un número diploide de 8. En el supuesto de que no haya entrecruzamiento en la meiosis, justifique cuál de estas dos especies tendrá más variabilidad genética en la descendencia de una misma pareja (0,5 puntos).
+
+b) En el saltamontes el sistema de determinación sexual es XX/X0. Complete en la siguiente tabla el número de autosomas y cromosomas sexuales en cada caso (1 punto):
+
+![Tabla de autosomas y cromosomas sexuales](/biologia-imgs/madrid/2018/extraordinaria/pregunta-B5-tabla-cromosomas-sexuales.png)
+
+c) Defina cromosoma sexual e indique otro sistema de determinación sexual, distinto del mencionado para el saltamontes (0,5 puntos).`,
         puntuacion: 2,
         criterios: criteriosGenericosExtraordinaria,
       },

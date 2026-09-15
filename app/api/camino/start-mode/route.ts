@@ -21,6 +21,17 @@ export const dynamic = 'force-dynamic'
 // — la respuesta es que buena parte de ese temario ya lo ha dado en clase y
 // no necesita verlo por primera vez.
 //
+// El alumno declara QUÉ BLOQUES ha dado, por su nombre. No una fracción del
+// temario ("el primer bloque", "voy por la mitad"): eso da por hecho que todos
+// los institutos recorren el temario en NUESTRO orden, y no lo hacen. El
+// primer bloque de la lista de Kairo no es por donde empezó su clase, así que
+// una fracción marcaba como vistos bloques que no ha tocado y dejaba como
+// nuevos los que sí. La lista de bloques la devuelve el GET de aquí mismo,
+// sacada de su propia cola, que es el único sitio donde su temario es suyo.
+//
+// `mode` se sigue aceptando porque el onboarding todavía declara así, pero la
+// tarjeta de previsión ya manda bloques.
+//
 // Se mantiene la regla de startingPoint.ts, que no se negocia: lo declarado
 // NUNCA se marca como completado. Pasa de temario nuevo a repaso express, más
 // corto, pero sigue en el plan y sigue contando en el denominador curricular.
@@ -35,6 +46,72 @@ function hhmm(minutes: number): string {
   return `${String(Math.floor(clamped / 60)).padStart(2, '0')}:${String(clamped % 60).padStart(2, '0')}`
 }
 
+type QueueRow = { id: string; block_key: string | null; metadata: Record<string, unknown> | null; subject_position: number | null }
+
+async function readQueue(db: ReturnType<typeof createServiceClient>, userId: string, subject: string) {
+  const { data, error } = await db
+    .from('user_learning_queue')
+    .select('id, block_key, metadata, subject_position')
+    .eq('user_id', userId)
+    .eq('subject', subject)
+    // 'pending' es lo que aún no tiene misión y 'scheduled' lo que ya la
+    // tiene. Hay que convertir las dos: si se dejara fuera 'scheduled', lo
+    // declarado no tocaría precisamente las semanas que el alumno tiene ya
+    // planificadas, que son las que está mirando cuando lo declara.
+    // 'completed' nunca entra — eso ya está hecho y no se reescribe.
+    .in('queue_status', ['pending', 'scheduled'])
+    .order('subject_position', { ascending: true })
+  if (error) throw new Error(`Queue read: ${error.message}`)
+  return (data ?? []) as QueueRow[]
+}
+
+/** Los bloques que el alumno tiene POR DELANTE en una asignatura, en su orden. */
+function blocksOf(queue: readonly QueueRow[]) {
+  const blocks = new Map<string, { key: string; lessons: number; declared: number }>()
+  for (const item of queue) {
+    const key = item.block_key ?? ''
+    if (!key) continue
+    const block = blocks.get(key) ?? { key, lessons: 0, declared: 0 }
+    block.lessons++
+    if ((item.metadata as Record<string, unknown> | null)?.mission_type === 'review') block.declared++
+    blocks.set(key, block)
+  }
+  // Un bloque cuenta como declarado cuando lo está entero: a medias sigue
+  // siendo temario por ver, y enseñarlo marcado sería mentirle al alumno.
+  return [...blocks.values()].map(block => ({
+    key: block.key, lessons: block.lessons, declared: block.declared === block.lessons,
+  }))
+}
+
+/**
+ * Los bloques de cada asignatura del alumno, para que la tarjeta pregunte por
+ * NOMBRE en vez de por fracción.
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const authContext = await getAuthContext(request)
+    if ('response' in authContext) return authContext.response
+    const { user } = authContext
+
+    const db = createServiceClient()
+    const { data: rows, error } = await db
+      .from('user_learning_queue')
+      .select('subject')
+      .eq('user_id', user.id)
+      .in('queue_status', ['pending', 'scheduled'])
+    if (error) throw new Error(`Subjects read: ${error.message}`)
+
+    const subjects = [...new Set((rows ?? []).map(row => normalizeSubjectSlug(row.subject)))]
+    const bySubject: Record<string, ReturnType<typeof blocksOf>> = {}
+    for (const subject of subjects) bySubject[subject] = blocksOf(await readQueue(db, user.id, subject))
+
+    return NextResponse.json({ ok: true, subjects: bySubject })
+  } catch (err) {
+    console.error('[camino/start-mode GET]', err)
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const authContext = await getAuthContext(request)
@@ -46,31 +123,35 @@ export async function POST(request: NextRequest) {
 
     const subject = typeof body.subject === 'string' ? normalizeSubjectSlug(body.subject) : ''
     if (!subject) return NextResponse.json({ error: 'Asignatura no válida' }, { status: 400 })
-    if (!isStartMode(body.mode)) return NextResponse.json({ error: 'Punto de partida no válido' }, { status: 400 })
-    const mode: StartMode = body.mode
+
+    // Dos formas de declarar, y `blocks` manda: es la que sabe QUÉ ha dado
+    // este alumno en vez de cuánto. `mode` sigue viva para el onboarding.
+    const declaredBlocks = Array.isArray(body.blocks)
+      ? body.blocks.filter((value: unknown): value is string => typeof value === 'string' && value.length > 0)
+      : null
+    if (declaredBlocks == null && !isStartMode(body.mode)) {
+      return NextResponse.json({ error: 'Punto de partida no válido' }, { status: 400 })
+    }
+    const mode: StartMode = isStartMode(body.mode) ? body.mode : 'zero'
 
     const db = createServiceClient()
 
-    const { data: queue, error: queueError } = await db
-      .from('user_learning_queue')
-      .select('id, block_key, metadata, subject_position')
-      .eq('user_id', user.id)
-      .eq('subject', subject)
-      // 'pending' es lo que aún no tiene misión y 'scheduled' lo que ya la
-      // tiene. Hay que convertir las dos: si se dejara fuera 'scheduled', lo
-      // declarado no tocaría precisamente las semanas que el alumno tiene ya
-      // planificadas, que son las que está mirando cuando lo declara.
-      // 'completed' nunca entra — eso ya está hecho y no se reescribe.
-      .in('queue_status', ['pending', 'scheduled'])
-      .order('subject_position', { ascending: true })
-    if (queueError) throw new Error(`Queue read: ${queueError.message}`)
-    if (!queue?.length) return NextResponse.json({ error: 'Esta asignatura no tiene temario por delante' }, { status: 409 })
+    const queue = await readQueue(db, user.id, subject)
+    if (!queue.length) return NextResponse.json({ error: 'Esta asignatura no tiene temario por delante' }, { status: 409 })
 
     // Los bloques se cuentan sobre el temario que LE QUEDA, no sobre el de la
-    // asignatura entera: "voy por la mitad" dicho en marzo se refiere a lo que
-    // tiene por delante, y lo ya completado no está en esta lista.
+    // asignatura entera: lo ya completado no está en esta lista.
     const uniqueBlocks = [...new Set(queue.map(item => item.block_key))]
-    const covered = new Set(uniqueBlocks.slice(0, coveredBlockCount(mode, uniqueBlocks.length)))
+    // Un bloque que el alumno no tiene por delante no se puede declarar: si
+    // llega uno así, es que la pantalla venía de una lista vieja.
+    const unknownBlocks = declaredBlocks?.filter(key => !uniqueBlocks.includes(key)) ?? []
+    if (unknownBlocks.length > 0) {
+      return NextResponse.json({ error: 'Esos bloques ya no están en tu temario; recarga la página' }, { status: 409 })
+    }
+    // La declaración es COMPLETA: lo que no viene marcado vuelve a ser temario
+    // nuevo. Así desmarcar un bloque deshace la declaración en vez de dejarla
+    // pegada para siempre.
+    const covered = new Set(declaredBlocks ?? uniqueBlocks.slice(0, coveredBlockCount(mode, uniqueBlocks.length)))
 
     const planContext = await loadStudentPlanContext(user.id, db)
     const dailyMinutes = planContext.dailyMinutes
@@ -79,11 +160,19 @@ export async function POST(request: NextRequest) {
     for (const item of queue) {
       const previous = (item.metadata as Record<string, unknown> | null) ?? {}
       const topicSlug = typeof previous.topic_slug === 'string' ? previous.topic_slug : ''
-      const next = queueMetadataFor(mode, covered.has(item.block_key), topicSlug)
+      const isCovered = covered.has(item.block_key)
+      // Declarando por bloques no se toca nada más que el tipo: `mode` traía
+      // consigo marcas de procedencia (`beta_sequence`) que aquí serían
+      // falsas, porque este alumno no viene de una siembra nueva.
+      const next = declaredBlocks != null
+        ? (isCovered
+            ? { mission_type: 'review' as const, express: true as const, topic_slug: topicSlug, declared_blocks: true }
+            : { mission_type: 'concept' as const, topic_slug: topicSlug, declared_blocks: true })
+        : queueMetadataFor(mode, isCovered, topicSlug)
       // `beta_sequence` y demás marcas de procedencia se conservan: solo se
       // reescribe lo que declara el punto de partida.
       const metadata: Record<string, unknown> = { ...previous, ...next }
-      if (!next.express) delete metadata.express
+      if (!('express' in next)) delete metadata.express
       if (previous.mission_type === next.mission_type && Boolean(previous.express) === Boolean(next.express)) continue
       changedById.set(item.id, {
         missionType: next.mission_type,
@@ -95,6 +184,7 @@ export async function POST(request: NextRequest) {
     if (changedById.size === 0) {
       return NextResponse.json({ ok: true, changedQueueItems: 0, changedMissions: 0 })
     }
+
 
     for (const [id, change] of changedById) {
       const { error } = await db.from('user_learning_queue')

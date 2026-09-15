@@ -26,15 +26,7 @@ const SUBJECT_LABELS: Record<string, string> = {
   economia: 'Economía',
 }
 
-// Las mismas opciones del onboarding, con el texto en primera persona: aquí
-// el alumno no está describiendo un curso que aún no ha empezado, está
-// corrigiendo lo que declaró cuando se dio de alta.
-const START_MODE_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: 'zero', label: 'No he dado nada todavía' },
-  { value: 'first_block', label: 'He dado el primer bloque' },
-  { value: 'mid', label: 'Voy por la mitad' },
-  { value: 'review', label: 'Lo he dado todo, me toca repasar' },
-]
+type SubjectBlock = { key: string; lessons: number; declared: boolean }
 
 const RISK_LABELS: Record<ForecastRiskReason, string> = {
   after_exam: 'Fecha posterior a la PAU', partial_deadline: 'Fuera del plazo del parcial',
@@ -130,27 +122,57 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
   const [replanning, setReplanning] = useState(false)
   const [replanError, setReplanError] = useState<string | null>(null)
   const [visibleRisks, setVisibleRisks] = useState(10)
-  const [startModes, setStartModes] = useState<Record<string, string>>({})
+  // Los bloques REALES de cada asignatura de este alumno. No se piden hasta
+  // que abre la lista: la mayoría de visitas a la tarjeta no la tocan.
+  const [blocks, setBlocks] = useState<Record<string, SubjectBlock[]> | null>(null)
+  const [blocksError, setBlocksError] = useState<string | null>(null)
+  const [openSubject, setOpenSubject] = useState<string | null>(null)
+  const [checked, setChecked] = useState<Record<string, Set<string>>>({})
   const [savingSubject, setSavingSubject] = useState<string | null>(null)
   const [startModeError, setStartModeError] = useState<string | null>(null)
 
-  async function declareStartMode(subject: string) {
-    const mode = startModes[subject]
-    if (!mode || savingSubject) return
+  async function authorizedFetch(input: string, init?: RequestInit) {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) throw new Error('Vuelve a iniciar sesión para declarar lo que ya has dado.')
+    return fetch(input, {
+      ...init,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, ...init?.headers },
+    })
+  }
+
+  async function openBlocks(subject: string) {
+    if (openSubject === subject) { setOpenSubject(null); return }
+    setOpenSubject(subject); setBlocksError(null)
+    if (blocks) return
+    try {
+      const response = await authorizedFetch('/api/camino/start-mode')
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(payload?.error ?? 'No se pudieron leer tus bloques.')
+      const loaded: Record<string, SubjectBlock[]> = payload.subjects ?? {}
+      setBlocks(loaded)
+      // Lo ya declarado llega marcado: la lista es el estado actual, no un
+      // formulario en blanco que al guardar borraría lo de antes.
+      setChecked(Object.fromEntries(Object.entries(loaded).map(
+        ([name, rows]) => [name, new Set(rows.filter(row => row.declared).map(row => row.key))],
+      )))
+    } catch (error) {
+      setBlocksError(error instanceof Error ? error.message : 'No se pudieron leer tus bloques.')
+    }
+  }
+
+  async function declareBlocks(subject: string) {
+    if (savingSubject) return
     setSavingSubject(subject); setStartModeError(null)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('Vuelve a iniciar sesión para cambiar tu punto de partida.')
-      const response = await fetch('/api/camino/start-mode', {
+      const response = await authorizedFetch('/api/camino/start-mode', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ subject, mode }),
+        body: JSON.stringify({ subject, blocks: [...(checked[subject] ?? [])] }),
       })
       const payload = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(payload?.error ?? 'No se pudo cambiar tu punto de partida.')
+      if (!response.ok) throw new Error(payload?.error ?? 'No se pudo guardar lo que ya has dado.')
       window.location.reload()
     } catch (error) {
-      setStartModeError(error instanceof Error ? error.message : 'No se pudo cambiar tu punto de partida.')
+      setStartModeError(error instanceof Error ? error.message : 'No se pudo guardar lo que ya has dado.')
       setSavingSubject(null)
     }
   }
@@ -379,42 +401,84 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
                 {forecast.deficitMinutes > 0 && withWork.length > 0 && (
                   <div style={{ display: 'grid', gap: 10 }}>
                     <p style={prose}>
-                      Sumar horas no es la única salida. Si parte de este temario ya lo has dado en clase,
-                      dilo y entrará como <strong>repaso express</strong> en vez de como lección nueva: más
-                      corto, pero sigue en tu Camino y sigue contando. No lo damos por aprobado — declarar
-                      no es demostrar.
+                      Sumar horas no es la única salida. Marca los bloques que <strong>ya has dado en
+                      clase</strong> y entrarán como <strong>repaso express</strong> en vez de como lección
+                      nueva: más cortos, pero siguen en tu Camino y siguen contando. No los damos por
+                      aprobados — declarar no es demostrar. Cada instituto lleva el temario en su orden, así
+                      que preguntamos por el nombre del bloque y no por cuánto llevas.
                     </p>
-                    {withWork.map(row => (
-                      <div key={row.subject} style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                        <span style={{ flex: '1 1 120px', minWidth: 0, fontSize: 12.5, fontWeight: 700 }}>
-                          {SUBJECT_LABELS[row.subject] ?? row.subject}
-                        </span>
-                        <select
-                          aria-label={`Punto de partida en ${SUBJECT_LABELS[row.subject] ?? row.subject}`}
-                          value={startModes[row.subject] ?? ''}
-                          onChange={event => setStartModes(current => ({ ...current, [row.subject]: event.target.value }))}
-                          style={{ flex: '1 1 160px', minWidth: 0, fontSize: 12, padding: '7px 8px', borderRadius: 8,
-                            border: '1px solid var(--clay-border)', background: 'var(--clay-surface-raised)', color: 'inherit' }}
-                        >
-                          <option value="">¿Por dónde vas?</option>
-                          {START_MODE_OPTIONS.map(option => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          disabled={!startModes[row.subject] || savingSubject != null}
-                          onClick={() => void declareStartMode(row.subject)}
-                          style={{ flex: 'none', fontSize: 12, fontWeight: 800, padding: '7px 12px', borderRadius: 8,
-                            border: '1px solid var(--clay-border)', background: 'var(--clay-surface-raised)',
-                            color: 'var(--clay-accent-text)',
-                            cursor: !startModes[row.subject] || savingSubject != null ? 'not-allowed' : 'pointer',
-                            opacity: !startModes[row.subject] || savingSubject != null ? 0.5 : 1 }}
-                        >
-                          {savingSubject === row.subject ? 'Aplicando…' : 'Aplicar'}
-                        </button>
-                      </div>
-                    ))}
+                    {withWork.map(row => {
+                      const label = SUBJECT_LABELS[row.subject] ?? row.subject
+                      const rows = blocks?.[row.subject] ?? []
+                      const marked = checked[row.subject] ?? new Set<string>()
+                      const open = openSubject === row.subject
+                      return (
+                        <div key={row.subject} style={{ display: 'grid', gap: 8 }}>
+                          <button
+                            type="button"
+                            onClick={() => void openBlocks(row.subject)}
+                            aria-expanded={open}
+                            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 10px',
+                              fontSize: 12.5, textAlign: 'left', color: 'inherit', borderRadius: 8, cursor: 'pointer',
+                              border: '1px solid var(--clay-border)', background: 'var(--clay-surface-raised)' }}
+                          >
+                            <span style={{ flex: 1, minWidth: 0, fontWeight: 700 }}>{label}</span>
+                            <span style={{ fontSize: 11.5, color: 'var(--clay-text-muted)' }}>
+                              {marked.size > 0 ? `${marked.size} ya dados` : 'Marcar lo que ya he dado'}
+                            </span>
+                            <ChevronDown size={14} aria-hidden="true"
+                              style={{ flex: 'none', color: 'var(--clay-text-muted)', transform: open ? 'rotate(180deg)' : 'none' }} />
+                          </button>
+
+                          {open && (
+                            <div style={{ display: 'grid', gap: 6, padding: '0 4px 4px 10px' }}>
+                              {blocks == null && !blocksError && (
+                                <span style={{ fontSize: 12, color: 'var(--clay-text-muted)' }}>Cargando tus bloques…</span>
+                              )}
+                              {blocksError && <p role="alert" style={prose}>{blocksError}</p>}
+                              {blocks != null && rows.length === 0 && (
+                                <span style={{ fontSize: 12, color: 'var(--clay-text-muted)' }}>
+                                  No te queda temario por delante en {label}.
+                                </span>
+                              )}
+                              {rows.map(block => (
+                                <label key={block.key} style={{ display: 'flex', alignItems: 'baseline', gap: 8, fontSize: 12.5, cursor: 'pointer' }}>
+                                  <input
+                                    type="checkbox"
+                                    checked={marked.has(block.key)}
+                                    onChange={event => setChecked(current => {
+                                      const next = new Set(current[row.subject] ?? [])
+                                      if (event.target.checked) next.add(block.key)
+                                      else next.delete(block.key)
+                                      return { ...current, [row.subject]: next }
+                                    })}
+                                    style={{ flex: 'none', marginTop: 2 }}
+                                  />
+                                  <span style={{ flex: 1, minWidth: 0 }}>{block.key}</span>
+                                  <span style={{ flex: 'none', fontSize: 11.5, color: 'var(--clay-text-muted)', fontVariantNumeric: 'tabular-nums' }}>
+                                    {block.lessons} {block.lessons === 1 ? 'lección' : 'lecciones'}
+                                  </span>
+                                </label>
+                              ))}
+                              {rows.length > 0 && (
+                                <button
+                                  type="button"
+                                  disabled={savingSubject != null}
+                                  onClick={() => void declareBlocks(row.subject)}
+                                  style={{ justifySelf: 'start', marginTop: 4, fontSize: 12, fontWeight: 800,
+                                    padding: '7px 12px', borderRadius: 8, border: '1px solid var(--clay-border)',
+                                    background: 'var(--clay-surface-raised)', color: 'var(--clay-accent-text)',
+                                    cursor: savingSubject != null ? 'wait' : 'pointer',
+                                    opacity: savingSubject != null ? 0.5 : 1 }}
+                                >
+                                  {savingSubject === row.subject ? 'Guardando…' : 'Guardar'}
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
                     {startModeError && <p role="alert" style={prose}>{startModeError}</p>}
                   </div>
                 )}

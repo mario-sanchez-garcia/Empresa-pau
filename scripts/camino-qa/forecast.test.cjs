@@ -572,6 +572,52 @@ test('declarar "ya lo he dado" recorta trabajo sin darlo por aprobado, y no se r
   {ok:true,changedQueueItems:0,changedMissions:0})
 })
 
+// El orden del temario es NUESTRO, no el del instituto del alumno. "He dado
+// el primer bloque" daba por vistos los primeros de nuestra lista, que para
+// media beta no son por donde empezó su clase. Se declara por nombre.
+test('se declara QUE bloque se ha dado, aunque no sea el primero de nuestra lista',async()=>{
+ const user='bloques-sueltos'
+ const bloques=['Cinematica','Campo gravitatorio','Ondas','Optica']
+ const cola=bloques.flatMap((block,b)=>Array.from({length:3},(_,i)=>({
+  id:`q-${b}-${i}`,user_id:user,subject:'fisica',queue_status:'pending',
+  v2_sort_order:b*10+i,subject_position:b*10+i,title:`Tema ${b}.${i}`,
+  block_key:block,block_slug:block,metadata:{mission_type:'concept',topic_slug:`t-${b}-${i}`},retry_not_before:null})))
+ const db=database({perfiles:[{id:user,subjects:['fisica'],pau_exam_date:'2027-06-07',student_exams:[]}],
+  user_entitlements:[{user_id:user,plan_id:'premium',status:'active'}],
+  billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:60,weekly_study_days_value:6}}],
+  user_learning_queue:cola})
+ const api=runtime('2026-09-15',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'t'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/start-mode/route.ts')
+
+ const listado=await (await api.GET({})).json()
+ assert.deepEqual(listado.subjects.fisica.map(b=>b.key),bloques,'la lista es el temario del alumno, en su orden')
+ assert.ok(listado.subjects.fisica.every(b=>b.declared===false&&b.lessons===3))
+
+ // Ni el primero ni consecutivos: justamente lo que una fraccion no sabe decir.
+ const respuesta=await api.POST({json:async()=>({subject:'fisica',blocks:['Campo gravitatorio','Optica']})})
+ assert.equal(respuesta.status,200)
+ const porId=new Map(db.tables.user_learning_queue.map(r=>[r.id,r]))
+ assert.equal(porId.get('q-0-0').metadata.mission_type,'concept','Cinematica no se ha declarado: sigue siendo nueva')
+ assert.equal(porId.get('q-1-0').metadata.mission_type,'review')
+ assert.equal(porId.get('q-1-0').metadata.express,true)
+ assert.equal(porId.get('q-3-2').metadata.mission_type,'review')
+ assert.notEqual(porId.get('q-1-0').queue_status,'completed','declarar no es demostrar')
+ assert.equal(porId.get('q-1-0').metadata.beta_sequence,undefined,'declarar no inventa procedencia')
+
+ // La declaracion es completa: desmarcar deshace.
+ assert.equal((await api.POST({json:async()=>({subject:'fisica',blocks:['Campo gravitatorio']})})).status,200)
+ const tras=new Map(db.tables.user_learning_queue.map(r=>[r.id,r]))
+ assert.equal(tras.get('q-3-2').metadata.mission_type,'concept','al desmarcar vuelve a ser temario nuevo')
+ assert.equal(tras.get('q-3-2').metadata.express,undefined)
+ assert.equal(tras.get('q-1-0').metadata.mission_type,'review','y lo que sigue marcado no se toca')
+ assert.deepEqual((await (await api.GET({})).json()).subjects.fisica.filter(b=>b.declared).map(b=>b.key),['Campo gravitatorio'])
+
+ // Un bloque que no es suyo no se puede declarar.
+ assert.equal((await api.POST({json:async()=>({subject:'fisica',blocks:['Termodinamica']})})).status,409)
+})
+
 test('same-day ensure upgrades legacy durations even if the preference hash still matches',async()=>{
  const user='legacy',db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',subjects:[]}],
   billing_events:[{user_id:user,event_type:'onboarding_completed',payload:{daily_minutes:180,weekly_study_days_value:2}}],

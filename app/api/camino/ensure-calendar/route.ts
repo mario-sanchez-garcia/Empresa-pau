@@ -46,6 +46,24 @@ export async function POST(request: NextRequest) {
         || new Date(`${date}T12:00:00Z`).toISOString().slice(0, 10) !== date
         || date > addDays(getMadridToday(), 366))
         return NextResponse.json({ error: 'invalid_planning_date' }, { status: 400 })
+      // La fecha pedida se siembra ENTERA, sin tope.
+      //
+      // Hubo aquí un cap de 8 semanas contra "~650 consultas cuando el alumno
+      // navega hasta la PAU de golpe". Ese coste ya no existe: los schedulers
+      // se piden en bloque para todas las fechas candidatas y la
+      // disponibilidad externa en un solo rango, así que abrir el curso entero
+      // cuesta ~63 consultas, las mismas que abrir una semana.
+      //
+      // Y el cap no era neutral. Se medía desde HOY, no desde lo ya sembrado,
+      // así que no avanzaba con las peticiones: abrir la semana 30 seguía
+      // sembrando solo hasta la 8, una y otra vez. El temario nunca se
+      // repartía más allá —170 de 218 días de estudio sin una sola misión, con
+      // 214 temas atrapados en la cola— que es justo lo que `throughDate`
+      // existe para evitar.
+      //
+      // Lo que sí escala con el horizonte es el tiempo de colocación (~1,2 s
+      // para el curso completo), y se paga UNA vez: la siguiente apertura de
+      // la misma fecha baja a ~170 ms porque ya no queda nada que sembrar.
       throughDate = date
     }
   } catch {

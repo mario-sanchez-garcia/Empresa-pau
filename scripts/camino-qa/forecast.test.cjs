@@ -888,4 +888,19 @@ test('abrir una semana lejana no cuesta una lectura por dia de plan',async()=>{
  const empty=days.filter(d=>!(minutesByDate.get(d)>0))
  assert.equal(empty.length,0,`${empty.length} de ${days.length} dias sembrados se quedan sin mision: ${empty.slice(0,5).join(', ')}`)
  for(const d of days) assert.ok(minutesByDate.get(d)<=180,`${d} se pasa del presupuesto declarado`)
+
+ // Y el horizonte pedido se siembra ENTERO, tambien el curso completo. Hubo un
+ // tope de 8 semanas medido desde hoy que no avanzaba con las peticiones: el
+ // temario se quedaba en noviembre para siempre. El coste sigue sin escalar
+ // con los dias, que es lo unico que ese tope tenia que proteger.
+ reads=0
+ const finDePlan=journey('app/lib/camino/planWindow.ts').planningDates(context,{includeFinalReviewWindow:true}).at(-1)
+ assert.equal((await api.POST({json:async()=>({throughDate:finDePlan})})).status,200)
+ assert.ok(reads<=120,`abrir el curso entero cuesta ${reads} consultas`)
+ const todo=journey('app/lib/camino/planWindow.ts').planningDates(context,{includeFinalReviewWindow:true})
+ const minutosFinal=new Map()
+ for(const r of db.tables.camino_calendar.filter(r=>['pending','postponed'].includes(r.status)))
+  minutosFinal.set(r.scheduled_date,(minutosFinal.get(r.scheduled_date)??0)+est(r))
+ const vacios=todo.filter(d=>!(minutosFinal.get(d)>0))
+ assert.equal(vacios.length,0,`${vacios.length} de ${todo.length} dias del curso se quedan sin mision: ${vacios.slice(0,5).join(', ')}`)
 })

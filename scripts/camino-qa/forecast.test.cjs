@@ -593,7 +593,9 @@ test('se declara QUE bloque se ha dado, aunque no sea el primero de nuestra list
 
  const listado=await (await api.GET({})).json()
  assert.deepEqual(listado.subjects.fisica.map(b=>b.key),bloques,'la lista es el temario del alumno, en su orden')
- assert.ok(listado.subjects.fisica.every(b=>b.declared===false&&b.lessons===3))
+ assert.ok(listado.subjects.fisica.every(b=>b.lessons.length===3&&b.lessons.every(l=>l.declared===false)),
+  'cada bloque trae SUS lecciones, que es la unidad con la que se declara')
+ assert.deepEqual(listado.subjects.fisica[0].lessons.map(l=>l.title),['Tema 0.0','Tema 0.1','Tema 0.2'])
 
  // Ni el primero ni consecutivos: justamente lo que una fraccion no sabe decir.
  const respuesta=await api.POST({json:async()=>({subject:'fisica',blocks:['Campo gravitatorio','Optica']})})
@@ -612,10 +614,24 @@ test('se declara QUE bloque se ha dado, aunque no sea el primero de nuestra list
  assert.equal(tras.get('q-3-2').metadata.mission_type,'concept','al desmarcar vuelve a ser temario nuevo')
  assert.equal(tras.get('q-3-2').metadata.express,undefined)
  assert.equal(tras.get('q-1-0').metadata.mission_type,'review','y lo que sigue marcado no se toca')
- assert.deepEqual((await (await api.GET({})).json()).subjects.fisica.filter(b=>b.declared).map(b=>b.key),['Campo gravitatorio'])
+ const enteros=b=>b.lessons.every(l=>l.declared)
+ assert.deepEqual((await (await api.GET({})).json()).subjects.fisica.filter(enteros).map(b=>b.key),['Campo gravitatorio'])
 
  // Un bloque que no es suyo no se puede declarar.
  assert.equal((await api.POST({json:async()=>({subject:'fisica',blocks:['Termodinamica']})})).status,409)
+
+ // Y la unidad real es la LECCION: media Alberga dada es el caso normal.
+ assert.equal((await api.POST({json:async()=>({subject:'fisica',lessons:['q-0-0','q-0-2']})})).status,200)
+ const sueltas=new Map(db.tables.user_learning_queue.map(r=>[r.id,r]))
+ assert.equal(sueltas.get('q-0-0').metadata.mission_type,'review','la 1a de Cinematica si')
+ assert.equal(sueltas.get('q-0-1').metadata.mission_type,'concept','la 2a no, aunque sea del mismo bloque')
+ assert.equal(sueltas.get('q-0-2').metadata.mission_type,'review','la 3a si')
+ assert.equal(sueltas.get('q-1-0').metadata.mission_type,'concept','y lo de otros bloques se desmarca')
+ const parcial=(await (await api.GET({})).json()).subjects.fisica[0]
+ assert.deepEqual(parcial.lessons.map(l=>l.declared),[true,false,true],'el bloque a medias se ve a medias')
+
+ // Una leccion que no es suya tampoco.
+ assert.equal((await api.POST({json:async()=>({subject:'fisica',lessons:['q-9-9']})})).status,409)
 })
 
 test('same-day ensure upgrades legacy durations even if the preference hash still matches',async()=>{

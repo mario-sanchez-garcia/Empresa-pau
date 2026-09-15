@@ -26,7 +26,13 @@ const SUBJECT_LABELS: Record<string, string> = {
   economia: 'Economía',
 }
 
-type SubjectBlock = { key: string; lessons: number; declared: boolean }
+type Lesson = { id: string; title: string; declared: boolean }
+type SubjectBlock = { key: string; lessons: Lesson[] }
+
+/** Búsqueda tolerante a tildes y mayúsculas: "algebra" tiene que encontrar "Álgebra". */
+function normalize(value: string) {
+  return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
 
 const RISK_LABELS: Record<ForecastRiskReason, string> = {
   after_exam: 'Fecha posterior a la PAU', partial_deadline: 'Fuera del plazo del parcial',
@@ -128,6 +134,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
   const [blocksError, setBlocksError] = useState<string | null>(null)
   const [openSubject, setOpenSubject] = useState<string | null>(null)
   const [checked, setChecked] = useState<Record<string, Set<string>>>({})
+  const [search, setSearch] = useState('')
   const [savingSubject, setSavingSubject] = useState<string | null>(null)
   const [startModeError, setStartModeError] = useState<string | null>(null)
 
@@ -142,7 +149,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
 
   async function openBlocks(subject: string) {
     if (openSubject === subject) { setOpenSubject(null); return }
-    setOpenSubject(subject); setBlocksError(null)
+    setOpenSubject(subject); setBlocksError(null); setSearch('')
     if (blocks) return
     try {
       const response = await authorizedFetch('/api/camino/start-mode')
@@ -153,7 +160,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
       // Lo ya declarado llega marcado: la lista es el estado actual, no un
       // formulario en blanco que al guardar borraría lo de antes.
       setChecked(Object.fromEntries(Object.entries(loaded).map(
-        ([name, rows]) => [name, new Set(rows.filter(row => row.declared).map(row => row.key))],
+        ([name, rows]) => [name, new Set(rows.flatMap(block => block.lessons).filter(lesson => lesson.declared).map(lesson => lesson.id))],
       )))
     } catch (error) {
       setBlocksError(error instanceof Error ? error.message : 'No se pudieron leer tus bloques.')
@@ -166,7 +173,7 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
     try {
       const response = await authorizedFetch('/api/camino/start-mode', {
         method: 'POST',
-        body: JSON.stringify({ subject, blocks: [...(checked[subject] ?? [])] }),
+        body: JSON.stringify({ subject, lessons: [...(checked[subject] ?? [])] }),
       })
       const payload = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(payload?.error ?? 'No se pudo guardar lo que ya has dado.')
@@ -401,17 +408,26 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
                 {forecast.deficitMinutes > 0 && withWork.length > 0 && (
                   <div style={{ display: 'grid', gap: 10 }}>
                     <p style={prose}>
-                      Sumar horas no es la única salida. Marca los bloques que <strong>ya has dado en
-                      clase</strong> y entrarán como <strong>repaso express</strong> en vez de como lección
-                      nueva: más cortos, pero siguen en tu Camino y siguen contando. No los damos por
-                      aprobados — declarar no es demostrar. Cada instituto lleva el temario en su orden, así
-                      que preguntamos por el nombre del bloque y no por cuánto llevas.
+                      Sumar horas no es la única salida. Marca lo que <strong>ya has dado en clase</strong>
+                      y entrará como <strong>repaso express</strong> en vez de como lección nueva: más corto,
+                      pero sigue en tu Camino y sigue contando. No lo damos por aprobado — declarar no es
+                      demostrar. Cada instituto lleva el temario en su orden y a su ritmo, así que se marca
+                      tema a tema (o el bloque entero de una vez, si lo has dado entero).
                     </p>
                     {withWork.map(row => {
                       const label = SUBJECT_LABELS[row.subject] ?? row.subject
                       const rows = blocks?.[row.subject] ?? []
                       const marked = checked[row.subject] ?? new Set<string>()
                       const open = openSubject === row.subject
+                      // Buscar por bloque enseña el bloque entero; buscar por
+                      // tema deja solo los temas que coinciden, con su bloque
+                      // de cabecera para no perder de vista dónde están.
+                      const query = normalize(search.trim())
+                      const visibleBlocks = !query ? rows : rows.flatMap(block => {
+                        if (normalize(block.key).includes(query)) return [block]
+                        const lessons = block.lessons.filter(lesson => normalize(lesson.title).includes(query))
+                        return lessons.length > 0 ? [{ ...block, lessons }] : []
+                      })
                       return (
                         <div key={row.subject} style={{ display: 'grid', gap: 8 }}>
                           <button
@@ -424,16 +440,18 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
                           >
                             <span style={{ flex: 1, minWidth: 0, fontWeight: 700 }}>{label}</span>
                             <span style={{ fontSize: 11.5, color: 'var(--clay-text-muted)' }}>
-                              {marked.size > 0 ? `${marked.size} ya dados` : 'Marcar lo que ya he dado'}
+                              {marked.size > 0
+                                ? `${marked.size} ${marked.size === 1 ? 'lección marcada' : 'lecciones marcadas'}`
+                                : 'Marcar lo que ya he dado'}
                             </span>
                             <ChevronDown size={14} aria-hidden="true"
                               style={{ flex: 'none', color: 'var(--clay-text-muted)', transform: open ? 'rotate(180deg)' : 'none' }} />
                           </button>
 
                           {open && (
-                            <div style={{ display: 'grid', gap: 6, padding: '0 4px 4px 10px' }}>
+                            <div style={{ display: 'grid', gap: 8, padding: '0 4px 6px 10px' }}>
                               {blocks == null && !blocksError && (
-                                <span style={{ fontSize: 12, color: 'var(--clay-text-muted)' }}>Cargando tus bloques…</span>
+                                <span style={{ fontSize: 12, color: 'var(--clay-text-muted)' }}>Cargando tu temario…</span>
                               )}
                               {blocksError && <p role="alert" style={prose}>{blocksError}</p>}
                               {blocks != null && rows.length === 0 && (
@@ -441,37 +459,81 @@ export default function CoverageForecastCard({ forecast }: { forecast: CoverageF
                                   No te queda temario por delante en {label}.
                                 </span>
                               )}
-                              {rows.map(block => (
-                                <label key={block.key} style={{ display: 'flex', alignItems: 'baseline', gap: 8, fontSize: 12.5, cursor: 'pointer' }}>
-                                  <input
-                                    type="checkbox"
-                                    checked={marked.has(block.key)}
-                                    onChange={event => setChecked(current => {
-                                      const next = new Set(current[row.subject] ?? [])
-                                      if (event.target.checked) next.add(block.key)
-                                      else next.delete(block.key)
-                                      return { ...current, [row.subject]: next }
-                                    })}
-                                    style={{ flex: 'none', marginTop: 2 }}
-                                  />
-                                  <span style={{ flex: 1, minWidth: 0 }}>{block.key}</span>
-                                  <span style={{ flex: 'none', fontSize: 11.5, color: 'var(--clay-text-muted)', fontVariantNumeric: 'tabular-nums' }}>
-                                    {block.lessons} {block.lessons === 1 ? 'lección' : 'lecciones'}
-                                  </span>
-                                </label>
-                              ))}
+
+                              {rows.length > 0 && (
+                                <input
+                                  type="search"
+                                  value={search}
+                                  onChange={event => setSearch(event.target.value)}
+                                  placeholder="Buscar un tema o un bloque…"
+                                  aria-label={`Buscar en el temario de ${label}`}
+                                  style={{ width: '100%', fontSize: 12.5, padding: '7px 9px', borderRadius: 8,
+                                    border: '1px solid var(--clay-border)', background: 'var(--clay-surface-raised)', color: 'inherit' }}
+                                />
+                              )}
+
+                              {visibleBlocks.map(block => {
+                                const ids = block.lessons.map(lesson => lesson.id)
+                                const all = ids.every(id => marked.has(id))
+                                return (
+                                  <div key={block.key} style={{ display: 'grid', gap: 4 }}>
+                                    {/* El bloque entero sigue siendo el atajo: marcar 38 lecciones
+                                        de una en una no es una interfaz, es un castigo. */}
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                                      <input
+                                        type="checkbox"
+                                        checked={all}
+                                        onChange={event => setChecked(current => {
+                                          const next = new Set(current[row.subject] ?? [])
+                                          for (const id of ids) { if (event.target.checked) next.add(id); else next.delete(id) }
+                                          return { ...current, [row.subject]: next }
+                                        })}
+                                        style={{ flex: 'none' }}
+                                      />
+                                      <span style={{ flex: 1, minWidth: 0 }}>{block.key}</span>
+                                      <span style={{ flex: 'none', fontSize: 11, fontWeight: 600, color: 'var(--clay-text-muted)', fontVariantNumeric: 'tabular-nums' }}>
+                                        {ids.filter(id => marked.has(id)).length}/{ids.length}
+                                      </span>
+                                    </label>
+                                    {block.lessons.map(lesson => (
+                                      <label key={lesson.id}
+                                        style={{ display: 'flex', alignItems: 'baseline', gap: 8, fontSize: 12.5, paddingLeft: 22, cursor: 'pointer' }}>
+                                        <input
+                                          type="checkbox"
+                                          checked={marked.has(lesson.id)}
+                                          onChange={event => setChecked(current => {
+                                            const next = new Set(current[row.subject] ?? [])
+                                            if (event.target.checked) next.add(lesson.id)
+                                            else next.delete(lesson.id)
+                                            return { ...current, [row.subject]: next }
+                                          })}
+                                          style={{ flex: 'none', marginTop: 2 }}
+                                        />
+                                        <span style={{ flex: 1, minWidth: 0, color: 'var(--clay-text-muted)' }}>{lesson.title}</span>
+                                      </label>
+                                    ))}
+                                  </div>
+                                )
+                              })}
+
+                              {rows.length > 0 && visibleBlocks.length === 0 && (
+                                <span style={{ fontSize: 12, color: 'var(--clay-text-muted)' }}>
+                                  Nada en {label} coincide con «{search}».
+                                </span>
+                              )}
+
                               {rows.length > 0 && (
                                 <button
                                   type="button"
                                   disabled={savingSubject != null}
                                   onClick={() => void declareBlocks(row.subject)}
-                                  style={{ justifySelf: 'start', marginTop: 4, fontSize: 12, fontWeight: 800,
+                                  style={{ justifySelf: 'start', marginTop: 2, fontSize: 12, fontWeight: 800,
                                     padding: '7px 12px', borderRadius: 8, border: '1px solid var(--clay-border)',
                                     background: 'var(--clay-surface-raised)', color: 'var(--clay-accent-text)',
                                     cursor: savingSubject != null ? 'wait' : 'pointer',
                                     opacity: savingSubject != null ? 0.5 : 1 }}
                                 >
-                                  {savingSubject === row.subject ? 'Guardando…' : 'Guardar'}
+                                  {savingSubject === row.subject ? 'Guardando…' : `Guardar (${marked.size} marcadas)`}
                                 </button>
                               )}
                             </div>

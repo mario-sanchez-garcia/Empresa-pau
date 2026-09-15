@@ -416,11 +416,14 @@ test('las asignaturas elegibles, las generables y las que acepta la cola son la 
 })
 
 
-// Matemáticas II y Matemáticas CCSS son la misma casilla: solo se examina
-// una en la PAU. Nada real justifica sembrar las dos (Álgebra y casi toda
-// Probabilidad se solapan), asi que ninguna de las tres puertas que podrian
-// dejar pasar ambas lo permite.
-test('matematicas_ii y matematicas_ccss nunca se siembran juntas: gana Ciencias',async()=>{
+// Matemáticas II y Matemáticas CCSS SÍ se pueden hacer las dos —hay razones
+// reales (una carrera que pide nota de una, itinerario real es el otro,
+// simple interés)— pero comparten Álgebra, Análisis y Probabilidad, así que
+// quien las hace las dos no las ve dos veces. Mates II se siembra ENTERA
+// (la versión más profunda); de CCSS solo entra lo que Mates II no cubre:
+// Inferencia. Mario, 15/09/2026: "si haces Análisis de Ciencias, no hagas
+// Análisis de Sociales".
+test('matematicas_ii y matematicas_ccss se siembran las dos, pero CCSS sin el solape',async()=>{
  const { generateCaminoPlan } = load('app/lib/onboarding/generateCaminoPlan.ts')
  const user='dos-mates'
  const db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',student_exams:[]}]})
@@ -429,11 +432,24 @@ test('matematicas_ii y matematicas_ccss nunca se siembran juntas: gana Ciencias'
   dailyMinutes:60, weeklyStudyDays:6, startMode:'zero',
  })
  assert.equal(result.success,true)
- const sembradas=[...new Set(db.tables.user_learning_queue.filter(r=>r.user_id===user).map(r=>r.subject))].sort()
- assert.deepEqual(sembradas,['fisica','matematicas_ii'],'CCSS se descarta, Ciencias se queda')
+ const cola=db.tables.user_learning_queue.filter(r=>r.user_id===user)
+ const sembradas=[...new Set(cola.map(r=>r.subject))].sort()
+ assert.deepEqual(sembradas,['fisica','matematicas_ccss','matematicas_ii'],'las dos entran, ninguna se descarta')
+ const bloquesCcss=[...new Set(cola.filter(r=>r.subject==='matematicas_ccss').map(r=>r.block_slug))]
+ assert.deepEqual(bloquesCcss,['inferencia'],'Álgebra/Análisis/Probabilidad de CCSS no se siembran: ya los cubre Mates II')
+ assert.ok(cola.some(r=>r.subject==='matematicas_ii'&&r.block_slug==='algebra'),'Mates II se siembra ENTERA, sin recortes')
 })
 
-test('add-subject rechaza la otra Matemáticas si ya tienes una',async()=>{
+test('CCSS sola (sin Mates II) se siembra completa, solape incluido',async()=>{
+ const { generateCaminoPlan } = load('app/lib/onboarding/generateCaminoPlan.ts')
+ const user='solo-ccss'
+ const db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',student_exams:[]}]})
+ await generateCaminoPlan({userId:user, db, subjects:['Matemáticas CCSS'], dailyMinutes:60, weeklyStudyDays:6, startMode:'zero'})
+ const bloques=[...new Set(db.tables.user_learning_queue.filter(r=>r.user_id===user&&r.subject==='matematicas_ccss').map(r=>r.block_slug))].sort()
+ assert.deepEqual(bloques,['algebra','analisis','inferencia','probabilidad'],'sin Mates II no hay de que recortar')
+})
+
+test('add-subject: añadir CCSS teniendo ya Mates II solo siembra el bloque que no se solapa',async()=>{
  const user='ya-tiene-ciencias'
  const db=database({
   perfiles:[{id:user,subjects:['Matemáticas II'],pau_exam_date:'2027-06-07',student_exams:[]}],
@@ -446,11 +462,31 @@ test('add-subject rechaza la otra Matemáticas si ya tienes una',async()=>{
   'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
  })('app/api/camino/add-subject/route.ts')
  const response=await api.POST({json:async()=>({subject:'matematicas_ccss'})})
- assert.equal(response.status,409)
- assert.equal(db.tables.user_learning_queue.filter(r=>r.subject==='matematicas_ccss').length,0,'no se siembra nada')
- // Y al reves: pedir la que ya tiene sigue siendo el camino idempotente normal.
- const again=await api.POST({json:async()=>({subject:'matematicas_ii'})})
+ assert.equal(response.status,200)
+ const ccss=db.tables.user_learning_queue.filter(r=>r.subject==='matematicas_ccss')
+ assert.ok(ccss.length>0,'CCSS sí se siembra')
+ assert.deepEqual([...new Set(ccss.map(r=>r.block_slug))],['inferencia'],'pero solo lo que Mates II no cubre')
+ // Idempotente: pedirla otra vez no la vuelve a sembrar.
+ const again=await api.POST({json:async()=>({subject:'matematicas_ccss'})})
  assert.equal((await again.json()).alreadyExists,true)
+})
+
+test('add-subject: añadir Mates II teniendo ya CCSS no recorta Mates II',async()=>{
+ const user='ya-tiene-sociales'
+ const db=database({
+  perfiles:[{id:user,subjects:['Matemáticas CCSS'],pau_exam_date:'2027-06-07',student_exams:[]}],
+  user_entitlements:[{user_id:user,plan_id:'premium',status:'active'}],
+  user_learning_queue:[{id:'q0',user_id:user,subject:'matematicas_ccss',queue_status:'pending',
+   subject_position:1,title:'Tema',block_key:'Algebra',block_slug:'algebra',metadata:{mission_type:'concept'}}],
+ })
+ const api=runtime('2026-09-15',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'t'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/add-subject/route.ts')
+ const response=await api.POST({json:async()=>({subject:'matematicas_ii'})})
+ assert.equal(response.status,200)
+ const ii=db.tables.user_learning_queue.filter(r=>r.subject==='matematicas_ii')
+ assert.ok(ii.some(r=>r.block_slug==='algebra'),'Mates II nunca se recorta, se haya añadido en el orden que se haya añadido')
 })
 
 for (const occupiedDays of [1,30]) test(`ensure fills unused minutes even with ${occupiedDays} occupied future days`,async()=>{
@@ -731,6 +767,29 @@ test('topUpSubjectQueue completa una cola atrapada en el relleno, sin tocar nada
  const { added, bySubject } = await topUpQueues(user, db)
  assert.equal(added,0,'ya se completo arriba')
  assert.equal(Object.keys(bySubject).length,0)
+})
+
+test('topUpSubjectQueue respeta el solape: no repone Algebra/Analisis/Probabilidad si ya hay Mates II',async()=>{
+ const { topUpSubjectQueue } = load('app/lib/camino/topUpSubjectQueue.ts')
+ const user='reparar-con-solape'
+ const catalogoCcss=[
+  {id:300,sort_order:1,subject:'matematicas_ccss',review_status:'published',title:'CCSS Algebra',block_key:'B',block_slug:'algebra'},
+  {id:301,sort_order:2,subject:'matematicas_ccss',review_status:'published',title:'CCSS Inferencia',block_key:'B',block_slug:'inferencia'},
+ ]
+ const db=database({
+  user_learning_queue:[
+   {id:'f-0',user_id:user,subject:'matematicas_ccss',queue_status:'pending',subject_position:1,
+    title:'Relleno viejo',block_key:'Relleno',block_slug:'relleno',metadata:{mission_type:'concept'}},
+   {id:'m-0',user_id:user,subject:'matematicas_ii',queue_status:'pending',subject_position:1,
+    title:'Mates II tema',block_key:'Algebra',block_slug:'algebra-lineal',metadata:{mission_type:'concept'}},
+  ],
+  curriculum_content_v2: catalogoCcss,
+ })
+ const result=await topUpSubjectQueue(user,'matematicas_ccss',db)
+ assert.equal(result.added,1,'solo Inferencia entra; Algebra de CCSS se queda fuera por el solape con Mates II')
+ const ccss=db.tables.user_learning_queue.filter(r=>r.user_id===user&&r.subject==='matematicas_ccss')
+ assert.ok(ccss.some(r=>r.title==='CCSS Inferencia'))
+ assert.ok(!ccss.some(r=>r.title==='CCSS Algebra'))
 })
 
 test('same-day ensure upgrades legacy durations even if the preference hash still matches',async()=>{

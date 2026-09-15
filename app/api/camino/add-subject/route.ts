@@ -5,21 +5,12 @@ import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle, subjectLabelFromSlug } from '@/app/lib/camino/caminoCurriculumPlan'
 import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
 import { ensureCaminoCalendar } from '@/app/lib/ensureCaminoCalendar'
+import { isCcssBlockCoveredByMatesII } from '@/app/lib/camino/mathOverlap'
 
 export const dynamic = 'force-dynamic'
 
 const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana', 'fisica', 'quimica', 'ingles', 'historia_filosofia', 'economia'])
 
-// Matemáticas II y Matemáticas CCSS son la misma casilla del expediente: el
-// itinerario de Bachillerato (Ciencias o Sociales) decide cuál examina la
-// PAU, nunca las dos. El modal de "+ Añadir asignatura" ya la oculta, pero
-// esta ruta también se puede llamar directa, así que el servidor tiene que
-// negarse igual.
-const EXCLUSIVE_MATH_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss'])
-function otherExclusiveMathSubject(subject: string): string | null {
-  if (!EXCLUSIVE_MATH_SUBJECTS.has(subject)) return null
-  return subject === 'matematicas_ii' ? 'matematicas_ccss' : 'matematicas_ii'
-}
 
 type QueueSourceItem = {
   sort_order: number
@@ -87,17 +78,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true, alreadyExists: true })
     }
 
-    const other = otherExclusiveMathSubject(subject)
-    if (other) {
-      const { count: hasOther } = await db
-        .from('user_learning_queue')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('subject', other)
-      if (hasOther && hasOther > 0) {
-        return NextResponse.json({ error: 'Ya tienes la otra Matemáticas en tu Camino; solo se examina una en la PAU.' }, { status: 409 })
-      }
-    }
 
     // Seed learning queue — same logic as /api/onboarding/generate
     const { data: flashcards } = await db
@@ -110,7 +90,21 @@ export async function POST(request: NextRequest) {
       .order('sort_order', { ascending: true })
 
     const items: QueueSourceItem[] = (flashcards ?? []).filter(fc => isPrivateBetaSubject(fc.subject))
-    const finalItems = items.length > 0 ? items : betaSequenceItems(subject)
+    let finalItems = items.length > 0 ? items : betaSequenceItems(subject)
+
+    // Añadir CCSS teniendo ya Mates II (o al revés) no duplica Álgebra,
+    // Análisis ni Probabilidad — ver mathOverlap.ts. Mates II nunca se
+    // recorta; solo se filtra si lo que se está añadiendo AHORA es CCSS.
+    if (subject === 'matematicas_ccss') {
+      const { count: hasMatesII } = await db
+        .from('user_learning_queue')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('subject', 'matematicas_ii')
+      if (hasMatesII && hasMatesII > 0) {
+        finalItems = finalItems.filter(item => !isCcssBlockCoveredByMatesII(item.block_slug))
+      }
+    }
 
     if (finalItems.length > 0) {
       const queueRows = finalItems.map((fc, i) => {

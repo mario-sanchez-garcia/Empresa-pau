@@ -598,22 +598,9 @@ export default function OnboardingFlow() {
     setSchoolOpen(false)
   }
 
-  // Matemáticas II y Matemáticas CCSS son la misma casilla del expediente: el
-  // itinerario de Bachillerato (Ciencias o Sociales) decide cuál examina la
-  // PAU, nunca las dos. Sin esto se podían marcar ambas y el Camino sembraba
-  // dos temarios con medio Álgebra y casi toda Probabilidad repetidos.
-  const EXCLUSIVE_MATH_SUBJECTS = ['matematicas_ii', 'matematicas_ccss']
-
   function toggleSubject(subject: string) {
     if (!PRIVATE_BETA_SUPPORTED_SUBJECTS.has(subject)) return
-    if (data.subjects.includes(subject)) {
-      update({ subjects: data.subjects.filter(item => item !== subject) })
-      return
-    }
-    const withoutExclusive = EXCLUSIVE_MATH_SUBJECTS.includes(subject)
-      ? data.subjects.filter(item => !EXCLUSIVE_MATH_SUBJECTS.includes(item))
-      : data.subjects
-    update({ subjects: [...withoutExclusive, subject] })
+    update({ subjects: data.subjects.includes(subject) ? data.subjects.filter(item => item !== subject) : [...data.subjects, subject] })
   }
 
   function addUpcomingExam() {

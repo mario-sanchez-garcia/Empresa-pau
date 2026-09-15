@@ -3,6 +3,7 @@ import { checkedDb } from '@/app/lib/camino/checkedDb'
 import { withPlanLock } from '@/app/lib/camino/planPersistence'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { PRIVATE_BETA_CURRICULUM_TOPICS, isPrivateBetaSubject } from '@/app/lib/camino/betaCurriculum'
+import { isCcssBlockCoveredByMatesII } from '@/app/lib/camino/mathOverlap'
 import { CAMINO_CURRICULUM_TOPICS, getTopic, getTopicByV2SortOrder, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from '@/app/lib/camino/caminoCurriculumPlan'
 import { applyCalendarPersonalization } from '@/app/lib/camino/applyCalendarPersonalization'
 import { minutesForPlacement, placementDurationMetadata } from '@/app/lib/camino/placementDuration'
@@ -154,17 +155,7 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
 async function generateCaminoPlanLocked(params: GenerateCaminoPlanParams): Promise<GenerateCaminoPlanResult> {
   const { userId, db, startMode, dailyMinutes } = params
   const declaredAvailability = { weeklyStudyDays: params.weeklyStudyDays ?? null, dailyMinutes }
-  const requestedSubjects = [...new Set(params.subjects.map(s => normalizeSubjectSlug(s)).filter(s => ALLOWED_GENERATE_SUBJECTS.has(s)))]
-  // Matemáticas II y Matemáticas CCSS son la misma casilla del expediente: el
-  // itinerario de Bachillerato decide cuál examina la PAU, nunca las dos. El
-  // selector del onboarding ya las hace excluyentes (ver toggleSubject en
-  // OnboardingFlow) y add-subject las rechaza por separado, pero esto es lo
-  // único que ve TODO alta —incluida cualquier llamada futura a esta
-  // función— así que es donde de verdad no puede colarse: nos quedamos con
-  // Matemáticas II si alguna vez llegan las dos.
-  const subjects = requestedSubjects.includes('matematicas_ii') && requestedSubjects.includes('matematicas_ccss')
-    ? requestedSubjects.filter(s => s !== 'matematicas_ccss')
-    : requestedSubjects
+  const subjects = [...new Set(params.subjects.map(s => normalizeSubjectSlug(s)).filter(s => ALLOWED_GENERATE_SUBJECTS.has(s)))]
 
   try {
     // Guarda contra el reset destructivo de más abajo: esta función borra
@@ -254,6 +245,14 @@ async function generateCaminoPlanLocked(params: GenerateCaminoPlanParams): Promi
       }
       for (const subject of subjectsToQueue) {
         if (!bySubject[subject]?.length) bySubject[subject] = betaSequenceItems(subject)
+      }
+
+      // Quien hace Matemáticas II Y CCSS a la vez no ve dos veces Álgebra,
+      // Análisis ni Probabilidad: Mates II se estudia entera (es la versión
+      // más profunda) y de CCSS solo entra lo que Mates II no cubre
+      // (Inferencia). Ver mathOverlap.ts.
+      if (subjects.includes('matematicas_ii') && bySubject.matematicas_ccss?.length) {
+        bySubject.matematicas_ccss = bySubject.matematicas_ccss.filter(item => !isCcssBlockCoveredByMatesII(item.block_slug))
       }
 
       // Punto de partida declarado POR ASIGNATURA (ver camino/startingPoint.ts).

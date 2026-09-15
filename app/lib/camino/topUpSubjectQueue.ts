@@ -4,6 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { isPrivateBetaSubject } from './betaCurriculum'
 import { CAMINO_CURRICULUM_TOPICS, normalizeSubjectSlug, normalizeTopicSlug, resolveTopicSlugAlias, sanitizeLessonTitle } from './caminoCurriculumPlan'
+import { isCcssBlockCoveredByMatesII } from './mathOverlap'
 
 // Repara la cola de un alumno cuando `curriculum_content_v2` publica más
 // temario del que su cola ya tiene sembrado.
@@ -90,7 +91,20 @@ export async function topUpSubjectQueue(
   if (existingRows.length === 0) return { added: 0 } // no ha elegido esta asignatura, no hay nada que completar
 
   const existingTitles = new Set(existingRows.map(row => normalizeTopicSlug(row.title)))
-  const missing = catalogRows.filter(row => !existingTitles.has(normalizeTopicSlug(row.title)))
+  let missing = catalogRows.filter(row => !existingTitles.has(normalizeTopicSlug(row.title)))
+
+  // Reponer CCSS no debe devolver el solape con Mates II que
+  // generateCaminoPlan/add-subject ya evitaron sembrar — ver mathOverlap.ts.
+  if (normalized === 'matematicas_ccss') {
+    const { count: hasMatesII } = await db
+      .from('user_learning_queue')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('subject', 'matematicas_ii')
+    if (hasMatesII && hasMatesII > 0) {
+      missing = missing.filter(row => !isCcssBlockCoveredByMatesII(row.block_slug))
+    }
+  }
   if (missing.length === 0) return { added: 0 }
 
   let cursor = existingRows.reduce((max, row) => Math.max(max, row.subject_position ?? 0), 0)

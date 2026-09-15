@@ -5781,15 +5781,7 @@ function AddSubjectModal({ currentSubjects, onClose, onAdd, loading }: {
   loading: boolean
 }) {
   const [selected, setSelected] = useState<string | null>(null)
-  // Matemáticas II y Matemáticas CCSS son la misma casilla del expediente: el
-  // itinerario de Bachillerato decide cuál examina la PAU, nunca las dos.
-  // Quien ya tiene una no puede añadir la otra desde aquí (mismo criterio
-  // que el selector del onboarding, ver toggleSubject en OnboardingFlow).
-  const EXCLUSIVE_MATH_SUBJECTS = ['Matemáticas II', 'Matemáticas CCSS']
-  const hasOtherMath = EXCLUSIVE_MATH_SUBJECTS.some(label => currentSubjects.includes(label))
-  const available = ADDABLE_SUBJECT_OPTS.filter(s =>
-    !currentSubjects.includes(s.id) && !(hasOtherMath && EXCLUSIVE_MATH_SUBJECTS.includes(s.id)),
-  )
+  const available = ADDABLE_SUBJECT_OPTS.filter(s => !currentSubjects.includes(s.id))
 
   const modalCardStyle: React.CSSProperties = { background: 'var(--clay-surface)', border: '1px solid var(--clay-border)', borderRadius: 18, boxShadow: '0 18px 50px rgba(15,23,42,0.18)', backdropFilter: 'blur(18px) saturate(1.12)', WebkitBackdropFilter: 'blur(18px) saturate(1.12)' }
 

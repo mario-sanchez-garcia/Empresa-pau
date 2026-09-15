@@ -10,6 +10,17 @@ export const dynamic = 'force-dynamic'
 
 const ALLOWED_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss', 'lengua', 'historia_espana', 'fisica', 'quimica', 'ingles', 'historia_filosofia', 'economia'])
 
+// Matemáticas II y Matemáticas CCSS son la misma casilla del expediente: el
+// itinerario de Bachillerato (Ciencias o Sociales) decide cuál examina la
+// PAU, nunca las dos. El modal de "+ Añadir asignatura" ya la oculta, pero
+// esta ruta también se puede llamar directa, así que el servidor tiene que
+// negarse igual.
+const EXCLUSIVE_MATH_SUBJECTS = new Set(['matematicas_ii', 'matematicas_ccss'])
+function otherExclusiveMathSubject(subject: string): string | null {
+  if (!EXCLUSIVE_MATH_SUBJECTS.has(subject)) return null
+  return subject === 'matematicas_ii' ? 'matematicas_ccss' : 'matematicas_ii'
+}
+
 type QueueSourceItem = {
   sort_order: number
   title: string
@@ -74,6 +85,18 @@ export async function POST(request: NextRequest) {
       .eq('subject', subject)
     if (existing && existing > 0) {
       return NextResponse.json({ ok: true, alreadyExists: true })
+    }
+
+    const other = otherExclusiveMathSubject(subject)
+    if (other) {
+      const { count: hasOther } = await db
+        .from('user_learning_queue')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('subject', other)
+      if (hasOther && hasOther > 0) {
+        return NextResponse.json({ error: 'Ya tienes la otra Matemáticas en tu Camino; solo se examina una en la PAU.' }, { status: 409 })
+      }
     }
 
     // Seed learning queue — same logic as /api/onboarding/generate

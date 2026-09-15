@@ -154,7 +154,17 @@ export async function generateCaminoPlan(params: GenerateCaminoPlanParams): Prom
 async function generateCaminoPlanLocked(params: GenerateCaminoPlanParams): Promise<GenerateCaminoPlanResult> {
   const { userId, db, startMode, dailyMinutes } = params
   const declaredAvailability = { weeklyStudyDays: params.weeklyStudyDays ?? null, dailyMinutes }
-  const subjects = [...new Set(params.subjects.map(s => normalizeSubjectSlug(s)).filter(s => ALLOWED_GENERATE_SUBJECTS.has(s)))]
+  const requestedSubjects = [...new Set(params.subjects.map(s => normalizeSubjectSlug(s)).filter(s => ALLOWED_GENERATE_SUBJECTS.has(s)))]
+  // Matemáticas II y Matemáticas CCSS son la misma casilla del expediente: el
+  // itinerario de Bachillerato decide cuál examina la PAU, nunca las dos. El
+  // selector del onboarding ya las hace excluyentes (ver toggleSubject en
+  // OnboardingFlow) y add-subject las rechaza por separado, pero esto es lo
+  // único que ve TODO alta —incluida cualquier llamada futura a esta
+  // función— así que es donde de verdad no puede colarse: nos quedamos con
+  // Matemáticas II si alguna vez llegan las dos.
+  const subjects = requestedSubjects.includes('matematicas_ii') && requestedSubjects.includes('matematicas_ccss')
+    ? requestedSubjects.filter(s => s !== 'matematicas_ccss')
+    : requestedSubjects
 
   try {
     // Guarda contra el reset destructivo de más abajo: esta función borra

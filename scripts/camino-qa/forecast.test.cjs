@@ -178,8 +178,11 @@ test('forecast: an unplaced session keeps an explicit estimate, with no lost min
 // Supabase is in-memory here; these tests do not certify the production catalog.
 // Nueve asignaturas es el caso real que rompia el modelo anterior: con un tope
 // de misiones por dia, mas tiempo declarado no compraba mas temario cubierto.
-// Todas las que el onboarding sabe generar (ALLOWED_GENERATE_SUBJECTS).
-const JOURNEY_SUBJECTS=['matematicas_ii','fisica','lengua','historia_espana','ingles','quimica','matematicas_ccss','historia_filosofia','economia','biologia']
+// Todas las que el onboarding sabe generar (ALLOWED_GENERATE_SUBJECTS), MENOS
+// matematicas_ccss: coexistir con matematicas_ii en la misma generacion ya
+// no es un caso valido (ver el test de exclusividad de las dos Matematicas
+// mas arriba), asi que mezclarla aqui rompia justo lo que ese test fija.
+const JOURNEY_SUBJECTS=['matematicas_ii','fisica','lengua','historia_espana','ingles','quimica','historia_filosofia','economia','biologia']
 // Filas publicadas de las asignaturas sin fallback estatico, tomadas del
 // catalogo real: la identidad de un tema es (block_slug, v2_sort_order), asi
 // que inventarlas aqui no las haria coincidir con nada.
@@ -187,7 +190,7 @@ const JOURNEY_PUBLISHED=['ingles','historia_filosofia','economia','biologia'].fl
  load('app/lib/camino/caminoCurriculumPlan.ts').CAMINO_CURRICULUM_TOPICS
   .filter(topic=>topic.subject===subject&&topic.v2SortOrder)
   .map(topic=>({subject,block_key:topic.blockTitle,block_slug:topic.blockSlug,sort_order:topic.v2SortOrder,title:topic.title,review_status:'published'})))
-for (const [today, count, minutes] of [['2026-09-14',6,90],['2027-01-11',4,60],['2027-05-31',6,90],['2027-06-05',4,60],['2026-09-14',10,180],['2027-05-31',9,180]]) {
+for (const [today, count, minutes] of [['2026-09-14',6,90],['2027-01-11',4,60],['2027-05-31',6,90],['2027-06-05',4,60],['2026-09-14',9,180],['2027-05-31',8,180]]) {
  test(`generate → personalize → read → forecast: ${today}, ${count} subjects`,async()=>{
   const user='journey', examDate='2027-06-07'
   const subjects=JOURNEY_SUBJECTS.slice(0,count)
@@ -412,6 +415,43 @@ test('las asignaturas elegibles, las generables y las que acepta la cola son la 
  assert.deepEqual(permitidas,elegibles,`${ultima} no acepta las mismas asignaturas que el generador`)
 })
 
+
+// Matemáticas II y Matemáticas CCSS son la misma casilla: solo se examina
+// una en la PAU. Nada real justifica sembrar las dos (Álgebra y casi toda
+// Probabilidad se solapan), asi que ninguna de las tres puertas que podrian
+// dejar pasar ambas lo permite.
+test('matematicas_ii y matematicas_ccss nunca se siembran juntas: gana Ciencias',async()=>{
+ const { generateCaminoPlan } = load('app/lib/onboarding/generateCaminoPlan.ts')
+ const user='dos-mates'
+ const db=database({perfiles:[{id:user,pau_exam_date:'2027-06-07',student_exams:[]}]})
+ const result=await generateCaminoPlan({
+  userId:user, db, subjects:['Matemáticas II','Matemáticas CCSS','Física'],
+  dailyMinutes:60, weeklyStudyDays:6, startMode:'zero',
+ })
+ assert.equal(result.success,true)
+ const sembradas=[...new Set(db.tables.user_learning_queue.filter(r=>r.user_id===user).map(r=>r.subject))].sort()
+ assert.deepEqual(sembradas,['fisica','matematicas_ii'],'CCSS se descarta, Ciencias se queda')
+})
+
+test('add-subject rechaza la otra Matemáticas si ya tienes una',async()=>{
+ const user='ya-tiene-ciencias'
+ const db=database({
+  perfiles:[{id:user,subjects:['Matemáticas II'],pau_exam_date:'2027-06-07',student_exams:[]}],
+  user_entitlements:[{user_id:user,plan_id:'premium',status:'active'}],
+  user_learning_queue:[{id:'q0',user_id:user,subject:'matematicas_ii',queue_status:'pending',
+   subject_position:1,title:'Tema',block_key:'Algebra',block_slug:'algebra',metadata:{mission_type:'concept'}}],
+ })
+ const api=runtime('2026-09-15',{
+  'app/lib/camino/caminoProgressServer.ts':{getAuthContext:async()=>({user:{id:user},accessToken:'t'})},
+  'app/lib/billing/supabase.ts':{createServiceClient:()=>db},
+ })('app/api/camino/add-subject/route.ts')
+ const response=await api.POST({json:async()=>({subject:'matematicas_ccss'})})
+ assert.equal(response.status,409)
+ assert.equal(db.tables.user_learning_queue.filter(r=>r.subject==='matematicas_ccss').length,0,'no se siembra nada')
+ // Y al reves: pedir la que ya tiene sigue siendo el camino idempotente normal.
+ const again=await api.POST({json:async()=>({subject:'matematicas_ii'})})
+ assert.equal((await again.json()).alreadyExists,true)
+})
 
 for (const occupiedDays of [1,30]) test(`ensure fills unused minutes even with ${occupiedDays} occupied future days`,async()=>{
  const journey=runtime('2027-01-11'),user='fill'
